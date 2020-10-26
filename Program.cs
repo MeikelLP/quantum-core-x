@@ -25,7 +25,7 @@ namespace QuantumCore
                 _ => null
             };
 
-            server?.Start();
+            server?.Start().Wait();
         }
     }
 }

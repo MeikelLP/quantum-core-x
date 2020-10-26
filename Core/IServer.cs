@@ -1,7 +1,9 @@
+using System.Threading.Tasks;
+
 namespace QuantumCore.Core
 {
     internal interface IServer
     {
-        void Start();
+        Task Start();
     }
 }

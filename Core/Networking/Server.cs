@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Reflection;
+using System.Threading.Tasks;
 using QuantumCore.Core.Packets;
 using Serilog;
 
@@ -44,7 +45,7 @@ namespace QuantumCore.Core.Networking
             _connections.Remove(connection.Id);
         }
 
-        public async void Start()
+        public async Task Start()
         {
             _listener.Start();
 
@@ -59,6 +60,8 @@ namespace QuantumCore.Core.Networking
                 } catch(Exception e) {
                     Log.Fatal(e.Message);
                 }
+            
+            Console.WriteLine("HALLO");
         }
 
         public void RegisterListener<T>(Func<Connection, T, bool> listener)

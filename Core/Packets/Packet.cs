@@ -65,6 +65,16 @@ namespace QuantumCore.Core.Packets
                             bw.Write((uint) field.GetValue(obj));
                         else if (type == typeof(byte))
                             bw.Write((byte) field.GetValue(obj));
+                        else if (type == typeof(string))
+                        {
+                            var attr = field.GetCustomAttribute<Field>();
+                            Debug.Assert(attr != null);
+                            var str = (string) field.GetValue(obj);
+                            for (var i = 0; i < attr.Length; i++)
+                            {
+                                bw.Write(str != null && str.Length >= i + 1 ? str[i] : '\0');
+                            }
+                        }
                         else
                             Debug.Assert(false);
                     }

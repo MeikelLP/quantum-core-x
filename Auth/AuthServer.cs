@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using QuantumCore.Auth.Packets;
 using QuantumCore.Core;
 using QuantumCore.Core.Constants;
@@ -19,19 +20,24 @@ namespace QuantumCore.Auth
             // Register auth server features
             _server.RegisterNamespace("QuantumCore.Auth.Packets");
             _server.RegisterNewConnectionListener(NewConnection);
-            _server.RegisterListener<LoginRequest>((connection, request) => {
+
+            _server.RegisterListener<LoginRequest>((connection, request) =>
+            {
                 Log.Debug($"Username: {request.Username}");
                 Log.Debug($"Password: {request.Password}");
+                
+                connection.Send(new LoginFailed
+                {
+                    Status = "WRONGPWD"
+                });
+                
                 return true;
             });
         }
 
-        public void Start()
+        public async Task Start()
         {
-            _server.Start();
-
-            Log.Information("Press any key bla");
-            Console.ReadLine();
+            await _server.Start();
         }
 
         private bool NewConnection(Connection connection)

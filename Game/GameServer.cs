@@ -1,11 +1,12 @@
 using System;
+using System.Threading.Tasks;
 using QuantumCore.Core;
 
 namespace QuantumCore.Game
 {
     internal class GameServer : IServer
     {
-        public void Start()
+        public Task Start()
         {
             throw new NotImplementedException();
         }
