@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using JetBrains.Annotations;
 
 namespace QuantumCore.Core.Packets
 {
@@ -14,6 +15,7 @@ namespace QuantumCore.Core.Packets
         Outgoing = 2
     }
 
+    [MeansImplicitUse]
     [AttributeUsage(AttributeTargets.Class, Inherited = false)]
     public class Packet : Attribute
     {
@@ -25,6 +27,7 @@ namespace QuantumCore.Core.Packets
 
         public byte Header { get; set; }
         public EDirection Direction { get; set; }
+        public bool Sequence { get; set; }
     }
 
     public class PacketCache
@@ -90,7 +93,7 @@ namespace QuantumCore.Core.Packets
                         if (type.IsArray)
                         {
                             type = type.GetElementType();
-                            multiplier = attribute.Length;
+                            multiplier = attribute.ArrayLength;
                             array = Array.CreateInstance(type, multiplier);
                         }
 
@@ -133,6 +136,10 @@ namespace QuantumCore.Core.Packets
             var fields = Type.GetProperties().Where(field => field.GetCustomAttribute<Field>() != null)
                 .OrderBy(field => field.GetCustomAttribute<Field>().Position);
             Size = 1;
+            var packetAttribute = Type.GetCustomAttribute<Packet>();
+            if (packetAttribute == null) return;
+            if (packetAttribute.Sequence) Size++;
+            
             foreach (var field in fields)
             {
                 var type = field.PropertyType;
@@ -142,7 +149,7 @@ namespace QuantumCore.Core.Packets
                 if (type.IsArray)
                 {
                     type = type.GetElementType();
-                    multiplier = (uint) attribute.Length;
+                    multiplier = (uint) attribute.ArrayLength;
                 }
 
                 if (type == typeof(uint))
@@ -177,13 +184,8 @@ namespace QuantumCore.Core.Packets
             Position = position;
         }
 
-        public Field(int position, int length)
-        {
-            Position = position;
-            Length = length;
-        }
-
         public int Position { get; set; }
         public int Length { get; set; } = -1;
+        public int ArrayLength { get; set; } = -1;
     }
 }
