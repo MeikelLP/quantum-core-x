@@ -1,5 +1,7 @@
-namespace QuantumCore.Core {
-    interface IServer {
+namespace QuantumCore.Core
+{
+    internal interface IServer
+    {
         void Start();
     }
 }

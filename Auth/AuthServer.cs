@@ -8,12 +8,13 @@ using Serilog;
 
 namespace QuantumCore.Auth
 {
-    class AuthServer : IServer {
-        private Server _server;
+    internal class AuthServer : IServer
+    {
+        private readonly Server _server;
 
-        public AuthServer()
+        public AuthServer(AuthOptions options)
         {
-            _server = new Server(11002);
+            _server = new Server(options.Port);
 
             // Register auth server features
             _server.RegisterNamespace("QuantumCore.Auth.Packets");
@@ -25,16 +26,18 @@ namespace QuantumCore.Auth
             });
         }
 
-        bool NewConnection(Connection connection) {
-            connection.SetPhase(EPhases.Auth);
-            return true;
-        }
-
-        public void Start() {
+        public void Start()
+        {
             _server.Start();
 
             Log.Information("Press any key bla");
             Console.ReadLine();
+        }
+
+        private bool NewConnection(Connection connection)
+        {
+            connection.SetPhase(EPhases.Auth);
+            return true;
         }
     }
 }

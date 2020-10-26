@@ -6,14 +6,11 @@ using QuantumCore.Core.Constants;
 using QuantumCore.Core.Packets;
 using Serilog;
 
-namespace QuantumCore.Core.Networking {
-    public class Connection {
-        private TcpClient _client;
-        public Server Server { get; private set; }
-        public Guid Id { get; private set; }
-        public UInt32 Handshake { get; private set; }
-        public bool Handshaking { get; private set; }
-        public EPhases Phase { get; private set; }
+namespace QuantumCore.Core.Networking
+{
+    public class Connection
+    {
+        private readonly TcpClient _client;
 
         private BinaryWriter _writer;
 
@@ -24,7 +21,13 @@ namespace QuantumCore.Core.Networking {
             Id = Guid.NewGuid();
         }
 
-        public async void Start() 
+        public Server Server { get; }
+        public Guid Id { get; }
+        public uint Handshake { get; private set; }
+        public bool Handshaking { get; private set; }
+        public EPhases Phase { get; private set; }
+
+        public async void Start()
         {
             Log.Information($"New connection from {_client.Client.RemoteEndPoint}");
 
@@ -35,8 +38,8 @@ namespace QuantumCore.Core.Networking {
 
             var buffer = new byte[1];
 
-            while(true) {
-                try 
+            while (true)
+                try
                 {
                     var read = await stream.ReadAsync(buffer, 0, 1);
                     if(read != 1)
@@ -45,9 +48,9 @@ namespace QuantumCore.Core.Networking {
                         _client.Close();
                         break;
                     }
-                    
+
                     var packetDetails = Server.GetIncomingPacket(buffer[0]);
-                    if(packetDetails == null)
+                    if (packetDetails == null)
                     {
                         Log.Information($"Received unknown header {buffer[0]:X2}");
                         _client.Close();
@@ -56,6 +59,7 @@ namespace QuantumCore.Core.Networking {
 
                     var data = new byte[packetDetails.Size - 1];
                     read = await stream.ReadAsync(data, 0, data.Length);
+
                     if(read != data.Length) {
                         Log.Information("Failed to read, closing connection");
                         _client.Close();
@@ -66,31 +70,25 @@ namespace QuantumCore.Core.Networking {
                     packetDetails.Deserialize(packet, data);
 
                     Server.CallListener(this, packet);
-                } 
-                catch(IOException) 
+                }
+                catch (IOException)
                 {
                     Log.Information("Failed to read");
                     _client.Close();
                     break;
                 }
-                
-            }
 
             Server.RemoveConnection(this);
         }
 
-        public void Send(object packet) {
+        public void Send(object packet)
+        {
             // Verify that the packet is a packet and registered
             var attr = packet.GetType().GetCustomAttribute<Packet>();
-            if(attr == null) 
-            {
-                throw new ArgumentException("Given packet is not a packet", nameof(packet));
-            }
+            if (attr == null) throw new ArgumentException("Given packet is not a packet", nameof(packet));
 
-            if(!Server.IsRegisteredOutgoing(packet.GetType())) 
-            {
+            if (!Server.IsRegisteredOutgoing(packet.GetType()))
                 throw new ArgumentException("Given packet is not a registered outgoing packet", nameof(packet));
-            }
 
             // Serialize object
             var data = Server.GetOutgoingPacket(attr.Header).Serialize(packet);
@@ -98,9 +96,9 @@ namespace QuantumCore.Core.Networking {
             _writer.Flush();
         }
 
-        public void StartHandshake() 
+        public void StartHandshake()
         {
-            if(Handshaking) return;
+            if (Handshaking) return;
 
             var r1 = (uint) Server.Random.Next(1 << 30);
             var r2 = (uint) Server.Random.Next(1 << 2);
@@ -111,8 +109,9 @@ namespace QuantumCore.Core.Networking {
             SendHandshake();
         }
 
-        public bool HandleHandshake(GCHandshake handshake) {
-            if(!Handshaking)
+        public bool HandleHandshake(GCHandshake handshake)
+        {
+            if (!Handshaking)
             {
                 // We wasn't handshaking!
                 Log.Information("Received handshake while not handshaking!");
@@ -120,7 +119,7 @@ namespace QuantumCore.Core.Networking {
                 return false;
             }
 
-            if(handshake.Handshake != Handshake) 
+            if (handshake.Handshake != Handshake)
             {
                 // We received a wrong handshake
                 Log.Information($"Received wrong handshake ({Handshake} != {handshake.Handshake})");
@@ -130,7 +129,7 @@ namespace QuantumCore.Core.Networking {
 
             var time = Server.ServerTime;
             var difference = time - (handshake.Time + handshake.Delta);
-            if(difference >= 0 && difference <= 50)
+            if (difference >= 0 && difference <= 50)
             {
                 // if we difference is less than or equal to 50ms the handshake is done and client time is synced enough
                 Log.Information("Handshake done");
@@ -138,41 +137,45 @@ namespace QuantumCore.Core.Networking {
 
                 Server.CallConnectionListener(this);
             }
-            else 
+            else
             {
                 // calculate new delta 
                 var delta = (time - handshake.Time) / 2;
-                if(delta < 0)
+                if (delta < 0)
                 {
                     Log.Information("Handshaking failed, CORONA!"); // DO NOT REMOVE! Easteregg, lol
                     _client.Close();
                     return false;
                 }
 
-                SendHandshake((uint)time, (uint)delta);
+                SendHandshake((uint) time, (uint) delta);
             }
 
             return true;
         }
 
-        public void SetPhase(EPhases phase) {
+        public void SetPhase(EPhases phase)
+        {
             Phase = phase;
-            Send(new GCPhase {
-                Phase = (byte)phase
+            Send(new GCPhase
+            {
+                Phase = (byte) phase
             });
         }
 
-        private void SendHandshake() 
+        private void SendHandshake()
         {
-            Send(new GCHandshake {
+            Send(new GCHandshake
+            {
                 Handshake = Handshake,
                 Time = (uint) Server.ServerTime
             });
         }
 
-        private void SendHandshake(UInt32 time, UInt32 delta) 
+        private void SendHandshake(uint time, uint delta)
         {
-            Send(new GCHandshake {
+            Send(new GCHandshake
+            {
                 Handshake = Handshake,
                 Time = time,
                 Delta = delta

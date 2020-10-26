@@ -1,11 +1,13 @@
+using System;
 using QuantumCore.Core;
 
-namespace QuantumCore.Game {
-    class GameServer : IServer
+namespace QuantumCore.Game
+{
+    internal class GameServer : IServer
     {
         public void Start()
         {
-            throw new System.NotImplementedException();
+            throw new NotImplementedException();
         }
     }
 }
