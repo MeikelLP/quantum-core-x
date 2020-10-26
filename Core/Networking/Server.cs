@@ -6,6 +6,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Reflection;
 using QuantumCore.Core.Packets;
+using Serilog;
 
 namespace QuantumCore.Core.Networking {
     public class Server {
@@ -57,7 +58,7 @@ namespace QuantumCore.Core.Networking {
 
                     connection.Start();
                 } catch(Exception e) {
-                    Console.WriteLine(e.Message);
+                    Log.Fatal(e.Message);
                 }
                 
             }
@@ -97,13 +98,13 @@ namespace QuantumCore.Core.Networking {
             var types = assembly.GetTypes().Where(t => String.Equals(t.Namespace, space, StringComparison.Ordinal)).Where(t => t.GetCustomAttribute<Packet>() != null).ToArray();
             foreach(var type in types) 
             {
-                Console.WriteLine($"Register Packet {type.Name}");
+                Log.Information($"Register Packet {type.Name}");
                 var packet = type.GetCustomAttribute<Packet>();
                 if(packet.Direction.HasFlag(EDirection.Incoming)) 
                 {
                     if(_incomingPackets.ContainsKey(packet.Header)) 
                     {
-                        Console.WriteLine($"Header 0x{packet.Header} is already in use for incoming packets. ({type.Name} & {_incomingPackets[packet.Header].Type.Name})");
+                        Log.Information($"Header 0x{packet.Header} is already in use for incoming packets. ({type.Name} & {_incomingPackets[packet.Header].Type.Name})");
                     }
                     else
                     {
@@ -115,7 +116,7 @@ namespace QuantumCore.Core.Networking {
                 {
                     if(_outgoingPackets.ContainsKey(packet.Header)) 
                     {
-                        Console.WriteLine($"Header 0x{packet.Header} is already in use for outgoing packets. ({type.Name} & {_outgoingPackets[packet.Header].Type.Name})");
+                        Log.Information($"Header 0x{packet.Header} is already in use for outgoing packets. ({type.Name} & {_outgoingPackets[packet.Header].Type.Name})");
                     }
                     else
                     {

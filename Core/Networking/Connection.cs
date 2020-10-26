@@ -4,6 +4,7 @@ using System.Net.Sockets;
 using System.Reflection;
 using QuantumCore.Core.Constants;
 using QuantumCore.Core.Packets;
+using Serilog;
 
 namespace QuantumCore.Core.Networking {
     public class Connection {
@@ -25,7 +26,7 @@ namespace QuantumCore.Core.Networking {
 
         public async void Start() 
         {
-            Console.WriteLine("New connection from " + _client.Client.RemoteEndPoint.ToString());
+            Log.Information($"New connection from {_client.Client.RemoteEndPoint}");
 
             var stream = _client.GetStream();
             _writer = new BinaryWriter(stream);
@@ -38,8 +39,9 @@ namespace QuantumCore.Core.Networking {
                 try 
                 {
                     var read = await stream.ReadAsync(buffer, 0, 1);
-                    if(read != 1) {
-                        Console.WriteLine("Failed to read, closing connection");
+                    if(read != 1)
+                    {
+                        Log.Information("Failed to read, closing connection");
                         _client.Close();
                         break;
                     }
@@ -47,7 +49,7 @@ namespace QuantumCore.Core.Networking {
                     var packetDetails = Server.GetIncomingPacket(buffer[0]);
                     if(packetDetails == null)
                     {
-                        Console.WriteLine($"Received unknown header {buffer[0]:X2}");
+                        Log.Information($"Received unknown header {buffer[0]:X2}");
                         _client.Close();
                         break;
                     }
@@ -55,7 +57,7 @@ namespace QuantumCore.Core.Networking {
                     var data = new byte[packetDetails.Size - 1];
                     read = await stream.ReadAsync(data, 0, data.Length);
                     if(read != data.Length) {
-                        Console.WriteLine("Failed to read, closing connection");
+                        Log.Information("Failed to read, closing connection");
                         _client.Close();
                         break;
                     }
@@ -67,7 +69,7 @@ namespace QuantumCore.Core.Networking {
                 } 
                 catch(IOException) 
                 {
-                    Console.WriteLine("Failed to read");
+                    Log.Information("Failed to read");
                     _client.Close();
                     break;
                 }
@@ -113,7 +115,7 @@ namespace QuantumCore.Core.Networking {
             if(!Handshaking)
             {
                 // We wasn't handshaking!
-                Console.WriteLine("Received handshake while not handshaking!");
+                Log.Information("Received handshake while not handshaking!");
                 _client.Close();
                 return false;
             }
@@ -121,7 +123,7 @@ namespace QuantumCore.Core.Networking {
             if(handshake.Handshake != Handshake) 
             {
                 // We received a wrong handshake
-                Console.WriteLine($"Received wrong handshake ({Handshake} != {handshake.Handshake})");
+                Log.Information($"Received wrong handshake ({Handshake} != {handshake.Handshake})");
                 _client.Close();
                 return false;
             }
@@ -131,7 +133,7 @@ namespace QuantumCore.Core.Networking {
             if(difference >= 0 && difference <= 50)
             {
                 // if we difference is less than or equal to 50ms the handshake is done and client time is synced enough
-                Console.WriteLine("Handshake done");
+                Log.Information("Handshake done");
                 Handshaking = false;
 
                 Server.CallConnectionListener(this);
@@ -142,7 +144,7 @@ namespace QuantumCore.Core.Networking {
                 var delta = (time - handshake.Time) / 2;
                 if(delta < 0)
                 {
-                    Console.WriteLine("Handshaking failed, CORONA!");
+                    Log.Information("Handshaking failed, CORONA!"); // DO NOT REMOVE! Easteregg, lol
                     _client.Close();
                     return false;
                 }

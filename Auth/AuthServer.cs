@@ -2,7 +2,9 @@ using System;
 using QuantumCore.Auth.Packets;
 using QuantumCore.Core;
 using QuantumCore.Core.Constants;
+using QuantumCore.Core.Logging;
 using QuantumCore.Core.Networking;
+using Serilog;
 
 namespace QuantumCore.Auth
 {
@@ -17,8 +19,8 @@ namespace QuantumCore.Auth
             _server.RegisterNamespace("QuantumCore.Auth.Packets");
             _server.RegisterNewConnectionListener(NewConnection);
             _server.RegisterListener<LoginRequest>((connection, request) => {
-                Console.WriteLine($"Username: {request.Username}");
-                Console.WriteLine($"Password: {request.Password}");
+                Log.Debug($"Username: {request.Username}");
+                Log.Debug($"Password: {request.Password}");
                 return true;
             });
         }
@@ -31,7 +33,7 @@ namespace QuantumCore.Auth
         public void Start() {
             _server.Start();
 
-            Console.WriteLine("Press any key bla");
+            Log.Information("Press any key bla");
             Console.ReadLine();
         }
     }

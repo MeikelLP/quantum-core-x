@@ -1,8 +1,9 @@
-﻿using System;
-using CommandLine;
+﻿using CommandLine;
 using QuantumCore.Auth;
 using QuantumCore.Core;
+using QuantumCore.Core.Logging;
 using QuantumCore.Game;
+using Serilog;
 
 namespace QuantumCore
 {
@@ -18,6 +19,8 @@ namespace QuantumCore
 
         static void Main(string[] args)
         {
+            Configurator.EnableLogging();
+            
             Parser.Default.ParseArguments<Options>(args).WithParsed<Options>(o => {
                 IServer server = null;
                 if(o.Auth) 
@@ -30,7 +33,7 @@ namespace QuantumCore
                 }
                 else 
                 {
-                    Console.WriteLine("Please specify the server mode");
+                    Log.Error("Please specify the server mode");
                     System.Environment.Exit(1);
                 }
 
