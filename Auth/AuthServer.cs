@@ -1,10 +1,12 @@
 using System;
+using System.Linq;
 using System.Threading.Tasks;
 using QuantumCore.Auth.Packets;
 using QuantumCore.Core;
 using QuantumCore.Core.Constants;
 using QuantumCore.Core.Logging;
 using QuantumCore.Core.Networking;
+using QuantumCore.Database;
 using Serilog;
 
 namespace QuantumCore.Auth
@@ -12,9 +14,11 @@ namespace QuantumCore.Auth
     internal class AuthServer : IServer
     {
         private readonly Server _server;
+        private readonly DatabaseContext _dbContext;
 
         public AuthServer(AuthOptions options)
         {
+            _dbContext = new DatabaseContext();
             _server = new Server(options.Port);
 
             // Register auth server features
@@ -23,14 +27,18 @@ namespace QuantumCore.Auth
 
             _server.RegisterListener<LoginRequest>((connection, request) =>
             {
-                Log.Debug($"Username: {request.Username}");
-                Log.Debug($"Password: {request.Password}");
-                
-                connection.Send(new LoginFailed
+                var account = _dbContext.Accounts.FirstOrDefault(a => a.Username == request.Username);
+                if (account == default(Account))
                 {
-                    Status = "WRONGPWD"
-                });
-                
+                    Log.Debug($"Account {request.Username} not found");
+                    connection.Send(new LoginFailed
+                    {
+                        Status = "WRONGPWD"
+                    });
+
+                    return true;
+                }
+
                 return true;
             });
         }
