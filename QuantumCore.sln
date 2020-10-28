@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core", "Core\Core.csproj", "{63977919-49C4-4E95-9A21-6510A940EC8A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CorePluginAPI", "CorePluginAPI\CorePluginAPI.csproj", "{017859C8-BBF8-47B1-B320-B6944BAFA8BD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExamplePlugin", "ExamplePlugin\ExamplePlugin.csproj", "{930E5131-B018-4255-BC08-ACE8F2C1BAC5}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{63977919-49C4-4E95-9A21-6510A940EC8A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{63977919-49C4-4E95-9A21-6510A940EC8A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{63977919-49C4-4E95-9A21-6510A940EC8A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{63977919-49C4-4E95-9A21-6510A940EC8A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{017859C8-BBF8-47B1-B320-B6944BAFA8BD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{017859C8-BBF8-47B1-B320-B6944BAFA8BD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{017859C8-BBF8-47B1-B320-B6944BAFA8BD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{017859C8-BBF8-47B1-B320-B6944BAFA8BD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{930E5131-B018-4255-BC08-ACE8F2C1BAC5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{930E5131-B018-4255-BC08-ACE8F2C1BAC5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{930E5131-B018-4255-BC08-ACE8F2C1BAC5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{930E5131-B018-4255-BC08-ACE8F2C1BAC5}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

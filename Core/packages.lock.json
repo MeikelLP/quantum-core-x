@@ -392,6 +392,9 @@
           "Microsoft.NETCore.Targets": "1.0.1",
           "System.Runtime": "4.1.0"
         }
+      },
+      "corepluginapi": {
+        "type": "Project"
       }
     }
   }

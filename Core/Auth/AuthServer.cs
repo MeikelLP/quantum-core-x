@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using QuantumCore.Auth.Packets;
 using QuantumCore.Core;
+using QuantumCore.Core.API;
 using QuantumCore.Core.Constants;
 using QuantumCore.Core.Logging;
 using QuantumCore.Core.Networking;
@@ -20,6 +21,8 @@ namespace QuantumCore.Auth
         {
             _dbContext = new DatabaseContext();
             _server = new Server(options.Port);
+            
+            PluginManager.LoadPlugins();
 
             // Register auth server features
             _server.RegisterNamespace("QuantumCore.Auth.Packets");
