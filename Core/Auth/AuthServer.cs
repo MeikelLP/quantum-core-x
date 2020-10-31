@@ -1,7 +1,7 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
+using Dapper;
 using QuantumCore.Auth.Packets;
 using QuantumCore.Core;
 using QuantumCore.Core.API;
@@ -16,11 +16,10 @@ namespace QuantumCore.Auth
     internal class AuthServer : IServer
     {
         private readonly Server _server;
-        private readonly DatabaseContext _dbContext;
 
         public AuthServer(AuthOptions options)
         {
-            _dbContext = new DatabaseContext();
+            DatabaseManager.Init(options.AccountString, options.GameString);
             _server = new Server(options.Port);
             
             PluginManager.LoadPlugins();
@@ -29,9 +28,11 @@ namespace QuantumCore.Auth
             _server.RegisterNamespace("QuantumCore.Auth.Packets");
             _server.RegisterNewConnectionListener(NewConnection);
 
-            _server.RegisterListener<LoginRequest>((connection, request) =>
+            _server.RegisterListener<LoginRequest>(async (connection, request) =>
             {
-                var account = _dbContext.Accounts.AsNoTracking().FirstOrDefault(a => a.Username == request.Username);
+                using var db = DatabaseManager.GetAccountDatabase();
+                var account = await db.QueryFirstOrDefaultAsync<Account>(
+                    "SELECT * FROM accounts WHERE Username = @Username", new {Username = request.Username});
                 // Check if account was found
                 if (account == default(Account))
                 {
@@ -44,7 +45,7 @@ namespace QuantumCore.Auth
                         Status = "WRONGPWD"
                     });
 
-                    return true;
+                    return;
                 }
                 
                 var status = "";
@@ -72,7 +73,7 @@ namespace QuantumCore.Auth
                         Status = status
                     });
 
-                    return true;
+                    return;
                 }
                 
                 // Generate authentication token
@@ -84,8 +85,6 @@ namespace QuantumCore.Auth
                     Key = authToken,
                     Result = 1
                 });
-
-                return true;
             });
         }
 

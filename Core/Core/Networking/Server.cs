@@ -63,7 +63,7 @@ namespace QuantumCore.Core.Networking
             Console.WriteLine("HALLO");
         }
 
-        public void RegisterListener<T>(Func<Connection, T, bool> listener)
+        public void RegisterListener<T>(Action<Connection, T> listener)
         {
             var packet = _incomingPackets.Where(p => p.Value.Type == typeof(T)).Select(p => p.Value).First();
             _listeners[packet.Header] = listener;
