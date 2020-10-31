@@ -2,6 +2,7 @@
 using QuantumCore.Auth;
 using QuantumCore.Core;
 using QuantumCore.Core.Logging;
+using QuantumCore.Database;
 using QuantumCore.Game;
 using Serilog;
 
@@ -11,7 +12,7 @@ namespace QuantumCore
     {
         private static void Main(string[] args)
         {
-            Parser.Default.ParseArguments<AuthOptions, GameOptions>(args).WithParsed(Run);
+            Parser.Default.ParseArguments<AuthOptions, GameOptions, MigrateOptions>(args).WithParsed(Run);
         }
 
         private static void Run(object obj)
@@ -22,6 +23,7 @@ namespace QuantumCore
             {
                 AuthOptions auth => new AuthServer(auth),
                 GameOptions game => new GameServer(),
+                MigrateOptions migrate => new Migrate(migrate),
                 _ => null
             };
 
