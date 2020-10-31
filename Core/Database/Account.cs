@@ -11,7 +11,7 @@ namespace QuantumCore.Database
         
         public string Email { get; set; }
 
-        public EAccountStatus Status { get; set; } = EAccountStatus.OK;
+        public int Status { get; set; }
         
         public DateTime LastLogin { get; set; }
     }

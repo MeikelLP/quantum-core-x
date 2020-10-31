@@ -14,7 +14,7 @@ namespace QuantumCore.Migrations
                 .WithColumn("Username").AsString(30).NotNullable()
                 .WithColumn("Password").AsString(60).NotNullable()
                 .WithColumn("Email").AsString(100).NotNullable()
-                .WithColumn("Status").AsInt16().NotNullable().WithDefaultValue((int)EAccountStatus.OK)
+                .WithColumn("Status").AsInt16().NotNullable().WithDefaultValue(1)
                 .WithColumn("LastLogin").AsDateTime().Nullable()
                 .WithColumn("CreatedAt").AsDateTime().NotNullable().WithDefault(SystemMethods.CurrentDateTime)
                 .WithColumn("UpdatedAt").AsDateTime().NotNullable().WithDefault(SystemMethods.CurrentDateTime);

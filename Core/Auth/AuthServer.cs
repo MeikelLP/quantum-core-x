@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Threading.Tasks;
 using Dapper;
+using Dapper.Contrib.Extensions;
 using QuantumCore.Auth.Packets;
 using QuantumCore.Core;
 using QuantumCore.Core.API;
@@ -57,6 +58,15 @@ namespace QuantumCore.Auth
                     {
                         Log.Debug($"Wrong password supplied for account {request.Username}");
                         status = "WRONGPWD";
+                    }
+                    else
+                    {
+                        // Check account status stored in the database
+                        var dbStatus = await db.GetAsync<AccountStatus>(account.Status);
+                        if (!dbStatus.AllowLogin)
+                        {
+                            status = dbStatus.ClientStatus;
+                        }
                     }
                 }
                 catch (Exception e)

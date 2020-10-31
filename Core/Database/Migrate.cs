@@ -17,7 +17,6 @@ namespace QuantumCore.Database
         public Migrate(MigrateOptions options)
         {
             _options = options;
-            
         }
 
         public async Task Start()
@@ -67,7 +66,7 @@ namespace QuantumCore.Database
                 .AddLogging(lb => lb.AddFluentMigratorConsole())
                 .Configure<FluentMigratorLoggerOptions>(opt =>
                 {
-                    opt.ShowSql = true;
+                    opt.ShowSql = _options.Debug;
                 })
                 .BuildServiceProvider();
         }
