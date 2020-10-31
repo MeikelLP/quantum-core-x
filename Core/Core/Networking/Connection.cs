@@ -2,8 +2,10 @@ using System;
 using System.IO;
 using System.Net.Sockets;
 using System.Reflection;
+using System.Security.Cryptography;
 using QuantumCore.Core.Constants;
 using QuantumCore.Core.Packets;
+using QuantumCore.Core.Utils;
 using Serilog;
 
 namespace QuantumCore.Core.Networking
@@ -100,10 +102,8 @@ namespace QuantumCore.Core.Networking
         {
             if (Handshaking) return;
 
-            var r1 = (uint) Server.Random.Next(1 << 30);
-            var r2 = (uint) Server.Random.Next(1 << 2);
-
-            Handshake = (r1 << 2) | r2;
+            // Generate random handshake and start the handshaking
+            Handshake = CoreRandom.GenerateUInt32();
             Handshaking = true;
             SetPhase(EPhases.Handshake);
             SendHandshake();

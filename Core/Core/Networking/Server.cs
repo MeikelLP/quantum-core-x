@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Reflection;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
 using QuantumCore.Core.Packets;
 using Serilog;
@@ -35,8 +36,6 @@ namespace QuantumCore.Core.Networking
             RegisterNamespace("QuantumCore.Core.Packets");
             RegisterListener<GCHandshake>((connection, packet) => connection.HandleHandshake(packet));
         }
-
-        public Random Random { get; } = new Random();
 
         public long ServerTime => _serverTimer.ElapsedMilliseconds;
 
