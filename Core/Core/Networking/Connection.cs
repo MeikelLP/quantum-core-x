@@ -16,6 +16,8 @@ namespace QuantumCore.Core.Networking
 
         private BinaryWriter _writer;
 
+        private long _lastHandshakeTime;
+
         public Connection(TcpClient client, Server server)
         {
             _client = client;
@@ -41,10 +43,11 @@ namespace QuantumCore.Core.Networking
             var buffer = new byte[1];
 
             while (true)
+            {
                 try
                 {
                     var read = await stream.ReadAsync(buffer, 0, 1);
-                    if(read != 1)
+                    if (read != 1)
                     {
                         Log.Information("Failed to read, closing connection");
                         _client.Close();
@@ -62,7 +65,8 @@ namespace QuantumCore.Core.Networking
                     var data = new byte[packetDetails.Size - 1];
                     read = await stream.ReadAsync(data, 0, data.Length);
 
-                    if(read != data.Length) {
+                    if (read != data.Length)
+                    {
                         Log.Information("Failed to read, closing connection");
                         _client.Close();
                         break;
@@ -70,15 +74,18 @@ namespace QuantumCore.Core.Networking
 
                     var packet = Activator.CreateInstance(packetDetails.Type);
                     packetDetails.Deserialize(packet, data);
+                    
+                    Log.Debug($"Recv {packet}");
 
                     Server.CallListener(this, packet);
                 }
-                catch (IOException)
+                catch (Exception)
                 {
-                    Log.Information("Failed to read");
+                    Log.Information("Failed to process network data");
                     _client.Close();
                     break;
                 }
+            }
 
             Server.RemoveConnection(this);
         }
@@ -92,6 +99,8 @@ namespace QuantumCore.Core.Networking
             if (!Server.IsRegisteredOutgoing(packet.GetType()))
                 throw new ArgumentException("Given packet is not a registered outgoing packet", nameof(packet));
 
+            Log.Debug($"Send {packet}");
+            
             // Serialize object
             var data = Server.GetOutgoingPacket(attr.Header).Serialize(packet);
             _writer.Write(data);
@@ -143,9 +152,8 @@ namespace QuantumCore.Core.Networking
                 var delta = (time - handshake.Time) / 2;
                 if (delta < 0)
                 {
-                    Log.Information("Handshaking failed, CORONA!"); // DO NOT REMOVE! Easteregg, lol
-                    _client.Close();
-                    return false;
+                    delta = (time - _lastHandshakeTime) / 2;
+                    Log.Debug($"Delta is too low, retry with last send time");
                 }
 
                 SendHandshake((uint) time, (uint) delta);
@@ -165,15 +173,18 @@ namespace QuantumCore.Core.Networking
 
         private void SendHandshake()
         {
+            var time = Server.ServerTime;
+            _lastHandshakeTime = time;
             Send(new GCHandshake
             {
                 Handshake = Handshake,
-                Time = (uint) Server.ServerTime
+                Time = (uint) time
             });
         }
 
         private void SendHandshake(uint time, uint delta)
         {
+            _lastHandshakeTime = time;
             Send(new GCHandshake
             {
                 Handshake = Handshake,

@@ -22,7 +22,7 @@ namespace QuantumCore
             IServer server = obj switch
             {
                 AuthOptions auth => new AuthServer(auth),
-                GameOptions game => new GameServer(),
+                GameOptions game => new GameServer(game),
                 MigrateOptions migrate => new Migrate(migrate),
                 _ => null
             };

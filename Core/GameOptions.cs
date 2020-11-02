@@ -6,6 +6,6 @@ namespace QuantumCore
     public class GameOptions : GeneralOptions
     {
         [Option("port", HelpText = "Port on which the server should listen")]
-        public short Port { get; set; }
+        public short Port { get; set; } = 13001;
     }
 }

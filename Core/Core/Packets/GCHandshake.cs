@@ -8,5 +8,10 @@ namespace QuantumCore.Core.Packets
         [Field(1)] public uint Time { get; set; }
 
         [Field(2)] public uint Delta { get; set; }
+
+        public override string ToString()
+        {
+            return base.ToString() + $" Handshake = {Handshake}, Time = {Time}, Delta = {Delta}";
+        }
     }
 }

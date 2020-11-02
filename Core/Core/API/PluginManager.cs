@@ -16,7 +16,7 @@ namespace QuantumCore.Core.API
 
         public static void LoadPlugins()
         {
-            var plugins = PluginPaths.SelectMany(Directory.GetFiles).Where(name => name.EndsWith(".dll")).ToList();
+            var plugins = PluginPaths.Where(Directory.Exists).SelectMany(Directory.GetFiles).Where(name => name.EndsWith(".dll")).ToList();
             foreach (var pluginPath in plugins)
             {
                 // Load assembly file

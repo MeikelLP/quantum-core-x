@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Dapper;
 using Dapper.Contrib.Extensions;
 using QuantumCore.Auth.Packets;
+using QuantumCore.Cache;
 using QuantumCore.Core;
 using QuantumCore.Core.API;
 using QuantumCore.Core.Constants;
@@ -16,13 +17,21 @@ namespace QuantumCore.Auth
 {
     internal class AuthServer : IServer
     {
+        private readonly AuthOptions _options;
         private readonly Server _server;
 
         public AuthServer(AuthOptions options)
         {
+            _options = options;
+
+            // Initialize static components
             DatabaseManager.Init(options.AccountString, options.GameString);
+            CacheManager.Init(options.RedisHost, options.RedisPort);
+            
+            // Start tcp server
             _server = new Server(options.Port);
             
+            // Load and init all plugins
             PluginManager.LoadPlugins();
 
             // Register auth server features
@@ -89,6 +98,11 @@ namespace QuantumCore.Auth
                 // Generate authentication token
                 var authToken = CoreRandom.GenerateUInt32();
                 
+                // Store auth token
+                await CacheManager.Redis.Set("token:" + authToken, account.Id);
+                // Set expiration on token
+                await CacheManager.Redis.Expire("token:" + authToken, 30);
+                
                 // Send the auth token to the client and let it connect to our game server
                 connection.Send(new LoginSuccess
                 {
@@ -100,6 +114,12 @@ namespace QuantumCore.Auth
 
         public async Task Start()
         {
+            var pong = await CacheManager.Redis.Ping();
+            if (!pong)
+            {
+                Log.Error("Failed to ping redis server");
+            }
+            
             await _server.Start();
         }
 

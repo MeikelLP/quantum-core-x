@@ -4,6 +4,11 @@ namespace QuantumCore
 {
     public class GeneralOptions
     {
+        [Option("redis-host", HelpText = "Redis host")]
+        public string RedisHost { get; set; } = "127.0.0.1";
+        [Option("redis-port", HelpText = "Redis port")]
+        public int RedisPort { get; set; } = 6379;
+        
         [Option("account-database-host", HelpText = "Database host for account database")]
         public string AccountDatabaseHost { get; set; } = "localhost";
         [Option("account-database-user", HelpText = "Database user for account database")]

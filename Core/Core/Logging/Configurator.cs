@@ -6,7 +6,7 @@ namespace QuantumCore.Core.Logging
 {
     public static class Configurator
     {
-        private const string MessageTemplate = "[{Timestamp:HH:mm:ss}][{Level:u3}][{ProcessName:u5}|{MachineName}:" +
+        private const string MessageTemplate = "[{Timestamp:HH:mm:ss.fff}][{Level:u3}][{ProcessName:u5}|{MachineName}:" +
                                                "{EnvironmentUserName}]{Caller} >> {Message:lj} " +
                                                "{NewLine:1}{Exception:1}";
 
