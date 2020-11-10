@@ -12,10 +12,10 @@ using Serilog;
 
 namespace QuantumCore.Core.Networking
 {
-    public class Server
+    public class Server<T> : IPacketManager where T : Connection
     {
-        private readonly List<Func<Connection, bool>> _connectionListeners = new List<Func<Connection, bool>>();
-        private readonly Dictionary<Guid, Connection> _connections = new Dictionary<Guid, Connection>();
+        private readonly List<Func<T, bool>> _connectionListeners = new List<Func<T, bool>>();
+        private readonly Dictionary<Guid, T> _connections = new Dictionary<Guid, T>();
         private readonly Dictionary<byte, PacketCache> _incomingPackets = new Dictionary<byte, PacketCache>();
         private readonly List<Type> _incomingTypes = new List<Type>();
         private readonly Dictionary<byte, Delegate> _listeners = new Dictionary<byte, Delegate>();
@@ -24,8 +24,12 @@ namespace QuantumCore.Core.Networking
         private readonly Stopwatch _serverTimer = new Stopwatch();
         private readonly TcpListener _listener;
 
-        public Server(int port, string bindIp = "0.0.0.0")
+        private readonly Func<Server<T>, TcpClient, T> _clientConstructor;
+
+        public Server(Func<Server<T>, TcpClient, T> clientConstructor, int port, string bindIp = "0.0.0.0")
         {
+            _clientConstructor = clientConstructor;
+            
             // Start server timer
             _serverTimer.Start();
 
@@ -52,7 +56,7 @@ namespace QuantumCore.Core.Networking
                 try
                 {
                     var client = await _listener.AcceptTcpClientAsync();
-                    var connection = new Connection(client, this);
+                    var connection = _clientConstructor(this, client);
                     _connections.Add(connection.Id, connection);
 
                     connection.Start();
@@ -63,9 +67,9 @@ namespace QuantumCore.Core.Networking
             Console.WriteLine("HALLO");
         }
 
-        public void RegisterListener<T>(Action<Connection, T> listener)
+        public void RegisterListener<P>(Action<T, P> listener)
         {
-            var packet = _incomingPackets.Where(p => p.Value.Type == typeof(T)).Select(p => p.Value).First();
+            var packet = _incomingPackets.Where(p => p.Value.Type == typeof(P)).Select(p => p.Value).First();
             _listeners[packet.Header] = listener;
         }
 
@@ -84,14 +88,14 @@ namespace QuantumCore.Core.Networking
             del.DynamicInvoke(connection, packet);
         }
 
-        public void CallConnectionListener(Connection connection)
+        public void CallConnectionListener(T connection)
         {
             foreach (var listener in _connectionListeners) listener(connection);
         }
 
         public void RegisterNamespace(string space, Assembly assembly = null)
         {
-            if (assembly == null) assembly = Assembly.GetAssembly(typeof(Server));
+            if (assembly == null) assembly = Assembly.GetAssembly(typeof(Server<T>));
 
             var types = assembly.GetTypes().Where(t => string.Equals(t.Namespace, space, StringComparison.Ordinal))
                 .Where(t => t.GetCustomAttribute<Packet>() != null).ToArray();

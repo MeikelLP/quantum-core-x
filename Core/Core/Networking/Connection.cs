@@ -10,27 +10,40 @@ using Serilog;
 
 namespace QuantumCore.Core.Networking
 {
-    public class Connection
+    public abstract class Connection : IConnection
     {
-        private readonly TcpClient _client;
+        private TcpClient _client;
+
+        private IPacketManager _packetManager;
 
         private BinaryWriter _writer;
 
         private long _lastHandshakeTime;
 
-        public Connection(TcpClient client, Server server)
-        {
-            _client = client;
-            Server = server;
-            Id = Guid.NewGuid();
-        }
-
-        public Server Server { get; }
         public Guid Id { get; }
         public uint Handshake { get; private set; }
         public bool Handshaking { get; private set; }
         public EPhases Phase { get; private set; }
+        
+        protected Connection()
+        {
+            Id = Guid.NewGuid();
+        }
 
+        public void Init(TcpClient client, IPacketManager packetManager)
+        {
+            _client = client;
+            _packetManager = packetManager;
+        }
+
+        protected abstract void OnHandshakeFinished();
+
+        protected abstract void OnClose();
+
+        protected abstract void OnReceive(object packet);
+
+        protected abstract long GetServerTime();
+        
         public async void Start()
         {
             Log.Information($"New connection from {_client.Client.RemoteEndPoint}");
@@ -54,7 +67,7 @@ namespace QuantumCore.Core.Networking
                         break;
                     }
 
-                    var packetDetails = Server.GetIncomingPacket(buffer[0]);
+                    var packetDetails = _packetManager.GetIncomingPacket(buffer[0]);
                     if (packetDetails == null)
                     {
                         Log.Information($"Received unknown header {buffer[0]:X2}");
@@ -77,7 +90,7 @@ namespace QuantumCore.Core.Networking
                     
                     Log.Debug($"Recv {packet}");
 
-                    Server.CallListener(this, packet);
+                    OnReceive(packet);
                 }
                 catch (Exception)
                 {
@@ -87,7 +100,13 @@ namespace QuantumCore.Core.Networking
                 }
             }
 
-            Server.RemoveConnection(this);
+            Close();
+        }
+
+        public void Close()
+        {
+            _client.Close();
+            OnClose();
         }
 
         public void Send(object packet)
@@ -96,13 +115,13 @@ namespace QuantumCore.Core.Networking
             var attr = packet.GetType().GetCustomAttribute<Packet>();
             if (attr == null) throw new ArgumentException("Given packet is not a packet", nameof(packet));
 
-            if (!Server.IsRegisteredOutgoing(packet.GetType()))
+            if (!_packetManager.IsRegisteredOutgoing(packet.GetType()))
                 throw new ArgumentException("Given packet is not a registered outgoing packet", nameof(packet));
 
             Log.Debug($"Send {packet}");
             
             // Serialize object
-            var data = Server.GetOutgoingPacket(attr.Header).Serialize(packet);
+            var data = _packetManager.GetOutgoingPacket(attr.Header).Serialize(packet);
             _writer.Write(data);
             _writer.Flush();
         }
@@ -136,7 +155,7 @@ namespace QuantumCore.Core.Networking
                 return false;
             }
 
-            var time = Server.ServerTime;
+            var time = GetServerTime();
             var difference = time - (handshake.Time + handshake.Delta);
             if (difference >= 0 && difference <= 50)
             {
@@ -144,7 +163,7 @@ namespace QuantumCore.Core.Networking
                 Log.Information("Handshake done");
                 Handshaking = false;
 
-                Server.CallConnectionListener(this);
+                OnHandshakeFinished();
             }
             else
             {
@@ -173,7 +192,7 @@ namespace QuantumCore.Core.Networking
 
         private void SendHandshake()
         {
-            var time = Server.ServerTime;
+            var time = GetServerTime();
             _lastHandshakeTime = time;
             Send(new GCHandshake
             {

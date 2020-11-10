@@ -18,7 +18,7 @@ namespace QuantumCore.Auth
     internal class AuthServer : IServer
     {
         private readonly AuthOptions _options;
-        private readonly Server _server;
+        private readonly Server<AuthConnection> _server;
 
         public AuthServer(AuthOptions options)
         {
@@ -29,7 +29,7 @@ namespace QuantumCore.Auth
             CacheManager.Init(options.RedisHost, options.RedisPort);
             
             // Start tcp server
-            _server = new Server(options.Port);
+            _server = new Server<AuthConnection>((server, client) => new AuthConnection(server, client), options.Port);
             
             // Load and init all plugins
             PluginManager.LoadPlugins();
@@ -99,7 +99,7 @@ namespace QuantumCore.Auth
                 var authToken = CoreRandom.GenerateUInt32();
                 
                 // Store auth token
-                await CacheManager.Redis.Set("token:" + authToken, account.Id);
+                await CacheManager.Redis.Set("token:" + authToken, account.Username);
                 // Set expiration on token
                 await CacheManager.Redis.Expire("token:" + authToken, 30);
                 
