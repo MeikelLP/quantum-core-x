@@ -31,7 +31,7 @@ namespace QuantumCore.Database
         public uint BodyPart { get; set; }
         public uint HairPart { get; set; }
 
-        public async IAsyncEnumerable<Player> GetPlayers(Guid account)
+        public static async IAsyncEnumerable<Player> GetPlayers(Guid account)
         {
             var key = "players:" + account;
             

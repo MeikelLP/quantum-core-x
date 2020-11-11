@@ -1,4 +1,5 @@
-﻿using System.Net.Sockets;
+﻿using System;
+using System.Net.Sockets;
 using QuantumCore.Core.Networking;
 
 namespace QuantumCore.Game
@@ -6,6 +7,9 @@ namespace QuantumCore.Game
     public class GameConnection : Connection
     {
         private Server<GameConnection> _server;
+        
+        public Guid AccountId { get; set; }
+        public string Username { get; set; }
 
         public GameConnection(Server<GameConnection> server, TcpClient client)
         {

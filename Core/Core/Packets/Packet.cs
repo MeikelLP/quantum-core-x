@@ -33,6 +33,7 @@ namespace QuantumCore.Core.Packets
     public class PacketCache
     {
         private readonly List<PropertyInfo> _properties = new List<PropertyInfo>();
+        private readonly Dictionary<int, PacketCache> _subTypes = new Dictionary<int, PacketCache>();
 
         public PacketCache(byte header, Type type)
         {
@@ -46,37 +47,68 @@ namespace QuantumCore.Core.Packets
         public Type Type { get; }
         public uint Size { get; private set; }
 
-        public byte[] Serialize(object obj)
+        private void WriteField(object value, Type type, BinaryWriter bw, Field field)
         {
-            if (obj.GetType() != Type) throw new ArgumentException("Invalid packet given", nameof(obj));
-
+            if (type == typeof(uint))
+                bw.Write((uint) value);
+            else if (type == typeof(int))
+                bw.Write((int) value);
+            else if (type == typeof(ushort)) 
+                bw.Write((ushort) value);
+            else if (type == typeof(short))
+                bw.Write((short) value);
+            else if (type == typeof(byte))
+                bw.Write((byte) value);
+            else if (type == typeof(string))
+            {
+                var str = (string) value;
+                for (var i = 0; i < field.Length; i++)
+                {
+                    bw.Write(str != null && str.Length >= i + 1 ? str[i] : '\0');
+                }
+            }
+            else if (type.IsClass)
+            {
+                var subType = _subTypes[field.Position];
+                bw.Write(subType.Serialize(value));
+            }
+            else
+                Debug.Assert(false);
+        }
+        
+        public byte[] Serialize([CanBeNull] object obj)
+        {
             var ret = new byte[Size];
+            if (obj == null) return ret;
+            
+            if (obj.GetType() != Type) throw new ArgumentException("Invalid packet given", nameof(obj));
+            
             using (var ms = new MemoryStream(ret))
             {
                 using (var bw = new BinaryWriter(ms))
                 {
                     // Write header
-                    bw.Write(Header);
+                    if(Header > 0) bw.Write(Header);
 
                     foreach (var field in _properties)
                     {
+                        var attr = field.GetCustomAttribute<Field>();
+                        if(attr == null) continue;
+                        
                         var type = field.PropertyType;
-                        if (type == typeof(uint))
-                            bw.Write((uint) field.GetValue(obj));
-                        else if (type == typeof(byte))
-                            bw.Write((byte) field.GetValue(obj));
-                        else if (type == typeof(string))
+
+                        if (type.IsArray)
                         {
-                            var attr = field.GetCustomAttribute<Field>();
-                            Debug.Assert(attr != null);
-                            var str = (string) field.GetValue(obj);
-                            for (var i = 0; i < attr.Length; i++)
+                            var array = (Array) field.GetValue(obj);
+                            for (var i = 0; i < attr.ArrayLength; i++)
                             {
-                                bw.Write(str != null && str.Length >= i + 1 ? str[i] : '\0');
-                            }
+                                WriteField(array.GetValue(i), type.GetElementType(), bw, attr);
+                            }   
                         }
                         else
-                            Debug.Assert(false);
+                        {
+                            WriteField(field.GetValue(obj), type, bw, attr);
+                        }
                     }
                 }
             }
@@ -145,15 +177,19 @@ namespace QuantumCore.Core.Packets
         {
             var fields = Type.GetProperties().Where(field => field.GetCustomAttribute<Field>() != null)
                 .OrderBy(field => field.GetCustomAttribute<Field>().Position);
-            Size = 1;
+            Size = Header > 0 ? 1u : 0u;
             var packetAttribute = Type.GetCustomAttribute<Packet>();
-            if (packetAttribute == null) return;
-            if (packetAttribute.Sequence) Size++;
-            
+            if (packetAttribute != null)
+            {
+                if (packetAttribute.Sequence) Size++;
+            }
+
             foreach (var field in fields)
             {
                 var type = field.PropertyType;
                 var attribute = field.GetCustomAttribute<Field>();
+                if(attribute == null) continue;
+                
                 uint multiplier = 1;
 
                 if (type.IsArray)
@@ -162,9 +198,13 @@ namespace QuantumCore.Core.Packets
                     multiplier = (uint) attribute.ArrayLength;
                 }
 
-                if (type == typeof(uint))
+                if (type == typeof(uint) || type == typeof(int))
                 {
                     Size += 4 * multiplier;
+                }
+                else if (type == typeof(ushort) || type == typeof(short))
+                {
+                    Size += 2 * multiplier;
                 }
                 else if (type == typeof(byte))
                 {
@@ -174,6 +214,12 @@ namespace QuantumCore.Core.Packets
                 {
                     Debug.Assert(attribute.Length > 0);
                     Size += (uint) attribute.Length * multiplier;
+                }
+                else if (type != null && type.IsClass)
+                {
+                    var subType = new PacketCache(0, type);
+                    _subTypes[attribute.Position] = subType;
+                    Size += subType.Size * multiplier;
                 }
                 else
                 {

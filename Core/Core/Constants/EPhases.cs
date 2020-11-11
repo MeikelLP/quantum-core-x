@@ -4,6 +4,7 @@ namespace QuantumCore.Core.Constants
     {
         Handshake = 1,
         Login = 2,
+        Select = 3,
         Auth = 10
     }
 }

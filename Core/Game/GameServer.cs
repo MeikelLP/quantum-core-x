@@ -39,34 +39,9 @@ namespace QuantumCore.Game
                 return true;
             });
             
-            _server.RegisterListener<TokenLogin>(OnTokenLogin);
+            _server.RegisterListener<TokenLogin>(((connection, packet) => connection.OnTokenLogin(packet)));
         }
-
-        private async void OnTokenLogin(Connection connection, TokenLogin packet)
-        {
-            var key = "token:" + packet.Key;
-
-            if (await CacheManager.Redis.Exists(key) <= 0)
-            {
-                Log.Warning($"Received invalid auth token {packet.Key} / {packet.Username}");
-                connection.Close();
-                return;
-            }
-            
-            var username = await CacheManager.Redis.Get<string>("token:" + packet.Key);
-            if (!string.Equals(username, packet.Username, StringComparison.OrdinalIgnoreCase))
-            {
-                Log.Warning($"Received invalid auth token, username does not match {username} != {packet.Username}");
-                connection.Close();
-                return;
-            }
-            
-            Log.Debug("Received valid auth token");
-            
-            // Remove TTL from token so we can use it for another game core transition
-            await CacheManager.Redis.Persist(key);
-        }
-
+        
         public async Task Start()
         {
             await _server.Start();

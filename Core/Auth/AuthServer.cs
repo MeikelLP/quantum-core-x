@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Dapper;
 using Dapper.Contrib.Extensions;
+using QuantumCore.Auth.Cache;
 using QuantumCore.Auth.Packets;
 using QuantumCore.Cache;
 using QuantumCore.Core;
@@ -99,7 +100,11 @@ namespace QuantumCore.Auth
                 var authToken = CoreRandom.GenerateUInt32();
                 
                 // Store auth token
-                await CacheManager.Redis.Set("token:" + authToken, account.Username);
+                await CacheManager.Redis.Set("token:" + authToken, new Token
+                {
+                    Username = account.Username,
+                    AccountId = account.Id
+                });
                 // Set expiration on token
                 await CacheManager.Redis.Expire("token:" + authToken, 30);
                 
