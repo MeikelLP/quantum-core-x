@@ -45,8 +45,8 @@ namespace QuantumCore.Game
             // Load players of account
             await foreach (var player in Player.GetPlayers(connection.AccountId))
             {
-                characters.CharacterList[i].Name = player.Name;
-                
+                characters.CharacterList[i] = Character.FromEntity(player);
+
                 i++;
             }
 

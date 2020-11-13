@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations.Schema;
 using System.Threading.Tasks;
 using Dapper;
+using Dapper.Contrib.Extensions;
 using QuantumCore.Cache;
 using Serilog;
 
 namespace QuantumCore.Database
 {
-    [Table("players")]
+    [System.ComponentModel.DataAnnotations.Schema.Table("players")]
     public class Player : BaseModel, ICache
     {
         public Guid AccountId { get; set; }
@@ -33,15 +33,16 @@ namespace QuantumCore.Database
 
         public static async IAsyncEnumerable<Player> GetPlayers(Guid account)
         {
+            var redis = CacheManager.Redis;
             var key = "players:" + account;
+
+            var list = redis.CreateList<Guid>(key);
             
             // Check if we have players cached
-            var redis = CacheManager.Redis;
             if (await redis.Exists(key) > 0)
             {
                 Log.Debug($"Found players for account {account} in cache");
                 // We have the characters cached
-                var list = redis.CreateList<Guid>(key);
                 var cachedIds = await list.Range(0, -1);
 
                 foreach (var id in cachedIds)
@@ -49,11 +50,36 @@ namespace QuantumCore.Database
                     yield return await redis.Get<Player>("player:" + id);    
                 }
             }
-            
-            Log.Debug($"Query players for account {account} from the database");
-            using var db = DatabaseManager.GetGameDatabase();
-            var ids = await db.QueryAsync("SELECT Id FROM players WHERE AccountId = @AccountId", new {AccountId = account});
-            
+            else
+            {
+                Log.Debug($"Query players for account {account} from the database");
+                using var db = DatabaseManager.GetGameDatabase();
+                var ids = await db.QueryAsync("SELECT Id FROM players WHERE AccountId = @AccountId",
+                    new {AccountId = account});
+
+                // todo: is it ever possible that we have a player cached but not the players list? 
+                //  if this is not the case we can make this part short and faster
+                foreach (var row in ids)
+                {
+                    Guid playerId = row.Id;
+                    await list.Push(playerId);
+
+                    var playerKey = "player:" + playerId;
+                    if (await redis.Exists(playerKey) > 0)
+                    {
+                        Log.Debug($"Read character {playerId} from cache");
+                        yield return await redis.Get<Player>(playerKey);
+                    }
+                    else
+                    {
+                        Log.Debug($"Query character {playerId} from the database");
+                        var player = db.Get<Player>(playerId);
+                        //var player = await SqlMapperExtensions.Get<Player>(db, playerId);
+                        await redis.Set(playerKey, player);
+                        yield return player;
+                    }
+                }
+            }
         }
     }
 }
