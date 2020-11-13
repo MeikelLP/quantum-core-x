@@ -31,6 +31,49 @@ namespace QuantumCore.Database
         public uint BodyPart { get; set; }
         public uint HairPart { get; set; }
 
+        public static async Task<Player> GetPlayer(Guid account, byte slot)
+        {
+            var redis = CacheManager.Redis;
+            var key = "players:" + account;
+            
+            var list = redis.CreateList<Guid>(key);
+            if (await redis.Exists(key) <= 0)
+            {
+                var i = 0;
+                await foreach (var player in GetPlayers(account))
+                {
+                    if (i == slot) return player;
+                    i++;
+                }
+
+                return null;
+            }
+
+            var playerId = await list.Index(slot);
+            return await GetPlayer(playerId);
+        }
+
+        public static async Task<Player> GetPlayer(Guid playerId)
+        {
+            var redis = CacheManager.Redis;
+            using var db = DatabaseManager.GetGameDatabase();
+            
+            var playerKey = "player:" + playerId;
+            if (await redis.Exists(playerKey) > 0)
+            {
+                Log.Debug($"Read character {playerId} from cache");
+                return await redis.Get<Player>(playerKey);
+            }
+            else
+            {
+                Log.Debug($"Query character {playerId} from the database");
+                var player = db.Get<Player>(playerId);
+                //var player = await SqlMapperExtensions.Get<Player>(db, playerId);
+                await redis.Set(playerKey, player);
+                return player;
+            }
+        }
+        
         public static async IAsyncEnumerable<Player> GetPlayers(Guid account)
         {
             var redis = CacheManager.Redis;
@@ -64,20 +107,7 @@ namespace QuantumCore.Database
                     Guid playerId = row.Id;
                     await list.Push(playerId);
 
-                    var playerKey = "player:" + playerId;
-                    if (await redis.Exists(playerKey) > 0)
-                    {
-                        Log.Debug($"Read character {playerId} from cache");
-                        yield return await redis.Get<Player>(playerKey);
-                    }
-                    else
-                    {
-                        Log.Debug($"Query character {playerId} from the database");
-                        var player = db.Get<Player>(playerId);
-                        //var player = await SqlMapperExtensions.Get<Player>(db, playerId);
-                        await redis.Set(playerKey, player);
-                        yield return player;
-                    }
+                    yield return await GetPlayer(playerId);
                 }
             }
         }

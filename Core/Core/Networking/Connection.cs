@@ -92,8 +92,9 @@ namespace QuantumCore.Core.Networking
 
                     OnReceive(packet);
                 }
-                catch (Exception)
+                catch (Exception e)
                 {
+                    Log.Debug(e.Message);
                     Log.Information("Failed to process network data");
                     _client.Close();
                     break;

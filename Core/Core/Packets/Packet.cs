@@ -59,6 +59,8 @@ namespace QuantumCore.Core.Packets
                 bw.Write((short) value);
             else if (type == typeof(byte))
                 bw.Write((byte) value);
+            else if (type == typeof(float))
+                bw.Write((float) value);
             else if (type == typeof(string))
             {
                 var str = (string) value;
@@ -78,6 +80,7 @@ namespace QuantumCore.Core.Packets
         
         public byte[] Serialize([CanBeNull] object obj)
         {
+            Debug.Assert(Size > 0);
             var ret = new byte[Size];
             if (obj == null) return ret;
             
@@ -156,6 +159,10 @@ namespace QuantumCore.Core.Packets
                                 var idx = Array.IndexOf(chars, '\0');
                                 value = new string(chars, 0, idx < 0 ? chars.Length : idx);
                             }
+                            else if (type == typeof(float))
+                            {
+                                value = br.ReadSingle();
+                            }
                             else
                             {
                                 Debug.Assert(false);
@@ -196,6 +203,7 @@ namespace QuantumCore.Core.Packets
                 {
                     type = type.GetElementType();
                     multiplier = (uint) attribute.ArrayLength;
+                    Debug.Assert(multiplier > 0);
                 }
 
                 if (type == typeof(uint) || type == typeof(int))
@@ -214,6 +222,10 @@ namespace QuantumCore.Core.Packets
                 {
                     Debug.Assert(attribute.Length > 0);
                     Size += (uint) attribute.Length * multiplier;
+                }
+                else if (type == typeof(float))
+                {
+                    Size += 4 * multiplier;
                 }
                 else if (type != null && type.IsClass)
                 {

@@ -1,40 +1,43 @@
 ﻿using System;
 using System.Net.Sockets;
 using QuantumCore.Core.Networking;
+using QuantumCore.Game.Packets;
+using QuantumCore.Game.World;
 
 namespace QuantumCore.Game
 {
     public class GameConnection : Connection
     {
-        private Server<GameConnection> _server;
+        public Server<GameConnection> Server { get; private set; }
         
-        public Guid AccountId { get; set; }
+        public Guid? AccountId { get; set; }
         public string Username { get; set; }
+        public PlayerEntity Player { get; set; }
 
         public GameConnection(Server<GameConnection> server, TcpClient client)
         {
-            _server = server;
+            Server = server;
             Init(client, server);
         }
-        
+
         protected override void OnHandshakeFinished()
         {
-            _server.CallConnectionListener(this);
+            Server.CallConnectionListener(this);
         }
 
         protected override void OnClose()
         {
-            _server.RemoveConnection(this);
+            Server.RemoveConnection(this);
         }
 
         protected override void OnReceive(object packet)
         {
-            _server.CallListener(this, packet);
+            Server.CallListener(this, packet);
         }
 
         protected override long GetServerTime()
         {
-            return _server.ServerTime;
+            return Server.ServerTime;
         }
     }
 }

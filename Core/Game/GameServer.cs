@@ -39,7 +39,9 @@ namespace QuantumCore.Game
                 return true;
             });
             
-            _server.RegisterListener<TokenLogin>(((connection, packet) => connection.OnTokenLogin(packet)));
+            _server.RegisterListener<TokenLogin>((connection, packet) => connection.OnTokenLogin(packet));
+            _server.RegisterListener<SelectCharacter>((connection, packet) => connection.OnSelectCharacter(packet));
+            _server.RegisterListener<EnterGame>((connection, packet) => connection.OnEnterGame(packet));
         }
         
         public async Task Start()
