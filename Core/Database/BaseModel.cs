@@ -1,11 +1,12 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using Dapper.Contrib.Extensions;
 
 namespace QuantumCore.Database
 {
     public class BaseModel
     {
-        [Key]
+        [ExplicitKey]
         public Guid Id { get; set; }
 
         public DateTime CreatedAt { get; set; } = DateTime.Now;

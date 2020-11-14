@@ -1,9 +1,16 @@
-﻿using System.Net;
+﻿using System.Diagnostics;
+using System.Linq;
+using System.Net;
+using System.Net.NetworkInformation;
+using System.Net.Sockets;
+using Serilog;
 
 namespace QuantumCore.Core.Utils
 {
-    public class IpUtils
+    public static class IpUtils
     {
+        public static IPAddress PublicIP { get; set; } 
+        
         public static int ConvertIpToUInt(string ip)
         {
             return ConvertIpToUInt(IPAddress.Parse(ip));
@@ -17,6 +24,30 @@ namespace QuantumCore.Core.Utils
             ret += (int) bytes[1] << 8;
             ret += (int) bytes[0];
             return ret;
+        }
+
+        public static void SearchPublicIp()
+        {
+            var interfaces = NetworkInterface.GetAllNetworkInterfaces()
+                .Where(c =>
+                    c.NetworkInterfaceType != NetworkInterfaceType.Loopback &&
+                    c.OperationalStatus == OperationalStatus.Up);
+            foreach (var iface in interfaces)
+            {
+                var ip = iface.GetIPProperties().UnicastAddresses
+                    .Where(c => c.Address.AddressFamily == AddressFamily.InterNetwork).Select(c => c.Address)
+                    .FirstOrDefault();
+
+                if (ip != null)
+                {
+                    PublicIP = ip;
+                    Log.Debug($"Public IP is {PublicIP}");
+                    return;
+                }
+            }
+
+            Log.Warning($"Failed to look up public ip!");
+            PublicIP = IPAddress.Loopback;
         }
     }
 }

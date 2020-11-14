@@ -54,7 +54,7 @@ namespace QuantumCore.Game
                 // todo character slot position
                 characters.CharacterList[i] = Character.FromEntity(player);
                 // todo calculate real target ip and port
-                characters.CharacterList[i].Ip = IpUtils.ConvertIpToUInt("127.0.0.1");
+                characters.CharacterList[i].Ip = IpUtils.ConvertIpToUInt(IpUtils.PublicIP);
                 characters.CharacterList[i].Port = 13001;
 
                 i++;
@@ -64,31 +64,6 @@ namespace QuantumCore.Game
             connection.Send(new Empire { EmpireId = 1 }); // todo read from database
             connection.SetPhase(EPhases.Select);
             connection.Send(characters);
-        }
-        
-        public static async void OnSelectCharacter(this GameConnection connection, SelectCharacter packet)
-        {
-            Log.Debug($"Selected character in slot {packet.Slot}");
-            if (connection.AccountId == null)
-            {
-                // We didn't received any login before
-                connection.Close();
-                Log.Warning($"Character select received before authorization");
-                return;
-            }
-
-            var accountId = connection.AccountId ?? default; // todo clean solution
-            
-            connection.SetPhase(EPhases.Loading);
-            
-            // Load player
-            var player = await Player.GetPlayer(accountId, packet.Slot);
-            var entity = new PlayerEntity(player, connection);
-            connection.Player = entity;
-            
-            // Send information about the player to the client
-            entity.SendBasicData();
-            entity.SendPoints();
         }
     }
 }

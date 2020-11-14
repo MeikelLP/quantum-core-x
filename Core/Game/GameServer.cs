@@ -1,10 +1,12 @@
 using System;
+using System.Net;
 using System.Threading.Tasks;
 using QuantumCore.Cache;
 using QuantumCore.Core;
 using QuantumCore.Core.API;
 using QuantumCore.Core.Constants;
 using QuantumCore.Core.Networking;
+using QuantumCore.Core.Utils;
 using QuantumCore.Database;
 using QuantumCore.Game.Packets;
 using Serilog;
@@ -19,6 +21,14 @@ namespace QuantumCore.Game
         public GameServer(GameOptions options)
         {
             _options = options;
+            if (_options.IpAddress != null)
+            {
+                IpUtils.PublicIP = IPAddress.Parse(_options.IpAddress);
+            }
+            else
+            {
+                IpUtils.SearchPublicIp();
+            }
             
             // Initialize static components
             DatabaseManager.Init(options.AccountString, options.GameString);
@@ -40,6 +50,7 @@ namespace QuantumCore.Game
             });
             
             _server.RegisterListener<TokenLogin>((connection, packet) => connection.OnTokenLogin(packet));
+            _server.RegisterListener<CreateCharacter>((connection, packet) => connection.OnCreateCharacter(packet));
             _server.RegisterListener<SelectCharacter>((connection, packet) => connection.OnSelectCharacter(packet));
             _server.RegisterListener<EnterGame>((connection, packet) => connection.OnEnterGame(packet));
         }
