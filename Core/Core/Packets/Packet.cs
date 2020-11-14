@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Text;
 using JetBrains.Annotations;
 
 namespace QuantumCore.Core.Packets
@@ -17,9 +18,9 @@ namespace QuantumCore.Core.Packets
 
     [MeansImplicitUse]
     [AttributeUsage(AttributeTargets.Class, Inherited = false)]
-    public class Packet : Attribute
+    public class PacketAttribute : Attribute
     {
-        public Packet(byte header, EDirection direction)
+        public PacketAttribute(byte header, EDirection direction)
         {
             Header = header;
             Direction = direction;
@@ -34,6 +35,8 @@ namespace QuantumCore.Core.Packets
     {
         private readonly List<PropertyInfo> _properties = new List<PropertyInfo>();
         private readonly Dictionary<int, PacketCache> _subTypes = new Dictionary<int, PacketCache>();
+        private PropertyInfo _dynamicValueProperty;
+        private PropertyInfo _dynamicSizeProperty;
 
         public PacketCache(byte header, Type type)
         {
@@ -46,8 +49,10 @@ namespace QuantumCore.Core.Packets
         public byte Header { get; }
         public Type Type { get; }
         public uint Size { get; private set; }
+        public bool IsDynamic { get; private set; }
+        public bool HasSequence { get; private set; }
 
-        private void WriteField(object value, Type type, BinaryWriter bw, Field field)
+        private void WriteField(object value, Type type, BinaryWriter bw, FieldAttribute field)
         {
             if (type == typeof(uint))
                 bw.Write((uint) value);
@@ -85,34 +90,31 @@ namespace QuantumCore.Core.Packets
             if (obj == null) return ret;
             
             if (obj.GetType() != Type) throw new ArgumentException("Invalid packet given", nameof(obj));
+
+            using var ms = new MemoryStream(ret);
+            using var bw = new BinaryWriter(ms, Encoding.ASCII);
             
-            using (var ms = new MemoryStream(ret))
+            // Write header
+            if(Header > 0) bw.Write(Header);
+
+            foreach (var field in _properties)
             {
-                using (var bw = new BinaryWriter(ms))
-                {
-                    // Write header
-                    if(Header > 0) bw.Write(Header);
-
-                    foreach (var field in _properties)
-                    {
-                        var attr = field.GetCustomAttribute<Field>();
-                        if(attr == null) continue;
+                var attr = field.GetCustomAttribute<FieldAttribute>();
+                if(attr == null) continue;
                         
-                        var type = field.PropertyType;
+                var type = field.PropertyType;
 
-                        if (type.IsArray)
-                        {
-                            var array = (Array) field.GetValue(obj);
-                            for (var i = 0; i < attr.ArrayLength; i++)
-                            {
-                                WriteField(array.GetValue(i), type.GetElementType(), bw, attr);
-                            }   
-                        }
-                        else
-                        {
-                            WriteField(field.GetValue(obj), type, bw, attr);
-                        }
-                    }
+                if (type.IsArray)
+                {
+                    var array = (Array) field.GetValue(obj);
+                    for (var i = 0; i < attr.ArrayLength; i++)
+                    {
+                        WriteField(array.GetValue(i), type.GetElementType(), bw, attr);
+                    }   
+                }
+                else
+                {
+                    WriteField(field.GetValue(obj), type, bw, attr);
                 }
             }
 
@@ -124,77 +126,136 @@ namespace QuantumCore.Core.Packets
             if (data.Length != Size - 1) throw new ArgumentException("Invalid data stream given", nameof(data));
             if (obj.GetType() != Type) throw new ArgumentException("Invalid packet given", nameof(obj));
 
-            using (var ms = new MemoryStream(data))
+            using var ms = new MemoryStream(data);
+            using var br = new BinaryReader(ms, Encoding.ASCII);
+            
+            foreach (var field in _properties)
             {
-                using (var br = new BinaryReader(ms))
+                var type = field.PropertyType;
+                var attribute = field.GetCustomAttribute<FieldAttribute>();
+                var multiplier = 1;
+                Array array = null;
+
+                if (type.IsArray)
                 {
-                    foreach (var field in _properties)
-                    {
-                        var type = field.PropertyType;
-                        var attribute = field.GetCustomAttribute<Field>();
-                        var multiplier = 1;
-                        Array array = null;
-
-                        if (type.IsArray)
-                        {
-                            type = type.GetElementType();
-                            multiplier = attribute.ArrayLength;
-                            array = Array.CreateInstance(type, multiplier);
-                        }
-
-                        for (var i = 0; i < multiplier; i++)
-                        {
-                            object value = null;
-                            if (type == typeof(uint))
-                            {
-                                value = br.ReadUInt32();
-                            }
-                            else if (type == typeof(byte))
-                            {
-                                value = br.ReadByte();
-                            }
-                            else if (type == typeof(string))
-                            {
-                                var chars = br.ReadChars(attribute.Length);
-                                var idx = Array.IndexOf(chars, '\0');
-                                value = new string(chars, 0, idx < 0 ? chars.Length : idx);
-                            }
-                            else if (type == typeof(float))
-                            {
-                                value = br.ReadSingle();
-                            }
-                            else
-                            {
-                                Debug.Assert(false);
-                            }
-
-                            if (array != null)
-                                array.SetValue(value, i);
-                            else
-                                field.SetValue(obj, value);
-                        }
-
-                        if (array != null) field.SetValue(obj, array);
-                    }
+                    type = type.GetElementType();
+                    multiplier = attribute.ArrayLength;
+                    array = Array.CreateInstance(type, multiplier);
                 }
+
+                for (var i = 0; i < multiplier; i++)
+                {
+                    object value = null;
+                    if (type == typeof(uint))
+                    {
+                        value = br.ReadUInt32();
+                    }
+                    else if (type == typeof(int))
+                    {
+                        value = br.ReadInt32();
+                    }
+                    else if (type == typeof(ushort))
+                    {
+                        value = br.ReadUInt16();
+                    }
+                    else if (type == typeof(short))
+                    {
+                        value = br.ReadInt16();
+                    }
+                    else if (type == typeof(float))
+                    {
+                        value = br.ReadSingle();
+                    }
+                    else if (type == typeof(byte))
+                    {
+                        value = br.ReadByte();
+                    }
+                    else if (type == typeof(string))
+                    {
+                        var chars = br.ReadChars(attribute.Length);
+                        var idx = Array.IndexOf(chars, '\0');
+                        value = new string(chars, 0, idx < 0 ? chars.Length : idx);
+                    }
+                    else if (type == typeof(float))
+                    {
+                        value = br.ReadSingle();
+                    }
+                    else
+                    {
+                        Debug.Assert(false);
+                    }
+
+                    if (array != null)
+                        array.SetValue(value, i);
+                    else
+                        field.SetValue(obj, value);
+                }
+
+                if (array != null) field.SetValue(obj, array);
             }
+        }
+
+        public void DeserializeDynamic(object packet, byte[] data)
+        {
+            Debug.Assert(IsDynamic);
+            Debug.Assert(_dynamicValueProperty != null);
+            
+            using var ms = new MemoryStream(data);
+            using var br = new BinaryReader(ms, Encoding.ASCII);
+
+            if (_dynamicValueProperty.PropertyType == typeof(string))
+            {
+                var chars = br.ReadChars(data.Length);
+                var idx = Array.IndexOf(chars, '\0');
+                var value = new string(chars, 0, idx < 0 ? chars.Length : idx);
+                _dynamicValueProperty.SetValue(packet, value);
+            }
+            else
+            {
+                Debug.Assert(false);
+            }
+        }
+
+        public ushort GetDynamicSize(object packet)
+        {
+            Debug.Assert(IsDynamic);
+            Debug.Assert(_dynamicSizeProperty != null);
+
+            var dynSize = _dynamicSizeProperty.GetValue(packet);
+            if (dynSize == null) return 0;
+
+            return (ushort) dynSize;
         }
 
         private void CalculateSize()
         {
-            var fields = Type.GetProperties().Where(field => field.GetCustomAttribute<Field>() != null)
-                .OrderBy(field => field.GetCustomAttribute<Field>().Position);
+            var fields = Type.GetProperties().Where(field => field.GetCustomAttribute<FieldAttribute>() != null)
+                .OrderBy(field => field.GetCustomAttribute<FieldAttribute>().Position);
             Size = Header > 0 ? 1u : 0u;
-            var packetAttribute = Type.GetCustomAttribute<Packet>();
+            var packetAttribute = Type.GetCustomAttribute<PacketAttribute>();
             if (packetAttribute != null)
             {
-                if (packetAttribute.Sequence) Size++;
+                HasSequence = packetAttribute.Sequence;
             }
 
+            // Check if we have a dynamic field
+            var dynamicField =
+                Type.GetProperties().FirstOrDefault(field => field.GetCustomAttribute<DynamicAttribute>() != null);
+            if (dynamicField != null)
+            {
+                IsDynamic = true;
+                _dynamicValueProperty = dynamicField;
+
+                var sizeField = Type.GetProperties()
+                    .FirstOrDefault(field => field.GetCustomAttribute<SizeAttribute>() != null);
+                Debug.Assert(sizeField != null);
+                _dynamicSizeProperty = sizeField;
+            }
+            
             foreach (var field in fields)
             {
                 var type = field.PropertyType;
-                var attribute = field.GetCustomAttribute<Field>();
+                var attribute = field.GetCustomAttribute<FieldAttribute>();
                 if(attribute == null) continue;
                 
                 uint multiplier = 1;
@@ -245,9 +306,9 @@ namespace QuantumCore.Core.Packets
     }
 
     [AttributeUsage(AttributeTargets.Property)]
-    public class Field : Attribute
+    public class FieldAttribute : Attribute
     {
-        public Field(int position)
+        public FieldAttribute(int position)
         {
             Position = position;
         }
@@ -255,5 +316,17 @@ namespace QuantumCore.Core.Packets
         public int Position { get; set; }
         public int Length { get; set; } = -1;
         public int ArrayLength { get; set; } = -1;
+    }
+
+    [AttributeUsage(AttributeTargets.Property)]
+    public class SizeAttribute : Attribute
+    {
+        
+    }
+
+    [AttributeUsage(AttributeTargets.Property)]
+    public class DynamicAttribute : Attribute
+    {
+        
     }
 }

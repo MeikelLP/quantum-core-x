@@ -98,11 +98,11 @@ namespace QuantumCore.Core.Networking
             if (assembly == null) assembly = Assembly.GetAssembly(typeof(Server<T>));
 
             var types = assembly.GetTypes().Where(t => string.Equals(t.Namespace, space, StringComparison.Ordinal))
-                .Where(t => t.GetCustomAttribute<Packet>() != null).ToArray();
+                .Where(t => t.GetCustomAttribute<PacketAttribute>() != null).ToArray();
             foreach (var type in types)
             {
                 Log.Information($"Register Packet {type.Name}");
-                var packet = type.GetCustomAttribute<Packet>();
+                var packet = type.GetCustomAttribute<PacketAttribute>();
                 if (packet.Direction.HasFlag(EDirection.Incoming))
                 {
                     if (_incomingPackets.ContainsKey(packet.Header))

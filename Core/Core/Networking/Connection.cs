@@ -88,14 +88,46 @@ namespace QuantumCore.Core.Networking
                     var packet = Activator.CreateInstance(packetDetails.Type);
                     packetDetails.Deserialize(packet, data);
                     
+                    // Check if packet has dynamic data
+                    if (packetDetails.IsDynamic)
+                    {
+                        // Calculate dynamic size
+                        var size = packetDetails.GetDynamicSize(packet) - (int)packetDetails.Size;
+                        
+                        // Read dynamic data
+                        var dynamicData = new byte[size];
+                        read = await stream.ReadAsync(dynamicData, 0, size);
+                        if (read != size)
+                        {
+                            Log.Information($"Failed to read dynamic data read {read} but expected {size}");
+                            _client.Close();
+                            break;
+                        }
+                        
+                        // Copy and deserialize dynamic data into the packet object
+                        packetDetails.DeserializeDynamic(packet, dynamicData);
+                    }
+                    
+                    // Check if packet has a sequence
+                    if (packetDetails.HasSequence)
+                    {
+                        var sequence = new byte[1];
+                        read = await stream.ReadAsync(sequence, 0, 1);
+                        if (read != 1)
+                        {
+                            _client.Close();
+                            break;
+                        }
+                        Log.Debug($"Read sequence {sequence[0]:X2}");
+                    }
+                    
                     Log.Debug($"Recv {packet}");
 
                     OnReceive(packet);
                 }
                 catch (Exception e)
                 {
-                    Log.Debug(e.Message);
-                    Log.Information("Failed to process network data");
+                    Log.Information(e, "Failed to process network data");
                     _client.Close();
                     break;
                 }
@@ -113,7 +145,7 @@ namespace QuantumCore.Core.Networking
         public void Send(object packet)
         {
             // Verify that the packet is a packet and registered
-            var attr = packet.GetType().GetCustomAttribute<Packet>();
+            var attr = packet.GetType().GetCustomAttribute<PacketAttribute>();
             if (attr == null) throw new ArgumentException("Given packet is not a packet", nameof(packet));
 
             if (!_packetManager.IsRegisteredOutgoing(packet.GetType()))
