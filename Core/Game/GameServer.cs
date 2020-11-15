@@ -21,12 +21,15 @@ namespace QuantumCore.Game
         public GameServer(GameOptions options)
         {
             _options = options;
+            
+            // Set public ip address
             if (_options.IpAddress != null)
             {
                 IpUtils.PublicIP = IPAddress.Parse(_options.IpAddress);
             }
             else
             {
+                // Query interfaces for our best ipv4 address
                 IpUtils.SearchPublicIp();
             }
             

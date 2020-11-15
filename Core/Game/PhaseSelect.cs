@@ -1,4 +1,5 @@
 using System;
+using Dapper;
 using Dapper.Contrib.Extensions;
 using QuantumCore.Cache;
 using QuantumCore.Core.Constants;
@@ -48,8 +49,14 @@ namespace QuantumCore.Game
             }
 
             var accountId = connection.AccountId ?? default;
-            
-            // todo check if name is available!
+
+            var db = DatabaseManager.GetGameDatabase();
+            var count = await db.QuerySingleAsync<int>("SELECT COUNT(*) FROM players WHERE Name = @Name", new {Name = packet.Name});
+            if (count > 0)
+            {
+                connection.Send(new CreateCharacterFailure());
+                return;
+            }
 
             // Create player data
             var player = new Player
