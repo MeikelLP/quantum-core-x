@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Net;
 using System.Threading.Tasks;
 using QuantumCore.Cache;
@@ -9,6 +10,7 @@ using QuantumCore.Core.Networking;
 using QuantumCore.Core.Utils;
 using QuantumCore.Database;
 using QuantumCore.Game.Packets;
+//using QuantumCore.Types;
 using Serilog;
 
 namespace QuantumCore.Game
@@ -36,6 +38,10 @@ namespace QuantumCore.Game
             // Initialize static components
             DatabaseManager.Init(options.AccountString, options.GameString);
             CacheManager.Init(options.RedisHost, options.RedisPort);
+            
+            // Load game data
+            //var itemProto = ItemProto.FromFile("data/item_proto");
+            //File.WriteAllBytes("item_proto_decompressed", itemProto.Content.Compressed);
             
             // Start tcp server
             _server = new Server<GameConnection>((server, client) => new GameConnection(server, client), options.Port);
