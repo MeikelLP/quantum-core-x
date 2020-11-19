@@ -7,10 +7,10 @@ using QuantumCore.Core;
 using QuantumCore.Core.API;
 using QuantumCore.Core.Constants;
 using QuantumCore.Core.Networking;
+using QuantumCore.Core.Types;
 using QuantumCore.Core.Utils;
 using QuantumCore.Database;
 using QuantumCore.Game.Packets;
-using QuantumCore.Types;
 using Serilog;
 
 namespace QuantumCore.Game
@@ -41,7 +41,6 @@ namespace QuantumCore.Game
             
             // Load game data
             var itemProto = ItemProto.FromFile("data/item_proto");
-            File.WriteAllBytes("item_proto_decompressed", itemProto.Content.Compressed);
             
             // Start tcp server
             _server = new Server<GameConnection>((server, client) => new GameConnection(server, client), options.Port);

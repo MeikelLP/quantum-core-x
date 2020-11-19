@@ -1,9 +1,7 @@
 using System;
 using System.IO;
-using System.IO.Compression;
-using lzo.net;
 
-namespace QuantumCore.Types
+namespace QuantumCore.Core.Types
 {
     /// <summary>
     /// LZO1Z implementation based on lzokay.

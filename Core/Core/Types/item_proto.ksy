@@ -32,4 +32,4 @@ types:
         type: u4
       - id: compressed
         size: crypted_size
-        process: lzo_xtea(real_size)
+        process: lzo_xtea(real_size, crypted_size)
