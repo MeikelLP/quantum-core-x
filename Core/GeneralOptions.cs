@@ -24,7 +24,7 @@ namespace QuantumCore
         public string GameDatabaseUser { get; set; } = "root";
         [Option("game-database-password", HelpText = "Database password for game database")]
         public string GameDatabasePassword { get; set; } = "";
-        [Option("account-database", HelpText = "Database for account database")]
+        [Option("game-database", HelpText = "Database for game database")]
         public string GameDatabase { get; set; } = "game";
 
         public string AccountString => $"Server={AccountDatabaseHost};Database={AccountDatabase};Uid={AccountDatabaseUser};Pwd={AccountDatabasePassword}";
