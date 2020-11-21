@@ -1,5 +1,6 @@
 ﻿using System.Data;
 using MySql.Data.MySqlClient;
+using Serilog;
 
 namespace QuantumCore.Database
 {
@@ -10,6 +11,7 @@ namespace QuantumCore.Database
 
         public static void Init(string accountString, string gameString)
         {
+            Log.Information("Initialize Database Manager");
             _accountConnectionString = accountString;
             _gameConnectionString = gameString;
         }

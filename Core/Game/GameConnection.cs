@@ -3,6 +3,7 @@ using System.Net.Sockets;
 using QuantumCore.Core.Networking;
 using QuantumCore.Game.Packets;
 using QuantumCore.Game.World;
+using QuantumCore.Game.World.Entities;
 
 namespace QuantumCore.Game
 {

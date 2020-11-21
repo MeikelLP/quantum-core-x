@@ -40,11 +40,12 @@ namespace QuantumCore.Game
             CacheManager.Init(options.RedisHost, options.RedisPort);
             
             // Load game data
+            Log.Information("Load item_proto");
             var itemProto = ItemProto.FromFile("data/item_proto");
-            foreach (var item in itemProto.M_Root.Content.Data.Items)
-            {
-                Console.WriteLine(item.Id + " : " + item.TranslatedName);
-            }
+            
+            Log.Information("Initialize world");
+            var world = new World.World();
+            world.Load();
             
             // Start tcp server
             _server = new Server<GameConnection>((server, client) => new GameConnection(server, client), options.Port);

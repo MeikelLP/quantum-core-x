@@ -2,17 +2,14 @@
 using QuantumCore.Database;
 using QuantumCore.Game.Packets;
 
-namespace QuantumCore.Game.World
+namespace QuantumCore.Game.World.Entities
 {
-    public class PlayerEntity
+    public class PlayerEntity : Entity
     {
         public Connection Connection { get; }
         public Player Player { get; private set; }
-        
-        public int PositionX { get; set; }
-        public int PositionY { get; set; }
 
-        public PlayerEntity(Player player, Connection connection)
+        public PlayerEntity(uint vid, Player player, Connection connection) : base(vid)
         {
             Connection = connection;
             Player = player;
