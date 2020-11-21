@@ -41,6 +41,10 @@ namespace QuantumCore.Game
             
             // Load game data
             var itemProto = ItemProto.FromFile("data/item_proto");
+            foreach (var item in itemProto.M_Root.Content.Data.Items)
+            {
+                Console.WriteLine(item.Id + " : " + item.TranslatedName);
+            }
             
             // Start tcp server
             _server = new Server<GameConnection>((server, client) => new GameConnection(server, client), options.Port);
