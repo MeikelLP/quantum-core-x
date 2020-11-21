@@ -1,6 +1,8 @@
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
 using QuantumCore.Cache;
 using QuantumCore.Core;
@@ -19,6 +21,12 @@ namespace QuantumCore.Game
     {
         private readonly GameOptions _options;
         private readonly Server<GameConnection> _server;
+
+        private readonly Stopwatch _gameTime = new Stopwatch();
+        private long _previousTicks = 0;
+        private TimeSpan _accumulatedElapsedTime;
+        private TimeSpan _targetElapsedTime = TimeSpan.FromTicks(100000); // 100hz
+        private TimeSpan _maxElapsedTime = TimeSpan.FromMilliseconds(500);
         
         public GameServer(GameOptions options)
         {
@@ -70,7 +78,34 @@ namespace QuantumCore.Game
         
         public async Task Start()
         {
-            await _server.Start();
+            _server.Start();
+            
+            _gameTime.Start();
+
+            while (true)
+            {
+                Tick();
+            }
+        }
+
+        private void Tick()
+        {
+            var currentTicks = _gameTime.ElapsedTicks;
+            _accumulatedElapsedTime = TimeSpan.FromTicks(currentTicks - _previousTicks);
+            _previousTicks = currentTicks;
+
+            if (_accumulatedElapsedTime < _targetElapsedTime)
+            {
+                var sleepTime = (_targetElapsedTime - _accumulatedElapsedTime).TotalMilliseconds;
+                Thread.Sleep((int) sleepTime);
+                Tick();
+                return;
+            }
+
+            if (_accumulatedElapsedTime > _maxElapsedTime)
+            {
+                _accumulatedElapsedTime = _maxElapsedTime;
+            }
         }
     }
 }

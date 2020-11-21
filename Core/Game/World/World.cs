@@ -13,9 +13,12 @@ namespace QuantumCore.Game.World
         private readonly Grid<Map> _world = new Grid<Map>(0, 0);
         private readonly Dictionary<string, Map> _maps = new Dictionary<string, Map>();
         
+        public static World Instance { get; private set; }
+        
         public World()
         {
             _vid = 0;
+            Instance = this;
         }
         
         public void Load()
@@ -53,17 +56,17 @@ namespace QuantumCore.Game.World
                             map.Initialize();
                             _maps[map.Name] = map;
 
-                            if (positionX > maxX) maxX = positionX;
-                            if (positionY > maxY) maxY = positionY;
+                            if (positionX + width * Map.MapUnit > maxX) maxX = positionX + width * Map.MapUnit;
+                            if (positionY + height * Map.MapUnit > maxY) maxY = positionY + height * Map.MapUnit;
                         }
                         catch (FormatException e)
                         {
-                            Log.Warning($"Failed to parse atlasinfo.txt:{lineNo} - Failed to parse number");
+                            Log.Warning($"Failed to parse atlasinfo.txt:line {lineNo} - Failed to parse number");
                         }
                     }
                     else
                     {
-                        Log.Warning($"Failed to parse atlasinfo.txt:{lineNo} - Failed to parse line");
+                        Log.Warning($"Failed to parse atlasinfo.txt:line {lineNo} - Failed to parse line");
                     }
                 }
                 
@@ -84,6 +87,30 @@ namespace QuantumCore.Game.World
             {
                 Log.Fatal("Failed to load atlasinfo.txt, file not found", e);
             }
+        }
+
+        public void Update()
+        {
+            foreach (var map in _maps.Values)
+            {
+                map.Update();
+            }
+        }
+
+        public Map GetMapAt(uint x, uint y)
+        {
+            var gridX = x / Map.MapUnit;
+            var gridY = y / Map.MapUnit;
+
+            return _world.Get(gridX, gridY);
+        }
+
+        public bool SpawnEntity(Entity e)
+        {
+            var map = GetMapAt((uint) e.PositionX, (uint) e.PositionY);
+            if (map == null) return false;
+
+            return map.SpawnEntity(e);
         }
         
         public uint GenerateVid()

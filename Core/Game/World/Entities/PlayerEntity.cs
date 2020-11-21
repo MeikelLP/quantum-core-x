@@ -9,14 +9,19 @@ namespace QuantumCore.Game.World.Entities
         public Connection Connection { get; }
         public Player Player { get; private set; }
 
-        public PlayerEntity(uint vid, Player player, Connection connection) : base(vid)
+        public PlayerEntity(Player player, Connection connection) : base(World.Instance.GenerateVid())
         {
             Connection = connection;
             Player = player;
             PositionX = player.PositionX;
             PositionY = player.PositionY;
         }
-        
+
+        public override void Update()
+        {
+            if (Map == null) return; // We don't have a map yet so we aren't spawned
+        }
+
         public void SendBasicData()
         {
             var details = new CharacterDetails
