@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using QuantumCore.Game.World;
+using QuantumCore.Game.World.Entities;
 
 namespace QuantumCore.Core.Utils
 {

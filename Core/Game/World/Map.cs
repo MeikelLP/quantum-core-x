@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using QuantumCore.Core.Utils;
+using QuantumCore.Game.World.Entities;
 using Serilog;
 
 namespace QuantumCore.Game.World
@@ -27,7 +28,7 @@ namespace QuantumCore.Game.World
             Width = width;
             Height = height;
             _entities = new List<Entity>();
-            _quadTree = new QuadTree<Entity>((int) x, (int) y, (int) width, (int) height, 20);
+            _quadTree = new QuadTree<Entity>((int) x, (int) y, (int) (width * MapUnit), (int) (height * MapUnit), 20);
         }
 
         public void Initialize()
@@ -35,17 +36,25 @@ namespace QuantumCore.Game.World
             Log.Debug($"Load map '{Name}' at {PositionX}x{PositionY} (size {Width}x{Height})");
         }
 
-        public void Update()
+        public void Update(double elapsedTime)
         {
             foreach (var entity in _entities)
             {
-                entity.Update();
+                entity.Update(elapsedTime);
             }
         }
         
         public bool SpawnEntity(Entity entity)
         {
             if (!_quadTree.Insert(entity)) return false;
+            
+            // Add this entity to all entities nearby
+            var nearby = new List<Entity>();
+            _quadTree.QueryAround(nearby, entity.PositionX, entity.PositionY, Entity.ViewDistance);
+            foreach (var e in nearby.Where(e => e != entity))
+            {
+                e.AddNearbyEntity(entity);
+            }
 
             _entities.Add(entity);
             entity.Map = this;

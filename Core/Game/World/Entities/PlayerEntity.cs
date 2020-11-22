@@ -1,6 +1,7 @@
 ﻿using QuantumCore.Core.Networking;
 using QuantumCore.Database;
 using QuantumCore.Game.Packets;
+using Serilog;
 
 namespace QuantumCore.Game.World.Entities
 {
@@ -17,9 +18,21 @@ namespace QuantumCore.Game.World.Entities
             PositionY = player.PositionY;
         }
 
-        public override void Update()
+        public override void Update(double elapsedTime)
         {
             if (Map == null) return; // We don't have a map yet so we aren't spawned
+            
+            base.Update(elapsedTime);
+        }
+
+        protected override void OnNewNearbyEntity(Entity entity)
+        {
+            Log.Debug($"New entity {entity} nearby {this}");
+        }
+
+        public override string ToString()
+        {
+            return Player.Name + "(Player)";
         }
 
         public void SendBasicData()

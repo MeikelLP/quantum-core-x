@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
 using QuantumCore.Core.Utils;
+using QuantumCore.Game.World.Entities;
 using Serilog;
 
 namespace QuantumCore.Game.World
@@ -89,11 +90,11 @@ namespace QuantumCore.Game.World
             }
         }
 
-        public void Update()
+        public void Update(double elapsedTime)
         {
             foreach (var map in _maps.Values)
             {
-                map.Update();
+                map.Update(elapsedTime);
             }
         }
 

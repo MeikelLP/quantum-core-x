@@ -21,7 +21,8 @@ namespace QuantumCore.Game
     {
         private readonly GameOptions _options;
         private readonly Server<GameConnection> _server;
-
+        private readonly World.World _world;
+        
         private readonly Stopwatch _gameTime = new Stopwatch();
         private long _previousTicks = 0;
         private TimeSpan _accumulatedElapsedTime;
@@ -51,9 +52,9 @@ namespace QuantumCore.Game
             Log.Information("Load item_proto");
             var itemProto = ItemProto.FromFile("data/item_proto");
             
-            Log.Information("Initialize world");
-            var world = new World.World();
-            world.Load();
+            Log.Information("Initialize world"); 
+            _world = new World.World();
+            _world.Load();
             
             // Start tcp server
             _server = new Server<GameConnection>((server, client) => new GameConnection(server, client), options.Port);
@@ -88,6 +89,11 @@ namespace QuantumCore.Game
             }
         }
 
+        private void Update(double elapsedTime)
+        {
+            _world.Update(elapsedTime);
+        }
+
         private void Tick()
         {
             var currentTicks = _gameTime.ElapsedTicks;
@@ -106,6 +112,17 @@ namespace QuantumCore.Game
             {
                 _accumulatedElapsedTime = _maxElapsedTime;
             }
+
+            var stepCount = 0;
+            while (_accumulatedElapsedTime >= _targetElapsedTime)
+            {
+                _accumulatedElapsedTime -= _targetElapsedTime;
+                ++stepCount;
+                
+                Update(_targetElapsedTime.TotalMilliseconds);
+            }
+            
+            // todo detect lags
         }
     }
 }
