@@ -28,6 +28,22 @@ namespace QuantumCore.Game.World.Entities
         protected override void OnNewNearbyEntity(Entity entity)
         {
             Log.Debug($"New entity {entity} nearby {this}");
+            entity.ShowEntity(Connection);
+        }
+
+        protected override void OnRemoveNearbyEntity(Entity entity)
+        {
+            Log.Debug($"Remove entity {entity} nearby {this}");
+            Connection.Send(new RemoveCharacter
+            {
+                Vid = entity.Vid
+            });
+        }
+
+        public override void ShowEntity(Connection connection)
+        {
+            SendCharacter(connection);
+            SendCharacterAdditional(connection);
         }
 
         public override string ToString()
@@ -39,7 +55,7 @@ namespace QuantumCore.Game.World.Entities
         {
             var details = new CharacterDetails
             {
-                Vid = 1,
+                Vid = Vid,
                 Name = Player.Name,
                 Class = Player.PlayerClass,
                 PositionX = PositionX,
@@ -59,7 +75,7 @@ namespace QuantumCore.Game.World.Entities
         {
             connection.Send(new SpawnCharacter
             {
-                Vid = 1, // todo
+                Vid = Vid,
                 CharacterType = 6, // todo
                 Angle = 0,
                 PositionX = PositionX,
@@ -74,7 +90,7 @@ namespace QuantumCore.Game.World.Entities
         {
             connection.Send(new CharacterInfo
             {
-                Vid = 1, // todo
+                Vid = Vid, // todo
                 Name = Player.Name,
                 Empire = 1, // todo
                 Level = Player.Level,

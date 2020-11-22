@@ -28,6 +28,10 @@ namespace QuantumCore.Game
 
         protected override void OnClose()
         {
+            if (Player?.Map != null)
+            {
+                Player.Map.DespawnEntity(Player);
+            }
             Server.RemoveConnection(this);
         }
 

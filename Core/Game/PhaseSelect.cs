@@ -35,17 +35,16 @@ namespace QuantumCore.Game
             var entity = new PlayerEntity(player, connection);
             connection.Player = entity;
 
+            // Send information about the player to the client
+            entity.SendBasicData();
+            entity.SendPoints();
+            
             // Spawn the player
             if (!World.World.Instance.SpawnEntity(entity))
             {
                 Log.Warning("Failed to spawn player entity");
                 connection.Close();
-                return;
             }
-            
-            // Send information about the player to the client
-            entity.SendBasicData();
-            entity.SendPoints();
         }
 
         public static async void OnCreateCharacter(this GameConnection connection, CreateCharacter packet)

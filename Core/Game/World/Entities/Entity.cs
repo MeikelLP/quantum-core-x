@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using QuantumCore.Core.Networking;
 using QuantumCore.Core.Utils;
 
 namespace QuantumCore.Game.World.Entities
@@ -20,6 +21,9 @@ namespace QuantumCore.Game.World.Entities
         }
 
         protected abstract void OnNewNearbyEntity(Entity entity);
+        protected abstract void OnRemoveNearbyEntity(Entity entity);
+
+        public abstract void ShowEntity(Connection connection);
         
         public virtual void Update(double elapsedTime)
         {
@@ -30,6 +34,14 @@ namespace QuantumCore.Game.World.Entities
         {
             NearbyEntities.Add(entity);
             OnNewNearbyEntity(entity);
+        }
+
+        public void RemoveNearbyEntity(Entity entity)
+        {
+            if (NearbyEntities.Remove(entity))
+            {
+                OnRemoveNearbyEntity(entity);
+            }
         }
 
         private void ClearNearbyEntities()

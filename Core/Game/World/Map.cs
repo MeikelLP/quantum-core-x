@@ -53,13 +53,23 @@ namespace QuantumCore.Game.World
             _quadTree.QueryAround(nearby, entity.PositionX, entity.PositionY, Entity.ViewDistance);
             foreach (var e in nearby.Where(e => e != entity))
             {
+                entity.AddNearbyEntity(e);
                 e.AddNearbyEntity(entity);
             }
 
             _entities.Add(entity);
             entity.Map = this;
             return true;
+        }
 
+        public void DespawnEntity(Entity entity)
+        {
+            // Remove this entity from all nearby entities
+            foreach (var e in entity.NearbyEntities)
+            {
+                e.RemoveNearbyEntity(entity);
+            }
+            
         }
     }
 }
