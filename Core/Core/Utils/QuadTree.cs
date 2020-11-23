@@ -53,6 +53,16 @@ namespace QuantumCore.Core.Utils
             return _nw.Insert(obj) || _ne.Insert(obj) || _sw.Insert(obj) || _se.Insert(obj);
         }
 
+        public bool Remove(T obj)
+        {
+            if (Subdivided)
+            {
+                return _nw.Remove(obj) || _ne.Remove(obj) || _sw.Remove(obj) || _se.Remove(obj);
+            }
+
+            return Objects.Remove(obj);
+        }
+
         public void QueryAround(List<T> objects, int x, int y, int radius)
         {
             // Check if the circle is in our bounds

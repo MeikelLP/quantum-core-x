@@ -69,7 +69,12 @@ namespace QuantumCore.Game.World
             {
                 e.RemoveNearbyEntity(entity);
             }
+
+            // Remove map from the entity
+            entity.Map = null;
             
+            // Remove entity from the quad tree
+            _quadTree.Remove(entity);
         }
     }
 }
