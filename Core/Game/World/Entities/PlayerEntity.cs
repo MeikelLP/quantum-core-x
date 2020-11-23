@@ -7,10 +7,25 @@ namespace QuantumCore.Game.World.Entities
 {
     public class PlayerEntity : Entity
     {
-        public Connection Connection { get; }
+        private enum State
+        {
+            Idle,
+            Moving
+        }
+        
+        public GameConnection Connection { get; }
         public Player Player { get; private set; }
+        
+        public uint MovementDuration { get; private set; }
 
-        public PlayerEntity(Player player, Connection connection) : base(World.Instance.GenerateVid())
+        private int _targetX;
+        private int _startX;
+        private int _targetY;
+        private int _startY;
+        private long _movementStart;
+        private State _state = State.Idle;
+        
+        public PlayerEntity(Player player, GameConnection connection) : base(World.Instance.GenerateVid())
         {
             Connection = connection;
             Player = player;
@@ -18,9 +33,27 @@ namespace QuantumCore.Game.World.Entities
             PositionY = player.PositionY;
         }
 
+        public void Goto(int x, int y)
+        {
+            if (PositionX == x && PositionY == y) return;
+            if (_targetX == x && _targetY == y) return;
+
+            _state = State.Moving;
+            _targetX = x;
+            _targetY = y;
+            _startX = PositionX;
+            _startY = PositionY;
+            _movementStart = Connection.Server.ServerTime;
+            
+            // todo calculate movement duration
+            MovementDuration = 0;
+        }
+
         public override void Update(double elapsedTime)
         {
             if (Map == null) return; // We don't have a map yet so we aren't spawned
+            
+            // todo move player when in moving state
             
             base.Update(elapsedTime);
         }

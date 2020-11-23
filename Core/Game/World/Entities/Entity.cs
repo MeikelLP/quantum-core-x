@@ -7,13 +7,37 @@ namespace QuantumCore.Game.World.Entities
     public abstract class Entity
     {
         public uint Vid { get; protected set; }
-        public int PositionX { get; protected set; }
-        public int PositionY { get; protected set; }
-        public Map Map { get; set; }
+        public int PositionX
+        {
+            get => _positionX;
+            set { 
+                _positionX = value;
+                _positionChanged = true;
+            }
+        }
+        public int PositionY
+        {
+            get => _positionY;
+            set { 
+                _positionY = value;
+                _positionChanged = true;
+            }
+        }
 
+        public float Rotation
+        {
+            get => _rotation;
+            set => _rotation = value;
+        }
+
+        public Map Map { get; set; }
         public List<Entity> NearbyEntities { get; } = new List<Entity>();
-        
         public const int ViewDistance = 10000;
+
+        private int _positionX;
+        private int _positionY;
+        private float _rotation;
+        private bool _positionChanged;
         
         public Entity(uint vid)
         {
@@ -28,6 +52,8 @@ namespace QuantumCore.Game.World.Entities
         public virtual void Update(double elapsedTime)
         {
             ClearNearbyEntities();
+            
+            // todo refresh quad tree position
         }
 
         public void AddNearbyEntity(Entity entity)
