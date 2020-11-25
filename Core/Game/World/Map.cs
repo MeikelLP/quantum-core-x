@@ -47,6 +47,9 @@ namespace QuantumCore.Game.World
                 {
                     _quadTree.Remove(entity);
                     _quadTree.Insert(entity);
+                    entity.PositionChanged = false;
+                    
+                    // todo Refresh nearby entities
                 }
             }
         }
@@ -82,6 +85,11 @@ namespace QuantumCore.Game.World
             
             // Remove entity from the quad tree
             _quadTree.Remove(entity);
+        }
+
+        public List<IEntity> GetEntities()
+        {
+            return new List<IEntity>(_entities);
         }
     }
 }

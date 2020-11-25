@@ -1,10 +1,11 @@
 ﻿using System.Collections.Generic;
+using QuantumCore.API.Game;
 using QuantumCore.Core.Networking;
 using QuantumCore.Core.Utils;
 
 namespace QuantumCore.Game.World.Entities
 {
-    public abstract class Entity
+    public abstract class Entity : IEntity
     {
         public uint Vid { get; protected set; }
         public int PositionX
@@ -29,7 +30,11 @@ namespace QuantumCore.Game.World.Entities
             set => _rotation = value;
         }
 
-        public bool PositionChanged => _positionChanged;
+        public bool PositionChanged
+        {
+            get => _positionChanged;
+            set => _positionChanged = value;
+        }
 
         public Map Map { get; set; }
         public List<Entity> NearbyEntities { get; } = new List<Entity>();

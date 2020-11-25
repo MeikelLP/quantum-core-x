@@ -1,18 +1,20 @@
-﻿using QuantumCore.Core.Networking;
+﻿using QuantumCore.API.Game;
+using QuantumCore.Core.Networking;
 using QuantumCore.Database;
 using QuantumCore.Game.Packets;
 using Serilog;
 
 namespace QuantumCore.Game.World.Entities
 {
-    public class PlayerEntity : Entity
+    public class PlayerEntity : Entity, IPlayerEntity
     {
         private enum State
         {
             Idle,
             Moving
         }
-        
+
+        public string Name => Player.Name;
         public GameConnection Connection { get; }
         public Player Player { get; private set; }
         

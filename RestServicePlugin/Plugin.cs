@@ -48,6 +48,7 @@ namespace RestServicePlugin
         {
             var server = new WebServer(o => o.WithUrlPrefix("http://localhost:8080").WithMode(HttpListenerMode.EmbedIO))
                 .WithLocalSessionManager()
+                .WithCors()
                 .WithWebApi("/api", m => m.WithController<ApiController>(() => new ApiController(_game)))
                 .WithModule(new LiveWebSocket("/ws", _game));
             server.StateChanged += (s, e) => Log.Debug($"WebServer New State - {e.NewState}");
