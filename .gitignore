@@ -6,3 +6,9 @@ obj/
 examples/
 *.user
 .DS_Store
+
+# Visual Studio launch settings
+launchSettings.json
+
+# Generated
+ItemProto.cs
