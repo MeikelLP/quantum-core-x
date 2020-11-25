@@ -4,6 +4,7 @@ using System.IO;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using QuantumCore.API.Game;
 using QuantumCore.Cache;
 using QuantumCore.Core;
 using QuantumCore.Core.API;
@@ -17,8 +18,10 @@ using Serilog;
 
 namespace QuantumCore.Game
 {
-    internal class GameServer : IServer
+    internal class GameServer : IServer, IGame
     {
+        public IWorld World => _world;
+        
         private readonly GameOptions _options;
         private readonly Server<GameConnection> _server;
         private readonly World.World _world;
@@ -60,7 +63,7 @@ namespace QuantumCore.Game
             _server = new Server<GameConnection>((server, client) => new GameConnection(server, client), options.Port);
             
             // Load and init all plugins
-            PluginManager.LoadPlugins();
+            PluginManager.LoadPlugins(this);
             
             // Register game server features
             _server.RegisterNamespace("QuantumCore.Game.Packets");

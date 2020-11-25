@@ -52,9 +52,26 @@ namespace QuantumCore.Game.World.Entities
         public override void Update(double elapsedTime)
         {
             if (Map == null) return; // We don't have a map yet so we aren't spawned
-            
-            // todo move player when in moving state
-            
+
+            if (_state == State.Moving)
+            {
+                var elapsed = Connection.Server.ServerTime - _movementStart;
+                var rate = elapsed / (float) MovementDuration;
+                if (rate > 1) rate = 1;
+
+                var x = (int)((_targetX - _startX) * rate + _startX);
+                var y = (int)((_targetY - _startY) * rate + _startY);
+
+                PositionX = x;
+                PositionY = y;
+
+                if (rate >= 1)
+                {
+                    _state = State.Idle;
+                    Log.Debug($"Movement of player {Player.Name} done");
+                }
+            }
+
             base.Update(elapsedTime);
         }
 

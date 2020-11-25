@@ -5,6 +5,7 @@
         public string Name { get; }
         public string Author { get; }
 
-        public void Register();
+        public void Register(object server);
+        public void Unregister();
     }
 }

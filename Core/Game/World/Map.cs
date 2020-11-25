@@ -1,12 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using QuantumCore.API.Game;
 using QuantumCore.Core.Utils;
 using QuantumCore.Game.World.Entities;
 using Serilog;
 
 namespace QuantumCore.Game.World
 {
-    public class Map
+    public class Map : IMap
     {
         public const uint MapUnit = 25600;
         public string Name { get; private set; }
@@ -41,6 +42,12 @@ namespace QuantumCore.Game.World
             foreach (var entity in _entities)
             {
                 entity.Update(elapsedTime);
+
+                if (entity.PositionChanged)
+                {
+                    _quadTree.Remove(entity);
+                    _quadTree.Insert(entity);
+                }
             }
         }
         

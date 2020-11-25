@@ -10,25 +10,26 @@ namespace QuantumCore.Game.World.Entities
         public int PositionX
         {
             get => _positionX;
-            set { 
+            set {
+                _positionChanged = _positionChanged || _positionX != value;
                 _positionX = value;
-                _positionChanged = true;
             }
         }
         public int PositionY
         {
             get => _positionY;
-            set { 
+            set {
+                _positionChanged = _positionChanged || _positionY != value;
                 _positionY = value;
-                _positionChanged = true;
             }
         }
-
         public float Rotation
         {
             get => _rotation;
             set => _rotation = value;
         }
+
+        public bool PositionChanged => _positionChanged;
 
         public Map Map { get; set; }
         public List<Entity> NearbyEntities { get; } = new List<Entity>();
@@ -52,8 +53,6 @@ namespace QuantumCore.Game.World.Entities
         public virtual void Update(double elapsedTime)
         {
             ClearNearbyEntities();
-            
-            // todo refresh quad tree position
         }
 
         public void AddNearbyEntity(Entity entity)

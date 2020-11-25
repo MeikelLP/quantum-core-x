@@ -2,13 +2,14 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
+using QuantumCore.API.Game;
 using QuantumCore.Core.Utils;
 using QuantumCore.Game.World.Entities;
 using Serilog;
 
 namespace QuantumCore.Game.World
 {
-    public class World
+    public class World : IWorld
     {
         private uint _vid;
         private readonly Grid<Map> _world = new Grid<Map>(0, 0);
@@ -104,6 +105,11 @@ namespace QuantumCore.Game.World
             var gridY = y / Map.MapUnit;
 
             return _world.Get(gridX, gridY);
+        }
+
+        public IMap GetMapByName(string name)
+        {
+            return _maps[name];
         }
 
         public bool SpawnEntity(Entity e)
