@@ -12,6 +12,7 @@ namespace QuantumCore.Cache
         
         public static void Init(string host, int port = 6379)
         {
+            Log.Information("Initialize Cache Manager");
             Redis = new RedisDB {DataFormater = new JsonFormater()};
             Redis.Host.AddWriteHost(host, port);
         }

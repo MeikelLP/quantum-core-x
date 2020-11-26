@@ -144,6 +144,12 @@ namespace QuantumCore.Core.Networking
 
         public void Send(object packet)
         {
+            if (!_client.Connected)
+            {
+                Log.Warning("Tried to send data to a closed connection");
+                return;
+            }
+            
             // Verify that the packet is a packet and registered
             var attr = packet.GetType().GetCustomAttribute<PacketAttribute>();
             if (attr == null) throw new ArgumentException("Given packet is not a packet", nameof(packet));

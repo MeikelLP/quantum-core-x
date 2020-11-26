@@ -28,6 +28,7 @@ namespace QuantumCore.Core.Networking
 
         public Server(Func<Server<T>, TcpClient, T> clientConstructor, int port, string bindIp = "0.0.0.0")
         {
+            Log.Information($"Initialize tcp server listening on {bindIp}:{port}");
             _clientConstructor = clientConstructor;
             
             // Start server timer
@@ -50,6 +51,7 @@ namespace QuantumCore.Core.Networking
 
         public async Task Start()
         {
+            Log.Information("Start listening for connections...");
             _listener.Start();
 
             while (true)
@@ -69,6 +71,7 @@ namespace QuantumCore.Core.Networking
 
         public void RegisterListener<P>(Action<T, P> listener)
         {
+            Log.Debug($"Register listener on packet {typeof(P).Name}");
             var packet = _incomingPackets.Where(p => p.Value.Type == typeof(P)).Select(p => p.Value).First();
             _listeners[packet.Header] = listener;
         }
@@ -95,13 +98,14 @@ namespace QuantumCore.Core.Networking
 
         public void RegisterNamespace(string space, Assembly assembly = null)
         {
+            Log.Debug($"Register packet namespace {space}");
             if (assembly == null) assembly = Assembly.GetAssembly(typeof(Server<T>));
 
             var types = assembly.GetTypes().Where(t => string.Equals(t.Namespace, space, StringComparison.Ordinal))
                 .Where(t => t.GetCustomAttribute<PacketAttribute>() != null).ToArray();
             foreach (var type in types)
             {
-                Log.Information($"Register Packet {type.Name}");
+                Log.Debug($"Register Packet {type.Name}");
                 var packet = type.GetCustomAttribute<PacketAttribute>();
                 if (packet.Direction.HasFlag(EDirection.Incoming))
                 {

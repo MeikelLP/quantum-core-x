@@ -33,7 +33,7 @@ namespace QuantumCore.Auth
             _server = new Server<AuthConnection>((server, client) => new AuthConnection(server, client), options.Port);
             
             // Load and init all plugins
-            PluginManager.LoadPlugins();
+            PluginManager.LoadPlugins(this);
 
             // Register auth server features
             _server.RegisterNamespace("QuantumCore.Auth.Packets");

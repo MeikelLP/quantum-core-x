@@ -7,6 +7,7 @@ using QuantumCore.Core.Utils;
 using QuantumCore.Database;
 using QuantumCore.Game.Packets;
 using QuantumCore.Game.World;
+using QuantumCore.Game.World.Entities;
 using Serilog;
 
 namespace QuantumCore.Game
@@ -26,16 +27,24 @@ namespace QuantumCore.Game
 
             var accountId = connection.AccountId ?? default; // todo clean solution
             
+            // Let the client load the game
             connection.SetPhase(EPhases.Loading);
             
             // Load player
             var player = await Player.GetPlayer(accountId, packet.Slot);
             var entity = new PlayerEntity(player, connection);
             connection.Player = entity;
-            
+
             // Send information about the player to the client
             entity.SendBasicData();
             entity.SendPoints();
+            
+            // Spawn the player
+            if (!World.World.Instance.SpawnEntity(entity))
+            {
+                Log.Warning("Failed to spawn player entity");
+                connection.Close();
+            }
         }
 
         public static async void OnCreateCharacter(this GameConnection connection, CreateCharacter packet)

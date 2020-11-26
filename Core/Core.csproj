@@ -4,6 +4,7 @@
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
 	<RestorePackagesWithLockFile>true</RestorePackagesWithLockFile>
+    <DisableImplicitNuGetFallbackFolder>true</DisableImplicitNuGetFallbackFolder>
 	<AssemblyName>Core</AssemblyName>
 	<RootNamespace>QuantumCore</RootNamespace>
   </PropertyGroup>
@@ -19,6 +20,7 @@
     <PackageReference Include="FluentMigrator.Runner.MySql" Version="3.2.9" />
     <PackageReference Include="KaitaiStruct.Runtime.CSharp" Version="0.9.0" />
     <PackageReference Include="lzo.net" Version="0.0.6" />
+    <PackageReference Include="McMaster.NETCore.Plugins" Version="1.3.1" />
     <PackageReference Include="MySql.Data" Version="8.0.22" />
     <PackageReference Include="Serilog" Version="2.10.1-dev-01249" />
     <PackageReference Include="Serilog.Enrichers.AssemblyName" Version="1.0.9" />
