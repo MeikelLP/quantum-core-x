@@ -53,5 +53,27 @@ namespace QuantumCore.Game
                 }
             }
         }
+		
+        public static void OnChat(this GameConnection connection, ChatIncoming packet)
+        {
+            string newMessage = connection.Player.Name + ": " + packet.Message;
+            var chat = new ChatOutcoming
+            {
+                MessageType = (byte)ChatMessageTypes.Normal,
+                Vid = connection.Player.Vid,
+                Empire = 1,
+                Message = newMessage
+            };
+
+            connection.Send(chat);
+
+            foreach (var entity in connection.Player.NearbyEntities)
+            {
+                if (entity is PlayerEntity player)
+                {
+                    player.Connection.Send(chat);
+                }
+            }
+        }
     }
 }

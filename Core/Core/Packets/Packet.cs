@@ -86,9 +86,15 @@ namespace QuantumCore.Core.Packets
         public byte[] Serialize([CanBeNull] object obj)
         {
             Debug.Assert(Size > 0);
-            var ret = new byte[Size];
-            if (obj == null) return ret;
-            
+
+            uint DataSize = Size;
+            if (IsDynamic)
+                DataSize = GetDynamicSize(obj);
+
+            var ret = new byte[DataSize];
+
+            if (obj == null) return ret;          
+
             if (obj.GetType() != Type) throw new ArgumentException("Invalid packet given", nameof(obj));
 
             using var ms = new MemoryStream(ret);
@@ -115,6 +121,21 @@ namespace QuantumCore.Core.Packets
                 else
                 {
                     WriteField(field.GetValue(obj), type, bw, attr);
+                }
+            }
+
+            if (IsDynamic)
+            {
+                if (_dynamicValueProperty.PropertyType == typeof(string))
+                {
+                    var msg = (string)_dynamicValueProperty.GetValue(obj);
+                    var chars = Encoding.UTF8.GetBytes(msg);
+                    bw.Write(chars);
+                    bw.Write((byte)0);
+                }
+                else
+                {
+                    Debug.Assert(false);
                 }
             }
 
@@ -193,6 +214,23 @@ namespace QuantumCore.Core.Packets
 
                 if (array != null) field.SetValue(obj, array);
             }
+        }
+        public void UpdateDynamicSize(object packet, uint packet_size)
+        {
+            if (_dynamicValueProperty.PropertyType == typeof(string))
+            {
+                var msg = (string)_dynamicValueProperty.GetValue(packet);
+                _dynamicSizeProperty.SetValue(packet, (ushort)((packet_size + msg.Length + 1) & 0xFFFF));
+                
+            }
+            else
+            {
+                Debug.Assert(false);
+            }
+
+            var sizeField = Type.GetProperties().FirstOrDefault(field => field.GetCustomAttribute<SizeAttribute>() != null);
+            Debug.Assert(sizeField != null);
+            sizeField.SetValue(packet, _dynamicSizeProperty.GetValue(packet));
         }
 
         public void DeserializeDynamic(object packet, byte[] data)

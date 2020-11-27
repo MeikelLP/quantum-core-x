@@ -158,9 +158,16 @@ namespace QuantumCore.Core.Networking
                 throw new ArgumentException("Given packet is not a registered outgoing packet", nameof(packet));
 
             Log.Debug($"Send {packet}");
-            
+
+            var packetDetails = _packetManager.GetOutgoingPacket(attr.Header);
+            // Check if packet has dynamic data
+            if (packetDetails.IsDynamic)
+            {
+                packetDetails.UpdateDynamicSize(packet, packetDetails.Size);
+            }
+
             // Serialize object
-            var data = _packetManager.GetOutgoingPacket(attr.Header).Serialize(packet);
+            var data = packetDetails.Serialize(packet);
             _writer.Write(data);
             _writer.Flush();
         }
