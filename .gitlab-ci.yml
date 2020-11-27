@@ -2,3 +2,34 @@ include:
   - template: Dependency-Scanning.gitlab-ci.yml
   - template: Security/SAST.gitlab-ci.yml
   - template: Secret-Detection.gitlab-ci.yml
+
+build-docker:
+  stage: build
+  image: docker:latest
+  services:
+    - docker:dind
+  script:
+    - docker login -u "$CI_REGISTRY_USER" -p "$CI_REGISTRY_PASSWORD" $CI_REGISTRY
+    - docker build --pull -t "$CI_REGISTRY_IMAGE:build" .
+    - "[[ -n $CI_COMMIT_BRANCH ]] && docker tag $CI_REGISTRY_IMAGE:build $CI_REGISTRY_IMAGE:$CI_COMMIT_BRANCH && docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_BRANCH"
+    - "[[ -z $CI_COMMIT_TAG ]] && exit 0"
+    - docker tag $CI_REGISTRY_IMAGE:build $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG
+    - docker push "$CI_REGISTRY_IMAGE:$CI_COMMIT_TAG"
+    
+build-binaries:
+  stage: build
+  image: mcr.microsoft.com/dotnet/sdk:3.1-alpine
+  script:
+    - wget https://dl.bintray.com/kaitai-io/universal/0.9/kaitai-struct-compiler-0.9.zip
+    - mkdir /kaitai
+    - unzip kaitai-struct-compiler-0.9.zip -d /kaitai
+    - export PATH=/kaitai/kaitai-struct-compiler-0.9/bin:$PATH
+    - apk add --no-cache bash openjdk8-jre
+    - ./generate_kaitai.sh
+    - dotnet publish Core -c Release -o bin/core
+    - dotnet publish RestServicePlugin -c Release -o bin/plugins/RestServicePlugin
+  artifacts:
+    paths:
+      - bin/core/*
+      - bin/plugins/RestServicePlugin/*
+    expire_in: 2 weeks
