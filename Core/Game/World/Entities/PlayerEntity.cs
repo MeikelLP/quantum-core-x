@@ -1,5 +1,6 @@
 ﻿using QuantumCore.API.Game;
 using QuantumCore.Core.Networking;
+using QuantumCore.Core.Utils;
 using QuantumCore.Database;
 using QuantumCore.Game.Packets;
 using Serilog;
@@ -26,6 +27,8 @@ namespace QuantumCore.Game.World.Entities
         private int _startY;
         private long _movementStart;
         private State _state = State.Idle;
+        private byte _moveSpeed = 150;
+        private byte _attackSpeed = 140;
         
         public PlayerEntity(Player player, GameConnection connection) : base(World.Instance.GenerateVid())
         {
@@ -40,15 +43,45 @@ namespace QuantumCore.Game.World.Entities
             if (PositionX == x && PositionY == y) return;
             if (_targetX == x && _targetY == y) return;
 
+            var animation =
+                AnimationManager.GetAnimation(Player.PlayerClass, AnimationType.Run, AnimationSubType.General);
+            if (animation == null)
+            {
+                Log.Debug($"No animation for player class {Player.PlayerClass} with General/Run found!");
+            }
+
             _state = State.Moving;
             _targetX = x;
             _targetY = y;
             _startX = PositionX;
             _startY = PositionY;
             _movementStart = Connection.Server.ServerTime;
-            
-            // todo calculate movement duration
-            MovementDuration = 0;
+
+            var distance = MathUtils.Distance(_startX, _startY, _targetX, _targetY);
+            if (animation == null)
+            {
+                MovementDuration = 0;
+            }
+            else
+            {
+                var animationSpeed = -animation.AccumulationY / animation.MotionDuration;
+                var i = 100 - _moveSpeed;
+                if (i > 0)
+                {
+                    i = 100 + i;
+                } else if (i < 0)
+                {
+                    i = 10000 / (100 - i);
+                }
+                else
+                {
+                    i = 100;
+                }
+
+                var duration = (int) ((distance / animationSpeed) * 1000) * i / 100;
+                MovementDuration = (uint) duration;
+                Log.Debug($"movement duration = {MovementDuration}");
+            }
         }
 
         public override void Update(double elapsedTime)
@@ -70,7 +103,7 @@ namespace QuantumCore.Game.World.Entities
                 if (rate >= 1)
                 {
                     _state = State.Idle;
-                    Log.Debug($"Movement of player {Player.Name} done");
+                    Log.Debug($"Movement of player {Player.Name} ({Player.PlayerClass}) done");
                 }
             }
 

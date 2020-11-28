@@ -55,6 +55,10 @@ namespace QuantumCore.Game
             Log.Information("Load item_proto");
             var itemProto = ItemProto.FromFile("data/item_proto");
             
+            // Load animations
+            Log.Information("Load animation data");
+            AnimationManager.Load();
+
             Log.Information("Initialize world"); 
             _world = new World.World();
             _world.Load();

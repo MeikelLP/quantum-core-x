@@ -17,7 +17,7 @@ namespace QuantumCore.Game
                 return;
             }
             
-            Log.Debug($"Received movement packet with type {packet.MovementType}");
+            Log.Debug($"Received movement packet with type {(CharacterMove.CharacterMovementType)packet.MovementType}");
             if (packet.MovementType == (int) CharacterMove.CharacterMovementType.Move)
             {
                 connection.Player.Rotation = packet.Rotation * 5;
