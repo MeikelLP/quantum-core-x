@@ -22,7 +22,7 @@ namespace QuantumCore.Game.World
 
         private readonly List<Entity> _entities;
         private readonly QuadTree<Entity> _quadTree;
-        
+
         public Map(string name, uint x, uint y, uint width, uint height)
         {
             Name = name;
@@ -91,6 +91,9 @@ namespace QuantumCore.Game.World
             
             // Remove entity from the quad tree
             _quadTree.Remove(entity);
+            
+            // Call despawn handlers
+            entity.OnDespawn();
         }
 
         public List<IEntity> GetEntities()

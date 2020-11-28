@@ -1,5 +1,7 @@
-﻿using QuantumCore.API.Game;
+﻿using System.Threading.Tasks;
+using QuantumCore.API.Game;
 using QuantumCore.API.Game.World;
+using QuantumCore.Cache;
 using QuantumCore.Core.Networking;
 using QuantumCore.Core.Utils;
 using QuantumCore.Database;
@@ -19,7 +21,7 @@ namespace QuantumCore.Game.World.Entities
         public string Name => Player.Name;
         public GameConnection Connection { get; }
         public Player Player { get; private set; }
-        
+
         public uint MovementDuration { get; private set; }
 
         private int _targetX;
@@ -30,6 +32,9 @@ namespace QuantumCore.Game.World.Entities
         private State _state = State.Idle;
         private byte _moveSpeed = 150;
         private byte _attackSpeed = 140;
+
+        private const int _persistInterval = 1000;
+        private int _persistTime = 0;
         
         public PlayerEntity(Player player, GameConnection connection) : base(World.Instance.GenerateVid())
         {
@@ -108,7 +113,22 @@ namespace QuantumCore.Game.World.Entities
                 }
             }
 
+            _persistTime += (int)elapsedTime;
+            if (_persistTime > _persistInterval)
+            {
+                Persist();
+                _persistTime -= _persistInterval;
+            }
+
             base.Update(elapsedTime);
+        }
+
+        private async Task Persist()
+        {
+            Player.PositionX = PositionX;
+            Player.PositionY = PositionY;
+            
+            await CacheManager.Redis.Set($"player:{Player.Id}", Player);
         }
 
         protected override void OnNewNearbyEntity(Entity entity)
@@ -126,15 +146,15 @@ namespace QuantumCore.Game.World.Entities
             });
         }
 
+        public override void OnDespawn()
+        {
+            Persist();
+        }
+
         public override void ShowEntity(Connection connection)
         {
             SendCharacter(connection);
             SendCharacterAdditional(connection);
-        }
-
-        public override string ToString()
-        {
-            return Player.Name + "(Player)";
         }
 
         public void SendBasicData()
@@ -187,6 +207,11 @@ namespace QuantumCore.Game.World.Entities
         {
             SendCharacter(connection);
             SendCharacterAdditional(connection);
+        }
+
+        public override string ToString()
+        {
+            return Player.Name + "(Player)";
         }
     }
 }

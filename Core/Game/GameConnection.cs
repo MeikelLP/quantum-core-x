@@ -33,6 +33,8 @@ namespace QuantumCore.Game
                 Player.Map.DespawnEntity(Player);
             }
             Server.RemoveConnection(this);
+            
+            // todo enable expiry on auth token
         }
 
         protected override void OnReceive(object packet)
