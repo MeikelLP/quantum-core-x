@@ -1,4 +1,6 @@
-﻿namespace QuantumCore.API.Game
+﻿using QuantumCore.API.Game.World;
+
+namespace QuantumCore.API.Game
 {
     public interface IGame
     {

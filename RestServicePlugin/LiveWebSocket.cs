@@ -3,11 +3,12 @@ using System.Threading.Tasks;
 using EmbedIO.WebSockets;
 using Newtonsoft.Json;
 using QuantumCore.API.Game;
+using QuantumCore.API.Game.World;
 using Serilog;
 
 namespace RestServicePlugin
 {
-    public class LiveWebSocket : WebSocketModule
+    public class LiveWebSocket : WebSocketModule, IHookMapUpdate
     {
         private class RegisterListener
         {
@@ -31,6 +32,11 @@ namespace RestServicePlugin
                 case "mapUpdate":
                     break;
             }
+        }
+
+        public void HookMapUpdate(IMap map, double elapsedTime)
+        {
+            // todo send update to listeners
         }
     }
 }

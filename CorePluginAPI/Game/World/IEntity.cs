@@ -1,4 +1,4 @@
-﻿namespace QuantumCore.API.Game
+﻿namespace QuantumCore.API.Game.World
 {
     public interface IEntity
     {

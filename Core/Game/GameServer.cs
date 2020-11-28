@@ -5,6 +5,7 @@ using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using QuantumCore.API.Game;
+using QuantumCore.API.Game.World;
 using QuantumCore.Cache;
 using QuantumCore.Core;
 using QuantumCore.Core.API;

@@ -4,6 +4,7 @@ using EmbedIO;
 using EmbedIO.Routing;
 using EmbedIO.WebApi;
 using QuantumCore.API.Game;
+using QuantumCore.API.Game.World;
 
 namespace RestServicePlugin
 {

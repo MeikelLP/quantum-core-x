@@ -17,6 +17,8 @@ namespace QuantumCore.Core.API
 
         public static void LoadPlugins(object server)
         {
+            Globals.HookManager = new HookManager();
+            
             Log.Information("Load plugins");
             var plugins = PluginPaths.Where(Directory.Exists).SelectMany(Directory.GetDirectories).ToList();
             foreach (var pluginPath in plugins)
@@ -36,15 +38,20 @@ namespace QuantumCore.Core.API
                             config.EnableHotReload = true;
                         }
                     );
+                    var pluginAssembly = loader.LoadDefaultAssembly();
+                    
                     loader.Reloaded += (sender, args) =>
                     {
                         Log.Debug($"Reload plugin {pluginPath}");
                         plugin?.Unregister();
-                        plugin = RegisterPlugin(loader, server);
+                        HookManager.Instance.UnregisterAssembly(pluginAssembly);
+
+                        pluginAssembly = loader.LoadDefaultAssembly();
+                        plugin = RegisterPlugin(pluginAssembly, server);
                     };
                     
                     Log.Debug($"Load Plugin {pluginPath}");
-                    plugin = RegisterPlugin(loader, server);
+                    plugin = RegisterPlugin(pluginAssembly, server);
                 }
                 else
                 {
@@ -53,10 +60,8 @@ namespace QuantumCore.Core.API
             }
         }
 
-        private static IPlugin RegisterPlugin(PluginLoader loader, object server)
+        private static IPlugin RegisterPlugin(Assembly pluginAssembly, object server)
         {
-            var pluginAssembly = loader.LoadDefaultAssembly();
-                    
             // Search entry point
             foreach (var type in pluginAssembly.GetTypes())
             {

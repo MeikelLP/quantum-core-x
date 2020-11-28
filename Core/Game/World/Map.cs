@@ -1,6 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using QuantumCore.API.Game;
+using QuantumCore.API.Game.World;
+using QuantumCore.Core.API;
 using QuantumCore.Core.Utils;
 using QuantumCore.Game.World.Entities;
 using Serilog;
@@ -39,6 +41,8 @@ namespace QuantumCore.Game.World
 
         public void Update(double elapsedTime)
         {
+            HookManager.Instance.CallHook<IHookMapUpdate>(this, elapsedTime);
+            
             foreach (var entity in _entities)
             {
                 entity.Update(elapsedTime);
