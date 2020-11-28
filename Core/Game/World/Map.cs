@@ -78,6 +78,8 @@ namespace QuantumCore.Game.World
 
         public void DespawnEntity(Entity entity)
         {
+            Log.Debug($"Despawn {entity}");
+            
             // Remove this entity from all nearby entities
             foreach (var e in entity.NearbyEntities)
             {

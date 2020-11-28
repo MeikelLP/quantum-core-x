@@ -56,7 +56,7 @@ namespace QuantumCore.Game
 		
         public static void OnChat(this GameConnection connection, ChatIncoming packet)
         {
-            string newMessage = connection.Player.Name + ": " + packet.Message;
+            var newMessage = connection.Player.Name + ": " + packet.Message;
             var chat = new ChatOutcoming
             {
                 MessageType = (byte)ChatMessageTypes.Normal,

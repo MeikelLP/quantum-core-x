@@ -2,7 +2,7 @@
 
 namespace QuantumCore.Game.Packets
 {
-    enum ChatMessageTypes : byte
+    public enum ChatMessageTypes : byte
     {
         Normal,
         Info,
@@ -20,8 +20,8 @@ namespace QuantumCore.Game.Packets
         [Field(0)]
         [Size]
         public ushort Size { get; set; }
-        [Field(1)]
-        public byte MessageType { get; set; }
+        [Field(1, EnumType = typeof(byte))]
+        public ChatMessageTypes MessageType { get; set; }
         [Dynamic]
         public string Message { get; set; }
 
@@ -32,14 +32,14 @@ namespace QuantumCore.Game.Packets
     }
 
     [Packet(0x04, EDirection.Outgoing, Sequence = false)]
-    class ChatOutcoming
+    public class ChatOutcoming
     {
         [Field(0)]
         [Size]
         public ushort Size { get; set; }
 
-        [Field(1)]
-        public byte MessageType { get; set; }
+        [Field(1, EnumType = typeof(byte))]
+        public ChatMessageTypes MessageType { get; set; }
 
         [Field(2)]
         public uint Vid { get; set; }

@@ -115,12 +115,14 @@ namespace QuantumCore.Core.Packets
                     var array = (Array) field.GetValue(obj);
                     for (var i = 0; i < attr.ArrayLength; i++)
                     {
+                        // todo: implement array of an enum
                         WriteField(array.GetValue(i), type.GetElementType(), bw, attr);
                     }   
                 }
                 else
                 {
-                    WriteField(field.GetValue(obj), type, bw, attr);
+                    // Use the field type or if the field type is an enum use the enum type defined at the field attribute
+                    WriteField(field.GetValue(obj), type.IsEnum ? attr.EnumType : type, bw, attr);
                 }
             }
 
@@ -162,6 +164,11 @@ namespace QuantumCore.Core.Packets
                     type = type.GetElementType();
                     multiplier = attribute.ArrayLength;
                     array = Array.CreateInstance(type, multiplier);
+                }
+
+                if (type.IsEnum)
+                {
+                    type = attribute.EnumType;
                 }
 
                 for (var i = 0; i < multiplier; i++)
@@ -305,6 +312,11 @@ namespace QuantumCore.Core.Packets
                     Debug.Assert(multiplier > 0);
                 }
 
+                if (type.IsEnum)
+                {
+                    type = attribute.EnumType;
+                }
+
                 if (type == typeof(uint) || type == typeof(int))
                 {
                     Size += 4 * multiplier;
@@ -354,6 +366,7 @@ namespace QuantumCore.Core.Packets
         public int Position { get; set; }
         public int Length { get; set; } = -1;
         public int ArrayLength { get; set; } = -1;
+        public Type EnumType { get; set; } = null;
     }
 
     [AttributeUsage(AttributeTargets.Property)]
