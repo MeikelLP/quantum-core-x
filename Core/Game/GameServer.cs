@@ -14,6 +14,7 @@ using QuantumCore.Core.Networking;
 using QuantumCore.Core.Types;
 using QuantumCore.Core.Utils;
 using QuantumCore.Database;
+using QuantumCore.Game.Commands;
 using QuantumCore.Game.Packets;
 using Serilog;
 
@@ -72,6 +73,8 @@ namespace QuantumCore.Game
             
             // Register game server features
             _server.RegisterNamespace("QuantumCore.Game.Packets");
+
+            CommandManager.Register("QuantumCore.Game.Commands");
             
             _server.RegisterNewConnectionListener(connection =>
             {

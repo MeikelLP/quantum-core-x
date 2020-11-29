@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using QuantumCore.Game.Commands;
 using QuantumCore.Game.Packets;
 using QuantumCore.Game.World.Entities;
 using Serilog;
@@ -56,22 +57,32 @@ namespace QuantumCore.Game
 		
         public static void OnChat(this GameConnection connection, ChatIncoming packet)
         {
-            var newMessage = connection.Player.Name + ": " + packet.Message;
-            var chat = new ChatOutcoming
+            if (packet.MessageType == ChatMessageTypes.Normal)
             {
-                MessageType = (byte)ChatMessageTypes.Normal,
-                Vid = connection.Player.Vid,
-                Empire = 1,
-                Message = newMessage
-            };
-
-            connection.Send(chat);
-
-            foreach (var entity in connection.Player.NearbyEntities)
-            {
-                if (entity is PlayerEntity player)
+                if (packet.Message.StartsWith('/'))
                 {
-                    player.Connection.Send(chat);
+                    CommandManager.Handle(connection, packet.Message);
+                }
+                else
+                {
+                    var newMessage = connection.Player.Name + ": " + packet.Message;
+                    var chat = new ChatOutcoming
+                    {
+                        MessageType = ChatMessageTypes.Normal,
+                        Vid = connection.Player.Vid,
+                        Empire = 1,
+                        Message = newMessage
+                    };
+
+                    connection.Send(chat);
+
+                    foreach (var entity in connection.Player.NearbyEntities)
+                    {
+                        if (entity is PlayerEntity player)
+                        {
+                            player.Connection.Send(chat);
+                        }
+                    }
                 }
             }
         }
