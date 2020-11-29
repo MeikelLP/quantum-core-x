@@ -6,6 +6,7 @@ using System.Security.Cryptography;
 using QuantumCore.Core.Constants;
 using QuantumCore.Core.Packets;
 using QuantumCore.Core.Utils;
+using QuantumCore.API;
 using Serilog;
 
 namespace QuantumCore.Core.Networking

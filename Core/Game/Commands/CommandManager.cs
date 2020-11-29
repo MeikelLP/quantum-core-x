@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
-using QuantumCore.Core.Networking;
 using QuantumCore.Game.Packets;
+using QuantumCore.API;
+using QuantumCore.API.Game;
 using Serilog;
 
 namespace QuantumCore.Game.Commands

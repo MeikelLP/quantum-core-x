@@ -1,4 +1,4 @@
-﻿namespace QuantumCore.Core.Networking
+﻿namespace QuantumCore.API
 {
     public interface IConnection
     {
