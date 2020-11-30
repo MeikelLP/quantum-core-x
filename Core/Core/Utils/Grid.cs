@@ -23,11 +23,17 @@
 
         public T Get(uint x, uint y)
         {
+            if (x >= Width || y >= Height)
+                return null;
+
             return _grid[x, y];
         }
 
         public void Set(uint x, uint y, T value)
         {
+            if (x >= Width || y >= Height)
+                return;
+
             _grid[x, y] = value;
         }
     }
