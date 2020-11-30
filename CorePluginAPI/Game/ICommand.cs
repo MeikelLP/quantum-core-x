@@ -1,4 +1,6 @@
-﻿namespace QuantumCore.API.Game
+﻿using System;
+
+namespace QuantumCore.API.Game
 {
     /// <summary>
     /// This interface rapresents an in-game command usable in the chat.

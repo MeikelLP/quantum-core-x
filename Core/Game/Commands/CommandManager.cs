@@ -10,21 +10,6 @@ using Serilog;
 
 namespace QuantumCore.Game.Commands
 {
-    public class TestCommand : ICommand
-    {
-        public void Execute(IConnection connection, string[] args) => connection.Send(new ChatOutcoming()
-        {
-            MessageType = ChatMessageTypes.Info,
-            Vid = 0,
-            Empire = 0,
-            Message = "This is a test command!"
-        });
-
-        public string GetDescription() => "This is an example command";
-
-        public string GetName() => "test";
-    }
-
     public static class CommandManager
     {
         private static Dictionary<string, ICommand> Commands = new Dictionary<string, ICommand>();
@@ -43,7 +28,7 @@ namespace QuantumCore.Game.Commands
 
                 Log.Debug($"Registring command {command.GetName()}");
 
-                Commands.Add(command.GetName(), command);
+                Commands[command.GetName()] = command;
             }
         }
 
@@ -63,7 +48,7 @@ namespace QuantumCore.Game.Commands
                     MessageType = ChatMessageTypes.Info,
                     Vid = 0,
                     Empire = 0,
-                    Message = $"Unknown command ${command}"
+                    Message = $"Unknown command {command}"
                 });
             }
         }

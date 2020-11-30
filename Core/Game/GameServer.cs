@@ -67,14 +67,14 @@ namespace QuantumCore.Game
             
             // Start tcp server
             _server = new Server<GameConnection>((server, client) => new GameConnection(server, client), options.Port);
-            
+
+            CommandManager.Register("QuantumCore.Game.Commands");
+
             // Load and init all plugins
             PluginManager.LoadPlugins(this);
             
             // Register game server features
             _server.RegisterNamespace("QuantumCore.Game.Packets");
-
-            CommandManager.Register("QuantumCore.Game.Commands");
             
             _server.RegisterNewConnectionListener(connection =>
             {
@@ -136,6 +136,11 @@ namespace QuantumCore.Game
             }
             
             // todo detect lags
+        }
+
+        public void RegisterCommandNamespace(Type t)
+        {
+            CommandManager.Register(t.Namespace, t.Assembly);
         }
     }
 }

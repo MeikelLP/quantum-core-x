@@ -1,5 +1,6 @@
 ﻿using System;
 using QuantumCore.API;
+using QuantumCore.API.Game;
 
 namespace ExamplePlugin
 {
@@ -11,6 +12,13 @@ namespace ExamplePlugin
         public void Register(object server)
         {
             Console.WriteLine("ExamplePlugin register!");
+
+            if (server is IGame)
+            {
+                Console.WriteLine("Loading this plugin on a game server!");
+                IGame game = (IGame)server;
+                game.RegisterCommandNamespace(typeof(ExampleCommand));
+            }
         }
 
         public void Unregister()
