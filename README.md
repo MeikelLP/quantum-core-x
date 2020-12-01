@@ -25,3 +25,8 @@ To get in touch with the developers, the best way is to join our [Discord server
 License: **Mozilla Public License 2.0**
 
 For more details see [LICENSE](LICENSE)
+
+## Partners & Supporters
+QuantumCore is supported by JetBrains which provide us with free licenses for their products.
+
+[![JetBrains](docs/images/jetbrains.png)](https://www.jetbrains.com/?from=QuantumCore)
