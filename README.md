@@ -29,4 +29,4 @@ For more details see [LICENSE](LICENSE)
 ## Partners & Supporters
 QuantumCore is supported by JetBrains which provide us with free licenses for their products.
 
-[![JetBrains](docs/images/jetbrains.png)](https://www.jetbrains.com/?from=QuantumCore)
+[<img src="docs/images/jetbrains.png" alt="JetBrains" width=150>](https://www.jetbrains.com/?from=QuantumCore)
