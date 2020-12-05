@@ -17,13 +17,10 @@ namespace QuantumCore.Game.Commands
     {
         public string Description { get; protected set; }
 
-        private Type Type;
-
         private List<CommandFunction> Functions = new List<CommandFunction>();
 
         public CommandCache(CommandAttribute attr, Type t)
         {
-            Type = t;
             Description = attr.Description;
 
             foreach (var method in t.GetMethods())
@@ -38,13 +35,11 @@ namespace QuantumCore.Game.Commands
                         description = spec.Description;
                     }
 
-                    var func = new CommandFunction
+                    Functions.Add(new CommandFunction
                     {
                         Description = description,
                         Method = method,
-                    };
-
-                    Functions.Add(func);
+                    });
                 }
             }
         }
@@ -95,8 +90,7 @@ namespace QuantumCore.Game.Commands
 
             if (isUsable)
             {
-                object obj = Activator.CreateInstance(Type);
-                method.Invoke(obj, args);
+                method.Invoke(null, args);
             }
             
             //else

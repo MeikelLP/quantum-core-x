@@ -47,8 +47,10 @@ namespace QuantumCore.Game.Commands
                     int n;
                     string str = args[i];
 
-                    if (str.Contains("."))
+                    if (str.Contains(".") || str.Contains(","))
                     {
+                        str = str.Replace(".", ",");
+
                         if (float.TryParse(str, out f))
                             objects[i] = f;
                         else
