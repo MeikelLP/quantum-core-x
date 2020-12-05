@@ -17,7 +17,7 @@ namespace ExamplePlugin
             {
                 Console.WriteLine("Loading this plugin on a game server!");
                 IGame game = (IGame)server;
-                game.RegisterCommandNamespace(typeof(ExampleCommand));
+                game.RegisterCommandNamespace(typeof(TestCommand));
             }
         }
 

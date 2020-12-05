@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Dapper;
 using Dapper.Contrib.Extensions;
+using QuantumCore.API.Game;
 using QuantumCore.Cache;
 using Serilog;
 
 namespace QuantumCore.Database
 {
     [System.ComponentModel.DataAnnotations.Schema.Table("players")]
-    public class Player : BaseModel, ICache
+    public class Player : BaseModel, ICache, IPlayer
     {
         public Guid AccountId { get; set; }
         public string Name { get; set; }

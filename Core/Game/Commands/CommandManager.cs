@@ -12,7 +12,7 @@ namespace QuantumCore.Game.Commands
 {
     public static class CommandManager
     {
-        private static Dictionary<string, ICommand> Commands = new Dictionary<string, ICommand>();
+        private static Dictionary<string, CommandCache> Commands = new Dictionary<string, CommandCache>();
 
         public static void Register(string ns, Assembly assembly = null)
         {
@@ -20,26 +20,50 @@ namespace QuantumCore.Game.Commands
             if (assembly == null) assembly = Assembly.GetAssembly(typeof(CommandManager));
 
             var types = assembly.GetTypes().Where(t => string.Equals(t.Namespace, ns, StringComparison.Ordinal))
-                .Where(t => t.GetInterface("ICommand") != null).ToArray();
+                .Where(t => t.GetCustomAttribute<CommandAttribute>() != null).ToArray();
 
             foreach (var type in types)
             {
-                var command = (ICommand)Activator.CreateInstance(type);
+                var attr = type.GetCustomAttribute<CommandAttribute>();
+                Log.Debug($"Registring command {attr.Name} from {type.Name}");
 
-                Log.Debug($"Registring command {command.GetName()}");
-
-                Commands[command.GetName()] = command;
+                Commands[attr.Name] = new CommandCache(attr, type);
             }
         }
 
-        public static void Handle(IConnection connection, string chatline)
+        public static void Handle(GameConnection connection, string chatline)
         {
             var args = chatline.Split(" ");
             string command = args[0].Substring(1);
 
             if (Commands.ContainsKey(command))
             {
-                Commands[command].Execute(connection, args);
+                object[] objects = new object[args.Length];
+                objects[0] = connection.Player.Player;
+
+                for (int i = 1; i < args.Length; i++)
+                {
+                    float f;
+                    int n;
+                    string str = args[i];
+
+                    if (str.Contains("."))
+                    {
+                        if (float.TryParse(str, out f))
+                            objects[i] = f;
+                        else
+                            objects[i] = str;
+                    }
+                    else
+                    {
+                        if (int.TryParse(str, out n))
+                            objects[i] = n;
+                        else
+                            objects[i] = str;
+                    }
+                }
+                
+                Commands[command].Run(objects);
             }
             else
             {
