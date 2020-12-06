@@ -33,12 +33,15 @@ namespace QuantumCore.Game
             // Load player
             var player = await Player.GetPlayer(accountId, packet.Slot);
             var entity = new PlayerEntity(player, connection);
+            await entity.Load();
+            
             connection.Player = entity;
 
             // Send information about the player to the client
             entity.SendBasicData();
             entity.SendPoints();
-            
+            entity.SendInventory();
+
             // Spawn the player
             if (!World.World.Instance.SpawnEntity(entity))
             {

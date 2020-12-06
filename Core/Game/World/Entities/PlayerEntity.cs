@@ -6,6 +6,7 @@ using QuantumCore.Core.Networking;
 using QuantumCore.Core.Utils;
 using QuantumCore.Database;
 using QuantumCore.Game.Packets;
+using QuantumCore.Game.PlayerUtils;
 using Serilog;
 
 namespace QuantumCore.Game.World.Entities
@@ -21,7 +22,8 @@ namespace QuantumCore.Game.World.Entities
         public string Name => Player.Name;
         public GameConnection Connection { get; }
         public Player Player { get; private set; }
-
+        public Inventory Inventory { get; private set; }
+        
         public uint MovementDuration { get; private set; }
 
         private int _targetX;
@@ -35,13 +37,19 @@ namespace QuantumCore.Game.World.Entities
 
         private const int _persistInterval = 1000;
         private int _persistTime = 0;
-        
+
         public PlayerEntity(Player player, GameConnection connection) : base(World.Instance.GenerateVid())
         {
             Connection = connection;
             Player = player;
             PositionX = player.PositionX;
             PositionY = player.PositionY;
+            Inventory = new Inventory(player.Id, 0, 5, 9, 2);
+        }
+
+        public async Task Load()
+        {
+            await Inventory.Load();
         }
 
         public void Goto(int x, int y)
@@ -177,6 +185,25 @@ namespace QuantumCore.Game.World.Entities
             Connection.Send(points);
         }
 
+        public void SendInventory()
+        {
+            foreach (var item in Inventory.Items)
+            {
+                SendItem(item);
+            }
+        }
+
+        private void SendItem(Item item)
+        {
+            var p = new SetItem {
+                Window = item.Window,
+                Position = (ushort)item.Position,
+                ItemId = item.ItemId,
+                Count = item.Count
+            };
+            Connection.Send(p);
+        }
+        
         public void SendCharacter(Connection connection)
         {
             connection.Send(new SpawnCharacter
