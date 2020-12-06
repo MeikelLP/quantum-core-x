@@ -10,7 +10,7 @@ using Serilog;
 namespace QuantumCore.Database
 {
     [System.ComponentModel.DataAnnotations.Schema.Table("players")]
-    public class Player : BaseModel, ICache, IPlayer
+    public class Player : BaseModel, ICache
     {
         public Guid AccountId { get; set; }
         public string Name { get; set; }

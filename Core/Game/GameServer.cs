@@ -55,8 +55,8 @@ namespace QuantumCore.Game
             
             // Load game data
             Log.Information("Load item_proto");
-            var itemProto = ItemProto.FromFile("data/item_proto");
-            
+            ItemManager.Load();
+
             // Load animations
             Log.Information("Load animation data");
             AnimationManager.Load();
@@ -68,6 +68,7 @@ namespace QuantumCore.Game
             // Start tcp server
             _server = new Server<GameConnection>((server, client) => new GameConnection(server, client), options.Port);
 
+            // Register all default commands
             CommandManager.Register("QuantumCore.Game.Commands");
 
             // Load and init all plugins
@@ -76,6 +77,7 @@ namespace QuantumCore.Game
             // Register game server features
             _server.RegisterNamespace("QuantumCore.Game.Packets");
             
+            // Put all new connections into login phase
             _server.RegisterNewConnectionListener(connection =>
             {
                 connection.SetPhase(EPhases.Login);

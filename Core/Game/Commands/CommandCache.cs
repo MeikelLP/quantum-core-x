@@ -25,77 +25,96 @@ namespace QuantumCore.Game.Commands
 
             foreach (var method in t.GetMethods())
             {
-                if (method.Name == "Run")
+                var spec = method.GetCustomAttribute<CommandMethodAttribute>();
+                if (spec == null)
                 {
-                    var spec = method.GetCustomAttribute<CommandMethodAttribute>();
-                    string description = "";
+                    continue;
+                }
 
-                    if (spec != null)
-                    {
-                        description = spec.Description;
-                    }
+                var description = spec.Description;
 
-                    Functions.Add(new CommandFunction
-                    {
-                        Description = description,
-                        Method = method,
-                    });
+                Functions.Add(new CommandFunction
+                {
+                    Description = description,
+                    Method = method,
+                });
+            }
+        }
+
+        private bool IsTypeConvertable(Type input, Type expected)
+        {
+            if (input == expected)
+            {
+                return true;
+            }
+            
+            if (input == typeof(int))
+            {
+                if (expected == typeof(uint) || expected == typeof(byte) || expected == typeof(ushort))
+                {
+                    return true;
                 }
             }
+
+            return false;
         }
 
         public void Run(object[] args)
         {
-            bool isUsable = true;
             MethodInfo method = null;
-
+            
             foreach (var function in Functions)
             {
+                var callArguments = new object[args.Length];
+                Array.Copy(args, callArguments, args.Length);
+                
                 var param = function.Method.GetParameters();
 
                 if (param.Length < args.Length)
                 {
-                    isUsable = false;
+                    method = null;
                     continue;
                 }
-
-                isUsable = true;
+                
                 method = function.Method;
 
-                for (int i = 1; i < param.Length; i++) // Parameter 0 is always an IPlayer, no reason to check it
+                for (var i = 1; i < param.Length; i++) // Parameter 0 is always an IPlayer, no reason to check it
                 {
-                    if (param[i].HasDefaultValue && (args.Length <= i))
+                    if (param[i].HasDefaultValue && (callArguments.Length <= i))
                     {
-                        Array.Resize(ref args, args.Length + 1);
-                        args[i] = Type.Missing;
+                        Array.Resize(ref callArguments, callArguments.Length + 1);
+                        callArguments[i] = Type.Missing;
                         continue;
                     }
 
-                    if (args.Length <= i)
+                    if (callArguments.Length <= i)
                     {
-                        isUsable = false;
+                        method = null;
                         break;
                     }
 
-                    if (param[i].ParameterType != args[i].GetType())
+                    if (param[i].ParameterType != callArguments[i].GetType())
                     {
-                        isUsable = false;
-                        break;
+                        if (IsTypeConvertable(callArguments[i].GetType(), param[i].ParameterType))
+                        {
+                            callArguments[i] = Convert.ChangeType(callArguments[i], param[i].ParameterType);
+                        }
+                        else
+                        {
+                            method = null;
+                            break;
+                        }
                     }
                 }
 
-                if (isUsable)
-                    break;
-            }
-
-            if (isUsable)
-            {
-                method.Invoke(null, args);
+                if (method != null)
+                {
+                    method.Invoke(null, callArguments);
+                    return;
+                }
             }
             
-            //else
-                // TODO: Should expose something like args[0].SendChatMessage(ChatType.Info, "Invalid parameters .....");
-
+            // TODO: Should expose something like args[0].SendChatMessage(ChatType.Info, "Invalid parameters .....");
         }
     }
 }

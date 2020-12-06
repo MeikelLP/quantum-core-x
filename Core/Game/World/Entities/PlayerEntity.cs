@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Diagnostics;
+using System.Threading.Tasks;
 using QuantumCore.API.Game;
 using QuantumCore.API.Game.World;
 using QuantumCore.Cache;
@@ -44,7 +45,7 @@ namespace QuantumCore.Game.World.Entities
             Player = player;
             PositionX = player.PositionX;
             PositionY = player.PositionY;
-            Inventory = new Inventory(player.Id, 0, 5, 9, 2);
+            Inventory = new Inventory(player.Id, 1, 5, 9, 2);
         }
 
         public async Task Load()
@@ -193,8 +194,10 @@ namespace QuantumCore.Game.World.Entities
             }
         }
 
-        private void SendItem(Item item)
+        public void SendItem(Item item)
         {
+            Debug.Assert(item.PlayerId == Player.Id);
+            
             var p = new SetItem {
                 Window = item.Window,
                 Position = (ushort)item.Position,
@@ -228,6 +231,18 @@ namespace QuantumCore.Game.World.Entities
                 Empire = 1, // todo
                 Level = Player.Level,
             });
+        }
+
+        public void SendChatMessage(string message)
+        {
+            var chat = new ChatOutcoming
+            {
+                MessageType = ChatMessageTypes.Normal,
+                Vid = Vid,
+                Empire = 1,
+                Message = message
+            };
+            Connection.Send(chat);
         }
 
         public void Show(Connection connection)

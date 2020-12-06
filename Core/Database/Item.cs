@@ -11,10 +11,10 @@ namespace QuantumCore.Database
     [System.ComponentModel.DataAnnotations.Schema.Table("items")]
     public class Item : BaseModel
     {
-        public Guid PlayerId { get; set; }
+        public Guid PlayerId { get; private set; }
         public uint ItemId { get; set; }
-        public byte Window { get; set; }
-        public uint Position { get; set; }
+        public byte Window { get; private set; }
+        public uint Position { get; private set; }
         public byte Count { get; set; }
 
         public static async Task<Item> GetItem(Guid id)
@@ -56,7 +56,7 @@ namespace QuantumCore.Database
             }
             else
             {
-                Log.Debug($"Query items for player {player} in window {window}");
+                Log.Debug($"Query items for player {player} in window {window} from database");
                 using var db = DatabaseManager.GetGameDatabase();
                 var ids = await db.QueryAsync(
                     "SELECT Id FROM items WHERE PlayerId = @PlayerId AND Window = @Window",
@@ -70,6 +70,44 @@ namespace QuantumCore.Database
                     yield return await GetItem(itemId);
                 }
             }
+        }
+
+        public async Task Persist()
+        {
+            var redis = CacheManager.Redis;
+            var key = "item:" + Id;
+
+            await redis.Set(key, this);
+        }
+
+        /// <summary>
+        /// Sets the item position, window, and owner.
+        /// Refresh the cache lists if needed, and persists the item
+        /// </summary>
+        /// <param name="owner">Owner the item is given to</param>
+        /// <param name="window">Window the item is placed in</param>
+        /// <param name="pos">Position of the item in the window</param>
+        public async Task Set(Guid owner, byte window, uint pos)
+        {
+            if (PlayerId != owner || Window != window)
+            {
+                var redis = CacheManager.Redis;
+                if (PlayerId != Guid.Empty)
+                {
+                    // Remove from last list
+                    var oldList = redis.CreateList<Guid>($"items:{PlayerId}:{Window}");
+                    await oldList.Rem(1, Id);
+                }
+
+                var newList = redis.CreateList<Guid>($"items:{owner}:{window}");
+                await newList.Push(Id);
+                
+                PlayerId = owner;
+                Window = window;
+            }
+
+            Position = pos;
+            await Persist();
         }
     }
 }

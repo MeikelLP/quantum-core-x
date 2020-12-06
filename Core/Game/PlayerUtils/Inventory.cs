@@ -57,19 +57,34 @@ namespace QuantumCore.Game.PlayerUtils
                 return true;
             }
 
-            public bool Place(Item item, long position)
+            /// <summary>
+            /// Tries to place the given item in the inventory page
+            /// </summary>
+            /// <param name="item">Item to place</param>
+            /// <returns>Position it got asserted or -1 if no space was found</returns>
+            public long Place(Item item)
             {
-                if (position < 0) return false;
-                if (position >= _width * _height) return false;
+                for (uint y = 0; y < _height; y++)
+                {
+                    for (uint x = 0; x < _width; x++)
+                    {
+                        if (Place(item, x, y)) return x + y * _width;
+                    }    
+                }
 
-                var x = (uint)(position % _width);
-                var y = (uint)(position / _width);
+                return -1;
+            }
 
-                var itemSize = 1; // todo: Look up item proto size
+            public bool Place(Item item, uint x, uint y)
+            {
+                var proto = ItemManager.GetItem(item.ItemId);
+                var itemSize = proto.Size; // todo: Look up item proto size
                 
                 // Check if all required positions are free and in bounds
-                for (byte i = 0; i < itemSize; i++) 
+                for (byte i = 0; i < itemSize; i++)
                 {
+                    if (y + i >= _height) return false;
+                    
                     if (_grid.Get(x, y + i) != null)
                     {
                         return false;
@@ -83,6 +98,17 @@ namespace QuantumCore.Game.PlayerUtils
                 }
                 
                 return true;
+            }
+
+            public bool Place(Item item, long position)
+            {
+                if (position < 0) return false;
+                if (position >= _width * _height) return false;
+
+                var x = (uint)(position % _width);
+                var y = (uint)(position / _width);
+
+                return Place(item, x, y);
             }
         }
         
@@ -139,6 +165,22 @@ namespace QuantumCore.Game.PlayerUtils
                     _items.Add(item);
                 }
             }
+        }
+
+        public async Task<bool> PlaceItem(Item instance)
+        {
+            foreach (var page in _pages)
+            {
+                var pos = page.Place(instance);
+                if (pos != -1)
+                {
+                    await instance.Set(Owner, Window, (uint) pos);
+                    return true;
+                }
+            }
+
+            // No space left in inventory
+            return false;
         }
     }
 }

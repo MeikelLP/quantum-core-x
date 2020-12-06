@@ -33,35 +33,43 @@ namespace QuantumCore.Game.Commands
 
         public static void Handle(GameConnection connection, string chatline)
         {
-            var args = chatline.Split(" ");
-            string command = args[0].Substring(1);
+            var args = chatline.Split(" "); // todo implement quotation marks for strings
+            var command = args[0].Substring(1);
 
             if (Commands.ContainsKey(command))
             {
-                object[] objects = new object[args.Length];
-                objects[0] = connection.Player.Player;
+                var objects = new object[args.Length];
+                objects[0] = connection.Player;
 
-                for (int i = 1; i < args.Length; i++)
+                for (var i = 1; i < args.Length; i++)
                 {
                     float f;
                     int n;
-                    string str = args[i];
+                    var str = args[i];
 
                     if (str.Contains(".") || str.Contains(","))
                     {
                         str = str.Replace(".", ",");
 
                         if (float.TryParse(str, out f))
+                        {
                             objects[i] = f;
+                        }
                         else
+                        {
                             objects[i] = str;
+                        }
                     }
                     else
                     {
                         if (int.TryParse(str, out n))
+                        {
                             objects[i] = n;
+                        }
                         else
+                        {
                             objects[i] = str;
+                        }
                     }
                 }
                 
