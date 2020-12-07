@@ -78,8 +78,8 @@ namespace QuantumCore.Game.PlayerUtils
             public bool Place(Item item, uint x, uint y)
             {
                 var proto = ItemManager.GetItem(item.ItemId);
-                var itemSize = proto.Size; // todo: Look up item proto size
-                
+                var itemSize = proto.Size;
+
                 // Check if all required positions are free and in bounds
                 for (byte i = 0; i < itemSize; i++)
                 {
@@ -94,7 +94,7 @@ namespace QuantumCore.Game.PlayerUtils
                 // Place the item
                 for (byte i = 0; i < itemSize; i++)
                 {
-                    _grid.Set(x, y, item);
+                    _grid.Set(x, y + i, item);
                 }
                 
                 return true;
@@ -169,12 +169,14 @@ namespace QuantumCore.Game.PlayerUtils
 
         public async Task<bool> PlaceItem(Item instance)
         {
-            foreach (var page in _pages)
+            for(var i = 0; i < _pages.Length; i++)
             {
+                var page = _pages[i];
+                
                 var pos = page.Place(instance);
                 if (pos != -1)
                 {
-                    await instance.Set(Owner, Window, (uint) pos);
+                    await instance.Set(Owner, Window, (uint) (pos + i * _width * _height));
                     return true;
                 }
             }

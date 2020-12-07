@@ -39,7 +39,7 @@ namespace QuantumCore.Database
         public static async IAsyncEnumerable<Item> GetItems(Guid player, byte window)
         {
             var redis = CacheManager.Redis;
-            var key = "items:" + player + ":window";
+            var key = "items:" + player + ":" + window;
 
             var list = redis.CreateList<Guid>(key);
             
