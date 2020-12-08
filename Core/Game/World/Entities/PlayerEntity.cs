@@ -206,7 +206,17 @@ namespace QuantumCore.Game.World.Entities
             };
             Connection.Send(p);
         }
-        
+
+        public void SendRemoveItem(byte window, ushort position)
+        {
+            Connection.Send(new SetItem {
+                Window = window,
+                Position = position,
+                ItemId = 0,
+                Count = 0
+            });
+        }
+
         public void SendCharacter(Connection connection)
         {
             connection.Send(new SpawnCharacter

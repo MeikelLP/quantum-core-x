@@ -47,8 +47,11 @@ namespace QuantumCore.Game.PlayerUtils
 
                 var item = _grid.Get(x, y);
                 if (item == null) return false;
+                
+                var proto = ItemManager.GetItem(item.ItemId);
+                if (proto == null) return false;
 
-                var itemSize = 1; // todo: Look up item proto size
+                var itemSize = proto.Size;
                 for (byte i = 0; i < itemSize; i++)
                 {
                     _grid.Set(x, y + i, null);
@@ -78,18 +81,11 @@ namespace QuantumCore.Game.PlayerUtils
             public bool Place(Item item, uint x, uint y)
             {
                 var proto = ItemManager.GetItem(item.ItemId);
+                if (proto == null) return false;
                 var itemSize = proto.Size;
 
                 // Check if all required positions are free and in bounds
-                for (byte i = 0; i < itemSize; i++)
-                {
-                    if (y + i >= _height) return false;
-                    
-                    if (_grid.Get(x, y + i) != null)
-                    {
-                        return false;
-                    }
-                }
+                if (!IsSpaceAvailable(x, y, proto.Size)) return false;
 
                 // Place the item
                 for (byte i = 0; i < itemSize; i++)
@@ -109,6 +105,35 @@ namespace QuantumCore.Game.PlayerUtils
                 var y = (uint)(position / _width);
 
                 return Place(item, x, y);
+            }
+
+            public bool IsSpaceAvailable(Item item, long position)
+            {
+                if (position < 0) return false;
+                if (position >= _width * _height) return false;
+                
+                var x = (uint)(position % _width);
+                var y = (uint)(position / _width);
+
+                var proto = ItemManager.GetItem(item.ItemId);
+                if (proto == null) return false;
+
+                return IsSpaceAvailable(x, y, proto.Size);
+            }
+
+            public bool IsSpaceAvailable(uint x, uint y, byte size)
+            {
+                for (byte i = 0; i < size; i++)
+                {
+                    if (y + i >= _height) return false;
+                    
+                    if (_grid.Get(x, y + i) != null)
+                    {
+                        return false;
+                    }
+                }
+
+                return true;
             }
         }
         
@@ -183,6 +208,59 @@ namespace QuantumCore.Game.PlayerUtils
 
             // No space left in inventory
             return false;
+        }
+
+        public Item GetItem(ushort position)
+        {
+            var pageSize = _width * _height;
+            var page = position / pageSize;
+            if (page >= _pages.Length)
+            {
+                return null;
+            }
+
+            return _pages[page].GetItem(position - page * pageSize);
+        }
+
+        public bool IsSpaceAvailable(Item item, ushort position)
+        {
+            var pageSize = _width * _height;
+            var page = position / pageSize;
+            if (page >= _pages.Length)
+            {
+                return false;
+            }
+
+            return _pages[page].IsSpaceAvailable(item, position - page * pageSize);
+        }
+
+        public void MoveItem(Item item, ushort fromPosition, ushort position)
+        {
+            var pageSize = _width * _height;
+
+            var fromPage = fromPosition / pageSize;
+            if (fromPage >= _pages.Length)
+            {
+                Log.Debug("Invalid from position");
+                return;
+            }
+
+            var toPage = position / pageSize;
+            if (toPage >= _pages.Length)
+            {
+                Log.Debug("Invalid to position");
+                return;
+            }
+
+            if (!_pages[fromPage].RemoveItem(fromPosition - fromPage * pageSize))
+            {
+                Log.Debug("Failed to remove item");
+            }
+
+            if (!_pages[toPage].Place(item, position - toPage * pageSize))
+            {
+                Log.Debug("Failed to place item");
+            }
         }
     }
 }

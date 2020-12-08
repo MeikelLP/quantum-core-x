@@ -86,5 +86,48 @@ namespace QuantumCore.Game
                 }
             }
         }
+
+        public static async void OnItemMove(this GameConnection connection, ItemMove packet)
+        {
+            var player = connection.Player;
+            if (player == null)
+            {
+                connection.Close();
+                return;
+            }
+            
+            Log.Debug($"Move item from {packet.FromWindow},{packet.FromPosition} to {packet.ToWindow},{packet.ToPosition}");
+            
+            if (packet.FromWindow == 1)
+            {
+                // from inventory 
+                var item = player.Inventory.GetItem(packet.FromPosition);
+                if (item == null)
+                {
+                    Log.Debug("From item wasn't found");
+                    return;
+                }
+                
+                if (packet.ToWindow == 1)
+                {
+                    // to inventory
+                    // check if space is free
+                    if (!player.Inventory.IsSpaceAvailable(item, packet.ToPosition))
+                    {
+                        Log.Debug("Space isn't available");
+                        return;
+                    }
+                    
+                    // place item
+                    player.Inventory.MoveItem(item, packet.FromPosition, packet.ToPosition);
+                    await item.Set(player.Player.Id, packet.ToWindow, packet.ToPosition);
+                    
+                    // send item movement to client
+                    // todo clear previous position
+                    player.SendRemoveItem(packet.FromWindow, packet.FromPosition);
+                    player.SendItem(item);
+                }
+            }
+        }
     }
 }
