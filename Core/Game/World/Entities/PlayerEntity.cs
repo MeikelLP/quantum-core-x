@@ -254,7 +254,31 @@ namespace QuantumCore.Game.World.Entities
             };
             Connection.Send(chat);
         }
-
+		
+        public void SendChatCommand(string message)
+        {
+            var chat = new ChatOutcoming
+            {
+                MessageType = ChatMessageTypes.Command,
+                Vid = 0,
+                Empire = 1,
+                Message = message
+            };
+            Connection.Send(chat);
+        }
+		
+        public void SendChatInfo(string message)
+        {
+            var chat = new ChatOutcoming
+            {
+                MessageType = ChatMessageTypes.Info,
+                Vid = 0,
+                Empire = 1,
+                Message = message
+            };
+            Connection.Send(chat);
+        }
+        
         public void Show(Connection connection)
         {
             SendCharacter(connection);
