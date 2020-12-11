@@ -59,7 +59,7 @@ namespace QuantumCore.Database
                 Log.Debug($"Query items for player {player} in window {window} from database");
                 using var db = DatabaseManager.GetGameDatabase();
                 var ids = await db.QueryAsync(
-                    "SELECT Id FROM items WHERE PlayerId = @PlayerId AND Window = @Window",
+                    "SELECT Id FROM items WHERE PlayerId = @PlayerId AND `Window` = @Window",
                     new {PlayerId = player, Window = window});
 
                 foreach (var row in ids)
