@@ -164,12 +164,11 @@ namespace QuantumCore.Game.World.Entities
         {
             switch (window)
             {
-                case 1:
+                case (byte) WindowType.Inventory:
                     if (position >= Inventory.Size)
                     {
                         // Equipment
-                        Log.Debug("From equipment");
-                        return null; //todo
+                        return Inventory.EquipmentWindow.GetItem(position);
                     }
                     else
                     {
@@ -185,12 +184,11 @@ namespace QuantumCore.Game.World.Entities
         {
             switch (window)
             {
-                case 1:
+                case (byte) WindowType.Inventory:
                     if (position >= Inventory.Size)
                     {
                         // Equipment
-                        Log.Debug("To equipment");
-                        return false; //todo
+                        return Inventory.EquipmentWindow.GetItem(position) == null;
                     }
                     else
                     {
@@ -206,12 +204,12 @@ namespace QuantumCore.Game.World.Entities
         {
             switch (item.Window)
             {
-                case 1:
+                case (byte) WindowType.Inventory:
                     if (item.Position >= Inventory.Size)
                     {
                         // Equipment
-                        Log.Debug("Remove equipment");
-                        return;
+                        Inventory.EquipmentWindow.RemoveItem(item);
+                        SendCharacterUpdate();
                     }
                     else
                     {
@@ -227,12 +225,16 @@ namespace QuantumCore.Game.World.Entities
         {
             switch (window)
             {
-                case 1:
+                case (byte) WindowType.Inventory:
                     if (position >= Inventory.Size)
                     {
                         // Equipment
-                        Log.Debug("To equipment");
-                        Debug.Assert(false);
+                        if (Inventory.EquipmentWindow.GetItem(position) == null)
+                        {
+                            Inventory.EquipmentWindow.SetItem(item, position);
+                            await item.Set(Player.Id, window, position);
+                            SendCharacterUpdate();
+                        }
                     }
                     else
                     {
@@ -275,6 +277,43 @@ namespace QuantumCore.Game.World.Entities
             {
                 SendItem(item);
             }
+
+            if (Inventory.EquipmentWindow.Body != null)
+            {
+                SendItem(Inventory.EquipmentWindow.Body);
+            }
+            if (Inventory.EquipmentWindow.Head != null)
+            {
+                SendItem(Inventory.EquipmentWindow.Head);
+            }
+            if (Inventory.EquipmentWindow.Shoes != null)
+            {
+                SendItem(Inventory.EquipmentWindow.Shoes);
+            }
+            if (Inventory.EquipmentWindow.Bracelet != null)
+            {
+                SendItem(Inventory.EquipmentWindow.Bracelet);
+            }
+            if (Inventory.EquipmentWindow.Weapon != null)
+            {
+                SendItem(Inventory.EquipmentWindow.Weapon);
+            }
+            if (Inventory.EquipmentWindow.Necklace != null)
+            {
+                SendItem(Inventory.EquipmentWindow.Necklace);
+            }
+            if (Inventory.EquipmentWindow.Earrings != null)
+            {
+                SendItem(Inventory.EquipmentWindow.Earrings);
+            }
+            if (Inventory.EquipmentWindow.Costume != null)
+            {
+                SendItem(Inventory.EquipmentWindow.Costume);
+            }
+            if (Inventory.EquipmentWindow.Hair != null)
+            {
+                SendItem(Inventory.EquipmentWindow.Hair);
+            }
         }
 
         public void SendItem(Item item)
@@ -310,8 +349,8 @@ namespace QuantumCore.Game.World.Entities
                 PositionX = PositionX,
                 PositionY = PositionY,
                 Class = Player.PlayerClass,
-                MoveSpeed = 100,
-                AttackSpeed = 100
+                MoveSpeed = _moveSpeed,
+                AttackSpeed = _attackSpeed
             });
         }
 
@@ -319,11 +358,41 @@ namespace QuantumCore.Game.World.Entities
         {
             connection.Send(new CharacterInfo
             {
-                Vid = Vid, // todo
+                Vid = Vid,
                 Name = Player.Name,
                 Empire = 1, // todo
                 Level = Player.Level,
+                Parts = new ushort[] {
+                    (ushort)(Inventory.EquipmentWindow.Body?.ItemId ?? 0), 
+                    (ushort)(Inventory.EquipmentWindow.Weapon?.ItemId ?? 0), 
+                    0, 
+                    (ushort)(Inventory.EquipmentWindow.Hair?.ItemId ?? 0)
+                }
             });
+        }
+
+        public void SendCharacterUpdate()
+        {
+            var packet = new CharacterUpdate {
+                Vid = Vid,
+                Parts = new ushort[] {
+                    (ushort) (Inventory.EquipmentWindow.Body?.ItemId ?? 0),
+                    (ushort) (Inventory.EquipmentWindow.Weapon?.ItemId ?? 0), 0,
+                    (ushort) (Inventory.EquipmentWindow.Hair?.ItemId ?? 0)
+                },
+                MoveSpeed = _moveSpeed,
+                AttackSpeed = _attackSpeed
+            };
+            
+            Connection.Send(packet);
+            
+            foreach (var entity in NearbyEntities)
+            {
+                if (entity is PlayerEntity p)
+                {
+                    p.Connection.Send(packet);
+                }    
+            }
         }
 
         public void SendChatMessage(string message)

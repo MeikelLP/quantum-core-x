@@ -9,6 +9,11 @@ using Serilog;
 
 namespace QuantumCore.Game.PlayerUtils
 {
+    public enum WindowType
+    {
+        Inventory = 1
+    }
+    
     public class Inventory
     {
         private class Page
@@ -144,6 +149,7 @@ namespace QuantumCore.Game.PlayerUtils
                 return _items.AsReadOnly();
             }
         }
+        public Equipment EquipmentWindow { get; private set; }
 
         public long Size {
             get {
@@ -170,6 +176,9 @@ namespace QuantumCore.Game.PlayerUtils
             {
                 _pages[i] = new Page(width, height);
             }
+            
+            // Initialize equipment
+            EquipmentWindow = new Equipment(Owner, Size);
         }
 
         public async Task Load()
@@ -183,7 +192,12 @@ namespace QuantumCore.Game.PlayerUtils
                 var page = item.Position / pageSize;
                 if (page >= _pages.Length)
                 {
-                    Log.Warning($"Failed to load item {item.Id} in position {item.Position} as it is outside the inventory!");
+                    if (!EquipmentWindow.SetItem(item))
+                    {
+                        Log.Warning(
+                            $"Failed to load item {item.Id} in position {item.Position} as it is outside the inventory!");
+                    }
+
                     continue;
                 }
 
