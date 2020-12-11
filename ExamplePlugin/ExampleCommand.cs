@@ -8,23 +8,24 @@ using QuantumCore.API.Game.World;
 namespace ExamplePlugin
 {
     [Command("test", "This is an example command")]
-    public class TestCommand
+    public static class TestCommand
     {
+        [CommandMethod("Plain command without any parameter")]
         public static void Run(IPlayerEntity player)
         {
-            Console.WriteLine("it works!");
+            player.SendChatInfo("Test command works!");
         }
 
-        [CommandMethod("second desc")]
+        [CommandMethod("This command tests the handler with more than one argument")]
         public static void Run(IPlayerEntity player, int required1, string optional1 = "")
         {
-            Console.WriteLine($"Run with {required1} {optional1}");
+            player.SendChatInfo($"Test command sent with parameters {required1} and {optional1}");
         }
 
-        [CommandMethod("third desc")]
+        [CommandMethod("This command tests the float type")]
         public static void Run(IPlayerEntity player, float required1, string optional1 = "")
         {
-            Console.WriteLine($"Run with {required1} and {optional1}");
+            player.SendChatInfo($"Test command sent with parameters {required1} and {optional1}");
         }
     }
 }
