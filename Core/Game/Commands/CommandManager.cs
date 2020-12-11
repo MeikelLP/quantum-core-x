@@ -12,7 +12,7 @@ namespace QuantumCore.Game.Commands
 {
     public static class CommandManager
     {
-        private static Dictionary<string, CommandCache> Commands = new Dictionary<string, CommandCache>();
+        public readonly static Dictionary<string, CommandCache> Commands = new Dictionary<string, CommandCache>();
 
         public static void Register(string ns, Assembly assembly = null)
         {

@@ -17,7 +17,7 @@ namespace QuantumCore.Game.Commands
     {
         public string Description { get; protected set; }
 
-        private List<CommandFunction> Functions = new List<CommandFunction>();
+        public List<CommandFunction> Functions = new List<CommandFunction>();
 
         public CommandCache(CommandAttribute attr, Type t)
         {
