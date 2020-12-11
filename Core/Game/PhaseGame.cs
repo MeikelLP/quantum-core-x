@@ -97,36 +97,27 @@ namespace QuantumCore.Game
             }
             
             Log.Debug($"Move item from {packet.FromWindow},{packet.FromPosition} to {packet.ToWindow},{packet.ToPosition}");
-            
-            if (packet.FromWindow == 1)
+
+            // Get moved item
+            var item = player.GetItem(packet.FromWindow, packet.FromPosition);
+            if (item == null)
             {
-                // from inventory 
-                var item = player.Inventory.GetItem(packet.FromPosition);
-                if (item == null)
-                {
-                    Log.Debug("From item wasn't found");
-                    return;
-                }
+                Log.Debug($"Moved item not found!");
+                return;
+            }
+
+            // Check if target space is available
+            if (player.IsSpaceAvailable(item, packet.ToWindow, packet.ToPosition))
+            {
+                // remove from old space
+                player.RemoveItem(item);
                 
-                if (packet.ToWindow == 1)
-                {
-                    // to inventory
-                    // check if space is free
-                    if (!player.Inventory.IsSpaceAvailable(item, packet.ToPosition))
-                    {
-                        Log.Debug("Space isn't available");
-                        return;
-                    }
-                    
-                    // place item
-                    player.Inventory.MoveItem(item, packet.FromPosition, packet.ToPosition);
-                    await item.Set(player.Player.Id, packet.ToWindow, packet.ToPosition);
-                    
-                    // send item movement to client
-                    // todo clear previous position
-                    player.SendRemoveItem(packet.FromWindow, packet.FromPosition);
-                    player.SendItem(item);
-                }
+                // place item
+                await player.SetItem(item, packet.ToWindow, packet.ToPosition);
+
+                // send item movement to client
+                player.SendRemoveItem(packet.FromWindow, packet.FromPosition);
+                player.SendItem(item);
             }
         }
     }

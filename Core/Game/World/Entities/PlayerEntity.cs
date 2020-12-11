@@ -160,6 +160,89 @@ namespace QuantumCore.Game.World.Entities
             Persist();
         }
 
+        public Item GetItem(byte window, ushort position)
+        {
+            switch (window)
+            {
+                case 1:
+                    if (position >= Inventory.Size)
+                    {
+                        // Equipment
+                        Log.Debug("From equipment");
+                        return null; //todo
+                    }
+                    else
+                    {
+                        // Inventory
+                        return Inventory.GetItem(position);
+                    }
+            }
+
+            return null;
+        }
+
+        public bool IsSpaceAvailable(Item item, byte window, ushort position)
+        {
+            switch (window)
+            {
+                case 1:
+                    if (position >= Inventory.Size)
+                    {
+                        // Equipment
+                        Log.Debug("To equipment");
+                        return false; //todo
+                    }
+                    else
+                    {
+                        // Inventory
+                        return Inventory.IsSpaceAvailable(item, position);
+                    }
+            }
+
+            return false;
+        }
+
+        public void RemoveItem(Item item)
+        {
+            switch (item.Window)
+            {
+                case 1:
+                    if (item.Position >= Inventory.Size)
+                    {
+                        // Equipment
+                        Log.Debug("Remove equipment");
+                        return;
+                    }
+                    else
+                    {
+                        // Inventory
+                        Inventory.RemoveItem(item);
+                    }
+
+                    break;
+            }
+        }
+
+        public async Task SetItem(Item item, byte window, ushort position)
+        {
+            switch (window)
+            {
+                case 1:
+                    if (position >= Inventory.Size)
+                    {
+                        // Equipment
+                        Log.Debug("To equipment");
+                        Debug.Assert(false);
+                    }
+                    else
+                    {
+                        // Inventory
+                        await Inventory.PlaceItem(item, position);
+                    } 
+                    break;
+            }
+        }
+
         public override void ShowEntity(Connection connection)
         {
             SendCharacter(connection);

@@ -145,6 +145,12 @@ namespace QuantumCore.Game.PlayerUtils
             }
         }
 
+        public long Size {
+            get {
+                return _width * _height * _pages.Length;
+            }
+        }
+
         private readonly Page[] _pages;
         private ushort _width;
         private ushort _height;
@@ -208,6 +214,36 @@ namespace QuantumCore.Game.PlayerUtils
 
             // No space left in inventory
             return false;
+        }
+
+        public async Task<bool> PlaceItem(Item item, ushort position)
+        {
+            var pageSize = _width * _height;
+            var page = position / pageSize;
+            if (page >= _pages.Length)
+            {
+                return false;
+            }
+
+            if (_pages[page].Place(item, position - page * pageSize))
+            {
+                await item.Set(Owner, Window, position);
+                return true;
+            }
+
+            return false;
+        }
+
+        public void RemoveItem(Item item)
+        {
+            var pageSize = _width * _height;
+            var page = item.Position / pageSize;
+            if (page >= _pages.Length)
+            {
+                return;
+            }
+
+            _pages[page].RemoveItem(item.Position - page * pageSize);
         }
 
         public Item GetItem(ushort position)
