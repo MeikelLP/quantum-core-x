@@ -278,42 +278,7 @@ namespace QuantumCore.Game.World.Entities
                 SendItem(item);
             }
 
-            if (Inventory.EquipmentWindow.Body != null)
-            {
-                SendItem(Inventory.EquipmentWindow.Body);
-            }
-            if (Inventory.EquipmentWindow.Head != null)
-            {
-                SendItem(Inventory.EquipmentWindow.Head);
-            }
-            if (Inventory.EquipmentWindow.Shoes != null)
-            {
-                SendItem(Inventory.EquipmentWindow.Shoes);
-            }
-            if (Inventory.EquipmentWindow.Bracelet != null)
-            {
-                SendItem(Inventory.EquipmentWindow.Bracelet);
-            }
-            if (Inventory.EquipmentWindow.Weapon != null)
-            {
-                SendItem(Inventory.EquipmentWindow.Weapon);
-            }
-            if (Inventory.EquipmentWindow.Necklace != null)
-            {
-                SendItem(Inventory.EquipmentWindow.Necklace);
-            }
-            if (Inventory.EquipmentWindow.Earrings != null)
-            {
-                SendItem(Inventory.EquipmentWindow.Earrings);
-            }
-            if (Inventory.EquipmentWindow.Costume != null)
-            {
-                SendItem(Inventory.EquipmentWindow.Costume);
-            }
-            if (Inventory.EquipmentWindow.Hair != null)
-            {
-                SendItem(Inventory.EquipmentWindow.Hair);
-            }
+            Inventory.EquipmentWindow.Send(this);
         }
 
         public void SendItem(Item item)

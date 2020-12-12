@@ -1,5 +1,6 @@
 using System;
 using QuantumCore.Database;
+using QuantumCore.Game.World.Entities;
 
 namespace QuantumCore.Game.PlayerUtils
 {
@@ -138,6 +139,46 @@ namespace QuantumCore.Game.PlayerUtils
             }
 
             return false;
+        }
+
+        public void Send(PlayerEntity player)
+        {
+            if (Body != null)
+            {
+                player.SendItem(Body);
+            }
+            if (Head != null)
+            {
+                player.SendItem(Head);
+            }
+            if (Shoes != null)
+            {
+                player.SendItem(Shoes);
+            }
+            if (Bracelet != null)
+            {
+                player.SendItem(Bracelet);
+            }
+            if (Weapon != null)
+            {
+                player.SendItem(Weapon);
+            }
+            if (Necklace != null)
+            {
+                player.SendItem(Necklace);
+            }
+            if (Earrings != null)
+            {
+                player.SendItem(Earrings);
+            }
+            if (Costume != null)
+            {
+                player.SendItem(Costume);
+            }
+            if (Hair != null)
+            {
+                player.SendItem(Hair);
+            }
         }
     }
 }
