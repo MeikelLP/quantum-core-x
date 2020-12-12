@@ -24,6 +24,48 @@ namespace QuantumCore.Game.World.Entities
         public GameConnection Connection { get; }
         public Player Player { get; private set; }
         public Inventory Inventory { get; private set; }
+
+        public EAntiFlags AntiFlagClass {
+            get {
+                switch (Player.PlayerClass)
+                {
+                    case 0:
+                    case 4:
+                        return EAntiFlags.Warrior;
+                    case 1:
+                    case 5:
+                        return EAntiFlags.Assassin;
+                    case 2:
+                    case 6:
+                        return EAntiFlags.Sura;
+                    case 3:
+                    case 7:
+                        return EAntiFlags.Shaman;
+                    default:
+                        return 0;
+                }
+            }
+        }
+
+        public EAntiFlags AntiFlagGender {
+            get {
+                switch (Player.PlayerClass)
+                {
+                    case 0:
+                    case 2:
+                    case 5:
+                    case 7:
+                        return EAntiFlags.Male;
+                    case 1:
+                    case 3:
+                    case 4:
+                    case 6:
+                        return EAntiFlags.Female;
+                    default:
+                        return 0;
+                }
+            }
+        }
         
         public uint MovementDuration { get; private set; }
 
@@ -188,7 +230,13 @@ namespace QuantumCore.Game.World.Entities
                     if (position >= Inventory.Size)
                     {
                         // Equipment
-                        return Inventory.EquipmentWindow.GetItem(position) == null;
+                        // Make sure item fits in equipment window
+                        if (IsEquippable(item) && Inventory.EquipmentWindow.IsSuitable(item, position))
+                        {
+                            return Inventory.EquipmentWindow.GetItem(position) == null;
+                        }
+                        
+                        return false;
                     }
                     else
                     {
@@ -200,6 +248,48 @@ namespace QuantumCore.Game.World.Entities
             return false;
         }
 
+        public bool IsEquippable(Item item)
+        {
+            var proto = ItemManager.GetItem(item.ItemId);
+            if (proto == null)
+            {
+                // Proto for item not found
+                return false;
+            }
+
+            if (proto.WearFlags == 0)
+            {
+                // No wear flags -> not wearable
+                return false;
+            }
+            
+            // Check anti flags
+            var antiFlags = (EAntiFlags) proto.AntiFlags;
+            if (antiFlags.HasFlag(AntiFlagClass))
+            {
+                return false;
+            }
+
+            if (antiFlags.HasFlag(AntiFlagGender))
+            {
+                return false;
+            }
+
+            // Check limits (level)
+            foreach (var limit in proto.Limits)
+            {
+                if (limit.Type == (byte) ELimitType.Level)
+                {
+                    if (Player.Level < limit.Value)
+                    {
+                        return false;
+                    }
+                }
+            }
+            
+            return true;
+        }
+        
         public void RemoveItem(Item item)
         {
             switch (item.Window)

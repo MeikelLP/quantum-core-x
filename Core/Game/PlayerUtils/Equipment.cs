@@ -180,5 +180,40 @@ namespace QuantumCore.Game.PlayerUtils
                 player.SendItem(Hair);
             }
         }
+
+        public bool IsSuitable(Item item, ushort position)
+        {
+            var proto = ItemManager.GetItem(item.ItemId);
+            if (proto == null)
+            {
+                return false;
+            }
+
+            var wearFlags = (EWearFlags) proto.WearFlags;
+            
+            switch ((EquipmentSlots)(position - _offset))
+            {
+                case EquipmentSlots.Body:
+                    return wearFlags.HasFlag(EWearFlags.Body);
+                case EquipmentSlots.Head:
+                    return wearFlags.HasFlag(EWearFlags.Head);
+                case EquipmentSlots.Shoes:
+                    return wearFlags.HasFlag(EWearFlags.Shoes);
+                case EquipmentSlots.Bracelet:
+                    return wearFlags.HasFlag(EWearFlags.Bracelet);
+                case EquipmentSlots.Weapon:
+                    return wearFlags.HasFlag(EWearFlags.Weapon);
+                case EquipmentSlots.Necklace:
+                    return wearFlags.HasFlag(EWearFlags.Necklace);
+                case EquipmentSlots.Earring:
+                    return wearFlags.HasFlag(EWearFlags.Earrings);
+                case EquipmentSlots.Costume:
+                    return false; // todo
+                case EquipmentSlots.Hair:
+                    return false; // todo
+                default:
+                    return false;
+            }
+        }
     }
 }
