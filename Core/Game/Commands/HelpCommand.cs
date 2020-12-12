@@ -55,7 +55,7 @@ namespace QuantumCore.Game.Commands
 
                 player.SendChatInfo($"--- Help for command {command} ---");
 
-                string commandString, paramName;
+                string commandString;
 
                 foreach (var desc in key.Functions)
                 {
