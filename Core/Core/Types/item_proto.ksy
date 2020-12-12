@@ -32,7 +32,7 @@ types:
         type: u4
       - id: data
         size: crypted_size
-        process: lzo_xtea(real_size, crypted_size)
+        process: lzo_xtea(real_size, crypted_size, 0x2A4A1, 0x45415AA, 0x185A8BE7, 0x1AAD6AB)
         type: items_container
   items_container:
     seq:

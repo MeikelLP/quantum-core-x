@@ -56,6 +56,8 @@ namespace QuantumCore.Game
             // Load game data
             Log.Information("Load item_proto");
             ItemManager.Load();
+            Log.Information("Load mob_proto");
+            MonsterManager.Load();
 
             // Load animations
             Log.Information("Load animation data");
