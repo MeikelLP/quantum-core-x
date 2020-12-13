@@ -11,5 +11,7 @@ namespace QuantumCore.API.Game.World
         public uint Height { get; }
 
         public List<IEntity> GetEntities();
+
+        public void DespawnEntity(IEntity entity);
     }
 }

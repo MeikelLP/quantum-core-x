@@ -63,6 +63,7 @@ namespace QuantumCore.Game
             Log.Information("Load animation data");
             AnimationManager.Load();
 
+            // Load game world
             Log.Information("Initialize world"); 
             _world = new World.World();
             _world.Load();

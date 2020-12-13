@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Threading.Tasks;
+using QuantumCore.API;
 using QuantumCore.API.Game;
 using QuantumCore.API.Game.World;
 using QuantumCore.Cache;
@@ -182,13 +183,13 @@ namespace QuantumCore.Game.World.Entities
             await CacheManager.Redis.Set($"player:{Player.Id}", Player);
         }
 
-        protected override void OnNewNearbyEntity(Entity entity)
+        protected override void OnNewNearbyEntity(IEntity entity)
         {
             Log.Debug($"New entity {entity} nearby {this}");
             entity.ShowEntity(Connection);
         }
 
-        protected override void OnRemoveNearbyEntity(Entity entity)
+        protected override void OnRemoveNearbyEntity(IEntity entity)
         {
             Log.Debug($"Remove entity {entity} nearby {this}");
             Connection.Send(new RemoveCharacter
@@ -335,7 +336,7 @@ namespace QuantumCore.Game.World.Entities
             }
         }
 
-        public override void ShowEntity(Connection connection)
+        public override void ShowEntity(IConnection connection)
         {
             SendCharacter(connection);
             SendCharacterAdditional(connection);
@@ -394,12 +395,12 @@ namespace QuantumCore.Game.World.Entities
             });
         }
 
-        public void SendCharacter(Connection connection)
+        public void SendCharacter(IConnection connection)
         {
             connection.Send(new SpawnCharacter
             {
                 Vid = Vid,
-                CharacterType = 6, // todo
+                CharacterType = (byte) EEntityType.Player,
                 Angle = 0,
                 PositionX = PositionX,
                 PositionY = PositionY,
@@ -409,7 +410,7 @@ namespace QuantumCore.Game.World.Entities
             });
         }
 
-        public void SendCharacterAdditional(Connection connection)
+        public void SendCharacterAdditional(IConnection connection)
         {
             connection.Send(new CharacterInfo
             {

@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using QuantumCore.API;
 using QuantumCore.API.Game;
 using QuantumCore.API.Game.World;
 using QuantumCore.Core.Networking;
@@ -37,8 +38,8 @@ namespace QuantumCore.Game.World.Entities
             set => _positionChanged = value;
         }
 
-        public Map Map { get; set; }
-        public List<Entity> NearbyEntities { get; } = new List<Entity>();
+        public IMap Map { get; set; }
+        public List<IEntity> NearbyEntities { get; } = new List<IEntity>();
         public const int ViewDistance = 10000;
 
         private int _positionX;
@@ -51,24 +52,24 @@ namespace QuantumCore.Game.World.Entities
             Vid = vid;
         }
 
-        protected abstract void OnNewNearbyEntity(Entity entity);
-        protected abstract void OnRemoveNearbyEntity(Entity entity);
+        protected abstract void OnNewNearbyEntity(IEntity entity);
+        protected abstract void OnRemoveNearbyEntity(IEntity entity);
         public abstract void OnDespawn();
 
-        public abstract void ShowEntity(Connection connection);
+        public abstract void ShowEntity(IConnection connection);
         
         public virtual void Update(double elapsedTime)
         {
             ClearNearbyEntities();
         }
 
-        public void AddNearbyEntity(Entity entity)
+        public void AddNearbyEntity(IEntity entity)
         {
             NearbyEntities.Add(entity);
             OnNewNearbyEntity(entity);
         }
 
-        public void RemoveNearbyEntity(Entity entity)
+        public void RemoveNearbyEntity(IEntity entity)
         {
             if (NearbyEntities.Remove(entity))
             {

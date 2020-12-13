@@ -1,12 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
+using QuantumCore.API.Game.World;
 using QuantumCore.Game.World;
 using QuantumCore.Game.World.Entities;
 
 namespace QuantumCore.Core.Utils
 {
-    public class QuadTree<T> where T : Entity
+    public class QuadTree<T> where T : IEntity
     {
         public int X { get; private set; }
         public int Y { get; private set; }

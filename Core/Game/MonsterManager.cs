@@ -1,3 +1,4 @@
+using System.Linq;
 using QuantumCore.Core.Types;
 using Serilog;
 
@@ -17,6 +18,11 @@ namespace QuantumCore.Game
         {
             _proto = MobProto.FromFile("data/mob_proto");
             Log.Debug($"Loaded {_proto.Content.Data.Monsters.Count} monsters");
+        }
+
+        public static MobProto.Monster GetMonster(uint id)
+        {
+            return _proto.Content.Data.Monsters.FirstOrDefault(monster => monster.Id == id);
         }
     }
 }

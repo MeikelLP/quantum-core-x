@@ -21,7 +21,7 @@ namespace QuantumCore.Game.World
         public uint Height { get; private set; }
 
         private readonly List<Entity> _entities;
-        private readonly QuadTree<Entity> _quadTree;
+        private readonly QuadTree<IEntity> _quadTree;
 
         public Map(string name, uint x, uint y, uint width, uint height)
         {
@@ -31,7 +31,7 @@ namespace QuantumCore.Game.World
             Width = width;
             Height = height;
             _entities = new List<Entity>();
-            _quadTree = new QuadTree<Entity>((int) x, (int) y, (int) (width * MapUnit), (int) (height * MapUnit), 20);
+            _quadTree = new QuadTree<IEntity>((int) x, (int) y, (int) (width * MapUnit), (int) (height * MapUnit), 20);
         }
 
         public void Initialize()
@@ -63,7 +63,7 @@ namespace QuantumCore.Game.World
             if (!_quadTree.Insert(entity)) return false;
             
             // Add this entity to all entities nearby
-            var nearby = new List<Entity>();
+            var nearby = new List<IEntity>();
             _quadTree.QueryAround(nearby, entity.PositionX, entity.PositionY, Entity.ViewDistance);
             foreach (var e in nearby.Where(e => e != entity))
             {
@@ -76,7 +76,7 @@ namespace QuantumCore.Game.World
             return true;
         }
 
-        public void DespawnEntity(Entity entity)
+        public void DespawnEntity(IEntity entity)
         {
             Log.Debug($"Despawn {entity}");
             
