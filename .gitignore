@@ -12,4 +12,5 @@ launchSettings.json
 
 # Generated
 ItemProto.cs
+MobProto.cs
 packages.lock.json
