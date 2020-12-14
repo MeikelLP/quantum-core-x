@@ -42,63 +42,77 @@ namespace QuantumCore.Game.World
         public void Update(double elapsedTime)
         {
             HookManager.Instance.CallHook<IHookMapUpdate>(this, elapsedTime);
-            
-            foreach (var entity in _entities)
-            {
-                entity.Update(elapsedTime);
 
-                if (entity.PositionChanged)
+            lock (_entities)
+            {
+                foreach (var entity in _entities)
                 {
-                    _quadTree.Remove(entity);
-                    _quadTree.Insert(entity);
-                    entity.PositionChanged = false;
-                    
-                    // todo Refresh nearby entities
+                    entity.Update(elapsedTime);
+
+                    if (entity.PositionChanged)
+                    {
+                        _quadTree.Remove(entity);
+                        _quadTree.Insert(entity);
+                        entity.PositionChanged = false;
+
+                        // todo Refresh nearby entities
+                    }
                 }
             }
         }
         
         public bool SpawnEntity(Entity entity)
         {
-            if (!_quadTree.Insert(entity)) return false;
-            
-            // Add this entity to all entities nearby
-            var nearby = new List<IEntity>();
-            _quadTree.QueryAround(nearby, entity.PositionX, entity.PositionY, Entity.ViewDistance);
-            foreach (var e in nearby.Where(e => e != entity))
+            lock (_entities)
             {
-                entity.AddNearbyEntity(e);
-                e.AddNearbyEntity(entity);
-            }
 
-            _entities.Add(entity);
-            entity.Map = this;
-            return true;
+                if (!_quadTree.Insert(entity)) return false;
+
+                // Add this entity to all entities nearby
+                var nearby = new List<IEntity>();
+                _quadTree.QueryAround(nearby, entity.PositionX, entity.PositionY, Entity.ViewDistance);
+                foreach (var e in nearby.Where(e => e != entity))
+                {
+                    entity.AddNearbyEntity(e);
+                    e.AddNearbyEntity(entity);
+                }
+
+                _entities.Add(entity);
+                entity.Map = this;
+                return true;
+            }
         }
 
         public void DespawnEntity(IEntity entity)
         {
-            Log.Debug($"Despawn {entity}");
-            
-            // Remove this entity from all nearby entities
-            foreach (var e in entity.NearbyEntities)
+            lock (_entities)
             {
-                e.RemoveNearbyEntity(entity);
-            }
+                Log.Debug($"Despawn {entity}");
 
-            // Remove map from the entity
-            entity.Map = null;
-            
-            // Remove entity from the quad tree
-            _quadTree.Remove(entity);
-            
-            // Call despawn handlers
-            entity.OnDespawn();
+                // Remove this entity from all nearby entities
+                foreach (var e in entity.NearbyEntities)
+                {
+                    e.RemoveNearbyEntity(entity);
+                }
+
+                // Remove map from the entity
+                entity.Map = null;
+
+                // Remove entity from the quad tree
+                _quadTree.Remove(entity);
+
+                // Call despawn handlers
+                entity.OnDespawn();
+            }
         }
 
         public List<IEntity> GetEntities()
         {
-            return new List<IEntity>(_entities);
+            // todo make sure if we have to lock here or not
+            lock (_entities)
+            {
+                return new List<IEntity>(_entities);
+            }
         }
     }
 }
