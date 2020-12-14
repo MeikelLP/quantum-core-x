@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Reflection;
 using QuantumCore.API.Game;
+using QuantumCore.API.Game.World;
 
 namespace QuantumCore.Game.Commands
 {
@@ -99,6 +100,24 @@ namespace QuantumCore.Game.Commands
                         {
                             callArguments[i] = Convert.ChangeType(callArguments[i], param[i].ParameterType);
                         }
+                        else if (param[i].ParameterType == typeof(IPlayerEntity))
+                        {
+                            if (callArguments[i].GetType() == typeof(string))
+                            {
+                                var player = World.World.Instance.GetPlayer((string) callArguments[i]);
+                                if (player == null)
+                                {
+                                    ((IPlayerEntity) callArguments[0]).SendChatInfo($"Cannot find player {(string)callArguments[i]}");
+                                    return;
+                                }
+                                callArguments[i] = player;
+                            }
+                            else
+                            {
+                                method = null;
+                                break;
+                            }
+                        }
                         else
                         {
                             method = null;
@@ -113,8 +132,8 @@ namespace QuantumCore.Game.Commands
                     return;
                 }
             }
-            
-            // TODO: Should expose something like args[0].SendChatMessage(ChatType.Info, "Invalid parameters .....");
+
+            ((IPlayerEntity)args[0]).SendChatInfo("Invalid command parameters");
         }
     }
 }
