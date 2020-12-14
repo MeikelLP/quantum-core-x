@@ -32,6 +32,10 @@ namespace QuantumCore.Game
             {
                 Player.Map.DespawnEntity(Player);
             }
+            if (Player != null)
+            {
+                World.World.Instance.RemovePlayer(Player);
+            }
             Server.RemoveConnection(this);
             
             // todo enable expiry on auth token

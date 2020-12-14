@@ -3,5 +3,7 @@
     public interface IWorld
     {
         public IMap GetMapByName(string name);
+
+        public IPlayerEntity GetPlayer(string name);
     }
 }

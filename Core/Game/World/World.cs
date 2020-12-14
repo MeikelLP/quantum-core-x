@@ -16,6 +16,7 @@ namespace QuantumCore.Game.World
         private uint _vid;
         private readonly Grid<Map> _world = new Grid<Map>(0, 0);
         private readonly Dictionary<string, Map> _maps = new Dictionary<string, Map>();
+        private readonly Dictionary<string, PlayerEntity> _players = new Dictionary<string, PlayerEntity>();
         
         public static World Instance { get; private set; }
         
@@ -121,12 +122,33 @@ namespace QuantumCore.Game.World
             var map = GetMapAt((uint) e.PositionX, (uint) e.PositionY);
             if (map == null) return false;
 
+            if (e.GetType() == typeof(PlayerEntity))
+                AddPlayer((PlayerEntity)e);
+
             return map.SpawnEntity(e);
         }
         
         public uint GenerateVid()
         {
             return ++_vid;
+        }
+
+        private void AddPlayer(PlayerEntity e)
+        {
+            if (_players.ContainsKey(e.Name))
+                _players[e.Name] = e;
+            else
+                _players.Add(e.Name, e);
+        }
+
+        public void RemovePlayer(PlayerEntity e)
+        {
+            _players.Remove(e.Name);
+        }
+
+        public IPlayerEntity GetPlayer(string playerName)
+        {
+            return _players.ContainsKey(playerName) ? _players[playerName] : null;
         }
     }
 }
