@@ -96,7 +96,38 @@ namespace QuantumCore.Game.World.Entities
             await Inventory.Load();
         }
 
-        public void Goto(int x, int y)
+        public override void Move(int x, int y)
+        {
+            if (PositionX == x && PositionY == y) return;
+
+            Map.DespawnEntity(this);
+
+            PositionX = x;
+            PositionY = y;
+
+            // Reset movement info
+            _state = State.Idle;
+            MovementDuration = 0;
+
+            // Spawn the player
+            if (!World.Instance.SpawnEntity(this))
+            {
+                Log.Warning("Failed to spawn player entity");
+                Connection.Close();
+            }
+
+            Show(Connection);
+
+            ForEachNearbyEntity(entity =>
+            {
+                if (entity is PlayerEntity p)
+                {
+                    p.Show(Connection);
+                }
+            });
+        }
+
+        public override void Goto(int x, int y)
         {
             if (PositionX == x && PositionY == y) return;
             if (_targetX == x && _targetY == y) return;

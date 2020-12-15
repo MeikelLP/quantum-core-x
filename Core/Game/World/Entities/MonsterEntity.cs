@@ -49,5 +49,10 @@ namespace QuantumCore.Game.World.Entities
         {
             return $"{_proto.TranslatedName} ({_proto.Id})";
         }
+
+        public override void Goto(int x, int y)
+        {
+            // TODO
+        }
     }
 }

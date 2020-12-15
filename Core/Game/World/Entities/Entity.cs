@@ -56,7 +56,15 @@ namespace QuantumCore.Game.World.Entities
         protected abstract void OnNewNearbyEntity(IEntity entity);
         protected abstract void OnRemoveNearbyEntity(IEntity entity);
         public abstract void OnDespawn();
+        public virtual void Move(int x, int y)
+        {
+            if (PositionX == x && PositionY == y) return;
+            PositionX = x;
+            PositionY = y;
+            PositionChanged = true;
+        }
 
+        public abstract void Goto(int x, int y);
         public abstract void ShowEntity(IConnection connection);
         
         public virtual void Update(double elapsedTime)

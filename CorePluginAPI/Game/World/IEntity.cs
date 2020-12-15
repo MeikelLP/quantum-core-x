@@ -16,5 +16,9 @@ namespace QuantumCore.API.Game.World
         public void RemoveNearbyEntity(IEntity entity);
         public void ForEachNearbyEntity(Action<IEntity> action);
         public void ShowEntity(IConnection connection);
+
+        public void Goto(int x, int y);
+
+        public void Move(int x, int y);
     }
 }
