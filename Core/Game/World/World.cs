@@ -8,6 +8,8 @@ using QuantumCore.Core.API;
 using QuantumCore.Core.Utils;
 using QuantumCore.Game.World.Entities;
 using Serilog;
+using Tomlyn;
+using Tomlyn.Model;
 
 namespace QuantumCore.Game.World
 {
@@ -17,6 +19,7 @@ namespace QuantumCore.Game.World
         private readonly Grid<Map> _world = new Grid<Map>(0, 0);
         private readonly Dictionary<string, Map> _maps = new Dictionary<string, Map>();
         private readonly Dictionary<string, PlayerEntity> _players = new Dictionary<string, PlayerEntity>();
+        private readonly Dictionary<int, SpawnGroup> _groups = new Dictionary<int, SpawnGroup>();
         
         public static World Instance { get; private set; }
         
@@ -28,6 +31,22 @@ namespace QuantumCore.Game.World
         
         public void Load()
         {
+            // Load groups
+            var path = Path.Join("data", "groups.toml");
+            if (File.Exists(path))
+            {
+                var toml = Toml.Parse(File.ReadAllText(path));
+                var model = toml.ToModel();
+                if (model["group"] is TomlTableArray groups)
+                {
+                    foreach (var group in groups)
+                    {
+                        var g = SpawnGroup.FromToml(group);
+                        _groups[g.Id] = g;
+                    }
+                }
+            }
+            
             try
             {
                 // Regex for parsing lines in the atlas info
@@ -58,7 +77,6 @@ namespace QuantumCore.Game.World
                             
                             // todo check if map is hosted by this game core
                             var map = new Map(mapName, positionX, positionY, width, height);
-                            map.Initialize();
                             _maps[map.Name] = map;
 
                             if (positionX + width * Map.MapUnit > maxX) maxX = positionX + width * Map.MapUnit;
@@ -86,6 +104,12 @@ namespace QuantumCore.Game.World
                             _world.Set(x, y, map);
                         }
                     }
+                }
+                
+                // Initialize maps, spawn monsters etc
+                foreach (var map in _maps.Values)
+                {
+                    map.Initialize();
                 }
             }
             catch (FileNotFoundException e)
@@ -115,6 +139,15 @@ namespace QuantumCore.Game.World
         public IMap GetMapByName(string name)
         {
             return _maps[name];
+        }
+
+        public SpawnGroup GetGroup(int id)
+        {
+            if (!_groups.ContainsKey(id))
+            {
+                return null;
+            }
+            return _groups[id];
         }
 
         public bool SpawnEntity(Entity e)
