@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using QuantumCore.API;
 using QuantumCore.API.Game;
 using QuantumCore.API.Game.World;
@@ -39,7 +40,7 @@ namespace QuantumCore.Game.World.Entities
         }
 
         public IMap Map { get; set; }
-        public List<IEntity> NearbyEntities { get; } = new List<IEntity>();
+        private List<IEntity> NearbyEntities { get; } = new List<IEntity>();
         public const int ViewDistance = 10000;
 
         private int _positionX;
@@ -65,22 +66,42 @@ namespace QuantumCore.Game.World.Entities
 
         public void AddNearbyEntity(IEntity entity)
         {
-            NearbyEntities.Add(entity);
-            OnNewNearbyEntity(entity);
+            lock (NearbyEntities)
+            {
+                NearbyEntities.Add(entity);
+                OnNewNearbyEntity(entity);
+            }
         }
 
         public void RemoveNearbyEntity(IEntity entity)
         {
-            if (NearbyEntities.Remove(entity))
+            lock (NearbyEntities)
             {
-                OnRemoveNearbyEntity(entity);
+                if (NearbyEntities.Remove(entity))
+                {
+                    OnRemoveNearbyEntity(entity);
+                }
             }
         }
 
         private void ClearNearbyEntities()
         {
-            NearbyEntities.RemoveAll(entity =>
-                MathUtils.Distance(entity.PositionX, entity.PositionY, PositionX, PositionY) > ViewDistance);
+            lock (NearbyEntities)
+            {
+                NearbyEntities.RemoveAll(entity =>
+                    MathUtils.Distance(entity.PositionX, entity.PositionY, PositionX, PositionY) > ViewDistance);
+            }
+        }
+
+        public void ForEachNearbyEntity(Action<IEntity> action)
+        {
+            lock (NearbyEntities)
+            {
+                foreach (var entity in NearbyEntities)
+                {
+                    action(entity);
+                }   
+            }
         }
     }
 }

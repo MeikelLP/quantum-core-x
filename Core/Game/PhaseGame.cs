@@ -46,13 +46,13 @@ namespace QuantumCore.Game
                     : 0
             };
             
-            foreach (var entity in connection.Player.NearbyEntities)
+            connection.Player.ForEachNearbyEntity(entity =>
             {
                 if(entity is PlayerEntity player)
                 {
                     player.Connection.Send(movement);
                 }
-            }
+            });
         }
 		
         public static void OnChat(this GameConnection connection, ChatIncoming packet)
@@ -76,13 +76,13 @@ namespace QuantumCore.Game
 
                     connection.Send(chat);
 
-                    foreach (var entity in connection.Player.NearbyEntities)
+                    connection.Player.ForEachNearbyEntity(entity =>
                     {
                         if (entity is PlayerEntity player)
                         {
                             player.Connection.Send(chat);
                         }
-                    }
+                    });
                 }
             }
         }

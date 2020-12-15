@@ -442,13 +442,13 @@ namespace QuantumCore.Game.World.Entities
             
             Connection.Send(packet);
             
-            foreach (var entity in NearbyEntities)
+            ForEachNearbyEntity(entity =>
             {
                 if (entity is PlayerEntity p)
                 {
                     p.Connection.Send(packet);
-                }    
-            }
+                }
+            });
         }
 
         public void SendChatMessage(string message)

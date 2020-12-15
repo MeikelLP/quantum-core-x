@@ -138,10 +138,7 @@ namespace QuantumCore.Game.World
                 Log.Debug($"Despawn {entity}");
 
                 // Remove this entity from all nearby entities
-                foreach (var e in entity.NearbyEntities)
-                {
-                    e.RemoveNearbyEntity(entity);
-                }
+                entity.ForEachNearbyEntity(e => e.RemoveNearbyEntity(entity));
 
                 // Remove map from the entity
                 entity.Map = null;

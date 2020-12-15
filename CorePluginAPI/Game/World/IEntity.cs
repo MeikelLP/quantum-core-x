@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace QuantumCore.API.Game.World
 {
@@ -9,11 +10,11 @@ namespace QuantumCore.API.Game.World
         public int PositionY { get; }
         public float Rotation { get; }
         public IMap Map { get; set; }
-        public List<IEntity> NearbyEntities { get; }
 
         public void OnDespawn();
         public void AddNearbyEntity(IEntity entity);
         public void RemoveNearbyEntity(IEntity entity);
+        public void ForEachNearbyEntity(Action<IEntity> action);
         public void ShowEntity(IConnection connection);
     }
 }

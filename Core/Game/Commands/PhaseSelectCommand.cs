@@ -11,13 +11,18 @@ namespace QuantumCore.Game.Commands
         public static async void PhaseSelect(IPlayerEntity player)
         {
             player.SendChatInfo("Going back to character selection. Please wait.");
-         	// todo migrate to plugin api style as soon as more is implemented
-            if (!(player is PlayerEntity p))
+
+            // todo implement wait
+            
+            // Despawn player
+            player.Map?.DespawnEntity(player);
+
+            // todo migrate to core api
+            if (player is PlayerEntity p)
             {
-                return;
+                // Bring client back to select menu
+                p.Connection.SetPhase(EPhases.Select);
             }
-        	p.NearbyEntities.Remove(p);
-        	p.Connection.SetPhase(EPhases.Select);
         }
     }
 }
