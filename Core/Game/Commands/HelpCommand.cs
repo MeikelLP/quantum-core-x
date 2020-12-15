@@ -42,7 +42,7 @@ namespace QuantumCore.Game.Commands
             }
         }
 
-        [CommandMethod]
+        [CommandMethod("Shows an help with a specific command")]
         public static async void HelpWithCommand(IPlayerEntity player, string command)
         {
             if (!CommandManager.Commands.ContainsKey(command))

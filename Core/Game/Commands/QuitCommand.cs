@@ -4,7 +4,7 @@ using QuantumCore.Game.Packets;
 using QuantumCore.Game.World.Entities;
 namespace QuantumCore.Game.Commands
 {
-	[Command("quit", "quit the game")]
+	[Command("quit", "Quit the game")]
     public static class QuitCommand
     {
     	[CommandMethod]
