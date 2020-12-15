@@ -8,7 +8,7 @@ using QuantumCore.Game.World.Entities;
 namespace QuantumCore.Game.Commands
 {
     [Command("tp", "Teleport to another player")]
-    public static class CommandTeleporpTo
+    public static class CommandTeleportTo
     {
         [CommandMethod]
         public static async void TeleportToPlayer(IPlayerEntity player, IPlayerEntity dest)
