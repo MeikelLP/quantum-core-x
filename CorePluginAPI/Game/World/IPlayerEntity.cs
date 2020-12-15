@@ -21,5 +21,7 @@
         /// </summary>
         /// <param name="info">Info message to send</param>
         public void SendChatInfo(string info);
+
+        public void Disconnect();
     }
 }

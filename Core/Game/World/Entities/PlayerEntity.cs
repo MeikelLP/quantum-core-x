@@ -524,6 +524,11 @@ namespace QuantumCore.Game.World.Entities
             SendCharacterAdditional(connection);
         }
 
+        public void Disconnect()
+        {
+            Connection.Close();
+        }
+
         public override string ToString()
         {
             return Player.Name + "(Player)";

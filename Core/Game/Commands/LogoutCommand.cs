@@ -11,12 +11,7 @@ namespace QuantumCore.Game.Commands
         public static async void Logout(IPlayerEntity player)
         {
             player.SendChatInfo("Logging out. Please wait.");
-        	 // todo migrate to plugin api style as soon as more is implemented
-            if (!(player is PlayerEntity p))
-            {
-                return;
-            }
-        	p.Connection.Close();
+            player.Disconnect();
         }
     }
 }

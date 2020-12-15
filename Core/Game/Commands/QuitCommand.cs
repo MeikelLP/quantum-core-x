@@ -12,12 +12,7 @@ namespace QuantumCore.Game.Commands
         {
             player.SendChatInfo("End the game. Please wait.");
         	player.SendChatCommand("quit");
-        	// todo migrate to plugin api style as soon as more is implemented
-            if (!(player is PlayerEntity p))
-            {
-                return;
-            }
-        	p.Connection.Close();
+            player.Disconnect();
         }
     }
 }
