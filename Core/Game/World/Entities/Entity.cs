@@ -69,7 +69,6 @@ namespace QuantumCore.Game.World.Entities
         
         public virtual void Update(double elapsedTime)
         {
-            ClearNearbyEntities();
         }
 
         public void AddNearbyEntity(IEntity entity)
@@ -94,11 +93,7 @@ namespace QuantumCore.Game.World.Entities
 
         private void ClearNearbyEntities()
         {
-            lock (NearbyEntities)
-            {
-                NearbyEntities.RemoveAll(entity =>
-                    MathUtils.Distance(entity.PositionX, entity.PositionY, PositionX, PositionY) > ViewDistance);
-            }
+
         }
 
         public void ForEachNearbyEntity(Action<IEntity> action)

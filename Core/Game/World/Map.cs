@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
@@ -28,6 +30,10 @@ namespace QuantumCore.Game.World
         private readonly QuadTree<IEntity> _quadTree;
         private readonly List<SpawnPoint> _spawnPoints = new List<SpawnPoint>();
 
+        private readonly List<IEntity> _nearby = new List<IEntity>();
+        private readonly List<IEntity> _remove = new List<IEntity>();
+        private readonly Stopwatch _sw = new Stopwatch();
+        
         public Map(string name, uint x, uint y, uint width, uint height)
         {
             Name = name;
@@ -91,7 +97,9 @@ namespace QuantumCore.Game.World
         public void Update(double elapsedTime)
         {
             HookManager.Instance.CallHook<IHookMapUpdate>(this, elapsedTime);
-
+            
+            _sw.Restart();
+            
             lock (_entities)
             {
                 foreach (var entity in _entities)
@@ -100,13 +108,55 @@ namespace QuantumCore.Game.World
 
                     if (entity.PositionChanged)
                     {
+                        entity.PositionChanged = false;
+                        
+                        // Update position in our quad tree (used for faster nearby look up)
                         _quadTree.Remove(entity);
                         _quadTree.Insert(entity);
-                        entity.PositionChanged = false;
 
-                        // todo Refresh nearby entities
+                        // Update entities nearby
+                        _quadTree.QueryAround(_nearby, entity.PositionX, entity.PositionY, Entity.ViewDistance);
+
+                        // Check nearby entities and mark all entities which are too far away now
+                        entity.ForEachNearbyEntity(e =>
+                        {
+                            // Remove this entity from our temporary list as they are already in it
+                            if (!_nearby.Remove(e))
+                            {
+                                // If it wasn't in our temporary list it is no longer in view
+                                _remove.Add(e);
+                            }
+                        });
+                        
+                        // Remove previously marked entities on both sides
+                        foreach (var e in _remove)
+                        {
+                            e.RemoveNearbyEntity(entity);
+                            entity.RemoveNearbyEntity(e);
+                        }
+                        
+                        // Add new nearby entities on both sides
+                        foreach (var e in _nearby)
+                        {
+                            if(e == entity)
+                            {
+                                continue; // do not add ourself!
+                            }
+
+                            e.AddNearbyEntity(entity);
+                            entity.AddNearbyEntity(e);
+                        }
+                        
+                        // Clear our temporary lists
+                        _nearby.Clear();
+                        _remove.Clear();
                     }
                 }
+            }
+
+            if (_sw.ElapsedMilliseconds > 10)
+            {
+                Log.Debug($"Needed {_sw.ElapsedMilliseconds}ms for update of map {Name}");
             }
         }
         
