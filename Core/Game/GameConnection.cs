@@ -28,14 +28,7 @@ namespace QuantumCore.Game
 
         protected override void OnClose()
         {
-            if (Player?.Map != null)
-            {
-                Player.Map.DespawnEntity(Player);
-            }
-            if (Player != null)
-            {
-                World.World.Instance.RemovePlayer(Player);
-            }
+            World.World.Instance.DespawnEntity(Player);
             Server.RemoveConnection(this);
             
             // todo enable expiry on auth token

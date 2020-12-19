@@ -26,6 +26,11 @@ namespace QuantumCore
         public string GameDatabasePassword { get; set; } = "";
         [Option("game-database", HelpText = "Database for game database")]
         public string GameDatabase { get; set; } = "game";
+        [Option("prometheus", HelpText = "Enable prometheus metrics server")]
+        public bool Prometheus { get; set; } = false;
+        [Option("prometheus-port", HelpText = "Prometheus metrics server port")]
+        public int PrometheusPort { get; set; } = 9999;
+        
 
         public string AccountString => $"Server={AccountDatabaseHost};Database={AccountDatabase};Uid={AccountDatabaseUser};Pwd={AccountDatabasePassword}";
 

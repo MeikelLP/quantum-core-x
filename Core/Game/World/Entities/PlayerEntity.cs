@@ -100,7 +100,7 @@ namespace QuantumCore.Game.World.Entities
         {
             if (PositionX == x && PositionY == y) return;
 
-            Map.DespawnEntity(this);
+            World.Instance.DespawnEntity(this);
 
             PositionX = x;
             PositionY = y;

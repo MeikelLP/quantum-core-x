@@ -181,6 +181,10 @@ namespace QuantumCore.Game.World
             }
         }
 
+        /// <summary>
+        /// Should only be called by World
+        /// </summary>
+        /// <param name="entity"></param>
         public void DespawnEntity(IEntity entity)
         {
             lock (_entities)

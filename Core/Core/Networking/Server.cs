@@ -7,6 +7,7 @@ using System.Net.Sockets;
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
+using Prometheus;
 using QuantumCore.Core.Packets;
 using Serilog;
 
@@ -23,6 +24,8 @@ namespace QuantumCore.Core.Networking
         private readonly List<Type> _outgoingTypes = new List<Type>();
         private readonly Stopwatch _serverTimer = new Stopwatch();
         private readonly TcpListener _listener;
+
+        private readonly Gauge _openConnections = Metrics.CreateGauge("open_connections", "Currently open connections");
 
         private readonly Func<Server<T>, TcpClient, T> _clientConstructor;
 
@@ -46,6 +49,7 @@ namespace QuantumCore.Core.Networking
 
         internal void RemoveConnection(Connection connection)
         {
+            _openConnections.Dec();
             _connections.Remove(connection.Id);
         }
 
@@ -60,6 +64,8 @@ namespace QuantumCore.Core.Networking
                     var client = await _listener.AcceptTcpClientAsync();
                     var connection = _clientConstructor(this, client);
                     _connections.Add(connection.Id, connection);
+                    
+                    _openConnections.Inc();
 
                     connection.Start();
                 } catch(Exception e) {

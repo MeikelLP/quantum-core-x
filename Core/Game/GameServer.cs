@@ -11,6 +11,7 @@ using QuantumCore.Core;
 using QuantumCore.Core.API;
 using QuantumCore.Core.Constants;
 using QuantumCore.Core.Networking;
+using QuantumCore.Core.Prometheus;
 using QuantumCore.Core.Types;
 using QuantumCore.Core.Utils;
 using QuantumCore.Database;
@@ -48,7 +49,13 @@ namespace QuantumCore.Game
                 // Query interfaces for our best ipv4 address
                 IpUtils.SearchPublicIp();
             }
-            
+
+            if (options.Prometheus)
+            {
+                // Start metric server
+                Server.Initialize(options.PrometheusPort);
+            }
+
             // Initialize static components
             DatabaseManager.Init(options.AccountString, options.GameString);
             CacheManager.Init(options.RedisHost, options.RedisPort);

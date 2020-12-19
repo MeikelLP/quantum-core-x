@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Text.RegularExpressions;
+using Prometheus;
 using QuantumCore.API.Game;
 using QuantumCore.API.Game.World;
 using QuantumCore.Core.API;
@@ -20,6 +22,10 @@ namespace QuantumCore.Game.World
         private readonly Dictionary<string, Map> _maps = new Dictionary<string, Map>();
         private readonly Dictionary<string, PlayerEntity> _players = new Dictionary<string, PlayerEntity>();
         private readonly Dictionary<int, SpawnGroup> _groups = new Dictionary<int, SpawnGroup>();
+
+        private readonly Histogram _updateDuration =
+            Metrics.CreateHistogram("world_update_duration_seconds", "How long did a world update took");
+        private readonly Gauge _entities = Metrics.CreateGauge("entities", "Currently handles entities");
         
         public static World Instance { get; private set; }
         
@@ -118,13 +124,17 @@ namespace QuantumCore.Game.World
             }
         }
 
+        private readonly Stopwatch _sw = new Stopwatch();
         public void Update(double elapsedTime)
         {
             HookManager.Instance.CallHook<IHookWorldUpdate>(elapsedTime);
-            
-            foreach (var map in _maps.Values)
+
+            using (_updateDuration.NewTimer())
             {
-                map.Update(elapsedTime);
+                foreach (var map in _maps.Values)
+                {
+                    map.Update(elapsedTime);
+                }
             }
         }
 
@@ -158,9 +168,21 @@ namespace QuantumCore.Game.World
             if (e.GetType() == typeof(PlayerEntity))
                 AddPlayer((PlayerEntity)e);
 
+            _entities.Inc();
             return map.SpawnEntity(e);
         }
-        
+
+        public void DespawnEntity(IEntity entity)
+        {
+            if (entity is PlayerEntity player)
+            {
+                RemovePlayer(player);
+            }
+            
+            _entities.Dec();
+            entity.Map?.DespawnEntity(entity);
+        }
+
         public uint GenerateVid()
         {
             return ++_vid;

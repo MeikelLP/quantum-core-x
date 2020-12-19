@@ -15,7 +15,7 @@ namespace QuantumCore.Game.Commands
             // todo implement wait
             
             // Despawn player
-            player.Map?.DespawnEntity(player);
+            World.World.Instance.DespawnEntity(player);
 
             // todo migrate to core api
             if (player is PlayerEntity p)
