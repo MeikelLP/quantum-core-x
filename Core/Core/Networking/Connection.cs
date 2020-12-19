@@ -3,6 +3,7 @@ using System.IO;
 using System.Net.Sockets;
 using System.Reflection;
 using System.Security.Cryptography;
+using Prometheus;
 using QuantumCore.Core.Constants;
 using QuantumCore.Core.Packets;
 using QuantumCore.Core.Utils;
@@ -21,6 +22,9 @@ namespace QuantumCore.Core.Networking
 
         private long _lastHandshakeTime;
 
+        private static Histogram _packetsReceived;
+        private static Histogram _packetsSent;
+
         public Guid Id { get; }
         public uint Handshake { get; private set; }
         public bool Handshaking { get; private set; }
@@ -29,6 +33,24 @@ namespace QuantumCore.Core.Networking
         protected Connection()
         {
             Id = Guid.NewGuid();
+
+            if (_packetsReceived == null)
+            {
+                CreateStaticMetrics();
+            }
+        }
+
+        private static void CreateStaticMetrics()
+        {
+            if (_packetsReceived != null)
+            {
+                return;
+            }
+            
+            _packetsReceived =
+                Metrics.CreateHistogram("packets_received_bytes", "Received packets in bytes");
+            _packetsSent =
+                Metrics.CreateHistogram("packets_sent_bytes", "Sent packets in bytes");
         }
 
         public void Init(TcpClient client, IPacketManager packetManager)
@@ -55,6 +77,7 @@ namespace QuantumCore.Core.Networking
             StartHandshake();
 
             var buffer = new byte[1];
+            var packetTotalSize = 1;
 
             while (true)
             {
@@ -68,6 +91,8 @@ namespace QuantumCore.Core.Networking
                         break;
                     }
 
+                    packetTotalSize = 1;
+                    
                     var packetDetails = _packetManager.GetIncomingPacket(buffer[0]);
                     if (packetDetails == null)
                     {
@@ -78,6 +103,8 @@ namespace QuantumCore.Core.Networking
 
                     var data = new byte[packetDetails.Size - 1];
                     read = await stream.ReadAsync(data, 0, data.Length);
+
+                    packetTotalSize += read;
 
                     if (read != data.Length)
                     {
@@ -98,6 +125,7 @@ namespace QuantumCore.Core.Networking
                         // Read dynamic data
                         var dynamicData = new byte[size];
                         read = await stream.ReadAsync(dynamicData, 0, size);
+                        packetTotalSize += read;
                         if (read != size)
                         {
                             Log.Information($"Failed to read dynamic data read {read} but expected {size}");
@@ -114,6 +142,7 @@ namespace QuantumCore.Core.Networking
                     {
                         var sequence = new byte[1];
                         read = await stream.ReadAsync(sequence, 0, 1);
+                        packetTotalSize += read;
                         if (read != 1)
                         {
                             _client.Close();
@@ -123,6 +152,7 @@ namespace QuantumCore.Core.Networking
                     }
                     
                     Log.Debug($"Recv {packet}");
+                    _packetsReceived.Observe(packetTotalSize);
 
                     OnReceive(packet);
                 }
@@ -169,6 +199,7 @@ namespace QuantumCore.Core.Networking
 
             // Serialize object
             var data = packetDetails.Serialize(packet);
+            _packetsSent.Observe(data.Length);
             _writer.Write(data);
             _writer.Flush();
         }
