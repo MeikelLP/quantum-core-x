@@ -11,11 +11,12 @@ namespace QuantumCore.Game.World.Entities
     {
         private readonly MobProto.Monster _proto;
         
-        public MonsterEntity(uint id, int x, int y) : base(World.Instance.GenerateVid())
+        public MonsterEntity(uint id, int x, int y, float rotation = 0) : base(World.Instance.GenerateVid())
         {
             _proto = MonsterManager.GetMonster(id);
             PositionX = x;
             PositionY = y;
+            Rotation = rotation;
         }
 
         protected override void OnNewNearbyEntity(IEntity entity)
@@ -36,7 +37,7 @@ namespace QuantumCore.Game.World.Entities
             {
                 Vid = Vid,
                 CharacterType = (byte) EEntityType.Monster,
-                Angle = 0,
+                Angle = Rotation,
                 PositionX = PositionX,
                 PositionY = PositionY,
                 Class = (ushort) _proto.Id,

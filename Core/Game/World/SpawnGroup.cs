@@ -33,7 +33,7 @@ namespace QuantumCore.Game.World
             }
 
             sg.Id = (int) (toml["id"] as long? ?? 0);
-            sg.Name = toml["name"] as string;
+            sg.Name = toml.Keys.Contains("name") ? toml["name"] as string : "";
 
             return sg;
         }

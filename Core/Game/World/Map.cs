@@ -85,7 +85,8 @@ namespace QuantumCore.Game.World
                             {
                                 var monster = new MonsterEntity(member.Id,
                                     (int) (PositionX + (baseX + RandomNumberGenerator.GetInt32(-5, 5)) * 100),
-                                    (int) (PositionY + (baseY + RandomNumberGenerator.GetInt32(-5, 5)) * 100));
+                                    (int) (PositionY + (baseY + RandomNumberGenerator.GetInt32(-5, 5)) * 100),
+                                    RandomNumberGenerator.GetInt32(0, 360));
                                 World.Instance.SpawnEntity(monster);
                             }
                         }
