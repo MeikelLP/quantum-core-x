@@ -7,6 +7,7 @@ using QuantumCore.Core.Constants;
 using QuantumCore.Core.Utils;
 using QuantumCore.Database;
 using QuantumCore.Game.Packets;
+using QuantumCore.Game.PlayerUtils;
 using QuantumCore.Game.World;
 using QuantumCore.Game.World.Entities;
 using Serilog;
@@ -63,6 +64,8 @@ namespace QuantumCore.Game
                 return;
             }
 
+            var job = JobInfo.Get((byte)packet.Class);
+            
             // Create player data
             var player = new Player
             {
@@ -72,7 +75,14 @@ namespace QuantumCore.Game
                 PlayerClass = (byte) packet.Class,
                 PositionX = 958870,
                 PositionY = 272788,
+                St = job.St,
+                Iq = job.Iq, 
+                Dx = job.Dx, 
+                Ht = job.Ht,
+                Health =  job.StartHp, 
+                Mana = job.StartSp,
             };
+
 
             // Persist player
             await DatabaseManager.GetGameDatabase().InsertAsync(player);

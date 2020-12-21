@@ -17,6 +17,7 @@ using QuantumCore.Core.Utils;
 using QuantumCore.Database;
 using QuantumCore.Game.Commands;
 using QuantumCore.Game.Packets;
+using QuantumCore.Game.PlayerUtils;
 using Serilog;
 
 namespace QuantumCore.Game
@@ -70,6 +71,7 @@ namespace QuantumCore.Game
             ItemManager.Load();
             Log.Information("Load mob_proto");
             MonsterManager.Load();
+            JobInfo.Load();
 
             // Load animations
             Log.Information("Load animation data");
