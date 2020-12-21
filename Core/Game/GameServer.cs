@@ -106,6 +106,7 @@ namespace QuantumCore.Game
             _server.RegisterListener<CharacterMove>((connection, packet) => connection.OnCharacterMove(packet));
             _server.RegisterListener<ChatIncoming>((connection, packet) => connection.OnChat(packet));
             _server.RegisterListener<ItemMove>((connection, packet) => connection.OnItemMove(packet));
+            _server.RegisterListener<ItemUse>((connection, packet) => connection.OnItemUse(packet));
         }
         
         public async Task Start()

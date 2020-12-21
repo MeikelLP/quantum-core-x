@@ -215,5 +215,31 @@ namespace QuantumCore.Game.PlayerUtils
                     return false;
             }
         }
+
+        public long GetWearSlot(Item item)
+        {
+            var proto = ItemManager.GetItem(item.ItemId);
+            if (proto == null)
+            {
+                return _offset + (ushort)EquipmentSlots.Body;
+            }
+
+            var wearFlags = (EWearFlags) proto.WearFlags;
+            
+            if (wearFlags.HasFlag(EWearFlags.Head))
+                return _offset + (ushort)EquipmentSlots.Head;
+            else if (wearFlags.HasFlag(EWearFlags.Shoes))
+                return _offset + (ushort)EquipmentSlots.Shoes;
+            else if (wearFlags.HasFlag(EWearFlags.Bracelet))
+                return _offset + (ushort)EquipmentSlots.Bracelet;
+            else if (wearFlags.HasFlag(EWearFlags.Weapon))
+                return _offset + (ushort)EquipmentSlots.Weapon;
+            else if (wearFlags.HasFlag(EWearFlags.Necklace))
+                return _offset + (ushort)EquipmentSlots.Necklace;
+            else if (wearFlags.HasFlag(EWearFlags.Earrings))
+                return _offset +  (ushort)EquipmentSlots.Earring;
+
+            return _offset + (ushort)EquipmentSlots.Body;
+        }
     }
 }

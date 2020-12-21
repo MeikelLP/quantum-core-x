@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using QuantumCore.Game.Commands;
 using QuantumCore.Game.Packets;
+using QuantumCore.Game.PlayerUtils;
 using QuantumCore.Game.World.Entities;
 using Serilog;
 
@@ -118,6 +119,69 @@ namespace QuantumCore.Game
                 // send item movement to client
                 player.SendRemoveItem(packet.FromWindow, packet.FromPosition);
                 player.SendItem(item);
+            }
+        }
+        public static async void OnItemUse(this GameConnection connection, ItemUse packet)
+        {
+            var player = connection.Player;
+            if (player == null)
+            {
+                connection.Close();
+                return;
+            }
+
+            Log.Debug($"Use item {packet.Window},{packet.Position}");
+
+            var item = player.GetItem(packet.Window, packet.Position);
+            if (item == null)
+            {
+                Log.Debug($"Used item not found!");
+                return;
+            }
+
+            var itemProto = ItemManager.GetItem(item.ItemId);
+            if (itemProto == null)
+            {
+                Log.Debug($"Cannot find item proto {item.ItemId}");
+                return;
+            }
+
+            if (packet.Window == (byte) WindowType.Inventory && packet.Position >= player.Inventory.Size)
+            {
+                player.RemoveItem(item);
+                if (await player.Inventory.PlaceItem(item))
+                {
+                    player.SendRemoveItem(packet.Window, packet.Position);
+                    player.SendItem(item);
+                    player.SendCharacterUpdate();
+                }
+                else
+                {
+                    await player.SetItem(item, packet.Window, packet.Position);
+                    player.SendChatInfo("Cannot unequip item if the inventory is full");
+                }
+            }
+            else if (player.IsEquippable(item))
+            {
+                var wearSlot = player.Inventory.EquipmentWindow.GetWearSlot(item);
+
+                if (wearSlot <= ushort.MaxValue)
+                {
+                    var item2 = player.Inventory.EquipmentWindow.GetItem((ushort)wearSlot);
+
+                    if (item2 != null)
+                    {
+                        // TODO: swap
+                    }
+                    else
+                    {
+                        player.RemoveItem(item);
+                        await player.SetItem(item, (byte) WindowType.Inventory, (ushort)wearSlot);
+                        player.SendRemoveItem(packet.Window, packet.Position);
+                        player.SendItem(item);
+                        player.SendCharacterUpdate();
+                    }
+                }
             }
         }
     }
