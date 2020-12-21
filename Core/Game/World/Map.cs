@@ -163,8 +163,17 @@ namespace QuantumCore.Game.World
         
         public bool SpawnEntity(Entity entity)
         {
+            Log.Debug($"Spawn entity {entity.Vid}");
+            
             lock (_entities)
             {
+                #if DEBUG
+                if (_entities.Contains(entity))
+                {
+                    Debug.Assert(false);
+                }
+                #endif
+                
                 if (!_quadTree.Insert(entity)) return false;
 
                 // Add this entity to all entities nearby

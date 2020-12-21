@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using QuantumCore.API.Game.World;
 using QuantumCore.Game.World;
@@ -84,6 +85,7 @@ namespace QuantumCore.Core.Utils
                 {
                     if (Math.Pow(obj.PositionX - x, 2) + Math.Pow(obj.PositionY - y, 2) <= Math.Pow(radius, 2))
                     {
+                        Debug.Assert(!objects.Contains(obj));
                         objects.Add(obj);
                     }
                 }

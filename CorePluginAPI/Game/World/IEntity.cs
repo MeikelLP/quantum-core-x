@@ -3,14 +3,29 @@ using System.Collections.Generic;
 
 namespace QuantumCore.API.Game.World
 {
+    public enum EEntityState
+    {
+        Idle,
+        Moving
+    }
+    
     public interface IEntity
     {
         public uint Vid { get; }
+        public EEntityState State { get; }
         public int PositionX { get; }
         public int PositionY { get; }
         public float Rotation { get; }
         public IMap Map { get; set; }
 
+        // Movement related
+        public long MovementStart { get; }
+        public int TargetPositionX { get; }
+        public int StartPositionX { get; }
+        public int TargetPositionY { get; }
+        public int StartPositionY { get; }
+        public uint MovementDuration { get; }
+        
         public void OnDespawn();
         public void AddNearbyEntity(IEntity entity);
         public void RemoveNearbyEntity(IEntity entity);
@@ -20,5 +35,6 @@ namespace QuantumCore.API.Game.World
         public void Goto(int x, int y);
 
         public void Move(int x, int y);
+        public void Stop();
     }
 }

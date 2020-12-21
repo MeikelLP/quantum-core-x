@@ -1,4 +1,5 @@
 using System;
+using System.Threading;
 using Dapper;
 using Dapper.Contrib.Extensions;
 using QuantumCore.Cache;
@@ -40,14 +41,6 @@ namespace QuantumCore.Game
             // Send information about the player to the client
             entity.SendBasicData();
             entity.SendPoints();
-            entity.SendInventory();
-
-            // Spawn the player
-            if (!World.World.Instance.SpawnEntity(entity))
-            {
-                Log.Warning("Failed to spawn player entity");
-                connection.Close();
-            }
         }
 
         public static async void OnCreateCharacter(this GameConnection connection, CreateCharacter packet)
