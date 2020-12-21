@@ -3,7 +3,7 @@ using FluentMigrator;
 namespace QuantumCore.Migrations
 {
     [Tags("game")]
-    [Migration(202012052341)]
+    [Migration(20201205234100)]
     public class CreateItemTable : Migration
     {
         public override void Up()
