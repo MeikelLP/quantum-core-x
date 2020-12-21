@@ -171,7 +171,23 @@ namespace QuantumCore.Game
 
                     if (item2 != null)
                     {
-                        // TODO: swap
+                        player.RemoveItem(item);
+                        player.RemoveItem(item2);
+                        if (await player.Inventory.PlaceItem(item2))
+                        {
+                            player.SendRemoveItem(packet.Window, (ushort)wearSlot);
+                            player.SendRemoveItem(packet.Window, packet.Position);
+                            await player.SetItem(item, packet.Window, (ushort)wearSlot);
+                            await player.SetItem(item2, packet.Window, packet.Position);
+                            player.SendItem(item);
+                            player.SendItem(item2);
+                        }
+                        else
+                        {
+                            await player.SetItem(item, packet.Window, packet.Position);
+                            await player.SetItem(item2, packet.Window, (ushort)wearSlot);
+                            player.SendChatInfo("Cannot swap item if the inventory is full");
+                        }
                     }
                     else
                     {
@@ -179,7 +195,6 @@ namespace QuantumCore.Game
                         await player.SetItem(item, (byte) WindowType.Inventory, (ushort)wearSlot);
                         player.SendRemoveItem(packet.Window, packet.Position);
                         player.SendItem(item);
-                        player.SendCharacterUpdate();
                     }
                 }
             }
