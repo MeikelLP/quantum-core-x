@@ -24,6 +24,7 @@ namespace QuantumCore.Game
     internal class GameServer : IServer, IGame
     {
         public IWorld World => _world;
+        public Server<GameConnection> Server => _server;
         
         private readonly GameOptions _options;
         private readonly Server<GameConnection> _server;
@@ -35,8 +36,12 @@ namespace QuantumCore.Game
         private TimeSpan _targetElapsedTime = TimeSpan.FromTicks(100000); // 100hz
         private TimeSpan _maxElapsedTime = TimeSpan.FromMilliseconds(500);
         
+        public static GameServer Instance { get; private set; }
+        
         public GameServer(GameOptions options)
         {
+            Instance = this;
+            
             _options = options;
             
             // Set public ip address
@@ -53,7 +58,7 @@ namespace QuantumCore.Game
             if (options.Prometheus)
             {
                 // Start metric server
-                Server.Initialize(options.PrometheusPort);
+                QuantumCore.Core.Prometheus.Server.Initialize(options.PrometheusPort);
             }
 
             // Initialize static components
@@ -109,6 +114,7 @@ namespace QuantumCore.Game
             
             _gameTime.Start();
 
+            Log.Debug("Start!");
             while (true)
             {
                 Tick();
@@ -122,20 +128,20 @@ namespace QuantumCore.Game
 
         private void Tick()
         {
-            var currentTicks = _gameTime.ElapsedTicks;
-            _accumulatedElapsedTime = TimeSpan.FromTicks(currentTicks - _previousTicks);
+            var currentTicks = _gameTime.Elapsed.Ticks;
+            _accumulatedElapsedTime += TimeSpan.FromTicks(currentTicks - _previousTicks);
             _previousTicks = currentTicks;
 
             if (_accumulatedElapsedTime < _targetElapsedTime)
             {
                 var sleepTime = (_targetElapsedTime - _accumulatedElapsedTime).TotalMilliseconds;
                 Thread.Sleep((int) sleepTime);
-                Tick();
                 return;
             }
 
             if (_accumulatedElapsedTime > _maxElapsedTime)
             {
+                Log.Warning($"Server is running slow");
                 _accumulatedElapsedTime = _maxElapsedTime;
             }
 
@@ -145,6 +151,7 @@ namespace QuantumCore.Game
                 _accumulatedElapsedTime -= _targetElapsedTime;
                 ++stepCount;
                 
+                //Log.Debug($"Update... ({stepCount})");
                 Update(_targetElapsedTime.TotalMilliseconds);
             }
             
