@@ -21,9 +21,18 @@ namespace QuantumCore.Game
             
             connection.Send(new GameTime { Time = (uint) connection.Server.ServerTime });
             connection.Send(new Channel { ChannelNo = 1 }); // todo
-
+            
             // Show the player
             player.Show(connection);
+            
+            // Spawn the player
+            if (!World.World.Instance.SpawnEntity(player))
+            {
+                Log.Warning("Failed to spawn player entity");
+                connection.Close();
+            }
+            
+            player.SendInventory();
         }
     }
 }

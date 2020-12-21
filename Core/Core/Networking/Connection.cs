@@ -151,7 +151,7 @@ namespace QuantumCore.Core.Networking
                         Log.Debug($"Read sequence {sequence[0]:X2}");
                     }
                     
-                    Log.Debug($"Recv {packet}");
+                    //Log.Debug($"Recv {packet}");
                     _packetsReceived.Observe(packetTotalSize);
 
                     OnReceive(packet);
@@ -188,7 +188,7 @@ namespace QuantumCore.Core.Networking
             if (!_packetManager.IsRegisteredOutgoing(packet.GetType()))
                 throw new ArgumentException("Given packet is not a registered outgoing packet", nameof(packet));
 
-            Log.Debug($"Send {packet}");
+            //Log.Debug($"Send {packet}");
 
             var packetDetails = _packetManager.GetOutgoingPacket(attr.Header);
             // Check if packet has dynamic data
