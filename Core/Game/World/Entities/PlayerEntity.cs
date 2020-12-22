@@ -16,6 +16,8 @@ namespace QuantumCore.Game.World.Entities
 {
     public class PlayerEntity : Entity, IPlayerEntity
     {
+        public override EEntityType Type => EEntityType.Player;
+
         public string Name => Player.Name;
         public GameConnection Connection { get; }
         public Player Player { get; private set; }

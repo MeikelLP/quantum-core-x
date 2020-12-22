@@ -12,6 +12,8 @@ namespace QuantumCore.Game.World.Entities
 {
     public class MonsterEntity : Entity
     {
+        public override EEntityType Type => EEntityType.Monster;
+
         public IBehaviour Behaviour {
             get { return _behaviour; }
             set {
@@ -19,7 +21,7 @@ namespace QuantumCore.Game.World.Entities
                 _behaviourInitialized = false;
             }
         }
-        
+
         private readonly MobProto.Monster _proto;
         private IBehaviour _behaviour;
         private bool _behaviourInitialized;
@@ -59,6 +61,7 @@ namespace QuantumCore.Game.World.Entities
             // Send movement to nearby players
             var movement = new CharacterMoveOut {
                 Vid = Vid,
+                Rotation = (byte) (Rotation / 5),
                 Argument = (byte) CharacterMove.CharacterMovementType.Wait,
                 PositionX = TargetPositionX,
                 PositionY = TargetPositionY,

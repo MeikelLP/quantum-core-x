@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using QuantumCore.Core.Types;
 using Serilog;
@@ -23,6 +24,11 @@ namespace QuantumCore.Game
         public static MobProto.Monster GetMonster(uint id)
         {
             return _proto.Content.Data.Monsters.FirstOrDefault(monster => monster.Id == id);
+        }
+
+        public static List<MobProto.Monster> GetMonsters()
+        {
+            return _proto.Content.Data.Monsters;
         }
     }
 }

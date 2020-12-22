@@ -28,7 +28,10 @@ namespace QuantumCore.Core.Types
                 line = line.Trim();
                 if(string.IsNullOrWhiteSpace(line)) continue;
 
-                var keyword = line.Substring(0, line.IndexOfAny(new []{' ', '\t'}));
+                var i = line.IndexOfAny(new[] {' ', '\t'});
+                if(i < 0) continue;
+                
+                var keyword = line.Substring(0, i);
                 var value = line.Substring(line.IndexOf(' ')).Split(new []{' ', '\t'}).Select(s => s.Trim())
                     .Where(s => !string.IsNullOrWhiteSpace(s)).ToArray();
                 _values[keyword] = string.Join(' ', value);

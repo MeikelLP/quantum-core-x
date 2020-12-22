@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using QuantumCore.API.Core.Utils;
 
 namespace QuantumCore.API.Game.World
 {
@@ -8,15 +9,28 @@ namespace QuantumCore.API.Game.World
         Idle,
         Moving
     }
+
+    public enum EEntityType
+    {
+        Monster = 0,
+        Npc = 1,
+        Player = 6
+    }
     
     public interface IEntity
     {
         public uint Vid { get; }
+        public EEntityType Type { get; }
         public EEntityState State { get; }
         public int PositionX { get; }
         public int PositionY { get; }
         public float Rotation { get; }
         public IMap Map { get; set; }
+        
+        // QuadTree cache
+        public int LastPositionX { get; set; }
+        public int LastPositionY { get; set; }
+        public IQuadTree LastQuadTree { get; set; }
 
         // Movement related
         public long MovementStart { get; }

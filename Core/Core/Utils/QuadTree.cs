@@ -1,14 +1,13 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
+using QuantumCore.API.Core.Utils;
 using QuantumCore.API.Game.World;
-using QuantumCore.Game.World;
 using QuantumCore.Game.World.Entities;
 
 namespace QuantumCore.Core.Utils
 {
-    public class QuadTree<T> where T : IEntity
+    public class QuadTree : IQuadTree
     {
         public int X { get; private set; }
         public int Y { get; private set; }
@@ -17,12 +16,12 @@ namespace QuantumCore.Core.Utils
         public uint Capacity { get; private set; }
         public Rectangle Bounds { get; private set; }
         public bool Subdivided { get; private set; }
-        public List<T> Objects { get; } = new List<T>();
+        public List<IEntity> Objects { get; } = new List<IEntity>();
 
-        private QuadTree<T> _nw;
-        private QuadTree<T> _ne;
-        private QuadTree<T> _sw;
-        private QuadTree<T> _se;
+        private QuadTree _nw;
+        private QuadTree _ne;
+        private QuadTree _sw;
+        private QuadTree _se;
 
         public QuadTree(int x, int y, int width, int height, uint capacity)
         {
@@ -34,13 +33,17 @@ namespace QuantumCore.Core.Utils
             Bounds = new Rectangle(X, Y, Width, Height);
         }
         
-        public bool Insert(T obj)
+        public bool Insert(IEntity obj)
         {
             if (!Bounds.Contains(obj.PositionX, obj.PositionY)) return false;
 
             if (Objects.Count < Capacity && !Subdivided)
             {
                 // We still have places in the quad and are not subdivided yet
+                obj.LastPositionX = obj.PositionX;
+                obj.LastPositionY = obj.PositionY;
+                obj.LastQuadTree = this;
+                
                 Objects.Add(obj);
                 return true;
             }
@@ -55,17 +58,23 @@ namespace QuantumCore.Core.Utils
             return _nw.Insert(obj) || _ne.Insert(obj) || _sw.Insert(obj) || _se.Insert(obj);
         }
 
-        public bool Remove(T obj)
+        public bool Remove(IEntity obj)
         {
             if (Subdivided)
             {
                 return _nw.Remove(obj) || _ne.Remove(obj) || _sw.Remove(obj) || _se.Remove(obj);
             }
 
-            return Objects.Remove(obj);
+            if (Objects.Remove(obj))
+            {
+                obj.LastQuadTree = null;
+                return true;
+            }
+
+            return false;
         }
 
-        public void QueryAround(List<T> objects, int x, int y, int radius)
+        public void QueryAround(List<IEntity> objects, int x, int y, int radius, EEntityType? filter = null)
         {
             // Check if the circle is in our bounds
             if (!CircleIntersects(x, y, radius)) return;
@@ -73,19 +82,23 @@ namespace QuantumCore.Core.Utils
             // If we are divided ask our child quadrants
             if (Subdivided)
             {
-                _ne.QueryAround(objects, x, y, radius);
-                _nw.QueryAround(objects, x, y, radius);
-                _se.QueryAround(objects, x, y, radius);
-                _sw.QueryAround(objects, x, y, radius);
+                _ne.QueryAround(objects, x, y, radius, filter);
+                _nw.QueryAround(objects, x, y, radius, filter);
+                _se.QueryAround(objects, x, y, radius, filter);
+                _sw.QueryAround(objects, x, y, radius, filter);
             }
             else
             {
                 // Go through all objects and check if their position is inside the circle
                 foreach (var obj in Objects)
                 {
+                    if (filter != null && obj.Type != filter)
+                    {
+                        continue;
+                    }
+                    
                     if (Math.Pow(obj.PositionX - x, 2) + Math.Pow(obj.PositionY - y, 2) <= Math.Pow(radius, 2))
                     {
-                        Debug.Assert(!objects.Contains(obj));
                         objects.Add(obj);
                     }
                 }
@@ -120,10 +133,10 @@ namespace QuantumCore.Core.Utils
             var halfWidth = Width / 2;
             var halfHeight = Height / 2;
             
-            _nw = new QuadTree<T>(X, Y, halfWidth, halfHeight, Capacity);
-            _ne = new QuadTree<T>(X, Y + halfHeight, halfWidth, halfHeight, Capacity);
-            _sw = new QuadTree<T>(X + halfWidth, Y, halfWidth, halfHeight, Capacity);
-            _se = new QuadTree<T>(X + halfWidth, Y + halfHeight, halfWidth, halfHeight, Capacity);
+            _nw = new QuadTree(X, Y, halfWidth, halfHeight, Capacity);
+            _ne = new QuadTree(X, Y + halfHeight, halfWidth, halfHeight, Capacity);
+            _sw = new QuadTree(X + halfWidth, Y, halfWidth, halfHeight, Capacity);
+            _se = new QuadTree(X + halfWidth, Y + halfHeight, halfWidth, halfHeight, Capacity);
             Subdivided = true;
             
             // Move our own objects to our children
@@ -132,6 +145,24 @@ namespace QuantumCore.Core.Utils
                 if (_nw.Insert(entity) || _ne.Insert(entity) || _sw.Insert(entity) || _se.Insert(entity)) ;
             }
             Objects.Clear();
+        }
+
+        public void UpdatePosition(IEntity entity)
+        {
+            if (entity.LastQuadTree == null)
+            {
+                Insert(entity);
+                return;
+            }
+
+            if (entity.LastQuadTree is QuadTree qt)
+            {
+                if (!qt.Bounds.Contains(entity.PositionX, entity.PositionY))
+                {
+                    qt.Remove(entity);
+                    Insert(entity);
+                }
+            }
         }
     }
 }

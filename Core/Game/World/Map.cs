@@ -27,12 +27,11 @@ namespace QuantumCore.Game.World
         public uint Height { get; private set; }
 
         private readonly List<Entity> _entities = new List<Entity>();
-        private readonly QuadTree<IEntity> _quadTree;
+        private readonly QuadTree _quadTree;
         private readonly List<SpawnPoint> _spawnPoints = new List<SpawnPoint>();
 
         private readonly List<IEntity> _nearby = new List<IEntity>();
         private readonly List<IEntity> _remove = new List<IEntity>();
-        private readonly Stopwatch _sw = new Stopwatch();
         
         public Map(string name, uint x, uint y, uint width, uint height)
         {
@@ -41,7 +40,7 @@ namespace QuantumCore.Game.World
             PositionY = y;
             Width = width;
             Height = height;
-            _quadTree = new QuadTree<IEntity>((int) x, (int) y, (int) (width * MapUnit), (int) (height * MapUnit), 20);
+            _quadTree = new QuadTree((int) x, (int) y, (int) (width * MapUnit), (int) (height * MapUnit), 20);
         }
 
         public void Initialize()
@@ -98,9 +97,7 @@ namespace QuantumCore.Game.World
         public void Update(double elapsedTime)
         {
             HookManager.Instance.CallHook<IHookMapUpdate>(this, elapsedTime);
-            
-            _sw.Restart();
-            
+
             lock (_entities)
             {
                 foreach (var entity in _entities)
@@ -112,73 +109,77 @@ namespace QuantumCore.Game.World
                         entity.PositionChanged = false;
                         
                         // Update position in our quad tree (used for faster nearby look up)
-                        _quadTree.Remove(entity);
-                        _quadTree.Insert(entity);
+                        _quadTree.UpdatePosition(entity);
 
-                        // Update entities nearby
-                        _quadTree.QueryAround(_nearby, entity.PositionX, entity.PositionY, Entity.ViewDistance);
-
-                        // Check nearby entities and mark all entities which are too far away now
-                        entity.ForEachNearbyEntity(e =>
+                        if (entity.Type == EEntityType.Player)
                         {
-                            // Remove this entity from our temporary list as they are already in it
-                            if (!_nearby.Remove(e))
+                            // Check which entities are relevant for nearby
+                            EEntityType? filter = null;
+                            if (entity.Type != EEntityType.Player)
                             {
-                                // If it wasn't in our temporary list it is no longer in view
-                                _remove.Add(e);
-                            }
-                        });
-                        
-                        // Remove previously marked entities on both sides
-                        foreach (var e in _remove)
-                        {
-                            e.RemoveNearbyEntity(entity);
-                            entity.RemoveNearbyEntity(e);
-                        }
-                        
-                        // Add new nearby entities on both sides
-                        foreach (var e in _nearby)
-                        {
-                            if(e == entity)
-                            {
-                                continue; // do not add ourself!
+                                // if we aren't a player only players are relevant for nearby
+                                filter = EEntityType.Player;
                             }
 
-                            e.AddNearbyEntity(entity);
-                            entity.AddNearbyEntity(e);
+                            // Update entities nearby
+                            _quadTree.QueryAround(_nearby, entity.PositionX, entity.PositionY, Entity.ViewDistance,
+                                filter);
+
+                            // Check nearby entities and mark all entities which are too far away now
+                            entity.ForEachNearbyEntity(e =>
+                            {
+                                // Remove this entity from our temporary list as they are already in it
+                                if (!_nearby.Remove(e))
+                                {
+                                    // If it wasn't in our temporary list it is no longer in view
+                                    _remove.Add(e);
+                                }
+                            });
+
+                            // Remove previously marked entities on both sides
+                            foreach (var e in _remove)
+                            {
+                                e.RemoveNearbyEntity(entity);
+                                entity.RemoveNearbyEntity(e);
+                            }
+
+                            // Add new nearby entities on both sides
+                            foreach (var e in _nearby)
+                            {
+                                if (e == entity)
+                                {
+                                    continue; // do not add ourself!
+                                }
+
+                                e.AddNearbyEntity(entity);
+                                entity.AddNearbyEntity(e);
+                            }
+
+                            // Clear our temporary lists
+                            _nearby.Clear();
+                            _remove.Clear();
                         }
-                        
-                        // Clear our temporary lists
-                        _nearby.Clear();
-                        _remove.Clear();
                     }
                 }
-            }
-
-            if (_sw.ElapsedMilliseconds > 10)
-            {
-                Log.Debug($"Needed {_sw.ElapsedMilliseconds}ms for update of map {Name}");
             }
         }
         
         public bool SpawnEntity(Entity entity)
         {
-            Log.Debug($"Spawn entity {entity.Vid}");
-            
             lock (_entities)
             {
-                #if DEBUG
-                if (_entities.Contains(entity))
-                {
-                    Debug.Assert(false);
-                }
-                #endif
-                
                 if (!_quadTree.Insert(entity)) return false;
 
                 // Add this entity to all entities nearby
                 var nearby = new List<IEntity>();
-                _quadTree.QueryAround(nearby, entity.PositionX, entity.PositionY, Entity.ViewDistance);
+                EEntityType? filter = null;
+                if (entity.Type != EEntityType.Player)
+                {
+                    // if we aren't a player only players are relevant for nearby
+                    filter = EEntityType.Player;
+                }
+                
+                _quadTree.QueryAround(nearby, entity.PositionX, entity.PositionY, Entity.ViewDistance, filter);
                 foreach (var e in nearby.Where(e => e != entity))
                 {
                     entity.AddNearbyEntity(e);

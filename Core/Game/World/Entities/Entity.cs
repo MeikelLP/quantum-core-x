@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using QuantumCore.API;
+using QuantumCore.API.Core.Utils;
 using QuantumCore.API.Game;
 using QuantumCore.API.Game.World;
 using QuantumCore.Core.Networking;
@@ -13,6 +14,7 @@ namespace QuantumCore.Game.World.Entities
     public abstract class Entity : IEntity
     {
         public uint Vid { get; }
+        public abstract EEntityType Type { get; }
         public uint EntityClass { get; protected set; }
         public EEntityState State { get; protected set; }
         public int PositionX
@@ -45,6 +47,11 @@ namespace QuantumCore.Game.World.Entities
         
         public IMap Map { get; set; }
         
+        // QuadTree cache
+        public int LastPositionX { get; set; }
+        public int LastPositionY { get; set; }
+        public IQuadTree LastQuadTree { get; set; }
+        
         // Movement related
         public long MovementStart { get; private set; }
         public int TargetPositionX { get; private set; }
@@ -53,7 +60,7 @@ namespace QuantumCore.Game.World.Entities
         public int StartPositionY { get; private set; }
         public uint MovementDuration { get; private set; }
         public byte MovementSpeed { get; protected set; }
-        
+
         private List<IEntity> NearbyEntities { get; } = new List<IEntity>();
         public const int ViewDistance = 10000;
 
@@ -61,7 +68,8 @@ namespace QuantumCore.Game.World.Entities
         private int _positionY;
         private float _rotation;
         private bool _positionChanged;
-        
+        private IEntity _entityImplementation;
+
         public Entity(uint vid)
         {
             Vid = vid;

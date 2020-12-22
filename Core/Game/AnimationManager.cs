@@ -66,7 +66,54 @@ namespace QuantumCore.Game
             }
             
             // Load monster animations
-            // todo implement after mob proto load is implemented
+            foreach (var monster in MonsterManager.GetMonsters())
+            {
+                // The animation could be in monster or monster2
+                var folder = monster.Folder.Trim('\0');
+                if(folder.Length == 0) continue;
+                
+                var monster1 = Path.Join("data", "monster", folder);
+                var monster2 = Path.Join("data", "monster2", folder);
+                
+                if (Directory.Exists(monster1))
+                {
+                    LoadMonsterAnimation(monster, monster1);
+                } else if (Directory.Exists(monster2))
+                {
+                    LoadMonsterAnimation(monster, monster2);
+                }
+                else
+                {
+                    Log.Warning(
+                        $"Failed to find animation folder of monster {monster.TranslatedName}({monster.Id}) {monster.Folder}");
+                }
+            }
+        }
+
+        private static void LoadMonsterAnimation(MobProto.Monster monster, string folder)
+        {
+            var motlist = Path.Join(folder, "motlist.txt");
+            if (!File.Exists(motlist))
+            {
+                Log.Warning($"No motlist.txt in monster folder {folder}");
+                return;
+            }
+
+            var lines = File.ReadAllLines(motlist);
+            foreach (var line in lines)
+            {
+                var parts = line.Split(new char[] {'\t', ' '});
+                if(parts.Length != 4) continue;
+                if(parts[0].ToLower() != "general") continue;
+
+                if (parts[1].ToLower() == "run")
+                {
+                    LoadAnimation(monster.Id, AnimationType.Run, AnimationSubType.General, Path.Join(folder, parts[2]));
+                } else if (parts[1].ToLower() == "walk")
+                {
+                    LoadAnimation(monster.Id, AnimationType.Walk, AnimationSubType.General, Path.Join(folder, parts[2]));
+                }
+            }
         }
 
         /// <summary>
