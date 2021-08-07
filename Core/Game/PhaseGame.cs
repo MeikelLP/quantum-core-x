@@ -199,5 +199,25 @@ namespace QuantumCore.Game
                 }
             }
         }
+
+        public static async void OnTargetChange(this GameConnection connection, TargetChange packet)
+        {
+            var player = connection.Player;
+            if (player == null)
+            {
+                Log.Debug("Target Change without having a player instance");
+                connection.Close();
+                return;
+            }
+
+            var entity = player.Map.GetEntity(packet.TargetVid);
+            if (entity == null)
+            {
+                return;
+            }
+
+            player.Target = entity;
+            player.SendTarget();
+        }
     }
 }

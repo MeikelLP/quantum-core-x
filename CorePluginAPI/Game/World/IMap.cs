@@ -12,6 +12,8 @@ namespace QuantumCore.API.Game.World
 
         public List<IEntity> GetEntities();
 
+        public IEntity GetEntity(uint vid);
+
         public void DespawnEntity(IEntity entity);
     }
 }

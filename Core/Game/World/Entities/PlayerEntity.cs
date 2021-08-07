@@ -22,6 +22,7 @@ namespace QuantumCore.Game.World.Entities
         public GameConnection Connection { get; }
         public Player Player { get; private set; }
         public Inventory Inventory { get; private set; }
+        public IEntity Target { get; set; }
 
         public EAntiFlags AntiFlagClass {
             get {
@@ -439,6 +440,17 @@ namespace QuantumCore.Game.World.Entities
                 Message = message
             };
             Connection.Send(chat);
+        }
+
+        public void SendTarget()
+        {
+            var packet = new SetTarget();
+            if (Target != null)
+            {
+                packet.TargetVid = Target.Vid;
+                packet.Percentage = Target.HealthPercentage;
+            }
+            Connection.Send(packet);
         }
         
         public void Show(Connection connection)

@@ -44,6 +44,8 @@ namespace QuantumCore.Game.World.Entities
             get => _positionChanged;
             set => _positionChanged = value;
         }
+
+        public byte HealthPercentage { get; } = 100;
         
         public IMap Map { get; set; }
         

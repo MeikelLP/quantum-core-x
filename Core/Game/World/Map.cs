@@ -224,5 +224,13 @@ namespace QuantumCore.Game.World
                 return new List<IEntity>(_entities);
             }
         }
+
+        public IEntity GetEntity(uint vid)
+        {
+            lock (_entities)
+            {
+                return _entities.Find(e => e.Vid == vid);
+            }
+        }
     }
 }
