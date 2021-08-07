@@ -1,5 +1,5 @@
 FROM mcr.microsoft.com/dotnet/sdk:5.0-alpine
-RUN wget https://dl.bintray.com/kaitai-io/universal/0.9/kaitai-struct-compiler-0.9.zip
+RUN wget https://github.com/kaitai-io/kaitai_struct_compiler/releases/download/0.9/kaitai-struct-compiler-0.9.zip
 RUN unzip kaitai-struct-compiler-0.9.zip
 ENV PATH="/kaitai-struct-compiler-0.9/bin/:${PATH}"
 RUN apk add --no-cache bash openjdk8-jre

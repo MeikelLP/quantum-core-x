@@ -20,7 +20,7 @@ build-binaries:
   stage: build
   image: mcr.microsoft.com/dotnet/sdk:5.0-alpine
   script:
-    - wget https://dl.bintray.com/kaitai-io/universal/0.9/kaitai-struct-compiler-0.9.zip
+    - wget https://github.com/kaitai-io/kaitai_struct_compiler/releases/download/0.9/kaitai-struct-compiler-0.9.zip
     - mkdir /kaitai
     - unzip kaitai-struct-compiler-0.9.zip -d /kaitai
     - export PATH=/kaitai/kaitai-struct-compiler-0.9/bin:$PATH
