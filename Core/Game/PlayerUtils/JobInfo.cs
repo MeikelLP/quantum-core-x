@@ -45,29 +45,26 @@ namespace QuantumCore.Game.PlayerUtils
         public static void Load()
         {
             var path = Path.Join("data", "jobs.toml");
-            if (File.Exists(path))
+            var toml = Toml.Parse(File.ReadAllText(path));
+            var model = toml.ToModel();
+            if (model["job"] is TomlTableArray groups)
             {
-                var toml = Toml.Parse(File.ReadAllText(path));
-                var model = toml.ToModel();
-                if (model["job"] is TomlTableArray groups)
+                foreach (var job in groups)
                 {
-                    foreach (var job in groups)
-                    {
-                        var id = (int)(job["id"] as long? ?? -1) + 1;
+                    var id = (int)(job["id"] as long? ?? -1) + 1;
 
-                        if (id == 0)
-                            continue;
+                    if (id == 0)
+                        continue;
                         
-                        for (var i = Jobs.Count - 1; i < id; i++)
-                            Jobs.Add(new Job());
+                    for (var i = Jobs.Count - 1; i < id; i++)
+                        Jobs.Add(new Job());
 
-                        Jobs[id].Ht = (byte) (job["ht"] as long? ?? 0);
-                        Jobs[id].Dx = (byte) (job["dx"] as long? ?? 0);
-                        Jobs[id].St = (byte) (job["st"] as long? ?? 0);
-                        Jobs[id].Iq = (byte) (job["iq"] as long? ?? 0);
-                        Jobs[id].StartHp = (byte) (job["start_hp"] as long? ?? 0);
-                        Jobs[id].StartSp = (byte) (job["start_sp"] as long? ?? 0);
-                    }
+                    Jobs[id].Ht = (byte) (job["ht"] as long? ?? 0);
+                    Jobs[id].Dx = (byte) (job["dx"] as long? ?? 0);
+                    Jobs[id].St = (byte) (job["st"] as long? ?? 0);
+                    Jobs[id].Iq = (byte) (job["iq"] as long? ?? 0);
+                    Jobs[id].StartHp = (byte) (job["start_hp"] as long? ?? 0);
+                    Jobs[id].StartSp = (byte) (job["start_sp"] as long? ?? 0);
                 }
             }
         }
