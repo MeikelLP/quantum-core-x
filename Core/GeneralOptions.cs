@@ -32,8 +32,8 @@ namespace QuantumCore
         public int PrometheusPort { get; set; } = 9999;
         
 
-        public string AccountString => $"Server={AccountDatabaseHost};Database={AccountDatabase};Uid={AccountDatabaseUser};Pwd={AccountDatabasePassword}";
+        public string AccountString => $"Server={AccountDatabaseHost};Database={AccountDatabase};Uid={AccountDatabaseUser};Pwd={AccountDatabasePassword};Charset=utf8";
 
-        public string GameString => $"Server={GameDatabaseHost};Database={GameDatabase};Uid={GameDatabaseUser};Pwd={GameDatabasePassword}";
+        public string GameString => $"Server={GameDatabaseHost};Database={GameDatabase};Uid={GameDatabaseUser};Pwd={GameDatabasePassword};Charset=utf8";
     }
 }
