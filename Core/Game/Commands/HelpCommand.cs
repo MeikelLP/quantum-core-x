@@ -20,8 +20,7 @@ namespace QuantumCore.Game.Commands
             else
             {
 
-                var allPages = CommandManager.Commands.Count / 5;
-                allPages += 1;
+                var allPages = (int) Math.Ceiling(CommandManager.Commands.Count / 5.0);
 
                 if (page > allPages)
                     page = allPages;
