@@ -13,8 +13,12 @@ namespace QuantumCore.Game.PlayerUtils
         public byte St { get; set; }
         public byte Dx { get; set; }
         public byte Iq { get; set; }
-        public int StartHp { get; set; }
-        public int StartSp { get; set; }
+        public uint StartHp { get; set; }
+        public uint StartSp { get; set; }
+        public uint HpPerHt { get; set; }
+        public uint SpPerIq { get; set; }
+        public uint HpPerLevel { get; set; }
+        public uint SpPerLevel { get; set; }
     }
 
     public static class JobInfo
@@ -63,8 +67,12 @@ namespace QuantumCore.Game.PlayerUtils
                     Jobs[id].Dx = (byte) (job["dx"] as long? ?? 0);
                     Jobs[id].St = (byte) (job["st"] as long? ?? 0);
                     Jobs[id].Iq = (byte) (job["iq"] as long? ?? 0);
-                    Jobs[id].StartHp = (byte) (job["start_hp"] as long? ?? 0);
-                    Jobs[id].StartSp = (byte) (job["start_sp"] as long? ?? 0);
+                    Jobs[id].StartHp = (uint) (job["start_hp"] as long? ?? 0);
+                    Jobs[id].StartSp = (uint) (job["start_sp"] as long? ?? 0);
+                    Jobs[id].HpPerHt = (uint) (job["hp_per_ht"] as long? ?? 0);
+                    Jobs[id].SpPerIq = (uint) (job["sp_per_iq"] as long? ?? 0);
+                    Jobs[id].HpPerLevel = (uint) (job["hp_per_level"] as long? ?? 0);
+                    Jobs[id].SpPerLevel = (uint) (job["sp_per_level"] as long? ?? 0);
                 }
             }
         }

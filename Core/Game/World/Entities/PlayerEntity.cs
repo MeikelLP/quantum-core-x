@@ -67,6 +67,7 @@ namespace QuantumCore.Game.World.Entities
         }
         
         private byte _attackSpeed = 140;
+        private uint _hp = 0;
 
         private const int _persistInterval = 1000;
         private int _persistTime = 0;
@@ -86,6 +87,7 @@ namespace QuantumCore.Game.World.Entities
         public async Task Load()
         {
             await Inventory.Load();
+            _hp = GetPoint(EPoints.MaxHp); // todo: cache hp of player 
         }
 
         public override void Move(int x, int y)
@@ -129,6 +131,38 @@ namespace QuantumCore.Game.World.Entities
             {
                 Persist();
                 _persistTime -= _persistInterval;
+            }
+        }
+
+        public uint GetPoint(EPoints point)
+        {
+            switch (point)
+            {
+                case EPoints.Level:
+                    return Player.Level;
+                case EPoints.Hp:
+                    return _hp;
+                case EPoints.MaxHp:
+                    var info = JobInfo.Get(Player.PlayerClass);
+                    if (info == null)
+                    {
+                        return 0;
+                    }
+
+                    return info.StartHp + info.HpPerHt * GetPoint(EPoints.Ht) +
+                           info.HpPerLevel * GetPoint(EPoints.Level);
+                case EPoints.St:
+                    return Player.St;
+                case EPoints.Ht:
+                    return Player.Ht;
+                case EPoints.Dx:
+                    return Player.Dx;
+                case EPoints.Iq:
+                    return Player.Iq;
+                case EPoints.Gold:
+                    return Player.Gold;
+                default:
+                    return 0;
             }
         }
 
@@ -314,6 +348,10 @@ namespace QuantumCore.Game.World.Entities
         public void SendPoints()
         {
             var points = new CharacterPoints();
+            for (var i = 0; i < points.Points.Length; i++)
+            {
+                points.Points[i] = GetPoint((EPoints) i);
+            }
             Connection.Send(points);
         }
 
