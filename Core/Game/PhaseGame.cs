@@ -216,8 +216,37 @@ namespace QuantumCore.Game
                 return;
             }
 
+            player.Target?.TargetedBy.Remove(player);
             player.Target = entity;
+            entity.TargetedBy.Add(player);
             player.SendTarget();
+        }
+
+        public static async void OnAttack(this GameConnection connection, Attack packet)
+        {
+            var player = connection.Player;
+            if (player == null)
+            {
+                connection.Close();
+                return;
+            }
+            
+            var entity = player.Map.GetEntity(packet.Vid);
+            if (entity == null)
+            {
+                return;
+            }
+            
+            Log.Debug($"Attack from {player.Name} with type {packet.AttackType} target {packet.Vid}");
+
+            if (entity is not IDamageable me)
+            {
+                return;
+            }
+
+            var damage = me.TakeDamage(10, player);
+            var info = new DamageInfo {Vid = entity.Vid, DamageType = 1, Damage = (int) damage};
+            player.Connection.Send(info);
         }
     }
 }

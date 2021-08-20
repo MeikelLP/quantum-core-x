@@ -110,6 +110,7 @@ namespace QuantumCore.Game
             _server.RegisterListener<ItemMove>((connection, packet) => connection.OnItemMove(packet));
             _server.RegisterListener<ItemUse>((connection, packet) => connection.OnItemUse(packet));
             _server.RegisterListener<TargetChange>((connection, packet) => connection.OnTargetChange(packet));
+            _server.RegisterListener<Attack>((connection, packet) => connection.OnAttack(packet));
         }
         
         public async Task Start()

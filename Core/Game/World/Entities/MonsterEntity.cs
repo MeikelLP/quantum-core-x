@@ -1,3 +1,4 @@
+using System;
 using System.Security.Cryptography;
 using QuantumCore.API;
 using QuantumCore.API.Game.World;
@@ -7,10 +8,11 @@ using QuantumCore.Core.Types;
 using QuantumCore.Core.Utils;
 using QuantumCore.Game.Packets;
 using QuantumCore.Game.World.AI;
+using Serilog;
 
 namespace QuantumCore.Game.World.Entities
 {
-    public class MonsterEntity : Entity
+    public class MonsterEntity : Entity, IDamageable
     {
         public override EEntityType Type => EEntityType.Monster;
 
@@ -19,6 +21,13 @@ namespace QuantumCore.Game.World.Entities
             set {
                 _behaviour = value;
                 _behaviourInitialized = false;
+            }
+        }
+
+        public override byte HealthPercentage {
+            get {
+                Log.Debug($"Health Percentage of {Vid}");
+                return (byte)(Math.Min(Math.Max(Health / (double)_proto.Hp, 0), 1) * 100);
             }
         }
 
@@ -34,6 +43,8 @@ namespace QuantumCore.Game.World.Entities
             Rotation = rotation;
 
             MovementSpeed = (byte) _proto.MoveSpeed;
+            
+            Health = _proto.Hp;
             EntityClass = id;
 
             _behaviour = new SimpleBehaviour();
@@ -102,6 +113,18 @@ namespace QuantumCore.Game.World.Entities
                 MoveSpeed = (byte) _proto.MoveSpeed,
                 AttackSpeed = (byte) _proto.AttackSpeed
             });
+        }
+
+        public long TakeDamage(long damage, Entity attacker)
+        {
+            Health -= damage;
+
+            foreach (var player in TargetedBy)
+            {
+                player.SendTarget();
+            }
+
+            return damage;
         }
 
         public override string ToString()

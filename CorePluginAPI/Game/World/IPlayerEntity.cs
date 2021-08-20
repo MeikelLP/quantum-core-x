@@ -22,6 +22,11 @@
         /// <param name="info">Info message to send</param>
         public void SendChatInfo(string info);
 
+        /// <summary>
+        /// Refresh the target information on the client.
+        /// </summary>
+        public void SendTarget();
+
         public void Disconnect();
     }
 }

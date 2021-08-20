@@ -24,6 +24,12 @@ namespace QuantumCore.Game.World.Entities
         public Inventory Inventory { get; private set; }
         public IEntity Target { get; set; }
 
+        public override byte HealthPercentage {
+            get {
+                return 100; // todo
+            }
+        }
+
         public EAntiFlags AntiFlagClass {
             get {
                 switch (Player.PlayerClass)

@@ -45,7 +45,8 @@ namespace QuantumCore.Game.World.Entities
             set => _positionChanged = value;
         }
 
-        public byte HealthPercentage { get; } = 100;
+        public long Health { get; set; }
+        public abstract byte HealthPercentage { get; }
         
         public IMap Map { get; set; }
         
@@ -63,7 +64,8 @@ namespace QuantumCore.Game.World.Entities
         public uint MovementDuration { get; private set; }
         public byte MovementSpeed { get; protected set; }
 
-        private List<IEntity> NearbyEntities { get; } = new List<IEntity>();
+        private List<IEntity> NearbyEntities { get; } = new();
+        public List<IPlayerEntity> TargetedBy { get; } = new();
         public const int ViewDistance = 10000;
 
         private int _positionX;

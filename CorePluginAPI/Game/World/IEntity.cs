@@ -27,6 +27,7 @@ namespace QuantumCore.API.Game.World
         public float Rotation { get; }
         public IMap Map { get; set; }
         public byte HealthPercentage { get; }
+        public List<IPlayerEntity> TargetedBy { get; }
         
         // QuadTree cache
         public int LastPositionX { get; set; }
