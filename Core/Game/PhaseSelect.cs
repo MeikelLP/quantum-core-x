@@ -44,6 +44,84 @@ namespace QuantumCore.Game
             entity.SendPoints();
         }
 
+        public static async void OnDeleteCharacter(this GameConnection connection, DeleteCharacter packet)
+        {
+            Log.Debug($"Deleting character in slot {packet.Slot}");
+
+            if (connection.AccountId == null)
+            {
+                connection.Close();
+                Log.Warning("Character remove received before authorization");
+                return;
+            }
+
+            var accountId = connection.AccountId ?? default;
+
+            var db = DatabaseManager.GetAccountDatabase();
+            var deletecode = await db.QueryFirstOrDefaultAsync<string>("SELECT DeleteCode FROM accounts WHERE Id = @Id", new { Id = connection.AccountId });
+
+            if (deletecode == default)
+            {
+                connection.Close();
+                Log.Warning("Invalida ccount id??");
+                return;
+            }
+
+            if (deletecode != packet.Code[..^1])
+            {
+                connection.Send(new DeleteCharacterFail());
+                return;
+            }
+
+            connection.Send(new DeleteCharacterSuccess
+            {
+                Slot = packet.Slot
+            });
+
+            var player = await Player.GetPlayer(accountId, packet.Slot);
+            if (player == null)
+            {
+                connection.Close();
+                Log.Warning("Invalid or not exist character");
+                return;
+            }
+
+            db = DatabaseManager.GetGameDatabase();
+
+            var delPlayer = new PlayerDeleted(player);
+            await db.InsertAsync(delPlayer); // add the player to the players_deleted table
+
+            await db.DeleteAsync(player); // delete the player from the players table
+
+            // Delete player redis data
+            var redis = CacheManager.Redis;
+            var key = "player:" + player.Id;
+            await redis.Del(key);
+
+            key = "players:" + connection.AccountId;
+            var list = redis.CreateList<Guid>(key);
+            await list.Rem(1, player.Id);
+
+            // Delete items in redis cache
+
+            //for (byte i = (byte)WindowType.Inventory; i < (byte) WindowType.Inventory; i++)
+            {
+                var items = Item.GetItems(player.Id, (byte) WindowType.Inventory);
+
+                await foreach (var item in items)
+                {
+                    key = "item:" + item.Id;
+                    await redis.Del(key);
+                }
+
+                key = "items:" + player.Id + ":" + (byte) WindowType.Inventory;
+                await redis.Del(key);
+            }
+
+            // Delete all items in db
+            await db.QueryAsync("DELETE FROM items WHERE PlayerId=@PlayerId", new { PlayerId = player.Id });
+        }
+
         public static async void OnCreateCharacter(this GameConnection connection, CreateCharacter packet)
         {
             Log.Debug($"Create character in slot {packet.Slot}");

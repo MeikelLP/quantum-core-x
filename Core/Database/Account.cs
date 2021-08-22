@@ -14,5 +14,7 @@ namespace QuantumCore.Database
         public int Status { get; set; }
         
         public DateTime LastLogin { get; set; }
+
+        public string DeleteCode { get; set; }
     }
 }
