@@ -5,6 +5,7 @@ using QuantumCore.Game.World.Entities;
 namespace QuantumCore.Game.Commands
 {
 	[Command("logout", "Logout from the game")]
+    [CommandNoPermission]
     public static class LogoutCommand
     {
     	[CommandMethod]

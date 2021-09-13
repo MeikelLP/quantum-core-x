@@ -5,6 +5,7 @@ using QuantumCore.Game.World.Entities;
 namespace QuantumCore.Game.Commands
 {
 	[Command("phase_select", "Go back to character selection")]
+    [CommandNoPermission]
     public static class PhaseSelectCommand
     {
     	[CommandMethod]

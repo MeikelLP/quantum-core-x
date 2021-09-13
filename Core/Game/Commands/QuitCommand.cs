@@ -5,6 +5,7 @@ using QuantumCore.Game.World.Entities;
 namespace QuantumCore.Game.Commands
 {
 	[Command("quit", "Quit the game")]
+    [CommandNoPermission]
     public static class QuitCommand
     {
     	[CommandMethod]

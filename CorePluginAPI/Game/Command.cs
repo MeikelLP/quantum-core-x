@@ -25,4 +25,7 @@ namespace QuantumCore.API.Game
 
         public string Description { get; }
     }
+
+    [AttributeUsage(AttributeTargets.Class)]
+    public class CommandNoPermissionAttribute : Attribute {}
 }

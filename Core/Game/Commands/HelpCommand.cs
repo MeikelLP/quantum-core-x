@@ -8,19 +8,28 @@ using QuantumCore.API.Game.World;
 namespace QuantumCore.Game.Commands
 {
     [Command("help", "Shows this help message")]
+    [CommandNoPermission]
     public static class HelpCommand
     {
         [CommandMethod]
         public static async void Help(IPlayerEntity player, int page = 1)
         {
-            if (CommandManager.Commands.Count < 1)
+            var usableCmd = new Dictionary<string, CommandCache>();
+
+            foreach (var cmd in CommandManager.Commands)
+            {
+                if (CommandManager.CanUseCommand((World.Entities.PlayerEntity) player, cmd.Key))
+                    usableCmd.Add(cmd.Key, cmd.Value);
+            }
+
+            if (usableCmd.Count < 1)
             {
                 player.SendChatInfo("--- Help - Page 0/0 ---");
             }
             else
             {
 
-                var allPages = (int) Math.Ceiling(CommandManager.Commands.Count / 5.0);
+                var allPages = (int) Math.Ceiling(usableCmd.Count / 5.0);
 
                 if (page > allPages)
                     page = allPages;
@@ -29,13 +38,12 @@ namespace QuantumCore.Game.Commands
 
                 var commandToShow = page * 5;
 
-                if (commandToShow > CommandManager.Commands.Count)
-                    commandToShow = CommandManager.Commands.Count;
+                if (commandToShow > usableCmd.Count)
+                    commandToShow = usableCmd.Count;
 
                 for (var i = (page - 1) * 5; i < commandToShow; i++)
                 {
-                    var command = CommandManager.Commands.ElementAt(i);
-
+                    var command = usableCmd.ElementAt(i);
                     player.SendChatInfo($"{command.Key}: {command.Value.Description}");
                 }
             }
@@ -44,7 +52,7 @@ namespace QuantumCore.Game.Commands
         [CommandMethod("Shows an help with a specific command")]
         public static async void HelpWithCommand(IPlayerEntity player, string command)
         {
-            if (!CommandManager.Commands.ContainsKey(command))
+            if (!CommandManager.Commands.ContainsKey(command) || !CommandManager.CanUseCommand((World.Entities.PlayerEntity) player, command))
             {
                 player.SendChatInfo("Specified command does not exists");
             }

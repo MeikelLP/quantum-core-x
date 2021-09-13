@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using QuantumCore.API;
@@ -23,6 +24,8 @@ namespace QuantumCore.Game.World.Entities
         public Player Player { get; private set; }
         public Inventory Inventory { get; private set; }
         public IEntity Target { get; set; }
+
+        public IList<Guid> Groups { get; private set; }
 
         public override byte HealthPercentage {
             get {
@@ -88,12 +91,29 @@ namespace QuantumCore.Game.World.Entities
 
             MovementSpeed = 150;
             EntityClass = player.PlayerClass;
+
+            Groups = new List<Guid>();
         }
 
         public async Task Load()
         {
             await Inventory.Load();
             _hp = GetPoint(EPoints.MaxHp); // todo: cache hp of player 
+            await LoadPermGroups();
+        }
+
+        private async Task LoadPermGroups()
+        {
+            var redis = CacheManager.Redis;
+            var playerId = Player.Id;
+
+            var playerKey = "perm:" + playerId;
+            var list = redis.CreateList<Guid>(playerKey);
+
+            foreach (var group in await list.Range(0, -1))
+            {
+                Groups.Add(group);
+            }
         }
 
         public override void Move(int x, int y)

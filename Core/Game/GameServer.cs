@@ -81,6 +81,10 @@ namespace QuantumCore.Game
             Log.Information("Initialize world"); 
             _world = new World.World();
             _world.Load();
+
+            // Load permissions
+            Log.Information("Initialize permissions");
+            CommandManager.Load();
             
             // Start tcp server
             _server = new Server<GameConnection>((server, client) => new GameConnection(server, client), options.Port);

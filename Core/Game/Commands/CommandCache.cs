@@ -20,9 +20,12 @@ namespace QuantumCore.Game.Commands
 
         public List<CommandFunction> Functions = new List<CommandFunction>();
 
-        public CommandCache(CommandAttribute attr, Type t)
+        public bool BypassPerm { get; }
+
+        public CommandCache(CommandAttribute attr, Type t, bool bypass)
         {
             Description = attr.Description;
+            BypassPerm = bypass;
 
             foreach (var method in t.GetMethods())
             {
