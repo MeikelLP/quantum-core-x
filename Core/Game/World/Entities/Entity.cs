@@ -47,6 +47,7 @@ namespace QuantumCore.Game.World.Entities
 
         public long Health { get; set; }
         public abstract byte HealthPercentage { get; }
+        public bool Dead { get; private set; }
         
         public IMap Map { get; set; }
         
@@ -158,6 +159,11 @@ namespace QuantumCore.Game.World.Entities
         {
             State = EEntityState.Idle;
             MovementDuration = 0;
+        }
+
+        public virtual void Die()
+        {
+            Dead = true;
         }
 
         public void AddNearbyEntity(IEntity entity)

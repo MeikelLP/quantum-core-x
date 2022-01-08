@@ -100,6 +100,12 @@ namespace QuantumCore.Game.World
 
             lock (_entities)
             {
+                foreach (var entity in _remove)
+                {
+                    _entities.Remove(entity as Entity);
+                }
+                _remove.Clear();
+                
                 foreach (var entity in _entities)
                 {
                     entity.Update(elapsedTime);
@@ -213,6 +219,9 @@ namespace QuantumCore.Game.World
 
                 // Call despawn handlers
                 entity.OnDespawn();
+
+                // Remove entity from entities list in the next update
+                _remove.Add(entity);
             }
         }
 

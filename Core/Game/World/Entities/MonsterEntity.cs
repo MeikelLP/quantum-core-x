@@ -34,6 +34,7 @@ namespace QuantumCore.Game.World.Entities
         private readonly MobProto.Monster _proto;
         private IBehaviour _behaviour;
         private bool _behaviourInitialized;
+        private double _deadTime = 5000;
         
         public MonsterEntity(uint id, int x, int y, float rotation = 0) : base(World.Instance.GenerateVid())
         {
@@ -52,6 +53,15 @@ namespace QuantumCore.Game.World.Entities
 
         public override void Update(double elapsedTime)
         {
+            if (Dead)
+            {
+                _deadTime -= elapsedTime;
+                if (_deadTime <= 0)
+                {
+                    Map.DespawnEntity(this);
+                }
+            }
+            
             if (!_behaviourInitialized)
             {
                 _behaviour?.Init(this);
@@ -88,6 +98,25 @@ namespace QuantumCore.Game.World.Entities
             });
         }
 
+        public override void Die()
+        {
+            if (Dead)
+            {
+                return;
+            }
+            
+            base.Die();
+
+            var dead = new CharacterDead { Vid = Vid };
+            ForEachNearbyEntity(entity =>
+            {
+                if (entity is PlayerEntity player)
+                {
+                    player.Connection.Send(dead);
+                }
+            });
+        }
+
         protected override void OnNewNearbyEntity(IEntity entity)
         {
         }
@@ -102,6 +131,11 @@ namespace QuantumCore.Game.World.Entities
 
         public override void ShowEntity(IConnection connection)
         {
+            if (Dead)
+            {
+                return; // no need to send dead entities to new players
+            }
+            
             connection.Send(new SpawnCharacter
             {
                 Vid = Vid,
@@ -122,6 +156,12 @@ namespace QuantumCore.Game.World.Entities
             foreach (var player in TargetedBy)
             {
                 player.SendTarget();
+            }
+
+            if (Health <= 0)
+            {
+                Health = 0;
+                Die();
             }
 
             return damage;

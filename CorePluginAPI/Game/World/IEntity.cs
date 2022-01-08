@@ -28,6 +28,7 @@ namespace QuantumCore.API.Game.World
         public IMap Map { get; set; }
         public byte HealthPercentage { get; }
         public List<IPlayerEntity> TargetedBy { get; }
+        public bool Dead { get; }
         
         // QuadTree cache
         public int LastPositionX { get; set; }
@@ -52,5 +53,6 @@ namespace QuantumCore.API.Game.World
 
         public void Move(int x, int y);
         public void Stop();
+        public void Die();
     }
 }
