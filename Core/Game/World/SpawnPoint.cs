@@ -16,6 +16,7 @@ namespace QuantumCore.Game.World
         public int Range { get; set; }
         public int RespawnTime { get; set; }
         public List<int> Groups { get; } = new List<int>();
+        public MonsterGroup CurrentGroup { get; set; }
 
         public static SpawnPoint FromToml(TomlTable toml)
         {

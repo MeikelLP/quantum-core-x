@@ -20,11 +20,12 @@ namespace QuantumCore.API.Game.World
     public interface IEntity
     {
         public uint Vid { get; }
+        public uint EntityClass { get; }
         public EEntityType Type { get; }
         public EEntityState State { get; }
         public int PositionX { get; }
         public int PositionY { get; }
-        public float Rotation { get; }
+        public float Rotation { get; set; }
         public IMap Map { get; set; }
         public byte HealthPercentage { get; }
         public List<IPlayerEntity> TargetedBy { get; }

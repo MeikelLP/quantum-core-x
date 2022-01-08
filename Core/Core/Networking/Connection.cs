@@ -148,7 +148,7 @@ namespace QuantumCore.Core.Networking
                             _client.Close();
                             break;
                         }
-                        Log.Debug($"Read sequence {sequence[0]:X2}");
+                        //Log.Debug($"Read sequence {sequence[0]:X2}");
                     }
                     
                     //Log.Debug($"Recv {packet}");

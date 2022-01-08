@@ -26,12 +26,13 @@ namespace QuantumCore.Game.World
         public uint Width { get; private set; }
         public uint Height { get; private set; }
 
-        private readonly List<Entity> _entities = new List<Entity>();
+        private readonly List<Entity> _entities = new();
         private readonly QuadTree _quadTree;
-        private readonly List<SpawnPoint> _spawnPoints = new List<SpawnPoint>();
+        private readonly List<SpawnPoint> _spawnPoints = new();
 
-        private readonly List<IEntity> _nearby = new List<IEntity>();
-        private readonly List<IEntity> _remove = new List<IEntity>();
+        private readonly List<IEntity> _nearby = new();
+        private readonly List<IEntity> _remove = new();
+        private readonly List<IEntity> _pendingRemovals = new();
         
         public Map(string name, uint x, uint y, uint width, uint height)
         {
@@ -70,7 +71,8 @@ namespace QuantumCore.Game.World
             }
             
             // Populate map
-            foreach(var spawnPoint in _spawnPoints) {
+            foreach(var spawnPoint in _spawnPoints) 
+            {
                 switch (spawnPoint.Type)
                 {
                     case ESpawnPointType.Group:
@@ -79,6 +81,9 @@ namespace QuantumCore.Game.World
                         {
                             var baseX = spawnPoint.X + RandomNumberGenerator.GetInt32(-spawnPoint.Range, spawnPoint.Range);
                             var baseY = spawnPoint.Y + RandomNumberGenerator.GetInt32(-spawnPoint.Range, spawnPoint.Range);
+
+                            var monsterGroup = new MonsterGroup();
+                            spawnPoint.CurrentGroup = monsterGroup;
                             
                             foreach (var member in group.Members)
                             {
@@ -87,8 +92,14 @@ namespace QuantumCore.Game.World
                                     (int) (PositionY + (baseY + RandomNumberGenerator.GetInt32(-5, 5)) * 100),
                                     RandomNumberGenerator.GetInt32(0, 360));
                                 World.Instance.SpawnEntity(monster);
+                                
+                                monsterGroup.Monsters.Add(monster);
+                                monster.Group = monsterGroup;
                             }
                         }
+                        break;
+                    default:
+                        Log.Warning($"Unknown spawn point type: {spawnPoint.Type}");
                         break;
                 }
             }
@@ -100,11 +111,11 @@ namespace QuantumCore.Game.World
 
             lock (_entities)
             {
-                foreach (var entity in _remove)
+                foreach (var entity in _pendingRemovals)
                 {
                     _entities.Remove(entity as Entity);
                 }
-                _remove.Clear();
+                _pendingRemovals.Clear();
                 
                 foreach (var entity in _entities)
                 {
@@ -221,7 +232,7 @@ namespace QuantumCore.Game.World
                 entity.OnDespawn();
 
                 // Remove entity from entities list in the next update
-                _remove.Add(entity);
+                _pendingRemovals.Add(entity);
             }
         }
 

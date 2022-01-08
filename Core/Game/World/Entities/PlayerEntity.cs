@@ -16,7 +16,7 @@ using Serilog;
 
 namespace QuantumCore.Game.World.Entities
 {
-    public class PlayerEntity : Entity, IPlayerEntity
+    public class PlayerEntity : Entity, IPlayerEntity, IDamageable
     {
         public override EEntityType Type => EEntityType.Player;
 
@@ -147,6 +147,28 @@ namespace QuantumCore.Game.World.Entities
             });
         }
 
+        public uint GetDefence()
+        {
+            return 0;
+        }
+
+        public long TakeDamage(long damage, Entity attacker)
+        {
+            _hp -= (uint) damage;
+
+            var damageInfo = new DamageInfo { Vid = Vid, DamageType = 1, Damage = (int) damage };
+            Connection.Send(damageInfo);
+            
+            SendPoints();
+
+            if (_hp <= 0)
+            {
+                Die();
+            }
+
+            return damage;
+        }
+
         public void Attack(IEntity victim)
         {
             if (victim is not IDamageable damageable)
@@ -167,7 +189,7 @@ namespace QuantumCore.Game.World.Entities
 
             // Calculating parameters we need for calculating effective damage base
             var growth = weaponItem != null ? weaponItem.Values[5] : 0;
-            var attackBase = weaponItem != null ? CoreRandom.GenerateUInt32((uint)weaponItem.Values[3], (uint)weaponItem.Values[4]) : 0;
+            var attackBase = weaponItem != null ? CoreRandom.GenerateUInt32((uint)weaponItem.Values[3], (uint)weaponItem.Values[4] + 1) : 0;
             var stat = GetPoint(JobInfo.Get(Player.PlayerClass).AttackStatus);
             var str = GetPoint(EPoints.St);
             var dex = GetPoint(EPoints.Dx);

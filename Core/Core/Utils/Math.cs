@@ -23,7 +23,7 @@ namespace QuantumCore.Core.Utils
 
             var rotationRadians = -(Math.Atan2(normalizedY, normalizedX) - Math.Atan2(upVectorY, upVectorX));
 
-            var rotationDegress = rotationRadians * Math.PI;
+            var rotationDegress = rotationRadians * (180 / Math.PI);
             if (rotationDegress < 0) rotationDegress += 360;
             return rotationDegress;
         }

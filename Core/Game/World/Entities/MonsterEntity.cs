@@ -1,5 +1,6 @@
 using System;
 using System.Security.Cryptography;
+using FluentMigrator.Runner.Generators.Postgres;
 using QuantumCore.API;
 using QuantumCore.API.Game.World;
 using QuantumCore.API.Game.World.AI;
@@ -31,6 +32,8 @@ namespace QuantumCore.Game.World.Entities
             }
         }
 
+        public MonsterGroup Group { get; set; }
+        
         private readonly MobProto.Monster _proto;
         private IBehaviour _behaviour;
         private bool _behaviourInitialized;
@@ -67,15 +70,18 @@ namespace QuantumCore.Game.World.Entities
                 _behaviour?.Init(this);
                 _behaviourInitialized = true;
             }
-            
-            _behaviour?.Update(elapsedTime);
-            
+
+            if (!Dead)
+            {
+                _behaviour?.Update(elapsedTime);
+            }
+
             base.Update(elapsedTime);
         }
 
         public override void Goto(int x, int y)
         {
-            Rotation = (float) MathUtils.Rotation(PositionX - x, PositionY - y);
+            Rotation = (float) MathUtils.Rotation(x - PositionX, y - PositionY);
             
             base.Goto(x, y);
             
@@ -94,6 +100,39 @@ namespace QuantumCore.Game.World.Entities
                 if (entity is PlayerEntity player)
                 {
                     player.Connection.Send(movement);
+                }
+            });
+        }
+
+        public void Attack(IEntity victim)
+        {
+            if (victim is not IDamageable damageable)
+            {
+                return;
+            }
+            
+            var rotation = MathUtils.Rotation(victim.PositionX - PositionX, victim.PositionY - PositionY);
+            Rotation = (float) rotation;
+
+            var minDamage = _proto.DamageRange[0];
+            var maxDamage = _proto.DamageRange[1];
+            var damage = CoreRandom.GenerateUInt32(minDamage, maxDamage + 1) * 2;
+
+            damageable.TakeDamage(damage, this);
+
+            var attackPacket = new CharacterMoveOut {
+                MovementType = (byte) CharacterMove.CharacterMovementType.Attack,
+                Rotation = (byte) (Rotation / 5),
+                Vid = Vid,
+                PositionX = PositionX,
+                PositionY = PositionY,
+                Time = (uint) GameServer.Instance.Server.ServerTime
+            };
+            ForEachNearbyEntity(entity =>
+            {
+                if (entity is PlayerEntity player)
+                {
+                    player.Connection.Send(attackPacket);
                 }
             });
         }
@@ -119,6 +158,7 @@ namespace QuantumCore.Game.World.Entities
 
         protected override void OnNewNearbyEntity(IEntity entity)
         {
+            _behaviour?.OnNewNearbyEntity(entity);
         }
 
         protected override void OnRemoveNearbyEntity(IEntity entity)
@@ -157,6 +197,14 @@ namespace QuantumCore.Game.World.Entities
             {
                 player.SendTarget();
             }
+
+            if (damage > 0 && Group != null)
+            {
+                // Trigger all monsters in the group
+                Group.TriggerAll(attacker, this);
+            }
+
+            _behaviour?.TookDamage(attacker, (uint)damage);
 
             if (Health <= 0)
             {
