@@ -7,6 +7,7 @@ using QuantumCore.API.Game;
 using QuantumCore.API.Game.World;
 using QuantumCore.Cache;
 using QuantumCore.Core.Networking;
+using QuantumCore.Core.Types;
 using QuantumCore.Core.Utils;
 using QuantumCore.Database;
 using QuantumCore.Game.Packets;
@@ -146,6 +147,64 @@ namespace QuantumCore.Game.World.Entities
             });
         }
 
+        public void Attack(IEntity victim)
+        {
+            if (victim is not IDamageable damageable)
+            {
+                return;
+            }
+            
+            // Get current equipped weapon
+            var weapon = Inventory.EquipmentWindow.Weapon;
+            ItemProto.Item weaponItem = null;
+            if (weapon != null)
+            {
+                weaponItem = ItemManager.GetItem(weapon.ItemId);
+            }
+            
+            // For more details on this formula:
+            // https://gitlab.com/quantum-core/core-dotnet/-/wikis/Attack-damage-calculation
+
+            // Calculating parameters we need for calculating effective damage base
+            var growth = weaponItem != null ? weaponItem.Values[5] : 0;
+            var attackBase = weaponItem != null ? CoreRandom.GenerateUInt32((uint)weaponItem.Values[3], (uint)weaponItem.Values[4]) : 0;
+            var stat = GetPoint(JobInfo.Get(Player.PlayerClass).AttackStatus);
+            var str = GetPoint(EPoints.St);
+            var dex = GetPoint(EPoints.Dx);
+            var level = GetPoint(EPoints.Level);
+            var defence = damageable.GetDefence();
+            
+            // Calculating effective damage base
+            var damageBase = 2 * (level + growth) +
+                1 / 75.0 * (70 + (2 * dex - 0.6 * level) / 9.0) * (str + (3 * attackBase + stat) / 2) - defence;
+            
+            // todo calculate final damage with all the stats
+            // todo critical hit?
+            // todo chance to miss a hit?
+
+            var actualDamage = damageable.TakeDamage((uint)damageBase, this);
+            var info = new DamageInfo {Vid = victim.Vid, DamageType = 1, Damage = (int) actualDamage};
+            Connection.Send(info);
+        }
+
+        public uint CalculateAttackDamage(uint baseDamage)
+        {
+            var levelBonus = GetPoint(EPoints.Level) * 2;
+            var statusBonus = (
+                4 * GetPoint(EPoints.St) +
+                2 * GetPoint(JobInfo.Get(Player.PlayerClass).AttackStatus)
+            ) / 3;
+            var weaponDamage = baseDamage * 2;
+
+            return levelBonus + (statusBonus + weaponDamage) * GetHitRate() / 100;
+        }
+
+        public uint GetHitRate()
+        {
+            var b = (GetPoint(EPoints.Dx) * 4 + GetPoint(EPoints.Level) * 2) / 6;
+            return 100 * ((b > 90 ? 90 : b) + 210) / 300;
+        }
+        
         public override void Update(double elapsedTime)
         {
             if (Map == null) return; // We don't have a map yet so we aren't spawned
@@ -187,6 +246,32 @@ namespace QuantumCore.Game.World.Entities
                     return Player.Iq;
                 case EPoints.Gold:
                     return Player.Gold;
+                case EPoints.MinWeaponDamage:
+                {
+                    var weapon = Inventory.EquipmentWindow.Weapon;
+                    if (weapon == null)
+                    {
+                        return 0;
+                    }
+
+                    var item = ItemManager.GetItem(weapon.ItemId);
+                    return (uint) (item.Values[3] + item.Values[5]);
+                }
+                case EPoints.MaxWeaponDamage:
+                {
+                    var weapon = Inventory.EquipmentWindow.Weapon;
+                    if (weapon == null)
+                    {
+                        return 0;
+                    }
+
+                    var item = ItemManager.GetItem(weapon.ItemId);
+                    return (uint) (item.Values[4] + item.Values[5]);
+                }
+                case EPoints.MinAttackDamage:
+                    return CalculateAttackDamage(GetPoint(EPoints.MinWeaponDamage));
+                case EPoints.MaxAttackDamage:
+                    return CalculateAttackDamage(GetPoint(EPoints.MaxWeaponDamage));
                 default:
                     return 0;
             }

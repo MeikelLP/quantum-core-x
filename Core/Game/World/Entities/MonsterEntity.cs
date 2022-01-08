@@ -127,6 +127,11 @@ namespace QuantumCore.Game.World.Entities
             return damage;
         }
 
+        public uint GetDefence()
+        {
+            return _proto.Defence;
+        }
+
         public override string ToString()
         {
             return $"{_proto.TranslatedName} ({_proto.Id})";

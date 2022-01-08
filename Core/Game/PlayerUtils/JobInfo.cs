@@ -2,6 +2,8 @@
 using System.IO;
 using QuantumCore.Database;
 using QuantumCore.Game.World;
+using Serilog;
+using Serilog.Core;
 using Tomlyn;
 using Tomlyn.Model;
 
@@ -19,6 +21,7 @@ namespace QuantumCore.Game.PlayerUtils
         public uint SpPerIq { get; set; }
         public uint HpPerLevel { get; set; }
         public uint SpPerLevel { get; set; }
+        public EPoints AttackStatus { get; set; }
     }
 
     public static class JobInfo
@@ -73,8 +76,36 @@ namespace QuantumCore.Game.PlayerUtils
                     Jobs[id].SpPerIq = (uint) (job["sp_per_iq"] as long? ?? 0);
                     Jobs[id].HpPerLevel = (uint) (job["hp_per_level"] as long? ?? 0);
                     Jobs[id].SpPerLevel = (uint) (job["sp_per_level"] as long? ?? 0);
+                    if (job.ContainsKey("attack_status") && job["attack_status"] is string attackStatus)
+                    {
+                        Jobs[id].AttackStatus = StringToPoints(attackStatus);
+                    }
+                    else
+                    {
+                        Log.Error($"Missing attack status in job {job["name"]}, falling back to ST!");
+                        Jobs[id].AttackStatus = EPoints.St;
+                    }
+                    
                 }
             }
+        }
+
+        private static EPoints StringToPoints(string str)
+        {
+            switch (str.ToLower())
+            {
+                case "ht":
+                    return EPoints.Ht;
+                case "st":
+                    return EPoints.St;
+                case "dx":
+                    return EPoints.Dx;
+                case "iq":
+                    return EPoints.Iq;
+            }
+
+            Log.Error($"Invalid status '{str}'");
+            return EPoints.St;
         }
         
         public static Job Get(byte playerClass)
