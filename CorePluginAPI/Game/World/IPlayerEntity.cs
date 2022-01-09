@@ -5,6 +5,13 @@
         public string Name { get; }
 
         /// <summary>
+        /// Respawns the player if the player is dead.
+        /// Does nothing if the player is alive
+        /// </summary>
+        /// <param name="town">If true the player will respawn in town instead of last location</param>
+        public void Respawn(bool town);
+        
+        /// <summary>
         /// Sends the given message to the player
         /// </summary>
         /// <param name="message">Message to send</param>

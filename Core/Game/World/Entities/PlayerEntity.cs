@@ -6,6 +6,7 @@ using QuantumCore.API;
 using QuantumCore.API.Game;
 using QuantumCore.API.Game.World;
 using QuantumCore.Cache;
+using QuantumCore.Core.Constants;
 using QuantumCore.Core.Networking;
 using QuantumCore.Core.Types;
 using QuantumCore.Core.Utils;
@@ -77,7 +78,7 @@ namespace QuantumCore.Game.World.Entities
         }
         
         private byte _attackSpeed = 140;
-        private uint _hp = 0;
+        private int _hp = 0;
 
         private const int _persistInterval = 1000;
         private int _persistTime = 0;
@@ -99,7 +100,7 @@ namespace QuantumCore.Game.World.Entities
         public async Task Load()
         {
             await Inventory.Load();
-            _hp = GetPoint(EPoints.MaxHp); // todo: cache hp of player 
+            _hp = (int) GetPoint(EPoints.MaxHp); // todo: cache hp of player 
             await LoadPermGroups();
         }
 
@@ -154,7 +155,7 @@ namespace QuantumCore.Game.World.Entities
 
         public long TakeDamage(long damage, Entity attacker)
         {
-            _hp -= (uint) damage;
+            _hp -= (int) damage;
 
             var damageInfo = new DamageInfo { Vid = Vid, DamageType = 1, Damage = (int) damage };
             Connection.Send(damageInfo);
@@ -167,6 +168,61 @@ namespace QuantumCore.Game.World.Entities
             }
 
             return damage;
+        }
+
+        public override void Die()
+        {
+            if (Dead)
+            {
+                return;
+            }
+            
+            base.Die();
+
+            var dead = new CharacterDead { Vid = Vid };
+            ForEachNearbyEntity(entity =>
+            {
+                if (entity is PlayerEntity player)
+                {
+                    player.Connection.Send(dead);
+                }
+            });
+            Connection.Send(dead);
+        }
+
+        public void Respawn(bool town)
+        {
+            if (!Dead)
+            {
+                return;
+            }
+
+            Dead = false;
+            
+            // todo implement respawn in town
+            // todo spawn with invisible affect
+            // todo not respawn with full health as soon as health regen is implemented
+            
+            SendChatCommand("CloseRestartWindow");
+            Connection.SetPhase(EPhases.Game);
+
+            var remove = new RemoveCharacter { Vid = Vid };
+            
+            Connection.Send(remove);
+            Show(Connection);
+            
+            ForEachNearbyEntity(entity =>
+            {
+                if (entity is PlayerEntity pe)
+                {
+                    ShowEntity(pe.Connection);
+                }
+                
+                entity.ShowEntity(Connection);
+            });
+
+            _hp = (int)GetPoint(EPoints.MaxHp);
+            SendPoints();
         }
 
         public void Attack(IEntity victim)
@@ -248,7 +304,7 @@ namespace QuantumCore.Game.World.Entities
                 case EPoints.Level:
                     return Player.Level;
                 case EPoints.Hp:
-                    return _hp;
+                    return (uint) _hp;
                 case EPoints.MaxHp:
                     var info = JobInfo.Get(Player.PlayerClass);
                     if (info == null)

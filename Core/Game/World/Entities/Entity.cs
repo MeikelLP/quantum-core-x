@@ -47,7 +47,7 @@ namespace QuantumCore.Game.World.Entities
 
         public long Health { get; set; }
         public abstract byte HealthPercentage { get; }
-        public bool Dead { get; private set; }
+        public bool Dead { get; protected set; }
         
         public IMap Map { get; set; }
         
