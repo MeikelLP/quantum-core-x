@@ -167,6 +167,14 @@ namespace QuantumCore.Game.World.Entities
 
         public override void OnDespawn()
         {
+            if (Group != null)
+            {
+                Group.Monsters.Remove(this);
+                if (Group.Monsters.Count == 0)
+                {
+                    (Map as Map)?.EnqueueGroupRespawn(Group);
+                }
+            }
         }
 
         public override void ShowEntity(IConnection connection)

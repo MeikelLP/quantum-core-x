@@ -7,6 +7,7 @@ using System.Security.Cryptography;
 using QuantumCore.API.Game;
 using QuantumCore.API.Game.World;
 using QuantumCore.Core.API;
+using QuantumCore.Core.Event;
 using QuantumCore.Core.Utils;
 using QuantumCore.Game.World.Entities;
 using Serilog;
@@ -73,35 +74,8 @@ namespace QuantumCore.Game.World
             // Populate map
             foreach(var spawnPoint in _spawnPoints) 
             {
-                switch (spawnPoint.Type)
-                {
-                    case ESpawnPointType.Group:
-                        var group = World.Instance.GetGroup(CoreRandom.GetRandom(spawnPoint.Groups));
-                        if (group != null)
-                        {
-                            var baseX = spawnPoint.X + RandomNumberGenerator.GetInt32(-spawnPoint.Range, spawnPoint.Range);
-                            var baseY = spawnPoint.Y + RandomNumberGenerator.GetInt32(-spawnPoint.Range, spawnPoint.Range);
-
-                            var monsterGroup = new MonsterGroup();
-                            spawnPoint.CurrentGroup = monsterGroup;
-                            
-                            foreach (var member in group.Members)
-                            {
-                                var monster = new MonsterEntity(member.Id,
-                                    (int) (PositionX + (baseX + RandomNumberGenerator.GetInt32(-5, 5)) * 100),
-                                    (int) (PositionY + (baseY + RandomNumberGenerator.GetInt32(-5, 5)) * 100),
-                                    RandomNumberGenerator.GetInt32(0, 360));
-                                World.Instance.SpawnEntity(monster);
-                                
-                                monsterGroup.Monsters.Add(monster);
-                                monster.Group = monsterGroup;
-                            }
-                        }
-                        break;
-                    default:
-                        Log.Warning($"Unknown spawn point type: {spawnPoint.Type}");
-                        break;
-                }
+                var monsterGroup = new MonsterGroup { SpawnPoint = spawnPoint };
+                SpawnGroup(monsterGroup);
             }
         }
 
@@ -180,6 +154,48 @@ namespace QuantumCore.Game.World
                 }
             }
         }
+
+        private void SpawnGroup(MonsterGroup groupInstance)
+        {
+            var spawnPoint = groupInstance.SpawnPoint;
+            switch (spawnPoint.Type)
+            {
+                case ESpawnPointType.Group:
+                    var group = World.Instance.GetGroup(CoreRandom.GetRandom(spawnPoint.Groups));
+                    if (group != null)
+                    {
+                        var baseX = spawnPoint.X + RandomNumberGenerator.GetInt32(-spawnPoint.Range, spawnPoint.Range);
+                        var baseY = spawnPoint.Y + RandomNumberGenerator.GetInt32(-spawnPoint.Range, spawnPoint.Range);
+                        
+                        spawnPoint.CurrentGroup = groupInstance;
+                            
+                        foreach (var member in group.Members)
+                        {
+                            var monster = new MonsterEntity(member.Id,
+                                (int) (PositionX + (baseX + RandomNumberGenerator.GetInt32(-5, 5)) * 100),
+                                (int) (PositionY + (baseY + RandomNumberGenerator.GetInt32(-5, 5)) * 100),
+                                RandomNumberGenerator.GetInt32(0, 360));
+                            World.Instance.SpawnEntity(monster);
+                                
+                            groupInstance.Monsters.Add(monster);
+                            monster.Group = groupInstance;
+                        }
+                    }
+                    break;
+                default:
+                    Log.Warning($"Unknown spawn point type: {spawnPoint.Type}");
+                    break;
+            }
+        }
+
+        public void EnqueueGroupRespawn(MonsterGroup group)
+        {
+            EventSystem.EnqueueEvent(() =>
+            {
+                SpawnGroup(group);
+                return 0;
+            }, group.SpawnPoint.RespawnTime * 1000);
+        }
         
         public bool SpawnEntity(Entity entity)
         {
@@ -219,6 +235,9 @@ namespace QuantumCore.Game.World
             {
                 Log.Debug($"Despawn {entity}");
 
+                // Call despawn handlers
+                entity.OnDespawn();
+
                 // Remove this entity from all nearby entities
                 entity.ForEachNearbyEntity(e => e.RemoveNearbyEntity(entity));
 
@@ -227,9 +246,6 @@ namespace QuantumCore.Game.World
 
                 // Remove entity from the quad tree
                 _quadTree.Remove(entity);
-
-                // Call despawn handlers
-                entity.OnDespawn();
 
                 // Remove entity from entities list in the next update
                 _pendingRemovals.Add(entity);

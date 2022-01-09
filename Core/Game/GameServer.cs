@@ -10,6 +10,7 @@ using QuantumCore.Cache;
 using QuantumCore.Core;
 using QuantumCore.Core.API;
 using QuantumCore.Core.Constants;
+using QuantumCore.Core.Event;
 using QuantumCore.Core.Networking;
 using QuantumCore.Core.Prometheus;
 using QuantumCore.Core.Types;
@@ -133,6 +134,8 @@ namespace QuantumCore.Game
 
         private void Update(double elapsedTime)
         {
+            EventSystem.Update(elapsedTime);
+            
             _world.Update(elapsedTime);
         }
 
