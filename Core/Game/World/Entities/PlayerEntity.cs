@@ -223,7 +223,7 @@ namespace QuantumCore.Game.World.Entities
                 entity.ShowEntity(Connection);
             });
 
-            _hp = (int)GetPoint(EPoints.MaxHp);
+            _hp = 50;
             SendPoints();
         }
 
