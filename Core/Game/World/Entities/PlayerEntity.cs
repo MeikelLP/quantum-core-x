@@ -80,8 +80,10 @@ namespace QuantumCore.Game.World.Entities
         private byte _attackSpeed = 140;
         private int _hp = 0;
 
-        private const int _persistInterval = 1000;
+        private const int PersistInterval = 1000;
         private int _persistTime = 0;
+        private const int HealthRegenInterval = 3 * 1000;
+        private double _healthRegenTime = HealthRegenInterval;
 
         public PlayerEntity(Player player, GameConnection connection) : base(World.Instance.GenerateVid())
         {
@@ -288,12 +290,26 @@ namespace QuantumCore.Game.World.Entities
             if (Map == null) return; // We don't have a map yet so we aren't spawned
 
             base.Update(elapsedTime);
-            
+
+            var maxHp = GetPoint(EPoints.MaxHp);
+            if (_hp < maxHp)
+            {
+                _healthRegenTime -= elapsedTime;
+                if (_healthRegenTime <= 0)
+                {
+                    var factor = State == EEntityState.Idle ? 0.05 : 0.01;
+                    _hp = Math.Min((int)maxHp, _hp + 15 + (int)(maxHp * factor));
+                    SendPoints();
+
+                    _healthRegenTime += HealthRegenInterval;
+                }
+            }
+
             _persistTime += (int)elapsedTime;
-            if (_persistTime > _persistInterval)
+            if (_persistTime > PersistInterval)
             {
                 Persist();
-                _persistTime -= _persistInterval;
+                _persistTime -= PersistInterval;
             }
         }
 

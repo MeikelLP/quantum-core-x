@@ -1,4 +1,6 @@
 ﻿using System.Linq;
+using QuantumCore.API.Game.World;
+using QuantumCore.Core.Networking;
 using QuantumCore.Game.Commands;
 using QuantumCore.Game.Packets;
 using QuantumCore.Game.PlayerUtils;
@@ -29,9 +31,7 @@ namespace QuantumCore.Game
             
             if (packet.MovementType == (int) CharacterMove.CharacterMovementType.Wait)
             {
-                // todo: Verify position possibility
-                connection.Player.PositionX = packet.PositionX;
-                connection.Player.PositionY = packet.PositionY;
+                connection.Player.Wait(packet.PositionX, packet.PositionY);
             }
 
             var movement = new CharacterMoveOut

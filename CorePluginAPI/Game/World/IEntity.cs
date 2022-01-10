@@ -51,6 +51,7 @@ namespace QuantumCore.API.Game.World
         public void ShowEntity(IConnection connection);
 
         public void Goto(int x, int y);
+        public void Wait(int x, int y);
 
         public void Move(int x, int y);
         public void Stop();

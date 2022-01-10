@@ -155,6 +155,13 @@ namespace QuantumCore.Game.World.Entities
             }
         }
 
+        public virtual void Wait(int x, int y)
+        {
+            // todo: Verify position possibility
+            PositionX = x;
+            PositionY = y;
+        }
+
         public void Stop()
         {
             State = EEntityState.Idle;
