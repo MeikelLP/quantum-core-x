@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Security.Cryptography;
@@ -61,6 +62,25 @@ namespace QuantumCore.Game.World.AI
             _entity.Goto(targetX, targetY);
         }
 
+        /// <summary>
+        /// Moves the monster in attack range to the given target
+        /// </summary>
+        /// <param name="target"></param>
+        private void MoveTo(IEntity target)
+        {
+            // We're moving to a distance of half of our attack range so we do not have to directly move again
+            double directionX = target.PositionX - _entity.PositionX;
+            double directionY = target.PositionY - _entity.PositionY;
+            var directionLength = Math.Sqrt(directionX * directionX + directionY * directionY);
+            directionX /= directionLength;
+            directionY /= directionLength;
+
+            var targetPositionX = target.PositionX + directionX * _proto.AttackRange * 0.75;
+            var targetPositionY = target.PositionY + directionY * _proto.AttackRange * 0.75;
+            
+            _entity.Goto((int)targetPositionX, (int)targetPositionY);
+        }
+
         public void Update(double elapsedTime)
         {
             if (_entity == null)
@@ -86,9 +106,7 @@ namespace QuantumCore.Game.World.AI
                             _targetEntity.PositionX, _targetEntity.PositionY);
                         if (movementDistance > _proto.AttackRange)
                         {
-                            // We have to update our move goal
-                            _entity.Goto(_targetEntity.PositionX,
-                                _targetEntity.PositionY); // todo do not directly move onto target
+                            MoveTo(_targetEntity);
                         }
                     }
                     else
@@ -98,8 +116,7 @@ namespace QuantumCore.Game.World.AI
                             _targetEntity.PositionY);
                         if (distance > _proto.AttackRange)
                         {
-                            _entity.Goto(_targetEntity.PositionX,
-                                _targetEntity.PositionY); // todo do not directly move onto target
+                            MoveTo(_targetEntity);
                         }
                         else
                         {
@@ -133,6 +150,9 @@ namespace QuantumCore.Game.World.AI
             {
                 return;
             }
+
+            monster.Rotation =
+                (float) MathUtils.Rotation(victim.PositionX - monster.PositionX, victim.PositionY - monster.PositionY);
 
             monster.Attack(victim, monster.Proto.BattleType);
             
