@@ -15,5 +15,7 @@ namespace QuantumCore.API.Game.World
         public IEntity GetEntity(uint vid);
 
         public void DespawnEntity(IEntity entity);
+
+        public bool IsPositionInside(int x, int y);
     }
 }

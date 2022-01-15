@@ -149,6 +149,26 @@ namespace QuantumCore.Game.World
             return _maps[name];
         }
 
+        public List<IMap> FindMapsByName(string needle)
+        {
+            var list = new List<IMap>();
+            foreach (var (name, map) in _maps)
+            {
+                if (name == needle)
+                {
+                    list.Clear();
+                    list.Add(map);
+                    return list;
+                }
+                
+                if (name.Contains(needle, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    list.Add(map);
+                }
+            }
+            return list;
+        }
+
         public SpawnGroup GetGroup(int id)
         {
             if (!_groups.ContainsKey(id))

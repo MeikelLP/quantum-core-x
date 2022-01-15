@@ -196,7 +196,12 @@ namespace QuantumCore.Game.World
                 return 0;
             }, group.SpawnPoint.RespawnTime * 1000);
         }
-        
+
+        public bool IsPositionInside(int x, int y)
+        {
+            return x >= PositionX && x < PositionX + Width * MapUnit && y >= PositionY && y < PositionY + Height * MapUnit;
+        }
+
         public bool SpawnEntity(Entity entity)
         {
             lock (_entities)

@@ -8,6 +8,7 @@ using QuantumCore.API.Game.World;
 using QuantumCore.Cache;
 using QuantumCore.Core.Constants;
 using QuantumCore.Core.Networking;
+using QuantumCore.Core.Utils;
 using QuantumCore.Database;
 using QuantumCore.Game.Packets;
 using QuantumCore.Game.PlayerUtils;
@@ -120,9 +121,36 @@ namespace QuantumCore.Game.World.Entities
             }
         }
 
+        private void Warp(int x, int y)
+        {
+            World.Instance.DespawnEntity(this);
+            
+            PositionX = x;
+            PositionY = y;
+            
+            Persist().ContinueWith(_ =>
+            {
+                Log.Information("Warp!");
+                var packet = new Warp {
+                    PositionX = PositionX,
+                    PositionY = PositionY,
+                    // todo calculate real target ip and port
+                    ServerAddress = IpUtils.ConvertIpToUInt(IpUtils.PublicIP),
+                    ServerPort = 13001
+                };
+                Connection.Send(packet);
+            });
+        }
+
         public override void Move(int x, int y)
         {
             if (PositionX == x && PositionY == y) return;
+            
+            if (!Map.IsPositionInside(x, y))
+            {
+                Warp(x, y);
+                return;
+            }
 
             World.Instance.DespawnEntity(this);
 

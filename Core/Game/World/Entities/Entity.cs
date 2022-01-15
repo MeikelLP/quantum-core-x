@@ -107,10 +107,11 @@ namespace QuantumCore.Game.World.Entities
                 }
             }
         }
-        
+
         public virtual void Move(int x, int y)
         {
             if (PositionX == x && PositionY == y) return;
+            
             PositionX = x;
             PositionY = y;
             PositionChanged = true;
