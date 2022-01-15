@@ -14,6 +14,16 @@ namespace QuantumCore.Core.Utils
             return (r1 << 2) | r2;
         }
 
+        public static bool PercentageCheck(long percentage)
+        {
+            return GenerateInt32(1, 101) <= percentage;
+        }
+
+        public static int GenerateInt32(int fromInclusive, int toExclusive)
+        {
+            return RandomNumberGenerator.GetInt32(fromInclusive, toExclusive);
+        }
+
         public static uint GenerateUInt32(uint fromInclusive, uint toExclusive)
         {
             if (fromInclusive >= toExclusive)

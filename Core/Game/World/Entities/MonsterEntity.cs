@@ -8,12 +8,13 @@ using QuantumCore.Core.Networking;
 using QuantumCore.Core.Types;
 using QuantumCore.Core.Utils;
 using QuantumCore.Game.Packets;
+using QuantumCore.Game.PlayerUtils;
 using QuantumCore.Game.World.AI;
 using Serilog;
 
 namespace QuantumCore.Game.World.Entities
 {
-    public class MonsterEntity : Entity, IDamageable
+    public class MonsterEntity : Entity
     {
         public override EEntityType Type => EEntityType.Monster;
 
@@ -32,6 +33,8 @@ namespace QuantumCore.Game.World.Entities
             }
         }
 
+        public MobProto.Monster Proto { get { return _proto; } }
+        
         public MonsterGroup Group { get; set; }
         
         private readonly MobProto.Monster _proto;
@@ -104,37 +107,61 @@ namespace QuantumCore.Game.World.Entities
             });
         }
 
-        public void Attack(IEntity victim)
+        public override byte GetBattleType()
         {
-            if (victim is not IDamageable damageable)
+            return _proto.BattleType;
+        }
+
+        public override int GetMinDamage()
+        {
+            return (int)_proto.DamageRange[0];
+        }
+
+        public override int GetMaxDamage()
+        {
+            return (int)_proto.DamageRange[1];
+        }
+
+        public override int GetBonusDamage()
+        {
+            return 0; // monster don't have bonus damage as players have from their weapon
+        }
+
+        public override int Damage(IEntity attacker, EDamageType damageType, int damage)
+        {
+            damage = base.Damage(attacker, damageType, damage);
+
+            if (damage >= 0)
             {
-                return;
+                Behaviour?.TookDamage(attacker, (uint) damage);
+                Group?.TriggerAll(attacker, this);
             }
-            
-            var rotation = MathUtils.Rotation(victim.PositionX - PositionX, victim.PositionY - PositionY);
-            Rotation = (float) rotation;
 
-            var minDamage = _proto.DamageRange[0];
-            var maxDamage = _proto.DamageRange[1];
-            var damage = CoreRandom.GenerateUInt32(minDamage, maxDamage + 1) * 2;
+            return damage;
+        }
 
-            damageable.TakeDamage(damage, this);
+        public void Trigger(IEntity attacker)
+        {
+            Behaviour?.TookDamage(attacker, 0);
+        }
 
-            var attackPacket = new CharacterMoveOut {
-                MovementType = (byte) CharacterMove.CharacterMovementType.Attack,
-                Rotation = (byte) (Rotation / 5),
-                Vid = Vid,
-                PositionX = PositionX,
-                PositionY = PositionY,
-                Time = (uint) GameServer.Instance.Server.ServerTime
-            };
-            ForEachNearbyEntity(entity =>
+        public override uint GetPoint(EPoints point)
+        {
+            switch (point)
             {
-                if (entity is PlayerEntity player)
-                {
-                    player.Connection.Send(attackPacket);
-                }
-            });
+                case EPoints.Level:
+                    return _proto.Level;
+                case EPoints.Dx:
+                    return _proto.Dx;
+                case EPoints.AttackGrade:
+                    return (uint) (_proto.Level * 2 + _proto.St * 2);
+                case EPoints.DefenceGrade:
+                    return (uint)(_proto.Level + _proto.Ht + _proto.Defence);
+                case EPoints.DefenceBonus:
+                    return 0;
+            }
+            Log.Warning($"Point {point} is not implemented on monster");
+            return 0;
         }
 
         public override void Die()
@@ -197,40 +224,9 @@ namespace QuantumCore.Game.World.Entities
             });
         }
 
-        public long TakeDamage(long damage, Entity attacker)
-        {
-            Health -= damage;
-
-            foreach (var player in TargetedBy)
-            {
-                player.SendTarget();
-            }
-
-            if (damage > 0 && Group != null)
-            {
-                // Trigger all monsters in the group
-                Group.TriggerAll(attacker, this);
-            }
-
-            _behaviour?.TookDamage(attacker, (uint)damage);
-
-            if (Health <= 0)
-            {
-                Health = 0;
-                Die();
-            }
-
-            return damage;
-        }
-
-        public uint GetDefence()
-        {
-            return _proto.Defence;
-        }
-
         public override string ToString()
         {
-            return $"{_proto.TranslatedName} ({_proto.Id})";
+            return $"{_proto.TranslatedName.Trim((char) 0x00)} ({_proto.Id})";
         }
     }
 }

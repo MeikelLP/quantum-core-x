@@ -7,6 +7,8 @@ using QuantumCore.API.Game;
 using QuantumCore.API.Game.World;
 using QuantumCore.Core.Networking;
 using QuantumCore.Core.Utils;
+using QuantumCore.Game.Packets;
+using QuantumCore.Game.PlayerUtils;
 using Serilog;
 
 namespace QuantumCore.Game.World.Entities
@@ -166,6 +168,191 @@ namespace QuantumCore.Game.World.Entities
         {
             State = EEntityState.Idle;
             MovementDuration = 0;
+        }
+
+        public abstract byte GetBattleType();
+        public abstract int GetMinDamage();
+        public abstract int GetMaxDamage();
+        public abstract int GetBonusDamage();
+        public abstract uint GetPoint(EPoints point);
+
+        public void Attack(IEntity victim, byte type)
+        {
+            if (type == 0)
+            {
+                var battleType = GetBattleType();
+                switch (battleType)
+                {
+                    case 0:
+                    case 4:
+                    case 5:
+                    case 6:
+                    case 7:
+                        // melee sort attack
+                        MeleeAttack(victim);
+                        break;
+                    case 1:
+                        // todo range attack
+                        Log.Warning("Range attack is not yet implemented");
+                        break;
+                    case 2:
+                        // todo magic attack
+                        Log.Warning("Magic attack is not yet implemented");
+                        break;
+                }
+            }
+            else
+            {
+                // todo implement skills
+                Log.Warning("Skill aren't yet implemented");
+            }
+        }
+
+        private void MeleeAttack(IEntity victim)
+        {
+            // todo verify victim is in range
+            
+            var attackerRating = Math.Min(90, (GetPoint(EPoints.Dx) * 4 + GetPoint(EPoints.Level) * 2) / 6);
+            var victimRating = Math.Min(90, (victim.GetPoint(EPoints.Dx) * 4 + victim.GetPoint(EPoints.Level) * 2) / 6);
+            var attackRating = (attackerRating + 210.0) / 300.0 - (victimRating * 2 + 5) / (victimRating + 95) * 3.0 / 10.0;
+
+            var minDamage = GetMinDamage();
+            var maxDamage = GetMaxDamage();
+
+            var damage = CoreRandom.GenerateInt32(minDamage, maxDamage + 1) * 2;
+            SendDebugDamage(victim, $"{this}->{victim} Base Attack value: {damage}");
+            var attack = (int)(GetPoint(EPoints.AttackGrade) + damage - GetPoint(EPoints.Level) * 2);
+            attack = (int) Math.Floor(attack * attackRating);
+            attack += (int)GetPoint(EPoints.Level) * 2 + GetBonusDamage() * 2;
+            attack *= (int)((100 + GetPoint(EPoints.AttackBonus) + GetPoint(EPoints.MagicAttackBonus)) / 100);
+            attack = CalculateAttackBonus(victim, attack);
+            SendDebugDamage(victim, $"{this}->{victim} With bonus and level {attack}");
+
+            var defence = (int)(victim.GetPoint(EPoints.DefenceGrade) * (100 + victim.GetPoint(EPoints.DefenceBonus)) / 100);
+            SendDebugDamage(victim, $"{this}->{victim} Base defence: {defence}");
+            if (this is MonsterEntity thisMonster)
+            {
+                attack = (int) Math.Floor(attack * thisMonster.Proto.DamageMultiply);
+            }
+
+            damage = Math.Max(0, attack - defence);
+            SendDebugDamage(victim, $"{this}->{victim} Melee damage: {damage}");
+            if (damage < 3)
+            {
+                damage = CoreRandom.GenerateInt32(1, 6);
+            }
+            
+            // todo reduce damage by weapon type resist
+            
+            victim.Damage(this, EDamageType.Normal, damage);
+        }
+
+        /// <summary>
+        /// Adds bonus to the attack value for race bonus etc
+        /// </summary>
+        /// <param name="victim">The victim of the damage</param>
+        /// <param name="attack">The current attack value</param>
+        /// <returns>The new attack value with the bonus</returns>
+        private int CalculateAttackBonus(IEntity victim, int attack)
+        {
+            // todo implement bonus attack against animals etc...
+            // todo implement bonus attack against warriors etc...
+            // todo implement resist again warriors etc...
+            // todo implement resist against fire etc...
+            
+            return attack;
+        }
+
+        private void SendDebugDamage(IEntity other, string text)
+        {
+            var thisPlayer = this as PlayerEntity;
+            var otherPlayer = other as PlayerEntity;
+            
+            thisPlayer?.SendChatInfo(text);
+            otherPlayer?.SendChatInfo(text);
+        }
+
+        public virtual int Damage(IEntity attacker, EDamageType damageType, int damage)
+        {
+            if (damageType != EDamageType.Normal)
+            {
+                throw new NotImplementedException();
+            }
+
+            // todo block
+            // todo handle berserk, fear, blessing skill
+            // todo handle reflect melee
+            
+            SendDebugDamage(attacker, $"{attacker}->{this} Base Damage: {damage}");
+
+            var isCritical = false;
+            var isPenetrate = false;
+
+            var criticalPercentage = attacker.GetPoint(EPoints.CriticalPercentage);
+            if (criticalPercentage > 0)
+            {
+                var resist = GetPoint(EPoints.ResistCritical);
+                criticalPercentage = resist > criticalPercentage ? 0 : criticalPercentage - resist;
+                if (CoreRandom.PercentageCheck(criticalPercentage))
+                {
+                    isCritical = true;
+                    damage *= 2;
+                    // todo send effect to clients
+                    SendDebugDamage(attacker, $"{attacker}->{this} Critical hit -> {damage} (percentage was {criticalPercentage})");
+                }
+            }
+
+            var penetratePercentage = attacker.GetPoint(EPoints.PenetratePercentage);
+            // todo add penetrate chance from passive
+            if (penetratePercentage > 0)
+            {
+                var resist = GetPoint(EPoints.ResistPenetrate);
+                penetratePercentage = resist > penetratePercentage ? 0 : penetratePercentage - resist;
+                if(CoreRandom.PercentageCheck(penetratePercentage))
+                {
+                    isPenetrate = true;
+                    damage += (int) (GetPoint(EPoints.DefenceGrade) * (100 + GetPoint(EPoints.DefenceBonus)) / 100);
+                    SendDebugDamage(attacker, $"{attacker}->{this} Penetrate hit -> {damage} (percentage was {penetratePercentage})");
+                }
+            } 
+            
+            // todo calculate hp steal, sp steal, hp recovery, sp recovery and mana burn
+
+            byte damageFlags = 1; // 1 = normal
+            if (isCritical)
+            {
+                damageFlags |= 32;
+            }
+            if (isPenetrate)
+            {
+                damageFlags |= 16;
+            }
+
+            var victimPlayer = this as PlayerEntity;
+            var attackerPlayer = attacker as PlayerEntity;
+            if (victimPlayer != null || attackerPlayer != null)
+            {
+                var damageInfo = new DamageInfo();
+                damageInfo.Vid = Vid;
+                damageInfo.Damage = damage;
+                damageInfo.DamageFlags = damageFlags;
+                
+                victimPlayer?.Connection.Send(damageInfo);
+                attackerPlayer?.Connection.Send(damageInfo);
+            }
+
+            this.Health -= damage;
+            victimPlayer?.SendPoints();
+            foreach (var playerEntity in TargetedBy)
+            {
+                playerEntity.SendTarget();
+            }
+            if (Health <= 0)
+            {
+                Die();
+            }
+
+            return damage;
         }
 
         public virtual void Die()

@@ -134,7 +134,24 @@ namespace QuantumCore.Game.World.AI
                 return;
             }
 
-            monster.Attack(victim);
+            monster.Attack(victim, monster.Proto.BattleType);
+            
+            // Send attack packet
+            var packet = new CharacterMoveOut {
+                MovementType = (byte) CharacterMove.CharacterMovementType.Attack,
+                Rotation = (byte) (monster.Rotation / 5),
+                Vid = monster.Vid,
+                PositionX = monster.PositionX,
+                PositionY = monster.PositionY,
+                Time = (uint) GameServer.Instance.Server.ServerTime
+            };
+            monster.ForEachNearbyEntity(entity =>
+            {
+                if (entity is PlayerEntity player)
+                {
+                    player.Connection.Send(packet);
+                }
+            });
         }
 
         private IEntity NextTarget()

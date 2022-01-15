@@ -1,15 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading.Tasks;
 using QuantumCore.API;
-using QuantumCore.API.Game;
 using QuantumCore.API.Game.World;
 using QuantumCore.Cache;
 using QuantumCore.Core.Constants;
 using QuantumCore.Core.Networking;
-using QuantumCore.Core.Types;
-using QuantumCore.Core.Utils;
 using QuantumCore.Database;
 using QuantumCore.Game.Packets;
 using QuantumCore.Game.PlayerUtils;
@@ -17,7 +15,7 @@ using Serilog;
 
 namespace QuantumCore.Game.World.Entities
 {
-    public class PlayerEntity : Entity, IPlayerEntity, IDamageable
+    public class PlayerEntity : Entity, IPlayerEntity
     {
         public override EEntityType Type => EEntityType.Player;
 
@@ -78,7 +76,7 @@ namespace QuantumCore.Game.World.Entities
         }
         
         private byte _attackSpeed = 140;
-        private int _hp = 0;
+        private uint _defence;
 
         private const int PersistInterval = 1000;
         private int _persistTime = 0;
@@ -102,8 +100,10 @@ namespace QuantumCore.Game.World.Entities
         public async Task Load()
         {
             await Inventory.Load();
-            _hp = (int) GetPoint(EPoints.MaxHp); // todo: cache hp of player 
+            Health = (int) GetPoint(EPoints.MaxHp); // todo: cache hp of player 
             await LoadPermGroups();
+            
+            CalculateDefence();
         }
 
         private async Task LoadPermGroups()
@@ -150,26 +150,23 @@ namespace QuantumCore.Game.World.Entities
             });
         }
 
-        public uint GetDefence()
+        private void CalculateDefence()
         {
-            return 0;
-        }
-
-        public long TakeDamage(long damage, Entity attacker)
-        {
-            _hp -= (int) damage;
-
-            var damageInfo = new DamageInfo { Vid = Vid, DamageType = 1, Damage = (int) damage };
-            Connection.Send(damageInfo);
+            _defence = GetPoint(EPoints.Level) + (uint)Math.Floor(0.8 * GetPoint(EPoints.Ht));
             
-            SendPoints();
-
-            if (_hp <= 0)
+            foreach (var slot in Enum.GetValues<EquipmentSlots>())
             {
-                Die();
-            }
+                var item = Inventory.EquipmentWindow.GetItem(slot);
+                if (item == null) continue;
+                var proto = ItemManager.GetItem(item.ItemId);
+                if (proto.Type != (byte) EItemType.Armor) continue;
 
-            return damage;
+                _defence += (uint)proto.Values[1] + (uint)proto.Values[5] * 2;
+            }
+            
+            Log.Debug($"Calculate defence value for {Name}, result: {_defence}");
+            
+            // todo add defence bonus from quests
         }
 
         public override void Die()
@@ -223,48 +220,8 @@ namespace QuantumCore.Game.World.Entities
                 entity.ShowEntity(Connection);
             });
 
-            _hp = 50;
+            Health = 50;
             SendPoints();
-        }
-
-        public void Attack(IEntity victim)
-        {
-            if (victim is not IDamageable damageable)
-            {
-                return;
-            }
-            
-            // Get current equipped weapon
-            var weapon = Inventory.EquipmentWindow.Weapon;
-            ItemProto.Item weaponItem = null;
-            if (weapon != null)
-            {
-                weaponItem = ItemManager.GetItem(weapon.ItemId);
-            }
-            
-            // For more details on this formula:
-            // https://gitlab.com/quantum-core/core-dotnet/-/wikis/Attack-damage-calculation
-
-            // Calculating parameters we need for calculating effective damage base
-            var growth = weaponItem != null ? weaponItem.Values[5] : 0;
-            var attackBase = weaponItem != null ? CoreRandom.GenerateUInt32((uint)weaponItem.Values[3], (uint)weaponItem.Values[4] + 1) : 0;
-            var stat = GetPoint(JobInfo.Get(Player.PlayerClass).AttackStatus);
-            var str = GetPoint(EPoints.St);
-            var dex = GetPoint(EPoints.Dx);
-            var level = GetPoint(EPoints.Level);
-            var defence = damageable.GetDefence();
-            
-            // Calculating effective damage base
-            var damageBase = 2 * (level + growth) +
-                1 / 75.0 * (70 + (2 * dex - 0.6 * level) / 9.0) * (str + (3 * attackBase + stat) / 2) - defence;
-            
-            // todo calculate final damage with all the stats
-            // todo critical hit?
-            // todo chance to miss a hit?
-
-            var actualDamage = damageable.TakeDamage((uint)damageBase, this);
-            var info = new DamageInfo {Vid = victim.Vid, DamageType = 1, Damage = (int) actualDamage};
-            Connection.Send(info);
         }
 
         public uint CalculateAttackDamage(uint baseDamage)
@@ -292,13 +249,13 @@ namespace QuantumCore.Game.World.Entities
             base.Update(elapsedTime);
 
             var maxHp = GetPoint(EPoints.MaxHp);
-            if (_hp < maxHp)
+            if (Health < maxHp)
             {
                 _healthRegenTime -= elapsedTime;
                 if (_healthRegenTime <= 0)
                 {
                     var factor = State == EEntityState.Idle ? 0.05 : 0.01;
-                    _hp = Math.Min((int)maxHp, _hp + 15 + (int)(maxHp * factor));
+                    Health = Math.Min((int)maxHp, Health + 15 + (int)(maxHp * factor));
                     SendPoints();
 
                     _healthRegenTime += HealthRegenInterval;
@@ -313,14 +270,46 @@ namespace QuantumCore.Game.World.Entities
             }
         }
 
-        public uint GetPoint(EPoints point)
+        public override byte GetBattleType()
+        {
+            return 0;
+        }
+
+        public override int GetMinDamage()
+        {
+            var weapon = Inventory.EquipmentWindow.Weapon;
+            if (weapon == null) return 0;
+            var item = ItemManager.GetItem(weapon.ItemId);
+            if (item == null) return 0;
+            return item.Values[3];
+        }
+
+        public override int GetMaxDamage()
+        {
+            var weapon = Inventory.EquipmentWindow.Weapon;
+            if (weapon == null) return 0;
+            var item = ItemManager.GetItem(weapon.ItemId);
+            if (item == null) return 0;
+            return item.Values[4];
+        }
+
+        public override int GetBonusDamage()
+        {
+            var weapon = Inventory.EquipmentWindow.Weapon;
+            if (weapon == null) return 0;
+            var item = ItemManager.GetItem(weapon.ItemId);
+            if (item == null) return 0;
+            return item.Values[5];
+        }
+
+        public override uint GetPoint(EPoints point)
         {
             switch (point)
             {
                 case EPoints.Level:
                     return Player.Level;
                 case EPoints.Hp:
-                    return (uint) _hp;
+                    return (uint) Health;
                 case EPoints.MaxHp:
                     var info = JobInfo.Get(Player.PlayerClass);
                     if (info == null)
@@ -366,7 +355,15 @@ namespace QuantumCore.Game.World.Entities
                     return CalculateAttackDamage(GetPoint(EPoints.MinWeaponDamage));
                 case EPoints.MaxAttackDamage:
                     return CalculateAttackDamage(GetPoint(EPoints.MaxWeaponDamage));
+                case EPoints.Defence:
+                case EPoints.DefenceGrade:
+                    return _defence;
                 default:
+                    if (Enum.GetValues<EPoints>().Contains(point))
+                    {
+                        Log.Warning($"Point {point} is not implemented on player");
+                    }
+
                     return 0;
             }
         }
@@ -494,7 +491,9 @@ namespace QuantumCore.Game.World.Entities
                     {
                         // Equipment
                         Inventory.EquipmentWindow.RemoveItem(item);
+                        CalculateDefence();
                         SendCharacterUpdate();
+                        SendPoints();
                     }
                     else
                     {
@@ -518,7 +517,9 @@ namespace QuantumCore.Game.World.Entities
                         {
                             Inventory.EquipmentWindow.SetItem(item, position);
                             await item.Set(Player.Id, window, position);
+                            CalculateDefence();
                             SendCharacterUpdate();
+                            SendPoints();
                         }
                     }
                     else

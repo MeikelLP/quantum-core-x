@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using QuantumCore.API.Core.Utils;
+using QuantumCore.Game.PlayerUtils;
 
 namespace QuantumCore.API.Game.World
 {
@@ -50,8 +51,17 @@ namespace QuantumCore.API.Game.World
         public void ForEachNearbyEntity(Action<IEntity> action);
         public void ShowEntity(IConnection connection);
 
+        public uint GetPoint(EPoints point);
+        public int GetMinDamage();
+        public int GetMaxDamage();
+        public int GetBonusDamage();
+
         public void Goto(int x, int y);
         public void Wait(int x, int y);
+
+        public byte GetBattleType();
+        public void Attack(IEntity victim, byte type);
+        public int Damage(IEntity attacker, EDamageType damageType, int damage);
 
         public void Move(int x, int y);
         public void Stop();

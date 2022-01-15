@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using QuantumCore.API.Game.World;
 using QuantumCore.Game.World.Entities;
 
 namespace QuantumCore.Game.World
@@ -8,11 +9,11 @@ namespace QuantumCore.Game.World
         public List<MonsterEntity> Monsters { get; } = new();
         public SpawnPoint SpawnPoint { get; set; }
 
-        public void TriggerAll(Entity attacker, MonsterEntity except)
+        public void TriggerAll(IEntity attacker, MonsterEntity except)
         {
             foreach (var monster in Monsters)
             {
-                monster.TakeDamage(0, attacker);
+                monster.Trigger(attacker);
             }
         }
     }

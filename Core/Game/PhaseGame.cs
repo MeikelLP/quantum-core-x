@@ -241,7 +241,7 @@ namespace QuantumCore.Game
             
             Log.Debug($"Attack from {attacker.Name} with type {packet.AttackType} target {packet.Vid}");
 
-            attacker.Attack(entity);
+            attacker.Attack(entity, 0);
         }
     }
 }

@@ -78,9 +78,9 @@ namespace QuantumCore.Game.PlayerUtils
             return false;
         }
 
-        public Item GetItem(ushort position)
+        public Item GetItem(EquipmentSlots slot)
         {
-            switch ((EquipmentSlots) (position - _offset))
+            switch (slot)
             {
                 case EquipmentSlots.Body:
                     return Body;
@@ -103,6 +103,11 @@ namespace QuantumCore.Game.PlayerUtils
             }
 
             return null;
+        }
+
+        public Item GetItem(ushort position)
+        {
+            return GetItem((EquipmentSlots) (position - _offset));
         }
 
         public bool RemoveItem(Item item)
