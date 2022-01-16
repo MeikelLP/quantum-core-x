@@ -161,14 +161,15 @@ namespace QuantumCore.Game.World
             switch (spawnPoint.Type)
             {
                 case ESpawnPointType.Group:
+                {
                     var group = World.Instance.GetGroup(CoreRandom.GetRandom(spawnPoint.Groups));
                     if (group != null)
                     {
                         var baseX = spawnPoint.X + RandomNumberGenerator.GetInt32(-spawnPoint.Range, spawnPoint.Range);
                         var baseY = spawnPoint.Y + RandomNumberGenerator.GetInt32(-spawnPoint.Range, spawnPoint.Range);
-                        
+
                         spawnPoint.CurrentGroup = groupInstance;
-                            
+
                         foreach (var member in group.Members)
                         {
                             var monster = new MonsterEntity(member.Id,
@@ -176,12 +177,39 @@ namespace QuantumCore.Game.World
                                 (int) (PositionY + (baseY + RandomNumberGenerator.GetInt32(-5, 5)) * 100),
                                 RandomNumberGenerator.GetInt32(0, 360));
                             World.Instance.SpawnEntity(monster);
-                                
+
                             groupInstance.Monsters.Add(monster);
                             monster.Group = groupInstance;
                         }
                     }
+
                     break;
+                }
+                case ESpawnPointType.Monster:
+                {
+                    int x, y;
+                    if (spawnPoint.RandomPosition)
+                    {
+                        // todo make sure monster doesn't spawn in non walkable area
+                        x = CoreRandom.GenerateInt32((int) (PositionX), (int) (PositionX + Width * MapUnit) + 1);
+                        y = CoreRandom.GenerateInt32((int) (PositionY), (int) (PositionY + Height * MapUnit) + 1);
+                    }
+                    else
+                    {
+                        x = (int)PositionX + (spawnPoint.X + CoreRandom.GenerateInt32(-spawnPoint.Range, spawnPoint.Range + 1)) * 100;
+                        y = (int)PositionY + (spawnPoint.Y + CoreRandom.GenerateInt32(-spawnPoint.Range, spawnPoint.Range + 1)) * 100;
+                    }
+
+                    spawnPoint.CurrentGroup = groupInstance;
+
+                    var monster = new MonsterEntity(spawnPoint.Monster, x, y, (spawnPoint.Direction - 1) * 45);
+                    World.Instance.SpawnEntity(monster);
+                    
+                    groupInstance.Monsters.Add(monster);
+                    monster.Group = groupInstance;
+
+                    break;
+                }
                 default:
                     Log.Warning($"Unknown spawn point type: {spawnPoint.Type}");
                     break;

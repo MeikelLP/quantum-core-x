@@ -54,7 +54,15 @@ namespace QuantumCore.Game.World.Entities
             Health = _proto.Hp;
             EntityClass = id;
 
-            _behaviour = new SimpleBehaviour();
+            if (_proto.Type == (byte) EEntityType.Monster)
+            {
+                // it's a monster
+                _behaviour = new SimpleBehaviour();
+            }
+            else if(_proto.Type == (byte) EEntityType.Npc)
+            {
+                // npc
+            }
         }
 
         public override void Update(double elapsedTime)
@@ -214,7 +222,7 @@ namespace QuantumCore.Game.World.Entities
             connection.Send(new SpawnCharacter
             {
                 Vid = Vid,
-                CharacterType = (byte) EEntityType.Monster,
+                CharacterType = _proto.Type,
                 Angle = Rotation,
                 PositionX = PositionX,
                 PositionY = PositionY,
@@ -222,6 +230,17 @@ namespace QuantumCore.Game.World.Entities
                 MoveSpeed = (byte) _proto.MoveSpeed,
                 AttackSpeed = (byte) _proto.AttackSpeed
             });
+
+            if (_proto.Type == (byte) EEntityType.Npc)
+            {
+                // NPCs need additional information too to show up for some reason
+                connection.Send(new CharacterInfo {
+                    Vid = Vid,
+                    Empire = _proto.Empire,
+                    Level = _proto.Level,
+                    Name = _proto.TranslatedName
+                });
+            }
         }
 
         public override string ToString()
