@@ -1,5 +1,7 @@
 using System;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Net.Sockets;
 using System.Reflection;
 using System.Security.Cryptography;
@@ -114,7 +116,22 @@ namespace QuantumCore.Core.Networking
                     }
 
                     var packet = Activator.CreateInstance(packetDetails.Type);
-                    packetDetails.Deserialize(packet, data);
+                    var subHeader = packetDetails.Deserialize(packet, data);
+
+                    if (packetDetails.IsSubHeader)
+                    {
+                        packetDetails =
+                            _packetManager.GetIncomingPacket((ushort) (packetDetails.Header << 8 | subHeader));
+
+                        packet = Activator.CreateInstance(packetDetails.Type);
+
+                        var subData = new byte[packetDetails.Size - data.Length - 1];
+                        read = await stream.ReadAsync(subData, 0, subData.Length);
+                        
+                        packetTotalSize += read;
+
+                        packetDetails.Deserialize(packet, data.Concat(subData).ToArray());
+                    }
                     
                     // Check if packet has dynamic data
                     if (packetDetails.IsDynamic)
@@ -188,9 +205,16 @@ namespace QuantumCore.Core.Networking
             if (!_packetManager.IsRegisteredOutgoing(packet.GetType()))
                 throw new ArgumentException("Given packet is not a registered outgoing packet", nameof(packet));
 
-            //Log.Debug($"Send {packet}");
-
             var packetDetails = _packetManager.GetOutgoingPacket(attr.Header);
+            
+            // Check if packet have sub packets
+            if (packetDetails.IsSubHeader)
+            {
+                var subAttr = packet.GetType().GetCustomAttribute<SubPacketAttribute>();
+                Debug.Assert(subAttr != null);
+                packetDetails = _packetManager.GetOutgoingPacket((ushort) (attr.Header << 8 | subAttr.SubHeader));
+            }
+            
             // Check if packet has dynamic data
             if (packetDetails.IsDynamic)
             {

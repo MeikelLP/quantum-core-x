@@ -18,6 +18,7 @@ using QuantumCore.Core.Utils;
 using QuantumCore.Database;
 using QuantumCore.Game.Commands;
 using QuantumCore.Game.Packets;
+using QuantumCore.Game.Packets.shop;
 using QuantumCore.Game.PlayerUtils;
 using Serilog;
 
@@ -117,6 +118,9 @@ namespace QuantumCore.Game
             _server.RegisterListener<ItemUse>((connection, packet) => connection.OnItemUse(packet));
             _server.RegisterListener<TargetChange>((connection, packet) => connection.OnTargetChange(packet));
             _server.RegisterListener<Attack>((connection, packet) => connection.OnAttack(packet));
+            _server.RegisterListener<ClickNpc>((connection, packet) => connection.OnClickNpc(packet));
+            _server.RegisterListener<ShopClose>((connection, packet) => connection.OnShopClose(packet));
+            _server.RegisterListener<ShopBuy>((connection, packet) => connection.OnShopBuy(packet));
         }
         
         public async Task Start()

@@ -1,18 +1,11 @@
 using QuantumCore.Core.Packets;
+using QuantumCore.Game.Packets.general;
 
 namespace QuantumCore.Game.Packets
 {
     [Packet(0x15, EDirection.Outgoing)]
     public class SetItem
     {
-        public class Bonus
-        {
-            [Field(0)]
-            public byte BonusId { get; set; }
-            [Field(1)]
-            public ushort Value { get; set; }
-        }
-        
         [Field(0)]
         public byte Window { get; set; }
         [Field(1)]
@@ -30,6 +23,6 @@ namespace QuantumCore.Game.Packets
         [Field(7, ArrayLength = 3)]
         public uint[] Sockets { get; set; } = new uint[3];
         [Field(8, ArrayLength = 7)]
-        public Bonus[] Bonuses { get; set; } = new Bonus[7];
+        public ItemBonus[] Bonuses { get; set; } = new ItemBonus[7];
     }
 }

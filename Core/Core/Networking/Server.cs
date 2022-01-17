@@ -15,14 +15,14 @@ namespace QuantumCore.Core.Networking
 {
     public class Server<T> : IPacketManager where T : Connection
     {
-        private readonly List<Func<T, bool>> _connectionListeners = new List<Func<T, bool>>();
-        private readonly Dictionary<Guid, T> _connections = new Dictionary<Guid, T>();
-        private readonly Dictionary<byte, PacketCache> _incomingPackets = new Dictionary<byte, PacketCache>();
-        private readonly List<Type> _incomingTypes = new List<Type>();
-        private readonly Dictionary<byte, Delegate> _listeners = new Dictionary<byte, Delegate>();
-        private readonly Dictionary<byte, PacketCache> _outgoingPackets = new Dictionary<byte, PacketCache>();
-        private readonly List<Type> _outgoingTypes = new List<Type>();
-        private readonly Stopwatch _serverTimer = new Stopwatch();
+        private readonly List<Func<T, bool>> _connectionListeners = new();
+        private readonly Dictionary<Guid, T> _connections = new();
+        private readonly Dictionary<ushort, PacketCache> _incomingPackets = new();
+        private readonly List<Type> _incomingTypes = new();
+        private readonly Dictionary<ushort, Delegate> _listeners = new();
+        private readonly Dictionary<ushort, PacketCache> _outgoingPackets = new();
+        private readonly List<Type> _outgoingTypes = new();
+        private readonly Stopwatch _serverTimer = new();
         private readonly TcpListener _listener;
 
         private readonly Gauge _openConnections = Metrics.CreateGauge("open_connections", "Currently open connections");
@@ -78,8 +78,8 @@ namespace QuantumCore.Core.Networking
         public void RegisterListener<P>(Action<T, P> listener)
         {
             Log.Debug($"Register listener on packet {typeof(P).Name}");
-            var packet = _incomingPackets.Where(p => p.Value.Type == typeof(P)).Select(p => p.Value).First();
-            _listeners[packet.Header] = listener;
+            var packet = _incomingPackets.First(p => p.Value.Type == typeof(P));
+            _listeners[packet.Key] = listener;
         }
 
         public void RegisterNewConnectionListener(Func<Connection, bool> listener)
@@ -89,11 +89,10 @@ namespace QuantumCore.Core.Networking
 
         public void CallListener(Connection connection, object packet)
         {
-            var header = _incomingPackets.Where(p => p.Value.Type == packet.GetType()).Select(p => p.Value.Header)
-                .First();
-            if (!_listeners.ContainsKey(header)) return;
+            var header = _incomingPackets.First(p => p.Value.Type == packet.GetType());
+            if (!_listeners.ContainsKey(header.Key)) return;
 
-            var del = _listeners[header];
+            var del = _listeners[header.Key];
             del.DynamicInvoke(connection, packet);
         }
 
@@ -107,34 +106,65 @@ namespace QuantumCore.Core.Networking
             Log.Debug($"Register packet namespace {space}");
             if (assembly == null) assembly = Assembly.GetAssembly(typeof(Server<T>));
 
-            var types = assembly.GetTypes().Where(t => string.Equals(t.Namespace, space, StringComparison.Ordinal))
+            var types = assembly.GetTypes().Where(t => t.Namespace?.StartsWith(space, StringComparison.Ordinal) ?? false)
                 .Where(t => t.GetCustomAttribute<PacketAttribute>() != null).ToArray();
             foreach (var type in types)
             {
                 Log.Debug($"Register Packet {type.Name}");
                 var packet = type.GetCustomAttribute<PacketAttribute>();
+                if (packet == null)
+                {
+                    continue;
+                }
+                
+                var cache = new PacketCache(packet.Header, type);
+
+                var header = (ushort) packet.Header;
+                if (cache.IsSubHeader)
+                {
+                    header = (ushort)(cache.Header << 8 | cache.SubHeader);
+                    
+                    // We have to create packet cache for the general fields on the first packet for a header which
+                    // has a subheader
+                    if (packet.Direction.HasFlag(EDirection.Incoming))
+                    {
+                        if (!_incomingPackets.ContainsKey(header))
+                        {
+                            _incomingPackets[packet.Header] = cache.CreateGeneralCache();
+                        }
+                    }
+
+                    if (packet.Direction.HasFlag(EDirection.Outgoing))
+                    {
+                        if (!_outgoingPackets.ContainsKey(header))
+                        {
+                            _outgoingPackets[packet.Header] = cache.CreateGeneralCache();
+                        }
+                    }
+                }
+                
                 if (packet.Direction.HasFlag(EDirection.Incoming))
                 {
-                    if (_incomingPackets.ContainsKey(packet.Header))
+                    if (_incomingPackets.ContainsKey(header))
                     {
                         Log.Information($"Header 0x{packet.Header} is already in use for incoming packets. ({type.Name} & {_incomingPackets[packet.Header].Type.Name})");
                     }
                     else
                     {
-                        _incomingPackets.Add(packet.Header, new PacketCache(packet.Header, type));
+                        _incomingPackets.Add(header, cache);
                         _incomingTypes.Add(type);
                     }
                 }
 
                 if (packet.Direction.HasFlag(EDirection.Outgoing))
                 {
-                    if (_outgoingPackets.ContainsKey(packet.Header))
+                    if (_outgoingPackets.ContainsKey(header))
                     {
                         Log.Information($"Header 0x{packet.Header} is already in use for outgoing packets. ({type.Name} & {_outgoingPackets[packet.Header].Type.Name})");
                     }
                     else
                     {
-                        _outgoingPackets.Add(packet.Header, new PacketCache(packet.Header, type));
+                        _outgoingPackets.Add(header, cache);
                         _outgoingTypes.Add(type);
                     }
                 }
@@ -146,12 +176,12 @@ namespace QuantumCore.Core.Networking
             return _outgoingTypes.Contains(packet);
         }
 
-        public PacketCache GetOutgoingPacket(byte header)
+        public PacketCache GetOutgoingPacket(ushort header)
         {
             return !_outgoingPackets.ContainsKey(header) ? null : _outgoingPackets[header];
         }
 
-        public PacketCache GetIncomingPacket(byte header)
+        public PacketCache GetIncomingPacket(ushort header)
         {
             return !_incomingPackets.ContainsKey(header) ? null : _incomingPackets[header];
         }

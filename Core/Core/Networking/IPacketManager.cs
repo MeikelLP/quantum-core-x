@@ -6,7 +6,7 @@ namespace QuantumCore.Core.Networking
     public interface IPacketManager
     {
         public bool IsRegisteredOutgoing(Type packet);
-        public PacketCache GetOutgoingPacket(byte header);
-        public PacketCache GetIncomingPacket(byte header);
+        public PacketCache GetOutgoingPacket(ushort header);
+        public PacketCache GetIncomingPacket(ushort header);
     }
 }

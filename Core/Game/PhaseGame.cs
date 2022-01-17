@@ -3,6 +3,7 @@ using QuantumCore.API.Game.World;
 using QuantumCore.Core.Networking;
 using QuantumCore.Game.Commands;
 using QuantumCore.Game.Packets;
+using QuantumCore.Game.Packets.shop;
 using QuantumCore.Game.PlayerUtils;
 using QuantumCore.Game.World.Entities;
 using Serilog;
@@ -242,6 +243,40 @@ namespace QuantumCore.Game
             Log.Debug($"Attack from {attacker.Name} with type {packet.AttackType} target {packet.Vid}");
 
             attacker.Attack(entity, 0);
+        }
+
+        public static async void OnClickNpc(this GameConnection connection, ClickNpc packet)
+        {
+            var player = connection.Player;
+            if (player == null)
+            {
+                connection.Close();
+                return;
+            }
+
+            var entity = player.Map.GetEntity(packet.Vid);
+            if (entity == null)
+            {
+                connection.Close();
+                return;
+            }
+            
+            Log.Debug($"On Click from {player.Name} on {entity}");
+
+            var shopStart = new ShopOpen();
+            shopStart.Vid = entity.Vid;
+            shopStart.Items[0] = new ShopItem { ItemId = 19, Count = 1, Position = 0, Price = 100 };
+            connection.Send(shopStart);
+        }
+
+        public static async void OnShopClose(this GameConnection connection, ShopClose packet)
+        {
+            Log.Information("Shop close");
+        }
+
+        public static async void OnShopBuy(this GameConnection connection, ShopBuy packet)
+        {
+            Log.Information($"Shop buy {packet.Position}");
         }
     }
 }
