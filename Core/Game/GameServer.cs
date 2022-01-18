@@ -108,7 +108,6 @@ namespace QuantumCore.Game
             });
             
             _server.RegisterListeners();
-            _server.RegisterListener<TokenLogin>((connection, packet) => connection.OnTokenLogin(packet));
         }
         
         public async Task Start()
