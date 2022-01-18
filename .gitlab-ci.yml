@@ -18,7 +18,7 @@ build-docker:
     
 build-binaries:
   stage: build
-  image: mcr.microsoft.com/dotnet/sdk:5.0-alpine
+  image: mcr.microsoft.com/dotnet/sdk:6.0-alpine
   script:
     - wget https://github.com/kaitai-io/kaitai_struct_compiler/releases/download/0.9/kaitai-struct-compiler-0.9.zip
     - mkdir /kaitai
