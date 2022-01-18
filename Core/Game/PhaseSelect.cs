@@ -4,6 +4,7 @@ using Dapper;
 using Dapper.Contrib.Extensions;
 using QuantumCore.Cache;
 using QuantumCore.Core.Constants;
+using QuantumCore.Core.Networking;
 using QuantumCore.Core.Utils;
 using QuantumCore.Database;
 using QuantumCore.Game.Packets;
@@ -16,6 +17,7 @@ namespace QuantumCore.Game
 {
     public static class PhaseSelect
     {
+        [Listener(typeof(SelectCharacter))]
         public static async void OnSelectCharacter(this GameConnection connection, SelectCharacter packet)
         {
             Log.Debug($"Selected character in slot {packet.Slot}");
@@ -44,6 +46,7 @@ namespace QuantumCore.Game
             entity.SendPoints();
         }
 
+        [Listener(typeof(DeleteCharacter))]
         public static async void OnDeleteCharacter(this GameConnection connection, DeleteCharacter packet)
         {
             Log.Debug($"Deleting character in slot {packet.Slot}");
@@ -122,6 +125,7 @@ namespace QuantumCore.Game
             await db.QueryAsync("DELETE FROM items WHERE PlayerId=@PlayerId", new { PlayerId = player.Id });
         }
 
+        [Listener(typeof(CreateCharacter))]
         public static async void OnCreateCharacter(this GameConnection connection, CreateCharacter packet)
         {
             Log.Debug($"Create character in slot {packet.Slot}");

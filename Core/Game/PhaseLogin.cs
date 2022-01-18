@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using QuantumCore.Auth.Cache;
 using QuantumCore.Cache;
 using QuantumCore.Core.Constants;
+using QuantumCore.Core.Networking;
 using QuantumCore.Core.Utils;
 using QuantumCore.Database;
 using QuantumCore.Game.Packets;
@@ -13,6 +14,7 @@ namespace QuantumCore.Game
 {
     public static class PhaseLogin
     {
+        [Listener(typeof(TokenLogin))]
         public static async void OnTokenLogin(this GameConnection connection, TokenLogin packet)
         {
             var key = "token:" + packet.Key;

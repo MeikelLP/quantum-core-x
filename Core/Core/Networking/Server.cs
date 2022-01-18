@@ -9,6 +9,7 @@ using System.Security.Cryptography;
 using System.Threading.Tasks;
 using Prometheus;
 using QuantumCore.Core.Packets;
+using QuantumCore.Core.Utils;
 using Serilog;
 
 namespace QuantumCore.Core.Networking
@@ -73,6 +74,55 @@ namespace QuantumCore.Core.Networking
                 }
             
             Console.WriteLine("HALLO");
+        }
+
+        public void RegisterListeners()
+        {
+            var connectionType = typeof(T);
+            var listeners = new List<MethodInfo>();
+            
+            foreach (var method in connectionType.GetMethods())
+            {
+                var attribute = method.GetCustomAttribute<ListenerAttribute>();
+                if (attribute != null)
+                {
+                    listeners.Add(method);
+                }
+            }
+            foreach (var method in connectionType.GetExtensionMethods())
+            {
+                var attribute = method.GetCustomAttribute<ListenerAttribute>();
+                if (attribute != null)
+                {
+                    listeners.Add(method);
+                }
+            }
+
+            foreach (var method in listeners)
+            {
+                var attribute = method.GetCustomAttribute<ListenerAttribute>();
+                if (attribute == null)
+                {
+                    continue;
+                }
+                
+                Log.Debug($"Register listener on packet {attribute.Packet.Name}");
+                var packet = _incomingPackets.First(p => p.Value.Type == attribute.Packet);
+                if (method.IsStatic)
+                {
+                    _listeners[packet.Key] = (T connection, object p) =>
+                    {
+                        method.Invoke(null, new[] {connection, p});
+                    };
+                }
+                else
+                {
+                    _listeners[packet.Key] = (T connection, object p) =>
+                    {
+                        method.Invoke(connection, new[] {p});
+                    };
+                }
+            }
         }
 
         public void RegisterListener<P>(Action<T, P> listener)

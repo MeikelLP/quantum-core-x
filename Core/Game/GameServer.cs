@@ -107,20 +107,8 @@ namespace QuantumCore.Game
                 return true;
             });
             
+            _server.RegisterListeners();
             _server.RegisterListener<TokenLogin>((connection, packet) => connection.OnTokenLogin(packet));
-            _server.RegisterListener<CreateCharacter>((connection, packet) => connection.OnCreateCharacter(packet));
-            _server.RegisterListener<SelectCharacter>((connection, packet) => connection.OnSelectCharacter(packet));
-            _server.RegisterListener<DeleteCharacter>((connection, packet) => connection.OnDeleteCharacter(packet));
-            _server.RegisterListener<EnterGame>((connection, packet) => connection.OnEnterGame(packet));
-            _server.RegisterListener<CharacterMove>((connection, packet) => connection.OnCharacterMove(packet));
-            _server.RegisterListener<ChatIncoming>((connection, packet) => connection.OnChat(packet));
-            _server.RegisterListener<ItemMove>((connection, packet) => connection.OnItemMove(packet));
-            _server.RegisterListener<ItemUse>((connection, packet) => connection.OnItemUse(packet));
-            _server.RegisterListener<TargetChange>((connection, packet) => connection.OnTargetChange(packet));
-            _server.RegisterListener<Attack>((connection, packet) => connection.OnAttack(packet));
-            _server.RegisterListener<ClickNpc>((connection, packet) => connection.OnClickNpc(packet));
-            _server.RegisterListener<ShopClose>((connection, packet) => connection.OnShopClose(packet));
-            _server.RegisterListener<ShopBuy>((connection, packet) => connection.OnShopBuy(packet));
         }
         
         public async Task Start()

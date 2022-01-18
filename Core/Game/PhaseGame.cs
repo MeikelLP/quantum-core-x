@@ -13,6 +13,7 @@ namespace QuantumCore.Game
 {
     public static class PhaseGame
     {
+        [Listener(typeof(CharacterMove))]
         public static void OnCharacterMove(this GameConnection connection, CharacterMove packet)
         {
             if (packet.MovementType > (int) CharacterMove.CharacterMovementType.Max &&
@@ -58,6 +59,7 @@ namespace QuantumCore.Game
             });
         }
 		
+        [Listener(typeof(ChatIncoming))]
         public static void OnChat(this GameConnection connection, ChatIncoming packet)
         {
             if (packet.MessageType == ChatMessageTypes.Normal)
@@ -90,6 +92,7 @@ namespace QuantumCore.Game
             }
         }
 
+        [Listener(typeof(ItemMove))]
         public static async void OnItemMove(this GameConnection connection, ItemMove packet)
         {
             var player = connection.Player;
@@ -123,6 +126,8 @@ namespace QuantumCore.Game
                 player.SendItem(item);
             }
         }
+        
+        [Listener(typeof(ItemUse))]
         public static async void OnItemUse(this GameConnection connection, ItemUse packet)
         {
             var player = connection.Player;
@@ -202,6 +207,7 @@ namespace QuantumCore.Game
             }
         }
 
+        [Listener(typeof(TargetChange))]
         public static async void OnTargetChange(this GameConnection connection, TargetChange packet)
         {
             var player = connection.Player;
@@ -224,6 +230,7 @@ namespace QuantumCore.Game
             player.SendTarget();
         }
 
+        [Listener(typeof(Attack))]
         public static async void OnAttack(this GameConnection connection, Attack packet)
         {
             var attacker = connection.Player;
@@ -245,6 +252,7 @@ namespace QuantumCore.Game
             attacker.Attack(entity, 0);
         }
 
+        [Listener(typeof(ClickNpc))]
         public static async void OnClickNpc(this GameConnection connection, ClickNpc packet)
         {
             var player = connection.Player;
@@ -269,11 +277,13 @@ namespace QuantumCore.Game
             connection.Send(shopStart);
         }
 
+        [Listener(typeof(ShopClose))]
         public static async void OnShopClose(this GameConnection connection, ShopClose packet)
         {
             Log.Information("Shop close");
         }
 
+        [Listener(typeof(ShopBuy))]
         public static async void OnShopBuy(this GameConnection connection, ShopBuy packet)
         {
             Log.Information($"Shop buy {packet.Position}");
