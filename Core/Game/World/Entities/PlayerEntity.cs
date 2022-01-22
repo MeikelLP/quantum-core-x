@@ -27,6 +27,7 @@ namespace QuantumCore.Game.World.Entities
         public IEntity Target { get; set; }
         public IList<Guid> Groups { get; private set; }
         public Shop Shop { get; set; }
+        public QuickSlotBar QuickSlotBar { get; }
 
         public override byte HealthPercentage {
             get {
@@ -91,6 +92,7 @@ namespace QuantumCore.Game.World.Entities
             PositionX = player.PositionX;
             PositionY = player.PositionY;
             Inventory = new Inventory(player.Id, 1, 5, 9, 2);
+            QuickSlotBar = new QuickSlotBar(this);
 
             MovementSpeed = 150;
             EntityClass = player.PlayerClass;
@@ -101,6 +103,7 @@ namespace QuantumCore.Game.World.Entities
         public async Task Load()
         {
             await Inventory.Load();
+            await QuickSlotBar.Load();
             Health = (int) GetPoint(EPoints.MaxHp); // todo: cache hp of player 
             await LoadPermGroups();
             
@@ -433,6 +436,8 @@ namespace QuantumCore.Game.World.Entities
 
         private async Task Persist()
         {
+            await QuickSlotBar.Persist();
+            
             Player.PositionX = PositionX;
             Player.PositionY = PositionY;
             

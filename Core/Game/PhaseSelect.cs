@@ -44,6 +44,7 @@ namespace QuantumCore.Game
             // Send information about the player to the client
             entity.SendBasicData();
             entity.SendPoints();
+            entity.QuickSlotBar.Send();
         }
 
         [Listener(typeof(DeleteCharacter))]

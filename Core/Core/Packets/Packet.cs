@@ -234,7 +234,13 @@ namespace QuantumCore.Core.Packets
 
         public byte Deserialize(object obj, byte[] data)
         {
-            if (data.Length != Size - 1) throw new ArgumentException("Invalid data stream given", nameof(data));
+            var expectedSize = Size;
+            if (Header != 0)
+            {
+                expectedSize--;
+            }
+            
+            if (data.Length != expectedSize) throw new ArgumentException("Invalid data stream given", nameof(data));
             if (obj.GetType() != Type) throw new ArgumentException("Invalid packet given", nameof(obj));
 
             using var ms = new MemoryStream(data);
@@ -296,6 +302,13 @@ namespace QuantumCore.Core.Packets
                     else if (type == typeof(float))
                     {
                         value = br.ReadSingle();
+                    }
+                    else if (type.IsClass)
+                    {
+                        var subType = _subTypes[field.Position];
+                        var instance = Activator.CreateInstance(type);
+                        subType.Deserialize(instance, br.ReadBytes((int) subType.Size));
+                        value = instance;
                     }
                     else
                     {

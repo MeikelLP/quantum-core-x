@@ -3,6 +3,7 @@ using QuantumCore.API.Game.World;
 using QuantumCore.Core.Networking;
 using QuantumCore.Game.Commands;
 using QuantumCore.Game.Packets;
+using QuantumCore.Game.Packets.QuickBar;
 using QuantumCore.Game.Packets.Shop;
 using QuantumCore.Game.PlayerUtils;
 using QuantumCore.Game.World.Entities;
@@ -296,6 +297,45 @@ namespace QuantumCore.Game
             }
 
             player.Shop?.Buy(player, packet.Position, packet.Count);
+        }
+
+        [Listener(typeof(QuickBarAdd))]
+        public static async void OnQuickBarAdd(this GameConnection connection, QuickBarAdd packet)
+        {
+            var player = connection.Player;
+            if (player == null)
+            {
+                connection.Close();
+                return;
+            }
+
+            player.QuickSlotBar.Add(packet.Position, packet.Slot);
+        }
+        
+        [Listener(typeof(QuickBarRemove))]
+        public static async void OnQuickBarRemove(this GameConnection connection, QuickBarRemove packet)
+        {
+            var player = connection.Player;
+            if (player == null)
+            {
+                connection.Close();
+                return;
+            }
+
+            player.QuickSlotBar.Remove(packet.Position);
+        }
+        
+        [Listener(typeof(QuickBarSwap))]
+        public static async void OnQuickBarSwap(this GameConnection connection, QuickBarSwap packet)
+        {
+            var player = connection.Player;
+            if (player == null)
+            {
+                connection.Close();
+                return;
+            }
+
+            player.QuickSlotBar.Swap(packet.Position1, packet.Position2);
         }
     }
 }
