@@ -18,10 +18,12 @@ namespace QuantumCore.Game.World
     public class World : IWorld
     {
         private uint _vid;
-        private readonly Grid<Map> _world = new Grid<Map>(0, 0);
-        private readonly Dictionary<string, Map> _maps = new Dictionary<string, Map>();
-        private readonly Dictionary<string, PlayerEntity> _players = new Dictionary<string, PlayerEntity>();
-        private readonly Dictionary<int, SpawnGroup> _groups = new Dictionary<int, SpawnGroup>();
+        private readonly Grid<Map> _world = new(0, 0);
+        private readonly Dictionary<string, Map> _maps = new();
+        private readonly Dictionary<string, PlayerEntity> _players = new();
+        private readonly Dictionary<int, SpawnGroup> _groups = new();
+
+        private readonly Dictionary<int, Shop> _staticShops = new();
 
         private readonly Histogram _updateDuration =
             Metrics.CreateHistogram("world_update_duration_seconds", "How long did a world update took");
@@ -36,6 +38,79 @@ namespace QuantumCore.Game.World
         }
         
         public void Load()
+        {
+            LoadShops();
+            LoadGroups();
+            LoadAtlasInfo();
+
+            // Initialize maps, spawn monsters etc
+            foreach (var map in _maps.Values)
+            {
+                map.Initialize();
+            }
+        }
+
+        private void LoadShops()
+        {
+            var path = Path.Join("data", "shops.toml");
+            if (File.Exists(path))
+            {
+                var toml = Toml.Parse(File.ReadAllText(path));
+                var model = toml.ToModel();
+
+                if (model["shop"] is not TomlTableArray shops)
+                {
+                    Log.Warning("Failed to read shops.toml");
+                    return;
+                }
+                
+                foreach (var shopDef in shops)
+                {
+                    var id = (int)(long) shopDef["id"];
+                    var shop = new Shop {Name = (string) shopDef["name"]};
+
+                    if (shopDef.ContainsKey("items"))
+                    {
+                        if (shopDef["items"] is not TomlTableArray items)
+                        {
+                            Log.Warning($"Can't read items of shop {shop.Name}");
+                            return;
+                        }
+
+                        foreach (var itemDef in items)
+                        {
+                            var itemId = (uint) (long) itemDef["id"];
+                            byte count = 1;
+                            if (itemDef.ContainsKey("count"))
+                            {
+                                count = (byte) (long) itemDef["count"];
+                            }
+
+                            var price = 0u;
+                            if (itemDef.ContainsKey("price"))
+                            {
+                                price = (uint) (long) itemDef["price"];
+                            }
+
+                            shop.AddItem(itemId, count, price);
+                        }
+                    }
+                    
+                    _staticShops[id] = shop;
+                    
+                    if (shopDef.ContainsKey("npc"))
+                    {
+                        var npc = (uint) (long) shopDef["npc"];
+                        GameEventManager.RegisterNpcClickEvent(shop.Name, npc, player =>
+                        {
+                            shop.Open(player);
+                        });
+                    }
+                }
+            }
+        }
+
+        private void LoadGroups()
         {
             // Load groups
             var path = Path.Join("data", "groups.toml");
@@ -52,7 +127,10 @@ namespace QuantumCore.Game.World
                     }
                 }
             }
-            
+        }
+
+        private void LoadAtlasInfo()
+        {
             // Regex for parsing lines in the atlas info
             var regex = new Regex(@"^([a-zA-Z0-9\/_]+)[\s]+([0-9]+)[\s]+([0-9]+)[\s]+([0-9]+)[\s]+([0-9]+)$");
                 
@@ -101,7 +179,7 @@ namespace QuantumCore.Game.World
                     throw new InvalidDataException($"Failed to parse atlasinfo.txt:line {lineNo} - Failed to parse line");
                 }
             }
-                
+
             // Initialize world grid and place maps on it
             _world.Resize(maxX / Map.MapUnit, maxY / Map.MapUnit);
             foreach (var map in _maps.Values)
@@ -114,15 +192,8 @@ namespace QuantumCore.Game.World
                     }
                 }
             }
-                
-            // Initialize maps, spawn monsters etc
-            foreach (var map in _maps.Values)
-            {
-                map.Initialize();
-            }
         }
-
-        private readonly Stopwatch _sw = new Stopwatch();
+        
         public void Update(double elapsedTime)
         {
             HookManager.Instance.CallHook<IHookWorldUpdate>(elapsedTime);

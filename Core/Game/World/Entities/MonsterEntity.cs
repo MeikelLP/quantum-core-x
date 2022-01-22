@@ -153,6 +153,16 @@ namespace QuantumCore.Game.World.Entities
             Behaviour?.TookDamage(attacker, 0);
         }
 
+        public override void AddPoint(EPoints point, int value)
+        {
+            
+        }
+
+        public override void SetPoint(EPoints point, uint value)
+        {
+            
+        }
+
         public override uint GetPoint(EPoints point)
         {
             switch (point)

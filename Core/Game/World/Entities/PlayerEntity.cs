@@ -25,8 +25,8 @@ namespace QuantumCore.Game.World.Entities
         public Player Player { get; private set; }
         public Inventory Inventory { get; private set; }
         public IEntity Target { get; set; }
-
         public IList<Guid> Groups { get; private set; }
+        public Shop Shop { get; set; }
 
         public override byte HealthPercentage {
             get {
@@ -224,6 +224,8 @@ namespace QuantumCore.Game.World.Entities
                 return;
             }
 
+            Shop?.Close(this);
+
             Dead = false;
             
             // todo implement respawn in town
@@ -328,6 +330,39 @@ namespace QuantumCore.Game.World.Entities
             var item = ItemManager.GetItem(weapon.ItemId);
             if (item == null) return 0;
             return item.Values[5];
+        }
+
+        public override void AddPoint(EPoints point, int value)
+        {
+            switch (point)
+            {
+                case EPoints.Level:
+                    Player.Level = (byte)(Player.Level + value);
+                    break;
+                case EPoints.Gold:
+                    var gold = Player.Gold + value;
+                    Player.Gold = (uint) Math.Min(uint.MaxValue, Math.Max(0, gold));
+                    break;
+                default:
+                    Log.Error($"Failed to add point to {point}, unsupported");
+                    break;
+            }
+        }
+
+        public override void SetPoint(EPoints point, uint value)
+        {
+            switch (point)
+            {
+                case EPoints.Level:
+                    Player.Level = (byte) value;
+                    break;
+                case EPoints.Gold:
+                    Player.Gold = value;
+                    break;
+                default:
+                    Log.Error($"Failed to set point to {point}, unsupported");
+                    break;
+            }
         }
 
         public override uint GetPoint(EPoints point)

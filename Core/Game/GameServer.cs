@@ -18,7 +18,7 @@ using QuantumCore.Core.Utils;
 using QuantumCore.Database;
 using QuantumCore.Game.Commands;
 using QuantumCore.Game.Packets;
-using QuantumCore.Game.Packets.shop;
+using QuantumCore.Game.Packets.Shop;
 using QuantumCore.Game.PlayerUtils;
 using Serilog;
 

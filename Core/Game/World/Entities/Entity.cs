@@ -175,6 +175,8 @@ namespace QuantumCore.Game.World.Entities
         public abstract int GetMinDamage();
         public abstract int GetMaxDamage();
         public abstract int GetBonusDamage();
+        public abstract void AddPoint(EPoints point, int value);
+        public abstract void SetPoint(EPoints point, uint value);
         public abstract uint GetPoint(EPoints point);
 
         public void Attack(IEntity victim, byte type)
