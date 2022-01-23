@@ -12,6 +12,7 @@ using QuantumCore.Core.Utils;
 using QuantumCore.Database;
 using QuantumCore.Game.Packets;
 using QuantumCore.Game.PlayerUtils;
+using QuantumCore.Game.Quest;
 using Serilog;
 
 namespace QuantumCore.Game.World.Entities
@@ -28,6 +29,8 @@ namespace QuantumCore.Game.World.Entities
         public IList<Guid> Groups { get; private set; }
         public Shop Shop { get; set; }
         public QuickSlotBar QuickSlotBar { get; }
+        public Quest.Quest CurrentQuest { get; set; }
+        public Dictionary<string, Quest.Quest> Quests { get; } = new();
 
         public override byte HealthPercentage {
             get {
@@ -106,6 +109,8 @@ namespace QuantumCore.Game.World.Entities
             await QuickSlotBar.Load();
             Health = (int) GetPoint(EPoints.MaxHp); // todo: cache hp of player 
             await LoadPermGroups();
+            
+            QuestManager.InitializePlayer(this);
             
             CalculateDefence();
         }

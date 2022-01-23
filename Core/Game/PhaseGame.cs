@@ -3,9 +3,11 @@ using QuantumCore.API.Game.World;
 using QuantumCore.Core.Networking;
 using QuantumCore.Game.Commands;
 using QuantumCore.Game.Packets;
+using QuantumCore.Game.Packets.Quest;
 using QuantumCore.Game.Packets.QuickBar;
 using QuantumCore.Game.Packets.Shop;
 using QuantumCore.Game.PlayerUtils;
+using QuantumCore.Game.Quest;
 using QuantumCore.Game.World.Entities;
 using Serilog;
 using Serilog.Core;
@@ -269,7 +271,7 @@ namespace QuantumCore.Game
                 connection.Close();
                 return;
             }
-
+            
             GameEventManager.OnNpcClick(entity.EntityClass, player);
         }
 
@@ -336,6 +338,20 @@ namespace QuantumCore.Game
             }
 
             player.QuickSlotBar.Swap(packet.Position1, packet.Position2);
+        }
+
+        [Listener(typeof(QuestAnswer))]
+        public static async void OnQuestAnswer(this GameConnection connection, QuestAnswer packet)
+        {
+            var player = connection.Player;
+            if (player == null)
+            {
+                connection.Close();
+                return;
+            }
+            
+            Log.Information($"Quest answer: {packet.Answer}");
+            player.CurrentQuest?.Answer(packet.Answer);
         }
     }
 }
