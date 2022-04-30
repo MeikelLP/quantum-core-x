@@ -50,6 +50,7 @@ namespace QuantumCore.API.Game.World
         public void RemoveNearbyEntity(IEntity entity);
         public void ForEachNearbyEntity(Action<IEntity> action);
         public void ShowEntity(IConnection connection);
+        public void HideEntity(IConnection connection);
 
         public uint GetPoint(EPoints point);
         public int GetMinDamage();

@@ -467,15 +467,76 @@ namespace QuantumCore.Game.World.Entities
 
         protected override void OnRemoveNearbyEntity(IEntity entity)
         {
-            Connection.Send(new RemoveCharacter
-            {
-                Vid = entity.Vid
-            });
+            entity.HideEntity(Connection);
         }
 
-        public override void OnDespawn()
+        public async void DropItem(Item item, byte count)
         {
-            Persist();
+            if (count > item.Count)
+            {
+                return;
+            }
+
+            if (item.Count == count)
+            {
+                RemoveItem(item);
+                SendRemoveItem(item.Window, (ushort) item.Position);
+                await item.Set(Guid.Empty, 0, 0);
+            }
+            else
+            {
+                item.Count -= count;
+                await item.Persist();
+                
+                SendItem(item);
+
+                item = ItemManager.CreateItem(ItemManager.GetItem(item.ItemId), count);
+            }
+
+            (Map as Map)?.AddGroundItem(item, PositionX, PositionY);
+        }
+
+        public async void Pickup(GroundItem groundItem)
+        {
+            var item = groundItem.Item;
+            if (item.ItemId == 1)
+            {
+                AddPoint(EPoints.Gold, (int) groundItem.Amount);
+                SendPoints();
+                Map.DespawnEntity(groundItem);
+
+                return;
+            }
+
+            if (!await Inventory.PlaceItem(item))
+            {
+                SendChatInfo("No inventory space left");
+                return;
+            }
+            
+            SendItem(item);
+            Map.DespawnEntity(groundItem);
+        }
+
+        public void DropGold(uint amount)
+        {
+            // todo prevent crashing the server with dropping gold too often ;)
+            
+            if (amount > GetPoint(EPoints.Gold))
+            {
+                return; // We can't drop more gold than we have ^^
+            }
+            
+            AddPoint(EPoints.Gold, -(int)amount);
+            SendPoints();
+
+            var item = ItemManager.CreateItem(ItemManager.GetItem(1), 1); // count will be overwritten as it's gold
+            (Map as Map)?.AddGroundItem(item, PositionX, PositionY, amount); // todo add method to IMap interface when we have an item interface...
+        }
+
+        public async override void OnDespawn()
+        {
+            await Persist();
         }
 
         public Item GetItem(byte window, ushort position)
@@ -631,6 +692,14 @@ namespace QuantumCore.Game.World.Entities
         {
             SendCharacter(connection);
             SendCharacterAdditional(connection);
+        }
+
+        public override void HideEntity(IConnection connection)
+        {
+            connection.Send(new RemoveCharacter
+            {
+                Vid = Vid
+            });
         }
 
         public void SendBasicData()

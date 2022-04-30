@@ -9,6 +9,7 @@ using QuantumCore.API.Game.World;
 using QuantumCore.Core.API;
 using QuantumCore.Core.Event;
 using QuantumCore.Core.Utils;
+using QuantumCore.Database;
 using QuantumCore.Game.World.Entities;
 using Serilog;
 using Tomlyn;
@@ -256,6 +257,23 @@ namespace QuantumCore.Game.World
                 entity.Map = this;
                 return true;
             }
+        }
+
+        /// <summary>
+        /// Add a ground item which will automatically get destroyed after configured time
+        /// </summary>
+        /// <param name="item">Item to add on the ground, should not have any owner!</param>
+        /// <param name="x">Position X</param>
+        /// <param name="y">Position Y</param>
+        /// <param name="amount">Only used for gold as we have a higher limit here</param>
+        public void AddGroundItem(Item item, int x, int y, uint amount = 0)
+        {
+            var groundItem = new GroundItem(World.Instance.GenerateVid(), item, amount) {
+                PositionX = x, 
+                PositionY = y
+            };
+
+            SpawnEntity(groundItem);
         }
 
         /// <summary>

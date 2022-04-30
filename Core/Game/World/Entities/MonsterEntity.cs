@@ -252,6 +252,14 @@ namespace QuantumCore.Game.World.Entities
                 });
             }
         }
+        
+        public override void HideEntity(IConnection connection)
+        {
+            connection.Send(new RemoveCharacter
+            {
+                Vid = Vid
+            });
+        }
 
         public override string ToString()
         {

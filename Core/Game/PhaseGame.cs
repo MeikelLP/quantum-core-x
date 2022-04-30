@@ -210,6 +210,54 @@ namespace QuantumCore.Game
             }
         }
 
+        [Listener(typeof(ItemDrop))]
+        public static async void OnItemDrop(this GameConnection connection, ItemDrop packet)
+        {
+            var player = connection.Player;
+            if (player == null)
+            {
+                connection.Close();
+                return;
+            }
+
+            if (packet.Gold > 0)
+            {
+                // We're dropping gold...
+                player.DropGold(packet.Gold);
+            }
+            else
+            {
+                // We're dropping an item...
+                var item = player.GetItem(packet.Window, packet.Position);
+                if (item == null)
+                {
+                    return; // Item slot is empty
+                }
+
+                player.DropItem(item, packet.Count);
+            }
+        }
+
+        [Listener(typeof(ItemPickup))]
+        public static async void OnItemPickup(this GameConnection connection, ItemPickup packet)
+        {
+            var player = connection.Player;
+            if (player == null)
+            {
+                connection.Close();
+                return;
+            }
+
+            var entity = player.Map.GetEntity(packet.Vid);
+            if (entity is not GroundItem groundItem)
+            {
+                // we can only pick up ground items
+                return;
+            }
+
+            player.Pickup(groundItem);
+        }
+
         [Listener(typeof(TargetChange))]
         public static async void OnTargetChange(this GameConnection connection, TargetChange packet)
         {

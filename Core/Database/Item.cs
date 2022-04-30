@@ -113,9 +113,12 @@ namespace QuantumCore.Database
                     await oldList.Rem(1, Id);
                 }
 
-                var newList = redis.CreateList<Guid>($"items:{owner}:{window}");
-                await newList.Push(Id);
-                
+                if (owner != Guid.Empty)
+                {
+                    var newList = redis.CreateList<Guid>($"items:{owner}:{window}");
+                    await newList.Push(Id);
+                }
+
                 PlayerId = owner;
                 Window = window;
             }
