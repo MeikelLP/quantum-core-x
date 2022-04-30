@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using QuantumCore.API;
+using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.World;
 using QuantumCore.Cache;
 using QuantumCore.Core.Constants;
@@ -22,7 +23,7 @@ namespace QuantumCore.Game.World.Entities
         public override EEntityType Type => EEntityType.Player;
 
         public string Name => Player.Name;
-        public GameConnection Connection { get; }
+        public IConnection Connection { get; }
         public Player Player { get; private set; }
         public Inventory Inventory { get; private set; }
         public IEntity Target { get; set; }
@@ -252,7 +253,7 @@ namespace QuantumCore.Game.World.Entities
             // todo not respawn with full health as soon as health regen is implemented
             
             SendChatCommand("CloseRestartWindow");
-            Connection.SetPhase(EPhases.Game);
+            (Connection as GameConnection)?.SetPhase(EPhases.Game);
 
             var remove = new RemoveCharacter { Vid = Vid };
             
@@ -374,6 +375,13 @@ namespace QuantumCore.Game.World.Entities
             {
                 case EPoints.Level:
                     Player.Level = (byte) value;
+                    ForEachNearbyEntity(entity =>
+                    {
+                        if (entity is IPlayerEntity other)
+                        {
+                            SendCharacterAdditional(other.Connection);
+                        }
+                    });
                     break;
                 case EPoints.Gold:
                     Player.Gold = value;
@@ -862,7 +870,7 @@ namespace QuantumCore.Game.World.Entities
             Connection.Send(packet);
         }
         
-        public void Show(Connection connection)
+        public void Show(IConnection connection)
         {
             SendCharacter(connection);
             SendCharacterAdditional(connection);

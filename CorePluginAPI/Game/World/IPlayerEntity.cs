@@ -1,8 +1,38 @@
-﻿namespace QuantumCore.API.Game.World
+﻿using QuantumCore.API.Game.Types;
+
+namespace QuantumCore.API.Game.World
 {
     public interface IPlayerEntity : IEntity
     {
         public string Name { get; }
+        
+        public IConnection Connection { get; }
+
+        /// <summary>
+        /// Sets the given point to the specified value
+        /// </summary>
+        /// <param name="point">Point to update</param>
+        /// <param name="value">New value</param>
+        public void SetPoint(EPoints point, uint value);
+        
+        /// <summary>
+        /// Adds the value to the given point
+        /// </summary>
+        /// <param name="point">Point to update</param>
+        /// <param name="value">Value to add (use negative value if you need to lower the point)</param>
+        public void AddPoint(EPoints point, int value);
+        
+        /// <summary>
+        /// Gets the value of the point
+        /// </summary>
+        /// <param name="point">Point to query</param>
+        /// <returns>Current value of the point</returns>
+        public uint GetPoint(EPoints point);
+        
+        /// <summary>
+        /// Sends all points to the player
+        /// </summary>
+        public void SendPoints();
 
         /// <summary>
         /// Respawns the player if the player is dead.

@@ -11,6 +11,13 @@ namespace QuantumCore.Game.Commands
         [CommandMethod]
         public static async void SpawnMonster(IPlayerEntity player, uint monsterId, byte count = 1)
         {
+            var proto = MonsterManager.GetMonster(monsterId);
+            if (proto == null)
+            {
+                player.SendChatInfo("No monster found with the specified id");
+                return;
+            }
+
             for (var i = 0; i < count; i++)
             {
                 // Calculate random spawn position close by the player

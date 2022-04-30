@@ -1,4 +1,5 @@
 ﻿using QuantumCore.API;
+using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.World;
 using QuantumCore.Database;
 using QuantumCore.Game.Packets;

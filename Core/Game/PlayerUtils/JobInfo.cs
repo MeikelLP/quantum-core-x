@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using QuantumCore.API.Game.Types;
 using QuantumCore.Database;
 using QuantumCore.Game.World;
 using Serilog;

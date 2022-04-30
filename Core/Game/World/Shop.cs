@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.World;
 using QuantumCore.Core.Utils;
 using QuantumCore.Game.Packets.Shop;

@@ -17,13 +17,9 @@ namespace QuantumCore.Game.Commands
             
             // Despawn player
             World.World.Instance.DespawnEntity(player);
-
-            // todo migrate to core api
-            if (player is PlayerEntity p)
-            {
-                // Bring client back to select menu
-                p.Connection.SetPhase(EPhases.Select);
-            }
+            
+            // Bring client back to select menu
+            (player.Connection as GameConnection)?.SetPhase(EPhases.Select);
         }
     }
 }

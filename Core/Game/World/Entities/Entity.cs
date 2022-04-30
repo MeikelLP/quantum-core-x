@@ -4,6 +4,7 @@ using System.Diagnostics;
 using QuantumCore.API;
 using QuantumCore.API.Core.Utils;
 using QuantumCore.API.Game;
+using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.World;
 using QuantumCore.Core.Networking;
 using QuantumCore.Core.Utils;
