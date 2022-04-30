@@ -3,6 +3,8 @@ namespace QuantumCore.API.Game.Types
     public enum EPoints
     {
         Level = 1,
+        Experience = 3,
+        NeededExperience = 4,
         Hp = 5,
         MaxHp = 6,
         Sp = 7,

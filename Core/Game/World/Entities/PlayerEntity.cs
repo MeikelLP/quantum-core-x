@@ -296,6 +296,29 @@ namespace QuantumCore.Game.World.Entities
             Player.GivenStatusPoints = shouldHavePoints;
         }
 
+        private bool CheckLevelUp()
+        {
+            var exp = GetPoint(EPoints.Experience);
+            var needed = GetPoint(EPoints.NeededExperience);
+            
+            if (exp >= needed)
+            {
+                // todo level up animation
+                
+                AddPoint(EPoints.Level, 1);
+                SetPoint(EPoints.Experience, exp - needed);
+
+                if (!CheckLevelUp())
+                {
+                    SendPoints();
+                }
+
+                return true;
+            }
+
+            return false;
+        }
+
         public uint CalculateAttackDamage(uint baseDamage)
         {
             var levelBonus = GetPoint(EPoints.Level) * 2;
@@ -376,6 +399,11 @@ namespace QuantumCore.Game.World.Entities
 
         public override void AddPoint(EPoints point, int value)
         {
+            if (value == 0)
+            {
+                return;
+            }
+            
             switch (point)
             {
                 case EPoints.Level:
@@ -388,6 +416,22 @@ namespace QuantumCore.Game.World.Entities
                         }
                     });
                     GiveStatusPoints();
+                    break;
+                case EPoints.Experience:
+                    if (value < 0 && Player.Experience <= -value)
+                    {
+                        Player.Experience = 0;
+                    }
+                    else
+                    {
+                        Player.Experience = (uint) (Player.Experience + value);
+                    }
+
+                    if (value > 0)
+                    {
+                        CheckLevelUp();
+                    }
+                    
                     break;
                 case EPoints.Gold:
                     var gold = Player.Gold + value;
@@ -430,6 +474,10 @@ namespace QuantumCore.Game.World.Entities
                     });
                     GiveStatusPoints();
                     break;
+                case EPoints.Experience:
+                    Player.Experience = value;
+                    CheckLevelUp();
+                    break;
                 case EPoints.Gold:
                     Player.Gold = value;
                     break;
@@ -445,6 +493,10 @@ namespace QuantumCore.Game.World.Entities
             {
                 case EPoints.Level:
                     return Player.Level;
+                case EPoints.Experience:
+                    return Player.Experience;
+                case EPoints.NeededExperience:
+                    return ExperienceTable.GetNeededExperience(Player.Level);
                 case EPoints.Hp:
                     return (uint) Health;
                 case EPoints.MaxHp:

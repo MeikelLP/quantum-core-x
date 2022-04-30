@@ -74,7 +74,10 @@ namespace QuantumCore.Game
             ItemManager.Load();
             Log.Information("Load mob_proto");
             MonsterManager.Load();
+            Log.Information("Load jobs.toml");
             JobInfo.Load();
+            Log.Information("Load exp.csv");
+            ExperienceTable.Load();
             
             // Load all quests
             QuestManager.Init();
