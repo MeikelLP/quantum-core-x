@@ -117,6 +117,32 @@ public class Shop
         p.SendItem(playerItem);
     }
 
+    public async void Sell(IPlayerEntity player, byte position)
+    {
+        if (player is not PlayerEntity p)
+        {
+            return;
+        }
+
+        var item = p.Inventory.GetItem(position);
+        if (item == null)
+        {
+            return;
+        }
+
+        var proto = ItemManager.GetItem(item.ItemId);
+        if (proto == null)
+        {
+            return;
+        }
+
+        if (await p.DestroyItem(item))
+        {
+            p.AddPoint(EPoints.Gold, (int) proto.SellPrice);
+            p.SendPoints();
+        }
+    }
+
     public void Close(IPlayerEntity player, bool sendClose = false)
     {
         if (player is not PlayerEntity p)

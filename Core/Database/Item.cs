@@ -72,6 +72,20 @@ namespace QuantumCore.Database
             }
         }
 
+        public async Task<bool> Destroy()
+        {
+            var redis = CacheManager.Redis;
+            var key = "item:" + Id;
+
+            if (PlayerId != Guid.Empty)
+            {
+                var oldList = redis.CreateList<Guid>($"items:{PlayerId}:{Window}");
+                await oldList.Rem(1, Id);
+            }
+
+            return await redis.Del(key) != 0;
+        }
+
         public async Task Persist()
         {
             var redis = CacheManager.Redis;

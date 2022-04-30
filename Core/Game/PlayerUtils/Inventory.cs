@@ -241,6 +241,7 @@ namespace QuantumCore.Game.PlayerUtils
 
             if (_pages[page].Place(item, position - page * pageSize))
             {
+                _items.Add(item);
                 await item.Set(Owner, Window, position);
                 return true;
             }
@@ -257,6 +258,7 @@ namespace QuantumCore.Game.PlayerUtils
                 return;
             }
 
+            _items.Remove(item);
             _pages[page].RemoveItem(item.Position - page * pageSize);
         }
 

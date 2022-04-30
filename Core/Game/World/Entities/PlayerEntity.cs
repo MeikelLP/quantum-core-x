@@ -565,6 +565,18 @@ namespace QuantumCore.Game.World.Entities
             
             return true;
         }
+
+        public async Task<bool> DestroyItem(Item item)
+        {
+            RemoveItem(item);
+            if (!await item.Destroy())
+            {
+                return false;
+            }
+
+            SendRemoveItem(item.Window, (ushort) item.Position);
+            return true;
+        }
         
         public void RemoveItem(Item item)
         {

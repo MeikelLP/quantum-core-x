@@ -301,6 +301,19 @@ namespace QuantumCore.Game
             player.Shop?.Buy(player, packet.Position, packet.Count);
         }
 
+        [Listener(typeof(ShopSell))]
+        public static async void OnShopSell(this GameConnection connection, ShopSell packet)
+        {
+            var player = connection.Player;
+            if (player == null)
+            {
+                connection.Close();
+                return;
+            }
+
+            player.Shop?.Sell(player, packet.Position);
+        }
+
         [Listener(typeof(QuickBarAdd))]
         public static async void OnQuickBarAdd(this GameConnection connection, QuickBarAdd packet)
         {

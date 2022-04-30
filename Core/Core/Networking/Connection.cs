@@ -122,6 +122,12 @@ namespace QuantumCore.Core.Networking
                     {
                         packetDetails =
                             _packetManager.GetIncomingPacket((ushort) (packetDetails.Header << 8 | subHeader));
+                        if (packetDetails == null)
+                        {
+                            Log.Information($"Received unknown sub header {subHeader:X2} for header {buffer[0]:X2}");
+                            _client.Close();
+                            break;
+                        }
 
                         packet = Activator.CreateInstance(packetDetails.Type);
 
