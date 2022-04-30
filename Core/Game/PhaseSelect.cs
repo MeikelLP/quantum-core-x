@@ -178,10 +178,13 @@ namespace QuantumCore.Game
             var list = redis.CreateList<Guid>("players:" + accountId);
             var idx = await list.Push(player.Id);
             
+            // Query responsible host for the map
+            var host = World.World.Instance.GetMapHost(player.PositionX, player.PositionY);
+            
             // Send success response
             var character = Character.FromEntity(player);
-            character.Ip = IpUtils.ConvertIpToUInt(IpUtils.PublicIP);
-            character.Port = 13001;
+            character.Ip = IpUtils.ConvertIpToUInt(host.Ip);
+            character.Port = host.Port;
             connection.Send(new CreateCharacterSuccess
             {
                 Slot = (byte)(idx - 1),

@@ -16,6 +16,7 @@ namespace QuantumCore.Core.Networking
 {
     public class Server<T> : IPacketManager where T : Connection
     {
+        private readonly int _port;
         private readonly List<Func<T, bool>> _connectionListeners = new();
         private readonly Dictionary<Guid, T> _connections = new();
         private readonly Dictionary<ushort, PacketCache> _incomingPackets = new();
@@ -30,8 +31,16 @@ namespace QuantumCore.Core.Networking
 
         private readonly Func<Server<T>, TcpClient, T> _clientConstructor;
 
+        public int Port {
+            get {
+                return _port;
+            }
+        }
+        
         public Server(Func<Server<T>, TcpClient, T> clientConstructor, int port, string bindIp = "0.0.0.0")
         {
+            _port = port;
+            
             Log.Information($"Initialize tcp server listening on {bindIp}:{port}");
             _clientConstructor = clientConstructor;
             

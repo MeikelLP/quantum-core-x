@@ -250,7 +250,6 @@ namespace QuantumCore.Game.World.Entities
             
             // todo implement respawn in town
             // todo spawn with invisible affect
-            // todo not respawn with full health as soon as health regen is implemented
             
             SendChatCommand("CloseRestartWindow");
             (Connection as GameConnection)?.SetPhase(EPhases.Game);

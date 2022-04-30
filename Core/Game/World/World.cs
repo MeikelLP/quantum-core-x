@@ -240,6 +240,17 @@ namespace QuantumCore.Game.World
             return list;
         }
 
+        public CoreHost GetMapHost(int x, int y)
+        {
+            var map = GetMapAt((uint) x, (uint) y);
+            if (map == null)
+            {
+                throw new NotImplementedException("Splitting workload is currently not supported..."); // todo implement
+            }
+
+            return new CoreHost {Ip = IpUtils.PublicIP, Port = (ushort) GameServer.Instance.Server.Port};
+        }
+
         public SpawnGroup GetGroup(int id)
         {
             if (!_groups.ContainsKey(id))

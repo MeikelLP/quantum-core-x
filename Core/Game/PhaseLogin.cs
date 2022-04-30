@@ -53,11 +53,12 @@ namespace QuantumCore.Game
             var i = 0;
             await foreach (var player in Player.GetPlayers(token.AccountId))
             {
+                var host = World.World.Instance.GetMapHost(player.PositionX, player.PositionY);
+                
                 // todo character slot position
                 characters.CharacterList[i] = Character.FromEntity(player);
-                // todo calculate real target ip and port
-                characters.CharacterList[i].Ip = IpUtils.ConvertIpToUInt(IpUtils.PublicIP);
-                characters.CharacterList[i].Port = 13001;
+                characters.CharacterList[i].Ip = IpUtils.ConvertIpToUInt(host.Ip);
+                characters.CharacterList[i].Port = host.Port;
 
                 i++;
             }
