@@ -277,6 +277,9 @@ namespace QuantumCore.Game.World.Entities
         private void GiveStatusPoints()
         {
             var shouldHavePoints = (uint) ((Player.Level - 1) * 3);
+            var steps = (byte) Math.Floor(GetPoint(EPoints.Experience) / (double)GetPoint(EPoints.NeededExperience) * 4);
+            shouldHavePoints += steps;
+            
             if (shouldHavePoints <= Player.GivenStatusPoints)
             {
                 // Remove available points if possible
@@ -315,7 +318,8 @@ namespace QuantumCore.Game.World.Entities
 
                 return true;
             }
-
+            
+            GiveStatusPoints();
             return false;
         }
 
