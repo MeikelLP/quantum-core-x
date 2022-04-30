@@ -129,6 +129,17 @@ namespace QuantumCore.Game.World.Entities
             }
         }
 
+        public T GetQuestInstance<T>() where T : Quest.Quest
+        {
+            var id = typeof(T).FullName;
+            if (id == null)
+            {
+                return null;
+            }
+
+            return (T) Quests[id];
+        }
+
         private void Warp(int x, int y)
         {
             World.Instance.DespawnEntity(this);

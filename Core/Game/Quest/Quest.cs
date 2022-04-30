@@ -13,6 +13,7 @@ public abstract class Quest
 
     private readonly PlayerEntity _player;
     private string _questScript = "";
+    private QuestSkin _currentSkin = QuestSkin.Normal;
 
     private TaskCompletionSource _currentNextTask;
     private TaskCompletionSource<byte> _currentChoiceTask;
@@ -26,15 +27,21 @@ public abstract class Quest
 
     public abstract void Init();
 
-    private void SendScript()
+    protected void SendScript()
     {
         _player.Connection.Send(new QuestScript {
-            Skin = 1,
+            Skin = (byte) _currentSkin,
             Source = _questScript,
             SourceSize = (ushort)(_questScript.Length + 1)
         });
 
+        _currentSkin = QuestSkin.Normal;
         _questScript = "";
+    }
+
+    protected void SetSkin(QuestSkin skin)
+    {
+        _currentSkin = skin;
     }
     
     public void Answer(byte answer)
@@ -65,7 +72,7 @@ public abstract class Quest
         return _currentNextTask.Task;
     }
 
-    protected Task<byte> Choice(params string[] options)
+    protected Task<byte> Choice(bool done = false, params string[] options)
     {
         Debug.Assert(options.Length > 0);
         
@@ -88,6 +95,11 @@ public abstract class Quest
         }
 
         _questScript += "]";
+
+        if (done)
+        {
+            _questScript += "[DONE]";
+        }
         
         SendScript();
 
@@ -95,9 +107,13 @@ public abstract class Quest
         return _currentChoiceTask.Task;
     }
 
-    protected void Done()
+    protected void Done(bool silent = false)
     {
-        _questScript += "[ENTER][DONE]";
+        if (!silent)
+        {
+            _questScript += "[ENTER]";
+        }
+        _questScript += "[DONE]";
         
         SendScript();
     }

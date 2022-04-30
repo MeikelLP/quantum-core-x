@@ -24,7 +24,7 @@ public class TestQuest : Quest
         
         Text("This is the second page showing how to easily");
         Text("using await to wait for user response");
-        var choice = await Choice("1st option", "2nd option");
+        var choice = await Choice(false, "1st option", "2nd option");
         
         Text($"You've chosen: {choice}");
         Done();

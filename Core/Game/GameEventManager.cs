@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using QuantumCore.API.Game.World;
+using QuantumCore.Game.Quest;
+using QuantumCore.Game.World.Entities;
 
 namespace QuantumCore.Game;
 
@@ -17,7 +19,7 @@ public static class GameEventManager
 
     private static readonly Dictionary<uint, List<NpcClickEvent>> NpcClickEvents = new();
 
-    public static void OnNpcClick(uint npcId, IPlayerEntity player)
+    public static async void OnNpcClick(uint npcId, IPlayerEntity player)
     {
         if (!NpcClickEvents.ContainsKey(npcId))
         {
@@ -27,7 +29,16 @@ public static class GameEventManager
         var events = NpcClickEvents[npcId].Where(e => e.Condition == null || e.Condition(player)).ToList();
         if (events.Count > 1)
         {
-            // todo show quest window with selection
+            var p = player as PlayerEntity;
+            var internalQuest = p.GetQuestInstance<InternalQuest>();
+
+            var selected = await internalQuest.SelectQuest(events.Select(e => e.Name));
+            if (events[selected].Callback.Target is not Quest.Quest)
+            {
+                internalQuest.EndQuest();
+            }
+            events[selected].Callback(player);
+            
             return;
         }
 
