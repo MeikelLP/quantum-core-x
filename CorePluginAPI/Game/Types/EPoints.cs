@@ -17,6 +17,7 @@ namespace QuantumCore.API.Game.Types
         AttackGrade = 18,
         MoveSpeed = 19,
         Defence = 20,
+        StatusPoints = 26,
         MinAttackDamage = 29,
         MaxAttackDamage = 30,
         CriticalPercentage = 40,

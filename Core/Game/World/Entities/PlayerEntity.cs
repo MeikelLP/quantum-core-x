@@ -274,6 +274,28 @@ namespace QuantumCore.Game.World.Entities
             SendPoints();
         }
 
+        private void GiveStatusPoints()
+        {
+            var shouldHavePoints = (uint) ((Player.Level - 1) * 3);
+            if (shouldHavePoints <= Player.GivenStatusPoints)
+            {
+                // Remove available points if possible
+                var tooMuch = Player.GivenStatusPoints - shouldHavePoints;
+                if (Player.AvailableStatusPoints < tooMuch)
+                {
+                    tooMuch = Player.AvailableStatusPoints;
+                }
+
+                Player.AvailableStatusPoints -= tooMuch;
+                Player.GivenStatusPoints -= tooMuch;
+
+                return;
+            }
+            
+            Player.AvailableStatusPoints += shouldHavePoints - Player.GivenStatusPoints;
+            Player.GivenStatusPoints = shouldHavePoints;
+        }
+
         public uint CalculateAttackDamage(uint baseDamage)
         {
             var levelBonus = GetPoint(EPoints.Level) * 2;
@@ -358,10 +380,34 @@ namespace QuantumCore.Game.World.Entities
             {
                 case EPoints.Level:
                     Player.Level = (byte)(Player.Level + value);
+                    ForEachNearbyEntity(entity =>
+                    {
+                        if (entity is IPlayerEntity other)
+                        {
+                            SendCharacterAdditional(other.Connection);
+                        }
+                    });
+                    GiveStatusPoints();
                     break;
                 case EPoints.Gold:
                     var gold = Player.Gold + value;
                     Player.Gold = (uint) Math.Min(uint.MaxValue, Math.Max(0, gold));
+                    break;
+                case EPoints.St:
+                    Player.St += (byte) value;
+                    break;
+                case EPoints.Dx:
+                    Player.Dx += (byte) value;
+                    break;
+                case EPoints.Ht:
+                    Player.Ht += (byte) value;
+                    break;
+                case EPoints.Iq:
+                    Player.Iq += (byte) value;
+                    break;
+                case EPoints.StatusPoints:
+                    Player.AvailableStatusPoints += (uint) value;
+
                     break;
                 default:
                     Log.Error($"Failed to add point to {point}, unsupported");
@@ -382,6 +428,7 @@ namespace QuantumCore.Game.World.Entities
                             SendCharacterAdditional(other.Connection);
                         }
                     });
+                    GiveStatusPoints();
                     break;
                 case EPoints.Gold:
                     Player.Gold = value;
@@ -448,6 +495,8 @@ namespace QuantumCore.Game.World.Entities
                 case EPoints.Defence:
                 case EPoints.DefenceGrade:
                     return _defence;
+                case EPoints.StatusPoints:
+                    return Player.AvailableStatusPoints;
                 default:
                     if (Enum.GetValues<EPoints>().Contains(point))
                     {

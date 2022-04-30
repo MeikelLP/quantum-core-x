@@ -31,6 +31,8 @@ namespace QuantumCore.Database
         public long Stamina { get; set; }
         public uint BodyPart { get; set; }
         public uint HairPart { get; set; }
+        public uint GivenStatusPoints { get; set; }
+        public uint AvailableStatusPoints { get; set; }
 
         public static async Task<Player> GetPlayer(Guid account, byte slot)
         {
