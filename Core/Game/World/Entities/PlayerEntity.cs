@@ -148,15 +148,16 @@ namespace QuantumCore.Game.World.Entities
             PositionX = x;
             PositionY = y;
             
+            var host = World.Instance.GetMapHost(PositionX, PositionY);
+            
             Persist().ContinueWith(_ =>
             {
                 Log.Information("Warp!");
                 var packet = new Warp {
                     PositionX = PositionX,
                     PositionY = PositionY,
-                    // todo calculate real target ip and port
-                    ServerAddress = IpUtils.ConvertIpToUInt(IpUtils.PublicIP),
-                    ServerPort = 13001
+                    ServerAddress = IpUtils.ConvertIpToUInt(host.Ip),
+                    ServerPort = host.Port
                 };
                 Connection.Send(packet);
             });

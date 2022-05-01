@@ -25,6 +25,7 @@ namespace QuantumCore.API.Game.World
         public uint EntityClass { get; }
         public EEntityType Type { get; }
         public EEntityState State { get; }
+        public bool PositionChanged { get; set; }
         public int PositionX { get; }
         public int PositionY { get; }
         public float Rotation { get; set; }
@@ -45,6 +46,8 @@ namespace QuantumCore.API.Game.World
         public int TargetPositionY { get; }
         public int StartPositionY { get; }
         public uint MovementDuration { get; }
+
+        public void Update(double elapsedTime);
         
         public void OnDespawn();
         public void AddNearbyEntity(IEntity entity);

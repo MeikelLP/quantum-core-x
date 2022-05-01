@@ -6,6 +6,7 @@ using System.Linq;
 using System.Security.Cryptography;
 using QuantumCore.API.Game;
 using QuantumCore.API.Game.World;
+using QuantumCore.Cache;
 using QuantumCore.Core.API;
 using QuantumCore.Core.Event;
 using QuantumCore.Core.Utils;
@@ -28,7 +29,7 @@ namespace QuantumCore.Game.World
         public uint Width { get; private set; }
         public uint Height { get; private set; }
 
-        private readonly List<Entity> _entities = new();
+        private readonly List<IEntity> _entities = new();
         private readonly QuadTree _quadTree;
         private readonly List<SpawnPoint> _spawnPoints = new();
 
@@ -49,6 +50,9 @@ namespace QuantumCore.Game.World
         public void Initialize()
         {
             Log.Debug($"Load map '{Name}' at {PositionX}x{PositionY} (size {Width}x{Height})");
+
+            CacheManager.Redis.Set($"maps:{Name}", IpUtils.PublicIP + ":" + GameServer.Instance.Server.Port);
+            CacheManager.Redis.Publish("maps", $"{Name} {IpUtils.PublicIP}:{GameServer.Instance.Server.Port}");
 
             // Load map spawn data
             var spawnFile = Path.Join("data", "maps", Name, "spawn.toml");
@@ -231,7 +235,7 @@ namespace QuantumCore.Game.World
             return x >= PositionX && x < PositionX + Width * MapUnit && y >= PositionY && y < PositionY + Height * MapUnit;
         }
 
-        public bool SpawnEntity(Entity entity)
+        public bool SpawnEntity(IEntity entity)
         {
             lock (_entities)
             {

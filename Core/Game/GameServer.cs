@@ -69,6 +69,12 @@ namespace QuantumCore.Game
             DatabaseManager.Init(options.AccountString, options.GameString);
             CacheManager.Init(options.RedisHost, options.RedisPort);
             
+            // Load game configuration
+            ConfigManager.Load();
+            
+            // Start tcp server
+            _server = new Server<GameConnection>((server, client) => new GameConnection(server, client), options.Port);
+            
             // Load game data
             Log.Information("Load item_proto");
             ItemManager.Load();
@@ -94,9 +100,6 @@ namespace QuantumCore.Game
             // Load permissions
             Log.Information("Initialize permissions");
             CommandManager.Load();
-            
-            // Start tcp server
-            _server = new Server<GameConnection>((server, client) => new GameConnection(server, client), options.Port);
 
             // Register all default commands
             CommandManager.Register("QuantumCore.Game.Commands");

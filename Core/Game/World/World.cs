@@ -2,10 +2,14 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
+using System.Net;
 using System.Text.RegularExpressions;
+using BeetleX.Redis;
 using Prometheus;
 using QuantumCore.API.Game;
 using QuantumCore.API.Game.World;
+using QuantumCore.Cache;
 using QuantumCore.Core.API;
 using QuantumCore.Core.Utils;
 using QuantumCore.Game.World.Entities;
@@ -18,13 +22,15 @@ namespace QuantumCore.Game.World
     public class World : IWorld
     {
         private uint _vid;
-        private readonly Grid<Map> _world = new(0, 0);
-        private readonly Dictionary<string, Map> _maps = new();
+        private readonly Grid<IMap> _world = new(0, 0);
+        private readonly Dictionary<string, IMap> _maps = new();
         private readonly Dictionary<string, PlayerEntity> _players = new();
         private readonly Dictionary<int, SpawnGroup> _groups = new();
 
         private readonly Dictionary<int, Shop> _staticShops = new();
 
+        private Subscriber _mapSubscriber;
+        
         private readonly Histogram _updateDuration =
             Metrics.CreateHistogram("world_update_duration_seconds", "How long did a world update took");
         private readonly Gauge _entities = Metrics.CreateGauge("entities", "Currently handles entities");
@@ -42,11 +48,15 @@ namespace QuantumCore.Game.World
             LoadShops();
             LoadGroups();
             LoadAtlasInfo();
+            LoadRemoteMaps();
 
             // Initialize maps, spawn monsters etc
             foreach (var map in _maps.Values)
             {
-                map.Initialize();
+                if (map is Map m)
+                {
+                    m.Initialize();
+                }
             }
         }
 
@@ -161,9 +171,18 @@ namespace QuantumCore.Game.World
                         var positionY = uint.Parse(match.Groups[3].Value);
                         var width = uint.Parse(match.Groups[4].Value);
                         var height = uint.Parse(match.Groups[5].Value);
-                            
-                        // todo check if map is hosted by this game core
-                        var map = new Map(mapName, positionX, positionY, width, height);
+
+                        IMap map;
+                        if (!ConfigManager.Maps.Contains(mapName))
+                        {
+                            map = new RemoteMap(mapName, positionX, positionY, width, height);
+                        }
+                        else
+                        {
+                            map = new Map(mapName, positionX, positionY, width, height);    
+                        }
+                        
+                        
                         _maps[map.Name] = map;
 
                         if (positionX + width * Map.MapUnit > maxX) maxX = positionX + width * Map.MapUnit;
@@ -193,6 +212,55 @@ namespace QuantumCore.Game.World
                 }
             }
         }
+
+        private async void LoadRemoteMaps()
+        {
+            var redis = CacheManager.Redis;
+            var keys = await redis.Keys("maps:*");
+
+            foreach (var key in keys)
+            {
+                var mapName = key[5..];
+                var map = _maps[mapName];
+                if (map is not RemoteMap remoteMap)
+                {
+                    continue;
+                }
+
+                var address = await redis.Get<string>(key);
+                var parts = address.Split(":");
+                Debug.Assert(parts.Length == 2);
+                    
+                remoteMap.Host = IPAddress.Parse(parts[0]);
+                remoteMap.Port = ushort.Parse(parts[1]);
+                
+                Log.Debug($"Map {remoteMap.Name} is available at {remoteMap.Host}:{remoteMap.Port}");
+            }
+
+            _mapSubscriber = redis.Subscribe();
+            _mapSubscriber.Register<string>("maps", mapDetails =>
+            {
+                var data = mapDetails.Split(" ");
+                Debug.Assert(data.Length == 2);
+
+                var mapName = data[0];
+                var parts = data[1].Split(":");
+                Debug.Assert(parts.Length == 2);
+
+                var map = _maps[mapName];
+                if (map is not RemoteMap remoteMap)
+                {
+                    return;
+                }
+                
+                remoteMap.Host = IPAddress.Parse(parts[0]);
+                remoteMap.Port = ushort.Parse(parts[1]);
+                
+                Log.Debug($"Map {remoteMap.Name} is now available at {remoteMap.Host}:{remoteMap.Port}");
+            });
+            
+            _mapSubscriber.Listen();
+        }
         
         public void Update(double elapsedTime)
         {
@@ -207,7 +275,7 @@ namespace QuantumCore.Game.World
             }
         }
 
-        public Map GetMapAt(uint x, uint y)
+        public IMap GetMapAt(uint x, uint y)
         {
             var gridX = x / Map.MapUnit;
             var gridY = y / Map.MapUnit;
@@ -245,7 +313,13 @@ namespace QuantumCore.Game.World
             var map = GetMapAt((uint) x, (uint) y);
             if (map == null)
             {
-                throw new NotImplementedException("Splitting workload is currently not supported..."); // todo implement
+                Log.Warning($"No available host for map at {x}x{y}");
+                return new CoreHost {Ip = IPAddress.None, Port = 0};
+            }
+
+            if (map is RemoteMap remoteMap)
+            {
+                return new CoreHost {Ip = remoteMap.Host, Port = remoteMap.Port};
             }
 
             return new CoreHost {Ip = IpUtils.PublicIP, Port = (ushort) GameServer.Instance.Server.Port};
