@@ -81,8 +81,14 @@ namespace QuantumCore.Core.Networking
                 } catch(Exception e) {
                     Log.Fatal(e.Message);
                 }
-            
-            Console.WriteLine("HALLO");
+        }
+
+        public void ForAllConnections(Action<T> callback)
+        {
+            foreach (var connection in _connections.Values)
+            {
+                callback(connection);
+            }
         }
 
         public void RegisterListeners()

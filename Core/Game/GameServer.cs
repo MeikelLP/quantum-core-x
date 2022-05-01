@@ -85,6 +85,9 @@ namespace QuantumCore.Game
             Log.Information("Load exp.csv");
             ExperienceTable.Load();
             
+            // Initialize core systems
+            ChatManager.Init();
+
             // Load all quests
             QuestManager.Init();
 

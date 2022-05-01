@@ -73,25 +73,18 @@ namespace QuantumCore.Game
                 }
                 else
                 {
-                    var newMessage = connection.Player.Name + ": " + packet.Message;
-                    var chat = new ChatOutcoming
-                    {
-                        MessageType = ChatMessageTypes.Normal,
-                        Vid = connection.Player.Vid,
-                        Empire = 1,
-                        Message = newMessage
-                    };
+                    var message = connection.Player.Name + ": " + packet.Message;
 
-                    connection.Send(chat);
-
-                    connection.Player.ForEachNearbyEntity(entity =>
-                    {
-                        if (entity is PlayerEntity player)
-                        {
-                            player.Connection.Send(chat);
-                        }
-                    });
+                    ChatManager.Talk(connection.Player, message);
                 }
+            }
+
+            if (packet.MessageType == ChatMessageTypes.Shout)
+            {
+                // todo check 15 seconds cooldown
+                var message = connection.Player.Name + ": " + packet.Message;
+                
+                ChatManager.Shout(message);
             }
         }
 
