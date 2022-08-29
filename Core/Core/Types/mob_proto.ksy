@@ -40,11 +40,11 @@ types:
       - id: id
         type: u4
       - id: name
-        type: str
+        type: strz
         encoding: ascii
         size: 25
       - id: translated_name
-        type: str
+        type: strz
         encoding: ascii
         size: 25
       - id: type
