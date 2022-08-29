@@ -1,4 +1,5 @@
 using QuantumCore.API.Game.World;
+using QuantumCore.Database;
 
 namespace QuantumCore.Game.Quest;
 
@@ -13,6 +14,7 @@ public class TestQuest : Quest
     {
         // todo invent api for register npc click event on player
         GameEventManager.RegisterNpcClickEvent("Test Quest", 20354, Test, player => player.Vid == Player.Vid);
+        GameEventManager.RegisterNpcGiveEvent("Test Quest", 20016, TestGive, (player, _) => player.Vid == Player.Vid);
     }
 
     private async void Test(IPlayerEntity player)
@@ -27,6 +29,14 @@ public class TestQuest : Quest
         var choice = await Choice(false, "1st option", "2nd option");
         
         Text($"You've chosen: {choice}");
+        Done();
+    }
+
+    private async void TestGive(IPlayerEntity player, Item item)
+    {
+        var proto = ItemManager.GetItem(item.ItemId);
+        
+        Text($"Thanks for giving me the item {proto.TranslatedName}.");
         Done();
     }
 }

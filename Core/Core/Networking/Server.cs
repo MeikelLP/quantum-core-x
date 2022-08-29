@@ -123,6 +123,7 @@ namespace QuantumCore.Core.Networking
                 
                 Log.Debug($"Register listener on packet {attribute.Packet.Name}");
                 var packet = _incomingPackets.First(p => p.Value.Type == attribute.Packet);
+
                 if (method.IsStatic)
                 {
                     _listeners[packet.Key] = (T connection, object p) =>

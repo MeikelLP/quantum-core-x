@@ -251,6 +251,33 @@ namespace QuantumCore.Game
             player.Pickup(groundItem);
         }
 
+        [Listener(typeof(ItemGive))]
+        public static async void OnItemGive(this GameConnection connection, ItemGive packet)
+        {
+            var player = connection.Player;
+            if (player == null)
+            {
+                connection.Close();
+                return;
+            }
+
+            var entity = player.Map.GetEntity(packet.TargetVid);
+            if (entity == null)
+            {
+                Log.Debug("Ignore item give to non existing entity");
+                return;
+            }
+
+            var item = player.GetItem(packet.Window, packet.Position);
+            if (item == null)
+            {
+                return;
+            }
+            
+            Log.Information($"Item give to {entity}");
+            GameEventManager.OnNpcGive(entity.EntityClass, player, item);
+        }
+
         [Listener(typeof(TargetChange))]
         public static async void OnTargetChange(this GameConnection connection, TargetChange packet)
         {
