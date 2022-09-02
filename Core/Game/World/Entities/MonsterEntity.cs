@@ -178,6 +178,8 @@ namespace QuantumCore.Game.World.Entities
                     return (uint)(_proto.Level + _proto.Ht + _proto.Defence);
                 case EPoints.DefenceBonus:
                     return 0;
+                case EPoints.Experience:
+                    return _proto.Experience;
             }
             Log.Warning($"Point {point} is not implemented on monster");
             return 0;

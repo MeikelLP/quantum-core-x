@@ -6,6 +6,7 @@ using QuantumCore.API.Core.Utils;
 using QuantumCore.API.Game;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.World;
+using QuantumCore.Core.Constants;
 using QuantumCore.Core.Networking;
 using QuantumCore.Core.Utils;
 using QuantumCore.Game.Packets;
@@ -268,6 +269,16 @@ namespace QuantumCore.Game.World.Entities
             return attack;
         }
 
+        private int CalculateExperience(uint playerLevel)
+        {
+            var baseExp = GetPoint(EPoints.Experience);
+            var entityLevel = GetPoint(EPoints.Level);
+
+            var percentage = ExperienceConstants.GetExperiencePercentageByLevelDifference(playerLevel, entityLevel);
+
+            return (int)(baseExp * percentage);
+        }
+
         private void SendDebugDamage(IEntity other, string text)
         {
             var thisPlayer = this as PlayerEntity;
@@ -352,9 +363,16 @@ namespace QuantumCore.Game.World.Entities
             {
                 playerEntity.SendTarget();
             }
+
             if (Health <= 0)
             {
                 Die();
+                if (Type != EEntityType.Player && attackerPlayer is not null)
+                {
+                    var exp = CalculateExperience(attackerPlayer.GetPoint(EPoints.Level));
+                    attackerPlayer.AddPoint(EPoints.Experience, exp);
+                    attackerPlayer.SendPoints();
+                }
             }
 
             return damage;
