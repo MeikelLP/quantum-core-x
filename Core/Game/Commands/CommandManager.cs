@@ -169,15 +169,13 @@ namespace QuantumCore.Game.Commands
 
                 for (var i = 1; i < args.Length; i++)
                 {
-                    float f;
-                    int n;
                     var str = args[i];
 
-                    if (str.Contains(".") || str.Contains(","))
+                    if (str.Contains('.') || str.Contains(','))
                     {
-                        str = str.Replace(".", ",");
+                        var numStr = str.Replace(".", ",");
 
-                        if (float.TryParse(str, out f))
+                        if (float.TryParse(numStr, out var f))
                         {
                             objects[i] = f;
                         }
@@ -188,7 +186,7 @@ namespace QuantumCore.Game.Commands
                     }
                     else
                     {
-                        if (int.TryParse(str, out n))
+                        if (int.TryParse(str, out var n))
                         {
                             objects[i] = n;
                         }
