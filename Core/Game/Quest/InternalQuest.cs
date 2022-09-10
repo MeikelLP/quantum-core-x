@@ -20,7 +20,7 @@ public class InternalQuest : Quest
 
     public async Task<byte> SelectQuest(IEnumerable<string> events)
     {
-        return await Choice(false, events.ToArray());
+        return await Choice(events.ToArray());
     }
 
     public void EndQuest()

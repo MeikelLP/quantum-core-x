@@ -1,8 +1,12 @@
+using System;
 using System.Diagnostics;
+using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using QuantumCore.API.Game.World;
 using QuantumCore.Game.Packets.Quest;
 using QuantumCore.Game.World.Entities;
+using Serilog;
 
 namespace QuantumCore.Game.Quest;
 
@@ -43,6 +47,23 @@ public abstract class Quest
     {
         _currentSkin = skin;
     }
+
+    protected void SendQuestLetter(string name, Action callback)
+    {
+        var buffer = new byte[31];
+        var encoded = Encoding.ASCII.GetBytes(name);
+        Array.Copy(encoded, buffer, encoded.Length > 30 ? 30 : encoded.Length);
+        
+        Log.Debug($"QuestInfo Data - {string.Join(" ", buffer.Select(n => n.ToString()))}");
+        
+        var info = new QuestInfo {Index = 0, Flags = (byte) (QuestInfo.InfoFlags.Title), Data = buffer};
+        Player.Connection.Send(info);
+    }
+
+    protected void ExitQuest()
+    {
+        // todo
+    }
     
     public void Answer(byte answer)
     {
@@ -72,7 +93,7 @@ public abstract class Quest
         return _currentNextTask.Task;
     }
 
-    protected Task<byte> Choice(bool done = false, params string[] options)
+    protected Task<byte> Choice(params string[] options)
     {
         Debug.Assert(options.Length > 0);
         
@@ -95,11 +116,6 @@ public abstract class Quest
         }
 
         _questScript += "]";
-
-        if (done)
-        {
-            _questScript += "[DONE]";
-        }
         
         SendScript();
 

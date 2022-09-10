@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Security.Cryptography;
 using FluentMigrator.Runner.Generators.Postgres;
 using QuantumCore.API;
@@ -42,6 +43,7 @@ namespace QuantumCore.Game.World.Entities
         private IBehaviour _behaviour;
         private bool _behaviourInitialized;
         private double _deadTime = 5000;
+        private readonly Dictionary<uint, uint> _damageMap = new();
         
         public MonsterEntity(uint id, int x, int y, float rotation = 0) : base(World.Instance.GenerateVid())
         {
@@ -136,14 +138,31 @@ namespace QuantumCore.Game.World.Entities
             return 0; // monster don't have bonus damage as players have from their weapon
         }
 
-        public override int Damage(IEntity attacker, EDamageType damageType, int damage)
+        public override int Damage(IEntity attacker, EDamageType damageType, int damage, bool handleDeath = true)
         {
-            damage = base.Damage(attacker, damageType, damage);
+            damage = base.Damage(attacker, damageType, damage, false);
 
             if (damage >= 0)
             {
                 Behaviour?.TookDamage(attacker, (uint) damage);
                 Group?.TriggerAll(attacker, this);
+                
+                // todo migrate with damage map in behaviour!
+                if (!_damageMap.ContainsKey(attacker.Vid))
+                {
+                    _damageMap[attacker.Vid] = (uint) damage;
+                }
+                else
+                {
+                    _damageMap[attacker.Vid] += (uint) damage;
+                }
+                
+                Log.Debug($"{attacker.Vid} total damage is {_damageMap[attacker.Vid]}");
+            }
+            
+            if (handleDeath && Health <= 0)
+            {
+                Die();
             }
 
             return damage;
@@ -193,6 +212,8 @@ namespace QuantumCore.Game.World.Entities
             }
             
             base.Die();
+            
+            Log.Debug($"{this} died");
 
             var dead = new CharacterDead { Vid = Vid };
             ForEachNearbyEntity(entity =>
@@ -202,6 +223,17 @@ namespace QuantumCore.Game.World.Entities
                     player.Connection.Send(dead);
                 }
             });
+            
+            foreach (var (vid, damage) in _damageMap)
+            {
+                var entity = Map.GetEntity(vid);
+                Log.Debug($"{vid} -> {entity} = {damage}");
+                if (entity is IPlayerEntity player)
+                {
+                    Log.Debug($"Kill of {_proto.Id} by {player}");
+                    GameEventManager.OnMonsterKill(player, _proto.Id);
+                }
+            }
         }
 
         protected override void OnNewNearbyEntity(IEntity entity)

@@ -26,8 +26,23 @@ public static class GameEventManager
         public Func<IPlayerEntity, Item, bool> Condition { get; set; }
     }
 
+    private struct LevelUpEvent
+    {
+        public Action<IPlayerEntity> Callback { get; set; }
+        public Func<IPlayerEntity, bool> Condition { get; set; }
+    }
+
+    private struct MonsterKillEvent
+    {
+        public uint MonsterId { get; set; }
+        public Action<IPlayerEntity> Callback { get; set; }
+        public Func<IPlayerEntity, bool> Condition { get; set; }
+    }
+
     private static readonly Dictionary<uint, List<NpcClickEvent>> NpcClickEvents = new();
     private static readonly Dictionary<uint, List<NpcGiveEvent>> NpcGiveEvents = new();
+    private static readonly List<LevelUpEvent> LevelUpEvents = new();
+    private static readonly Dictionary<uint, List<MonsterKillEvent>> MonsterKillEvents = new();
 
     public static async void OnNpcClick(uint npcId, IPlayerEntity player)
     {
@@ -92,6 +107,33 @@ public static class GameEventManager
 
         events[0].Callback(player, item);
     }
+
+    public static void OnLevelUp(IPlayerEntity player)
+    {
+        foreach (var evt in LevelUpEvents)
+        {
+            if (evt.Condition == null || evt.Condition(player))
+            {
+                evt.Callback(player);
+            }
+        }
+    }
+
+    public static void OnMonsterKill(IPlayerEntity player, uint monsterId)
+    {
+        if (!MonsterKillEvents.ContainsKey(monsterId))
+        {
+            return;
+        }
+
+        foreach (var evt in MonsterKillEvents[monsterId])
+        {
+            if (evt.Condition == null || evt.Condition(player))
+            {
+                evt.Callback(player);
+            }
+        }
+    }
     
     public static void RegisterNpcClickEvent(string name, uint npcId, Action<IPlayerEntity> callback, 
         Func<IPlayerEntity, bool> condition = null)
@@ -120,6 +162,29 @@ public static class GameEventManager
         NpcGiveEvents[npcId].Add(new NpcGiveEvent {
             Name = name,
             NpcId = npcId,
+            Callback = callback,
+            Condition = condition
+        });
+    }
+
+    public static void RegisterLevelUpEvent(Action<IPlayerEntity> callback, Func<IPlayerEntity, bool> condition = null)
+    {
+        LevelUpEvents.Add(new LevelUpEvent {
+            Callback = callback,
+            Condition = condition
+        });
+    }
+
+    public static void RegisterMonsterKillEvent(uint monsterId, Action<IPlayerEntity> callback,
+        Func<IPlayerEntity, bool> condition = null)
+    {
+        if (!MonsterKillEvents.ContainsKey(monsterId))
+        {
+            MonsterKillEvents[monsterId] = new List<MonsterKillEvent>();
+        }
+        
+        MonsterKillEvents[monsterId].Add(new MonsterKillEvent {
+            MonsterId = monsterId,
             Callback = callback,
             Condition = condition
         });

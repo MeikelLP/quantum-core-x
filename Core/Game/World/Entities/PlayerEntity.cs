@@ -111,7 +111,7 @@ namespace QuantumCore.Game.World.Entities
             Health = (int) GetPoint(EPoints.MaxHp); // todo: cache hp of player 
             await LoadPermGroups();
             
-            QuestManager.InitializePlayer(this);
+            await QuestManager.InitializePlayer(this);
             
             CalculateDefence();
         }
@@ -419,6 +419,8 @@ namespace QuantumCore.Game.World.Entities
                         }
                     });
                     GiveStatusPoints();
+                    
+                    GameEventManager.OnLevelUp(this);
                     break;
                 case EPoints.Experience:
                     if (value < 0 && Player.Experience <= -value)
@@ -476,6 +478,8 @@ namespace QuantumCore.Game.World.Entities
                         }
                     });
                     GiveStatusPoints();
+                    
+                    GameEventManager.OnLevelUp(this);
                     break;
                 case EPoints.Experience:
                     Player.Experience = value;
@@ -565,6 +569,7 @@ namespace QuantumCore.Game.World.Entities
         private async Task Persist()
         {
             await QuickSlotBar.Persist();
+            await QuestManager.PersistPlayer(this);
             
             Player.PositionX = PositionX;
             Player.PositionY = PositionY;

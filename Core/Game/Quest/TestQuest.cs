@@ -1,38 +1,100 @@
+using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.World;
 using QuantumCore.Database;
+using Serilog;
 
 namespace QuantumCore.Game.Quest;
 
 [Quest]
 public class TestQuest : Quest
 {
+    private const uint Vnum1 = 101;
+    private const uint Vnum2 = 103;
+
     public TestQuest(QuestState state, IPlayerEntity player) : base(state, player)
     {
     }
 
     public override void Init()
     {
-        // todo invent api for register npc click event on player
-        GameEventManager.RegisterNpcClickEvent("Test Quest", 20354, Test, player => player.Vid == Player.Vid);
-        GameEventManager.RegisterNpcGiveEvent("Test Quest", 20016, TestGive, (player, _) => player.Vid == Player.Vid);
+        if (Player.GetPoint(EPoints.Level) >= 10 && State.Get<uint>("monster") == 0)
+        {
+            //SendQuestLetter("Test Quest", QuestLetter);
+        }
     }
 
-    private async void Test(IPlayerEntity player)
+    [QuestTrigger.LevelUp]
+    [QuestCondition.Level(10)]
+    [QuestCondition.Once]
+    public void LevelUp()
+    {
+        //SendQuestLetter("Test Quest", QuestLetter);
+        
+        Log.Debug("TestQuest: Level Up trigger with level 10");
+    }
+
+    private void QuestLetter()
+    {
+        Text("Please visit npc " + MonsterManager.GetMonster(20354).TranslatedName);
+        Done();
+    }
+
+    [QuestTrigger.NpcClick(20354)]
+    [QuestCondition.Level(10)]
+    [QuestCondition.State("monster", 0)]
+    public async void NpcTalk()
     {
         Text("Hello World from QuantumCore!");
         Text("This is using the current work in progress");
         Text("Quest API.");
         await Next();
         
-        Text("This is the second page showing how to easily");
-        Text("using await to wait for user response");
-        var choice = await Choice(false, "1st option", "2nd option");
+        Text("Please select a monster you want to have to kill");
+        var choice = await Choice(
+            "10 x " + MonsterManager.GetMonster(Vnum1).TranslatedName,
+            "10 x " + MonsterManager.GetMonster(Vnum2).TranslatedName);
+
+        State.Set("monster", choice == 1 ? Vnum1 : Vnum2);
+        State.Set("count", 10);
         
-        Text($"You've chosen: {choice}");
+        SetSkin(QuestSkin.NoWindow);
         Done();
     }
 
-    private async void TestGive(IPlayerEntity player, Item item)
+    [QuestTrigger.MonsterKill(Vnum1)]
+    [QuestTrigger.MonsterKill(Vnum2)]
+    [QuestCondition.State("count", 0, QuestCondition.StateAttribute.Comparator.Greater)]
+    public void MonsterKill(QuestTrigger.MonsterKillAttribute trigger)
+    {
+        Log.Debug("TestQuest: Monster kill trigger");
+        
+        var selectedMonster = State.Get<uint>("monster");
+        if (trigger.MonsterId != selectedMonster)
+        {
+            return;
+        }
+        
+        var count = State.Get<int>("count");
+        count--;
+        State.Set("count", count);
+        
+        if (count <= 0)
+        {
+            SendQuestLetter("Test Quest", FinishQuest);
+        }
+    }
+
+    private void FinishQuest()
+    {
+        Text("Thanks for helping me!");
+        Player.AddPoint(EPoints.Experience, 10_000);
+        
+        Done();
+        ExitQuest();
+    }
+
+    [QuestTrigger.NpcGive(20016)]
+    public async void TestGive(Item item)
     {
         var proto = ItemManager.Instance.GetItem(item.ItemId);
         

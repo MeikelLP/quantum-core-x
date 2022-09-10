@@ -229,6 +229,8 @@ namespace QuantumCore.Core.Networking
 
             // Serialize object
             var data = packetDetails.Serialize(packet);
+            Log.Debug($"Sent {string.Join(" ", data.Select(b => Convert.ToString(b, 16)))}");
+            
             _packetsSent.Observe(data.Length);
             _writer.Write(data);
             _writer.Flush();

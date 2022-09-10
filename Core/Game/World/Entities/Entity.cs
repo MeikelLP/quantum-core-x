@@ -288,7 +288,7 @@ namespace QuantumCore.Game.World.Entities
             otherPlayer?.SendChatInfo(text);
         }
 
-        public virtual int Damage(IEntity attacker, EDamageType damageType, int damage)
+        public virtual int Damage(IEntity attacker, EDamageType damageType, int damage, bool handleDeath = true)
         {
             if (damageType != EDamageType.Normal)
             {
@@ -364,7 +364,7 @@ namespace QuantumCore.Game.World.Entities
                 playerEntity.SendTarget();
             }
 
-            if (Health <= 0)
+            if (handleDeath && Health <= 0)
             {
                 Die();
                 if (Type != EEntityType.Player && attackerPlayer is not null)

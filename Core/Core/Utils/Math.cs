@@ -1,4 +1,5 @@
 ﻿using System;
+using Serilog;
 
 namespace QuantumCore.Core.Utils
 {
@@ -26,6 +27,32 @@ namespace QuantumCore.Core.Utils
             var rotationDegress = rotationRadians * (180 / Math.PI);
             if (rotationDegress < 0) rotationDegress += 360;
             return rotationDegress;
+        }
+
+        public static int CompareTwoNumbers(object a, object b)
+        {
+            try
+            {
+                var numA = Convert.ToDouble(a);
+                var numB = Convert.ToDouble(b);
+
+                if (numA > numB)
+                {
+                    return 1;
+                }
+
+                if (numB > numA)
+                {
+                    return -1;
+                }
+
+                return 0;
+            }
+            catch (Exception)
+            {
+                Log.Error($"Can't compare {a.GetType().Name} with {b.GetType().Name}");
+                return 0;
+            }
         }
     }
 }

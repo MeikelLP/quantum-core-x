@@ -223,6 +223,11 @@ namespace QuantumCore.Core.Packets
                     bw.Write(chars);
                     bw.Write((byte)0);
                 }
+                else if (_dynamicValueProperty.PropertyType == typeof(byte[]))
+                {
+                    var buffer = (byte[]) _dynamicValueProperty.GetValue(obj);
+                    bw.Write(buffer);
+                }
                 else
                 {
                     Debug.Assert(false);
@@ -338,13 +343,17 @@ namespace QuantumCore.Core.Packets
             return subHeader;
         }
         
-        public void UpdateDynamicSize(object packet, uint packet_size)
+        public void UpdateDynamicSize(object packet, uint packetSize)
         {
             if (_dynamicValueProperty.PropertyType == typeof(string))
             {
                 var msg = (string)_dynamicValueProperty.GetValue(packet);
-                _dynamicSizeProperty.SetValue(packet, (ushort)((packet_size + msg.Length + 1) & 0xFFFF));
-                
+                _dynamicSizeProperty.SetValue(packet, (ushort)((packetSize + msg.Length + 1) & 0xFFFF));
+            }
+            else if (_dynamicValueProperty.PropertyType == typeof(byte[]))
+            {
+                var buffer = (byte[]) _dynamicValueProperty.GetValue(packet);
+                _dynamicSizeProperty.SetValue(packet, (ushort) (packetSize + buffer.Length));
             }
             else
             {
@@ -400,6 +409,11 @@ namespace QuantumCore.Core.Packets
             if(dynSize is string dynString)
             {
                 return Size + (ushort)(dynString.Length + 1);
+            }
+
+            if (dynSize is byte[] buffer)
+            {
+                return Size + (ushort) buffer.Length;
             }
 
             Debug.Assert(false);
