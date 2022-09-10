@@ -25,4 +25,45 @@ namespace QuantumCore.Game.Commands
             player.SendChatMessage($"Attack Damage: {minAttack}-{maxAttack}");
         }
     }
+
+    [Command("debug_quest", "Print debug information on current quests and states")]
+    public class DebugCommandQuest
+    {
+        [CommandMethod("List all current active quests for the current character")]
+        public static void ListActiveQuests(IPlayerEntity player)
+        {
+            if (player is not PlayerEntity p)
+            {
+                return;
+            }
+
+            player.SendChatInfo("Active quests:");
+            foreach (var quest in p.Quests)
+            {
+                player.SendChatInfo($"- {quest.Key}");
+            }
+        }
+
+        [CommandMethod("Shows the current state of the given quest")]
+        public static void GetQuestState(IPlayerEntity player, string questId)
+        {
+            if (player is not PlayerEntity p)
+            {
+                return;
+            }
+
+            if (!p.Quests.ContainsKey(questId))
+            {
+                player.SendChatInfo($"Quest {questId} is not active");
+                return;
+            }
+
+            player.SendChatInfo($"{questId}:");
+            var quest = p.Quests[questId];
+            foreach (var name in quest.State.Keys)
+            {
+                player.SendChatInfo($"- {name} = {quest.State.Get(name)}");
+            }
+        }
+    }
 }

@@ -43,6 +43,12 @@ public class QuestState
         return !_state.ContainsKey(name) ? null : _state[name];
     }
 
+    public IEnumerable<string> Keys {
+        get {
+            return _state.Keys;
+        }
+    }
+
     public T Get<T>(string name)
     {
         if (!_state.ContainsKey(name))
