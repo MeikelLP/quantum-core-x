@@ -19,11 +19,16 @@ public class TestQuest : Quest
 
     public override void Init()
     {
-        if (Player.GetPoint(EPoints.Level) >= 10 && State.Get<uint>("monster") == 0)
+        if (Player.GetPoint(EPoints.Level) >= 10)
         {
             _letter = CreateQuestLetter("Test Quest", QuestLetter);
-            _letter.CounterName = "Test";
-            _letter.CounterValue = 10;
+            var vnum = State.Get<uint>("monster");
+            if (vnum != 0)
+            {
+                _letter.CounterName = MonsterManager.GetMonster(vnum).TranslatedName;
+                _letter.CounterValue = State.Get<int>("count");
+            }
+
             _letter.Send();
         }
     }
@@ -45,7 +50,21 @@ public class TestQuest : Quest
 
     private void QuestLetter()
     {
-        Text("Please visit npc " + MonsterManager.GetMonster(20354).TranslatedName);
+        var vnum = State.Get<uint>("monster");
+        var count = State.Get<int>("count");
+        
+        if (vnum == 0)
+        {
+            Text("Please visit npc " + MonsterManager.GetMonster(20354).TranslatedName);
+        } else if (count > 0)
+        {
+            Text($"You still need to kill {count} more {MonsterManager.GetMonster(vnum).TranslatedName}");
+        }
+        else
+        {
+            Text($"You finished the quest. Please visit {MonsterManager.GetMonster(20354).TranslatedName} again.");
+        }
+
         Done();
     }
 
@@ -64,11 +83,31 @@ public class TestQuest : Quest
             "10 x " + MonsterManager.GetMonster(Vnum1).TranslatedName,
             "10 x " + MonsterManager.GetMonster(Vnum2).TranslatedName);
 
-        State.Set("monster", choice == 1 ? Vnum1 : Vnum2);
+        var vnum = choice == 1 ? Vnum1 : Vnum2;
+        State.Set("monster", vnum);
         State.Set("count", 10);
         
         SetSkin(QuestSkin.NoWindow);
         Done();
+
+        _letter.CounterName = MonsterManager.GetMonster(vnum).TranslatedName;
+        _letter.CounterValue = 10;
+        _letter.Send();
+    }
+
+    [QuestTrigger.NpcClick(20354)]
+    [QuestCondition.State("monster", 0, QuestCondition.StateAttribute.Comparator.NotEquals)]
+    [QuestCondition.State("count", 0)]
+    public async void NpcFinishTalk()
+    {
+        Text("Thanks for helping me!");
+        Player.AddPoint(EPoints.Experience, 10_000);
+        Player.SendPoints(); // todo consider if this should maybe happen automatically?
+        
+        Done();
+        ExitQuest();
+
+        _letter.End();
     }
 
     [QuestTrigger.MonsterKill(Vnum1)]
@@ -88,19 +127,8 @@ public class TestQuest : Quest
         count--;
         State.Set("count", count);
         
-        if (count <= 0)
-        {
-            CreateQuestLetter("Test Quest", FinishQuest);
-        }
-    }
-
-    private void FinishQuest()
-    {
-        Text("Thanks for helping me!");
-        Player.AddPoint(EPoints.Experience, 10_000);
-        
-        Done();
-        ExitQuest();
+        _letter.CounterValue = count;
+        _letter.Send();
     }
 
     [QuestTrigger.NpcGive(20016)]

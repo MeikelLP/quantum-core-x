@@ -11,6 +11,7 @@ public class StateAttribute : Condition
     public enum Comparator
     {
         Equals,
+        NotEquals,
         Greater,
         Less,
         GreaterEqual,
@@ -46,6 +47,7 @@ public class StateAttribute : Condition
 
         return Compare switch {
             Comparator.Equals => Equals(state, Value),
+            Comparator.NotEquals => !Equals(state, Value),
             Comparator.Greater => MathUtils.CompareTwoNumbers(state, Value) > 0,
             Comparator.Less => MathUtils.CompareTwoNumbers(state, Value) < 0,
             Comparator.GreaterEqual => MathUtils.CompareTwoNumbers(state, Value) >= 0,

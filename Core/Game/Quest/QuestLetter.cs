@@ -62,6 +62,11 @@ public class QuestLetter
         _quest.Player.Connection.Send(info);
     }
 
+    public void End()
+    {
+        // todo
+    }
+
     private void CopyTo(List<byte> buffer, byte[] data, ushort length)
     {
         for (var i = 0; i < length; i++)
