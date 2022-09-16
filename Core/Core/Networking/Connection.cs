@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net.Sockets;
 using System.Reflection;
 using System.Security.Cryptography;
+using System.Threading.Tasks;
 using Prometheus;
 using QuantumCore.Core.Constants;
 using QuantumCore.Core.Packets;
@@ -69,7 +70,7 @@ namespace QuantumCore.Core.Networking
 
         protected abstract long GetServerTime();
         
-        public async void Start()
+        public async Task Start()
         {
             Log.Information($"New connection from {_client.Client.RemoteEndPoint}");
 

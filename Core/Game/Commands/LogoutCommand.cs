@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using QuantumCore.API.Game;
 using QuantumCore.API.Game.World;
 using QuantumCore.Core.Constants;
@@ -9,7 +10,7 @@ namespace QuantumCore.Game.Commands
     public static class LogoutCommand
     {
     	[CommandMethod]
-        public static async void Logout(IPlayerEntity player)
+        public static async Task Logout(IPlayerEntity player)
         {
             player.SendChatInfo("Logging out. Please wait.");
             player.Disconnect();

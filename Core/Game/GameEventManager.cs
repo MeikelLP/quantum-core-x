@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using QuantumCore.API.Game.World;
 using QuantumCore.Database;
 using QuantumCore.Game.Quest;
@@ -14,7 +15,7 @@ public static class GameEventManager
     {
         public string Name { get; set; }
         public uint NpcId { get; set; }
-        public Action<IPlayerEntity> Callback { get; set; }
+        public Func<IPlayerEntity, Task> Callback { get; set; }
         public Func<IPlayerEntity, bool> Condition { get; set; }
     }
 
@@ -22,14 +23,14 @@ public static class GameEventManager
     {
         public string Name { get; set; }
         public uint NpcId { get; set; }
-        public Action<IPlayerEntity, Item> Callback { get; set; }
+        public Func<IPlayerEntity, Item, Task> Callback { get; set; }
         public Func<IPlayerEntity, Item, bool> Condition { get; set; }
     }
 
     private static readonly Dictionary<uint, List<NpcClickEvent>> NpcClickEvents = new();
     private static readonly Dictionary<uint, List<NpcGiveEvent>> NpcGiveEvents = new();
 
-    public static async void OnNpcClick(uint npcId, IPlayerEntity player)
+    public static async Task OnNpcClick(uint npcId, IPlayerEntity player)
     {
         if (!NpcClickEvents.ContainsKey(npcId))
         {
@@ -61,7 +62,7 @@ public static class GameEventManager
         events[0].Callback(player);
     }
 
-    public static async void OnNpcGive(uint npcId, IPlayerEntity player, Item item)
+    public static async Task OnNpcGive(uint npcId, IPlayerEntity player, Item item)
     {
         if (!NpcGiveEvents.ContainsKey(npcId))
         {
@@ -93,7 +94,7 @@ public static class GameEventManager
         events[0].Callback(player, item);
     }
     
-    public static void RegisterNpcClickEvent(string name, uint npcId, Action<IPlayerEntity> callback, 
+    public static void RegisterNpcClickEvent(string name, uint npcId, Func<IPlayerEntity, Task> callback, 
         Func<IPlayerEntity, bool> condition = null)
     {
         if (!NpcClickEvents.ContainsKey(npcId))
@@ -109,7 +110,7 @@ public static class GameEventManager
         });
     }
 
-    public static void RegisterNpcGiveEvent(string name, uint npcId, Action<IPlayerEntity, Item> callback,
+    public static void RegisterNpcGiveEvent(string name, uint npcId, Func<IPlayerEntity, Item, Task> callback,
         Func<IPlayerEntity, Item, bool> condition = null)
     {
         if (!NpcGiveEvents.ContainsKey(npcId))

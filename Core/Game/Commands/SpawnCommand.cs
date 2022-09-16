@@ -1,4 +1,5 @@
 using System.Security.Cryptography;
+using System.Threading.Tasks;
 using QuantumCore.API.Game;
 using QuantumCore.API.Game.World;
 using QuantumCore.Game.World.Entities;
@@ -9,7 +10,7 @@ namespace QuantumCore.Game.Commands
     public static class SpawnCommand
     {
         [CommandMethod]
-        public static async void SpawnMonster(IPlayerEntity player, uint monsterId, byte count = 1)
+        public static async Task SpawnMonster(IPlayerEntity player, uint monsterId, byte count = 1)
         {
             var proto = MonsterManager.GetMonster(monsterId);
             if (proto == null)

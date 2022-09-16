@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 using QuantumCore.API.Game;
 using QuantumCore.API.Game.World;
 using QuantumCore.Game.Packets;
@@ -13,7 +14,7 @@ namespace QuantumCore.Game.Commands
     public static class GotoCommand
     {
         [CommandMethod("X and Y cordinates to teleport to")]
-        public static async void GoToCoordinate(IPlayerEntity player, int x, int y)
+        public static async Task GoToCoordinate(IPlayerEntity player, int x, int y)
         {
             if (x < 0 || y < 0)
                 player.SendChatInfo("The X and Y position must be positive");
@@ -22,7 +23,7 @@ namespace QuantumCore.Game.Commands
         }
 
         [CommandMethod("Teleports you to a map by their name")]
-        public static async void GoToMap(IPlayerEntity player, string mapName)
+        public static async Task GoToMap(IPlayerEntity player, string mapName)
         {
             var world = World.World.Instance;
             var maps = world.FindMapsByName(mapName);

@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using BeetleX.Redis;
 using Prometheus;
 using QuantumCore.API.Game;
@@ -111,7 +112,7 @@ namespace QuantumCore.Game.World
                     if (shopDef.ContainsKey("npc"))
                     {
                         var npc = (uint) (long) shopDef["npc"];
-                        GameEventManager.RegisterNpcClickEvent(shop.Name, npc, player =>
+                        GameEventManager.RegisterNpcClickEvent(shop.Name, npc, async player =>
                         {
                             shop.Open(player);
                         });
@@ -213,7 +214,7 @@ namespace QuantumCore.Game.World
             }
         }
 
-        private async void LoadRemoteMaps()
+        private async Task LoadRemoteMaps()
         {
             var keys = await CacheManager.Instance.Keys("maps:*");
 

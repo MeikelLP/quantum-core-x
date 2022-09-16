@@ -582,7 +582,7 @@ namespace QuantumCore.Game.World.Entities
             entity.HideEntity(Connection);
         }
 
-        public async void DropItem(Item item, byte count)
+        public async Task DropItem(Item item, byte count)
         {
             if (count > item.Count)
             {
@@ -608,7 +608,7 @@ namespace QuantumCore.Game.World.Entities
             (Map as Map)?.AddGroundItem(item, PositionX, PositionY);
         }
 
-        public async void Pickup(GroundItem groundItem)
+        public async Task Pickup(GroundItem groundItem)
         {
             var item = groundItem.Item;
             if (item.ItemId == 1)

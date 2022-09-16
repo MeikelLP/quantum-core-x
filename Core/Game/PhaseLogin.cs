@@ -15,7 +15,7 @@ namespace QuantumCore.Game
     public static class PhaseLogin
     {
         [Listener(typeof(TokenLogin))]
-        public static async void OnTokenLogin(this GameConnection connection, TokenLogin packet)
+        public static async Task OnTokenLogin(this GameConnection connection, TokenLogin packet)
         {
             var key = "token:" + packet.Key;
 

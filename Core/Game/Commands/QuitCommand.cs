@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using QuantumCore.API.Game;
 using QuantumCore.API.Game.World;
 using QuantumCore.Game.Packets;
@@ -9,7 +10,7 @@ namespace QuantumCore.Game.Commands
     public static class QuitCommand
     {
     	[CommandMethod]
-        public static async void Quit(IPlayerEntity player)
+        public static async Task Quit(IPlayerEntity player)
         {
             player.SendChatInfo("End the game. Please wait.");
         	player.SendChatCommand("quit");

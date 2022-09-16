@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using System.Threading.Tasks;
 using QuantumCore.API.Game.World;
 using QuantumCore.Core.Networking;
 using QuantumCore.Game.Commands;
@@ -89,7 +90,7 @@ namespace QuantumCore.Game
         }
 
         [Listener(typeof(ItemMove))]
-        public static async void OnItemMove(this GameConnection connection, ItemMove packet)
+        public static async Task OnItemMove(this GameConnection connection, ItemMove packet)
         {
             var player = connection.Player;
             if (player == null)
@@ -124,7 +125,7 @@ namespace QuantumCore.Game
         }
         
         [Listener(typeof(ItemUse))]
-        public static async void OnItemUse(this GameConnection connection, ItemUse packet)
+        public static async Task OnItemUse(this GameConnection connection, ItemUse packet)
         {
             var player = connection.Player;
             if (player == null)
@@ -204,7 +205,7 @@ namespace QuantumCore.Game
         }
 
         [Listener(typeof(ItemDrop))]
-        public static async void OnItemDrop(this GameConnection connection, ItemDrop packet)
+        public static async Task OnItemDrop(this GameConnection connection, ItemDrop packet)
         {
             var player = connection.Player;
             if (player == null)
@@ -232,7 +233,7 @@ namespace QuantumCore.Game
         }
 
         [Listener(typeof(ItemPickup))]
-        public static async void OnItemPickup(this GameConnection connection, ItemPickup packet)
+        public static async Task OnItemPickup(this GameConnection connection, ItemPickup packet)
         {
             var player = connection.Player;
             if (player == null)
@@ -252,7 +253,7 @@ namespace QuantumCore.Game
         }
 
         [Listener(typeof(ItemGive))]
-        public static async void OnItemGive(this GameConnection connection, ItemGive packet)
+        public static async Task OnItemGive(this GameConnection connection, ItemGive packet)
         {
             var player = connection.Player;
             if (player == null)
@@ -279,7 +280,7 @@ namespace QuantumCore.Game
         }
 
         [Listener(typeof(TargetChange))]
-        public static async void OnTargetChange(this GameConnection connection, TargetChange packet)
+        public static async Task OnTargetChange(this GameConnection connection, TargetChange packet)
         {
             var player = connection.Player;
             if (player == null)
@@ -302,7 +303,7 @@ namespace QuantumCore.Game
         }
 
         [Listener(typeof(Attack))]
-        public static async void OnAttack(this GameConnection connection, Attack packet)
+        public static async Task OnAttack(this GameConnection connection, Attack packet)
         {
             var attacker = connection.Player;
             if (attacker == null)
@@ -324,7 +325,7 @@ namespace QuantumCore.Game
         }
 
         [Listener(typeof(ClickNpc))]
-        public static async void OnClickNpc(this GameConnection connection, ClickNpc packet)
+        public static async Task OnClickNpc(this GameConnection connection, ClickNpc packet)
         {
             var player = connection.Player;
             if (player == null)
@@ -344,7 +345,7 @@ namespace QuantumCore.Game
         }
 
         [Listener(typeof(ShopClose))]
-        public static async void OnShopClose(this GameConnection connection, ShopClose packet)
+        public static async Task OnShopClose(this GameConnection connection, ShopClose packet)
         {
             var player = connection.Player;
             if (player == null)
@@ -357,7 +358,7 @@ namespace QuantumCore.Game
         }
 
         [Listener(typeof(ShopBuy))]
-        public static async void OnShopBuy(this GameConnection connection, ShopBuy packet)
+        public static async Task OnShopBuy(this GameConnection connection, ShopBuy packet)
         {
             var player = connection.Player;
             if (player == null)
@@ -370,7 +371,7 @@ namespace QuantumCore.Game
         }
 
         [Listener(typeof(ShopSell))]
-        public static async void OnShopSell(this GameConnection connection, ShopSell packet)
+        public static async Task OnShopSell(this GameConnection connection, ShopSell packet)
         {
             var player = connection.Player;
             if (player == null)
@@ -383,7 +384,7 @@ namespace QuantumCore.Game
         }
 
         [Listener(typeof(QuickBarAdd))]
-        public static async void OnQuickBarAdd(this GameConnection connection, QuickBarAdd packet)
+        public static async Task OnQuickBarAdd(this GameConnection connection, QuickBarAdd packet)
         {
             var player = connection.Player;
             if (player == null)
@@ -396,7 +397,7 @@ namespace QuantumCore.Game
         }
         
         [Listener(typeof(QuickBarRemove))]
-        public static async void OnQuickBarRemove(this GameConnection connection, QuickBarRemove packet)
+        public static async Task OnQuickBarRemove(this GameConnection connection, QuickBarRemove packet)
         {
             var player = connection.Player;
             if (player == null)
@@ -409,7 +410,7 @@ namespace QuantumCore.Game
         }
         
         [Listener(typeof(QuickBarSwap))]
-        public static async void OnQuickBarSwap(this GameConnection connection, QuickBarSwap packet)
+        public static async Task OnQuickBarSwap(this GameConnection connection, QuickBarSwap packet)
         {
             var player = connection.Player;
             if (player == null)
@@ -422,7 +423,7 @@ namespace QuantumCore.Game
         }
 
         [Listener(typeof(QuestAnswer))]
-        public static async void OnQuestAnswer(this GameConnection connection, QuestAnswer packet)
+        public static async Task OnQuestAnswer(this GameConnection connection, QuestAnswer packet)
         {
             var player = connection.Player;
             if (player == null)

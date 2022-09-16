@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading.Tasks;
 using BeetleX.Redis;
 using QuantumCore.API.Game.World;
 using QuantumCore.Cache;
@@ -82,7 +83,7 @@ public static class ChatManager
         });
     }
 
-    public static async void Shout(string message)
+    public static async Task Shout(string message)
     {
         var chat = new ChatOutcoming
         {

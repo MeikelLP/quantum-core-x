@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 using QuantumCore.API.Game;
 using QuantumCore.API.Game.World;
 using QuantumCore.Game.World.Entities;
@@ -11,7 +12,7 @@ namespace QuantumCore.Game.Commands
     public static class CommandTeleportTo
     {
         [CommandMethod]
-        public static async void TeleportToPlayer(IPlayerEntity player, IPlayerEntity dest)
+        public static async Task TeleportToPlayer(IPlayerEntity player, IPlayerEntity dest)
         {
             player.SendChatInfo($"Teleporting to player {dest.Name}");
             player.Move(dest.PositionX, dest.PositionY);
@@ -22,7 +23,7 @@ namespace QuantumCore.Game.Commands
     public static class CommandTeleportHere
     {
         [CommandMethod]
-        public static async void TeleportToPlayer(IPlayerEntity player, IPlayerEntity dest)
+        public static async Task TeleportToPlayer(IPlayerEntity player, IPlayerEntity dest)
         {
             player.SendChatInfo($"Teleporting {player.Name} to your position");
             dest.Move(player.PositionX, player.PositionY);

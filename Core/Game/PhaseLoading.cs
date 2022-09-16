@@ -1,4 +1,5 @@
-﻿using QuantumCore.Core.Constants;
+﻿using System.Threading.Tasks;
+using QuantumCore.Core.Constants;
 using QuantumCore.Core.Networking;
 using QuantumCore.Game.Packets;
 using Serilog;
@@ -8,7 +9,7 @@ namespace QuantumCore.Game
     public static class PhaseLoading
     {
         [Listener(typeof(EnterGame))]
-        public static async void OnEnterGame(this GameConnection connection, EnterGame packet)
+        public static async Task OnEnterGame(this GameConnection connection, EnterGame packet)
         {
             var player = connection.Player;
             if (player == null)

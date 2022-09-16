@@ -1,5 +1,6 @@
 using System;
 using System.Threading;
+using System.Threading.Tasks;
 using Dapper;
 using Dapper.Contrib.Extensions;
 using QuantumCore.Cache;
@@ -18,7 +19,7 @@ namespace QuantumCore.Game
     public static class PhaseSelect
     {
         [Listener(typeof(SelectCharacter))]
-        public static async void OnSelectCharacter(this GameConnection connection, SelectCharacter packet)
+        public static async Task OnSelectCharacter(this GameConnection connection, SelectCharacter packet)
         {
             Log.Debug($"Selected character in slot {packet.Slot}");
             if (connection.AccountId == null)
@@ -48,7 +49,7 @@ namespace QuantumCore.Game
         }
 
         [Listener(typeof(DeleteCharacter))]
-        public static async void OnDeleteCharacter(this GameConnection connection, DeleteCharacter packet)
+        public static async Task OnDeleteCharacter(this GameConnection connection, DeleteCharacter packet)
         {
             Log.Debug($"Deleting character in slot {packet.Slot}");
 
@@ -126,7 +127,7 @@ namespace QuantumCore.Game
         }
 
         [Listener(typeof(CreateCharacter))]
-        public static async void OnCreateCharacter(this GameConnection connection, CreateCharacter packet)
+        public static async Task OnCreateCharacter(this GameConnection connection, CreateCharacter packet)
         {
             Log.Debug($"Create character in slot {packet.Slot}");
             if (connection.AccountId == null)

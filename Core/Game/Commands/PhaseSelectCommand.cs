@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using QuantumCore.API.Game;
 using QuantumCore.API.Game.World;
 using QuantumCore.Core.Constants;
@@ -9,7 +10,7 @@ namespace QuantumCore.Game.Commands
     public static class PhaseSelectCommand
     {
     	[CommandMethod]
-        public static async void PhaseSelect(IPlayerEntity player)
+        public static async Task PhaseSelect(IPlayerEntity player)
         {
             player.SendChatInfo("Going back to character selection. Please wait.");
 

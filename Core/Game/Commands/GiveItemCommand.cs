@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using QuantumCore.API.Game;
 using QuantumCore.API.Game.World;
 using QuantumCore.Game.World.Entities;
@@ -14,7 +15,7 @@ namespace QuantumCore.Game.Commands
         }
 
         [CommandMethod]
-        public static async void GiveAnother(IPlayerEntity player, IPlayerEntity target, uint itemId, byte count = 1)
+        public static async Task GiveAnother(IPlayerEntity player, IPlayerEntity target, uint itemId, byte count = 1)
         {
             // todo replace item with item instance and let command manager do the lookup!
             // So we can also allow to give the item to another user

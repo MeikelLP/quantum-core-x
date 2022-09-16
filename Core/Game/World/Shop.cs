@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.World;
 using QuantumCore.Core.Utils;
@@ -77,7 +78,7 @@ public class Shop
         p.Connection.Send(shopStart);
     }
 
-    public async void Buy(IPlayerEntity player, byte position, byte count)
+    public async Task Buy(IPlayerEntity player, byte position, byte count)
     {
         if (player is not PlayerEntity p)
         {
@@ -118,7 +119,7 @@ public class Shop
         p.SendItem(playerItem);
     }
 
-    public async void Sell(IPlayerEntity player, byte position)
+    public async Task Sell(IPlayerEntity player, byte position)
     {
         if (player is not PlayerEntity p)
         {

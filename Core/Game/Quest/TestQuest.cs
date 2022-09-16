@@ -1,3 +1,4 @@
+using System.Threading.Tasks;
 using QuantumCore.API.Game.World;
 using QuantumCore.Database;
 
@@ -17,7 +18,7 @@ public class TestQuest : Quest
         GameEventManager.RegisterNpcGiveEvent("Test Quest", 20016, TestGive, (player, _) => player.Vid == Player.Vid);
     }
 
-    private async void Test(IPlayerEntity player)
+    private async Task Test(IPlayerEntity player)
     {
         Text("Hello World from QuantumCore!");
         Text("This is using the current work in progress");
@@ -32,7 +33,7 @@ public class TestQuest : Quest
         Done();
     }
 
-    private async void TestGive(IPlayerEntity player, Item item)
+    private async Task TestGive(IPlayerEntity player, Item item)
     {
         var proto = ItemManager.Instance.GetItem(item.ItemId);
         
