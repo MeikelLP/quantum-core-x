@@ -188,7 +188,7 @@ namespace QuantumCore.Game.PlayerUtils
 
         public bool IsSuitable(Item item, ushort position)
         {
-            var proto = ItemManager.GetItem(item.ItemId);
+            var proto = ItemManager.Instance.GetItem(item.ItemId);
             if (proto == null)
             {
                 return false;
@@ -223,7 +223,7 @@ namespace QuantumCore.Game.PlayerUtils
 
         public long GetWearSlot(Item item)
         {
-            var proto = ItemManager.GetItem(item.ItemId);
+            var proto = ItemManager.Instance.GetItem(item.ItemId);
             if (proto == null)
             {
                 return _offset + (ushort)EquipmentSlots.Body;

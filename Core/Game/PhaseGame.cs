@@ -142,7 +142,7 @@ namespace QuantumCore.Game
                 return;
             }
 
-            var itemProto = ItemManager.GetItem(item.ItemId);
+            var itemProto = ItemManager.Instance.GetItem(item.ItemId);
             if (itemProto == null)
             {
                 Log.Debug($"Cannot find item proto {item.ItemId}");

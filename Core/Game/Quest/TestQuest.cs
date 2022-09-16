@@ -34,7 +34,7 @@ public class TestQuest : Quest
 
     private async void TestGive(IPlayerEntity player, Item item)
     {
-        var proto = ItemManager.GetItem(item.ItemId);
+        var proto = ItemManager.Instance.GetItem(item.ItemId);
         
         Text($"Thanks for giving me the item {proto.TranslatedName}.");
         Done();

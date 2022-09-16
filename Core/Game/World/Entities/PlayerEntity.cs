@@ -207,7 +207,7 @@ namespace QuantumCore.Game.World.Entities
             {
                 var item = Inventory.EquipmentWindow.GetItem(slot);
                 if (item == null) continue;
-                var proto = ItemManager.GetItem(item.ItemId);
+                var proto = ItemManager.Instance.GetItem(item.ItemId);
                 if (proto.Type != (byte) EItemType.Armor) continue;
 
                 _defence += (uint)proto.Values[1] + (uint)proto.Values[5] * 2;
@@ -378,7 +378,7 @@ namespace QuantumCore.Game.World.Entities
         {
             var weapon = Inventory.EquipmentWindow.Weapon;
             if (weapon == null) return 0;
-            var item = ItemManager.GetItem(weapon.ItemId);
+            var item = ItemManager.Instance.GetItem(weapon.ItemId);
             if (item == null) return 0;
             return item.Values[3];
         }
@@ -387,7 +387,7 @@ namespace QuantumCore.Game.World.Entities
         {
             var weapon = Inventory.EquipmentWindow.Weapon;
             if (weapon == null) return 0;
-            var item = ItemManager.GetItem(weapon.ItemId);
+            var item = ItemManager.Instance.GetItem(weapon.ItemId);
             if (item == null) return 0;
             return item.Values[4];
         }
@@ -396,7 +396,7 @@ namespace QuantumCore.Game.World.Entities
         {
             var weapon = Inventory.EquipmentWindow.Weapon;
             if (weapon == null) return 0;
-            var item = ItemManager.GetItem(weapon.ItemId);
+            var item = ItemManager.Instance.GetItem(weapon.ItemId);
             if (item == null) return 0;
             return item.Values[5];
         }
@@ -530,7 +530,7 @@ namespace QuantumCore.Game.World.Entities
                         return 0;
                     }
 
-                    var item = ItemManager.GetItem(weapon.ItemId);
+                    var item = ItemManager.Instance.GetItem(weapon.ItemId);
                     return (uint) (item.Values[3] + item.Values[5]);
                 }
                 case EPoints.MaxWeaponDamage:
@@ -541,7 +541,7 @@ namespace QuantumCore.Game.World.Entities
                         return 0;
                     }
 
-                    var item = ItemManager.GetItem(weapon.ItemId);
+                    var item = ItemManager.Instance.GetItem(weapon.ItemId);
                     return (uint) (item.Values[4] + item.Values[5]);
                 }
                 case EPoints.MinAttackDamage:
@@ -603,7 +603,7 @@ namespace QuantumCore.Game.World.Entities
                 
                 SendItem(item);
 
-                item = ItemManager.CreateItem(ItemManager.GetItem(item.ItemId), count);
+                item = ItemManager.Instance.CreateItem(ItemManager.Instance.GetItem(item.ItemId), count);
             }
 
             (Map as Map)?.AddGroundItem(item, PositionX, PositionY);
@@ -643,7 +643,7 @@ namespace QuantumCore.Game.World.Entities
             AddPoint(EPoints.Gold, -(int)amount);
             SendPoints();
 
-            var item = ItemManager.CreateItem(ItemManager.GetItem(1), 1); // count will be overwritten as it's gold
+            var item = ItemManager.Instance.CreateItem(ItemManager.Instance.GetItem(1), 1); // count will be overwritten as it's gold
             (Map as Map)?.AddGroundItem(item, PositionX, PositionY, amount); // todo add method to IMap interface when we have an item interface...
         }
 
@@ -700,7 +700,7 @@ namespace QuantumCore.Game.World.Entities
 
         public bool IsEquippable(Item item)
         {
-            var proto = ItemManager.GetItem(item.ItemId);
+            var proto = ItemManager.Instance.GetItem(item.ItemId);
             if (proto == null)
             {
                 // Proto for item not found

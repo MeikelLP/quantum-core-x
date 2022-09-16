@@ -53,7 +53,7 @@ namespace QuantumCore.Game.PlayerUtils
                 var item = _grid.Get(x, y);
                 if (item == null) return false;
                 
-                var proto = ItemManager.GetItem(item.ItemId);
+                var proto = ItemManager.Instance.GetItem(item.ItemId);
                 if (proto == null) return false;
 
                 var itemSize = proto.Size;
@@ -85,7 +85,7 @@ namespace QuantumCore.Game.PlayerUtils
 
             public bool Place(Item item, uint x, uint y)
             {
-                var proto = ItemManager.GetItem(item.ItemId);
+                var proto = ItemManager.Instance.GetItem(item.ItemId);
                 if (proto == null) return false;
                 var itemSize = proto.Size;
 
@@ -120,7 +120,7 @@ namespace QuantumCore.Game.PlayerUtils
                 var x = (uint)(position % _width);
                 var y = (uint)(position / _width);
 
-                var proto = ItemManager.GetItem(item.ItemId);
+                var proto = ItemManager.Instance.GetItem(item.ItemId);
                 if (proto == null) return false;
 
                 return IsSpaceAvailable(x, y, proto.Size);

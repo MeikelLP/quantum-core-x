@@ -18,7 +18,7 @@ namespace QuantumCore.Game.Commands
         {
             // todo replace item with item instance and let command manager do the lookup!
             // So we can also allow to give the item to another user
-            var item = ItemManager.GetItem(itemId);
+            var item = ItemManager.Instance.GetItem(itemId);
             if (item == null)
             {
                 player.SendChatInfo("Item not found");
@@ -32,7 +32,7 @@ namespace QuantumCore.Game.Commands
             }
 
             // Create item
-            var instance = ItemManager.CreateItem(item, count);
+            var instance = ItemManager.Instance.CreateItem(item, count);
             // Add item to players inventory
             if (!await p.Inventory.PlaceItem(instance))
             {

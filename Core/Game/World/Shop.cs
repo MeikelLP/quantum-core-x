@@ -33,7 +33,7 @@ public class Shop
     
     public void AddItem(uint itemId, byte count, uint price)
     {
-        var proto = ItemManager.GetItem(itemId);
+        var proto = ItemManager.Instance.GetItem(itemId);
         if (proto == null)
         {
             return;
@@ -93,7 +93,7 @@ public class Shop
             return;
         }
 
-        var proto = ItemManager.GetItem(item.ItemId);
+        var proto = ItemManager.Instance.GetItem(item.ItemId);
 
         var gold = p.GetPoint(EPoints.Gold);
         if (gold < item.Price)
@@ -103,7 +103,7 @@ public class Shop
         }
 
         // Create item instance
-        var playerItem = ItemManager.CreateItem(proto, item.Count);
+        var playerItem = ItemManager.Instance.CreateItem(proto, item.Count);
         
         // todo set bonuses and sockets
         
@@ -131,7 +131,7 @@ public class Shop
             return;
         }
 
-        var proto = ItemManager.GetItem(item.ItemId);
+        var proto = ItemManager.Instance.GetItem(item.ItemId);
         if (proto == null)
         {
             return;
