@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
@@ -22,6 +23,8 @@ public abstract class Quest
     private TaskCompletionSource _currentNextTask;
     private TaskCompletionSource<byte> _currentChoiceTask;
 
+    private readonly Dictionary<ushort, QuestLetter> _questLetters = new();
+
     public Quest(QuestState state, IPlayerEntity player)
     {
         State = state;
@@ -30,6 +33,16 @@ public abstract class Quest
     }
 
     public abstract void Init();
+
+    public QuestLetter GetQuestLetter(ushort id)
+    {
+        if (!_questLetters.ContainsKey(id))
+        {
+            return null;
+        }
+
+        return _questLetters[id];
+    }
 
     protected void SendScript()
     {
@@ -48,16 +61,13 @@ public abstract class Quest
         _currentSkin = skin;
     }
 
-    protected void SendQuestLetter(string name, Action callback)
+    protected QuestLetter CreateQuestLetter(string name, Action callback)
     {
-        var buffer = new byte[31];
-        var encoded = Encoding.ASCII.GetBytes(name);
-        Array.Copy(encoded, buffer, encoded.Length > 30 ? 30 : encoded.Length);
-        
-        Log.Debug($"QuestInfo Data - {string.Join(" ", buffer.Select(n => n.ToString()))}");
-        
-        var info = new QuestInfo {Index = 0, Flags = (byte) (QuestInfo.InfoFlags.Title), Data = buffer};
-        Player.Connection.Send(info);
+        var id = _player.GetNextQuestLetterId();
+        var letter = new QuestLetter(id, this, callback) {Title = name};
+        _questLetters[id] = letter;
+
+        return letter;
     }
 
     protected void ExitQuest()

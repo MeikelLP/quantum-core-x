@@ -10,7 +10,9 @@ public class QuestInfo
     public enum InfoFlags
     {
         Begin = 1 << 0,
-        Title = 1 << 1
+        Title = 1 << 1,
+        CounterName = 1 << 4,
+        CounterValue = 1 << 5
     }
     
     [Field(0)]

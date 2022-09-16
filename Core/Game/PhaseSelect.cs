@@ -9,6 +9,7 @@ using QuantumCore.Core.Utils;
 using QuantumCore.Database;
 using QuantumCore.Game.Packets;
 using QuantumCore.Game.PlayerUtils;
+using QuantumCore.Game.Quest;
 using QuantumCore.Game.World;
 using QuantumCore.Game.World.Entities;
 using Serilog;
@@ -45,6 +46,11 @@ namespace QuantumCore.Game
             entity.SendBasicData();
             entity.SendPoints();
             entity.QuickSlotBar.Send();
+            
+            // NOTE: we have to initialize the quest after we send data about the character to the client
+            //       because quests might send a quest letter and else wise the client might freeze in the
+            //       loading screen.
+            await QuestManager.InitializePlayer(entity);
         }
 
         [Listener(typeof(DeleteCharacter))]

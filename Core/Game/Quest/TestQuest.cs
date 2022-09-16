@@ -11,6 +11,8 @@ public class TestQuest : Quest
     private const uint Vnum1 = 101;
     private const uint Vnum2 = 103;
 
+    private QuestLetter _letter;
+
     public TestQuest(QuestState state, IPlayerEntity player) : base(state, player)
     {
     }
@@ -19,7 +21,10 @@ public class TestQuest : Quest
     {
         if (Player.GetPoint(EPoints.Level) >= 10 && State.Get<uint>("monster") == 0)
         {
-            //SendQuestLetter("Test Quest", QuestLetter);
+            _letter = CreateQuestLetter("Test Quest", QuestLetter);
+            _letter.CounterName = "Test";
+            _letter.CounterValue = 10;
+            _letter.Send();
         }
     }
 
@@ -28,8 +33,13 @@ public class TestQuest : Quest
     [QuestCondition.Once]
     public void LevelUp()
     {
-        //SendQuestLetter("Test Quest", QuestLetter);
+        if (_letter == null)
+        {
+            // The letter should normally never exists at this point, but just to make sure we check it here
+            _letter = CreateQuestLetter("Test Quest", QuestLetter);
+        }
         
+        _letter.Send();
         Log.Debug("TestQuest: Level Up trigger with level 10");
     }
 
@@ -80,7 +90,7 @@ public class TestQuest : Quest
         
         if (count <= 0)
         {
-            SendQuestLetter("Test Quest", FinishQuest);
+            CreateQuestLetter("Test Quest", FinishQuest);
         }
     }
 

@@ -89,6 +89,8 @@ namespace QuantumCore.Game.World.Entities
         private const int HealthRegenInterval = 3 * 1000;
         private double _healthRegenTime = HealthRegenInterval;
 
+        private ushort _questLetterId = 0;
+
         public PlayerEntity(Player player, GameConnection connection) : base(World.Instance.GenerateVid())
         {
             Connection = connection;
@@ -111,7 +113,7 @@ namespace QuantumCore.Game.World.Entities
             Health = (int) GetPoint(EPoints.MaxHp); // todo: cache hp of player 
             await LoadPermGroups();
             
-            await QuestManager.InitializePlayer(this);
+            
             
             CalculateDefence();
         }
@@ -138,6 +140,25 @@ namespace QuantumCore.Game.World.Entities
             }
 
             return (T) Quests[id];
+        }
+
+        public ushort GetNextQuestLetterId()
+        {
+            return _questLetterId++;
+        }
+
+        public QuestLetter GetQuestLetter(ushort id)
+        {
+            foreach (var quest in Quests.Values)
+            {
+                var letter = quest.GetQuestLetter(id);
+                if (letter != null)
+                {
+                    return letter;
+                }
+            }
+
+            return null;
         }
 
         private void Warp(int x, int y)

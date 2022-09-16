@@ -21,7 +21,7 @@ public class QuestState
 
     public async Task Load()
     {
-        _state = await CacheManager.Redis.Get<Dictionary<string, object>>($"quest:{_playerId}:{_questId}");
+        _state = await CacheManager.Instance.Get<Dictionary<string, object>>($"quest:{_playerId}:{_questId}");
         if (_state == null)
         {
             _state = new Dictionary<string, object>();
@@ -30,7 +30,7 @@ public class QuestState
 
     public async Task Save()
     {
-        await CacheManager.Redis.Set($"quest:{_playerId}:{_questId}", _state);
+        await CacheManager.Instance.Set($"quest:{_playerId}:{_questId}", _state);
     }
     
     public void Set<T>(string name, T value)

@@ -39,7 +39,7 @@ public static class QuestManager
         {
             return;
         }
-        
+
         foreach (var (id, questType) in Quests)
         {
             var state = new QuestState(p.Player.Id, id);

@@ -434,5 +434,27 @@ namespace QuantumCore.Game
             Log.Information($"Quest answer: {packet.Answer}");
             player.CurrentQuest?.Answer(packet.Answer);
         }
+
+        [Listener(typeof(UseQuestLetter))]
+        public static async void OnUseQuestLetter(this GameConnection connection, UseQuestLetter packet)
+        {
+            var player = connection.Player;
+            if (player == null)
+            {
+                connection.Close();
+                return;
+            }
+
+            if ((packet.LetterId & 0x8000_0000) == 0x8000_0000)
+            {
+                var letterId = packet.LetterId & 0x7fff_ffff;
+                var letter = player.GetQuestLetter((ushort) letterId);
+                letter?.Invoke();
+            }
+            else
+            {
+                Log.Error($"Unknown quest id type ({packet.LetterId})");
+            }
+        }
     }
 }
