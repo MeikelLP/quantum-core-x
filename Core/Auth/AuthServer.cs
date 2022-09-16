@@ -100,13 +100,13 @@ namespace QuantumCore.Auth
                 var authToken = CoreRandom.GenerateUInt32();
                 
                 // Store auth token
-                await CacheManager.Redis.Set("token:" + authToken, new Token
+                await CacheManager.Instance.Set("token:" + authToken, new Token
                 {
                     Username = account.Username,
                     AccountId = account.Id
                 });
                 // Set expiration on token
-                await CacheManager.Redis.Expire("token:" + authToken, 30);
+                await CacheManager.Instance.Expire("token:" + authToken, 30);
                 
                 // Send the auth token to the client and let it connect to our game server
                 connection.Send(new LoginSuccess
@@ -119,7 +119,7 @@ namespace QuantumCore.Auth
 
         public async Task Start()
         {
-            var pong = await CacheManager.Redis.Ping();
+            var pong = await CacheManager.Instance.Ping();
             if (!pong)
             {
                 Log.Error("Failed to ping redis server");

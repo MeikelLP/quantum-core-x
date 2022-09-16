@@ -19,32 +19,30 @@ namespace QuantumCore.Database
 
         public static async Task<Item> GetItem(Guid id)
         {
-            var redis = CacheManager.Redis;
             var key = "item:" + id;
 
-            if (await redis.Exists(key) > 0)
+            if (await CacheManager.Instance.Exists(key) > 0)
             {
                 Log.Debug($"Read item {id} from cache");
-                return await redis.Get<Item>(key);
+                return await CacheManager.Instance.Get<Item>(key);
             }
 
             Log.Debug($"Load item {id} from database");
             using var db = DatabaseManager.GetGameDatabase();
 
             var item = db.Get<Item>(id);
-            await redis.Set(key, item);
+            await CacheManager.Instance.Set(key, item);
             return item;
         }
         
         public static async IAsyncEnumerable<Item> GetItems(Guid player, byte window)
         {
-            var redis = CacheManager.Redis;
             var key = "items:" + player + ":" + window;
 
-            var list = redis.CreateList<Guid>(key);
+            var list = CacheManager.Instance.CreateList<Guid>(key);
             
             // Check if the window list exists
-            if (await redis.Exists(key) > 0)
+            if (await CacheManager.Instance.Exists(key) > 0)
             {
                 Log.Debug($"Found items for player {player} in window {window} in cache");
                 var itemIds = await list.Range(0, -1);
@@ -74,24 +72,22 @@ namespace QuantumCore.Database
 
         public async Task<bool> Destroy()
         {
-            var redis = CacheManager.Redis;
             var key = "item:" + Id;
 
             if (PlayerId != Guid.Empty)
             {
-                var oldList = redis.CreateList<Guid>($"items:{PlayerId}:{Window}");
+                var oldList = CacheManager.Instance.CreateList<Guid>($"items:{PlayerId}:{Window}");
                 await oldList.Rem(1, Id);
             }
 
-            return await redis.Del(key) != 0;
+            return await CacheManager.Instance.Del(key) != 0;
         }
 
         public async Task Persist()
         {
-            var redis = CacheManager.Redis;
             var key = "item:" + Id;
 
-            await redis.Set(key, this);
+            await CacheManager.Instance.Set(key, this);
         }
 
         /// <summary>
@@ -105,17 +101,16 @@ namespace QuantumCore.Database
         {
             if (PlayerId != owner || Window != window)
             {
-                var redis = CacheManager.Redis;
                 if (PlayerId != Guid.Empty)
                 {
                     // Remove from last list
-                    var oldList = redis.CreateList<Guid>($"items:{PlayerId}:{Window}");
+                    var oldList = CacheManager.Instance.CreateList<Guid>($"items:{PlayerId}:{Window}");
                     await oldList.Rem(1, Id);
                 }
 
                 if (owner != Guid.Empty)
                 {
-                    var newList = redis.CreateList<Guid>($"items:{owner}:{window}");
+                    var newList = CacheManager.Instance.CreateList<Guid>($"items:{owner}:{window}");
                     await newList.Push(Id);
                 }
 

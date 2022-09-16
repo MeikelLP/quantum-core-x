@@ -51,8 +51,8 @@ namespace QuantumCore.Game.World
         {
             Log.Debug($"Load map '{Name}' at {PositionX}x{PositionY} (size {Width}x{Height})");
 
-            CacheManager.Redis.Set($"maps:{Name}", IpUtils.PublicIP + ":" + GameServer.Instance.Server.Port);
-            CacheManager.Redis.Publish("maps", $"{Name} {IpUtils.PublicIP}:{GameServer.Instance.Server.Port}");
+            CacheManager.Instance.Set($"maps:{Name}", IpUtils.PublicIP + ":" + GameServer.Instance.Server.Port);
+            CacheManager.Instance.Publish("maps", $"{Name} {IpUtils.PublicIP}:{GameServer.Instance.Server.Port}");
 
             // Load map spawn data
             var spawnFile = Path.Join("data", "maps", Name, "spawn.toml");

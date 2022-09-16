@@ -98,12 +98,11 @@ namespace QuantumCore.Game
             await db.DeleteAsync(player); // delete the player from the players table
 
             // Delete player redis data
-            var redis = CacheManager.Redis;
             var key = "player:" + player.Id;
-            await redis.Del(key);
+            await CacheManager.Instance.Del(key);
 
             key = "players:" + connection.AccountId;
-            var list = redis.CreateList<Guid>(key);
+            var list = CacheManager.Instance.CreateList<Guid>(key);
             await list.Rem(1, player.Id);
 
             // Delete items in redis cache
@@ -115,11 +114,11 @@ namespace QuantumCore.Game
                 await foreach (var item in items)
                 {
                     key = "item:" + item.Id;
-                    await redis.Del(key);
+                    await CacheManager.Instance.Del(key);
                 }
 
                 key = "items:" + player.Id + ":" + (byte) WindowType.Inventory;
-                await redis.Del(key);
+                await CacheManager.Instance.Del(key);
             }
 
             // Delete all items in db
@@ -171,11 +170,10 @@ namespace QuantumCore.Game
             await DatabaseManager.GetGameDatabase().InsertAsync(player);
             
             // Add player to cache
-            var redis = CacheManager.Redis;
-            await redis.Set("player:" + player.Id, player);
+            await CacheManager.Instance.Set("player:" + player.Id, player);
             
             // Add player to the list of characters
-            var list = redis.CreateList<Guid>("players:" + accountId);
+            var list = CacheManager.Instance.CreateList<Guid>("players:" + accountId);
             var idx = await list.Push(player.Id);
             
             // Query responsible host for the map

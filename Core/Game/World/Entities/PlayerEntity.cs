@@ -118,11 +118,10 @@ namespace QuantumCore.Game.World.Entities
 
         private async Task LoadPermGroups()
         {
-            var redis = CacheManager.Redis;
             var playerId = Player.Id;
 
             var playerKey = "perm:" + playerId;
-            var list = redis.CreateList<Guid>(playerKey);
+            var list = CacheManager.Instance.CreateList<Guid>(playerKey);
 
             foreach (var group in await list.Range(0, -1))
             {
@@ -570,7 +569,7 @@ namespace QuantumCore.Game.World.Entities
             Player.PositionX = PositionX;
             Player.PositionY = PositionY;
             
-            await CacheManager.Redis.Set($"player:{Player.Id}", Player);
+            await CacheManager.Instance.Set($"player:{Player.Id}", Player);
         }
 
         protected override void OnNewNearbyEntity(IEntity entity)

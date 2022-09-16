@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 using BeetleX.Redis;
 using Dapper.Contrib.Extensions;
 using QuantumCore.Database;
@@ -6,18 +7,28 @@ using Serilog;
 
 namespace QuantumCore.Cache
 {
-    public static class CacheManager
+    public class CacheManager : ICacheManager
     {
-        public static RedisDB Redis { get; private set; }
+        private CacheManager()
+        {
+        }
+        
+        public static ICacheManager Instance { get; private set; }
+        private RedisDB Redis;
         
         public static void Init(string host, int port = 6379)
         {
             Log.Information("Initialize Cache Manager");
-            Redis = new RedisDB {DataFormater = new JsonFormater()};
-            Redis.Host.AddWriteHost(host, port);
+            var instance = new CacheManager {
+                Redis = new RedisDB {
+                    DataFormater = new JsonFormater()
+                }
+            };
+            instance.Redis.Host.AddWriteHost(host, port);
+            Instance = instance;
         }
 
-        public static async Task<T> Get<T>(object id) where T : class
+        public async ValueTask<T> GetOrCreate<T>(object id) where T : class
         {
             var keyName = typeof(T).Name + ":" + id;
 
@@ -36,5 +47,17 @@ namespace QuantumCore.Cache
             
             return obj;
         }
+
+        public RedisList<T> CreateList<T>(string name) => Redis.CreateList<T>(name);
+        public ValueTask<long> Del(string key) => Redis.Del(key);
+        public ValueTask<string> Set(string key, object item) => Redis.Set(key, item);
+        public ValueTask<T> Get<T>(string key) => Redis.Get<T>(key);
+        public ValueTask<long> Exists(string key) => Redis.Exists(key);
+        public ValueTask<long> Expire(string key, int seconds) => Redis.Expire(key, seconds);
+        public ValueTask<bool> Ping() => Redis.Ping();
+        public ValueTask<long> Publish(string key, object obj) => Redis.Publish(key, obj);
+        public Subscriber Subscribe() => Redis.Subscribe();
+        public ValueTask<string[]> Keys(string key) => Redis.Keys(key);
+        public ValueTask<long> Persist(string key) => Redis.Persist(key);
     }
 }

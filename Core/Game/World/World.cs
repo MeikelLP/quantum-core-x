@@ -215,8 +215,7 @@ namespace QuantumCore.Game.World
 
         private async void LoadRemoteMaps()
         {
-            var redis = CacheManager.Redis;
-            var keys = await redis.Keys("maps:*");
+            var keys = await CacheManager.Instance.Keys("maps:*");
 
             foreach (var key in keys)
             {
@@ -227,7 +226,7 @@ namespace QuantumCore.Game.World
                     continue;
                 }
 
-                var address = await redis.Get<string>(key);
+                var address = await CacheManager.Instance.Get<string>(key);
                 var parts = address.Split(":");
                 Debug.Assert(parts.Length == 2);
                     
@@ -237,7 +236,7 @@ namespace QuantumCore.Game.World
                 Log.Debug($"Map {remoteMap.Name} is available at {remoteMap.Host}:{remoteMap.Port}");
             }
 
-            _mapSubscriber = redis.Subscribe();
+            _mapSubscriber = CacheManager.Instance.Subscribe();
             _mapSubscriber.Register<string>("maps", mapDetails =>
             {
                 var data = mapDetails.Split(" ");

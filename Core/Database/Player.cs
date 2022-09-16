@@ -36,11 +36,10 @@ namespace QuantumCore.Database
 
         public static async Task<Player> GetPlayer(Guid account, byte slot)
         {
-            var redis = CacheManager.Redis;
             var key = "players:" + account;
             
-            var list = redis.CreateList<Guid>(key);
-            if (await redis.Exists(key) <= 0)
+            var list = CacheManager.Instance.CreateList<Guid>(key);
+            if (await CacheManager.Instance.Exists(key) <= 0)
             {
                 var i = 0;
                 await foreach (var player in GetPlayers(account))
@@ -58,34 +57,32 @@ namespace QuantumCore.Database
 
         public static async Task<Player> GetPlayer(Guid playerId)
         {
-            var redis = CacheManager.Redis;
             using var db = DatabaseManager.GetGameDatabase();
             
             var playerKey = "player:" + playerId;
-            if (await redis.Exists(playerKey) > 0)
+            if (await CacheManager.Instance.Exists(playerKey) > 0)
             {
                 Log.Debug($"Read character {playerId} from cache");
-                return await redis.Get<Player>(playerKey);
+                return await CacheManager.Instance.Get<Player>(playerKey);
             }
             else
             {
                 Log.Debug($"Query character {playerId} from the database");
                 var player = db.Get<Player>(playerId);
                 //var player = await SqlMapperExtensions.Get<Player>(db, playerId);
-                await redis.Set(playerKey, player);
+                await CacheManager.Instance.Set(playerKey, player);
                 return player;
             }
         }
         
         public static async IAsyncEnumerable<Player> GetPlayers(Guid account)
         {
-            var redis = CacheManager.Redis;
             var key = "players:" + account;
 
-            var list = redis.CreateList<Guid>(key);
+            var list = CacheManager.Instance.CreateList<Guid>(key);
             
             // Check if we have players cached
-            if (await redis.Exists(key) > 0)
+            if (await CacheManager.Instance.Exists(key) > 0)
             {
                 Log.Debug($"Found players for account {account} in cache");
                 // We have the characters cached
@@ -93,7 +90,7 @@ namespace QuantumCore.Database
 
                 foreach (var id in cachedIds)
                 {
-                    yield return await redis.Get<Player>("player:" + id);    
+                    yield return await CacheManager.Instance.Get<Player>("player:" + id);    
                 }
             }
             else

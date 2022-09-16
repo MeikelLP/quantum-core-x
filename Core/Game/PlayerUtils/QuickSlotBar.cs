@@ -20,16 +20,15 @@ public class QuickSlotBar
 
     public async Task Load()
     {
-        var redis = CacheManager.Redis;
         var key = $"quickbar:{Player.Player.Id}";
         
-        if (await redis.Exists(key) > 0)
+        if (await CacheManager.Instance.Exists(key) > 0)
         {
-            var slots = await redis.Get<QuickSlot[]>(key);
+            var slots = await CacheManager.Instance.Get<QuickSlot[]>(key);
             if (slots.Length != Slots.Length)
             {
                 Log.Warning("Removing cached quick slots, length mismatch");
-                await redis.Del(key);
+                await CacheManager.Instance.Del(key);
             }
             else
             {
@@ -45,10 +44,9 @@ public class QuickSlotBar
 
     public async Task Persist()
     {
-        var redis = CacheManager.Redis;
         var key = $"quickbar:{Player.Player.Id}";
 
-        await redis.Set(key, Slots);
+        await CacheManager.Instance.Set(key, Slots);
     }
 
     public void Send()

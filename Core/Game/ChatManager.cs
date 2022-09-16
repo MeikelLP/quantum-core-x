@@ -25,7 +25,7 @@ public static class ChatManager
     {
         _id = Guid.NewGuid();
 
-        _subscriber = CacheManager.Redis.Subscribe();
+        _subscriber = CacheManager.Instance.Subscribe();
         _subscriber.Register<ChatMessage>("chat", OnChatMessage);
         _subscriber.Listen();
     }
@@ -104,7 +104,7 @@ public static class ChatManager
         });
         
         // Broadcast message to all cores 
-        await CacheManager.Redis.Publish("chat",
+        await CacheManager.Instance.Publish("chat",
             new ChatMessage {Type = ChatMessageTypes.Shout, Message = message, OwnerCore = _id});
     }
 }

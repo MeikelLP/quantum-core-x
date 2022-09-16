@@ -44,7 +44,6 @@ namespace QuantumCore.Game.Commands
         private static async Task ParseGroup(Guid id, string name)
         {
             using var db = DatabaseManager.GetGameDatabase();
-            var redis = CacheManager.Redis;
 
             var p = new PermissionGroup
             {
@@ -71,7 +70,7 @@ namespace QuantumCore.Game.Commands
                 p.Users.Add(Guid.Parse(user.Player));
 
                 var key = "perm:" + user.Player;
-                var redisList = redis.CreateList<Guid>(key);
+                var redisList = CacheManager.Instance.CreateList<Guid>(key);
 
                 await redisList.Push(id);
             }
@@ -81,12 +80,11 @@ namespace QuantumCore.Game.Commands
 
         public static async Task Load()
         {
-            var redis = CacheManager.Redis;
-            var permission_keys = await redis.Keys("perm:*");
+            var permission_keys = await CacheManager.Instance.Keys("perm:*");
 
             foreach (var p in permission_keys)
             {
-                await redis.Del(p);
+                await CacheManager.Instance.Del(p);
             }
             using var db = DatabaseManager.GetGameDatabase();
 

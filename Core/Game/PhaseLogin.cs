@@ -19,7 +19,7 @@ namespace QuantumCore.Game
         {
             var key = "token:" + packet.Key;
 
-            if (await CacheManager.Redis.Exists(key) <= 0)
+            if (await CacheManager.Instance.Exists(key) <= 0)
             {
                 Log.Warning($"Received invalid auth token {packet.Key} / {packet.Username}");
                 connection.Close();
@@ -27,7 +27,7 @@ namespace QuantumCore.Game
             }
             
             // Verify that the given token is for the given user
-            var token = await CacheManager.Redis.Get<Token>(key);
+            var token = await CacheManager.Instance.Get<Token>(key);
             if (!string.Equals(token.Username, packet.Username, StringComparison.OrdinalIgnoreCase))
             {
                 Log.Warning($"Received invalid auth token, username does not match {token.Username} != {packet.Username}");
@@ -40,7 +40,7 @@ namespace QuantumCore.Game
             Log.Debug("Received valid auth token");
             
             // Remove TTL from token so we can use it for another game core transition
-            await CacheManager.Redis.Persist(key);
+            await CacheManager.Instance.Persist(key);
 
             // Store the username and id for later reference
             connection.Username = token.Username;
