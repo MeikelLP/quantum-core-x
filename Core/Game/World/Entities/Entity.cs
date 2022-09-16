@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Threading.Tasks;
 using QuantumCore.API;
 using QuantumCore.API.Core.Utils;
 using QuantumCore.API.Game;
@@ -90,7 +91,7 @@ namespace QuantumCore.Game.World.Entities
         public abstract void ShowEntity(IConnection connection);
         public abstract void HideEntity(IConnection connection);
         
-        public virtual void Update(double elapsedTime)
+        public virtual async Task Update(double elapsedTime)
         {
             if (State == EEntityState.Moving)
             {

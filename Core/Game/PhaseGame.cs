@@ -64,7 +64,7 @@ namespace QuantumCore.Game
         }
 		
         [Listener(typeof(ChatIncoming))]
-        public static void OnChat(this GameConnection connection, ChatIncoming packet)
+        public static async Task OnChat(this GameConnection connection, ChatIncoming packet)
         {
             if (packet.MessageType == ChatMessageTypes.Normal)
             {
@@ -85,7 +85,7 @@ namespace QuantumCore.Game
                 // todo check 15 seconds cooldown
                 var message = connection.Player.Name + ": " + packet.Message;
                 
-                ChatManager.Shout(message);
+                await ChatManager.Shout(message);
             }
         }
 
@@ -228,7 +228,7 @@ namespace QuantumCore.Game
                     return; // Item slot is empty
                 }
 
-                player.DropItem(item, packet.Count);
+                await player.DropItem(item, packet.Count);
             }
         }
 
@@ -249,7 +249,7 @@ namespace QuantumCore.Game
                 return;
             }
 
-            player.Pickup(groundItem);
+            await player.Pickup(groundItem);
         }
 
         [Listener(typeof(ItemGive))]
@@ -276,7 +276,7 @@ namespace QuantumCore.Game
             }
             
             Log.Information($"Item give to {entity}");
-            GameEventManager.OnNpcGive(entity.EntityClass, player, item);
+            await GameEventManager.OnNpcGive(entity.EntityClass, player, item);
         }
 
         [Listener(typeof(TargetChange))]
@@ -341,7 +341,7 @@ namespace QuantumCore.Game
                 return;
             }
             
-            GameEventManager.OnNpcClick(entity.EntityClass, player);
+            await GameEventManager.OnNpcClick(entity.EntityClass, player);
         }
 
         [Listener(typeof(ShopClose))]

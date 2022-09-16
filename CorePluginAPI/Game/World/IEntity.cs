@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using QuantumCore.API.Core.Utils;
 using QuantumCore.API.Game.Types;
 using QuantumCore.Game.PlayerUtils;
@@ -47,7 +48,7 @@ namespace QuantumCore.API.Game.World
         public int StartPositionY { get; }
         public uint MovementDuration { get; }
 
-        public void Update(double elapsedTime);
+        public Task Update(double elapsedTime);
         
         public void OnDespawn();
         public void AddNearbyEntity(IEntity entity);

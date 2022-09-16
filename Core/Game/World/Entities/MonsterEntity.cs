@@ -1,5 +1,6 @@
 using System;
 using System.Security.Cryptography;
+using System.Threading.Tasks;
 using FluentMigrator.Runner.Generators.Postgres;
 using QuantumCore.API;
 using QuantumCore.API.Game.Types;
@@ -66,7 +67,7 @@ namespace QuantumCore.Game.World.Entities
             }
         }
 
-        public override void Update(double elapsedTime)
+        public override async Task Update(double elapsedTime)
         {
             if (Dead)
             {
@@ -88,7 +89,7 @@ namespace QuantumCore.Game.World.Entities
                 _behaviour?.Update(elapsedTime);
             }
 
-            base.Update(elapsedTime);
+            await base.Update(elapsedTime);
         }
 
         public override void Goto(int x, int y)

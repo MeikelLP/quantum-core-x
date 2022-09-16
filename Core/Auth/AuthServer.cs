@@ -117,6 +117,11 @@ namespace QuantumCore.Auth
             });
         }
 
+        public async Task Init()
+        {
+            
+        }
+
         public async Task Start()
         {
             var pong = await CacheManager.Instance.Ping();

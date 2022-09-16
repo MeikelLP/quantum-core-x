@@ -19,6 +19,11 @@ namespace QuantumCore.Database
             _options = options;
         }
 
+        public async Task Init()
+        {
+            
+        }
+
         public async Task Start()
         {
             var serviceProvider = CreateServices("account", _options.AccountString);

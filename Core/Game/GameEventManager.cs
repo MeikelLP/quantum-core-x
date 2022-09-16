@@ -49,7 +49,7 @@ public static class GameEventManager
             {
                 internalQuest.EndQuest();
             }
-            events[selected].Callback(player);
+            await events[selected].Callback(player);
             
             return;
         }
@@ -59,7 +59,7 @@ public static class GameEventManager
             return; 
         }
 
-        events[0].Callback(player);
+        await events[0].Callback(player);
     }
 
     public static async Task OnNpcGive(uint npcId, IPlayerEntity player, Item item)
@@ -81,7 +81,7 @@ public static class GameEventManager
             {
                 internalQuest.EndQuest();
             }
-            events[selected].Callback(player, item);
+            await events[selected].Callback(player, item);
             
             return;
         }
@@ -91,7 +91,7 @@ public static class GameEventManager
             return; 
         }
 
-        events[0].Callback(player, item);
+        await events[0].Callback(player, item);
     }
     
     public static void RegisterNpcClickEvent(string name, uint npcId, Func<IPlayerEntity, Task> callback, 

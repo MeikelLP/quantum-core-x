@@ -340,7 +340,7 @@ namespace QuantumCore.Game.World.Entities
             return 100 * ((b > 90 ? 90 : b) + 210) / 300;
         }
         
-        public override void Update(double elapsedTime)
+        public override async Task Update(double elapsedTime)
         {
             if (Map == null) return; // We don't have a map yet so we aren't spawned
 
@@ -363,7 +363,7 @@ namespace QuantumCore.Game.World.Entities
             _persistTime += (int)elapsedTime;
             if (_persistTime > PersistInterval)
             {
-                Persist();
+                await Persist();
                 _persistTime -= PersistInterval;
             }
         }

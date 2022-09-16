@@ -9,9 +9,9 @@ namespace QuantumCore.Game.Commands
     public static class GiveItemCommand
     {
         [CommandMethod]
-        public static void GiveMyself(IPlayerEntity player, uint itemId, byte count = 1)
+        public static async Task GiveMyself(IPlayerEntity player, uint itemId, byte count = 1)
         {
-            GiveAnother(player, player, itemId, count);
+            await GiveAnother(player, player, itemId, count);
         }
 
         [CommandMethod]

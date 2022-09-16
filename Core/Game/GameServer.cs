@@ -31,8 +31,8 @@ namespace QuantumCore.Game
         public Server<GameConnection> Server => _server;
         
         private readonly GameOptions _options;
-        private readonly Server<GameConnection> _server;
-        private readonly World.World _world;
+        private Server<GameConnection> _server;
+        private World.World _world;
         
         private readonly Stopwatch _gameTime = new Stopwatch();
         private long _previousTicks = 0;
@@ -47,7 +47,10 @@ namespace QuantumCore.Game
             Instance = this;
             
             _options = options;
-            
+        }
+
+        public async Task Init()
+        {
             // Set public ip address
             if (_options.IpAddress != null)
             {
@@ -59,21 +62,21 @@ namespace QuantumCore.Game
                 IpUtils.SearchPublicIp();
             }
 
-            if (options.Prometheus)
+            if (_options.Prometheus)
             {
                 // Start metric server
-                QuantumCore.Core.Prometheus.Server.Initialize(options.PrometheusPort);
+                QuantumCore.Core.Prometheus.Server.Initialize(_options.PrometheusPort);
             }
 
             // Initialize static components
-            DatabaseManager.Init(options.AccountString, options.GameString);
-            CacheManager.Init(options.RedisHost, options.RedisPort);
+            DatabaseManager.Init(_options.AccountString, _options.GameString);
+            CacheManager.Init(_options.RedisHost, _options.RedisPort);
             
             // Load game configuration
             ConfigManager.Load();
             
             // Start tcp server
-            _server = new Server<GameConnection>((server, client) => new GameConnection(server, client), options.Port);
+            _server = new Server<GameConnection>((server, client) => new GameConnection(server, client), _options.Port);
             
             // Load game data
             Log.Information("Load item_proto");
@@ -98,11 +101,11 @@ namespace QuantumCore.Game
             // Load game world
             Log.Information("Initialize world"); 
             _world = new World.World();
-            _world.Load();
+            await _world.Load();
 
             // Load permissions
             Log.Information("Initialize permissions");
-            CommandManager.Load();
+            await CommandManager.Load();
 
             // Register all default commands
             CommandManager.Register("QuantumCore.Game.Commands");

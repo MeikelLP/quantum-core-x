@@ -44,12 +44,12 @@ namespace QuantumCore.Game.World
             Instance = this;
         }
         
-        public void Load()
+        public async Task Load()
         {
             LoadShops();
             LoadGroups();
             LoadAtlasInfo();
-            LoadRemoteMaps();
+            await LoadRemoteMaps();
 
             // Initialize maps, spawn monsters etc
             foreach (var map in _maps.Values)
