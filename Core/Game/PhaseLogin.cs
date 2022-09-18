@@ -64,9 +64,9 @@ namespace QuantumCore.Game
             }
 
             // Send empire to the client and characters
-            connection.Send(new Empire { EmpireId = 1 }); // todo read from database
-            connection.SetPhase(EPhases.Select);
-            connection.Send(characters);
+            await connection.Send(new Empire { EmpireId = 1 }); // todo read from database
+            await connection.SetPhase(EPhases.Select);
+            await connection.Send(characters);
         }
     }
 }

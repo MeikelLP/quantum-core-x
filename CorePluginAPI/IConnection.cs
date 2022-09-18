@@ -6,6 +6,6 @@ namespace QuantumCore.API
     {
         public Task Start();
         public void Close();
-        public void Send(object packet);
+        public Task Send(object packet);
     }
 }

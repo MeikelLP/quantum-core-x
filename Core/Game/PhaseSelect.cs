@@ -33,7 +33,7 @@ namespace QuantumCore.Game
             var accountId = connection.AccountId ?? default; // todo clean solution
             
             // Let the client load the game
-            connection.SetPhase(EPhases.Loading);
+            await connection.SetPhase(EPhases.Loading);
             
             // Load player
             var player = await Player.GetPlayer(accountId, packet.Slot);
@@ -74,11 +74,11 @@ namespace QuantumCore.Game
 
             if (deletecode != packet.Code[..^1])
             {
-                connection.Send(new DeleteCharacterFail());
+                await connection.Send(new DeleteCharacterFail());
                 return;
             }
 
-            connection.Send(new DeleteCharacterSuccess
+            await connection.Send(new DeleteCharacterSuccess
             {
                 Slot = packet.Slot
             });
@@ -143,7 +143,7 @@ namespace QuantumCore.Game
             var count = await db.QuerySingleAsync<int>("SELECT COUNT(*) FROM players WHERE Name = @Name", new {Name = packet.Name});
             if (count > 0)
             {
-                connection.Send(new CreateCharacterFailure());
+                await connection.Send(new CreateCharacterFailure());
                 return;
             }
 
@@ -184,7 +184,7 @@ namespace QuantumCore.Game
             var character = Character.FromEntity(player);
             character.Ip = IpUtils.ConvertIpToUInt(host.Ip);
             character.Port = host.Port;
-            connection.Send(new CreateCharacterSuccess
+            await connection.Send(new CreateCharacterSuccess
             {
                 Slot = (byte)(idx - 1),
                 Character = character

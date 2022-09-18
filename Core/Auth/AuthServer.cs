@@ -58,7 +58,7 @@ namespace QuantumCore.Auth
                     BCrypt.Net.BCrypt.HashPassword(request.Password);
                     
                     Log.Debug($"Account {request.Username} not found");
-                    connection.Send(new LoginFailed
+                    await connection.Send(new LoginFailed
                     {
                         Status = "WRONGPWD"
                     });
@@ -95,7 +95,7 @@ namespace QuantumCore.Auth
                 // If the status is not empty send a failed login response to the client
                 if (status != "")
                 {
-                    connection.Send(new LoginFailed
+                    await connection.Send(new LoginFailed
                     {
                         Status = status
                     });
@@ -116,7 +116,7 @@ namespace QuantumCore.Auth
                 await CacheManager.Instance.Expire("token:" + authToken, 30);
                 
                 // Send the auth token to the client and let it connect to our game server
-                connection.Send(new LoginSuccess
+                await connection.Send(new LoginSuccess
                 {
                     Key = authToken,
                     Result = 1
@@ -132,9 +132,9 @@ namespace QuantumCore.Auth
             await _server.Start();
         }
 
-        private bool NewConnection(Connection connection)
+        private async Task<bool> NewConnection(Connection connection)
         {
-            connection.SetPhase(EPhases.Auth);
+            await connection.SetPhase(EPhases.Auth);
             return true;
         }
 

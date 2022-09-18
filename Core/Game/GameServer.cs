@@ -126,9 +126,9 @@ namespace QuantumCore.Game
             _server.RegisterNamespace("QuantumCore.Game.Packets");
             
             // Put all new connections into login phase
-            _server.RegisterNewConnectionListener(connection =>
+            _server.RegisterNewConnectionListener(async connection =>
             {
-                connection.SetPhase(EPhases.Login);
+                await connection.SetPhase(EPhases.Login);
                 return true;
             });
             

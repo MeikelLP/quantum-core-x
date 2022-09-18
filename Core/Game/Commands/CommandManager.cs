@@ -141,7 +141,7 @@ namespace QuantumCore.Game.Commands
             return false;
         }
 
-        public static void Handle(GameConnection connection, string chatline)
+        public static async Task Handle(GameConnection connection, string chatline)
         {
             var args = chatline.Split(" "); // todo implement quotation marks for strings
             var command = args[0].Substring(1);
@@ -152,7 +152,7 @@ namespace QuantumCore.Game.Commands
 
                 if (!CanUseCommand(connection.Player, command))
                 {
-                    connection.Send(new ChatOutcoming()
+                    await connection.Send(new ChatOutcoming()
                     {
                         MessageType = ChatMessageTypes.Info,
                         Vid = 0,
@@ -199,7 +199,7 @@ namespace QuantumCore.Game.Commands
             }
             else
             {
-                connection.Send(new ChatOutcoming()
+                await connection.Send(new ChatOutcoming()
                 {
                     MessageType = ChatMessageTypes.Info,
                     Vid = 0,

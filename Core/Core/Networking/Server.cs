@@ -17,7 +17,7 @@ namespace QuantumCore.Core.Networking
     public class Server<T> : IPacketManager where T : Connection
     {
         private readonly int _port;
-        private readonly List<Func<T, bool>> _connectionListeners = new();
+        private readonly List<Func<T, Task<bool>>> _connectionListeners = new();
         private readonly Dictionary<Guid, T> _connections = new();
         private readonly Dictionary<ushort, PacketCache> _incomingPackets = new();
         private readonly List<Type> _incomingTypes = new();
@@ -89,11 +89,11 @@ namespace QuantumCore.Core.Networking
             await connection.Start();
         }
 
-        public void ForAllConnections(Action<T> callback)
+        public async Task ForAllConnections(Func<T, Task> callback)
         {
             foreach (var connection in _connections.Values)
             {
-                callback(connection);
+                await callback(connection);
             }
         }
 
@@ -147,14 +147,14 @@ namespace QuantumCore.Core.Networking
             }
         }
 
-        public void RegisterListener<P>(Action<T, P> listener)
+        public void RegisterListener<P>(Func<T, P, Task> listener)
         {
             Log.Debug($"Register listener on packet {typeof(P).Name}");
             var packet = _incomingPackets.First(p => p.Value.Type == typeof(P));
             _listeners[packet.Key] = listener;
         }
 
-        public void RegisterNewConnectionListener(Func<Connection, bool> listener)
+        public void RegisterNewConnectionListener(Func<Connection, Task<bool>> listener)
         {
             _connectionListeners.Add(listener);
         }

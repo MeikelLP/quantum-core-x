@@ -70,7 +70,7 @@ namespace QuantumCore.Game
             {
                 if (packet.Message.StartsWith('/'))
                 {
-                    CommandManager.Handle(connection, packet.Message);
+                    await CommandManager.Handle(connection, packet.Message);
                 }
                 else
                 {

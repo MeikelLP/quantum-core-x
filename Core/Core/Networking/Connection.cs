@@ -21,7 +21,7 @@ namespace QuantumCore.Core.Networking
 
         private IPacketManager _packetManager;
 
-        private BinaryWriter _writer;
+        private Stream _stream;
 
         private long _lastHandshakeTime;
 
@@ -74,10 +74,9 @@ namespace QuantumCore.Core.Networking
         {
             Log.Information($"New connection from {_client.Client.RemoteEndPoint}");
 
-            var stream = _client.GetStream();
-            _writer = new BinaryWriter(stream);
+            _stream = _client.GetStream();
 
-            StartHandshake();
+            await StartHandshake();
 
             var buffer = new byte[1];
             var packetTotalSize = 1;
@@ -86,7 +85,7 @@ namespace QuantumCore.Core.Networking
             {
                 try
                 {
-                    var read = await stream.ReadAsync(buffer, 0, 1);
+                    var read = await _stream.ReadAsync(buffer, 0, 1);
                     if (read != 1)
                     {
                         Log.Information("Failed to read, closing connection");
@@ -105,7 +104,7 @@ namespace QuantumCore.Core.Networking
                     }
 
                     var data = new byte[packetDetails.Size - 1];
-                    read = await stream.ReadAsync(data, 0, data.Length);
+                    read = await _stream.ReadAsync(data, 0, data.Length);
 
                     packetTotalSize += read;
 
@@ -133,7 +132,7 @@ namespace QuantumCore.Core.Networking
                         packet = Activator.CreateInstance(packetDetails.Type);
 
                         var subData = new byte[packetDetails.Size - data.Length - 1];
-                        read = await stream.ReadAsync(subData, 0, subData.Length);
+                        read = await _stream.ReadAsync(subData, 0, subData.Length);
                         
                         packetTotalSize += read;
 
@@ -148,7 +147,7 @@ namespace QuantumCore.Core.Networking
                         
                         // Read dynamic data
                         var dynamicData = new byte[size];
-                        read = await stream.ReadAsync(dynamicData, 0, size);
+                        read = await _stream.ReadAsync(dynamicData, 0, size);
                         packetTotalSize += read;
                         if (read != size)
                         {
@@ -165,7 +164,7 @@ namespace QuantumCore.Core.Networking
                     if (packetDetails.HasSequence)
                     {
                         var sequence = new byte[1];
-                        read = await stream.ReadAsync(sequence, 0, 1);
+                        read = await _stream.ReadAsync(sequence, 0, 1);
                         packetTotalSize += read;
                         if (read != 1)
                         {
@@ -197,7 +196,7 @@ namespace QuantumCore.Core.Networking
             OnClose();
         }
 
-        public void Send(object packet)
+        public async Task Send(object packet)
         {
             if (!_client.Connected)
             {
@@ -231,22 +230,22 @@ namespace QuantumCore.Core.Networking
             // Serialize object
             var data = packetDetails.Serialize(packet);
             _packetsSent.Observe(data.Length);
-            _writer.Write(data);
-            _writer.Flush();
+            await _stream.WriteAsync(data);
+            await _stream.FlushAsync();
         }
 
-        public void StartHandshake()
+        public async Task StartHandshake()
         {
             if (Handshaking) return;
 
             // Generate random handshake and start the handshaking
             Handshake = CoreRandom.GenerateUInt32();
             Handshaking = true;
-            SetPhase(EPhases.Handshake);
-            SendHandshake();
+            await SetPhase(EPhases.Handshake);
+            await SendHandshake();
         }
 
-        public bool HandleHandshake(GCHandshake handshake)
+        public async Task<bool> HandleHandshake(GCHandshake handshake)
         {
             if (!Handshaking)
             {
@@ -284,36 +283,36 @@ namespace QuantumCore.Core.Networking
                     Log.Debug($"Delta is too low, retry with last send time");
                 }
 
-                SendHandshake((uint) time, (uint) delta);
+                await SendHandshake((uint) time, (uint) delta);
             }
 
             return true;
         }
 
-        public void SetPhase(EPhases phase)
+        public async Task SetPhase(EPhases phase)
         {
             Phase = phase;
-            Send(new GCPhase
+            await Send(new GCPhase
             {
                 Phase = (byte) phase
             });
         }
 
-        private void SendHandshake()
+        private async Task SendHandshake()
         {
             var time = GetServerTime();
             _lastHandshakeTime = time;
-            Send(new GCHandshake
+            await Send(new GCHandshake
             {
                 Handshake = Handshake,
                 Time = (uint) time
             });
         }
 
-        private void SendHandshake(uint time, uint delta)
+        private async Task SendHandshake(uint time, uint delta)
         {
             _lastHandshakeTime = time;
-            Send(new GCHandshake
+            await Send(new GCHandshake
             {
                 Handshake = Handshake,
                 Time = time,

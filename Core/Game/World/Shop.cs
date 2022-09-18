@@ -99,7 +99,7 @@ public class Shop
         var gold = p.GetPoint(EPoints.Gold);
         if (gold < item.Price)
         {
-            p.Connection.Send(new ShopNotEnoughMoney());
+            await p.Connection.Send(new ShopNotEnoughMoney());
             return;
         }
 
@@ -111,7 +111,7 @@ public class Shop
         // Try to place item into players inventory
         if (!await p.Inventory.PlaceItem(playerItem))
         {
-            p.Connection.Send(new ShopNoSpaceLeft());
+            await p.Connection.Send(new ShopNoSpaceLeft());
         }
         p.AddPoint(EPoints.Gold, -(int)item.Price);
 

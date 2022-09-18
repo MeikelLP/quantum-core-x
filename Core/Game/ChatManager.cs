@@ -27,11 +27,13 @@ public static class ChatManager
         _id = Guid.NewGuid();
 
         _subscriber = CacheManager.Instance.Subscribe();
-        _subscriber.Register<ChatMessage>("chat", OnChatMessage);
+#pragma warning disable CS4014
+        _subscriber.Register<ChatMessage>("chat", msg => OnChatMessage(msg));
+#pragma warning restore CS4014
         _subscriber.Listen();
     }
 
-    private static void OnChatMessage(ChatMessage message)
+    private static async Task OnChatMessage(ChatMessage message)
     {
         if (message.OwnerCore == _id)
         {
@@ -48,14 +50,14 @@ public static class ChatManager
         };
         
         // Send message to all connections in the game phase
-        GameServer.Instance.Server.ForAllConnections(connection =>
+        await GameServer.Instance.Server.ForAllConnections(async connection =>
         {
             if (connection.Phase != EPhases.Game)
             {
                 return;
             }
             
-            connection.Send(chat);
+            await connection.Send(chat);
         });
     }
     
@@ -94,14 +96,14 @@ public static class ChatManager
         };
         
         // Send message to all connections in the game phase
-        GameServer.Instance.Server.ForAllConnections(connection =>
+        await GameServer.Instance.Server.ForAllConnections(async connection =>
         {
             if (connection.Phase != EPhases.Game)
             {
                 return;
             }
             
-            connection.Send(chat);
+            await connection.Send(chat);
         });
         
         // Broadcast message to all cores 
