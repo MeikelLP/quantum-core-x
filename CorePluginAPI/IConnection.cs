@@ -1,11 +1,17 @@
-﻿using System.Threading.Tasks;
+﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
+using QuantumCore.API.Game.Types;
 
 namespace QuantumCore.API
 {
     public interface IConnection
     {
-        public Task Start();
-        public void Close();
-        public Task Send(object packet);
+        Guid Id { get; }
+        EPhases Phase { get; }
+        Task ExecuteTask { get; }
+        void Close();
+        Task Send(object packet);
+        Task StartAsync(CancellationToken token = default);
     }
 }

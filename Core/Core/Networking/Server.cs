@@ -8,6 +8,7 @@ using System.Reflection;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 using Prometheus;
+using QuantumCore.API;
 using QuantumCore.Core.Packets;
 using QuantumCore.Core.Utils;
 using Serilog;
@@ -18,7 +19,7 @@ namespace QuantumCore.Core.Networking
     {
         private readonly int _port;
         private readonly List<Func<T, Task<bool>>> _connectionListeners = new();
-        private readonly Dictionary<Guid, T> _connections = new();
+        private readonly Dictionary<Guid, IConnection> _connections = new();
         private readonly Dictionary<ushort, PacketCache> _incomingPackets = new();
         private readonly List<Type> _incomingTypes = new();
         private readonly Dictionary<ushort, Delegate> _listeners = new();
@@ -29,7 +30,7 @@ namespace QuantumCore.Core.Networking
 
         private readonly Gauge _openConnections = Metrics.CreateGauge("open_connections", "Currently open connections");
 
-        private readonly Func<Server<T>, TcpClient, T> _clientConstructor;
+        private readonly Func<Server<T>, TcpClient, IConnection> _clientConstructor;
 
         public int Port {
             get {
@@ -37,7 +38,7 @@ namespace QuantumCore.Core.Networking
             }
         }
         
-        public Server(Func<Server<T>, TcpClient, T> clientConstructor, int port, string bindIp = "0.0.0.0")
+        public Server(Func<Server<T>, TcpClient, IConnection> clientConstructor, int port, string bindIp = "0.0.0.0")
         {
             _port = port;
             
@@ -85,11 +86,11 @@ namespace QuantumCore.Core.Networking
             // wait for new client connection
             _listener.BeginAcceptTcpClient(OnClientAccepted, _listener);
             
-            // TODO no while(true)
-            await connection.Start();
+            await connection.StartAsync();
+            await connection.ExecuteTask.ConfigureAwait(false);
         }
 
-        public async Task ForAllConnections(Func<T, Task> callback)
+        public async Task ForAllConnections(Func<IConnection, Task> callback)
         {
             foreach (var connection in _connections.Values)
             {

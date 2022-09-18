@@ -5,7 +5,9 @@ using System.Linq;
 using System.Net.Sockets;
 using System.Reflection;
 using System.Security.Cryptography;
+using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Hosting;
 using Prometheus;
 using QuantumCore.Core.Constants;
 using QuantumCore.Core.Packets;
@@ -16,7 +18,7 @@ using Serilog;
 
 namespace QuantumCore.Core.Networking
 {
-    public abstract class Connection : IConnection
+    public abstract class Connection : BackgroundService, IConnection
     {
         private TcpClient _client;
 
@@ -70,8 +72,8 @@ namespace QuantumCore.Core.Networking
         protected abstract void OnReceive(object packet);
 
         protected abstract long GetServerTime();
-        
-        public async Task Start()
+
+        protected async override Task ExecuteAsync(CancellationToken stoppingToken)
         {
             Log.Information($"New connection from {_client.Client.RemoteEndPoint}");
 
@@ -82,7 +84,7 @@ namespace QuantumCore.Core.Networking
             var buffer = new byte[1];
             var packetTotalSize = 1;
 
-            while (true)
+            while (!stoppingToken.IsCancellationRequested)
             {
                 try
                 {
