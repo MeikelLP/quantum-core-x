@@ -6,6 +6,7 @@ using Dapper;
 using Dapper.Contrib.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
+using QuantumCore.API.Game.Types;
 using QuantumCore.Auth.Cache;
 using QuantumCore.Auth.Packets;
 using QuantumCore.Cache;

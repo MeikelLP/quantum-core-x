@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using QuantumCore.API.Game.Types;
 using QuantumCore.Core.Constants;
 using QuantumCore.Core.Networking;
 using QuantumCore.Game.Packets;

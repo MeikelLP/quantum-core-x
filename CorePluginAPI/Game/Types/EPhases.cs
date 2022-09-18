@@ -1,4 +1,4 @@
-namespace QuantumCore.Core.Constants
+namespace QuantumCore.API.Game.Types
 {
     public enum EPhases
     {

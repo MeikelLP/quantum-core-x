@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using QuantumCore.API.Game.Types;
 using QuantumCore.Auth.Cache;
 using QuantumCore.Cache;
 using QuantumCore.Core.Constants;

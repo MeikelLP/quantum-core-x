@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dapper;
 using Dapper.Contrib.Extensions;
+using QuantumCore.API.Game.Types;
 using QuantumCore.Cache;
 using QuantumCore.Core.Constants;
 using QuantumCore.Core.Networking;

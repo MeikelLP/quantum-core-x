@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
 using BeetleX.Redis;
+using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.World;
 using QuantumCore.Cache;
 using QuantumCore.Core.Constants;
