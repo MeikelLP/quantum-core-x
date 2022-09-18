@@ -27,7 +27,7 @@ using Serilog;
 
 namespace QuantumCore.Game
 {
-    internal class GameServer : IGame, IHostedService
+    internal class GameServer : BackgroundService, IGame 
     {
         public IWorld World => _world;
         public Server<GameConnection> Server => _server;
@@ -50,8 +50,15 @@ namespace QuantumCore.Game
             
             _options = options.Value;
         }
-        
-        public async Task StartAsync(CancellationToken token)
+
+        private void Update(double elapsedTime)
+        {
+            EventSystem.Update(elapsedTime);
+            
+            _world.Update(elapsedTime);
+        }
+
+        protected async override Task ExecuteAsync(CancellationToken stoppingToken)
         {
             // Set public ip address
             if (_options.IpAddress != null)
@@ -127,22 +134,23 @@ namespace QuantumCore.Game
             
             _server.RegisterListeners();
             
-            _server.Start();
+            await _server.Start();
             
             _gameTime.Start();
 
             Log.Debug("Start!");
-            while (true)
-            {
-                Tick();
-            }
-        }
-
-        private void Update(double elapsedTime)
-        {
-            EventSystem.Update(elapsedTime);
             
-            _world.Update(elapsedTime);
+            while (!stoppingToken.IsCancellationRequested)
+            {
+                try
+                {
+                    Tick();
+                }
+                catch (Exception e)
+                {
+                    Log.Error(e, "Tick failed");
+                }
+            }
         }
 
         private void Tick()
@@ -180,11 +188,6 @@ namespace QuantumCore.Game
         public void RegisterCommandNamespace(Type t)
         {
             CommandManager.Register(t.Namespace, t.Assembly);
-        }
-
-        public Task StopAsync(CancellationToken token)
-        {
-            return Task.CompletedTask;
         }
     }
 }
