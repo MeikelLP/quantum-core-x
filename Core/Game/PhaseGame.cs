@@ -280,48 +280,52 @@ namespace QuantumCore.Game
         }
 
         [Listener(typeof(TargetChange))]
-        public static async Task OnTargetChange(this GameConnection connection, TargetChange packet)
+        public static Task OnTargetChange(this GameConnection connection, TargetChange packet)
         {
             var player = connection.Player;
             if (player == null)
             {
                 Log.Warning("Target Change without having a player instance");
                 connection.Close();
-                return;
+                return Task.CompletedTask;
             }
 
             var entity = player.Map.GetEntity(packet.TargetVid);
             if (entity == null)
             {
-                return;
+                return Task.CompletedTask;
             }
 
             player.Target?.TargetedBy.Remove(player);
             player.Target = entity;
             entity.TargetedBy.Add(player);
             player.SendTarget();
+
+            return Task.CompletedTask;
         }
 
         [Listener(typeof(Attack))]
-        public static async Task OnAttack(this GameConnection connection, Attack packet)
+        public static Task OnAttack(this GameConnection connection, Attack packet)
         {
             var attacker = connection.Player;
             if (attacker == null)
             {
                 Log.Warning("Attack without having a player instance");
                 connection.Close();
-                return;
+                return Task.CompletedTask;
             }
             
             var entity = attacker.Map.GetEntity(packet.Vid);
             if (entity == null)
             {
-                return;
+                return Task.CompletedTask;
             }
             
             Log.Debug($"Attack from {attacker.Name} with type {packet.AttackType} target {packet.Vid}");
 
             attacker.Attack(entity, 0);
+
+            return Task.CompletedTask;
         }
 
         [Listener(typeof(ClickNpc))]
@@ -345,95 +349,110 @@ namespace QuantumCore.Game
         }
 
         [Listener(typeof(ShopClose))]
-        public static async Task OnShopClose(this GameConnection connection, ShopClose packet)
+        public static Task OnShopClose(this GameConnection connection, ShopClose packet)
         {
             var player = connection.Player;
             if (player == null)
             {
                 connection.Close();
-                return;
+                return Task.CompletedTask;
             }
             
             player.Shop?.Close(player);
+
+            return Task.CompletedTask;
         }
 
         [Listener(typeof(ShopBuy))]
-        public static async Task OnShopBuy(this GameConnection connection, ShopBuy packet)
+        public static Task OnShopBuy(this GameConnection connection, ShopBuy packet)
         {
             var player = connection.Player;
             if (player == null)
             {
                 connection.Close();
-                return;
+
+                return Task.CompletedTask;
             }
 
             player.Shop?.Buy(player, packet.Position, packet.Count);
+
+            return Task.CompletedTask;
         }
 
         [Listener(typeof(ShopSell))]
-        public static async Task OnShopSell(this GameConnection connection, ShopSell packet)
+        public static Task OnShopSell(this GameConnection connection, ShopSell packet)
         {
             var player = connection.Player;
             if (player == null)
             {
                 connection.Close();
-                return;
+                return Task.CompletedTask;
             }
 
             player.Shop?.Sell(player, packet.Position);
+
+            return Task.CompletedTask;
         }
 
         [Listener(typeof(QuickBarAdd))]
-        public static async Task OnQuickBarAdd(this GameConnection connection, QuickBarAdd packet)
+        public static Task OnQuickBarAdd(this GameConnection connection, QuickBarAdd packet)
         {
             var player = connection.Player;
             if (player == null)
             {
                 connection.Close();
-                return;
+                return Task.CompletedTask;
             }
 
             player.QuickSlotBar.Add(packet.Position, packet.Slot);
+
+            return Task.CompletedTask;
         }
         
         [Listener(typeof(QuickBarRemove))]
-        public static async Task OnQuickBarRemove(this GameConnection connection, QuickBarRemove packet)
+        public static Task OnQuickBarRemove(this GameConnection connection, QuickBarRemove packet)
         {
             var player = connection.Player;
             if (player == null)
             {
                 connection.Close();
-                return;
+                return Task.CompletedTask;
             }
 
             player.QuickSlotBar.Remove(packet.Position);
+
+            return Task.CompletedTask;
         }
         
         [Listener(typeof(QuickBarSwap))]
-        public static async Task OnQuickBarSwap(this GameConnection connection, QuickBarSwap packet)
+        public static Task OnQuickBarSwap(this GameConnection connection, QuickBarSwap packet)
         {
             var player = connection.Player;
             if (player == null)
             {
                 connection.Close();
-                return;
+                return Task.CompletedTask;
             }
 
             player.QuickSlotBar.Swap(packet.Position1, packet.Position2);
+
+            return Task.CompletedTask;
         }
 
         [Listener(typeof(QuestAnswer))]
-        public static async Task OnQuestAnswer(this GameConnection connection, QuestAnswer packet)
+        public static Task OnQuestAnswer(this GameConnection connection, QuestAnswer packet)
         {
             var player = connection.Player;
             if (player == null)
             {
                 connection.Close();
-                return;
+                return Task.CompletedTask;
             }
             
             Log.Information($"Quest answer: {packet.Answer}");
             player.CurrentQuest?.Answer(packet.Answer);
+
+            return Task.CompletedTask;
         }
     }
 }

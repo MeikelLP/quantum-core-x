@@ -340,11 +340,11 @@ namespace QuantumCore.Game.World.Entities
             return 100 * ((b > 90 ? 90 : b) + 210) / 300;
         }
         
-        public override async Task Update(double elapsedTime)
+        public async override Task Update(double elapsedTime)
         {
             if (Map == null) return; // We don't have a map yet so we aren't spawned
 
-            base.Update(elapsedTime);
+            await base.Update(elapsedTime);
 
             var maxHp = GetPoint(EPoints.MaxHp);
             if (Health < maxHp)

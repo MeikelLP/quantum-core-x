@@ -13,7 +13,7 @@ namespace QuantumCore.Game.Commands
     public static class HelpCommand
     {
         [CommandMethod]
-        public static async Task Help(IPlayerEntity player, int page = 1)
+        public static Task Help(IPlayerEntity player, int page = 1)
         {
             var usableCmd = new Dictionary<string, CommandCache>();
 
@@ -48,10 +48,12 @@ namespace QuantumCore.Game.Commands
                     player.SendChatInfo($"{command.Key}: {command.Value.Description}");
                 }
             }
+            
+            return Task.CompletedTask;
         }
 
         [CommandMethod("Shows an help with a specific command")]
-        public static async Task HelpWithCommand(IPlayerEntity player, string command)
+        public static Task HelpWithCommand(IPlayerEntity player, string command)
         {
             if (!CommandManager.Commands.ContainsKey(command) || !CommandManager.CanUseCommand((World.Entities.PlayerEntity) player, command))
             {
@@ -91,6 +93,7 @@ namespace QuantumCore.Game.Commands
                 }
             }
 
+            return Task.CompletedTask;
         }
     }
 }

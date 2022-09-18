@@ -44,7 +44,7 @@ public class GroundItem : Entity
         
     }
 
-    public async override void OnDespawn()
+    public override void OnDespawn()
     {
         
     }

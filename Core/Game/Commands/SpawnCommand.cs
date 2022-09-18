@@ -10,13 +10,13 @@ namespace QuantumCore.Game.Commands
     public static class SpawnCommand
     {
         [CommandMethod]
-        public static async Task SpawnMonster(IPlayerEntity player, uint monsterId, byte count = 1)
+        public static Task SpawnMonster(IPlayerEntity player, uint monsterId, byte count = 1)
         {
             var proto = MonsterManager.GetMonster(monsterId);
             if (proto == null)
             {
                 player.SendChatInfo("No monster found with the specified id");
-                return;
+                return Task.CompletedTask;
             }
 
             for (var i = 0; i < count; i++)
@@ -29,6 +29,8 @@ namespace QuantumCore.Game.Commands
                 var monster = new MonsterEntity(monsterId, x, y);
                 World.World.Instance.SpawnEntity(monster);
             }
+            
+            return Task.CompletedTask;
         }
     }
 }

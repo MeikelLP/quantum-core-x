@@ -9,14 +9,14 @@ namespace QuantumCore.Game
     public static class PhaseLoading
     {
         [Listener(typeof(EnterGame))]
-        public static async Task OnEnterGame(this GameConnection connection, EnterGame packet)
+        public static Task OnEnterGame(this GameConnection connection, EnterGame packet)
         {
             var player = connection.Player;
             if (player == null)
             {
                 Log.Warning($"Trying to enter game without a player!");
                 connection.Close();
-                return;
+                return Task.CompletedTask;
             }
             
             // Enable game phase
@@ -36,6 +36,7 @@ namespace QuantumCore.Game
             }
             
             player.SendInventory();
+            return Task.CompletedTask;
         }
     }
 }

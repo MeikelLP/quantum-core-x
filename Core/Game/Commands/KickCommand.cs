@@ -12,9 +12,11 @@ namespace QuantumCore.Game.Commands
     public static class KickCommand
     {
         [CommandMethod]
-        public static async Task Kick(IPlayerEntity player, IPlayerEntity target)
+        public static Task Kick(IPlayerEntity player, IPlayerEntity target)
         {
             target.Disconnect();
+
+            return Task.CompletedTask;
         }
     }
 }

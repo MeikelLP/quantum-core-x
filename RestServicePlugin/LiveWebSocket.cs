@@ -23,7 +23,7 @@ namespace RestServicePlugin
             _game = game;
         }
 
-        protected override async Task OnMessageReceivedAsync(IWebSocketContext context, byte[] buffer, IWebSocketReceiveResult result)
+        protected override Task OnMessageReceivedAsync(IWebSocketContext context, byte[] buffer, IWebSocketReceiveResult result)
         {
             var register = JsonConvert.DeserializeObject<RegisterListener>(Encoding.UTF8.GetString(buffer));
 
@@ -32,6 +32,8 @@ namespace RestServicePlugin
                 case "mapUpdate":
                     break;
             }
+
+            return Task.CompletedTask;
         }
 
         public void HookMapUpdate(IMap map, double elapsedTime)

@@ -33,11 +33,12 @@ public class TestQuest : Quest
         Done();
     }
 
-    private async Task TestGive(IPlayerEntity player, Item item)
+    private Task TestGive(IPlayerEntity player, Item item)
     {
         var proto = ItemManager.Instance.GetItem(item.ItemId);
         
         Text($"Thanks for giving me the item {proto.TranslatedName}.");
         Done();
+        return Task.CompletedTask;
     }
 }

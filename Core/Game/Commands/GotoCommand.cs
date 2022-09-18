@@ -14,16 +14,18 @@ namespace QuantumCore.Game.Commands
     public static class GotoCommand
     {
         [CommandMethod("X and Y cordinates to teleport to")]
-        public static async Task GoToCoordinate(IPlayerEntity player, int x, int y)
+        public static Task GoToCoordinate(IPlayerEntity player, int x, int y)
         {
             if (x < 0 || y < 0)
                 player.SendChatInfo("The X and Y position must be positive");
             else
                 player.Move((int) player.Map.PositionX + (x*100), (int)player.Map.PositionY + (y*100));
+
+            return Task.CompletedTask;
         }
 
         [CommandMethod("Teleports you to a map by their name")]
-        public static async Task GoToMap(IPlayerEntity player, string mapName)
+        public static Task GoToMap(IPlayerEntity player, string mapName)
         {
             var world = World.World.Instance;
             var maps = world.FindMapsByName(mapName);
@@ -35,19 +37,22 @@ namespace QuantumCore.Game.Commands
                     player.SendChatInfo($"- {map.Name}");   
                 }
 
-                return;
+                return Task.CompletedTask;
             }
 
             if (maps.Count == 0)
             {
                 player.SendChatInfo("Unknown map");
-                return;
+
+                return Task.CompletedTask;
             }
             
             // todo read goto position from map instead of using center
 
             var targetMap = maps[0];
             player.Move((int)(targetMap.PositionX + targetMap.Width * Map.MapUnit / 2), (int)(targetMap.PositionY + targetMap.Height * Map.MapUnit / 2));
+
+            return Task.CompletedTask;
         }
     }
 }

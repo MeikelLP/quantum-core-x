@@ -91,7 +91,7 @@ namespace QuantumCore.Game.World.Entities
         public abstract void ShowEntity(IConnection connection);
         public abstract void HideEntity(IConnection connection);
         
-        public virtual async Task Update(double elapsedTime)
+        public virtual Task Update(double elapsedTime)
         {
             if (State == EEntityState.Moving)
             {
@@ -110,6 +110,8 @@ namespace QuantumCore.Game.World.Entities
                     State = EEntityState.Idle;
                 }
             }
+
+            return Task.CompletedTask;
         }
 
         public virtual void Move(int x, int y)

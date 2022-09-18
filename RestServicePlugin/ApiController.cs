@@ -43,12 +43,12 @@ namespace RestServicePlugin
         }
         
         [Route(HttpVerbs.Get, "/entities/{mapName}")]
-        public async Task<object> Test(string mapName)
+        public Task<object> Test(string mapName)
         {
             var map = _game.World.GetMapByName(mapName);
             var entities = map.GetEntities();
 
-            return new
+            return Task.FromResult<object>(new
             {
                 Name = map.Name,
                 PositionX = map.PositionX,
@@ -56,7 +56,7 @@ namespace RestServicePlugin
                 Width = map.Width,
                 Height = map.Height,
                 Entities = entities.Select(FormatEntity)
-            };
+            });
         }
     }
 }
