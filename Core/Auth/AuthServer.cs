@@ -1,8 +1,11 @@
 using System;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Dapper;
 using Dapper.Contrib.Extensions;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using QuantumCore.Auth.Cache;
 using QuantumCore.Auth.Packets;
 using QuantumCore.Cache;
@@ -16,21 +19,25 @@ using Serilog;
 
 namespace QuantumCore.Auth
 {
-    internal class AuthServer : IServer
+    internal class AuthServer : IHostedService
     {
         private readonly AuthOptions _options;
-        private readonly Server<AuthConnection> _server;
+        private Server<AuthConnection> _server;
 
-        public AuthServer(AuthOptions options)
+        public AuthServer(IOptions<AuthOptions> options)
         {
-            _options = options;
+            _options = options.Value;
+        }
+
+        public async Task StartAsync(CancellationToken token)
+        {
 
             // Initialize static components
-            DatabaseManager.Init(options.AccountString, options.GameString);
-            CacheManager.Init(options.RedisHost, options.RedisPort);
+            DatabaseManager.Init(_options.AccountString, _options.GameString);
+            CacheManager.Init(_options.RedisHost, _options.RedisPort);
             
             // Start tcp server
-            _server = new Server<AuthConnection>((server, client) => new AuthConnection(server, client), options.Port);
+            _server = new Server<AuthConnection>((server, client) => new AuthConnection(server, client), _options.Port);
             
             // Load and init all plugins
             PluginManager.LoadPlugins(this);
@@ -115,15 +122,7 @@ namespace QuantumCore.Auth
                     Result = 1
                 });
             });
-        }
-
-        public async Task Init()
-        {
             
-        }
-
-        public async Task Start()
-        {
             var pong = await CacheManager.Instance.Ping();
             if (!pong)
             {
@@ -137,6 +136,11 @@ namespace QuantumCore.Auth
         {
             connection.SetPhase(EPhases.Auth);
             return true;
+        }
+
+        public Task StopAsync(CancellationToken token)
+        {
+            return Task.CompletedTask;
         }
     }
 }

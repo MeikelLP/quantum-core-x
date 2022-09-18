@@ -63,24 +63,30 @@ namespace QuantumCore.Core.Networking
             _connections.Remove(connection.Id);
         }
 
-        public async Task Start()
+        public Task Start()
         {
             Log.Information("Start listening for connections...");
+
             _listener.Start();
+            _listener.BeginAcceptTcpClient(OnClientAccepted, _listener);
 
-            while (true)
-                try
-                {
-                    var client = await _listener.AcceptTcpClientAsync();
-                    var connection = _clientConstructor(this, client);
-                    _connections.Add(connection.Id, connection);
+            return Task.CompletedTask;
+        }
+
+        private async void OnClientAccepted(IAsyncResult ar)
+        {
+            var listener = (TcpListener) ar.AsyncState;
+            var client = listener!.EndAcceptTcpClient(ar);
+            var connection = _clientConstructor(this, client);
+            _connections.Add(connection.Id, connection);
                     
-                    _openConnections.Inc();
+            _openConnections.Inc();
 
-                    connection.Start();
-                } catch(Exception e) {
-                    Log.Fatal(e.Message);
-                }
+            // wait for new client connection
+            _listener.BeginAcceptTcpClient(OnClientAccepted, _listener);
+            
+            // TODO no while(true)
+            await connection.Start();
         }
 
         public void ForAllConnections(Action<T> callback)

@@ -1,34 +1,32 @@
 ﻿using System;
+using System.Threading;
 using System.Threading.Tasks;
 using FluentMigrator.Runner;
 using FluentMigrator.Runner.Exceptions;
 using FluentMigrator.Runner.Initialization;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using QuantumCore.Core;
 using QuantumCore.Migrations;
 using Serilog;
 
 namespace QuantumCore.Database
 {
-    public class Migrate : IServer
+    public class Migrate : IHostedService
     {
-        private MigrateOptions _options;
+        private readonly MigrateOptions _options;
         
-        public Migrate(MigrateOptions options)
+        public Migrate(IOptions<MigrateOptions> options)
         {
-            _options = options;
+            _options = options.Value;
         }
 
-        public async Task Init()
-        {
-            
-        }
-
-        public async Task Start()
+        public async Task StartAsync(CancellationToken token)
         {
             var serviceProvider = CreateServices("account", _options.AccountString);
 
-            using (var scope = serviceProvider.CreateScope())
+            await using (serviceProvider.CreateAsyncScope())
             {
                 var runner = serviceProvider.GetRequiredService<IMigrationRunner>();
                 try
@@ -42,7 +40,7 @@ namespace QuantumCore.Database
             }
 
             serviceProvider = CreateServices("game", _options.GameString);
-            using (var scope = serviceProvider.CreateScope())
+            await using (serviceProvider.CreateAsyncScope())
             {
                 var runner = serviceProvider.GetRequiredService<IMigrationRunner>();
                 try
@@ -74,6 +72,11 @@ namespace QuantumCore.Database
                     opt.ShowSql = _options.Debug;
                 })
                 .BuildServiceProvider();
+        }
+
+        public Task StopAsync(CancellationToken token)
+        {
+            return Task.CompletedTask;
         }
     }
 }

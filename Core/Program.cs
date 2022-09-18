@@ -1,4 +1,9 @@
-﻿using CommandLine;
+﻿using System;
+using System.Threading.Tasks;
+using CommandLine;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using QuantumCore.Auth;
 using QuantumCore.Core;
 using QuantumCore.Core.Logging;
@@ -10,25 +15,39 @@ namespace QuantumCore
 {
     internal class Program
     {
-        private static void Main(string[] args)
+        private static async Task Main(string[] args)
         {
-            Parser.Default.ParseArguments<AuthOptions, GameOptions, MigrateOptions>(args).WithParsed(Run);
+            await Parser.Default.ParseArguments<AuthOptions, GameOptions, MigrateOptions>(args).WithParsedAsync(RunAsync);
         }
 
-        private static void Run(object obj)
+        private static async Task RunAsync(object obj)
         {
             Configurator.EnableLogging();
 
-            IServer server = obj switch
-            {
-                AuthOptions auth => new AuthServer(auth),
-                GameOptions game => new GameServer(game),
-                MigrateOptions migrate => new Migrate(migrate),
-                _ => null
-            };
+            var host = Host.CreateDefaultBuilder()
+                .ConfigureServices(services =>
+                {
+                    switch (obj)
+                    {
+                        case AuthOptions auth:
+                            services.AddSingleton<IOptions<AuthOptions>>(_ => new OptionsWrapper<AuthOptions>(auth));
+                            services.AddHostedService<AuthServer>();
+                            break;
+                        case GameOptions game:
+                            services.AddSingleton<IOptions<GameOptions>>(_ => new OptionsWrapper<GameOptions>(game));
+                            services.AddHostedService<GameServer>();
+                            break;
+                        case MigrateOptions migrate:
+                            services.AddSingleton<IOptions<MigrateOptions>>(_ => new OptionsWrapper<MigrateOptions>(migrate));
+                            services.AddHostedService<Migrate>();
+                            break;
+                        default:
+                            throw new NotImplementedException();
+                    }
+                })
+                .Build();
 
-            server?.Init().Wait();
-            server?.Start().Wait();
+            await host.RunAsync();
         }
     }
 }

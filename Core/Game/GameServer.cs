@@ -4,6 +4,8 @@ using System.IO;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Options;
 using QuantumCore.API.Game;
 using QuantumCore.API.Game.World;
 using QuantumCore.Cache;
@@ -25,7 +27,7 @@ using Serilog;
 
 namespace QuantumCore.Game
 {
-    internal class GameServer : IServer, IGame
+    internal class GameServer : IGame, IHostedService
     {
         public IWorld World => _world;
         public Server<GameConnection> Server => _server;
@@ -42,14 +44,14 @@ namespace QuantumCore.Game
         
         public static GameServer Instance { get; private set; }
         
-        public GameServer(GameOptions options)
+        public GameServer(IOptions<GameOptions> options)
         {
             Instance = this;
             
-            _options = options;
+            _options = options.Value;
         }
-
-        public async Task Init()
+        
+        public async Task StartAsync(CancellationToken token)
         {
             // Set public ip address
             if (_options.IpAddress != null)
@@ -124,10 +126,7 @@ namespace QuantumCore.Game
             });
             
             _server.RegisterListeners();
-        }
-        
-        public async Task Start()
-        {
+            
             _server.Start();
             
             _gameTime.Start();
@@ -181,6 +180,11 @@ namespace QuantumCore.Game
         public void RegisterCommandNamespace(Type t)
         {
             CommandManager.Register(t.Namespace, t.Assembly);
+        }
+
+        public Task StopAsync(CancellationToken token)
+        {
+            return Task.CompletedTask;
         }
     }
 }
