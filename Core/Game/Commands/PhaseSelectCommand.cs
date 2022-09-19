@@ -11,9 +11,9 @@ namespace QuantumCore.Game.Commands
     public static class PhaseSelectCommand
     {
     	[CommandMethod]
-        public static Task PhaseSelect(IPlayerEntity player)
+        public static async Task PhaseSelect(IPlayerEntity player)
         {
-            player.SendChatInfo("Going back to character selection. Please wait.");
+            await player.SendChatInfo("Going back to character selection. Please wait.");
 
             // todo implement wait
             
@@ -21,9 +21,10 @@ namespace QuantumCore.Game.Commands
             World.World.Instance.DespawnEntity(player);
             
             // Bring client back to select menu
-            (player.Connection as GameConnection)?.SetPhase(EPhases.Select);
-
-            return Task.CompletedTask;
+            if (player.Connection is GameConnection gc)
+            {
+                await gc.SetPhase(EPhases.Select);
+            }
         }
     }
 }

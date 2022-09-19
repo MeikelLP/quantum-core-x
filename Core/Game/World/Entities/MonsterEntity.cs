@@ -67,14 +67,14 @@ namespace QuantumCore.Game.World.Entities
             }
         }
 
-        public override async Task Update(double elapsedTime)
+        public async override Task Update(double elapsedTime)
         {
             if (Dead)
             {
                 _deadTime -= elapsedTime;
                 if (_deadTime <= 0)
                 {
-                    Map.DespawnEntity(this);
+                    await Map.DespawnEntity(this);
                 }
             }
             
@@ -92,11 +92,11 @@ namespace QuantumCore.Game.World.Entities
             await base.Update(elapsedTime);
         }
 
-        public override void Goto(int x, int y)
+        public override async Task Goto(int x, int y)
         {
             Rotation = (float) MathUtils.Rotation(x - PositionX, y - PositionY);
             
-            base.Goto(x, y);
+            await base.Goto(x, y);
             
             // Send movement to nearby players
             var movement = new CharacterMoveOut {
@@ -108,11 +108,11 @@ namespace QuantumCore.Game.World.Entities
                 Time = (uint) GameServer.Instance.Server.ServerTime,
                 Duration = MovementDuration
             };
-            ForEachNearbyEntity(entity =>
+            await ForEachNearbyEntity(async entity =>
             {
                 if (entity is PlayerEntity player)
                 {
-                    player.Connection.Send(movement);
+                    await player.Connection.Send(movement);
                 }
             });
         }
@@ -137,9 +137,9 @@ namespace QuantumCore.Game.World.Entities
             return 0; // monster don't have bonus damage as players have from their weapon
         }
 
-        public override int Damage(IEntity attacker, EDamageType damageType, int damage)
+        public async override Task<int> Damage(IEntity attacker, EDamageType damageType, int damage)
         {
-            damage = base.Damage(attacker, damageType, damage);
+            damage = await base.Damage(attacker, damageType, damage);
 
             if (damage >= 0)
             {
@@ -155,14 +155,14 @@ namespace QuantumCore.Game.World.Entities
             Behaviour?.TookDamage(attacker, 0);
         }
 
-        public override void AddPoint(EPoints point, int value)
+        public override ValueTask AddPoint(EPoints point, int value)
         {
-            
+            return ValueTask.CompletedTask;
         }
 
-        public override void SetPoint(EPoints point, uint value)
+        public override ValueTask SetPoint(EPoints point, uint value)
         {
-            
+            return ValueTask.CompletedTask;
         }
 
         public override uint GetPoint(EPoints point)
@@ -186,35 +186,38 @@ namespace QuantumCore.Game.World.Entities
             return 0;
         }
 
-        public override void Die()
+        public override async ValueTask Die()
         {
             if (Dead)
             {
                 return;
             }
             
-            base.Die();
+            await base.Die();
 
             var dead = new CharacterDead { Vid = Vid };
-            ForEachNearbyEntity(entity =>
+            await ForEachNearbyEntity(async entity =>
             {
                 if (entity is PlayerEntity player)
                 {
-                    player.Connection.Send(dead);
+                    await player.Connection.Send(dead);
                 }
             });
         }
 
-        protected override void OnNewNearbyEntity(IEntity entity)
+        protected override ValueTask OnNewNearbyEntity(IEntity entity)
         {
             _behaviour?.OnNewNearbyEntity(entity);
+        
+            return ValueTask.CompletedTask;
         }
 
-        protected override void OnRemoveNearbyEntity(IEntity entity)
+        protected override ValueTask OnRemoveNearbyEntity(IEntity entity)
         {
+            return ValueTask.CompletedTask;
         }
 
-        public override void OnDespawn()
+        public override ValueTask OnDespawn()
         {
             if (Group != null)
             {
@@ -224,16 +227,18 @@ namespace QuantumCore.Game.World.Entities
                     (Map as Map)?.EnqueueGroupRespawn(Group);
                 }
             }
+        
+            return ValueTask.CompletedTask;
         }
 
-        public override void ShowEntity(IConnection connection)
+        public override async Task ShowEntity(IConnection connection)
         {
             if (Dead)
             {
                 return; // no need to send dead entities to new players
             }
             
-            connection.Send(new SpawnCharacter
+            await connection.Send(new SpawnCharacter
             {
                 Vid = Vid,
                 CharacterType = _proto.Type,
@@ -248,7 +253,7 @@ namespace QuantumCore.Game.World.Entities
             if (_proto.Type == (byte) EEntityType.Npc)
             {
                 // NPCs need additional information too to show up for some reason
-                connection.Send(new CharacterInfo {
+                await connection.Send(new CharacterInfo {
                     Vid = Vid,
                     Empire = _proto.Empire,
                     Level = _proto.Level,
@@ -257,9 +262,9 @@ namespace QuantumCore.Game.World.Entities
             }
         }
         
-        public override void HideEntity(IConnection connection)
+        public async override Task HideEntity(IConnection connection)
         {
-            connection.Send(new RemoveCharacter
+            await connection.Send(new RemoveCharacter
             {
                 Vid = Vid
             });

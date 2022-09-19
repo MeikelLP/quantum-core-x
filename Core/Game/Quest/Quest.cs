@@ -27,9 +27,9 @@ public abstract class Quest
 
     public abstract void Init();
 
-    protected void SendScript()
+    protected async Task SendScript()
     {
-        _player.Connection.Send(new QuestScript {
+        await _player.Connection.Send(new QuestScript {
             Skin = (byte) _currentSkin,
             Source = _questScript,
             SourceSize = (ushort)(_questScript.Length + 1)
@@ -60,19 +60,18 @@ public abstract class Quest
         _questScript += str + "[ENTER]";
     }
 
-    protected Task Next()
+    protected async Task Next()
     {
         _currentNextTask?.TrySetCanceled();
         _currentNextTask = new TaskCompletionSource();
         
         _questScript += "[NEXT]";
-        SendScript();
+        await SendScript();
         
         _player.CurrentQuest = this;
-        return _currentNextTask.Task;
     }
 
-    protected Task<byte> Choice(bool done = false, params string[] options)
+    protected async Task<byte> Choice(bool done = false, params string[] options)
     {
         Debug.Assert(options.Length > 0);
         
@@ -101,13 +100,13 @@ public abstract class Quest
             _questScript += "[DONE]";
         }
         
-        SendScript();
+        await SendScript();
 
         _player.CurrentQuest = this;
-        return _currentChoiceTask.Task;
+        return await _currentChoiceTask.Task;
     }
 
-    protected void Done(bool silent = false)
+    protected async Task Done(bool silent = false)
     {
         if (!silent)
         {
@@ -115,7 +114,6 @@ public abstract class Quest
         }
         _questScript += "[DONE]";
         
-        SendScript();
+        await SendScript();
     }
-    
 }

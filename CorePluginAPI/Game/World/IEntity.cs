@@ -50,27 +50,27 @@ namespace QuantumCore.API.Game.World
 
         public Task Update(double elapsedTime);
         
-        public void OnDespawn();
-        public void AddNearbyEntity(IEntity entity);
-        public void RemoveNearbyEntity(IEntity entity);
-        public void ForEachNearbyEntity(Action<IEntity> action);
-        public void ShowEntity(IConnection connection);
-        public void HideEntity(IConnection connection);
+        public ValueTask OnDespawn();
+        public ValueTask AddNearbyEntity(IEntity entity);
+        public ValueTask RemoveNearbyEntity(IEntity entity);
+        public Task ForEachNearbyEntity(Func<IEntity, Task> action);
+        public Task ShowEntity(IConnection connection);
+        public Task HideEntity(IConnection connection);
 
         public uint GetPoint(EPoints point);
         public int GetMinDamage();
         public int GetMaxDamage();
         public int GetBonusDamage();
 
-        public void Goto(int x, int y);
+        public Task Goto(int x, int y);
         public void Wait(int x, int y);
 
         public byte GetBattleType();
-        public void Attack(IEntity victim, byte type);
-        public int Damage(IEntity attacker, EDamageType damageType, int damage);
+        public Task Attack(IEntity victim, byte type);
+        public Task<int> Damage(IEntity attacker, EDamageType damageType, int damage);
 
-        public void Move(int x, int y);
+        public Task Move(int x, int y);
         public void Stop();
-        public void Die();
+        public ValueTask Die();
     }
 }

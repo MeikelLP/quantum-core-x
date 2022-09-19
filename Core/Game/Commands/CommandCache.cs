@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Threading.Tasks;
 using QuantumCore.API.Game;
 using QuantumCore.API.Game.World;
 
@@ -63,7 +64,7 @@ namespace QuantumCore.Game.Commands
             return false;
         }
 
-        public void Run(object[] args)
+        public async Task Run(object[] args)
         {
             MethodInfo method = null;
             
@@ -110,7 +111,7 @@ namespace QuantumCore.Game.Commands
                                 var player = World.World.Instance.GetPlayer((string) callArguments[i]);
                                 if (player == null)
                                 {
-                                    ((IPlayerEntity) callArguments[0]).SendChatInfo($"Cannot find player {(string)callArguments[i]}");
+                                    await ((IPlayerEntity) callArguments[0]).SendChatInfo($"Cannot find player {(string)callArguments[i]}");
                                     return;
                                 }
                                 callArguments[i] = player;
@@ -136,7 +137,7 @@ namespace QuantumCore.Game.Commands
                 }
             }
 
-            ((IPlayerEntity)args[0]).SendChatInfo("Invalid command parameters");
+            await ((IPlayerEntity)args[0]).SendChatInfo("Invalid command parameters");
         }
     }
 }

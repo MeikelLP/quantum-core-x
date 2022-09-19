@@ -22,7 +22,7 @@ namespace QuantumCore.Game.Commands
             var item = ItemManager.Instance.GetItem(itemId);
             if (item == null)
             {
-                player.SendChatInfo("Item not found");
+                await player.SendChatInfo("Item not found");
                 return;
             }
 
@@ -44,7 +44,7 @@ namespace QuantumCore.Game.Commands
             await instance.Persist();
 
             // Send item to client
-            p.SendItem(instance);
+            await p.SendItem(instance);
         }
     }
 }

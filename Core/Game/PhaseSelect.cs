@@ -44,9 +44,9 @@ namespace QuantumCore.Game
             connection.Player = entity;
 
             // Send information about the player to the client
-            entity.SendBasicData();
-            entity.SendPoints();
-            entity.QuickSlotBar.Send();
+            await entity.SendBasicData();
+            await entity.SendPoints();
+            await entity.QuickSlotBar.Send();
         }
 
         [Listener(typeof(DeleteCharacter))]

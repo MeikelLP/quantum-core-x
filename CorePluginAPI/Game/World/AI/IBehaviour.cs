@@ -1,3 +1,5 @@
+using System.Threading.Tasks;
+
 namespace QuantumCore.API.Game.World.AI
 {
     public interface IBehaviour
@@ -11,7 +13,7 @@ namespace QuantumCore.API.Game.World.AI
         /// <summary>
         /// Executes behaviour logic
         /// </summary>
-        void Update(double elapsedTime);
+        Task Update(double elapsedTime);
         
         /// <summary>
         /// Called as soon as the entity got damage

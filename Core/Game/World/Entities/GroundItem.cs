@@ -1,4 +1,5 @@
-﻿using QuantumCore.API;
+﻿using System.Threading.Tasks;
+using QuantumCore.API;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.World;
 using QuantumCore.Database;
@@ -34,24 +35,24 @@ public class GroundItem : Entity
 
     public override byte HealthPercentage { get; } = 0;
     
-    protected override void OnNewNearbyEntity(IEntity entity)
+    protected override ValueTask OnNewNearbyEntity(IEntity entity)
     {
-       
+       return ValueTask.CompletedTask;
     }
 
-    protected override void OnRemoveNearbyEntity(IEntity entity)
+    protected override ValueTask OnRemoveNearbyEntity(IEntity entity)
     {
-        
+        return ValueTask.CompletedTask;
     }
 
-    public override void OnDespawn()
+    public override ValueTask OnDespawn()
     {
-        
+        return ValueTask.CompletedTask;
     }
 
-    public override void ShowEntity(IConnection connection)
+    public async override Task ShowEntity(IConnection connection)
     {
-        connection.Send(new GroundItemAdd {
+        await connection.Send(new GroundItemAdd {
             PositionX = PositionX,
             PositionY = PositionY,
             Vid = Vid,
@@ -59,9 +60,9 @@ public class GroundItem : Entity
         });
     }
 
-    public override void HideEntity(IConnection connection)
+    public async override Task HideEntity(IConnection connection)
     {
-        connection.Send(new GroundItemRemove {
+        await connection.Send(new GroundItemRemove {
             Vid = Vid
         });
     }
@@ -91,12 +92,12 @@ public class GroundItem : Entity
         throw new System.NotImplementedException();
     }
 
-    public override void AddPoint(EPoints point, int value)
+    public override ValueTask AddPoint(EPoints point, int value)
     {
         throw new System.NotImplementedException();
     }
 
-    public override void SetPoint(EPoints point, uint value)
+    public override ValueTask SetPoint(EPoints point, uint value)
     {
         throw new System.NotImplementedException();
     }

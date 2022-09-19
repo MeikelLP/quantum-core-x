@@ -31,12 +31,12 @@ namespace QuantumCore.Game.Commands
                 .ToArray();
             foreach (var item in items)
             {
-                p.RemoveItem(item);
-                p.SendRemoveItem(item.Window, (ushort)item.Position);
+                await p.RemoveItem(item);
+                await p.SendRemoveItem(item.Window, (ushort)item.Position);
                 await item.Destroy();
             }
 
-            p.SendInventory();
+            await p.SendInventory();
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Net;
+using System.Threading.Tasks;
 using QuantumCore.API.Game.World;
 
 namespace QuantumCore.Game.World;
@@ -41,7 +42,7 @@ public class RemoteMap : IMap
         throw new System.NotImplementedException();
     }
 
-    public void DespawnEntity(IEntity entity)
+    public Task DespawnEntity(IEntity entity)
     {
         throw new System.NotImplementedException();
     }
@@ -51,8 +52,8 @@ public class RemoteMap : IMap
         return x >= PositionX && x < PositionX + Width * Map.MapUnit && y >= PositionY && y < PositionY + Height * Map.MapUnit;
     }
 
-    public void Update(double elapsedTime)
+    public ValueTask Update(double elapsedTime)
     {
-        
+        return ValueTask.CompletedTask;
     }
 }

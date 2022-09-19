@@ -27,7 +27,7 @@ namespace QuantumCore.Game
             await connection.Send(new Channel { ChannelNo = 1 }); // todo
             
             // Show the player
-            player.Show(connection);
+            await player.Show(connection);
             
             // Spawn the player
             if (!World.World.Instance.SpawnEntity(player))
@@ -36,7 +36,7 @@ namespace QuantumCore.Game
                 connection.Close();
             }
             
-            player.SendInventory();
+            await player.SendInventory();
         }
     }
 }

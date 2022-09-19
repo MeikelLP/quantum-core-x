@@ -62,7 +62,7 @@ public static class ChatManager
         });
     }
     
-    public static void Talk(IEntity entity, string message)
+    public static async ValueTask Talk(IEntity entity, string message)
     {
         var packet = new ChatOutcoming
         {
@@ -74,14 +74,14 @@ public static class ChatManager
 
         if (entity is IPlayerEntity player)
         {
-            player.Connection.Send(packet);
+            await player.Connection.Send(packet);
         }
         
-        entity.ForEachNearbyEntity(nearby =>
+        await entity.ForEachNearbyEntity(async nearby =>
         {
             if (nearby is PlayerEntity player)
             {
-                player.Connection.Send(packet);
+                await player.Connection.Send(packet);
             }
         });
     }

@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Security.Cryptography;
+using System.Threading.Tasks;
 using QuantumCore.API.Game.World;
 using QuantumCore.API.Game.World.AI;
 using QuantumCore.Core.Types;
@@ -81,7 +82,7 @@ namespace QuantumCore.Game.World.AI
             _entity.Goto((int)targetPositionX, (int)targetPositionY);
         }
 
-        public void Update(double elapsedTime)
+        public async Task Update(double elapsedTime)
         {
             if (_entity == null)
             {
@@ -123,7 +124,7 @@ namespace QuantumCore.Game.World.AI
                             _attackCooldown -= elapsedTime;
                             if (_attackCooldown <= 0)
                             {
-                                Attack(_targetEntity);
+                                await Attack(_targetEntity);
                                 _attackCooldown += 2000; // todo use attack speed
                             }
                         }
@@ -144,7 +145,7 @@ namespace QuantumCore.Game.World.AI
             }
         }
 
-        private void Attack(IEntity victim)
+        private async Task Attack(IEntity victim)
         {
             if (_entity is not MonsterEntity monster)
             {
@@ -154,7 +155,7 @@ namespace QuantumCore.Game.World.AI
             monster.Rotation =
                 (float) MathUtils.Rotation(victim.PositionX - monster.PositionX, victim.PositionY - monster.PositionY);
 
-            monster.Attack(victim, monster.Proto.BattleType);
+            await monster.Attack(victim, monster.Proto.BattleType);
             
             // Send attack packet
             var packet = new CharacterMoveOut {
@@ -165,11 +166,11 @@ namespace QuantumCore.Game.World.AI
                 PositionY = monster.PositionY,
                 Time = (uint) GameServer.Instance.Server.ServerTime
             };
-            monster.ForEachNearbyEntity(entity =>
+            await monster.ForEachNearbyEntity(async entity =>
             {
                 if (entity is PlayerEntity player)
                 {
-                    player.Connection.Send(packet);
+                    await player.Connection.Send(packet);
                 }
             });
         }

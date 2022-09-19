@@ -195,7 +195,7 @@ namespace QuantumCore.Game.Commands
                     }
                 }
 
-                cmd.Run(objects);
+                await cmd.Run(objects);
             }
             else
             {

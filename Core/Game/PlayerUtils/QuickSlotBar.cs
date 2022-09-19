@@ -49,7 +49,7 @@ public class QuickSlotBar
         await CacheManager.Instance.Set(key, Slots);
     }
 
-    public void Send()
+    public async Task Send()
     {
         for (var i = 0; i < Slots.Length; i++)
         {
@@ -59,14 +59,14 @@ public class QuickSlotBar
                 continue;
             }
             
-            Player.Connection.Send(new QuickBarAddOut {
+            await Player.Connection.Send(new QuickBarAddOut {
                 Position = (byte) i,
                 Slot = slot
             });
         }
     }
 
-    public void Add(byte position, QuickSlot slot)
+    public async Task Add(byte position, QuickSlot slot)
     {
         if (position >= 8)
         {
@@ -76,13 +76,13 @@ public class QuickSlotBar
         // todo verify type, and position?
         
         Slots[position] = slot;
-        Player.Connection.Send(new QuickBarAddOut {
+        await Player.Connection.Send(new QuickBarAddOut {
             Position = position,
             Slot = slot
         });
     }
 
-    public void Swap(byte position1, byte position2)
+    public async Task Swap(byte position1, byte position2)
     {
         if (position1 >= 8 || position2 >= 8)
         {
@@ -93,13 +93,13 @@ public class QuickSlotBar
         var slot2 = Slots[position2];
         Slots[position1] = slot2;
         Slots[position2] = slot1;
-        Player.Connection.Send(new QuickBarSwapOut {
+        await Player.Connection.Send(new QuickBarSwapOut {
             Position1 = position1,
             Position2 = position2
         });
     }
 
-    public void Remove(byte position)
+    public async Task Remove(byte position)
     {
         if (position >= 8)
         {
@@ -107,7 +107,7 @@ public class QuickSlotBar
         }
 
         Slots[position] = null;
-        Player.Connection.Send(new QuickBarRemoveOut {
+        await Player.Connection.Send(new QuickBarRemoveOut {
             Position = position
         });
     }

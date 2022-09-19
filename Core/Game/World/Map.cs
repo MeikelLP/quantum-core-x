@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
+using System.Threading.Tasks;
 using QuantumCore.API.Game;
 using QuantumCore.API.Game.World;
 using QuantumCore.Cache;
@@ -84,77 +85,76 @@ namespace QuantumCore.Game.World
             }
         }
 
-        public void Update(double elapsedTime)
+        public async ValueTask Update(double elapsedTime)
         {
             HookManager.Instance.CallHook<IHookMapUpdate>(this, elapsedTime);
 
-            lock (_entities)
+            foreach (var entity in _pendingRemovals)
             {
-                foreach (var entity in _pendingRemovals)
-                {
-                    _entities.Remove(entity as Entity);
-                }
-                _pendingRemovals.Clear();
-                
-                foreach (var entity in _entities)
-                {
-                    entity.Update(elapsedTime);
+                _entities.Remove(entity as Entity);
+            }
+            _pendingRemovals.Clear();
+            
+            foreach (var entity in _entities)
+            {
+                await entity.Update(elapsedTime);
 
-                    if (entity.PositionChanged)
+                if (entity.PositionChanged)
+                {
+                    entity.PositionChanged = false;
+                    
+                    // Update position in our quad tree (used for faster nearby look up)
+                    _quadTree.UpdatePosition(entity);
+
+                    if (entity.Type == EEntityType.Player)
                     {
-                        entity.PositionChanged = false;
-                        
-                        // Update position in our quad tree (used for faster nearby look up)
-                        _quadTree.UpdatePosition(entity);
-
-                        if (entity.Type == EEntityType.Player)
+                        // Check which entities are relevant for nearby
+                        EEntityType? filter = null;
+                        if (entity.Type != EEntityType.Player)
                         {
-                            // Check which entities are relevant for nearby
-                            EEntityType? filter = null;
-                            if (entity.Type != EEntityType.Player)
-                            {
-                                // if we aren't a player only players are relevant for nearby
-                                filter = EEntityType.Player;
-                            }
-
-                            // Update entities nearby
-                            _quadTree.QueryAround(_nearby, entity.PositionX, entity.PositionY, Entity.ViewDistance,
-                                filter);
-
-                            // Check nearby entities and mark all entities which are too far away now
-                            entity.ForEachNearbyEntity(e =>
-                            {
-                                // Remove this entity from our temporary list as they are already in it
-                                if (!_nearby.Remove(e))
-                                {
-                                    // If it wasn't in our temporary list it is no longer in view
-                                    _remove.Add(e);
-                                }
-                            });
-
-                            // Remove previously marked entities on both sides
-                            foreach (var e in _remove)
-                            {
-                                e.RemoveNearbyEntity(entity);
-                                entity.RemoveNearbyEntity(e);
-                            }
-
-                            // Add new nearby entities on both sides
-                            foreach (var e in _nearby)
-                            {
-                                if (e == entity)
-                                {
-                                    continue; // do not add ourself!
-                                }
-
-                                e.AddNearbyEntity(entity);
-                                entity.AddNearbyEntity(e);
-                            }
-
-                            // Clear our temporary lists
-                            _nearby.Clear();
-                            _remove.Clear();
+                            // if we aren't a player only players are relevant for nearby
+                            filter = EEntityType.Player;
                         }
+
+                        // Update entities nearby
+                        _quadTree.QueryAround(_nearby, entity.PositionX, entity.PositionY, Entity.ViewDistance,
+                            filter);
+
+                        // Check nearby entities and mark all entities which are too far away now
+                        await entity.ForEachNearbyEntity(e =>
+                        {
+                            // Remove this entity from our temporary list as they are already in it
+                            if (!_nearby.Remove(e))
+                            {
+                                // If it wasn't in our temporary list it is no longer in view
+                                _remove.Add(e);
+                            }
+
+                            return Task.CompletedTask;
+                        });
+
+                        // Remove previously marked entities on both sides
+                        foreach (var e in _remove)
+                        {
+                            await e.RemoveNearbyEntity(entity);
+                            await entity.RemoveNearbyEntity(e);
+                        }
+
+                        // Add new nearby entities on both sides
+                        foreach (var e in _nearby)
+                        {
+                            if (e == entity)
+                            {
+                                continue; // do not add ourself!
+                            }
+
+                            await e.AddNearbyEntity(entity);
+                            await entity.AddNearbyEntity(e);
+                        }
+
+                        // Clear our temporary lists
+                        _nearby.Clear();
+                        _remove.Clear();
                     }
                 }
             }
@@ -284,27 +284,25 @@ namespace QuantumCore.Game.World
         /// Should only be called by World
         /// </summary>
         /// <param name="entity"></param>
-        public void DespawnEntity(IEntity entity)
+        public async Task DespawnEntity(IEntity entity)
         {
-            lock (_entities)
-            {
-                Log.Debug($"Despawn {entity}");
+            Log.Debug($"Despawn {entity}");
 
-                // Call despawn handlers
-                entity.OnDespawn();
+            // Call despawn handlers
+            await entity.OnDespawn();
 
-                // Remove this entity from all nearby entities
-                entity.ForEachNearbyEntity(e => e.RemoveNearbyEntity(entity));
+            // Remove this entity from all nearby entities
+            await entity.ForEachNearbyEntity(async e => await e.RemoveNearbyEntity(entity));
 
-                // Remove map from the entity
-                entity.Map = null;
+            // Remove map from the entity
+            entity.Map = null;
 
-                // Remove entity from the quad tree
-                _quadTree.Remove(entity);
+            // Remove entity from the quad tree
+            _quadTree.Remove(entity);
 
-                // Remove entity from entities list in the next update
-                _pendingRemovals.Add(entity);
-            }
+            // Remove entity from entities list in the next update
+            _pendingRemovals.Add(entity);
+            
         }
 
         public List<IEntity> GetEntities()

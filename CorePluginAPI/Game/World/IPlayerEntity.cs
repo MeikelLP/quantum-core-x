@@ -1,4 +1,5 @@
-﻿using QuantumCore.API.Game.Types;
+﻿using System.Threading.Tasks;
+using QuantumCore.API.Game.Types;
 
 namespace QuantumCore.API.Game.World
 {
@@ -13,14 +14,14 @@ namespace QuantumCore.API.Game.World
         /// </summary>
         /// <param name="point">Point to update</param>
         /// <param name="value">New value</param>
-        public void SetPoint(EPoints point, uint value);
+        public ValueTask SetPoint(EPoints point, uint value);
         
         /// <summary>
         /// Adds the value to the given point
         /// </summary>
         /// <param name="point">Point to update</param>
         /// <param name="value">Value to add (use negative value if you need to lower the point)</param>
-        public void AddPoint(EPoints point, int value);
+        public ValueTask AddPoint(EPoints point, int value);
         
         /// <summary>
         /// Gets the value of the point
@@ -32,37 +33,37 @@ namespace QuantumCore.API.Game.World
         /// <summary>
         /// Sends all points to the player
         /// </summary>
-        public void SendPoints();
+        public Task SendPoints();
 
         /// <summary>
         /// Respawns the player if the player is dead.
         /// Does nothing if the player is alive
         /// </summary>
         /// <param name="town">If true the player will respawn in town instead of last location</param>
-        public void Respawn(bool town);
+        public Task Respawn(bool town);
         
         /// <summary>
         /// Sends the given message to the player
         /// </summary>
         /// <param name="message">Message to send</param>
-        public void SendChatMessage(string message);
+        public Task SendChatMessage(string message);
         
         /// <summary>
         /// Sends the given chat command to the player
         /// </summary>
         /// <param name="command">Command to send</param>
-        public void SendChatCommand(string command);
+        public Task SendChatCommand(string command);
         
         /// <summary>
         /// Sends the given chat info to the player
         /// </summary>
         /// <param name="info">Info message to send</param>
-        public void SendChatInfo(string info);
+        public Task SendChatInfo(string info);
 
         /// <summary>
         /// Refresh the target information on the client.
         /// </summary>
-        public void SendTarget();
+        public Task SendTarget();
 
         public void Disconnect();
     }

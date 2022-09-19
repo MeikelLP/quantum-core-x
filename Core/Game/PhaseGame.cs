@@ -18,7 +18,7 @@ namespace QuantumCore.Game
     public static class PhaseGame
     {
         [Listener(typeof(CharacterMove))]
-        public static void OnCharacterMove(this GameConnection connection, CharacterMove packet)
+        public static async Task OnCharacterMove(this GameConnection connection, CharacterMove packet)
         {
             if (packet.MovementType > (int) CharacterMove.CharacterMovementType.Max &&
                 packet.MovementType != (int) CharacterMove.CharacterMovementType.Skill)
@@ -32,7 +32,7 @@ namespace QuantumCore.Game
             if (packet.MovementType == (int) CharacterMove.CharacterMovementType.Move)
             {
                 connection.Player.Rotation = packet.Rotation * 5;
-                connection.Player.Goto(packet.PositionX, packet.PositionY);
+                await connection.Player.Goto(packet.PositionX, packet.PositionY);
             }
             
             if (packet.MovementType == (int) CharacterMove.CharacterMovementType.Wait)
@@ -54,15 +54,15 @@ namespace QuantumCore.Game
                     : 0
             };
             
-            connection.Player.ForEachNearbyEntity(entity =>
+            await connection.Player.ForEachNearbyEntity(async entity =>
             {
                 if(entity is PlayerEntity player)
                 {
-                    player.Connection.Send(movement);
+                    await player.Connection.Send(movement);
                 }
             });
         }
-		
+
         [Listener(typeof(ChatIncoming))]
         public static async Task OnChat(this GameConnection connection, ChatIncoming packet)
         {
@@ -76,7 +76,7 @@ namespace QuantumCore.Game
                 {
                     var message = connection.Player.Name + ": " + packet.Message;
 
-                    ChatManager.Talk(connection.Player, message);
+                    await ChatManager.Talk(connection.Player, message);
                 }
             }
 
@@ -113,14 +113,14 @@ namespace QuantumCore.Game
             if (player.IsSpaceAvailable(item, packet.ToWindow, packet.ToPosition))
             {
                 // remove from old space
-                player.RemoveItem(item);
+                await player.RemoveItem(item);
                 
                 // place item
                 await player.SetItem(item, packet.ToWindow, packet.ToPosition);
 
                 // send item movement to client
-                player.SendRemoveItem(packet.FromWindow, packet.FromPosition);
-                player.SendItem(item);
+                await player.SendRemoveItem(packet.FromWindow, packet.FromPosition);
+                await player.SendItem(item);
             }
         }
         
@@ -152,17 +152,17 @@ namespace QuantumCore.Game
 
             if (packet.Window == (byte) WindowType.Inventory && packet.Position >= player.Inventory.Size)
             {
-                player.RemoveItem(item);
+                await player.RemoveItem(item);
                 if (await player.Inventory.PlaceItem(item))
                 {
-                    player.SendRemoveItem(packet.Window, packet.Position);
-                    player.SendItem(item);
-                    player.SendCharacterUpdate();
+                    await player.SendRemoveItem(packet.Window, packet.Position);
+                    await player.SendItem(item);
+                    await player.SendCharacterUpdate();
                 }
                 else
                 {
                     await player.SetItem(item, packet.Window, packet.Position);
-                    player.SendChatInfo("Cannot unequip item if the inventory is full");
+                    await player.SendChatInfo("Cannot unequip item if the inventory is full");
                 }
             }
             else if (player.IsEquippable(item))
@@ -175,30 +175,30 @@ namespace QuantumCore.Game
 
                     if (item2 != null)
                     {
-                        player.RemoveItem(item);
-                        player.RemoveItem(item2);
+                        await player.RemoveItem(item);
+                        await player.RemoveItem(item2);
                         if (await player.Inventory.PlaceItem(item2))
                         {
-                            player.SendRemoveItem(packet.Window, (ushort)wearSlot);
-                            player.SendRemoveItem(packet.Window, packet.Position);
+                            await player.SendRemoveItem(packet.Window, (ushort)wearSlot);
+                            await player.SendRemoveItem(packet.Window, packet.Position);
                             await player.SetItem(item, packet.Window, (ushort)wearSlot);
                             await player.SetItem(item2, packet.Window, packet.Position);
-                            player.SendItem(item);
-                            player.SendItem(item2);
+                            await player.SendItem(item);
+                            await player.SendItem(item2);
                         }
                         else
                         {
                             await player.SetItem(item, packet.Window, packet.Position);
                             await player.SetItem(item2, packet.Window, (ushort)wearSlot);
-                            player.SendChatInfo("Cannot swap item if the inventory is full");
+                            await player.SendChatInfo("Cannot swap item if the inventory is full");
                         }
                     }
                     else
                     {
-                        player.RemoveItem(item);
+                        await player.RemoveItem(item);
                         await player.SetItem(item, (byte) WindowType.Inventory, (ushort)wearSlot);
-                        player.SendRemoveItem(packet.Window, packet.Position);
-                        player.SendItem(item);
+                        await player.SendRemoveItem(packet.Window, packet.Position);
+                        await player.SendItem(item);
                     }
                 }
             }
@@ -217,7 +217,7 @@ namespace QuantumCore.Game
             if (packet.Gold > 0)
             {
                 // We're dropping gold...
-                player.DropGold(packet.Gold);
+                await player.DropGold(packet.Gold);
             }
             else
             {
@@ -280,52 +280,48 @@ namespace QuantumCore.Game
         }
 
         [Listener(typeof(TargetChange))]
-        public static Task OnTargetChange(this GameConnection connection, TargetChange packet)
+        public static async Task OnTargetChange(this GameConnection connection, TargetChange packet)
         {
             var player = connection.Player;
             if (player == null)
             {
                 Log.Warning("Target Change without having a player instance");
                 connection.Close();
-                return Task.CompletedTask;
+                return;
             }
 
             var entity = player.Map.GetEntity(packet.TargetVid);
             if (entity == null)
             {
-                return Task.CompletedTask;
+                return;
             }
 
             player.Target?.TargetedBy.Remove(player);
             player.Target = entity;
             entity.TargetedBy.Add(player);
-            player.SendTarget();
-
-            return Task.CompletedTask;
+            await player.SendTarget();
         }
 
         [Listener(typeof(Attack))]
-        public static Task OnAttack(this GameConnection connection, Attack packet)
+        public static async Task OnAttack(this GameConnection connection, Attack packet)
         {
             var attacker = connection.Player;
             if (attacker == null)
             {
                 Log.Warning("Attack without having a player instance");
                 connection.Close();
-                return Task.CompletedTask;
+                return;
             }
             
             var entity = attacker.Map.GetEntity(packet.Vid);
             if (entity == null)
             {
-                return Task.CompletedTask;
+                return;
             }
             
             Log.Debug($"Attack from {attacker.Name} with type {packet.AttackType} target {packet.Vid}");
 
-            attacker.Attack(entity, 0);
-
-            return Task.CompletedTask;
+            await attacker.Attack(entity, 0);
         }
 
         [Listener(typeof(ClickNpc))]
@@ -395,48 +391,42 @@ namespace QuantumCore.Game
         }
 
         [Listener(typeof(QuickBarAdd))]
-        public static Task OnQuickBarAdd(this GameConnection connection, QuickBarAdd packet)
+        public static async Task OnQuickBarAdd(this GameConnection connection, QuickBarAdd packet)
         {
             var player = connection.Player;
             if (player == null)
             {
                 connection.Close();
-                return Task.CompletedTask;
+                return;
             }
 
-            player.QuickSlotBar.Add(packet.Position, packet.Slot);
-
-            return Task.CompletedTask;
+            await player.QuickSlotBar.Add(packet.Position, packet.Slot);
         }
         
         [Listener(typeof(QuickBarRemove))]
-        public static Task OnQuickBarRemove(this GameConnection connection, QuickBarRemove packet)
+        public static async Task OnQuickBarRemove(this GameConnection connection, QuickBarRemove packet)
         {
             var player = connection.Player;
             if (player == null)
             {
                 connection.Close();
-                return Task.CompletedTask;
+                return;
             }
 
-            player.QuickSlotBar.Remove(packet.Position);
-
-            return Task.CompletedTask;
+            await player.QuickSlotBar.Remove(packet.Position);
         }
         
         [Listener(typeof(QuickBarSwap))]
-        public static Task OnQuickBarSwap(this GameConnection connection, QuickBarSwap packet)
+        public static async Task OnQuickBarSwap(this GameConnection connection, QuickBarSwap packet)
         {
             var player = connection.Player;
             if (player == null)
             {
                 connection.Close();
-                return Task.CompletedTask;
+                return;
             }
 
-            player.QuickSlotBar.Swap(packet.Position1, packet.Position2);
-
-            return Task.CompletedTask;
+            await player.QuickSlotBar.Swap(packet.Position1, packet.Position2);
         }
 
         [Listener(typeof(QuestAnswer))]

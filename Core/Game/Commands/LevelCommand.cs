@@ -1,4 +1,5 @@
-﻿using QuantumCore.API.Game;
+﻿using System.Threading.Tasks;
+using QuantumCore.API.Game;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.World;
 
@@ -8,16 +9,16 @@ namespace QuantumCore.Game.Commands;
 public class LevelCommand
 {
     [CommandMethod]
-    public static void SetMyLevel(IPlayerEntity player, byte level)
+    public static async Task SetMyLevel(IPlayerEntity player, byte level)
     {
-        player.SetPoint(EPoints.Level, level);
-        player.SendPoints();
+        await player.SetPoint(EPoints.Level, level);
+        await player.SendPoints();
     }
 
     [CommandMethod]
-    public static void SetOtherLevel(IPlayerEntity player, IPlayerEntity target, byte level)
+    public static async Task SetOtherLevel(IPlayerEntity player, IPlayerEntity target, byte level)
     {
-        target.SetPoint(EPoints.Level, level);
-        target.SendPoints();
+        await target.SetPoint(EPoints.Level, level);
+        await target.SendPoints();
     }
 }

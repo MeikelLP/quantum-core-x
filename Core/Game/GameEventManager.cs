@@ -47,7 +47,7 @@ public static class GameEventManager
             var selected = await internalQuest.SelectQuest(events.Select(e => e.Name));
             if (events[selected].Callback.Target is not Quest.Quest)
             {
-                internalQuest.EndQuest();
+                await internalQuest.EndQuest();
             }
             await events[selected].Callback(player);
             
@@ -79,7 +79,7 @@ public static class GameEventManager
             var selected = await internalQuest.SelectQuest(events.Select(e => e.Name));
             if (events[selected].Callback.Target is not Quest.Quest)
             {
-                internalQuest.EndQuest();
+                await internalQuest.EndQuest();
             }
             await events[selected].Callback(player, item);
             

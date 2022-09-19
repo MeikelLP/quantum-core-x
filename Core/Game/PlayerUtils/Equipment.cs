@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using QuantumCore.Database;
 using QuantumCore.Game.World.Entities;
 
@@ -146,43 +147,43 @@ namespace QuantumCore.Game.PlayerUtils
             return false;
         }
 
-        public void Send(PlayerEntity player)
+        public async Task Send(PlayerEntity player)
         {
             if (Body != null)
             {
-                player.SendItem(Body);
+                await player.SendItem(Body);
             }
             if (Head != null)
             {
-                player.SendItem(Head);
+                await player.SendItem(Head);
             }
             if (Shoes != null)
             {
-                player.SendItem(Shoes);
+                await player.SendItem(Shoes);
             }
             if (Bracelet != null)
             {
-                player.SendItem(Bracelet);
+                await player.SendItem(Bracelet);
             }
             if (Weapon != null)
             {
-                player.SendItem(Weapon);
+                await player.SendItem(Weapon);
             }
             if (Necklace != null)
             {
-                player.SendItem(Necklace);
+                await player.SendItem(Necklace);
             }
             if (Earrings != null)
             {
-                player.SendItem(Earrings);
+                await player.SendItem(Earrings);
             }
             if (Costume != null)
             {
-                player.SendItem(Costume);
+                await player.SendItem(Costume);
             }
             if (Hair != null)
             {
-                player.SendItem(Hair);
+                await player.SendItem(Hair);
             }
         }
 

@@ -112,11 +112,9 @@ namespace QuantumCore.Game.World
                     if (shopDef.ContainsKey("npc"))
                     {
                         var npc = (uint) (long) shopDef["npc"];
-                        GameEventManager.RegisterNpcClickEvent(shop.Name, npc, player =>
+                        GameEventManager.RegisterNpcClickEvent(shop.Name, npc, async player =>
                         {
-                            shop.Open(player);
-
-                            return Task.CompletedTask;
+                            await shop.Open(player);
                         });
                     }
                 }

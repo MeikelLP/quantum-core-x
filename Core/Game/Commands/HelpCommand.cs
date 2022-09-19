@@ -13,7 +13,7 @@ namespace QuantumCore.Game.Commands
     public static class HelpCommand
     {
         [CommandMethod]
-        public static Task Help(IPlayerEntity player, int page = 1)
+        public static async Task Help(IPlayerEntity player, int page = 1)
         {
             var usableCmd = new Dictionary<string, CommandCache>();
 
@@ -25,7 +25,7 @@ namespace QuantumCore.Game.Commands
 
             if (usableCmd.Count < 1)
             {
-                player.SendChatInfo("--- Help - Page 0/0 ---");
+                await player.SendChatInfo("--- Help - Page 0/0 ---");
             }
             else
             {
@@ -35,7 +35,7 @@ namespace QuantumCore.Game.Commands
                 if (page > allPages)
                     page = allPages;
 
-                player.SendChatInfo($"--- Help - Page {page}/{allPages} ---");
+                await player.SendChatInfo($"--- Help - Page {page}/{allPages} ---");
 
                 var commandToShow = page * 5;
 
@@ -45,25 +45,23 @@ namespace QuantumCore.Game.Commands
                 for (var i = (page - 1) * 5; i < commandToShow; i++)
                 {
                     var command = usableCmd.ElementAt(i);
-                    player.SendChatInfo($"{command.Key}: {command.Value.Description}");
+                    await player.SendChatInfo($"{command.Key}: {command.Value.Description}");
                 }
             }
-            
-            return Task.CompletedTask;
         }
 
         [CommandMethod("Shows an help with a specific command")]
-        public static Task HelpWithCommand(IPlayerEntity player, string command)
+        public static async Task HelpWithCommand(IPlayerEntity player, string command)
         {
             if (!CommandManager.Commands.ContainsKey(command) || !CommandManager.CanUseCommand((World.Entities.PlayerEntity) player, command))
             {
-                player.SendChatInfo("Specified command does not exists");
+                await player.SendChatInfo("Specified command does not exists");
             }
             else
             {
                 var key = CommandManager.Commands[command];
 
-                player.SendChatInfo($"--- Help for command {command} ---");
+                await player.SendChatInfo($"--- Help for command {command} ---");
 
                 string commandString;
 
@@ -89,11 +87,9 @@ namespace QuantumCore.Game.Commands
                             commandString += ">";
                     }
 
-                    player.SendChatInfo($"{command}{commandString}: {desc.Description}");
+                    await player.SendChatInfo($"{command}{commandString}: {desc.Description}");
                 }
             }
-
-            return Task.CompletedTask;
         }
     }
 }

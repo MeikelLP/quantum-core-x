@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace QuantumCore.API.Game.World
 {
@@ -18,10 +19,10 @@ namespace QuantumCore.API.Game.World
 
         public bool SpawnEntity(IEntity entity);
         
-        public void DespawnEntity(IEntity entity);
+        public Task DespawnEntity(IEntity entity);
 
         public bool IsPositionInside(int x, int y);
 
-        public void Update(double elapsedTime);
+        public ValueTask Update(double elapsedTime);
     }
 }

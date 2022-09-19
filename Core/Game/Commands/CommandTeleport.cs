@@ -12,12 +12,10 @@ namespace QuantumCore.Game.Commands
     public static class CommandTeleportTo
     {
         [CommandMethod]
-        public static Task TeleportToPlayer(IPlayerEntity player, IPlayerEntity dest)
+        public static async Task TeleportToPlayer(IPlayerEntity player, IPlayerEntity dest)
         {
-            player.SendChatInfo($"Teleporting to player {dest.Name}");
-            player.Move(dest.PositionX, dest.PositionY);
-
-            return Task.CompletedTask;
+            await player.SendChatInfo($"Teleporting to player {dest.Name}");
+            await player.Move(dest.PositionX, dest.PositionY);
         }
     }
 
@@ -25,12 +23,10 @@ namespace QuantumCore.Game.Commands
     public static class CommandTeleportHere
     {
         [CommandMethod]
-        public static Task TeleportToPlayer(IPlayerEntity player, IPlayerEntity dest)
+        public static async Task TeleportToPlayer(IPlayerEntity player, IPlayerEntity dest)
         {
-            player.SendChatInfo($"Teleporting {player.Name} to your position");
-            dest.Move(player.PositionX, player.PositionY);
-
-            return Task.CompletedTask;
+            await player.SendChatInfo($"Teleporting {player.Name} to your position");
+            await dest.Move(player.PositionX, player.PositionY);
         }
     }
 }

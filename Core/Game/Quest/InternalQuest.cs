@@ -23,9 +23,9 @@ public class InternalQuest : Quest
         return await Choice(false, events.ToArray());
     }
 
-    public void EndQuest()
+    public async Task EndQuest()
     {
         SetSkin(QuestSkin.NoWindow);
-        Done();
+        await Done();
     }
 }

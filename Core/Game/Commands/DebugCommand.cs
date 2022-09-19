@@ -1,4 +1,5 @@
-﻿using QuantumCore.API.Game;
+﻿using System.Threading.Tasks;
+using QuantumCore.API.Game;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.World;
 using QuantumCore.Game.PlayerUtils;
@@ -10,7 +11,7 @@ namespace QuantumCore.Game.Commands
     public class DebugCommandDamage
     {
         [CommandMethod]
-        public static void Command(IPlayerEntity iplayer)
+        public static async Task Command(IPlayerEntity iplayer)
         {
             if (iplayer is not PlayerEntity player)
             {
@@ -21,8 +22,8 @@ namespace QuantumCore.Game.Commands
             var maxWeapon = player.GetPoint(EPoints.MaxWeaponDamage);
             var minAttack = player.GetPoint(EPoints.MinAttackDamage);
             var maxAttack = player.GetPoint(EPoints.MaxAttackDamage);
-            player.SendChatMessage($"Weapon Damage: {minWeapon}-{maxWeapon}");
-            player.SendChatMessage($"Attack Damage: {minAttack}-{maxAttack}");
+            await player.SendChatMessage($"Weapon Damage: {minWeapon}-{maxWeapon}");
+            await player.SendChatMessage($"Attack Damage: {minAttack}-{maxAttack}");
         }
     }
 }

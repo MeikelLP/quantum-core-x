@@ -9,14 +9,12 @@ namespace QuantumCore.Game.Commands
     [CommandNoPermission]
     public static class QuitCommand
     {
-    	[CommandMethod]
-        public static Task Quit(IPlayerEntity player)
+        [CommandMethod]
+        public static async Task Quit(IPlayerEntity player)
         {
-            player.SendChatInfo("End the game. Please wait.");
-        	player.SendChatCommand("quit");
+            await player.SendChatInfo("End the game. Please wait.");
+            await player.SendChatCommand("quit");
             player.Disconnect();
-
-            return Task.CompletedTask;
         }
     }
 }

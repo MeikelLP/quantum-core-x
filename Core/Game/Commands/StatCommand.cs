@@ -1,4 +1,5 @@
-﻿using QuantumCore.API.Game;
+﻿using System.Threading.Tasks;
+using QuantumCore.API.Game;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.World;
 
@@ -9,7 +10,7 @@ namespace QuantumCore.Game.Commands;
 public class StatCommand
 {
     [CommandMethod]
-    public static void Execute(IPlayerEntity player, string status)
+    public static async Task Execute(IPlayerEntity player, string status)
     {
         EPoints point;
         switch (status)
@@ -35,8 +36,8 @@ public class StatCommand
             return;
         }
         
-        player.AddPoint(point, 1);
-        player.AddPoint(EPoints.StatusPoints, -1);
-        player.SendPoints();
+        await player.AddPoint(point, 1);
+        await player.AddPoint(EPoints.StatusPoints, -1);
+        await player.SendPoints();
     }
 }

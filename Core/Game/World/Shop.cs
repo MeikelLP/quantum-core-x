@@ -54,7 +54,7 @@ public class Shop
         _grid.SetBlock((uint) x, (uint) y, 1, proto.Size, item);
     }
 
-    public void Open(IPlayerEntity player)
+    public async Task Open(IPlayerEntity player)
     {
         if (player is not PlayerEntity p)
         {
@@ -75,7 +75,7 @@ public class Shop
                 Price = item.Price
             };
         }
-        p.Connection.Send(shopStart);
+        await p.Connection.Send(shopStart);
     }
 
     public async Task Buy(IPlayerEntity player, byte position, byte count)
@@ -113,10 +113,10 @@ public class Shop
         {
             await p.Connection.Send(new ShopNoSpaceLeft());
         }
-        p.AddPoint(EPoints.Gold, -(int)item.Price);
+        await p.AddPoint(EPoints.Gold, -(int)item.Price);
 
-        p.SendPoints();
-        p.SendItem(playerItem);
+        await p.SendPoints();
+        await p.SendItem(playerItem);
     }
 
     public async Task Sell(IPlayerEntity player, byte position)
@@ -140,8 +140,8 @@ public class Shop
 
         if (await p.DestroyItem(item))
         {
-            p.AddPoint(EPoints.Gold, (int) proto.SellPrice);
-            p.SendPoints();
+            await p.AddPoint(EPoints.Gold, (int) proto.SellPrice);
+            await p.SendPoints();
         }
     }
 
