@@ -9,16 +9,17 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Prometheus;
 using QuantumCore.API;
 using QuantumCore.Core.Packets;
 using QuantumCore.Core.Utils;
-using Serilog;
 
 namespace QuantumCore.Core.Networking
 {
     public abstract class ServerBase<T> : BackgroundService where T : Connection
     {
+        private readonly ILogger _logger;
         protected IPacketManager PacketManager { get; }
         private readonly List<Func<T, Task<bool>>> _connectionListeners = new();
         private readonly Dictionary<Guid, IConnection> _connections = new();
@@ -32,13 +33,14 @@ namespace QuantumCore.Core.Networking
         
         public int Port { get; }
 
-        public ServerBase(IServiceProvider serviceProvider, IPacketManager packetManager, int port, string bindIp = "0.0.0.0")
+        public ServerBase(IServiceProvider serviceProvider, IPacketManager packetManager, ILogger logger, int port, string bindIp = "0.0.0.0")
         {
-            PacketManager = packetManager;
+            _logger = logger;
             _scope = serviceProvider.CreateAsyncScope();
+            PacketManager = packetManager;
             Port = port;
-            
-            Log.Information($"Initialize tcp server listening on {bindIp}:{port}");
+
+            _logger.LogInformation($"Initialize tcp server listening on {bindIp}:{port}");
             
             // Start server timer
             _serverTimer.Start();
@@ -46,7 +48,7 @@ namespace QuantumCore.Core.Networking
             var localAddr = IPAddress.Parse(bindIp);
             Listener = new TcpListener(localAddr, Port);
             
-            Log.Information($"Initialize tcp server listening on {bindIp}:{Port}");
+            _logger.LogInformation($"Initialize tcp server listening on {bindIp}:{Port}");
 
             // Register Core Features
             PacketManager.RegisterNamespace("QuantumCore.Core.Packets");
@@ -64,7 +66,7 @@ namespace QuantumCore.Core.Networking
         public override Task StartAsync(CancellationToken token)
         {
             base.StartAsync(token);
-            Log.Information("Start listening for connections...");
+            _logger.LogInformation("Start listening for connections...");
 
             Listener.Start();
             Listener.BeginAcceptTcpClient(OnClientAccepted, Listener);
@@ -98,7 +100,7 @@ namespace QuantumCore.Core.Networking
 
         public void RegisterListener<P>(Func<T, P, Task> listener)
         {
-            Log.Debug($"Register listener on packet {typeof(P).Name}");
+            _logger.LogDebug($"Register listener on packet {typeof(P).Name}");
             var packet = PacketManager.IncomingPackets.First(p => p.Value.Type == typeof(P));
             _listeners[packet.Key] = listener;
         }
@@ -158,7 +160,7 @@ namespace QuantumCore.Core.Networking
                     continue;
                 }
                 
-                Log.Debug($"Register listener on packet {attribute.Packet.Name}");
+                _logger.LogDebug($"Register listener on packet {attribute.Packet.Name}");
                 var packet = PacketManager.IncomingPackets.First(p => p.Value.Type == attribute.Packet);
 
                 if (method.IsStatic)

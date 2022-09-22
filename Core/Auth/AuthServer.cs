@@ -1,31 +1,30 @@
 using System;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Dapper;
 using Dapper.Contrib.Extensions;
-using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using QuantumCore.API.Game.Types;
 using QuantumCore.Auth.Cache;
 using QuantumCore.Auth.Packets;
 using QuantumCore.Cache;
-using QuantumCore.Core;
 using QuantumCore.Core.API;
-using QuantumCore.Core.Constants;
 using QuantumCore.Core.Networking;
 using QuantumCore.Core.Utils;
 using QuantumCore.Database;
-using Serilog;
 
 namespace QuantumCore.Auth
 {
     public class AuthServer : ServerBase<AuthConnection>
     {
+        private readonly ILogger<AuthServer> _logger;
         private readonly AuthOptions _options;
 
-        public AuthServer(IServiceProvider serviceProvider, IOptions<AuthOptions> options, IPacketManager packetManager) : base(serviceProvider, packetManager, options.Value.Port)
+        public AuthServer(IServiceProvider serviceProvider, IOptions<AuthOptions> options, IPacketManager packetManager, ILogger<AuthServer> logger) 
+            : base(serviceProvider, packetManager, logger, options.Value.Port)
         {
+            _logger = logger;
             _options = options.Value;
         }
 
@@ -53,7 +52,7 @@ namespace QuantumCore.Auth
                     // Hash the password to prevent timing attacks
                     BCrypt.Net.BCrypt.HashPassword(request.Password);
                     
-                    Log.Debug($"Account {request.Username} not found");
+                    _logger.LogDebug($"Account {request.Username} not found");
                     await connection.Send(new LoginFailed
                     {
                         Status = "WRONGPWD"
@@ -69,7 +68,7 @@ namespace QuantumCore.Auth
                 {
                     if (!BCrypt.Net.BCrypt.Verify(request.Password, account.Password))
                     {
-                        Log.Debug($"Wrong password supplied for account {request.Username}");
+                        _logger.LogDebug($"Wrong password supplied for account {request.Username}");
                         status = "WRONGPWD";
                     }
                     else
@@ -84,7 +83,7 @@ namespace QuantumCore.Auth
                 }
                 catch (Exception e)
                 {
-                    Log.Warning($"Failed to verify password for account {request.Username}: {e.Message}");
+                    _logger.LogWarning($"Failed to verify password for account {request.Username}: {e.Message}");
                     status = "WRONGPWD";
                 }
 
@@ -122,7 +121,7 @@ namespace QuantumCore.Auth
             var pong = await CacheManager.Instance.Ping();
             if (!pong)
             {
-                Log.Error("Failed to ping redis server");
+                _logger.LogError("Failed to ping redis server");
             }
         }
 

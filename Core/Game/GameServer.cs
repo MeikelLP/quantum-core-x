@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Prometheus;
 using QuantumCore.API.Game;
@@ -18,12 +19,12 @@ using QuantumCore.Database;
 using QuantumCore.Game.Commands;
 using QuantumCore.Game.PlayerUtils;
 using QuantumCore.Game.Quest;
-using Serilog;
 
 namespace QuantumCore.Game
 {
     public class GameServer : ServerBase<GameConnection>, IGame
     {
+        private readonly ILogger<GameServer> _logger;
         public IWorld World => _world;
         private readonly GameOptions _options;
         private World.World _world;
@@ -39,9 +40,10 @@ namespace QuantumCore.Game
 
         public static GameServer Instance { get; private set; }
         
-        public GameServer(IOptions<GameOptions> options, IServiceProvider serviceProvider, IPacketManager packetManager) 
-            : base(serviceProvider, packetManager, options.Value.Port)
+        public GameServer(IOptions<GameOptions> options, IServiceProvider serviceProvider, IPacketManager packetManager, ILogger<GameServer> logger) 
+            : base(serviceProvider, packetManager, logger, options.Value.Port)
         {
+            _logger = logger;
             Instance = this;
             _options = options.Value;
         }
@@ -80,13 +82,13 @@ namespace QuantumCore.Game
             ConfigManager.Load();
             
             // Load game data
-            Log.Information("Load item_proto");
+            _logger.LogInformation("Load item_proto");
             ItemManager.Instance.Load();
-            Log.Information("Load mob_proto");
+            _logger.LogInformation("Load mob_proto");
             MonsterManager.Load();
-            Log.Information("Load jobs.toml");
+            _logger.LogInformation("Load jobs.toml");
             JobInfo.Load();
-            Log.Information("Load exp.csv");
+            _logger.LogInformation("Load exp.csv");
             ExperienceTable.Load();
             
             // Initialize core systems
@@ -96,16 +98,16 @@ namespace QuantumCore.Game
             QuestManager.Init();
 
             // Load animations
-            Log.Information("Load animation data");
+            _logger.LogInformation("Load animation data");
             AnimationManager.Load();
 
             // Load game world
-            Log.Information("Initialize world"); 
+            _logger.LogInformation("Initialize world"); 
             _world = new World.World();
             await _world.Load();
 
             // Load permissions
-            Log.Information("Initialize permissions");
+            _logger.LogInformation("Initialize permissions");
             await CommandManager.Load();
 
             // Register all default commands
@@ -132,13 +134,13 @@ namespace QuantumCore.Game
             // Register Core Features
             PacketManager.RegisterNamespace("QuantumCore.Core.Packets");
             RegisterListener<GCHandshake>((connection, packet) => connection.HandleHandshake(packet));
-            Log.Information("Start listening for connections...");
+            _logger.LogInformation("Start listening for connections...");
 
             StartListening();
             
             _gameTime.Start();
 
-            Log.Debug("Start!");
+            _logger.LogDebug("Start!");
             
             while (!stoppingToken.IsCancellationRequested)
             {
@@ -148,7 +150,7 @@ namespace QuantumCore.Game
                 }
                 catch (Exception e)
                 {
-                    Log.Error(e, "Tick failed");
+                    _logger.LogError(e, "Tick failed");
                 }
             }
         }
@@ -168,7 +170,7 @@ namespace QuantumCore.Game
 
             if (_accumulatedElapsedTime > _maxElapsedTime)
             {
-                Log.Warning($"Server is running slow");
+                _logger.LogWarning($"Server is running slow");
                 _accumulatedElapsedTime = _maxElapsedTime;
             }
 
@@ -178,7 +180,7 @@ namespace QuantumCore.Game
                 _accumulatedElapsedTime -= _targetElapsedTime;
                 ++stepCount;
                 
-                //Log.Debug($"Update... ({stepCount})");
+                //_logger.LogDebug($"Update... ({stepCount})");
                 Update(_targetElapsedTime.TotalMilliseconds);
             }
             

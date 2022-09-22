@@ -23,8 +23,6 @@ namespace QuantumCore
 
         private static async Task RunAsync(object obj)
         {
-            Configurator.EnableLogging();
-
             var host = Host.CreateDefaultBuilder()
                 .ConfigureServices(services =>
                 {
