@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using QuantumCore.Core.Logging.Enrichers;
 using QuantumCore.Core.Networking;
 using Serilog;
@@ -64,7 +65,11 @@ public static class ServiceExtensions
             outputTemplate: MessageTemplate);
 
         // finally, create the logger
-        services.AddLogging(x => x.AddSerilog(config.CreateLogger()));
+        services.AddLogging(x =>
+        {
+            x.ClearProviders();
+            x.AddSerilog(config.CreateLogger());
+        });
         return services;
     }
 }
