@@ -1,4 +1,5 @@
 ﻿using System.Net.Sockets;
+using Microsoft.Extensions.Logging;
 using QuantumCore.Core.Networking;
 
 namespace QuantumCore.Auth
@@ -7,7 +8,8 @@ namespace QuantumCore.Auth
     {
         private AuthServer _server;
 
-        public AuthConnection(AuthServer server, TcpClient client, IPacketManager packetManager)
+        public AuthConnection(AuthServer server, TcpClient client, IPacketManager packetManager, ILogger<AuthConnection> logger) 
+            : base(logger)
         {
             _server = server;
             Init(client, packetManager);

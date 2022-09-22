@@ -4,22 +4,21 @@ using System.IO;
 using System.Linq;
 using System.Net.Sockets;
 using System.Reflection;
-using System.Security.Cryptography;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Prometheus;
-using QuantumCore.Core.Constants;
 using QuantumCore.Core.Packets;
 using QuantumCore.Core.Utils;
 using QuantumCore.API;
 using QuantumCore.API.Game.Types;
-using Serilog;
 
 namespace QuantumCore.Core.Networking
 {
     public abstract class Connection : BackgroundService, IConnection
     {
+        private readonly ILogger _logger;
         private TcpClient _client;
 
         private IPacketManager _packetManager;
@@ -36,8 +35,9 @@ namespace QuantumCore.Core.Networking
         public bool Handshaking { get; private set; }
         public EPhases Phase { get; private set; }
         
-        protected Connection()
+        protected Connection(ILogger logger)
         {
+            _logger = logger;
             Id = Guid.NewGuid();
 
             if (_packetsReceived == null)
@@ -75,7 +75,7 @@ namespace QuantumCore.Core.Networking
 
         protected async override Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            Log.Information($"New connection from {_client.Client.RemoteEndPoint}");
+            _logger.LogInformation($"New connection from {_client.Client.RemoteEndPoint}");
 
             _stream = _client.GetStream();
 
@@ -91,7 +91,7 @@ namespace QuantumCore.Core.Networking
                     var read = await _stream.ReadAsync(buffer, 0, 1);
                     if (read != 1)
                     {
-                        Log.Information("Failed to read, closing connection");
+                        _logger.LogInformation("Failed to read, closing connection");
                         _client.Close();
                         break;
                     }
@@ -101,7 +101,7 @@ namespace QuantumCore.Core.Networking
                     var packetDetails = _packetManager.GetIncomingPacket(buffer[0]);
                     if (packetDetails == null)
                     {
-                        Log.Information($"Received unknown header {buffer[0]:X2}");
+                        _logger.LogInformation($"Received unknown header {buffer[0]:X2}");
                         _client.Close();
                         break;
                     }
@@ -113,7 +113,7 @@ namespace QuantumCore.Core.Networking
 
                     if (read != data.Length)
                     {
-                        Log.Information("Failed to read, closing connection");
+                        _logger.LogInformation("Failed to read, closing connection");
                         _client.Close();
                         break;
                     }
@@ -127,7 +127,7 @@ namespace QuantumCore.Core.Networking
                             _packetManager.GetIncomingPacket((ushort) (packetDetails.Header << 8 | subHeader));
                         if (packetDetails == null)
                         {
-                            Log.Information($"Received unknown sub header {subHeader:X2} for header {buffer[0]:X2}");
+                            _logger.LogInformation($"Received unknown sub header {subHeader:X2} for header {buffer[0]:X2}");
                             _client.Close();
                             break;
                         }
@@ -154,7 +154,7 @@ namespace QuantumCore.Core.Networking
                         packetTotalSize += read;
                         if (read != size)
                         {
-                            Log.Information($"Failed to read dynamic data read {read} but expected {size}");
+                            _logger.LogInformation($"Failed to read dynamic data read {read} but expected {size}");
                             _client.Close();
                             break;
                         }
@@ -174,17 +174,17 @@ namespace QuantumCore.Core.Networking
                             _client.Close();
                             break;
                         }
-                        //Log.Debug($"Read sequence {sequence[0]:X2}");
+                        //_logger.LogDebug($"Read sequence {sequence[0]:X2}");
                     }
                     
-                    //Log.Debug($"Recv {packet}");
+                    //_logger.LogDebug($"Recv {packet}");
                     _packetsReceived.Observe(packetTotalSize);
 
                     OnReceive(packet);
                 }
                 catch (Exception e)
                 {
-                    Log.Information(e, "Failed to process network data");
+                    _logger.LogInformation(e, "Failed to process network data");
                     _client.Close();
                     break;
                 }
@@ -203,7 +203,7 @@ namespace QuantumCore.Core.Networking
         {
             if (!_client.Connected)
             {
-                Log.Warning("Tried to send data to a closed connection");
+                _logger.LogWarning("Tried to send data to a closed connection");
                 return;
             }
             
@@ -253,7 +253,7 @@ namespace QuantumCore.Core.Networking
             if (!Handshaking)
             {
                 // We wasn't handshaking!
-                Log.Information("Received handshake while not handshaking!");
+                _logger.LogInformation("Received handshake while not handshaking!");
                 _client.Close();
                 return false;
             }
@@ -261,7 +261,7 @@ namespace QuantumCore.Core.Networking
             if (handshake.Handshake != Handshake)
             {
                 // We received a wrong handshake
-                Log.Information($"Received wrong handshake ({Handshake} != {handshake.Handshake})");
+                _logger.LogInformation($"Received wrong handshake ({Handshake} != {handshake.Handshake})");
                 _client.Close();
                 return false;
             }
@@ -271,7 +271,7 @@ namespace QuantumCore.Core.Networking
             if (difference >= 0 && difference <= 50)
             {
                 // if we difference is less than or equal to 50ms the handshake is done and client time is synced enough
-                Log.Information("Handshake done");
+                _logger.LogInformation("Handshake done");
                 Handshaking = false;
 
                 OnHandshakeFinished();
@@ -283,7 +283,7 @@ namespace QuantumCore.Core.Networking
                 if (delta < 0)
                 {
                     delta = (time - _lastHandshakeTime) / 2;
-                    Log.Debug($"Delta is too low, retry with last send time");
+                    _logger.LogDebug($"Delta is too low, retry with last send time");
                 }
 
                 await SendHandshake((uint) time, (uint) delta);

@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Net.Sockets;
+using Microsoft.Extensions.Logging;
+using QuantumCore.Auth;
 using QuantumCore.Core.Networking;
-using QuantumCore.Game.Packets;
-using QuantumCore.Game.World;
 using QuantumCore.Game.World.Entities;
 
 namespace QuantumCore.Game
@@ -14,7 +14,8 @@ namespace QuantumCore.Game
         public string Username { get; set; }
         public PlayerEntity Player { get; set; }
 
-        public GameConnection(GameServer server, TcpClient client, IPacketManager packetManager)
+        public GameConnection(GameServer server, TcpClient client, IPacketManager packetManager, ILogger<AuthConnection> logger) 
+            : base(logger)
         {
             Server = server;
             Init(client, packetManager);
