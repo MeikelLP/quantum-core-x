@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -8,12 +9,14 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Prometheus;
 using QuantumCore.API;
 using QuantumCore.Core.Packets;
 using QuantumCore.Core.Utils;
+using QuantumCore.Extensions;
 
 namespace QuantumCore.Core.Networking
 {
@@ -22,21 +25,21 @@ namespace QuantumCore.Core.Networking
         private readonly ILogger _logger;
         protected IPacketManager PacketManager { get; }
         private readonly List<Func<T, Task<bool>>> _connectionListeners = new();
-        private readonly Dictionary<Guid, IConnection> _connections = new();
+        private readonly ConcurrentDictionary<Guid, IConnection> _connections = new();
         private readonly Dictionary<ushort, Delegate> _listeners = new();
         private readonly Stopwatch _serverTimer = new();
-        private readonly AsyncServiceScope _scope;
         private readonly CancellationTokenSource _stoppingToken = new();
         protected TcpListener Listener { get; }
 
         private readonly Gauge _openConnections = Metrics.CreateGauge("open_connections", "Currently open connections");
-        
+        private ServiceProvider _serverLifetimeProvider;
+        protected IServiceCollection Services { get; }
+
         public int Port { get; }
 
-        public ServerBase(IServiceProvider serviceProvider, IPacketManager packetManager, ILogger logger, int port, string bindIp = "0.0.0.0")
+        public ServerBase(IPacketManager packetManager, ILogger logger, int port, string bindIp = "0.0.0.0")
         {
             _logger = logger;
-            _scope = serviceProvider.CreateAsyncScope();
             PacketManager = packetManager;
             Port = port;
 
@@ -53,6 +56,8 @@ namespace QuantumCore.Core.Networking
             // Register Core Features
             PacketManager.RegisterNamespace("QuantumCore.Core.Packets");
             RegisterListener<GCHandshake>((connection, packet) => connection.HandleHandshake(packet));
+            Services = new ServiceCollection().AddCoreServices()
+                .Replace(new ServiceDescriptor(typeof(IPacketManager), _ => packetManager, ServiceLifetime.Singleton));
         }
 
         public long ServerTime => _serverTimer.ElapsedMilliseconds;
@@ -60,7 +65,7 @@ namespace QuantumCore.Core.Networking
         internal void RemoveConnection(Connection connection)
         {
             _openConnections.Dec();
-            _connections.Remove(connection.Id);
+            _connections.Remove(connection.Id, out _);
         }
 
         public override Task StartAsync(CancellationToken token)
@@ -68,6 +73,7 @@ namespace QuantumCore.Core.Networking
             base.StartAsync(token);
             _logger.LogInformation("Start listening for connections...");
 
+            _serverLifetimeProvider = Services.BuildServiceProvider();
             Listener.Start();
             Listener.BeginAcceptTcpClient(OnClientAccepted, Listener);
 
@@ -78,12 +84,15 @@ namespace QuantumCore.Core.Networking
         {
             var listener = (TcpListener) ar.AsyncState;
             var client = listener!.EndAcceptTcpClient(ar);
-            var connection = ActivatorUtilities.CreateInstance<T>(_scope.ServiceProvider, client, this);
-            _connections.Add(connection.Id, connection);
+            
+            await using var scope = _serverLifetimeProvider.CreateAsyncScope();
+            // cannot inject tcp client here
+            var connection = ActivatorUtilities.CreateInstance<T>(scope.ServiceProvider, client);
+            _connections.TryAdd(connection.Id, connection);
                     
             _openConnections.Inc();
 
-            // wait for new client connection
+            // accept new connections on another thread
             Listener.BeginAcceptTcpClient(OnClientAccepted, Listener);
             
             await connection.StartAsync(_stoppingToken.Token);
@@ -184,7 +193,6 @@ namespace QuantumCore.Core.Networking
         {
             _stoppingToken.Cancel();
             await base.StopAsync(cancellationToken);
-            await _scope.DisposeAsync();
         }
     }
 }

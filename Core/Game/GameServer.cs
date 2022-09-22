@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Prometheus;
@@ -40,12 +41,14 @@ namespace QuantumCore.Game
 
         public static GameServer Instance { get; private set; }
         
-        public GameServer(IOptions<GameOptions> options, IServiceProvider serviceProvider, IPacketManager packetManager, ILogger<GameServer> logger) 
-            : base(serviceProvider, packetManager, logger, options.Value.Port)
+        public GameServer(IOptions<GameOptions> options, IPacketManager packetManager, ILogger<GameServer> logger) 
+            : base(packetManager, logger, options.Value.Port)
         {
             _logger = logger;
             Instance = this;
             _options = options.Value;
+
+            Services.AddSingleton(_ => this);
         }
 
         private void Update(double elapsedTime)

@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Dapper;
 using Dapper.Contrib.Extensions;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using QuantumCore.API.Game.Types;
@@ -21,11 +22,13 @@ namespace QuantumCore.Auth
         private readonly ILogger<AuthServer> _logger;
         private readonly AuthOptions _options;
 
-        public AuthServer(IServiceProvider serviceProvider, IOptions<AuthOptions> options, IPacketManager packetManager, ILogger<AuthServer> logger) 
-            : base(serviceProvider, packetManager, logger, options.Value.Port)
+        public AuthServer(IOptions<AuthOptions> options, IPacketManager packetManager, ILogger<AuthServer> logger) 
+            : base(packetManager, logger, options.Value.Port)
         {
             _logger = logger;
             _options = options.Value;
+            
+            Services.AddSingleton(_ => this);
         }
 
         protected async override Task ExecuteAsync(CancellationToken token)
