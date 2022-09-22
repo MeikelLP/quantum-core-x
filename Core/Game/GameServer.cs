@@ -1,54 +1,48 @@
 using System;
 using System.Diagnostics;
-using System.IO;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
+using Prometheus;
 using QuantumCore.API.Game;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.World;
 using QuantumCore.Cache;
-using QuantumCore.Core;
 using QuantumCore.Core.API;
-using QuantumCore.Core.Constants;
 using QuantumCore.Core.Event;
 using QuantumCore.Core.Networking;
-using QuantumCore.Core.Prometheus;
-using QuantumCore.Core.Types;
+using QuantumCore.Core.Packets;
 using QuantumCore.Core.Utils;
 using QuantumCore.Database;
 using QuantumCore.Game.Commands;
-using QuantumCore.Game.Packets;
-using QuantumCore.Game.Packets.Shop;
 using QuantumCore.Game.PlayerUtils;
 using QuantumCore.Game.Quest;
 using Serilog;
 
 namespace QuantumCore.Game
 {
-    internal class GameServer : BackgroundService, IGame 
+    public class GameServer : ServerBase<GameConnection>, IGame
     {
         public IWorld World => _world;
-        public Server<GameConnection> Server => _server;
-        
         private readonly GameOptions _options;
-        private Server<GameConnection> _server;
         private World.World _world;
-        
+
         private readonly Stopwatch _gameTime = new Stopwatch();
         private long _previousTicks = 0;
         private TimeSpan _accumulatedElapsedTime;
         private TimeSpan _targetElapsedTime = TimeSpan.FromTicks(100000); // 100hz
         private TimeSpan _maxElapsedTime = TimeSpan.FromMilliseconds(500);
-        
+        private readonly Stopwatch _serverTimer = new();
+
+        private readonly Gauge _openConnections = Metrics.CreateGauge("open_connections", "Currently open connections");
+
         public static GameServer Instance { get; private set; }
         
-        public GameServer(IOptions<GameOptions> options)
+        public GameServer(IOptions<GameOptions> options, IServiceProvider serviceProvider, IPacketManager packetManager) 
+            : base(serviceProvider, packetManager, options.Value.Port)
         {
             Instance = this;
-            
             _options = options.Value;
         }
 
@@ -84,9 +78,6 @@ namespace QuantumCore.Game
             
             // Load game configuration
             ConfigManager.Load();
-            
-            // Start tcp server
-            _server = new Server<GameConnection>((server, client) => new GameConnection(server, client), _options.Port);
             
             // Load game data
             Log.Information("Load item_proto");
@@ -124,18 +115,26 @@ namespace QuantumCore.Game
             PluginManager.LoadPlugins(this);
             
             // Register game server features
-            _server.RegisterNamespace("QuantumCore.Game.Packets");
+            PacketManager.RegisterNamespace("QuantumCore.Game.Packets");
             
             // Put all new connections into login phase
-            _server.RegisterNewConnectionListener(async connection =>
+            RegisterNewConnectionListener(async connection =>
             {
                 await connection.SetPhase(EPhases.Login);
                 return true;
             });
             
-            _server.RegisterListeners();
+            RegisterListeners<GameConnection>();
             
-            await _server.Start();
+            // Start server timer
+            _serverTimer.Start();
+
+            // Register Core Features
+            PacketManager.RegisterNamespace("QuantumCore.Core.Packets");
+            RegisterListener<GCHandshake>((connection, packet) => connection.HandleHandshake(packet));
+            Log.Information("Start listening for connections...");
+
+            StartListening();
             
             _gameTime.Start();
 
@@ -145,7 +144,7 @@ namespace QuantumCore.Game
             {
                 try
                 {
-                    Tick();
+                    await Tick();
                 }
                 catch (Exception e)
                 {
@@ -154,7 +153,7 @@ namespace QuantumCore.Game
             }
         }
 
-        private void Tick()
+        private async ValueTask Tick()
         {
             var currentTicks = _gameTime.Elapsed.Ticks;
             _accumulatedElapsedTime += TimeSpan.FromTicks(currentTicks - _previousTicks);
@@ -163,7 +162,7 @@ namespace QuantumCore.Game
             if (_accumulatedElapsedTime < _targetElapsedTime)
             {
                 var sleepTime = (_targetElapsedTime - _accumulatedElapsedTime).TotalMilliseconds;
-                Thread.Sleep((int) sleepTime);
+                await Task.Delay((int) sleepTime).ConfigureAwait(false);
                 return;
             }
 

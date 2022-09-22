@@ -20,34 +20,29 @@ using Serilog;
 
 namespace QuantumCore.Auth
 {
-    internal class AuthServer : IHostedService
+    public class AuthServer : ServerBase<AuthConnection>
     {
         private readonly AuthOptions _options;
-        private Server<AuthConnection> _server;
 
-        public AuthServer(IOptions<AuthOptions> options)
+        public AuthServer(IServiceProvider serviceProvider, IOptions<AuthOptions> options, IPacketManager packetManager) : base(serviceProvider, packetManager, options.Value.Port)
         {
             _options = options.Value;
         }
 
-        public async Task StartAsync(CancellationToken token)
+        protected async override Task ExecuteAsync(CancellationToken token)
         {
-
             // Initialize static components
             DatabaseManager.Init(_options.AccountString, _options.GameString);
             CacheManager.Init(_options.RedisHost, _options.RedisPort);
-            
-            // Start tcp server
-            _server = new Server<AuthConnection>((server, client) => new AuthConnection(server, client), _options.Port);
             
             // Load and init all plugins
             PluginManager.LoadPlugins(this);
 
             // Register auth server features
-            _server.RegisterNamespace("QuantumCore.Auth.Packets");
-            _server.RegisterNewConnectionListener(NewConnection);
+            PacketManager.RegisterNamespace("QuantumCore.Auth.Packets");
+            RegisterNewConnectionListener(NewConnection);
 
-            _server.RegisterListener<LoginRequest>(async (connection, request) =>
+            RegisterListener<LoginRequest>(async (connection, request) =>
             {
                 using var db = DatabaseManager.GetAccountDatabase();
                 var account = await db.QueryFirstOrDefaultAsync<Account>(
@@ -129,19 +124,12 @@ namespace QuantumCore.Auth
             {
                 Log.Error("Failed to ping redis server");
             }
-            
-            await _server.Start();
         }
 
         private async Task<bool> NewConnection(Connection connection)
         {
             await connection.SetPhase(EPhases.Auth);
             return true;
-        }
-
-        public Task StopAsync(CancellationToken token)
-        {
-            return Task.CompletedTask;
         }
     }
 }

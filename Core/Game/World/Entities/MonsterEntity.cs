@@ -105,7 +105,7 @@ namespace QuantumCore.Game.World.Entities
                 Argument = (byte) CharacterMove.CharacterMovementType.Wait,
                 PositionX = TargetPositionX,
                 PositionY = TargetPositionY,
-                Time = (uint) GameServer.Instance.Server.ServerTime,
+                Time = (uint) GameServer.Instance.ServerTime,
                 Duration = MovementDuration
             };
             await ForEachNearbyEntity(async entity =>

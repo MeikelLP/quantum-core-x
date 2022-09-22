@@ -51,7 +51,7 @@ public static class ChatManager
         };
         
         // Send message to all connections in the game phase
-        await GameServer.Instance.Server.ForAllConnections(async connection =>
+        await GameServer.Instance.ForAllConnections(async connection =>
         {
             if (connection.Phase != EPhases.Game)
             {
@@ -97,7 +97,7 @@ public static class ChatManager
         };
         
         // Send message to all connections in the game phase
-        await GameServer.Instance.Server.ForAllConnections(async connection =>
+        await GameServer.Instance.ForAllConnections(async connection =>
         {
             if (connection.Phase != EPhases.Game)
             {

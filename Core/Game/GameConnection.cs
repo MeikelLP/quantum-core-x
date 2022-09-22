@@ -9,21 +9,20 @@ namespace QuantumCore.Game
 {
     public class GameConnection : Connection
     {
-        public Server<GameConnection> Server { get; private set; }
-        
+        public GameServer Server { get; }
         public Guid? AccountId { get; set; }
         public string Username { get; set; }
         public PlayerEntity Player { get; set; }
 
-        public GameConnection(Server<GameConnection> server, TcpClient client)
+        public GameConnection(GameServer server, TcpClient client, IPacketManager packetManager)
         {
             Server = server;
-            Init(client, server);
+            Init(client, packetManager);
         }
 
         protected override void OnHandshakeFinished()
         {
-            Server.CallConnectionListener(this);
+            GameServer.Instance.CallConnectionListener(this);
         }
 
         protected override void OnClose()

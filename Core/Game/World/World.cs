@@ -322,7 +322,7 @@ namespace QuantumCore.Game.World
                 return new CoreHost {Ip = remoteMap.Host, Port = remoteMap.Port};
             }
 
-            return new CoreHost {Ip = IpUtils.PublicIP, Port = (ushort) GameServer.Instance.Server.Port};
+            return new CoreHost {Ip = IpUtils.PublicIP, Port = (ushort) GameServer.Instance.Port};
         }
 
         public SpawnGroup GetGroup(int id)

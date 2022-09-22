@@ -164,7 +164,7 @@ namespace QuantumCore.Game.World.AI
                 Vid = monster.Vid,
                 PositionX = monster.PositionX,
                 PositionY = monster.PositionY,
-                Time = (uint) GameServer.Instance.Server.ServerTime
+                Time = (uint) GameServer.Instance.ServerTime
             };
             await monster.ForEachNearbyEntity(async entity =>
             {

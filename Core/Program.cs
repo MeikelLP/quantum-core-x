@@ -8,6 +8,7 @@ using QuantumCore.Auth;
 using QuantumCore.Core;
 using QuantumCore.Core.Logging;
 using QuantumCore.Database;
+using QuantumCore.Extensions;
 using QuantumCore.Game;
 using Serilog;
 
@@ -31,10 +32,12 @@ namespace QuantumCore
                     {
                         case AuthOptions auth:
                             services.AddSingleton<IOptions<AuthOptions>>(_ => new OptionsWrapper<AuthOptions>(auth));
+                            services.AddCoreServices();
                             services.AddHostedService<AuthServer>();
                             break;
                         case GameOptions game:
                             services.AddSingleton<IOptions<GameOptions>>(_ => new OptionsWrapper<GameOptions>(game));
+                            services.AddCoreServices();
                             services.AddHostedService<GameServer>();
                             break;
                         case MigrateOptions migrate:

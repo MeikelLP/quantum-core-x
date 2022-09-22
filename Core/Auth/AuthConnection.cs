@@ -5,12 +5,12 @@ namespace QuantumCore.Auth
 {
     public class AuthConnection : Connection
     {
-        private Server<AuthConnection> _server;
+        private AuthServer _server;
 
-        public AuthConnection(Server<AuthConnection> server, TcpClient client)
+        public AuthConnection(AuthServer server, TcpClient client, IPacketManager packetManager)
         {
             _server = server;
-            Init(client, server);
+            Init(client, packetManager);
         }
 
         protected override void OnHandshakeFinished()

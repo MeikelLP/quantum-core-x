@@ -95,7 +95,7 @@ namespace QuantumCore.Game.World.Entities
         {
             if (State == EEntityState.Moving)
             {
-                var elapsed = GameServer.Instance.Server.ServerTime - MovementStart;
+                var elapsed = GameServer.Instance.ServerTime - MovementStart;
                 var rate = MovementDuration == 0 ? 1 : elapsed / (float) MovementDuration;
                 if (rate > 1) rate = 1;
 
@@ -137,7 +137,7 @@ namespace QuantumCore.Game.World.Entities
             TargetPositionY = y;
             StartPositionX = PositionX;
             StartPositionY = PositionY;
-            MovementStart = GameServer.Instance.Server.ServerTime;
+            MovementStart = GameServer.Instance.ServerTime;
 
             var distance = MathUtils.Distance(StartPositionX, StartPositionY, TargetPositionX, TargetPositionY);
             if (animation == null)
