@@ -42,16 +42,14 @@ namespace QuantumCore.Core.Networking
             _logger = logger;
             PacketManager = packetManager;
             Port = port;
-
-            _logger.LogInformation($"Initialize tcp server listening on {bindIp}:{port}");
             
             // Start server timer
             _serverTimer.Start();
             
             var localAddr = IPAddress.Parse(bindIp);
             Listener = new TcpListener(localAddr, Port);
-            
-            _logger.LogInformation($"Initialize tcp server listening on {bindIp}:{Port}");
+
+            _logger.LogInformation("Initialize tcp server listening on {IP}:{Port}", bindIp, port);
 
             // Register Core Features
             PacketManager.RegisterNamespace("QuantumCore.Core.Packets");
@@ -109,7 +107,7 @@ namespace QuantumCore.Core.Networking
 
         public void RegisterListener<P>(Func<T, P, Task> listener)
         {
-            _logger.LogDebug($"Register listener on packet {typeof(P).Name}");
+            _logger.LogDebug("Register listener on packet {TypeName}", typeof(P).Name);
             var packet = PacketManager.IncomingPackets.First(p => p.Value.Type == typeof(P));
             _listeners[packet.Key] = listener;
         }
@@ -169,7 +167,7 @@ namespace QuantumCore.Core.Networking
                     continue;
                 }
                 
-                _logger.LogDebug($"Register listener on packet {attribute.Packet.Name}");
+                _logger.LogDebug("Register listener on packet {PacketName}", attribute.Packet.Name);
                 var packet = PacketManager.IncomingPackets.First(p => p.Value.Type == attribute.Packet);
 
                 if (method.IsStatic)
