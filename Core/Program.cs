@@ -10,12 +10,9 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using QuantumCore.API;
 using QuantumCore.Auth;
-using QuantumCore.Core;
-using QuantumCore.Core.Logging;
 using QuantumCore.Database;
 using QuantumCore.Extensions;
 using QuantumCore.Game;
-using Serilog;
 using Weikio.PluginFramework.Abstractions;
 
 namespace QuantumCore
@@ -50,7 +47,7 @@ namespace QuantumCore
                             services.AddHostedService<Migrate>();
                             break;
                         default:
-                            throw new NotImplementedException();
+                            throw new InvalidOperationException($"Invalid option type {obj.GetType().FullName}. This should never happen");
                     }
                 })
                 .Build();
