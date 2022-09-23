@@ -27,6 +27,12 @@ namespace QuantumCore.Game
         private readonly ILogger<GameServer> _logger;
         private readonly PluginExecutor _pluginExecutor;
         private readonly IServiceProvider _serviceProvider;
+        private readonly IItemManager _itemManager;
+        private readonly IMonsterManager _monsterManager;
+        private readonly IJobManager _jobManager;
+        private readonly IExperienceManager _experienceManager;
+        private readonly IAnimationManager _animationManager;
+        private readonly ICommandManager _commandManager;
         public IWorld World => _world;
         private readonly GameOptions _options;
         private World.World _world;
@@ -41,12 +47,20 @@ namespace QuantumCore.Game
         public static GameServer Instance { get; private set; }
         
         public GameServer(IOptions<GameOptions> options, IPacketManager packetManager, ILogger<GameServer> logger, 
-            PluginExecutor pluginExecutor, IServiceProvider serviceProvider)
+            PluginExecutor pluginExecutor, IServiceProvider serviceProvider, IItemManager itemManager, 
+            IMonsterManager monsterManager, IJobManager jobManager, IExperienceManager experienceManager,
+            IAnimationManager animationManager, ICommandManager commandManager)
             : base(packetManager, logger, pluginExecutor, serviceProvider, options.Value.Port)
         {
             _logger = logger;
             _pluginExecutor = pluginExecutor;
             _serviceProvider = serviceProvider;
+            _itemManager = itemManager;
+            _monsterManager = monsterManager;
+            _jobManager = jobManager;
+            _experienceManager = experienceManager;
+            _animationManager = animationManager;
+            _commandManager = commandManager;
             Instance = this;
             _options = options.Value;
 
@@ -82,14 +96,14 @@ namespace QuantumCore.Game
             ConfigManager.Load();
             
             // Load game data
-            _logger.LogInformation("Load item_proto");
-            ItemManager.Instance.Load();
-            _logger.LogInformation("Load mob_proto");
-            MonsterManager.Load();
-            _logger.LogInformation("Load jobs.toml");
-            JobInfo.Load();
-            _logger.LogInformation("Load exp.csv");
-            ExperienceTable.Load();
+            await Task.WhenAll(
+                _itemManager.LoadAsync(stoppingToken), 
+                _monsterManager.LoadAsync(stoppingToken), 
+                _jobManager.LoadAsync(stoppingToken), 
+                _experienceManager.LoadAsync(stoppingToken),
+                _animationManager.LoadAsync(stoppingToken),
+                _commandManager.LoadAsync(stoppingToken)
+            );
             
             // Initialize core systems
             ChatManager.Init();
@@ -97,21 +111,13 @@ namespace QuantumCore.Game
             // Load all quests
             QuestManager.Init();
 
-            // Load animations
-            _logger.LogInformation("Load animation data");
-            AnimationManager.Load();
-
             // Load game world
             _logger.LogInformation("Initialize world"); 
             _world = ActivatorUtilities.CreateInstance<World.World>(_serviceProvider);
             await _world.Load();
 
-            // Load permissions
-            _logger.LogInformation("Initialize permissions");
-            await CommandManager.Load();
-
             // Register all default commands
-            CommandManager.Register("QuantumCore.Game.Commands");
+            _commandManager.Register("QuantumCore.Game.Commands");
 
             // Register game server features
             PacketManager.RegisterNamespace("QuantumCore.Game.Packets");
@@ -188,7 +194,7 @@ namespace QuantumCore.Game
 
         public void RegisterCommandNamespace(Type t)
         {
-            CommandManager.Register(t.Namespace, t.Assembly);
+            _commandManager.Register(t.Namespace, t.Assembly);
         }
     }
 }

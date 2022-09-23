@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using JetBrains.Annotations;
 using Serilog;
 
@@ -11,19 +13,19 @@ namespace QuantumCore.Core.Types
     public class StructuredFile
     {
         private readonly Dictionary<string, string> _values = new Dictionary<string, string>();
-        
+
         /// <summary>
         /// Parses the given file
         /// </summary>
         /// <param name="path">Path to file</param>
         /// <exception cref="FileNotFoundException">Thrown if the given file wasn't found</exception>
-        public void Read(string path)
+        public async Task ReadAsync(string path)
         {
             if (!File.Exists(path)) throw new FileNotFoundException("Structured file not found", path);
             
             using var reader = new StreamReader(path);
             string line;
-            while ((line = reader.ReadLine()) != null)
+            while ((line = await reader.ReadLineAsync()) != null)
             {
                 line = line.Trim();
                 if(string.IsNullOrWhiteSpace(line)) continue;

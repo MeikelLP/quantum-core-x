@@ -20,7 +20,9 @@ namespace QuantumCore.Game
     public static class PhaseSelect
     {
         [Listener(typeof(SelectCharacter))]
-        public static async Task OnSelectCharacter(this GameConnection connection, SelectCharacter packet)
+        public static async Task OnSelectCharacter(this GameConnection connection, SelectCharacter packet,
+            IItemManager itemManager, IJobManager jobManager, IExperienceManager experienceManager,
+            IAnimationManager animationManager)
         {
             Log.Debug($"Selected character in slot {packet.Slot}");
             if (connection.AccountId == null)
@@ -38,7 +40,7 @@ namespace QuantumCore.Game
             
             // Load player
             var player = await Player.GetPlayer(accountId, packet.Slot);
-            var entity = new PlayerEntity(player, connection);
+            var entity = new PlayerEntity(player, connection, itemManager, jobManager, experienceManager, animationManager);
             await entity.Load();
             
             connection.Player = entity;
@@ -128,7 +130,8 @@ namespace QuantumCore.Game
         }
 
         [Listener(typeof(CreateCharacter))]
-        public static async Task OnCreateCharacter(this GameConnection connection, CreateCharacter packet)
+        public static async Task OnCreateCharacter(this GameConnection connection, CreateCharacter packet,
+            IJobManager jobManager)
         {
             Log.Debug($"Create character in slot {packet.Slot}");
             if (connection.AccountId == null)
@@ -148,7 +151,7 @@ namespace QuantumCore.Game
                 return;
             }
 
-            var job = JobInfo.Get((byte)packet.Class);
+            var job = jobManager.Get((byte)packet.Class);
             
             // Create player data
             var player = new Player

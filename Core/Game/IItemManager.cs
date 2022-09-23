@@ -1,4 +1,6 @@
-﻿using QuantumCore.Core.Types;
+﻿using System.Threading;
+using System.Threading.Tasks;
+using QuantumCore.Core.Types;
 using QuantumCore.Database;
 
 namespace QuantumCore.Game;
@@ -6,6 +8,6 @@ namespace QuantumCore.Game;
 public interface IItemManager
 {
     ItemProto.Item GetItem(uint id);
-    void Load();
+    Task LoadAsync(CancellationToken token = default);
     Item CreateItem(ItemProto.Item proto, byte count = 1);
 }

@@ -15,6 +15,7 @@ namespace QuantumCore.Game.World.AI
 {
     public class SimpleBehaviour : IBehaviour
     {
+        private readonly IMonsterManager _monsterManager;
         private MobProto.Monster _proto;
         private IEntity _entity;
         private long _nextMovementIn;
@@ -31,8 +32,9 @@ namespace QuantumCore.Game.World.AI
 
         private const int MoveRadius = 1000;
 
-        public SimpleBehaviour()
+        public SimpleBehaviour(IMonsterManager monsterManager)
         {
+            _monsterManager = monsterManager;
             CalculateNextMovement();
         }
         
@@ -41,7 +43,7 @@ namespace QuantumCore.Game.World.AI
             Debug.Assert(_entity == null);
             _entity = entity;
 
-            _proto = MonsterManager.GetMonster(_entity.EntityClass);
+            _proto = _monsterManager.GetMonster(_entity.EntityClass);
 
             _spawnX = entity.PositionX;
             _spawnY = entity.PositionY;

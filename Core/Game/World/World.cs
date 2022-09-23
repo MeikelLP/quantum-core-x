@@ -33,13 +33,20 @@ namespace QuantumCore.Game.World
         private readonly Dictionary<int, Shop> _staticShops = new();
 
         private Subscriber _mapSubscriber;
-        
+        private readonly IItemManager _itemManager;
+        private readonly IMonsterManager _monsterManager;
+        private readonly IAnimationManager _animationManager;
+
         public static World Instance { get; private set; }
         
-        public World(ILogger<World> logger, PluginExecutor pluginExecutor)
+        public World(ILogger<World> logger, PluginExecutor pluginExecutor, IItemManager itemManager, 
+            IMonsterManager monsterManager, IAnimationManager animationManager)
         {
             _logger = logger;
             _pluginExecutor = pluginExecutor;
+            _itemManager = itemManager;
+            _monsterManager = monsterManager;
+            _animationManager = animationManager;
             _vid = 0;
             Instance = this;
         }
@@ -56,7 +63,7 @@ namespace QuantumCore.Game.World
             {
                 if (map is Map m)
                 {
-                    m.Initialize();
+                    await m.Initialize();
                 }
             }
         }
@@ -78,7 +85,7 @@ namespace QuantumCore.Game.World
                 foreach (var shopDef in shops)
                 {
                     var id = (int)(long) shopDef["id"];
-                    var shop = new Shop {Name = (string) shopDef["name"]};
+                    var shop = new Shop (_itemManager){Name = (string) shopDef["name"]};
 
                     if (shopDef.ContainsKey("items"))
                     {
@@ -180,7 +187,7 @@ namespace QuantumCore.Game.World
                         }
                         else
                         {
-                            map = new Map(mapName, positionX, positionY, width, height);    
+                            map = new Map(_monsterManager, _animationManager, mapName, positionX, positionY, width, height);    
                         }
                         
                         

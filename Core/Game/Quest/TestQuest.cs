@@ -7,8 +7,11 @@ namespace QuantumCore.Game.Quest;
 [Quest]
 public class TestQuest : Quest
 {
-    public TestQuest(QuestState state, IPlayerEntity player) : base(state, player)
+    private readonly IItemManager _itemManager;
+
+    public TestQuest(QuestState state, IPlayerEntity player, IItemManager itemManager) : base(state, player)
     {
+        _itemManager = itemManager;
     }
 
     public override void Init()
@@ -35,7 +38,7 @@ public class TestQuest : Quest
 
     private async Task TestGive(IPlayerEntity player, Item item)
     {
-        var proto = ItemManager.Instance.GetItem(item.ItemId);
+        var proto = _itemManager.GetItem(item.ItemId);
         
         Text($"Thanks for giving me the item {proto.TranslatedName}.");
         await Done();

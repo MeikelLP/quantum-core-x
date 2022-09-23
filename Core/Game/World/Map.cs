@@ -37,9 +37,13 @@ namespace QuantumCore.Game.World
         private readonly List<IEntity> _nearby = new();
         private readonly List<IEntity> _remove = new();
         private readonly List<IEntity> _pendingRemovals = new();
-        
-        public Map(string name, uint x, uint y, uint width, uint height)
+        private readonly IMonsterManager _monsterManager;
+        private readonly IAnimationManager _animationManager;
+
+        public Map(IMonsterManager monsterManager, IAnimationManager animationManager, string name, uint x, uint y, uint width, uint height)
         {
+            _monsterManager = monsterManager;
+            _animationManager = animationManager;
             Name = name;
             PositionX = x;
             PositionY = y;
@@ -48,12 +52,12 @@ namespace QuantumCore.Game.World
             _quadTree = new QuadTree((int) x, (int) y, (int) (width * MapUnit), (int) (height * MapUnit), 20);
         }
 
-        public void Initialize()
+        public async Task Initialize()
         {
             Log.Debug($"Load map '{Name}' at {PositionX}x{PositionY} (size {Width}x{Height})");
 
-            CacheManager.Instance.Set($"maps:{Name}", IpUtils.PublicIP + ":" + GameServer.Instance.Port);
-            CacheManager.Instance.Publish("maps", $"{Name} {IpUtils.PublicIP}:{GameServer.Instance.Port}");
+            await CacheManager.Instance.Set($"maps:{Name}", IpUtils.PublicIP + ":" + GameServer.Instance.Port);
+            await CacheManager.Instance.Publish("maps", $"{Name} {IpUtils.PublicIP}:{GameServer.Instance.Port}");
 
             // Load map spawn data
             var spawnFile = Path.Join("data", "maps", Name, "spawn.toml");
@@ -81,7 +85,7 @@ namespace QuantumCore.Game.World
             foreach(var spawnPoint in _spawnPoints) 
             {
                 var monsterGroup = new MonsterGroup { SpawnPoint = spawnPoint };
-                SpawnGroup(monsterGroup);
+                await SpawnGroup(monsterGroup);
             }
         }
 
@@ -160,7 +164,7 @@ namespace QuantumCore.Game.World
             }
         }
 
-        private void SpawnGroup(MonsterGroup groupInstance)
+        private async Task SpawnGroup(MonsterGroup groupInstance)
         {
             var spawnPoint = groupInstance.SpawnPoint;
             switch (spawnPoint.Type)
@@ -177,11 +181,11 @@ namespace QuantumCore.Game.World
 
                         foreach (var member in group.Members)
                         {
-                            var monster = new MonsterEntity(member.Id,
+                            var monster = new MonsterEntity(_monsterManager, _animationManager, member.Id,
                                 (int) (PositionX + (baseX + RandomNumberGenerator.GetInt32(-5, 5)) * 100),
                                 (int) (PositionY + (baseY + RandomNumberGenerator.GetInt32(-5, 5)) * 100),
                                 RandomNumberGenerator.GetInt32(0, 360));
-                            World.Instance.SpawnEntity(monster);
+                            await World.Instance.SpawnEntity(monster);
 
                             groupInstance.Monsters.Add(monster);
                             monster.Group = groupInstance;
@@ -207,8 +211,8 @@ namespace QuantumCore.Game.World
 
                     spawnPoint.CurrentGroup = groupInstance;
 
-                    var monster = new MonsterEntity(spawnPoint.Monster, x, y, (spawnPoint.Direction - 1) * 45);
-                    World.Instance.SpawnEntity(monster);
+                    var monster = new MonsterEntity(_monsterManager, _animationManager, spawnPoint.Monster, x, y, (spawnPoint.Direction - 1) * 45);
+                    await World.Instance.SpawnEntity(monster);
                     
                     groupInstance.Monsters.Add(monster);
                     monster.Group = groupInstance;
@@ -225,6 +229,7 @@ namespace QuantumCore.Game.World
         {
             EventSystem.EnqueueEvent(() =>
             {
+                // TODO
                 SpawnGroup(group);
                 return 0;
             }, group.SpawnPoint.RespawnTime * 1000);
@@ -272,7 +277,7 @@ namespace QuantumCore.Game.World
         /// <param name="amount">Only used for gold as we have a higher limit here</param>
         public void AddGroundItem(Item item, int x, int y, uint amount = 0)
         {
-            var groundItem = new GroundItem(World.Instance.GenerateVid(), item, amount) {
+            var groundItem = new GroundItem(_animationManager,  World.Instance.GenerateVid(), item, amount) {
                 PositionX = x, 
                 PositionY = y
             };

@@ -18,7 +18,7 @@ namespace QuantumCore.Game.Commands
             // todo implement wait
             
             // Despawn player
-            World.World.Instance.DespawnEntity(player);
+            await World.World.Instance.DespawnEntity(player);
             
             // Bring client back to select menu
             if (player.Connection is GameConnection gc)

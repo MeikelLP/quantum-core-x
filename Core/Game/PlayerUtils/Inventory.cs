@@ -18,13 +18,15 @@ namespace QuantumCore.Game.PlayerUtils
     {
         private class Page
         {
+            private readonly IItemManager _itemManager;
             private ushort _width;
             private ushort _height;
 
             private readonly Grid<Item> _grid;
 
-            public Page(ushort width, ushort height)
+            public Page(IItemManager itemManager, ushort width, ushort height)
             {
+                _itemManager = itemManager;
                 _width = width;
                 _height = height;
                 
@@ -53,7 +55,7 @@ namespace QuantumCore.Game.PlayerUtils
                 var item = _grid.Get(x, y);
                 if (item == null) return false;
                 
-                var proto = ItemManager.Instance.GetItem(item.ItemId);
+                var proto = _itemManager.GetItem(item.ItemId);
                 if (proto == null) return false;
 
                 var itemSize = proto.Size;
@@ -85,7 +87,7 @@ namespace QuantumCore.Game.PlayerUtils
 
             public bool Place(Item item, uint x, uint y)
             {
-                var proto = ItemManager.Instance.GetItem(item.ItemId);
+                var proto = _itemManager.GetItem(item.ItemId);
                 if (proto == null) return false;
                 var itemSize = proto.Size;
 
@@ -120,7 +122,7 @@ namespace QuantumCore.Game.PlayerUtils
                 var x = (uint)(position % _width);
                 var y = (uint)(position / _width);
 
-                var proto = ItemManager.Instance.GetItem(item.ItemId);
+                var proto = _itemManager.GetItem(item.ItemId);
                 if (proto == null) return false;
 
                 return IsSpaceAvailable(x, y, proto.Size);
@@ -158,15 +160,17 @@ namespace QuantumCore.Game.PlayerUtils
         }
 
         private readonly Page[] _pages;
+        private readonly IItemManager _itemManager;
         private ushort _width;
         private ushort _height;
         private readonly List<Item> _items = new List<Item>();
         
-        public Inventory(Guid owner, byte window, ushort width, ushort height, ushort pages)
+        public Inventory(IItemManager itemManager, Guid owner, byte window, ushort width, ushort height, ushort pages)
         {
             Owner = owner;
             Window = window;
 
+            _itemManager = itemManager;
             _width = width;
             _height = height;
             
@@ -174,7 +178,7 @@ namespace QuantumCore.Game.PlayerUtils
             _pages = new Page[pages];
             for (var i = 0; i < pages; i++)
             {
-                _pages[i] = new Page(width, height);
+                _pages[i] = new Page(_itemManager, width, height);
             }
             
             // Initialize equipment

@@ -88,14 +88,20 @@ namespace QuantumCore.Game.World.Entities
         private int _persistTime = 0;
         private const int HealthRegenInterval = 3 * 1000;
         private double _healthRegenTime = HealthRegenInterval;
+        private readonly IItemManager _itemManager;
+        private readonly IJobManager _jobManager;
+        private readonly IExperienceManager _experienceManager;
 
-        public PlayerEntity(Player player, GameConnection connection) : base(World.Instance.GenerateVid())
+        public PlayerEntity(Player player, GameConnection connection, IItemManager itemManager, IJobManager jobManager, IExperienceManager experienceManager, IAnimationManager animationManager) : base(animationManager, World.Instance.GenerateVid())
         {
             Connection = connection;
+            _itemManager = itemManager;
+            _jobManager = jobManager;
+            _experienceManager = experienceManager;
             Player = player;
             PositionX = player.PositionX;
             PositionY = player.PositionY;
-            Inventory = new Inventory(player.Id, 1, 5, 9, 2);
+            Inventory = new Inventory(itemManager, player.Id, 1, 5, 9, 2);
             QuickSlotBar = new QuickSlotBar(this);
 
             MovementSpeed = 150;
@@ -142,7 +148,7 @@ namespace QuantumCore.Game.World.Entities
 
         private async Task Warp(int x, int y)
         {
-            World.Instance.DespawnEntity(this);
+            await World.Instance.DespawnEntity(this);
             
             PositionX = x;
             PositionY = y;
@@ -204,7 +210,7 @@ namespace QuantumCore.Game.World.Entities
             {
                 var item = Inventory.EquipmentWindow.GetItem(slot);
                 if (item == null) continue;
-                var proto = ItemManager.Instance.GetItem(item.ItemId);
+                var proto = _itemManager.GetItem(item.ItemId);
                 if (proto.Type != (byte) EItemType.Armor) continue;
 
                 _defence += (uint)proto.Values[1] + (uint)proto.Values[5] * 2;
@@ -325,7 +331,7 @@ namespace QuantumCore.Game.World.Entities
             var levelBonus = GetPoint(EPoints.Level) * 2;
             var statusBonus = (
                 4 * GetPoint(EPoints.St) +
-                2 * GetPoint(JobInfo.Get(Player.PlayerClass).AttackStatus)
+                2 * GetPoint(_jobManager.Get(Player.PlayerClass).AttackStatus)
             ) / 3;
             var weaponDamage = baseDamage * 2;
 
@@ -375,7 +381,7 @@ namespace QuantumCore.Game.World.Entities
         {
             var weapon = Inventory.EquipmentWindow.Weapon;
             if (weapon == null) return 0;
-            var item = ItemManager.Instance.GetItem(weapon.ItemId);
+            var item = _itemManager.GetItem(weapon.ItemId);
             if (item == null) return 0;
             return item.Values[3];
         }
@@ -384,7 +390,7 @@ namespace QuantumCore.Game.World.Entities
         {
             var weapon = Inventory.EquipmentWindow.Weapon;
             if (weapon == null) return 0;
-            var item = ItemManager.Instance.GetItem(weapon.ItemId);
+            var item = _itemManager.GetItem(weapon.ItemId);
             if (item == null) return 0;
             return item.Values[4];
         }
@@ -393,7 +399,7 @@ namespace QuantumCore.Game.World.Entities
         {
             var weapon = Inventory.EquipmentWindow.Weapon;
             if (weapon == null) return 0;
-            var item = ItemManager.Instance.GetItem(weapon.ItemId);
+            var item = _itemManager.GetItem(weapon.ItemId);
             if (item == null) return 0;
             return item.Values[5];
         }
@@ -497,11 +503,11 @@ namespace QuantumCore.Game.World.Entities
                 case EPoints.Experience:
                     return Player.Experience;
                 case EPoints.NeededExperience:
-                    return ExperienceTable.GetNeededExperience(Player.Level);
+                    return _experienceManager.GetNeededExperience(Player.Level);
                 case EPoints.Hp:
                     return (uint) Health;
                 case EPoints.MaxHp:
-                    var info = JobInfo.Get(Player.PlayerClass);
+                    var info = _jobManager.Get(Player.PlayerClass);
                     if (info == null)
                     {
                         return 0;
@@ -527,7 +533,7 @@ namespace QuantumCore.Game.World.Entities
                         return 0;
                     }
 
-                    var item = ItemManager.Instance.GetItem(weapon.ItemId);
+                    var item = _itemManager.GetItem(weapon.ItemId);
                     return (uint) (item.Values[3] + item.Values[5]);
                 }
                 case EPoints.MaxWeaponDamage:
@@ -538,7 +544,7 @@ namespace QuantumCore.Game.World.Entities
                         return 0;
                     }
 
-                    var item = ItemManager.Instance.GetItem(weapon.ItemId);
+                    var item = _itemManager.GetItem(weapon.ItemId);
                     return (uint) (item.Values[4] + item.Values[5]);
                 }
                 case EPoints.MinAttackDamage:
@@ -600,7 +606,7 @@ namespace QuantumCore.Game.World.Entities
                 
                 await SendItem(item);
 
-                item = ItemManager.Instance.CreateItem(ItemManager.Instance.GetItem(item.ItemId), count);
+                item = _itemManager.CreateItem(_itemManager.GetItem(item.ItemId), count);
             }
 
             (Map as Map)?.AddGroundItem(item, PositionX, PositionY);
@@ -640,7 +646,7 @@ namespace QuantumCore.Game.World.Entities
             await AddPoint(EPoints.Gold, -(int)amount);
             await SendPoints();
 
-            var item = ItemManager.Instance.CreateItem(ItemManager.Instance.GetItem(1), 1); // count will be overwritten as it's gold
+            var item = _itemManager.CreateItem(_itemManager.GetItem(1), 1); // count will be overwritten as it's gold
             (Map as Map)?.AddGroundItem(item, PositionX, PositionY, amount); // todo add method to IMap interface when we have an item interface...
         }
 
@@ -678,7 +684,7 @@ namespace QuantumCore.Game.World.Entities
                     {
                         // Equipment
                         // Make sure item fits in equipment window
-                        if (IsEquippable(item) && Inventory.EquipmentWindow.IsSuitable(item, position))
+                        if (IsEquippable(item) && Inventory.EquipmentWindow.IsSuitable(_itemManager, item, position))
                         {
                             return Inventory.EquipmentWindow.GetItem(position) == null;
                         }
@@ -697,7 +703,7 @@ namespace QuantumCore.Game.World.Entities
 
         public bool IsEquippable(Item item)
         {
-            var proto = ItemManager.Instance.GetItem(item.ItemId);
+            var proto = _itemManager.GetItem(item.ItemId);
             if (proto == null)
             {
                 // Proto for item not found

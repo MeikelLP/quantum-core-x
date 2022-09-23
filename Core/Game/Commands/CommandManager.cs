@@ -2,30 +2,34 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using System.Text;
+using System.Threading;
 using QuantumCore.Game.Packets;
-using QuantumCore.API;
 using QuantumCore.API.Game;
-using Serilog;
 using System.Threading.Tasks;
 using QuantumCore.Cache;
 using QuantumCore.Database;
 using Dapper;
+using Microsoft.Extensions.Logging;
 using QuantumCore.Game.World.Entities;
 
 namespace QuantumCore.Game.Commands
 {
-    public static class CommandManager
+    public class CommandManager : ICommandManager
     {
-        public readonly static Dictionary<string, CommandCache> Commands = new Dictionary<string, CommandCache>();
+        private readonly ILogger<CommandManager> _logger;
+        public Dictionary<string, CommandCache> Commands { get; } = new ();
+        public Dictionary<Guid, PermissionGroup> Groups { get; } = new ();
 
-        public readonly static Dictionary<Guid, PermissionGroup> Groups = new Dictionary<Guid, PermissionGroup>();
+        public readonly Guid Operator_Group = Guid.Parse("45bff707-1836-42b7-956d-00b9b69e0ee0");
 
-        public readonly static Guid Operator_Group = Guid.Parse("45bff707-1836-42b7-956d-00b9b69e0ee0");
-
-        public static void Register(string ns, Assembly assembly = null)
+        public CommandManager(ILogger<CommandManager> logger)
         {
-            Log.Debug($"Registring commands from namespace {ns}");
+            _logger = logger;
+        }
+        
+        public void Register(string ns, Assembly assembly = null)
+        {
+            _logger.LogDebug("Registring commands from namespace {Namespace}", ns);
             if (assembly == null) assembly = Assembly.GetAssembly(typeof(CommandManager));
 
             var types = assembly.GetTypes().Where(t => string.Equals(t.Namespace, ns, StringComparison.Ordinal))
@@ -34,14 +38,14 @@ namespace QuantumCore.Game.Commands
             foreach (var type in types)
             {
                 var attr = type.GetCustomAttribute<CommandAttribute>();
-                Log.Debug($"Registring command {attr.Name} from {type.Name}");
+                _logger.LogDebug("Registring command {CommandName} from {TypeName}", attr.Name, type.Name);
                 var bypass = type.GetCustomAttribute<CommandNoPermissionAttribute>();
 
                 Commands[attr.Name] = new CommandCache(attr, type, bypass != null);
             }
         }
 
-        private static async Task ParseGroup(Guid id, string name)
+        private async Task ParseGroup(Guid id, string name)
         {
             using var db = DatabaseManager.GetGameDatabase();
 
@@ -78,8 +82,9 @@ namespace QuantumCore.Game.Commands
             Groups.Add(p.Id, p);
         }
 
-        public static async Task Load()
+        public async Task LoadAsync(CancellationToken token = default)
         {
+            _logger.LogInformation("Initialize permissions");
             var permission_keys = await CacheManager.Instance.Keys("perm:*");
 
             foreach (var p in permission_keys)
@@ -98,7 +103,7 @@ namespace QuantumCore.Game.Commands
             await ParseGroup(Operator_Group, "Operator");
         }
 
-        public static bool HavePerm(Guid group, string cmd)
+        public bool HavePerm(Guid group, string cmd)
         {
             if (!Groups.ContainsKey(group))
             {
@@ -118,7 +123,7 @@ namespace QuantumCore.Game.Commands
             return false;
         }
 
-        public static bool CanUseCommand(PlayerEntity player, string cmd)
+        public bool CanUseCommand(PlayerEntity player, string cmd)
         {
             if (Commands[cmd].BypassPerm)
             {
@@ -141,7 +146,7 @@ namespace QuantumCore.Game.Commands
             return false;
         }
 
-        public static async Task Handle(GameConnection connection, string chatline)
+        public async Task Handle(GameConnection connection, string chatline)
         {
             var args = chatline.Split(" "); // todo implement quotation marks for strings
             var command = args[0].Substring(1);

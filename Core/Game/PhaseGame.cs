@@ -64,13 +64,13 @@ namespace QuantumCore.Game
         }
 
         [Listener(typeof(ChatIncoming))]
-        public static async Task OnChat(this GameConnection connection, ChatIncoming packet)
+        public static async Task OnChat(this GameConnection connection, ICommandManager commandManager, ChatIncoming packet)
         {
             if (packet.MessageType == ChatMessageTypes.Normal)
             {
                 if (packet.Message.StartsWith('/'))
                 {
-                    await CommandManager.Handle(connection, packet.Message);
+                    await commandManager.Handle(connection, packet.Message);
                 }
                 else
                 {
@@ -124,8 +124,9 @@ namespace QuantumCore.Game
             }
         }
         
+        // TODO this will not work as IItemManager cannot be injected here (yet)
         [Listener(typeof(ItemUse))]
-        public static async Task OnItemUse(this GameConnection connection, ItemUse packet)
+        public static async Task OnItemUse(this GameConnection connection, IItemManager itemManager, ItemUse packet)
         {
             var player = connection.Player;
             if (player == null)
@@ -143,7 +144,7 @@ namespace QuantumCore.Game
                 return;
             }
 
-            var itemProto = ItemManager.Instance.GetItem(item.ItemId);
+            var itemProto = itemManager.GetItem(item.ItemId);
             if (itemProto == null)
             {
                 Log.Debug($"Cannot find item proto {item.ItemId}");
@@ -167,7 +168,7 @@ namespace QuantumCore.Game
             }
             else if (player.IsEquippable(item))
             {
-                var wearSlot = player.Inventory.EquipmentWindow.GetWearSlot(item);
+                var wearSlot = player.Inventory.EquipmentWindow.GetWearSlot(itemManager, item);
 
                 if (wearSlot <= ushort.MaxValue)
                 {

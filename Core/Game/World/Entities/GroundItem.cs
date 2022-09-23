@@ -25,7 +25,7 @@ public class GroundItem : Entity
         }
     }
 
-    public GroundItem(uint vid, Item item, uint amount) : base(vid)
+    public GroundItem(IAnimationManager animationManager, uint vid, Item item, uint amount) : base(animationManager, vid)
     {
         _item = item;
         _amount = amount;

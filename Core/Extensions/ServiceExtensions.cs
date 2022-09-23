@@ -5,6 +5,9 @@ using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.Core.Logging.Enrichers;
 using QuantumCore.Core.Networking;
+using QuantumCore.Game;
+using QuantumCore.Game.Commands;
+using QuantumCore.Game.PlayerUtils;
 using Serilog;
 using Weikio.PluginFramework.Catalogs;
 
@@ -20,6 +23,12 @@ public static class ServiceExtensions
         services.AddCustomLogging();
         services.AddSingleton<IPacketManager, DefaultPacketManager>();
         services.AddSingleton<PluginExecutor>();
+        services.AddSingleton<IItemManager, ItemManager>();
+        services.AddSingleton<IMonsterManager, MonsterManager>();
+        services.AddSingleton<IJobManager, JobManager>();
+        services.AddSingleton<IAnimationManager, AnimationManager>();
+        services.AddSingleton<IExperienceManager, ExperienceManager>();
+        services.AddSingleton<ICommandManager, CommandManager>();
         services.AddPluginFramework()
             .AddPluginCatalog(new FolderPluginCatalog("plugins"))
             .AddPluginType<ISingletonPlugin>()

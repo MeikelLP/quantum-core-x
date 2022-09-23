@@ -18,6 +18,7 @@ namespace QuantumCore.Game.World.Entities
 {
     public abstract class Entity : IEntity
     {
+        private readonly IAnimationManager _animationManager;
         public uint Vid { get; }
         public abstract EEntityType Type { get; }
         public uint EntityClass { get; protected set; }
@@ -80,8 +81,9 @@ namespace QuantumCore.Game.World.Entities
         private bool _positionChanged;
         private IEntity _entityImplementation;
 
-        public Entity(uint vid)
+        public Entity(IAnimationManager animationManager, uint vid)
         {
+            _animationManager = animationManager;
             Vid = vid;
         }
 
@@ -130,7 +132,7 @@ namespace QuantumCore.Game.World.Entities
             if (TargetPositionX == x && TargetPositionY == y) return Task.CompletedTask;
 
             var animation =
-                AnimationManager.GetAnimation(EntityClass, AnimationType.Run, AnimationSubType.General);
+                _animationManager.GetAnimation(EntityClass, AnimationType.Run, AnimationSubType.General);
 
             State = EEntityState.Moving;
             TargetPositionX = x;

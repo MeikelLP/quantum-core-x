@@ -44,9 +44,9 @@ namespace QuantumCore.Game.World.Entities
         private bool _behaviourInitialized;
         private double _deadTime = 5000;
         
-        public MonsterEntity(uint id, int x, int y, float rotation = 0) : base(World.Instance.GenerateVid())
+        public MonsterEntity(IMonsterManager monsterManager, IAnimationManager animationManager, uint id, int x, int y, float rotation = 0) : base(animationManager, World.Instance.GenerateVid())
         {
-            _proto = MonsterManager.GetMonster(id);
+            _proto = monsterManager.GetMonster(id);
             PositionX = x;
             PositionY = y;
             Rotation = rotation;
@@ -59,7 +59,7 @@ namespace QuantumCore.Game.World.Entities
             if (_proto.Type == (byte) EEntityType.Monster)
             {
                 // it's a monster
-                _behaviour = new SimpleBehaviour();
+                _behaviour = new SimpleBehaviour(monsterManager);
             }
             else if(_proto.Type == (byte) EEntityType.Npc)
             {

@@ -13,13 +13,13 @@ namespace QuantumCore.Game.Commands
     public static class HelpCommand
     {
         [CommandMethod]
-        public static async Task Help(IPlayerEntity player, int page = 1)
+        public static async Task Help(IPlayerEntity player, ICommandManager commandManager, int page = 1)
         {
             var usableCmd = new Dictionary<string, CommandCache>();
 
-            foreach (var cmd in CommandManager.Commands)
+            foreach (var cmd in commandManager.Commands)
             {
-                if (CommandManager.CanUseCommand((World.Entities.PlayerEntity) player, cmd.Key))
+                if (commandManager.CanUseCommand((World.Entities.PlayerEntity) player, cmd.Key))
                     usableCmd.Add(cmd.Key, cmd.Value);
             }
 
@@ -51,15 +51,15 @@ namespace QuantumCore.Game.Commands
         }
 
         [CommandMethod("Shows an help with a specific command")]
-        public static async Task HelpWithCommand(IPlayerEntity player, string command)
+        public static async Task HelpWithCommand(IPlayerEntity player, ICommandManager commandManager, string command)
         {
-            if (!CommandManager.Commands.ContainsKey(command) || !CommandManager.CanUseCommand((World.Entities.PlayerEntity) player, command))
+            if (!commandManager.Commands.ContainsKey(command) || !commandManager.CanUseCommand((World.Entities.PlayerEntity) player, command))
             {
                 await player.SendChatInfo("Specified command does not exists");
             }
             else
             {
-                var key = CommandManager.Commands[command];
+                var key = commandManager.Commands[command];
 
                 await player.SendChatInfo($"--- Help for command {command} ---");
 

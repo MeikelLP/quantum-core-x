@@ -187,9 +187,9 @@ namespace QuantumCore.Game.PlayerUtils
             }
         }
 
-        public bool IsSuitable(Item item, ushort position)
+        public bool IsSuitable(IItemManager itemManager, Item item, ushort position)
         {
-            var proto = ItemManager.Instance.GetItem(item.ItemId);
+            var proto = itemManager.GetItem(item.ItemId);
             if (proto == null)
             {
                 return false;
@@ -222,9 +222,9 @@ namespace QuantumCore.Game.PlayerUtils
             }
         }
 
-        public long GetWearSlot(Item item)
+        public long GetWearSlot(IItemManager itemManager, Item item)
         {
-            var proto = ItemManager.Instance.GetItem(item.ItemId);
+            var proto = itemManager.GetItem(item.ItemId);
             if (proto == null)
             {
                 return _offset + (ushort)EquipmentSlots.Body;

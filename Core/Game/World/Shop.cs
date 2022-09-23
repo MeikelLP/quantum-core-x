@@ -31,10 +31,16 @@ public class Shop
 
     private Grid<ShopItem> _grid = new(4, 5);
     private readonly List<ShopItem> _items = new();
-    
+    private readonly IItemManager _itemManager;
+
+    public Shop(IItemManager itemManager)
+    {
+        _itemManager = itemManager;
+    }
+
     public void AddItem(uint itemId, byte count, uint price)
     {
-        var proto = ItemManager.Instance.GetItem(itemId);
+        var proto = _itemManager.GetItem(itemId);
         if (proto == null)
         {
             return;
@@ -94,7 +100,7 @@ public class Shop
             return;
         }
 
-        var proto = ItemManager.Instance.GetItem(item.ItemId);
+        var proto = _itemManager.GetItem(item.ItemId);
 
         var gold = p.GetPoint(EPoints.Gold);
         if (gold < item.Price)
@@ -104,7 +110,7 @@ public class Shop
         }
 
         // Create item instance
-        var playerItem = ItemManager.Instance.CreateItem(proto, item.Count);
+        var playerItem = _itemManager.CreateItem(proto, item.Count);
         
         // todo set bonuses and sockets
         
@@ -132,7 +138,7 @@ public class Shop
             return;
         }
 
-        var proto = ItemManager.Instance.GetItem(item.ItemId);
+        var proto = _itemManager.GetItem(item.ItemId);
         if (proto == null)
         {
             return;

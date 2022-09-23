@@ -1,5 +1,8 @@
 using System;
 using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using QuantumCore.Core.Types;
 using QuantumCore.Database;
 
@@ -10,8 +13,13 @@ namespace QuantumCore.Game
     /// </summary>
     public class ItemManager : IItemManager
     {
-        private static ItemProto _proto;
-        public static IItemManager Instance { get; internal set; } = new ItemManager();
+        private readonly ILogger<ItemManager> _logger;
+        private ItemProto _proto;
+
+        public ItemManager(ILogger<ItemManager> logger)
+        {
+            _logger = logger;
+        }
 
         /// <summary>
         /// Query for a specific item definition by it's id
@@ -26,9 +34,12 @@ namespace QuantumCore.Game
         /// <summary>
         /// Try to load the item_proto file
         /// </summary>
-        public void Load()
+        public Task LoadAsync(CancellationToken token = default)
         {
+            _logger.LogInformation("Loading item_proto");
             _proto = ItemProto.FromFile("data/item_proto");
+
+            return Task.CompletedTask;
         }
 
         /// <summary>

@@ -7,12 +7,20 @@ using QuantumCore.Game.World.Entities;
 namespace QuantumCore.Game.Commands
 {
     [Command("spawn", "Spawn a monster or npc")]
-    public static class SpawnCommand
+    public class SpawnCommand
     {
-        [CommandMethod]
-        public static async Task SpawnMonster(IPlayerEntity player, uint monsterId, byte count = 1)
+        private readonly IMonsterManager _monsterManager;
+        private readonly IAnimationManager _animationManager;
+
+        public SpawnCommand(IMonsterManager monsterManager)
         {
-            var proto = MonsterManager.GetMonster(monsterId);
+            _monsterManager = monsterManager;
+        }
+        
+        [CommandMethod]
+        public async Task SpawnMonster(IPlayerEntity player, uint monsterId, byte count = 1)
+        {
+            var proto = _monsterManager.GetMonster(monsterId);
             if (proto == null)
             {
                 await player.SendChatInfo("No monster found with the specified id");
@@ -25,8 +33,8 @@ namespace QuantumCore.Game.Commands
                 var y = player.PositionY + RandomNumberGenerator.GetInt32(-1500, 1501);
 
                 // Create entity instance
-                var monster = new MonsterEntity(monsterId, x, y);
-                World.World.Instance.SpawnEntity(monster);
+                var monster = new MonsterEntity(_monsterManager, _animationManager, monsterId, x, y);
+                await World.World.Instance.SpawnEntity(monster);
             }
         }
     }
