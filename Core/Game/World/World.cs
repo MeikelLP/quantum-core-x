@@ -7,11 +7,11 @@ using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using BeetleX.Redis;
-using Prometheus;
-using QuantumCore.API.Game;
+using Microsoft.Extensions.Logging;
+using QuantumCore.API;
 using QuantumCore.API.Game.World;
 using QuantumCore.Cache;
-using QuantumCore.Core.API;
+// using QuantumCore.Core.API;
 using QuantumCore.Core.Utils;
 using QuantumCore.Game.World.Entities;
 using Serilog;
@@ -22,6 +22,8 @@ namespace QuantumCore.Game.World
 {
     public class World : IWorld
     {
+        private readonly ILogger<World> _logger;
+        private readonly PluginExecutor _pluginExecutor;
         private uint _vid;
         private readonly Grid<IMap> _world = new(0, 0);
         private readonly Dictionary<string, IMap> _maps = new();
@@ -32,14 +34,12 @@ namespace QuantumCore.Game.World
 
         private Subscriber _mapSubscriber;
         
-        private readonly Histogram _updateDuration =
-            Metrics.CreateHistogram("world_update_duration_seconds", "How long did a world update took");
-        private readonly Gauge _entities = Metrics.CreateGauge("entities", "Currently handles entities");
-        
         public static World Instance { get; private set; }
         
-        public World()
+        public World(ILogger<World> logger, PluginExecutor pluginExecutor)
         {
+            _logger = logger;
+            _pluginExecutor = pluginExecutor;
             _vid = 0;
             Instance = this;
         }
@@ -264,14 +264,11 @@ namespace QuantumCore.Game.World
         
         public void Update(double elapsedTime)
         {
-            HookManager.Instance.CallHook<IHookWorldUpdate>(elapsedTime);
+            // HookManager.Instance.CallHook<IHookWorldUpdate>(elapsedTime);
 
-            using (_updateDuration.NewTimer())
+            foreach (var map in _maps.Values)
             {
-                foreach (var map in _maps.Values)
-                {
-                    map.Update(elapsedTime);
-                }
+                map.Update(elapsedTime);
             }
         }
 
@@ -334,7 +331,7 @@ namespace QuantumCore.Game.World
             return _groups[id];
         }
 
-        public bool SpawnEntity(Entity e)
+        public async ValueTask<bool> SpawnEntity(Entity e)
         {
             var map = GetMapAt((uint) e.PositionX, (uint) e.PositionY);
             if (map == null) return false;
@@ -342,19 +339,22 @@ namespace QuantumCore.Game.World
             if (e.GetType() == typeof(PlayerEntity))
                 AddPlayer((PlayerEntity)e);
 
-            _entities.Inc();
-            return map.SpawnEntity(e);
+            await _pluginExecutor.ExecutePlugins<IGameEntityLifetimeListener>(_logger, x => x.OnPreCreatedAsync());
+            var result = map.SpawnEntity(e);
+            await _pluginExecutor.ExecutePlugins<IGameEntityLifetimeListener>(_logger, x => x.OnPostCreatedAsync());
+            return result;
         }
 
-        public void DespawnEntity(IEntity entity)
+        public async Task DespawnEntity(IEntity entity)
         {
             if (entity is PlayerEntity player)
             {
                 RemovePlayer(player);
             }
             
-            _entities.Dec();
+            await _pluginExecutor.ExecutePlugins<IGameEntityLifetimeListener>(_logger, x => x.OnPreDeletedAsync());
             entity.Map?.DespawnEntity(entity);
+            await _pluginExecutor.ExecutePlugins<IGameEntityLifetimeListener>(_logger, x => x.OnPostDeletedAsync());
         }
 
         public uint GenerateVid()

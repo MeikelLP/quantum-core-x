@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using QuantumCore.API.Game;
 using QuantumCore.API.Game.World;
 using QuantumCore.Cache;
-using QuantumCore.Core.API;
+// using QuantumCore.Core.API;
 using QuantumCore.Core.Event;
 using QuantumCore.Core.Utils;
 using QuantumCore.Database;
@@ -87,7 +87,7 @@ namespace QuantumCore.Game.World
 
         public async ValueTask Update(double elapsedTime)
         {
-            HookManager.Instance.CallHook<IHookMapUpdate>(this, elapsedTime);
+            // HookManager.Instance.CallHook<IHookMapUpdate>(this, elapsedTime);
 
             foreach (var entity in _pendingRemovals)
             {

@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Dapper;
@@ -6,11 +7,11 @@ using Dapper.Contrib.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using QuantumCore.API;
 using QuantumCore.API.Game.Types;
 using QuantumCore.Auth.Cache;
 using QuantumCore.Auth.Packets;
 using QuantumCore.Cache;
-using QuantumCore.Core.API;
 using QuantumCore.Core.Networking;
 using QuantumCore.Core.Utils;
 using QuantumCore.Database;
@@ -22,8 +23,9 @@ namespace QuantumCore.Auth
         private readonly ILogger<AuthServer> _logger;
         private readonly AuthOptions _options;
 
-        public AuthServer(IOptions<AuthOptions> options, IPacketManager packetManager, ILogger<AuthServer> logger) 
-            : base(packetManager, logger, options.Value.Port)
+        public AuthServer(IOptions<AuthOptions> options, IPacketManager packetManager, ILogger<AuthServer> logger, 
+            PluginExecutor pluginExecutor, IServiceProvider serviceProvider)
+            : base(packetManager, logger, pluginExecutor, serviceProvider, options.Value.Port)
         {
             _logger = logger;
             _options = options.Value;
@@ -36,9 +38,6 @@ namespace QuantumCore.Auth
             // Initialize static components
             DatabaseManager.Init(_options.AccountString, _options.GameString);
             CacheManager.Init(_options.RedisHost, _options.RedisPort);
-            
-            // Load and init all plugins
-            PluginManager.LoadPlugins(this);
 
             // Register auth server features
             PacketManager.RegisterNamespace("QuantumCore.Auth.Packets");

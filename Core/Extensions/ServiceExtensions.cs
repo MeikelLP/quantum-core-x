@@ -1,9 +1,12 @@
 ﻿using System.IO;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using QuantumCore.API;
 using QuantumCore.Core.Logging.Enrichers;
 using QuantumCore.Core.Networking;
 using Serilog;
+using Weikio.PluginFramework.Catalogs;
 
 namespace QuantumCore.Extensions;
 
@@ -16,6 +19,15 @@ public static class ServiceExtensions
     {
         services.AddCustomLogging();
         services.AddSingleton<IPacketManager, DefaultPacketManager>();
+        services.AddSingleton<PluginExecutor>();
+        services.AddPluginFramework()
+            .AddPluginCatalog(new FolderPluginCatalog("plugins"))
+            .AddPluginType<ISingletonPlugin>()
+            .AddPluginType<IConnectionLifetimeListener>()
+            .AddPluginType<IGameTickListener>()
+            .AddPluginType<IPacketOperationListener>()
+            .AddPluginType<IGameEntityLifetimeListener>();
+
         return services;
     }
 

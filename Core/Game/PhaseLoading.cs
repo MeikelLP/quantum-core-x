@@ -30,7 +30,7 @@ namespace QuantumCore.Game
             await player.Show(connection);
             
             // Spawn the player
-            if (!World.World.Instance.SpawnEntity(player))
+            if (!await World.World.Instance.SpawnEntity(player))
             {
                 Log.Warning("Failed to spawn player entity");
                 connection.Close();

@@ -6,12 +6,11 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Prometheus;
+using QuantumCore.API;
 using QuantumCore.API.Game;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.World;
 using QuantumCore.Cache;
-using QuantumCore.Core.API;
 using QuantumCore.Core.Event;
 using QuantumCore.Core.Networking;
 using QuantumCore.Core.Packets;
@@ -26,6 +25,8 @@ namespace QuantumCore.Game
     public class GameServer : ServerBase<GameConnection>, IGame
     {
         private readonly ILogger<GameServer> _logger;
+        private readonly PluginExecutor _pluginExecutor;
+        private readonly IServiceProvider _serviceProvider;
         public IWorld World => _world;
         private readonly GameOptions _options;
         private World.World _world;
@@ -37,18 +38,20 @@ namespace QuantumCore.Game
         private TimeSpan _maxElapsedTime = TimeSpan.FromMilliseconds(500);
         private readonly Stopwatch _serverTimer = new();
 
-        private readonly Gauge _openConnections = Metrics.CreateGauge("open_connections", "Currently open connections");
-
         public static GameServer Instance { get; private set; }
         
-        public GameServer(IOptions<GameOptions> options, IPacketManager packetManager, ILogger<GameServer> logger) 
-            : base(packetManager, logger, options.Value.Port)
+        public GameServer(IOptions<GameOptions> options, IPacketManager packetManager, ILogger<GameServer> logger, 
+            PluginExecutor pluginExecutor, IServiceProvider serviceProvider)
+            : base(packetManager, logger, pluginExecutor, serviceProvider, options.Value.Port)
         {
             _logger = logger;
+            _pluginExecutor = pluginExecutor;
+            _serviceProvider = serviceProvider;
             Instance = this;
             _options = options.Value;
 
             Services.AddSingleton(_ => this);
+            Services.AddSingleton<IGame>(_ => this);
         }
 
         private void Update(double elapsedTime)
@@ -69,12 +72,6 @@ namespace QuantumCore.Game
             {
                 // Query interfaces for our best ipv4 address
                 IpUtils.SearchPublicIp();
-            }
-
-            if (_options.Prometheus)
-            {
-                // Start metric server
-                QuantumCore.Core.Prometheus.Server.Initialize(_options.PrometheusPort);
             }
 
             // Initialize static components
@@ -106,7 +103,7 @@ namespace QuantumCore.Game
 
             // Load game world
             _logger.LogInformation("Initialize world"); 
-            _world = new World.World();
+            _world = ActivatorUtilities.CreateInstance<World.World>(_serviceProvider);
             await _world.Load();
 
             // Load permissions
@@ -116,9 +113,6 @@ namespace QuantumCore.Game
             // Register all default commands
             CommandManager.Register("QuantumCore.Game.Commands");
 
-            // Load and init all plugins
-            PluginManager.LoadPlugins(this);
-            
             // Register game server features
             PacketManager.RegisterNamespace("QuantumCore.Game.Packets");
             
@@ -149,7 +143,9 @@ namespace QuantumCore.Game
             {
                 try
                 {
+                    await _pluginExecutor.ExecutePlugins<IGameTickListener>(_logger, x => x.PreUpdateAsync(stoppingToken));
                     await Tick();
+                    await _pluginExecutor.ExecutePlugins<IGameTickListener>(_logger, x => x.PostUpdateAsync(stoppingToken));
                 }
                 catch (Exception e)
                 {

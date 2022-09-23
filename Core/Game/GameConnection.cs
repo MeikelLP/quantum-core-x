@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Net.Sockets;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using QuantumCore.Auth;
 using QuantumCore.Core.Networking;
@@ -14,11 +15,11 @@ namespace QuantumCore.Game
         public string Username { get; set; }
         public PlayerEntity Player { get; set; }
 
-        public GameConnection(GameServer server, TcpClient client, IPacketManager packetManager, ILogger<AuthConnection> logger) 
-            : base(logger)
+        public GameConnection(GameServer server, TcpClient client, IPacketManager packetManager, ILogger<AuthConnection> logger, PluginExecutor pluginExecutor) 
+            : base(logger, pluginExecutor, packetManager)
         {
             Server = server;
-            Init(client, packetManager);
+            Init(client);
         }
 
         protected override void OnHandshakeFinished()
@@ -26,14 +27,14 @@ namespace QuantumCore.Game
             GameServer.Instance.CallConnectionListener(this);
         }
 
-        protected override void OnClose()
+        protected async override Task OnClose()
         {
             if (Player != null)
             {
-                World.World.Instance.DespawnEntity(Player);
+                await World.World.Instance.DespawnEntity(Player);
             }
 
-            Server.RemoveConnection(this);
+            await Server.RemoveConnection(this);
             
             // todo enable expiry on auth token
         }

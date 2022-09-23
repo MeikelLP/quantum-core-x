@@ -8,7 +8,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Prometheus;
 using QuantumCore.Core.Packets;
 using QuantumCore.Core.Utils;
 using QuantumCore.API;
@@ -19,6 +18,7 @@ namespace QuantumCore.Core.Networking
     public abstract class Connection : BackgroundService, IConnection
     {
         private readonly ILogger _logger;
+        private readonly PluginExecutor _pluginExecutor;
         private TcpClient _client;
 
         private IPacketManager _packetManager;
@@ -27,47 +27,27 @@ namespace QuantumCore.Core.Networking
 
         private long _lastHandshakeTime;
 
-        private static Histogram _packetsReceived;
-        private static Histogram _packetsSent;
-
         public Guid Id { get; }
         public uint Handshake { get; private set; }
         public bool Handshaking { get; private set; }
         public EPhases Phase { get; private set; }
         
-        protected Connection(ILogger logger)
+        protected Connection(ILogger logger, PluginExecutor pluginExecutor, IPacketManager packetManager)
         {
             _logger = logger;
+            _pluginExecutor = pluginExecutor;
+            _packetManager = packetManager;
             Id = Guid.NewGuid();
-
-            if (_packetsReceived == null)
-            {
-                CreateStaticMetrics();
-            }
         }
 
-        private static void CreateStaticMetrics()
-        {
-            if (_packetsReceived != null)
-            {
-                return;
-            }
-            
-            _packetsReceived =
-                Metrics.CreateHistogram("packets_received_bytes", "Received packets in bytes");
-            _packetsSent =
-                Metrics.CreateHistogram("packets_sent_bytes", "Sent packets in bytes");
-        }
-
-        public void Init(TcpClient client, IPacketManager packetManager)
+        public void Init(TcpClient client)
         {
             _client = client;
-            _packetManager = packetManager;
         }
 
         protected abstract void OnHandshakeFinished();
 
-        protected abstract void OnClose();
+        protected abstract Task OnClose();
 
         protected abstract void OnReceive(object packet);
 
@@ -110,6 +90,9 @@ namespace QuantumCore.Core.Networking
                     read = await _stream.ReadAsync(data, 0, data.Length);
 
                     packetTotalSize += read;
+                    var allData = new byte[packetTotalSize];
+                    allData[0] = buffer[0];
+                    data.CopyTo(allData, 1);
 
                     if (read != data.Length)
                     {
@@ -138,6 +121,9 @@ namespace QuantumCore.Core.Networking
                         read = await _stream.ReadAsync(subData, 0, subData.Length);
                         
                         packetTotalSize += read;
+                        var oldSize = data.Length;
+                        Array.Resize(ref data, data.Length + read);
+                        data.CopyTo(allData, oldSize);
 
                         packetDetails.Deserialize(packet, data.Concat(subData).ToArray());
                     }
@@ -152,6 +138,9 @@ namespace QuantumCore.Core.Networking
                         var dynamicData = new byte[size];
                         read = await _stream.ReadAsync(dynamicData, 0, size);
                         packetTotalSize += read;
+                        var oldSize = data.Length;
+                        Array.Resize(ref allData, data.Length + read);
+                        dynamicData.CopyTo(allData, oldSize);
                         if (read != size)
                         {
                             _logger.LogInformation($"Failed to read dynamic data read {read} but expected {size}");
@@ -169,6 +158,9 @@ namespace QuantumCore.Core.Networking
                         var sequence = new byte[1];
                         read = await _stream.ReadAsync(sequence, 0, 1);
                         packetTotalSize += read;
+                        var oldSize = data.Length;
+                        Array.Resize(ref allData, data.Length + read);
+                        sequence.CopyTo(allData, oldSize);
                         if (read != 1)
                         {
                             _client.Close();
@@ -178,9 +170,13 @@ namespace QuantumCore.Core.Networking
                     }
                     
                     //_logger.LogDebug($"Recv {packet}");
-                    _packetsReceived.Observe(packetTotalSize);
+                    // TODO token
+                    await _pluginExecutor.ExecutePlugins<IPacketOperationListener>(_logger, x => x.OnPrePacketReceivedAsync(packet, allData, CancellationToken.None));
 
                     OnReceive(packet);
+
+                    // TODO token
+                    await _pluginExecutor.ExecutePlugins<IPacketOperationListener>(_logger, x => x.OnPostPacketReceivedAsync(packet, allData, CancellationToken.None));
                 }
                 catch (Exception e)
                 {
@@ -230,11 +226,14 @@ namespace QuantumCore.Core.Networking
                 packetDetails.UpdateDynamicSize(packet, packetDetails.Size);
             }
 
+            // TODO token
+            await _pluginExecutor.ExecutePlugins<IPacketOperationListener>(_logger, x => x.OnPrePacketSentAsync(packet, CancellationToken.None));
             // Serialize object
             var data = packetDetails.Serialize(packet);
-            _packetsSent.Observe(data.Length);
             await _stream.WriteAsync(data);
             await _stream.FlushAsync();
+            // TODO token
+            await _pluginExecutor.ExecutePlugins<IPacketOperationListener>(_logger, x => x.OnPostPacketReceivedAsync(packet, data, CancellationToken.None));
         }
 
         public async Task StartHandshake()

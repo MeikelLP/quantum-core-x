@@ -1,9 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using CommandLine;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using QuantumCore.API;
 using QuantumCore.Auth;
 using QuantumCore.Core;
 using QuantumCore.Core.Logging;
@@ -11,6 +16,7 @@ using QuantumCore.Database;
 using QuantumCore.Extensions;
 using QuantumCore.Game;
 using Serilog;
+using Weikio.PluginFramework.Abstractions;
 
 namespace QuantumCore
 {
@@ -18,12 +24,13 @@ namespace QuantumCore
     {
         private static async Task Main(string[] args)
         {
-            await Parser.Default.ParseArguments<AuthOptions, GameOptions, MigrateOptions>(args).WithParsedAsync(RunAsync);
+            await Parser.Default.ParseArguments<AuthOptions, GameOptions, MigrateOptions>(args).WithParsedAsync(obj => RunAsync(obj, args));
         }
 
-        private static async Task RunAsync(object obj)
+        private static async Task RunAsync(object obj, string[] args)
         {
-            var host = Host.CreateDefaultBuilder()
+            var host = Host.CreateDefaultBuilder(args)
+                .UseConsoleLifetime()
                 .ConfigureServices(services =>
                 {
                     switch (obj)
@@ -48,6 +55,18 @@ namespace QuantumCore
                 })
                 .Build();
 
+            // plugins
+            if (!Directory.Exists("plugins"))
+            {
+                Directory.CreateDirectory("plugins");
+            }
+
+            await Task.WhenAll(host.Services.GetRequiredService<IEnumerable<IPluginCatalog>>()
+                .Select(x => x.Initialize()));
+            var pluginExecutor = host.Services.GetRequiredService<PluginExecutor>();
+            var logger = host.Services.GetRequiredService<ILogger<Program>>();
+            await pluginExecutor.ExecutePlugins<ISingletonPlugin>(logger, x => x.InitializeAsync());
+            
             await host.RunAsync();
         }
     }

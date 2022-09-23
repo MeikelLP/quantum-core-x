@@ -170,7 +170,7 @@ namespace QuantumCore.Game.World.Entities
                 return;
             }
 
-            World.Instance.DespawnEntity(this);
+            await World.Instance.DespawnEntity(this);
 
             PositionX = x;
             PositionY = y;
@@ -179,7 +179,7 @@ namespace QuantumCore.Game.World.Entities
             Stop();
 
             // Spawn the player
-            if (!World.Instance.SpawnEntity(this))
+            if (!await World.Instance.SpawnEntity(this))
             {
                 Log.Warning("Failed to spawn player entity");
                 Connection.Close();

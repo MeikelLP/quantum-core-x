@@ -8,11 +8,11 @@ using System.Net.Sockets;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Prometheus;
 using QuantumCore.API;
 using QuantumCore.Core.Packets;
 using QuantumCore.Core.Utils;
@@ -31,15 +31,17 @@ namespace QuantumCore.Core.Networking
         private readonly CancellationTokenSource _stoppingToken = new();
         protected TcpListener Listener { get; }
 
-        private readonly Gauge _openConnections = Metrics.CreateGauge("open_connections", "Currently open connections");
         private ServiceProvider _serverLifetimeProvider;
+        private readonly PluginExecutor _pluginExecutor;
         protected IServiceCollection Services { get; }
 
         public int Port { get; }
 
-        public ServerBase(IPacketManager packetManager, ILogger logger, int port, string bindIp = "0.0.0.0")
+        public ServerBase(IPacketManager packetManager, ILogger logger, PluginExecutor pluginExecutor, IServiceProvider serviceProvider, 
+            int port, string bindIp = "0.0.0.0")
         {
             _logger = logger;
+            _pluginExecutor = pluginExecutor;
             PacketManager = packetManager;
             Port = port;
             
@@ -54,16 +56,20 @@ namespace QuantumCore.Core.Networking
             // Register Core Features
             PacketManager.RegisterNamespace("QuantumCore.Core.Packets");
             RegisterListener<GCHandshake>((connection, packet) => connection.HandleHandshake(packet));
-            Services = new ServiceCollection().AddCoreServices()
+            var cfg = serviceProvider.GetRequiredService<IConfiguration>();
+            Services = new ServiceCollection()
+                .AddCoreServices()
+                .AddSingleton(_ => cfg)
                 .Replace(new ServiceDescriptor(typeof(IPacketManager), _ => packetManager, ServiceLifetime.Singleton));
         }
 
         public long ServerTime => _serverTimer.ElapsedMilliseconds;
 
-        internal void RemoveConnection(Connection connection)
+        internal async Task RemoveConnection(Connection connection)
         {
-            _openConnections.Dec();
             _connections.Remove(connection.Id, out _);
+            
+            await _pluginExecutor.ExecutePlugins<IConnectionLifetimeListener>(_logger, x => x.OnDisconnectedAsync(_stoppingToken.Token));
         }
 
         public override Task StartAsync(CancellationToken token)
@@ -87,8 +93,8 @@ namespace QuantumCore.Core.Networking
             // cannot inject tcp client here
             var connection = ActivatorUtilities.CreateInstance<T>(scope.ServiceProvider, client);
             _connections.TryAdd(connection.Id, connection);
-                    
-            _openConnections.Inc();
+            
+            await _pluginExecutor.ExecutePlugins<IConnectionLifetimeListener>(_logger, x => x.OnConnectedAsync(_stoppingToken.Token));
 
             // accept new connections on another thread
             Listener.BeginAcceptTcpClient(OnClientAccepted, Listener);

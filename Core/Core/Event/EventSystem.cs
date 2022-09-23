@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using Prometheus;
+// using Prometheus; // TODO
 
 namespace QuantumCore.Core.Event
 {
@@ -11,7 +11,7 @@ namespace QuantumCore.Core.Event
 
         private static readonly List<long> Remove = new();
         
-        private static readonly Gauge EventsGauge = Metrics.CreateGauge("events", "Currently queued events");
+        // private static readonly Gauge EventsGauge = Metrics.CreateGauge("events", "Currently queued events");
 
         /// <summary>
         /// Updates all pending events and call them if needed.
@@ -47,7 +47,7 @@ namespace QuantumCore.Core.Event
                 }
                 Remove.Clear();
 
-                EventsGauge.Set(PendingEvents.Count);
+                // EventsGauge.Set(PendingEvents.Count);
             }
         }
         

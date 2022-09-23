@@ -1,29 +1,31 @@
-﻿using System;
+﻿using System.Threading;
+using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.Game;
 
 namespace ExamplePlugin
 {
-    public class Plugin : IPlugin
+    public class Plugin : ISingletonPlugin
     {
+        private readonly ILogger<Plugin> _logger;
+        private readonly IGame _server;
         public string Name { get; } = "ExamplePlugin";
         public string Author { get; } = "QuantumCore Contributors";
 
-        public void Register(object server)
+        public Plugin(ILogger<Plugin> logger, IGame server)
         {
-            Console.WriteLine("ExamplePlugin register!");
-
-            if (server is IGame)
-            {
-                Console.WriteLine("Loading this plugin on a game server!");
-                IGame game = (IGame)server;
-                game.RegisterCommandNamespace(typeof(TestCommand));
-            }
+            _logger = logger;
+            _server = server;
         }
 
-        public void Unregister()
+        public Task InitializeAsync(CancellationToken token = default)
         {
-            Console.WriteLine("ExamplePlugin unregister!");
+            _logger.LogInformation("ExamplePlugin register!");
+
+            _server.RegisterCommandNamespace(typeof(TestCommand));
+            
+            return Task.CompletedTask;
         }
     }
 }

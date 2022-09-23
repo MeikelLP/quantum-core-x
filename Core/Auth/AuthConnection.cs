@@ -1,4 +1,6 @@
 ﻿using System.Net.Sockets;
+using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using QuantumCore.Core.Networking;
 
@@ -8,11 +10,12 @@ namespace QuantumCore.Auth
     {
         private AuthServer _server;
 
-        public AuthConnection(AuthServer server, TcpClient client, IPacketManager packetManager, ILogger<AuthConnection> logger) 
-            : base(logger)
+        public AuthConnection(AuthServer server, TcpClient client, IPacketManager packetManager, 
+            ILogger<AuthConnection> logger, PluginExecutor pluginExecutor) 
+            : base(logger, pluginExecutor, packetManager)
         {
             _server = server;
-            Init(client, packetManager);
+            Init(client);
         }
 
         protected override void OnHandshakeFinished()
@@ -20,9 +23,9 @@ namespace QuantumCore.Auth
             _server.CallConnectionListener(this);
         }
 
-        protected override void OnClose()
+        protected async override Task OnClose()
         {
-            _server.RemoveConnection(this);
+            await _server.RemoveConnection(this);
         }
 
         protected override void OnReceive(object packet)
