@@ -64,7 +64,7 @@ namespace QuantumCore.Game
         }
 
         [Listener(typeof(ChatIncoming))]
-        public static async Task OnChat(this GameConnection connection, ICommandManager commandManager, ChatIncoming packet)
+        public static async Task OnChat(this GameConnection connection, IChatManager chatManager, ICommandManager commandManager, ChatIncoming packet)
         {
             if (packet.MessageType == ChatMessageTypes.Normal)
             {
@@ -76,7 +76,7 @@ namespace QuantumCore.Game
                 {
                     var message = connection.Player.Name + ": " + packet.Message;
 
-                    await ChatManager.Talk(connection.Player, message);
+                    await chatManager.Talk(connection.Player, message);
                 }
             }
 
@@ -85,7 +85,7 @@ namespace QuantumCore.Game
                 // todo check 15 seconds cooldown
                 var message = connection.Player.Name + ": " + packet.Message;
                 
-                await ChatManager.Shout(message);
+                await chatManager.Shout(message);
             }
         }
 

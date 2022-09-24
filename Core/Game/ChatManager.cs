@@ -4,14 +4,12 @@ using BeetleX.Redis;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.World;
 using QuantumCore.Cache;
-using QuantumCore.Core.Constants;
 using QuantumCore.Game.Packets;
 using QuantumCore.Game.World.Entities;
-using Serilog;
 
 namespace QuantumCore.Game;
 
-public static class ChatManager
+public class ChatManager : IChatManager
 {
     private struct ChatMessage
     {
@@ -20,10 +18,10 @@ public static class ChatManager
         public string Message { get; set; }
     }
 
-    private static Subscriber _subscriber;
-    private static Guid _id;
+    private Subscriber _subscriber;
+    private Guid _id;
 
-    public static void Init()
+    public void Init()
     {
         _id = Guid.NewGuid();
 
@@ -34,7 +32,7 @@ public static class ChatManager
         _subscriber.Listen();
     }
 
-    private static async Task OnChatMessage(ChatMessage message)
+    private async Task OnChatMessage(ChatMessage message)
     {
         if (message.OwnerCore == _id)
         {
@@ -62,7 +60,7 @@ public static class ChatManager
         });
     }
     
-    public static async ValueTask Talk(IEntity entity, string message)
+    public async ValueTask Talk(IEntity entity, string message)
     {
         var packet = new ChatOutcoming
         {
@@ -86,7 +84,7 @@ public static class ChatManager
         });
     }
 
-    public static async Task Shout(string message)
+    public async Task Shout(string message)
     {
         var chat = new ChatOutcoming
         {

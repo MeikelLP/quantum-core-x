@@ -36,6 +36,7 @@ namespace QuantumCore.Game
         private readonly ICommandManager _commandManager;
         private readonly IDatabaseManager _databaseManager;
         private readonly IQuestManager _questManager;
+        private readonly IChatManager _chatManager;
         public IWorld World => _world;
         private readonly GameOptions _options;
         private World.World _world;
@@ -53,7 +54,7 @@ namespace QuantumCore.Game
             PluginExecutor pluginExecutor, IServiceProvider serviceProvider, IItemManager itemManager, 
             IMonsterManager monsterManager, IJobManager jobManager, IExperienceManager experienceManager,
             IAnimationManager animationManager, ICommandManager commandManager, IDatabaseManager databaseManager, 
-            IEnumerable<IPacketHandler> packetHandlers, IQuestManager questManager)
+            IEnumerable<IPacketHandler> packetHandlers, IQuestManager questManager, IChatManager chatManager)
             : base(packetManager, logger, pluginExecutor, serviceProvider, packetHandlers, options.Value.Port)
         {
             _logger = logger;
@@ -67,6 +68,7 @@ namespace QuantumCore.Game
             _commandManager = commandManager;
             _databaseManager = databaseManager;
             _questManager = questManager;
+            _chatManager = chatManager;
             Instance = this;
             _options = options.Value;
 
@@ -112,7 +114,7 @@ namespace QuantumCore.Game
             );
             
             // Initialize core systems
-            ChatManager.Init();
+            _chatManager.Init();
 
             // Load all quests
             _questManager.Init();
