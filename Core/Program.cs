@@ -27,7 +27,7 @@ namespace QuantumCore
         private static async Task RunAsync(object obj, string[] args)
         {
             var host = Host.CreateDefaultBuilder(args)
-                .UseConsoleLifetime()
+                .UseConsoleLifetime(x => x.SuppressStatusMessages = true)
                 .ConfigureServices(services =>
                 {
                     switch (obj)
