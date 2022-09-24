@@ -16,7 +16,7 @@ public class CustomQuestManager : IQuestManager
     
     public void Init()
     {
-        _logger.LogInformation("Hello World");
+        _logger.LogInformation("Hello World from {Type}", nameof(CustomQuestManager));
     }
 
     public void InitializePlayer(IPlayerEntity player)

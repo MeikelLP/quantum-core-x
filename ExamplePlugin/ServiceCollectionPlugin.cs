@@ -8,6 +8,6 @@ public class ServiceCollectionPlugin : IServiceCollectionPlugin
 {
     public void ModifyServiceCollection(IServiceCollection services)
     {
-        services.Replace(new ServiceDescriptor(typeof(IQuestManager), typeof(CustomQuestManager)));
+        services.Replace(new ServiceDescriptor(typeof(IQuestManager), typeof(CustomQuestManager), ServiceLifetime.Singleton));
     }
 }
