@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
+using QuantumCore.Core.Cache;
 using QuantumCore.Core.Logging.Enrichers;
 using QuantumCore.Core.Networking;
 using QuantumCore.Database;
@@ -40,6 +41,7 @@ public static class ServiceExtensions
         services.AddSingleton<IDatabaseManager, DatabaseManager>();
         services.AddSingleton<IChatManager, ChatManager>();
         services.AddSingleton<IQuestManager, QuestManager>();
+        services.AddSingleton<ICacheManager, CacheManager>();
         services.AddPluginFramework()
             .AddPluginCatalog(pluginCatalog)
             .AddPluginType<ISingletonPlugin>()

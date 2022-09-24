@@ -6,10 +6,10 @@ using System.Threading;
 using QuantumCore.Game.Packets;
 using QuantumCore.API.Game;
 using System.Threading.Tasks;
-using QuantumCore.Cache;
 using QuantumCore.Database;
 using Dapper;
 using Microsoft.Extensions.Logging;
+using QuantumCore.Core.Cache;
 using QuantumCore.Game.World.Entities;
 
 namespace QuantumCore.Game.Commands
@@ -18,15 +18,17 @@ namespace QuantumCore.Game.Commands
     {
         private readonly ILogger<CommandManager> _logger;
         private readonly IDatabaseManager _databaseManager;
+        private readonly ICacheManager _cacheManager;
         public Dictionary<string, CommandCache> Commands { get; } = new ();
         public Dictionary<Guid, PermissionGroup> Groups { get; } = new ();
 
         public readonly Guid Operator_Group = Guid.Parse("45bff707-1836-42b7-956d-00b9b69e0ee0");
 
-        public CommandManager(ILogger<CommandManager> logger, IDatabaseManager databaseManager)
+        public CommandManager(ILogger<CommandManager> logger, IDatabaseManager databaseManager, ICacheManager cacheManager)
         {
             _logger = logger;
             _databaseManager = databaseManager;
+            _cacheManager = cacheManager;
         }
         
         public void Register(string ns, Assembly assembly = null)
@@ -76,7 +78,7 @@ namespace QuantumCore.Game.Commands
                 p.Users.Add(Guid.Parse(user.Player));
 
                 var key = "perm:" + user.Player;
-                var redisList = CacheManager.Instance.CreateList<Guid>(key);
+                var redisList = _cacheManager.CreateList<Guid>(key);
 
                 await redisList.Push(id);
             }
@@ -87,11 +89,11 @@ namespace QuantumCore.Game.Commands
         public async Task LoadAsync(CancellationToken token = default)
         {
             _logger.LogInformation("Initialize permissions");
-            var permission_keys = await CacheManager.Instance.Keys("perm:*");
+            var permission_keys = await _cacheManager.Keys("perm:*");
 
             foreach (var p in permission_keys)
             {
-                await CacheManager.Instance.Del(p);
+                await _cacheManager.Del(p);
             }
             using var db = _databaseManager.GetGameDatabase();
 

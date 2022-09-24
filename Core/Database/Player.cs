@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Dapper;
 using Dapper.Contrib.Extensions;
 using QuantumCore.API.Game;
-using QuantumCore.Cache;
+using QuantumCore.Core.Cache;
 using Serilog;
 
 namespace QuantumCore.Database
@@ -34,15 +34,15 @@ namespace QuantumCore.Database
         public uint GivenStatusPoints { get; set; }
         public uint AvailableStatusPoints { get; set; }
 
-        public static async Task<Player> GetPlayer(IDatabaseManager databaseManager, Guid account, byte slot)
+        public static async Task<Player> GetPlayer(IDatabaseManager databaseManager, ICacheManager cacheManager, Guid account, byte slot)
         {
             var key = "players:" + account;
             
-            var list = CacheManager.Instance.CreateList<Guid>(key);
-            if (await CacheManager.Instance.Exists(key) <= 0)
+            var list = cacheManager.CreateList<Guid>(key);
+            if (await cacheManager.Exists(key) <= 0)
             {
                 var i = 0;
-                await foreach (var player in GetPlayers(databaseManager, account))
+                await foreach (var player in GetPlayers(databaseManager, cacheManager, account))
                 {
                     if (i == slot) return player;
                     i++;
@@ -52,37 +52,37 @@ namespace QuantumCore.Database
             }
 
             var playerId = await list.Index(slot);
-            return await GetPlayer(databaseManager, playerId);
+            return await GetPlayer(databaseManager, cacheManager, playerId);
         }
 
-        public static async Task<Player> GetPlayer(IDatabaseManager databaseManager, Guid playerId)
+        public static async Task<Player> GetPlayer(IDatabaseManager databaseManager, ICacheManager cacheManager, Guid playerId)
         {
             using var db = databaseManager.GetGameDatabase();
             
             var playerKey = "player:" + playerId;
-            if (await CacheManager.Instance.Exists(playerKey) > 0)
+            if (await cacheManager.Exists(playerKey) > 0)
             {
                 Log.Debug($"Read character {playerId} from cache");
-                return await CacheManager.Instance.Get<Player>(playerKey);
+                return await cacheManager.Get<Player>(playerKey);
             }
             else
             {
                 Log.Debug($"Query character {playerId} from the database");
                 var player = db.Get<Player>(playerId);
                 //var player = await SqlMapperExtensions.Get<Player>(db, playerId);
-                await CacheManager.Instance.Set(playerKey, player);
+                await cacheManager.Set(playerKey, player);
                 return player;
             }
         }
         
-        public static async IAsyncEnumerable<Player> GetPlayers(IDatabaseManager databaseManager, Guid account)
+        public static async IAsyncEnumerable<Player> GetPlayers(IDatabaseManager databaseManager, ICacheManager cacheManager, Guid account)
         {
             var key = "players:" + account;
 
-            var list = CacheManager.Instance.CreateList<Guid>(key);
+            var list = cacheManager.CreateList<Guid>(key);
             
             // Check if we have players cached
-            if (await CacheManager.Instance.Exists(key) > 0)
+            if (await cacheManager.Exists(key) > 0)
             {
                 Log.Debug($"Found players for account {account} in cache");
                 // We have the characters cached
@@ -90,7 +90,7 @@ namespace QuantumCore.Database
 
                 foreach (var id in cachedIds)
                 {
-                    yield return await CacheManager.Instance.Get<Player>("player:" + id);    
+                    yield return await cacheManager.Get<Player>("player:" + id);    
                 }
             }
             else
@@ -107,7 +107,7 @@ namespace QuantumCore.Database
                     Guid playerId = row.Id;
                     await list.Push(playerId);
 
-                    yield return await GetPlayer(databaseManager, playerId);
+                    yield return await GetPlayer(databaseManager, cacheManager, playerId);
                 }
             }
         }

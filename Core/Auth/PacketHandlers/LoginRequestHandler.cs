@@ -6,7 +6,7 @@ using Dapper.Contrib.Extensions;
 using Microsoft.Extensions.Logging;
 using QuantumCore.Auth.Cache;
 using QuantumCore.Auth.Packets;
-using QuantumCore.Cache;
+using QuantumCore.Core.Cache;
 using QuantumCore.Core.Networking;
 using QuantumCore.Core.Utils;
 using QuantumCore.Database;
@@ -17,11 +17,13 @@ public class LoginRequestHandler : IPacketHandler<LoginRequest>
 {
     private readonly IDatabaseManager _databaseManager;
     private readonly ILogger<LoginRequestHandler> _logger;
+    private readonly ICacheManager _cacheManager;
 
-    public LoginRequestHandler(IDatabaseManager databaseManager, ILogger<LoginRequestHandler> logger)
+    public LoginRequestHandler(IDatabaseManager databaseManager, ILogger<LoginRequestHandler> logger, ICacheManager cacheManager)
     {
         _databaseManager = databaseManager;
         _logger = logger;
+        _cacheManager = cacheManager;
     }
 
     public async Task ExecuteAsync(PacketContext<LoginRequest> ctx, CancellationToken token = default)
@@ -85,13 +87,13 @@ public class LoginRequestHandler : IPacketHandler<LoginRequest>
         var authToken = CoreRandom.GenerateUInt32();
         
         // Store auth token
-        await CacheManager.Instance.Set("token:" + authToken, new Token
+        await _cacheManager.Set("token:" + authToken, new Token
         {
             Username = account.Username,
             AccountId = account.Id
         });
         // Set expiration on token
-        await CacheManager.Instance.Expire("token:" + authToken, 30);
+        await _cacheManager.Expire("token:" + authToken, 30);
         
         // Send the auth token to the client and let it connect to our game server
         await ctx.Connection.Send(new LoginSuccess

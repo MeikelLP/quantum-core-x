@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API.Game.Types;
 using QuantumCore.Auth.Cache;
-using QuantumCore.Cache;
+using QuantumCore.Core.Cache;
 using QuantumCore.Core.Networking;
 using QuantumCore.Core.Utils;
 using QuantumCore.Database;
@@ -16,18 +16,20 @@ namespace QuantumCore.Game.PacketHandlers
     {
         private readonly IDatabaseManager _databaseManager;
         private readonly ILogger<TokenLoginHandler> _logger;
+        private readonly ICacheManager _cacheManager;
 
-        public TokenLoginHandler(IDatabaseManager databaseManager, ILogger<TokenLoginHandler> logger)
+        public TokenLoginHandler(IDatabaseManager databaseManager, ILogger<TokenLoginHandler> logger, ICacheManager cacheManager)
         {
             _databaseManager = databaseManager;
             _logger = logger;
+            _cacheManager = cacheManager;
         }
         
         public async Task ExecuteAsync(PacketContext<TokenLogin> ctx, CancellationToken cancellationToken = default)
         {
             var key = "token:" + ctx.Packet.Key;
 
-            if (await CacheManager.Instance.Exists(key) <= 0)
+            if (await _cacheManager.Exists(key) <= 0)
             {
                 _logger.LogWarning($"Received invalid auth token {ctx.Packet.Key} / {ctx.Packet.Username}");
                 ctx.Connection.Close();
@@ -35,7 +37,7 @@ namespace QuantumCore.Game.PacketHandlers
             }
             
             // Verify that the given token is for the given user
-            var token = await CacheManager.Instance.Get<Token>(key);
+            var token = await _cacheManager.Get<Token>(key);
             if (!string.Equals(token.Username, ctx.Packet.Username, StringComparison.OrdinalIgnoreCase))
             {
                 _logger.LogWarning("Received invalid auth token, username does not match {TokenUsername} != {PacketUserName}", token.Username, ctx.Packet.Username);
@@ -48,7 +50,7 @@ namespace QuantumCore.Game.PacketHandlers
             _logger.LogDebug("Received valid auth token");
             
             // Remove TTL from token so we can use it for another game core transition
-            await CacheManager.Instance.Persist(key);
+            await _cacheManager.Persist(key);
 
             // Store the username and id for later reference
             ctx.Connection.Username = token.Username;
@@ -59,7 +61,7 @@ namespace QuantumCore.Game.PacketHandlers
             // Load players of account
             var characters = new Characters();
             var i = 0;
-            await foreach (var player in Player.GetPlayers(_databaseManager, token.AccountId).WithCancellation(cancellationToken))
+            await foreach (var player in Player.GetPlayers(_databaseManager, _cacheManager, token.AccountId).WithCancellation(cancellationToken))
             {
                 var host = World.World.Instance.GetMapHost(player.PositionX, player.PositionY);
                 

@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Dapper;
 using Dapper.Contrib.Extensions;
 using Microsoft.Extensions.Logging;
-using QuantumCore.Cache;
+using QuantumCore.Core.Cache;
 using QuantumCore.Core.Networking;
 using QuantumCore.Core.Utils;
 using QuantumCore.Database;
@@ -18,12 +18,15 @@ public class CreateCharacterHandler : ISelectPacketHandler<CreateCharacter>
     private readonly ILogger<CreateCharacterHandler> _logger;
     private readonly IDatabaseManager _databaseManager;
     private readonly IJobManager _jobManager;
+    private readonly ICacheManager _cacheManager;
 
-    public CreateCharacterHandler(ILogger<CreateCharacterHandler> logger, IDatabaseManager databaseManager, IJobManager jobManager)
+    public CreateCharacterHandler(ILogger<CreateCharacterHandler> logger, IDatabaseManager databaseManager, 
+        IJobManager jobManager, ICacheManager cacheManager)
     {
         _logger = logger;
         _databaseManager = databaseManager;
         _jobManager = jobManager;
+        _cacheManager = cacheManager;
     }
     
     public async Task ExecuteAsync(PacketContext<CreateCharacter> ctx, CancellationToken token = default)
@@ -70,10 +73,10 @@ public class CreateCharacterHandler : ISelectPacketHandler<CreateCharacter>
         await _databaseManager.GetGameDatabase().InsertAsync(player);
         
         // Add player to cache
-        await CacheManager.Instance.Set("player:" + player.Id, player);
+        await _cacheManager.Set("player:" + player.Id, player);
         
         // Add player to the list of characters
-        var list = CacheManager.Instance.CreateList<Guid>("players:" + accountId);
+        var list = _cacheManager.CreateList<Guid>("players:" + accountId);
         var idx = await list.Push(player.Id);
         
         // Query responsible host for the map

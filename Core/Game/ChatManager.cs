@@ -4,7 +4,7 @@ using BeetleX.Redis;
 using QuantumCore.API;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.World;
-using QuantumCore.Cache;
+using QuantumCore.Core.Cache;
 using QuantumCore.Game.Packets;
 using QuantumCore.Game.World.Entities;
 
@@ -12,6 +12,8 @@ namespace QuantumCore.Game;
 
 public class ChatManager : IChatManager
 {
+    private readonly ICacheManager _cacheManager;
+
     private struct ChatMessage
     {
         public Guid OwnerCore { get; set; }
@@ -22,11 +24,16 @@ public class ChatManager : IChatManager
     private Subscriber _subscriber;
     private Guid _id;
 
+    public ChatManager(ICacheManager cacheManager)
+    {
+        _cacheManager = cacheManager;
+    }
+    
     public void Init()
     {
         _id = Guid.NewGuid();
 
-        _subscriber = CacheManager.Instance.Subscribe();
+        _subscriber = _cacheManager.Subscribe();
 #pragma warning disable CS4014
         _subscriber.Register<ChatMessage>("chat", msg => OnChatMessage(msg));
 #pragma warning restore CS4014
@@ -107,7 +114,7 @@ public class ChatManager : IChatManager
         });
         
         // Broadcast message to all cores 
-        await CacheManager.Instance.Publish("chat",
+        await _cacheManager.Publish("chat",
             new ChatMessage {Type = ChatMessageTypes.Shout, Message = message, OwnerCore = _id});
     }
 }

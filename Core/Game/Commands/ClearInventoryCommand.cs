@@ -2,6 +2,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using QuantumCore.API.Game;
 using QuantumCore.API.Game.World;
+using QuantumCore.Core.Cache;
 using QuantumCore.Extensions;
 using QuantumCore.Game.World.Entities;
 
@@ -11,7 +12,7 @@ namespace QuantumCore.Game.Commands
     public static class ClearInventoryCommand
     {
         [CommandMethod]
-        public static async Task ClearInventory(IPlayerEntity player)
+        public static async Task ClearInventory(IPlayerEntity player, ICacheManager cacheManager)
         {
             if (!(player is PlayerEntity p))
             {
@@ -34,7 +35,7 @@ namespace QuantumCore.Game.Commands
             {
                 await p.RemoveItem(item);
                 await p.SendRemoveItem(item.Window, (ushort)item.Position);
-                await item.Destroy();
+                await item.Destroy(cacheManager);
             }
 
             await p.SendInventory();

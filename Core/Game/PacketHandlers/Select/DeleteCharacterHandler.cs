@@ -4,7 +4,7 @@ using System.Threading.Tasks;
 using Dapper;
 using Dapper.Contrib.Extensions;
 using Microsoft.Extensions.Logging;
-using QuantumCore.Cache;
+using QuantumCore.Core.Cache;
 using QuantumCore.Core.Networking;
 using QuantumCore.Database;
 using QuantumCore.Extensions;
@@ -18,11 +18,13 @@ public class DeleteCharacterHandler : ISelectPacketHandler<DeleteCharacter>
 {
     private readonly ILogger<DeleteCharacterHandler> _logger;
     private readonly IDatabaseManager _databaseManager;
+    private readonly ICacheManager _cacheManager;
 
-    public DeleteCharacterHandler(ILogger<DeleteCharacterHandler> logger, IDatabaseManager databaseManager)
+    public DeleteCharacterHandler(ILogger<DeleteCharacterHandler> logger, IDatabaseManager databaseManager, ICacheManager cacheManager)
     {
         _logger = logger;
         _databaseManager = databaseManager;
+        _cacheManager = cacheManager;
     }
     
     public async Task ExecuteAsync(PacketContext<DeleteCharacter> ctx, CancellationToken token = default)
@@ -59,7 +61,7 @@ public class DeleteCharacterHandler : ISelectPacketHandler<DeleteCharacter>
             Slot = ctx.Packet.Slot
         });
 
-        var player = await Player.GetPlayer(_databaseManager, accountId, ctx.Packet.Slot);
+        var player = await Player.GetPlayer(_databaseManager, _cacheManager, accountId, ctx.Packet.Slot);
         if (player == null)
         {
             ctx.Connection.Close();
@@ -76,26 +78,26 @@ public class DeleteCharacterHandler : ISelectPacketHandler<DeleteCharacter>
 
         // Delete player redis data
         var key = "player:" + player.Id;
-        await CacheManager.Instance.Del(key);
+        await _cacheManager.Del(key);
 
         key = "players:" + ctx.Connection.AccountId;
-        var list = CacheManager.Instance.CreateList<Guid>(key);
+        var list = _cacheManager.CreateList<Guid>(key);
         await list.Rem(1, player.Id);
 
         // Delete items in redis cache
 
         //for (byte i = (byte)WindowType.Inventory; i < (byte) WindowType.Inventory; i++)
         {
-            var items = _databaseManager.GetItems(player.Id, (byte) WindowType.Inventory);
+            var items = _databaseManager.GetItems(_cacheManager, player.Id, (byte) WindowType.Inventory);
 
             await foreach (var item in items)
             {
                 key = "item:" + item.Id;
-                await CacheManager.Instance.Del(key);
+                await _cacheManager.Del(key);
             }
 
             key = "items:" + player.Id + ":" + (byte) WindowType.Inventory;
-            await CacheManager.Instance.Del(key);
+            await _cacheManager.Del(key);
         }
 
         // Delete all items in db

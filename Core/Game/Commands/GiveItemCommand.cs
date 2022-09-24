@@ -2,6 +2,7 @@ using System.Threading.Tasks;
 using QuantumCore.API;
 using QuantumCore.API.Game;
 using QuantumCore.API.Game.World;
+using QuantumCore.Core.Cache;
 using QuantumCore.Extensions;
 using QuantumCore.Game.World.Entities;
 
@@ -11,10 +12,12 @@ namespace QuantumCore.Game.Commands
     public class GiveItemCommand
     {
         private readonly IItemManager _itemManager;
+        private readonly ICacheManager _cacheManager;
 
-        public GiveItemCommand(IItemManager itemManager)
+        public GiveItemCommand(IItemManager itemManager, ICacheManager cacheManager)
         {
             _itemManager = itemManager;
+            _cacheManager = cacheManager;
         }
         
         [CommandMethod]
@@ -50,7 +53,7 @@ namespace QuantumCore.Game.Commands
                 return;
             }
             // Store item in cache
-            await instance.Persist();
+            await instance.Persist(_cacheManager);
 
             // Send item to client
             await p.SendItem(instance);

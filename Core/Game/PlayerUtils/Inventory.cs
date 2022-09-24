@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
+using QuantumCore.Core.Cache;
 using QuantumCore.Core.Utils;
 using QuantumCore.Database;
 using QuantumCore.Extensions;
@@ -168,14 +169,17 @@ namespace QuantumCore.Game.PlayerUtils
         private ushort _height;
         private readonly List<ItemInstance> _items = new List<ItemInstance>();
         private readonly IDatabaseManager _databaseManager;
+        private readonly ICacheManager _cacheManager;
 
-        public Inventory(IItemManager itemManager, IDatabaseManager databaseManager, Guid owner, byte window, ushort width, ushort height, ushort pages)
+        public Inventory(IItemManager itemManager, IDatabaseManager databaseManager, ICacheManager cacheManager, 
+            Guid owner, byte window, ushort width, ushort height, ushort pages)
         {
             Owner = owner;
             Window = window;
 
             _itemManager = itemManager;
             _databaseManager = databaseManager;
+            _cacheManager = cacheManager;
             _width = width;
             _height = height;
 
@@ -195,7 +199,7 @@ namespace QuantumCore.Game.PlayerUtils
             _items.Clear();
             
             var pageSize = _width * _height;
-            await foreach(var item in _databaseManager.GetItems(Owner, Window))
+            await foreach(var item in _databaseManager.GetItems(_cacheManager, Owner, Window))
             {
                 // Calculate page
                 var page = item.Position / pageSize;
@@ -230,7 +234,7 @@ namespace QuantumCore.Game.PlayerUtils
                 var pos = page.Place(instance);
                 if (pos != -1)
                 {
-                    await instance.Set(Owner, Window, (uint) (pos + i * _width * _height));
+                    await instance.Set(_cacheManager, Owner, Window, (uint) (pos + i * _width * _height));
                     return true;
                 }
             }
@@ -251,7 +255,7 @@ namespace QuantumCore.Game.PlayerUtils
             if (_pages[page].Place(item, position - page * pageSize))
             {
                 _items.Add(item);
-                await item.Set(Owner, Window, position);
+                await item.Set(_cacheManager, Owner, Window, position);
                 return true;
             }
 

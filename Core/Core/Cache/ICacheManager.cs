@@ -1,7 +1,7 @@
 using System.Threading.Tasks;
 using BeetleX.Redis;
 
-namespace QuantumCore.Cache;
+namespace QuantumCore.Core.Cache;
 
 public interface ICacheManager
 {

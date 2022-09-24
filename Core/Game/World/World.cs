@@ -10,7 +10,7 @@ using BeetleX.Redis;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.Game.World;
-using QuantumCore.Cache;
+using QuantumCore.Core.Cache;
 // using QuantumCore.Core.API;
 using QuantumCore.Core.Utils;
 using QuantumCore.Game.World.Entities;
@@ -36,17 +36,19 @@ namespace QuantumCore.Game.World
         private readonly IItemManager _itemManager;
         private readonly IMonsterManager _monsterManager;
         private readonly IAnimationManager _animationManager;
+        private readonly ICacheManager _cacheManager;
 
         public static World Instance { get; private set; }
         
         public World(ILogger<World> logger, PluginExecutor pluginExecutor, IItemManager itemManager, 
-            IMonsterManager monsterManager, IAnimationManager animationManager)
+            IMonsterManager monsterManager, IAnimationManager animationManager, ICacheManager cacheManager)
         {
             _logger = logger;
             _pluginExecutor = pluginExecutor;
             _itemManager = itemManager;
             _monsterManager = monsterManager;
             _animationManager = animationManager;
+            _cacheManager = cacheManager;
             _vid = 0;
             Instance = this;
         }
@@ -187,7 +189,7 @@ namespace QuantumCore.Game.World
                         }
                         else
                         {
-                            map = new Map(_monsterManager, _animationManager, mapName, positionX, positionY, width, height);    
+                            map = new Map(_monsterManager, _animationManager, _cacheManager, mapName, positionX, positionY, width, height);    
                         }
                         
                         
@@ -223,7 +225,7 @@ namespace QuantumCore.Game.World
 
         private async Task LoadRemoteMaps()
         {
-            var keys = await CacheManager.Instance.Keys("maps:*");
+            var keys = await _cacheManager.Keys("maps:*");
 
             foreach (var key in keys)
             {
@@ -234,7 +236,7 @@ namespace QuantumCore.Game.World
                     continue;
                 }
 
-                var address = await CacheManager.Instance.Get<string>(key);
+                var address = await _cacheManager.Get<string>(key);
                 var parts = address.Split(":");
                 Debug.Assert(parts.Length == 2);
                     
@@ -244,7 +246,7 @@ namespace QuantumCore.Game.World
                 Log.Debug($"Map {remoteMap.Name} is available at {remoteMap.Host}:{remoteMap.Port}");
             }
 
-            _mapSubscriber = CacheManager.Instance.Subscribe();
+            _mapSubscriber = _cacheManager.Subscribe();
             _mapSubscriber.Register<string>("maps", mapDetails =>
             {
                 var data = mapDetails.Split(" ");

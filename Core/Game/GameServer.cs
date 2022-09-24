@@ -11,7 +11,7 @@ using QuantumCore.API;
 using QuantumCore.API.Game;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.World;
-using QuantumCore.Cache;
+using QuantumCore.Core.Cache;
 using QuantumCore.Core.Event;
 using QuantumCore.Core.Networking;
 using QuantumCore.Core.Packets;
@@ -98,7 +98,6 @@ namespace QuantumCore.Game
 
             // Initialize static components
             _databaseManager.Init(_options.AccountString, _options.GameString);
-            CacheManager.Init(_databaseManager, _options.RedisHost, _options.RedisPort);
             
             // Load game configuration
             ConfigManager.Load();

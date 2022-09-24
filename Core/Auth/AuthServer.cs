@@ -11,7 +11,7 @@ using QuantumCore.API;
 using QuantumCore.API.Game.Types;
 using QuantumCore.Auth.Cache;
 using QuantumCore.Auth.Packets;
-using QuantumCore.Cache;
+using QuantumCore.Core.Cache;
 using QuantumCore.Core.Networking;
 using QuantumCore.Core.Utils;
 using QuantumCore.Database;
@@ -23,13 +23,16 @@ namespace QuantumCore.Auth
         private readonly ILogger<AuthServer> _logger;
         private readonly AuthOptions _options;
         private readonly IDatabaseManager _databaseManager;
+        private readonly ICacheManager _cacheManager;
 
         public AuthServer(IOptions<AuthOptions> options, IPacketManager packetManager, ILogger<AuthServer> logger, 
-            PluginExecutor pluginExecutor, IServiceProvider serviceProvider, IDatabaseManager databaseManager, IEnumerable<IPacketHandler> packetHandlers)
+            PluginExecutor pluginExecutor, IServiceProvider serviceProvider, IDatabaseManager databaseManager, 
+            IEnumerable<IPacketHandler> packetHandlers, ICacheManager cacheManager)
             : base(packetManager, logger, pluginExecutor, serviceProvider, packetHandlers, options.Value.Port)
         {
             _logger = logger;
             _databaseManager = databaseManager;
+            _cacheManager = cacheManager;
             _options = options.Value;
             
             Services.AddSingleton(_ => this);
@@ -39,13 +42,12 @@ namespace QuantumCore.Auth
         {
             // Initialize static components
             _databaseManager.Init(_options.AccountString, _options.GameString);
-            CacheManager.Init(_databaseManager, _options.RedisHost, _options.RedisPort);
 
             // Register auth server features
             PacketManager.RegisterNamespace("QuantumCore.Auth.Packets");
             RegisterNewConnectionListener(NewConnection);
             
-            var pong = await CacheManager.Instance.Ping();
+            var pong = await _cacheManager.Ping();
             if (!pong)
             {
                 _logger.LogError("Failed to ping redis server");

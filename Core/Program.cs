@@ -37,11 +37,13 @@ namespace QuantumCore
                     switch (obj)
                     {
                         case AuthOptions auth:
+                            services.AddSingleton<IOptions<GeneralOptions>>(_ => new OptionsWrapper<GeneralOptions>(auth));
                             services.AddSingleton<IOptions<AuthOptions>>(_ => new OptionsWrapper<AuthOptions>(auth));
                             services.AddCoreServices(pluginCatalog);
                             services.AddHostedService<AuthServer>();
                             break;
                         case GameOptions game:
+                            services.AddSingleton<IOptions<GeneralOptions>>(_ => new OptionsWrapper<GeneralOptions>(game));
                             services.AddSingleton<IOptions<GameOptions>>(_ => new OptionsWrapper<GameOptions>(game));
                             services.AddCoreServices(pluginCatalog);
                             services.AddHostedService<GameServer>();

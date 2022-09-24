@@ -7,7 +7,7 @@ using QuantumCore.API;
 using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.World;
-using QuantumCore.Cache;
+using QuantumCore.Core.Cache;
 using QuantumCore.Core.Constants;
 using QuantumCore.Core.Networking;
 using QuantumCore.Core.Utils;
@@ -94,10 +94,11 @@ namespace QuantumCore.Game.World.Entities
         private readonly IJobManager _jobManager;
         private readonly IExperienceManager _experienceManager;
         private readonly IQuestManager _questManager;
+        private readonly ICacheManager _cacheManager;
 
         public PlayerEntity(Player player, GameConnection connection, IItemManager itemManager, IJobManager jobManager, 
             IExperienceManager experienceManager, IAnimationManager animationManager, IDatabaseManager databaseManager,
-            IQuestManager questManager) 
+            IQuestManager questManager, ICacheManager cacheManager) 
             : base(animationManager, World.Instance.GenerateVid())
         {
             Connection = connection;
@@ -105,11 +106,12 @@ namespace QuantumCore.Game.World.Entities
             _jobManager = jobManager;
             _experienceManager = experienceManager;
             _questManager = questManager;
+            _cacheManager = cacheManager;
             Player = player;
             PositionX = player.PositionX;
             PositionY = player.PositionY;
-            Inventory = new Inventory(itemManager, databaseManager, player.Id, 1, 5, 9, 2);
-            QuickSlotBar = new QuickSlotBar(this);
+            Inventory = new Inventory(itemManager, databaseManager, _cacheManager, player.Id, 1, 5, 9, 2);
+            QuickSlotBar = new QuickSlotBar(_cacheManager, this);
 
             MovementSpeed = 150;
             EntityClass = player.PlayerClass;
@@ -134,7 +136,7 @@ namespace QuantumCore.Game.World.Entities
             var playerId = Player.Id;
 
             var playerKey = "perm:" + playerId;
-            var list = CacheManager.Instance.CreateList<Guid>(playerKey);
+            var list = _cacheManager.CreateList<Guid>(playerKey);
 
             foreach (var group in await list.Range(0, -1))
             {
@@ -580,7 +582,7 @@ namespace QuantumCore.Game.World.Entities
             Player.PositionX = PositionX;
             Player.PositionY = PositionY;
             
-            await CacheManager.Instance.Set($"player:{Player.Id}", Player);
+            await _cacheManager.Set($"player:{Player.Id}", Player);
         }
 
         protected override async ValueTask OnNewNearbyEntity(IEntity entity)
@@ -604,12 +606,12 @@ namespace QuantumCore.Game.World.Entities
             {
                 await RemoveItem(item);
                 await SendRemoveItem(item.Window, (ushort) item.Position);
-                await item.Set(Guid.Empty, 0, 0);
+                await item.Set(_cacheManager, Guid.Empty, 0, 0);
             }
             else
             {
                 item.Count -= count;
-                await item.Persist();
+                await item.Persist(_cacheManager);
                 
                 await SendItem(item);
 
@@ -753,7 +755,7 @@ namespace QuantumCore.Game.World.Entities
         public async Task<bool> DestroyItem(ItemInstance item)
         {
             await RemoveItem(item);
-            if (!await item.Destroy())
+            if (!await item.Destroy(_cacheManager))
             {
                 return false;
             }
@@ -796,7 +798,7 @@ namespace QuantumCore.Game.World.Entities
                         if (Inventory.EquipmentWindow.GetItem(position) == null)
                         {
                             Inventory.EquipmentWindow.SetItem(item, position);
-                            await item.Set(Player.Id, window, position);
+                            await item.Set(_cacheManager, Player.Id, window, position);
                             CalculateDefence();
                             await SendCharacterUpdate();
                             await SendPoints();

@@ -9,7 +9,7 @@ using QuantumCore.API;
 using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game;
 using QuantumCore.API.Game.World;
-using QuantumCore.Cache;
+using QuantumCore.Core.Cache;
 // using QuantumCore.Core.API;
 using QuantumCore.Core.Event;
 using QuantumCore.Core.Utils;
@@ -41,11 +41,14 @@ namespace QuantumCore.Game.World
         private readonly List<IEntity> _pendingRemovals = new();
         private readonly IMonsterManager _monsterManager;
         private readonly IAnimationManager _animationManager;
+        private readonly ICacheManager _cacheManager;
 
-        public Map(IMonsterManager monsterManager, IAnimationManager animationManager, string name, uint x, uint y, uint width, uint height)
+        public Map(IMonsterManager monsterManager, IAnimationManager animationManager, ICacheManager cacheManager,
+            string name, uint x, uint y, uint width, uint height)
         {
             _monsterManager = monsterManager;
             _animationManager = animationManager;
+            _cacheManager = cacheManager;
             Name = name;
             PositionX = x;
             PositionY = y;
@@ -58,8 +61,8 @@ namespace QuantumCore.Game.World
         {
             Log.Debug($"Load map '{Name}' at {PositionX}x{PositionY} (size {Width}x{Height})");
 
-            await CacheManager.Instance.Set($"maps:{Name}", IpUtils.PublicIP + ":" + GameServer.Instance.Port);
-            await CacheManager.Instance.Publish("maps", $"{Name} {IpUtils.PublicIP}:{GameServer.Instance.Port}");
+            await _cacheManager.Set($"maps:{Name}", IpUtils.PublicIP + ":" + GameServer.Instance.Port);
+            await _cacheManager.Publish("maps", $"{Name} {IpUtils.PublicIP}:{GameServer.Instance.Port}");
 
             // Load map spawn data
             var spawnFile = Path.Join("data", "maps", Name, "spawn.toml");
