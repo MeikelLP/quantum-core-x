@@ -180,7 +180,16 @@ namespace QuantumCore.Core.Networking
                     _logger.LogWarning("Packet type {Type} is missing a {AttributeTypeName}", packetType.Name, nameof(PacketAttribute));
                     continue;
                 }
-                _listeners.Add(packetDescription.Header, packetHandler);
+                
+                var subPacketDescription = packetType.GetCustomAttribute<SubPacketAttribute>();
+                if (subPacketDescription is not null)
+                {
+                    _listeners.Add((ushort)(packetDescription.Header << 8 | subPacketDescription.SubHeader), packetHandler);
+                }
+                else
+                {
+                    _listeners.Add(packetDescription.Header, packetHandler);
+                }
             }
         }
 

@@ -8,6 +8,7 @@ using QuantumCore.Database;
 using QuantumCore.Game;
 using QuantumCore.Game.Commands;
 using QuantumCore.Game.PlayerUtils;
+using QuantumCore.Game.Quest;
 using Serilog;
 using Weikio.PluginFramework.Catalogs;
 
@@ -37,6 +38,8 @@ public static class ServiceExtensions
         services.AddSingleton<IExperienceManager, ExperienceManager>();
         services.AddSingleton<ICommandManager, CommandManager>();
         services.AddSingleton<IDatabaseManager, DatabaseManager>();
+        services.AddSingleton<IChatManager, ChatManager>();
+        services.AddSingleton<IQuestManager, QuestManager>();
         services.AddPluginFramework()
             .AddPluginCatalog(new FolderPluginCatalog("plugins"))
             .AddPluginType<ISingletonPlugin>()

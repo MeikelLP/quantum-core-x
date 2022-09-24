@@ -2,15 +2,24 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using QuantumCore.API.Game.World;
 using QuantumCore.Game.World.Entities;
-using Serilog;
 
 namespace QuantumCore.Game.Quest;
 
 public class QuestManager : IQuestManager
 {
+    private readonly IServiceProvider _serviceProvider;
+    private readonly ILogger<QuestManager> _logger;
     private readonly Dictionary<string, Type> Quests = new();
+
+    public QuestManager(IServiceProvider serviceProvider, ILogger<QuestManager> logger)
+    {
+        _serviceProvider = serviceProvider;
+        _logger = logger;
+    }
 
     public void Init()
     {
@@ -38,10 +47,14 @@ public class QuestManager : IQuestManager
         {
             // todo load state
             var state = new QuestState();
-            var quest = (Quest) Activator.CreateInstance(questType, state, player);
-            if (quest == null)
+            Quest quest;
+            try
             {
-                Log.Warning($"Failed to initialize quest {id} for {player}");
+                quest = (Quest) ActivatorUtilities.CreateInstance(_serviceProvider, questType, state, player);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Failed to initialize quest {Id} for {Player}", id, player);
                 continue;
             }
             
@@ -55,11 +68,11 @@ public class QuestManager : IQuestManager
         var id = questType.FullName ?? Guid.NewGuid().ToString();
         if (Quests.ContainsKey(id))
         {
-            Log.Error($"Can't register quest {questType.FullName} because it's already registered or a duplicate");
+            _logger.LogError("Can't register quest {Type} because it's already registered or a duplicate", questType.FullName);
             return;
         }
 
-        Log.Information($"Registered quest {id}");
+        _logger.LogInformation("Registered quest {Id}", id);
         Quests[id] = questType;
     }
 }
