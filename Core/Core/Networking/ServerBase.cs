@@ -16,6 +16,7 @@ using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.Core.Packets;
 using QuantumCore.Extensions;
+using Weikio.PluginFramework.Abstractions;
 
 namespace QuantumCore.Core.Networking
 {
@@ -37,7 +38,8 @@ namespace QuantumCore.Core.Networking
 
         public int Port { get; }
 
-        public ServerBase(IPacketManager packetManager, ILogger logger, PluginExecutor pluginExecutor, IServiceProvider serviceProvider, IEnumerable<IPacketHandler> packetHandlers,
+        public ServerBase(IPacketManager packetManager, ILogger logger, PluginExecutor pluginExecutor,
+            IServiceProvider serviceProvider, IEnumerable<IPacketHandler> packetHandlers,
             int port, string bindIp = "0.0.0.0")
         {
             _logger = logger;
@@ -58,7 +60,7 @@ namespace QuantumCore.Core.Networking
             PacketManager.RegisterNamespace("QuantumCore.Core.Packets");
             var cfg = serviceProvider.GetRequiredService<IConfiguration>();
             Services = new ServiceCollection()
-                .AddCoreServices()
+                .AddCoreServices(serviceProvider.GetRequiredService<IPluginCatalog>())
                 .AddSingleton(_ => cfg)
                 .Replace(new ServiceDescriptor(typeof(IPacketManager), _ => packetManager, ServiceLifetime.Singleton));
         }

@@ -10,7 +10,7 @@ using QuantumCore.Game.Commands;
 using QuantumCore.Game.PlayerUtils;
 using QuantumCore.Game.Quest;
 using Serilog;
-using Weikio.PluginFramework.Catalogs;
+using Weikio.PluginFramework.Abstractions;
 
 namespace QuantumCore.Extensions;
 
@@ -19,7 +19,7 @@ public static class ServiceExtensions
     private const string MessageTemplate = "[{Timestamp:HH:mm:ss.fff}][{Level:u3}][{ProcessName:u5}|{MachineName}:" +
                                            "{EnvironmentUserName}]{Caller} >> {Message:lj} " +
                                            "{NewLine:1}{Exception:1}";
-    public static IServiceCollection AddCoreServices(this IServiceCollection services)
+    public static IServiceCollection AddCoreServices(this IServiceCollection services, IPluginCatalog pluginCatalog)
     {
         services.AddCustomLogging();
         services.Scan(scan =>
@@ -41,7 +41,7 @@ public static class ServiceExtensions
         services.AddSingleton<IChatManager, ChatManager>();
         services.AddSingleton<IQuestManager, QuestManager>();
         services.AddPluginFramework()
-            .AddPluginCatalog(new FolderPluginCatalog("plugins"))
+            .AddPluginCatalog(pluginCatalog)
             .AddPluginType<ISingletonPlugin>()
             .AddPluginType<IConnectionLifetimeListener>()
             .AddPluginType<IGameTickListener>()
