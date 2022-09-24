@@ -42,7 +42,7 @@ namespace QuantumCore.Game.PlayerUtils
         
         public async Task LoadAsync(CancellationToken token = default)
         {
-            _logger.LogInformation("Load jobs.toml");
+            _logger.LogInformation("Loading jobs.toml");
             
             var path = Path.Join("data", "jobs.toml");
             var toml = Toml.Parse(await File.ReadAllTextAsync(path, token));

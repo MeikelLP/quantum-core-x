@@ -27,7 +27,7 @@ public class ExperienceManager : IExperienceManager
 
     public async Task LoadAsync(CancellationToken token = default)
     {
-        _logger.LogInformation("Load exp.csv");
+        _logger.LogInformation("Loading exp.csv");
         var path = Path.Join("data", "exp.csv");
         if (!File.Exists(path))
         {
