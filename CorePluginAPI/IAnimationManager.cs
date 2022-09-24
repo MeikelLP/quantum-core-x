@@ -1,7 +1,8 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
+using QuantumCore.API.Core.Models;
 
-namespace QuantumCore.Game;
+namespace QuantumCore.API;
 
 public interface IAnimationManager
 {

@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 using QuantumCore.API;
+using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.World;
 using QuantumCore.Cache;
@@ -11,6 +12,7 @@ using QuantumCore.Core.Constants;
 using QuantumCore.Core.Networking;
 using QuantumCore.Core.Utils;
 using QuantumCore.Database;
+using QuantumCore.Extensions;
 using QuantumCore.Game.Packets;
 using QuantumCore.Game.PlayerUtils;
 using QuantumCore.Game.Quest;
@@ -591,7 +593,7 @@ namespace QuantumCore.Game.World.Entities
             await entity.HideEntity(Connection);
         }
 
-        public async Task DropItem(Item item, byte count)
+        public async Task DropItem(ItemInstance item, byte count)
         {
             if (count > item.Count)
             {
@@ -660,7 +662,7 @@ namespace QuantumCore.Game.World.Entities
             await Persist();
         }
 
-        public Item GetItem(byte window, ushort position)
+        public ItemInstance GetItem(byte window, ushort position)
         {
             switch (window)
             {
@@ -680,7 +682,7 @@ namespace QuantumCore.Game.World.Entities
             return null;
         }
 
-        public bool IsSpaceAvailable(Item item, byte window, ushort position)
+        public bool IsSpaceAvailable(ItemInstance item, byte window, ushort position)
         {
             switch (window)
             {
@@ -706,7 +708,7 @@ namespace QuantumCore.Game.World.Entities
             return false;
         }
 
-        public bool IsEquippable(Item item)
+        public bool IsEquippable(ItemInstance item)
         {
             var proto = _itemManager.GetItem(item.ItemId);
             if (proto == null)
@@ -748,7 +750,7 @@ namespace QuantumCore.Game.World.Entities
             return true;
         }
 
-        public async Task<bool> DestroyItem(Item item)
+        public async Task<bool> DestroyItem(ItemInstance item)
         {
             await RemoveItem(item);
             if (!await item.Destroy())
@@ -760,7 +762,7 @@ namespace QuantumCore.Game.World.Entities
             return true;
         }
         
-        public async Task RemoveItem(Item item)
+        public async Task RemoveItem(ItemInstance item)
         {
             switch (item.Window)
             {
@@ -783,7 +785,7 @@ namespace QuantumCore.Game.World.Entities
             }
         }
 
-        public async Task SetItem(Item item, byte window, ushort position)
+        public async Task SetItem(ItemInstance item, byte window, ushort position)
         {
             switch (window)
             {
@@ -857,7 +859,7 @@ namespace QuantumCore.Game.World.Entities
             await Inventory.EquipmentWindow.Send(this);
         }
 
-        public async Task SendItem(Item item)
+        public async Task SendItem(ItemInstance item)
         {
             Debug.Assert(item.PlayerId == Player.Id);
             

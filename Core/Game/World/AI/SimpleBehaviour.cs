@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
+using QuantumCore.API;
+using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game.World;
 using QuantumCore.API.Game.World.AI;
 using QuantumCore.Core.Types;
@@ -16,7 +18,7 @@ namespace QuantumCore.Game.World.AI
     public class SimpleBehaviour : IBehaviour
     {
         private readonly IMonsterManager _monsterManager;
-        private MobProto.Monster _proto;
+        private MonsterData _proto;
         private IEntity _entity;
         private long _nextMovementIn;
 
@@ -37,7 +39,7 @@ namespace QuantumCore.Game.World.AI
             _monsterManager = monsterManager;
             CalculateNextMovement();
         }
-        
+
         public void Init(IEntity entity)
         {
             Debug.Assert(_entity == null);
@@ -61,7 +63,7 @@ namespace QuantumCore.Game.World.AI
 
             var targetX = _spawnX + offsetX;
             var targetY = _spawnY + offsetY;
-            
+
             _entity.Goto(targetX, targetY);
         }
 
@@ -80,8 +82,8 @@ namespace QuantumCore.Game.World.AI
 
             var targetPositionX = target.PositionX + directionX * _proto.AttackRange * 0.75;
             var targetPositionY = target.PositionY + directionY * _proto.AttackRange * 0.75;
-            
-            _entity.Goto((int)targetPositionX, (int)targetPositionY);
+
+            _entity.Goto((int) targetPositionX, (int) targetPositionY);
         }
 
         public async Task Update(double elapsedTime)
@@ -158,7 +160,7 @@ namespace QuantumCore.Game.World.AI
                 (float) MathUtils.Rotation(victim.PositionX - monster.PositionX, victim.PositionY - monster.PositionY);
 
             await monster.Attack(victim, monster.Proto.BattleType);
-            
+
             // Send attack packet
             var packet = new CharacterMoveOut {
                 MovementType = (byte) CharacterMove.CharacterMovementType.Attack,
@@ -207,7 +209,7 @@ namespace QuantumCore.Game.World.AI
             {
                 _damageMap[attacker.Vid] += damage;
             }
-            
+
             // Check if target has to be changed
             if (_targetEntity?.Map != _entity.Map)
             {

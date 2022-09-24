@@ -1,4 +1,4 @@
-﻿namespace QuantumCore.Game;
+﻿namespace QuantumCore.API.Core.Models;
 
 public enum AnimationType
 {

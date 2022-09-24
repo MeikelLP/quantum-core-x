@@ -5,6 +5,8 @@ using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
+using QuantumCore.API;
+using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game;
 using QuantumCore.API.Game.World;
 using QuantumCore.Cache;
@@ -275,7 +277,7 @@ namespace QuantumCore.Game.World
         /// <param name="x">Position X</param>
         /// <param name="y">Position Y</param>
         /// <param name="amount">Only used for gold as we have a higher limit here</param>
-        public void AddGroundItem(Item item, int x, int y, uint amount = 0)
+        public void AddGroundItem(ItemInstance item, int x, int y, uint amount = 0)
         {
             var groundItem = new GroundItem(_animationManager,  World.Instance.GenerateVid(), item, amount) {
                 PositionX = x, 

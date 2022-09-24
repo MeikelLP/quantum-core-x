@@ -1,5 +1,7 @@
 using System;
 using System.Threading.Tasks;
+using QuantumCore.API;
+using QuantumCore.API.Core.Models;
 using QuantumCore.Database;
 using QuantumCore.Game.World.Entities;
 
@@ -21,15 +23,15 @@ namespace QuantumCore.Game.PlayerUtils
     public class Equipment
     {
         public Guid Owner { get; }
-        public Item Body { get; private set; }
-        public Item Head { get; private set; }
-        public Item Shoes { get; private set; }
-        public Item Bracelet { get; private set; }
-        public Item Weapon { get; private set; }
-        public Item Necklace { get; private set; }
-        public Item Earrings { get; private set; }
-        public Item Costume { get; private set; }
-        public Item Hair { get; private set; }
+        public ItemInstance Body { get; private set; }
+        public ItemInstance Head { get; private set; }
+        public ItemInstance Shoes { get; private set; }
+        public ItemInstance Bracelet { get; private set; }
+        public ItemInstance Weapon { get; private set; }
+        public ItemInstance Necklace { get; private set; }
+        public ItemInstance Earrings { get; private set; }
+        public ItemInstance Costume { get; private set; }
+        public ItemInstance Hair { get; private set; }
 
         private long _offset;
 
@@ -39,12 +41,12 @@ namespace QuantumCore.Game.PlayerUtils
             _offset = offset;
         }
 
-        public bool SetItem(Item item)
+        public bool SetItem(ItemInstance item)
         {
             return SetItem(item, (ushort) item.Position);
         }
 
-        public bool SetItem(Item item, ushort position)
+        public bool SetItem(ItemInstance item, ushort position)
         {
             switch ((EquipmentSlots)(position - _offset))
             {
@@ -79,7 +81,7 @@ namespace QuantumCore.Game.PlayerUtils
             return false;
         }
 
-        public Item GetItem(EquipmentSlots slot)
+        public ItemInstance GetItem(EquipmentSlots slot)
         {
             switch (slot)
             {
@@ -106,12 +108,12 @@ namespace QuantumCore.Game.PlayerUtils
             return null;
         }
 
-        public Item GetItem(ushort position)
+        public ItemInstance GetItem(ushort position)
         {
             return GetItem((EquipmentSlots) (position - _offset));
         }
 
-        public bool RemoveItem(Item item)
+        public bool RemoveItem(ItemInstance item)
         {
             switch ((EquipmentSlots)(item.Position - _offset))
             {
@@ -187,7 +189,7 @@ namespace QuantumCore.Game.PlayerUtils
             }
         }
 
-        public bool IsSuitable(IItemManager itemManager, Item item, ushort position)
+        public bool IsSuitable(IItemManager itemManager, ItemInstance item, ushort position)
         {
             var proto = itemManager.GetItem(item.ItemId);
             if (proto == null)
@@ -222,7 +224,7 @@ namespace QuantumCore.Game.PlayerUtils
             }
         }
 
-        public long GetWearSlot(IItemManager itemManager, Item item)
+        public long GetWearSlot(IItemManager itemManager, ItemInstance item)
         {
             var proto = itemManager.GetItem(item.ItemId);
             if (proto == null)

@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
 using QuantumCore.API.Game.World;
 
-namespace QuantumCore.Game;
+namespace QuantumCore.API;
 
 public interface IChatManager
 {

@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using QuantumCore.API;
+using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.World;
 using QuantumCore.Database;
@@ -10,10 +11,10 @@ namespace QuantumCore.Game.World.Entities;
 
 public class GroundItem : Entity
 {
-    private readonly Item _item;
+    private readonly ItemInstance _item;
     private readonly uint _amount;
 
-    public Item Item {
+    public ItemInstance Item {
         get {
             return _item;
         }
@@ -25,7 +26,7 @@ public class GroundItem : Entity
         }
     }
 
-    public GroundItem(IAnimationManager animationManager, uint vid, Item item, uint amount) : base(animationManager, vid)
+    public GroundItem(IAnimationManager animationManager, uint vid, ItemInstance item, uint amount) : base(animationManager, vid)
     {
         _item = item;
         _amount = amount;

@@ -4,6 +4,8 @@ using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using QuantumCore.API;
+using QuantumCore.API.Core.Models;
 using QuantumCore.Core.Types;
 
 namespace QuantumCore.Game
@@ -75,7 +77,7 @@ namespace QuantumCore.Game
             }
         }
 
-        private async Task LoadMonsterAnimation(MobProto.Monster monster, string folder)
+        private async Task LoadMonsterAnimation(MonsterData monster, string folder)
         {
             var motlist = Path.Join(folder, "motlist.txt");
             if (!File.Exists(motlist))

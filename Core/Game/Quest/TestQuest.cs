@@ -1,6 +1,7 @@
 using System.Threading.Tasks;
+using QuantumCore.API;
+using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game.World;
-using QuantumCore.Database;
 
 namespace QuantumCore.Game.Quest;
 
@@ -36,7 +37,7 @@ public class TestQuest : Quest
         await Done();
     }
 
-    private async Task TestGive(IPlayerEntity player, Item item)
+    private async Task TestGive(IPlayerEntity player, ItemInstance item)
     {
         var proto = _itemManager.GetItem(item.ItemId);
         

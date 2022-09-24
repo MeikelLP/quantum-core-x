@@ -7,6 +7,7 @@ using Microsoft.Extensions.Logging;
 using QuantumCore.Cache;
 using QuantumCore.Core.Networking;
 using QuantumCore.Database;
+using QuantumCore.Extensions;
 using QuantumCore.Game.Packets;
 using QuantumCore.Game.PlayerUtils;
 using Serilog;
@@ -85,7 +86,7 @@ public class DeleteCharacterHandler : ISelectPacketHandler<DeleteCharacter>
 
         //for (byte i = (byte)WindowType.Inventory; i < (byte) WindowType.Inventory; i++)
         {
-            var items = Item.GetItems(_databaseManager, player.Id, (byte) WindowType.Inventory);
+            var items = _databaseManager.GetItems(player.Id, (byte) WindowType.Inventory);
 
             await foreach (var item in items)
             {

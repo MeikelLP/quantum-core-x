@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using QuantumCore.API.Core.Utils;
 using QuantumCore.API.Game.Types;
-using QuantumCore.Game.PlayerUtils;
 
 namespace QuantumCore.API.Game.World
 {

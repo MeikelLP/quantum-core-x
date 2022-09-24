@@ -14,6 +14,7 @@ using QuantumCore.Database;
 using QuantumCore.Extensions;
 using QuantumCore.Game;
 using Weikio.PluginFramework.Abstractions;
+using Weikio.PluginFramework.Catalogs;
 
 namespace QuantumCore
 {
@@ -26,20 +27,23 @@ namespace QuantumCore
 
         private static async Task RunAsync(object obj, string[] args)
         {
+            var pluginCatalog = new FolderPluginCatalog("plugins");
+            await pluginCatalog.Initialize();
+            
             var host = Host.CreateDefaultBuilder(args)
                 .UseConsoleLifetime(x => x.SuppressStatusMessages = true)
-                .ConfigureServices(services =>
+                .ConfigureServices((ctx, services) =>
                 {
                     switch (obj)
                     {
                         case AuthOptions auth:
                             services.AddSingleton<IOptions<AuthOptions>>(_ => new OptionsWrapper<AuthOptions>(auth));
-                            services.AddCoreServices();
+                            services.AddCoreServices(pluginCatalog);
                             services.AddHostedService<AuthServer>();
                             break;
                         case GameOptions game:
                             services.AddSingleton<IOptions<GameOptions>>(_ => new OptionsWrapper<GameOptions>(game));
-                            services.AddCoreServices();
+                            services.AddCoreServices(pluginCatalog);
                             services.AddHostedService<GameServer>();
                             break;
                         case MigrateOptions migrate:
@@ -48,6 +52,25 @@ namespace QuantumCore
                             break;
                         default:
                             throw new InvalidOperationException($"Invalid option type {obj.GetType().FullName}. This should never happen");
+                    }
+                    var serviceCollectionPluginTypes = pluginCatalog.GetPlugins()
+                        .FindAll(x => typeof(IServiceCollectionPlugin).IsAssignableFrom(x.Type))
+                        .Select(x => x.Type)
+                        .ToArray();
+                    foreach (var serviceCollectionPluginType in serviceCollectionPluginTypes)
+                    {
+                        try
+                        {
+                            var serviceCollectionPlugin = (IServiceCollectionPlugin) Activator.CreateInstance(serviceCollectionPluginType)!;
+                            serviceCollectionPlugin.ModifyServiceCollection(services);
+                        }
+                        catch (Exception e)
+                        {
+                            // The application will crash / not start if a service plugin throws an exception
+                            // this is by design. They shall only modify the services and not have side effects
+                            Console.WriteLine(e);
+                            throw;
+                        }
                     }
                 })
                 .Build();

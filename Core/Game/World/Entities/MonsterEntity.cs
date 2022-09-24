@@ -3,6 +3,7 @@ using System.Security.Cryptography;
 using System.Threading.Tasks;
 using FluentMigrator.Runner.Generators.Postgres;
 using QuantumCore.API;
+using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.World;
 using QuantumCore.API.Game.World.AI;
@@ -35,11 +36,11 @@ namespace QuantumCore.Game.World.Entities
             }
         }
 
-        public MobProto.Monster Proto { get { return _proto; } }
+        public MonsterData Proto { get { return _proto; } }
         
         public MonsterGroup Group { get; set; }
         
-        private readonly MobProto.Monster _proto;
+        private readonly MonsterData _proto;
         private IBehaviour _behaviour;
         private bool _behaviourInitialized;
         private double _deadTime = 5000;

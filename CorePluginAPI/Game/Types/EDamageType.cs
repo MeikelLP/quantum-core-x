@@ -1,4 +1,4 @@
-﻿namespace QuantumCore.Game.PlayerUtils
+﻿namespace QuantumCore.API.Game.Types
 {
     public enum EDamageType
     {

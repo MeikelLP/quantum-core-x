@@ -1,7 +1,7 @@
 ﻿using System;
 using QuantumCore.API.Game.World;
 
-namespace QuantumCore.Game.Quest;
+namespace QuantumCore.API;
 
 public interface IQuestManager
 {

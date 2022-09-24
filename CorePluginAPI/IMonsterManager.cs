@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using QuantumCore.Core.Types;
+using QuantumCore.API.Core.Models;
 
-namespace QuantumCore.Game;
+namespace QuantumCore.API;
 
 public interface IMonsterManager
 {
@@ -12,6 +12,6 @@ public interface IMonsterManager
     /// </summary>
     Task LoadAsync(CancellationToken token = default);
 
-    MobProto.Monster GetMonster(uint id);
-    List<MobProto.Monster> GetMonsters();
+    MonsterData GetMonster(uint id);
+    List<MonsterData> GetMonsters();
 }

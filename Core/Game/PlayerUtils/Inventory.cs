@@ -3,8 +3,11 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Threading.Tasks;
+using QuantumCore.API;
+using QuantumCore.API.Core.Models;
 using QuantumCore.Core.Utils;
 using QuantumCore.Database;
+using QuantumCore.Extensions;
 using Serilog;
 
 namespace QuantumCore.Game.PlayerUtils
@@ -22,7 +25,7 @@ namespace QuantumCore.Game.PlayerUtils
             private ushort _width;
             private ushort _height;
 
-            private readonly Grid<Item> _grid;
+            private readonly Grid<ItemInstance> _grid;
 
             public Page(IItemManager itemManager, ushort width, ushort height)
             {
@@ -30,10 +33,10 @@ namespace QuantumCore.Game.PlayerUtils
                 _width = width;
                 _height = height;
                 
-                _grid = new Grid<Item>(_width, _height);
+                _grid = new Grid<ItemInstance>(_width, _height);
             }
 
-            public Item GetItem(long position)
+            public ItemInstance GetItem(long position)
             {
                 if (position < 0) return null;
                 if (position >= _width * _height) return null;
@@ -72,7 +75,7 @@ namespace QuantumCore.Game.PlayerUtils
             /// </summary>
             /// <param name="item">Item to place</param>
             /// <returns>Position it got asserted or -1 if no space was found</returns>
-            public long Place(Item item)
+            public long Place(ItemInstance item)
             {
                 for (uint y = 0; y < _height; y++)
                 {
@@ -85,7 +88,7 @@ namespace QuantumCore.Game.PlayerUtils
                 return -1;
             }
 
-            public bool Place(Item item, uint x, uint y)
+            public bool Place(ItemInstance item, uint x, uint y)
             {
                 var proto = _itemManager.GetItem(item.ItemId);
                 if (proto == null) return false;
@@ -103,7 +106,7 @@ namespace QuantumCore.Game.PlayerUtils
                 return true;
             }
 
-            public bool Place(Item item, long position)
+            public bool Place(ItemInstance item, long position)
             {
                 if (position < 0) return false;
                 if (position >= _width * _height) return false;
@@ -114,7 +117,7 @@ namespace QuantumCore.Game.PlayerUtils
                 return Place(item, x, y);
             }
 
-            public bool IsSpaceAvailable(Item item, long position)
+            public bool IsSpaceAvailable(ItemInstance item, long position)
             {
                 if (position < 0) return false;
                 if (position >= _width * _height) return false;
@@ -146,7 +149,7 @@ namespace QuantumCore.Game.PlayerUtils
         
         public Guid Owner { get; private set; }
         public byte Window { get; private set; }
-        public ReadOnlyCollection<Item> Items {
+        public ReadOnlyCollection<ItemInstance> Items {
             get {
                 return _items.AsReadOnly();
             }
@@ -163,7 +166,7 @@ namespace QuantumCore.Game.PlayerUtils
         private readonly IItemManager _itemManager;
         private ushort _width;
         private ushort _height;
-        private readonly List<Item> _items = new List<Item>();
+        private readonly List<ItemInstance> _items = new List<ItemInstance>();
         private readonly IDatabaseManager _databaseManager;
 
         public Inventory(IItemManager itemManager, IDatabaseManager databaseManager, Guid owner, byte window, ushort width, ushort height, ushort pages)
@@ -192,7 +195,7 @@ namespace QuantumCore.Game.PlayerUtils
             _items.Clear();
             
             var pageSize = _width * _height;
-            await foreach(var item in Item.GetItems(_databaseManager, Owner, Window))
+            await foreach(var item in _databaseManager.GetItems(Owner, Window))
             {
                 // Calculate page
                 var page = item.Position / pageSize;
@@ -218,7 +221,7 @@ namespace QuantumCore.Game.PlayerUtils
             }
         }
 
-        public async Task<bool> PlaceItem(Item instance)
+        public async Task<bool> PlaceItem(ItemInstance instance)
         {
             for(var i = 0; i < _pages.Length; i++)
             {
@@ -236,7 +239,7 @@ namespace QuantumCore.Game.PlayerUtils
             return false;
         }
 
-        public async Task<bool> PlaceItem(Item item, ushort position)
+        public async Task<bool> PlaceItem(ItemInstance item, ushort position)
         {
             var pageSize = _width * _height;
             var page = position / pageSize;
@@ -255,7 +258,7 @@ namespace QuantumCore.Game.PlayerUtils
             return false;
         }
 
-        public void RemoveItem(Item item)
+        public void RemoveItem(ItemInstance item)
         {
             var pageSize = _width * _height;
             var page = item.Position / pageSize;
@@ -268,7 +271,7 @@ namespace QuantumCore.Game.PlayerUtils
             _pages[page].RemoveItem(item.Position - page * pageSize);
         }
 
-        public Item GetItem(ushort position)
+        public ItemInstance GetItem(ushort position)
         {
             var pageSize = _width * _height;
             var page = position / pageSize;
@@ -280,7 +283,7 @@ namespace QuantumCore.Game.PlayerUtils
             return _pages[page].GetItem(position - page * pageSize);
         }
 
-        public bool IsSpaceAvailable(Item item, ushort position)
+        public bool IsSpaceAvailable(ItemInstance item, ushort position)
         {
             var pageSize = _width * _height;
             var page = position / pageSize;
@@ -292,7 +295,7 @@ namespace QuantumCore.Game.PlayerUtils
             return _pages[page].IsSpaceAvailable(item, position - page * pageSize);
         }
 
-        public void MoveItem(Item item, ushort fromPosition, ushort position)
+        public void MoveItem(ItemInstance item, ushort fromPosition, ushort position)
         {
             var pageSize = _width * _height;
 

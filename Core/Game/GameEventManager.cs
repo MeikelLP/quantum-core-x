@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game.World;
 using QuantumCore.Database;
 using QuantumCore.Game.Quest;
@@ -23,8 +24,8 @@ public static class GameEventManager
     {
         public string Name { get; set; }
         public uint NpcId { get; set; }
-        public Func<IPlayerEntity, Item, Task> Callback { get; set; }
-        public Func<IPlayerEntity, Item, bool> Condition { get; set; }
+        public Func<IPlayerEntity, ItemInstance, Task> Callback { get; set; }
+        public Func<IPlayerEntity, ItemInstance, bool> Condition { get; set; }
     }
 
     private static readonly Dictionary<uint, List<NpcClickEvent>> NpcClickEvents = new();
@@ -62,7 +63,7 @@ public static class GameEventManager
         await events[0].Callback(player);
     }
 
-    public static async Task OnNpcGive(uint npcId, IPlayerEntity player, Item item)
+    public static async Task OnNpcGive(uint npcId, IPlayerEntity player, ItemInstance item)
     {
         if (!NpcGiveEvents.ContainsKey(npcId))
         {
@@ -110,8 +111,8 @@ public static class GameEventManager
         });
     }
 
-    public static void RegisterNpcGiveEvent(string name, uint npcId, Func<IPlayerEntity, Item, Task> callback,
-        Func<IPlayerEntity, Item, bool> condition = null)
+    public static void RegisterNpcGiveEvent(string name, uint npcId, Func<IPlayerEntity, ItemInstance, Task> callback,
+        Func<IPlayerEntity, ItemInstance, bool> condition = null)
     {
         if (!NpcGiveEvents.ContainsKey(npcId))
         {
