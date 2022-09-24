@@ -232,7 +232,7 @@ namespace QuantumCore.Game.World
             EventSystem.EnqueueEvent(() =>
             {
                 // TODO
-                SpawnGroup(group);
+                SpawnGroup(group).Wait();
                 return 0;
             }, group.SpawnPoint.RespawnTime * 1000);
         }

@@ -173,7 +173,7 @@ namespace QuantumCore.Core.Networking
                     // TODO token
                     await _pluginExecutor.ExecutePlugins<IPacketOperationListener>(_logger, x => x.OnPrePacketReceivedAsync(packet, allData, CancellationToken.None));
 
-                    OnReceive(packet);
+                    await OnReceive(packet);
 
                     // TODO token
                     await _pluginExecutor.ExecutePlugins<IPacketOperationListener>(_logger, x => x.OnPostPacketReceivedAsync(packet, allData, CancellationToken.None));
