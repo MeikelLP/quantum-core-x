@@ -15,7 +15,6 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.Core.Packets;
-using QuantumCore.Core.Utils;
 using QuantumCore.Extensions;
 
 namespace QuantumCore.Core.Networking
@@ -26,22 +25,24 @@ namespace QuantumCore.Core.Networking
         protected IPacketManager PacketManager { get; }
         private readonly List<Func<T, Task<bool>>> _connectionListeners = new();
         private readonly ConcurrentDictionary<Guid, IConnection> _connections = new();
-        private readonly Dictionary<ushort, Delegate> _listeners = new();
+        private readonly Dictionary<ushort, IPacketHandler> _listeners = new();
         private readonly Stopwatch _serverTimer = new();
         private readonly CancellationTokenSource _stoppingToken = new();
         protected TcpListener Listener { get; }
 
         private ServiceProvider _serverLifetimeProvider;
         private readonly PluginExecutor _pluginExecutor;
+        private readonly IEnumerable<IPacketHandler> _packetHandlers;
         protected IServiceCollection Services { get; }
 
         public int Port { get; }
 
-        public ServerBase(IPacketManager packetManager, ILogger logger, PluginExecutor pluginExecutor, IServiceProvider serviceProvider, 
+        public ServerBase(IPacketManager packetManager, ILogger logger, PluginExecutor pluginExecutor, IServiceProvider serviceProvider, IEnumerable<IPacketHandler> packetHandlers,
             int port, string bindIp = "0.0.0.0")
         {
             _logger = logger;
             _pluginExecutor = pluginExecutor;
+            _packetHandlers = packetHandlers;
             PacketManager = packetManager;
             Port = port;
             
@@ -55,7 +56,6 @@ namespace QuantumCore.Core.Networking
 
             // Register Core Features
             PacketManager.RegisterNamespace("QuantumCore.Core.Packets");
-            RegisterListener<GCHandshake>((connection, packet) => connection.HandleHandshake(packet));
             var cfg = serviceProvider.GetRequiredService<IConfiguration>();
             Services = new ServiceCollection()
                 .AddCoreServices()
@@ -111,25 +111,44 @@ namespace QuantumCore.Core.Networking
             }
         }
 
-        public void RegisterListener<P>(Func<T, P, Task> listener)
-        {
-            _logger.LogDebug("Register listener on packet {TypeName}", typeof(P).Name);
-            var packet = PacketManager.IncomingPackets.First(p => p.Value.Type == typeof(P));
-            _listeners[packet.Key] = listener;
-        }
-
         public void RegisterNewConnectionListener(Func<Connection, Task<bool>> listener)
         {
             _connectionListeners.Add(listener);
         }
 
-        public void CallListener(Connection connection, object packet)
+        public async Task CallListener(Connection connection, object packet)
         {
             var header = PacketManager.IncomingPackets.First(p => p.Value.Type == packet.GetType());
-            if (!_listeners.ContainsKey(header.Key)) return;
+            if (!_listeners.ContainsKey(header.Key))
+            {
+                _logger.LogWarning("Don't know how to handle header {Header}", header.Key);
+                return;
+            }
 
-            var del = _listeners[header.Key];
-            del.DynamicInvoke(connection, packet);
+            var handler = _listeners[header.Key];
+            var handlerType = handler.GetType();
+            var packetType = handlerType.GetPacketType();
+            
+            // TODO caching
+            var handlerExecuteMethod =
+                    handlerType.GetMethod(nameof(ISelectPacketHandler<object>.ExecuteAsync))!;
+            var contextPacketProperty = typeof(PacketContext<>).MakeGenericType(packetType)
+                .GetProperty(nameof(PacketContext<object>.Packet))!;
+            var contextConnectionProperty = typeof(PacketContext<>).MakeGenericType(packetType)
+                .GetProperty(nameof(PacketContext<object>.Connection))!;
+
+            var context = Activator.CreateInstance(typeof(PacketContext<>).MakeGenericType(packetType));
+            contextPacketProperty.SetValue(context, packet);
+            contextConnectionProperty.SetValue(context, connection);
+
+            try
+            {
+                await (Task) handlerExecuteMethod.Invoke(handler, new[] { context, new CancellationToken() })!;
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Failed to execute packet handler");
+            }
         }
 
         public void CallConnectionListener(T connection)
@@ -143,53 +162,25 @@ namespace QuantumCore.Core.Networking
             Listener.BeginAcceptTcpClient(OnClientAccepted, Listener);
         }
 
-        public void RegisterListeners<T>() where T : Connection
+        public void RegisterListeners()
         {
-            var connectionType = typeof(T);
-            var listeners = new List<MethodInfo>();
-            
-            foreach (var method in connectionType.GetMethods())
+            foreach (var packetHandler in _packetHandlers)
             {
-                var attribute = method.GetCustomAttribute<ListenerAttribute>();
-                if (attribute != null)
-                {
-                    listeners.Add(method);
-                }
-            }
-            foreach (var method in connectionType.GetExtensionMethods())
-            {
-                var attribute = method.GetCustomAttribute<ListenerAttribute>();
-                if (attribute != null)
-                {
-                    listeners.Add(method);
-                }
-            }
+                var packetType = packetHandler.GetType().GetPacketType();
 
-            foreach (var method in listeners)
-            {
-                var attribute = method.GetCustomAttribute<ListenerAttribute>();
-                if (attribute == null)
+                if (packetType is null)
                 {
+                    _logger.LogWarning("Base interface did not match {BaseInterface} this should not happen", nameof(IPacketHandler));
                     continue;
                 }
                 
-                _logger.LogDebug("Register listener on packet {PacketName}", attribute.Packet.Name);
-                var packet = PacketManager.IncomingPackets.First(p => p.Value.Type == attribute.Packet);
-
-                if (method.IsStatic)
+                var packetDescription = packetType.GetCustomAttribute<PacketAttribute>();
+                if (packetDescription is null)
                 {
-                    _listeners[packet.Key] = (T connection, object p) =>
-                    {
-                        method.Invoke(null, new[] {connection, p});
-                    };
+                    _logger.LogWarning("Packet type {Type} is missing a {AttributeTypeName}", packetType.Name, nameof(PacketAttribute));
+                    continue;
                 }
-                else
-                {
-                    _listeners[packet.Key] = (T connection, object p) =>
-                    {
-                        method.Invoke(connection, new[] {p});
-                    };
-                }
+                _listeners.Add(packetDescription.Header, packetHandler);
             }
         }
 

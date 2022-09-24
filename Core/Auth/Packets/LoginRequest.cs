@@ -3,7 +3,7 @@ using QuantumCore.Core.Packets;
 namespace QuantumCore.Auth.Packets
 {
     [Packet(0x6f, EDirection.Incoming, Sequence = true)]
-    internal class LoginRequest
+    public class LoginRequest
     {
         [Field(0, Length = 31)] public string Username { get; set; }
 

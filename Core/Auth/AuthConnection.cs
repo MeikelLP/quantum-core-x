@@ -28,9 +28,9 @@ namespace QuantumCore.Auth
             await _server.RemoveConnection(this);
         }
 
-        protected override void OnReceive(object packet)
+        protected async override Task OnReceive(object packet)
         {
-            _server.CallListener(this, packet);
+            await _server.CallListener(this, packet);
         }
 
         protected override long GetServerTime()

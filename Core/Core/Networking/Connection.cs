@@ -49,7 +49,7 @@ namespace QuantumCore.Core.Networking
 
         protected abstract Task OnClose();
 
-        protected abstract void OnReceive(object packet);
+        protected abstract Task OnReceive(object packet);
 
         protected abstract long GetServerTime();
 

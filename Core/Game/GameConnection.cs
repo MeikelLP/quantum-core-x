@@ -39,9 +39,9 @@ namespace QuantumCore.Game
             // todo enable expiry on auth token
         }
 
-        protected override void OnReceive(object packet)
+        protected async override Task OnReceive(object packet)
         {
-            Server.CallListener(this, packet);
+            await Server.CallListener(this, packet);
         }
 
         protected override long GetServerTime()

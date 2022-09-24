@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Net;
 using System.Threading;
@@ -50,8 +51,8 @@ namespace QuantumCore.Game
         public GameServer(IOptions<GameOptions> options, IPacketManager packetManager, ILogger<GameServer> logger, 
             PluginExecutor pluginExecutor, IServiceProvider serviceProvider, IItemManager itemManager, 
             IMonsterManager monsterManager, IJobManager jobManager, IExperienceManager experienceManager,
-            IAnimationManager animationManager, ICommandManager commandManager, IDatabaseManager databaseManager)
-            : base(packetManager, logger, pluginExecutor, serviceProvider, options.Value.Port)
+            IAnimationManager animationManager, ICommandManager commandManager, IDatabaseManager databaseManager, IEnumerable<IPacketHandler> packetHandlers)
+            : base(packetManager, logger, pluginExecutor, serviceProvider, packetHandlers, options.Value.Port)
         {
             _logger = logger;
             _pluginExecutor = pluginExecutor;
@@ -130,15 +131,14 @@ namespace QuantumCore.Game
                 await connection.SetPhase(EPhases.Login);
                 return true;
             });
-            
-            RegisterListeners<GameConnection>();
+
+            RegisterListeners();
             
             // Start server timer
             _serverTimer.Start();
 
             // Register Core Features
             PacketManager.RegisterNamespace("QuantumCore.Core.Packets");
-            RegisterListener<GCHandshake>((connection, packet) => connection.HandleHandshake(packet));
             _logger.LogInformation("Start listening for connections...");
 
             StartListening();

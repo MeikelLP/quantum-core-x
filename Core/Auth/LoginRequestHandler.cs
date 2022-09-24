@@ -1,0 +1,103 @@
+﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
+using Dapper;
+using Dapper.Contrib.Extensions;
+using Microsoft.Extensions.Logging;
+using QuantumCore.Auth.Cache;
+using QuantumCore.Auth.Packets;
+using QuantumCore.Cache;
+using QuantumCore.Core.Networking;
+using QuantumCore.Core.Utils;
+using QuantumCore.Database;
+
+namespace QuantumCore.Auth;
+
+public class LoginRequestHandler : IPacketHandler<LoginRequest>
+{
+    private readonly IDatabaseManager _databaseManager;
+    private readonly ILogger<LoginRequestHandler> _logger;
+
+    public LoginRequestHandler(IDatabaseManager databaseManager, ILogger<LoginRequestHandler> logger)
+    {
+        _databaseManager = databaseManager;
+        _logger = logger;
+    }
+
+    public async Task ExecuteAsync(PacketContext<LoginRequest> ctx, CancellationToken token = default)
+    {
+        using var db = _databaseManager.GetAccountDatabase();
+        var account = await db.QueryFirstOrDefaultAsync<Account>(
+            "SELECT * FROM accounts WHERE Username = @Username", new {Username = ctx.Packet.Username});
+        // Check if account was found
+        if (account == default(Account))
+        {
+            // Hash the password to prevent timing attacks
+            BCrypt.Net.BCrypt.HashPassword(ctx.Packet.Password);
+            
+            _logger.LogDebug($"Account {ctx.Packet.Username} not found");
+            await ctx.Connection.Send(new LoginFailed
+            {
+                Status = "WRONGPWD"
+            });
+
+            return;
+        }
+        
+        var status = "";
+
+        // Verify the password against the stored one
+        try
+        {
+            if (!BCrypt.Net.BCrypt.Verify(ctx.Packet.Password, account.Password))
+            {
+                _logger.LogDebug($"Wrong password supplied for account {ctx.Packet.Username}");
+                status = "WRONGPWD";
+            }
+            else
+            {
+                // Check account status stored in the database
+                var dbStatus = await db.GetAsync<AccountStatus>(account.Status);
+                if (!dbStatus.AllowLogin)
+                {
+                    status = dbStatus.ClientStatus;
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            _logger.LogWarning($"Failed to verify password for account {ctx.Packet.Username}: {e.Message}");
+            status = "WRONGPWD";
+        }
+
+        // If the status is not empty send a failed login response to the client
+        if (status != "")
+        {
+            await ctx.Connection.Send(new LoginFailed
+            {
+                Status = status
+            });
+
+            return;
+        }
+        
+        // Generate authentication token
+        var authToken = CoreRandom.GenerateUInt32();
+        
+        // Store auth token
+        await CacheManager.Instance.Set("token:" + authToken, new Token
+        {
+            Username = account.Username,
+            AccountId = account.Id
+        });
+        // Set expiration on token
+        await CacheManager.Instance.Expire("token:" + authToken, 30);
+        
+        // Send the auth token to the client and let it connect to our game server
+        await ctx.Connection.Send(new LoginSuccess
+        {
+            Key = authToken,
+            Result = 1
+        });
+    }
+}

@@ -1,5 +1,4 @@
 ﻿using System.IO;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
@@ -22,6 +21,13 @@ public static class ServiceExtensions
     public static IServiceCollection AddCoreServices(this IServiceCollection services)
     {
         services.AddCustomLogging();
+        services.Scan(scan =>
+        {
+            scan.FromAssemblyOf<GameServer>()
+                .AddClasses(classes => classes.AssignableTo<IPacketHandler>())
+                .AsImplementedInterfaces()
+                .WithSingletonLifetime();
+        });
         services.AddSingleton<IPacketManager, DefaultPacketManager>();
         services.AddSingleton<PluginExecutor>();
         services.AddSingleton<IItemManager, ItemManager>();
