@@ -6,9 +6,10 @@ using Microsoft.Extensions.Logging;
 using QuantumCore.API.Game.Types;
 using QuantumCore.Core.Networking;
 using QuantumCore.Database;
+using QuantumCore.Game.Packets;
 using QuantumCore.Game.World.Entities;
 
-namespace QuantumCore.Game.Packets.Select;
+namespace QuantumCore.Game.PacketHandlers.Select;
 
 public class SelectCharacterHandler : ISelectPacketHandler<SelectCharacter>
 {

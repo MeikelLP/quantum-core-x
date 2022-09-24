@@ -8,9 +8,10 @@ using QuantumCore.Cache;
 using QuantumCore.Core.Networking;
 using QuantumCore.Core.Utils;
 using QuantumCore.Database;
+using QuantumCore.Game.Packets;
 using QuantumCore.Game.PlayerUtils;
 
-namespace QuantumCore.Game.Packets.Select;
+namespace QuantumCore.Game.PacketHandlers.Select;
 
 public class CreateCharacterHandler : ISelectPacketHandler<CreateCharacter>
 {

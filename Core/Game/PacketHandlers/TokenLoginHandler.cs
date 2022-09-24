@@ -10,7 +10,7 @@ using QuantumCore.Core.Utils;
 using QuantumCore.Database;
 using QuantumCore.Game.Packets;
 
-namespace QuantumCore.Game
+namespace QuantumCore.Game.PacketHandlers
 {
     public class TokenLoginHandler : IPacketHandler<TokenLogin>
     {

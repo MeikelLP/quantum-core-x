@@ -11,7 +11,7 @@ using QuantumCore.Core.Networking;
 using QuantumCore.Core.Utils;
 using QuantumCore.Database;
 
-namespace QuantumCore.Auth;
+namespace QuantumCore.Auth.PacketHandlers;
 
 public class LoginRequestHandler : IPacketHandler<LoginRequest>
 {

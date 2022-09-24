@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using QuantumCore.Core.Networking;
 using QuantumCore.Core.Packets;
 
-namespace QuantumCore.Game.Packets;
+namespace QuantumCore.Game.PacketHandlers;
 
 public class GCHandshakeHandler : IPacketHandler<GCHandshake>
 {
