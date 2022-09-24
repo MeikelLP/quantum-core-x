@@ -8,11 +8,11 @@ using Serilog;
 
 namespace QuantumCore.Game.Quest;
 
-public static class QuestManager
+public class QuestManager : IQuestManager
 {
-    private static readonly Dictionary<string, Type> Quests = new();
+    private readonly Dictionary<string, Type> Quests = new();
 
-    public static void Init()
+    public void Init()
     {
         // Scan for all available quests
         var assembly = Assembly.GetAssembly(typeof(QuestManager));
@@ -27,7 +27,7 @@ public static class QuestManager
         }
     }
 
-    public static void InitializePlayer(IPlayerEntity player)
+    public void InitializePlayer(IPlayerEntity player)
     {
         if (player is not PlayerEntity p)
         {
@@ -50,7 +50,7 @@ public static class QuestManager
         }
     }
 
-    public static void RegisterQuest(Type questType)
+    public void RegisterQuest(Type questType)
     {
         var id = questType.FullName ?? Guid.NewGuid().ToString();
         if (Quests.ContainsKey(id))

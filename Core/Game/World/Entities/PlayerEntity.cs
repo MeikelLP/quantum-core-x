@@ -91,15 +91,18 @@ namespace QuantumCore.Game.World.Entities
         private readonly IItemManager _itemManager;
         private readonly IJobManager _jobManager;
         private readonly IExperienceManager _experienceManager;
+        private readonly IQuestManager _questManager;
 
         public PlayerEntity(Player player, GameConnection connection, IItemManager itemManager, IJobManager jobManager, 
-            IExperienceManager experienceManager, IAnimationManager animationManager, IDatabaseManager databaseManager) 
+            IExperienceManager experienceManager, IAnimationManager animationManager, IDatabaseManager databaseManager,
+            IQuestManager questManager) 
             : base(animationManager, World.Instance.GenerateVid())
         {
             Connection = connection;
             _itemManager = itemManager;
             _jobManager = jobManager;
             _experienceManager = experienceManager;
+            _questManager = questManager;
             Player = player;
             PositionX = player.PositionX;
             PositionY = player.PositionY;
@@ -119,7 +122,7 @@ namespace QuantumCore.Game.World.Entities
             Health = (int) GetPoint(EPoints.MaxHp); // todo: cache hp of player 
             await LoadPermGroups();
             
-            QuestManager.InitializePlayer(this);
+            _questManager.InitializePlayer(this);
             
             CalculateDefence();
         }
