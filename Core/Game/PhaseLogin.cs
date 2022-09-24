@@ -16,7 +16,8 @@ namespace QuantumCore.Game
     public static class PhaseLogin
     {
         [Listener(typeof(TokenLogin))]
-        public static async Task OnTokenLogin(this GameConnection connection, TokenLogin packet)
+        public static async Task OnTokenLogin(this GameConnection connection, TokenLogin packet,
+            IDatabaseManager databaseManager)
         {
             var key = "token:" + packet.Key;
 
@@ -52,7 +53,7 @@ namespace QuantumCore.Game
             // Load players of account
             var characters = new Characters();
             var i = 0;
-            await foreach (var player in Player.GetPlayers(token.AccountId))
+            await foreach (var player in Player.GetPlayers(databaseManager, token.AccountId))
             {
                 var host = World.World.Instance.GetMapHost(player.PositionX, player.PositionY);
                 

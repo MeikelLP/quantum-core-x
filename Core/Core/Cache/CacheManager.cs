@@ -9,17 +9,20 @@ namespace QuantumCore.Cache
 {
     public class CacheManager : ICacheManager
     {
-        private CacheManager()
+        private readonly IDatabaseManager _databaseManager;
+
+        private CacheManager(IDatabaseManager databaseManager)
         {
+            _databaseManager = databaseManager;
         }
         
         public static ICacheManager Instance { get; private set; }
         private RedisDB Redis;
         
-        public static void Init(string host, int port = 6379)
+        public static void Init(IDatabaseManager databaseManager, string host, int port = 6379)
         {
             Log.Information("Initialize Cache Manager");
-            var instance = new CacheManager {
+            var instance = new CacheManager (databaseManager) {
                 Redis = new RedisDB {
                     DataFormater = new JsonFormater()
                 }
@@ -41,7 +44,7 @@ namespace QuantumCore.Cache
 
             Log.Debug($"Query {typeof(T).Name} with id {id} from the database");
             // We have to query the object from the database, cache it and return it
-            using var db = DatabaseManager.GetGameDatabase();
+            using var db = _databaseManager.GetGameDatabase();
             var obj = await db.GetAsync<T>(id);
             await Redis.Set(keyName, obj);
             

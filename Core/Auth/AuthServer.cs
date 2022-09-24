@@ -22,12 +22,14 @@ namespace QuantumCore.Auth
     {
         private readonly ILogger<AuthServer> _logger;
         private readonly AuthOptions _options;
+        private readonly IDatabaseManager _databaseManager;
 
         public AuthServer(IOptions<AuthOptions> options, IPacketManager packetManager, ILogger<AuthServer> logger, 
-            PluginExecutor pluginExecutor, IServiceProvider serviceProvider)
+            PluginExecutor pluginExecutor, IServiceProvider serviceProvider, IDatabaseManager databaseManager)
             : base(packetManager, logger, pluginExecutor, serviceProvider, options.Value.Port)
         {
             _logger = logger;
+            _databaseManager = databaseManager;
             _options = options.Value;
             
             Services.AddSingleton(_ => this);
@@ -36,8 +38,8 @@ namespace QuantumCore.Auth
         protected async override Task ExecuteAsync(CancellationToken token)
         {
             // Initialize static components
-            DatabaseManager.Init(_options.AccountString, _options.GameString);
-            CacheManager.Init(_options.RedisHost, _options.RedisPort);
+            _databaseManager.Init(_options.AccountString, _options.GameString);
+            CacheManager.Init(_databaseManager, _options.RedisHost, _options.RedisPort);
 
             // Register auth server features
             PacketManager.RegisterNamespace("QuantumCore.Auth.Packets");
@@ -45,7 +47,7 @@ namespace QuantumCore.Auth
 
             RegisterListener<LoginRequest>(async (connection, request) =>
             {
-                using var db = DatabaseManager.GetAccountDatabase();
+                using var db = _databaseManager.GetAccountDatabase();
                 var account = await db.QueryFirstOrDefaultAsync<Account>(
                     "SELECT * FROM accounts WHERE Username = @Username", new {Username = request.Username});
                 // Check if account was found

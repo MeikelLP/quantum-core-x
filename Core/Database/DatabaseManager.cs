@@ -1,27 +1,33 @@
 ﻿using System.Data;
+using Microsoft.Extensions.Logging;
 using MySqlConnector;
-using Serilog;
 
 namespace QuantumCore.Database
 {
-    public class DatabaseManager
+    public class DatabaseManager : IDatabaseManager
     {
-        private static string _accountConnectionString;
-        private static string _gameConnectionString;
+        private readonly ILogger<DatabaseManager> _logger;
+        private string _accountConnectionString;
+        private string _gameConnectionString;
 
-        public static void Init(string accountString, string gameString)
+        public DatabaseManager(ILogger<DatabaseManager> logger)
         {
-            Log.Information("Initialize Database Manager");
+            _logger = logger;
+        }
+        
+        public void Init(string accountString, string gameString)
+        {
+            _logger.LogInformation("Initialize Database Manager");
             _accountConnectionString = accountString;
             _gameConnectionString = gameString;
         }
 
-        public static IDbConnection GetAccountDatabase()
+        public IDbConnection GetAccountDatabase()
         {
             return new MySqlConnection(_accountConnectionString);
         }
 
-        public static IDbConnection GetGameDatabase()
+        public IDbConnection GetGameDatabase()
         {
             return new MySqlConnection(_gameConnectionString);
         }

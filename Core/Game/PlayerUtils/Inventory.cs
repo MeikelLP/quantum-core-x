@@ -164,16 +164,18 @@ namespace QuantumCore.Game.PlayerUtils
         private ushort _width;
         private ushort _height;
         private readonly List<Item> _items = new List<Item>();
-        
-        public Inventory(IItemManager itemManager, Guid owner, byte window, ushort width, ushort height, ushort pages)
+        private readonly IDatabaseManager _databaseManager;
+
+        public Inventory(IItemManager itemManager, IDatabaseManager databaseManager, Guid owner, byte window, ushort width, ushort height, ushort pages)
         {
             Owner = owner;
             Window = window;
 
             _itemManager = itemManager;
+            _databaseManager = databaseManager;
             _width = width;
             _height = height;
-            
+
             // Initialize pages
             _pages = new Page[pages];
             for (var i = 0; i < pages; i++)
@@ -190,7 +192,7 @@ namespace QuantumCore.Game.PlayerUtils
             _items.Clear();
             
             var pageSize = _width * _height;
-            await foreach(var item in Item.GetItems(Owner, Window))
+            await foreach(var item in Item.GetItems(_databaseManager, Owner, Window))
             {
                 // Calculate page
                 var page = item.Position / pageSize;

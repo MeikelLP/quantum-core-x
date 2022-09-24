@@ -92,7 +92,9 @@ namespace QuantumCore.Game.World.Entities
         private readonly IJobManager _jobManager;
         private readonly IExperienceManager _experienceManager;
 
-        public PlayerEntity(Player player, GameConnection connection, IItemManager itemManager, IJobManager jobManager, IExperienceManager experienceManager, IAnimationManager animationManager) : base(animationManager, World.Instance.GenerateVid())
+        public PlayerEntity(Player player, GameConnection connection, IItemManager itemManager, IJobManager jobManager, 
+            IExperienceManager experienceManager, IAnimationManager animationManager, IDatabaseManager databaseManager) 
+            : base(animationManager, World.Instance.GenerateVid())
         {
             Connection = connection;
             _itemManager = itemManager;
@@ -101,7 +103,7 @@ namespace QuantumCore.Game.World.Entities
             Player = player;
             PositionX = player.PositionX;
             PositionY = player.PositionY;
-            Inventory = new Inventory(itemManager, player.Id, 1, 5, 9, 2);
+            Inventory = new Inventory(itemManager, databaseManager, player.Id, 1, 5, 9, 2);
             QuickSlotBar = new QuickSlotBar(this);
 
             MovementSpeed = 150;

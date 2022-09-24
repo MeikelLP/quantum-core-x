@@ -17,14 +17,16 @@ namespace QuantumCore.Game.Commands
     public class CommandManager : ICommandManager
     {
         private readonly ILogger<CommandManager> _logger;
+        private readonly IDatabaseManager _databaseManager;
         public Dictionary<string, CommandCache> Commands { get; } = new ();
         public Dictionary<Guid, PermissionGroup> Groups { get; } = new ();
 
         public readonly Guid Operator_Group = Guid.Parse("45bff707-1836-42b7-956d-00b9b69e0ee0");
 
-        public CommandManager(ILogger<CommandManager> logger)
+        public CommandManager(ILogger<CommandManager> logger, IDatabaseManager databaseManager)
         {
             _logger = logger;
+            _databaseManager = databaseManager;
         }
         
         public void Register(string ns, Assembly assembly = null)
@@ -47,7 +49,7 @@ namespace QuantumCore.Game.Commands
 
         private async Task ParseGroup(Guid id, string name)
         {
-            using var db = DatabaseManager.GetGameDatabase();
+            using var db = _databaseManager.GetGameDatabase();
 
             var p = new PermissionGroup
             {
@@ -91,7 +93,7 @@ namespace QuantumCore.Game.Commands
             {
                 await CacheManager.Instance.Del(p);
             }
-            using var db = DatabaseManager.GetGameDatabase();
+            using var db = _databaseManager.GetGameDatabase();
 
             var groups = await db.QueryAsync("SELECT * FROM perm_groups");
 

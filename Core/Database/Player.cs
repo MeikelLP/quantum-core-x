@@ -34,7 +34,7 @@ namespace QuantumCore.Database
         public uint GivenStatusPoints { get; set; }
         public uint AvailableStatusPoints { get; set; }
 
-        public static async Task<Player> GetPlayer(Guid account, byte slot)
+        public static async Task<Player> GetPlayer(IDatabaseManager databaseManager, Guid account, byte slot)
         {
             var key = "players:" + account;
             
@@ -42,7 +42,7 @@ namespace QuantumCore.Database
             if (await CacheManager.Instance.Exists(key) <= 0)
             {
                 var i = 0;
-                await foreach (var player in GetPlayers(account))
+                await foreach (var player in GetPlayers(databaseManager, account))
                 {
                     if (i == slot) return player;
                     i++;
@@ -52,12 +52,12 @@ namespace QuantumCore.Database
             }
 
             var playerId = await list.Index(slot);
-            return await GetPlayer(playerId);
+            return await GetPlayer(databaseManager, playerId);
         }
 
-        public static async Task<Player> GetPlayer(Guid playerId)
+        public static async Task<Player> GetPlayer(IDatabaseManager databaseManager, Guid playerId)
         {
-            using var db = DatabaseManager.GetGameDatabase();
+            using var db = databaseManager.GetGameDatabase();
             
             var playerKey = "player:" + playerId;
             if (await CacheManager.Instance.Exists(playerKey) > 0)
@@ -75,7 +75,7 @@ namespace QuantumCore.Database
             }
         }
         
-        public static async IAsyncEnumerable<Player> GetPlayers(Guid account)
+        public static async IAsyncEnumerable<Player> GetPlayers(IDatabaseManager databaseManager, Guid account)
         {
             var key = "players:" + account;
 
@@ -96,7 +96,7 @@ namespace QuantumCore.Database
             else
             {
                 Log.Debug($"Query players for account {account} from the database");
-                using var db = DatabaseManager.GetGameDatabase();
+                using var db = databaseManager.GetGameDatabase();
                 var ids = await db.QueryAsync("SELECT Id FROM players WHERE AccountId = @AccountId",
                     new {AccountId = account});
 
@@ -107,7 +107,7 @@ namespace QuantumCore.Database
                     Guid playerId = row.Id;
                     await list.Push(playerId);
 
-                    yield return await GetPlayer(playerId);
+                    yield return await GetPlayer(databaseManager, playerId);
                 }
             }
         }

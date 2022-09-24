@@ -33,6 +33,7 @@ namespace QuantumCore.Game
         private readonly IExperienceManager _experienceManager;
         private readonly IAnimationManager _animationManager;
         private readonly ICommandManager _commandManager;
+        private readonly IDatabaseManager _databaseManager;
         public IWorld World => _world;
         private readonly GameOptions _options;
         private World.World _world;
@@ -49,7 +50,7 @@ namespace QuantumCore.Game
         public GameServer(IOptions<GameOptions> options, IPacketManager packetManager, ILogger<GameServer> logger, 
             PluginExecutor pluginExecutor, IServiceProvider serviceProvider, IItemManager itemManager, 
             IMonsterManager monsterManager, IJobManager jobManager, IExperienceManager experienceManager,
-            IAnimationManager animationManager, ICommandManager commandManager)
+            IAnimationManager animationManager, ICommandManager commandManager, IDatabaseManager databaseManager)
             : base(packetManager, logger, pluginExecutor, serviceProvider, options.Value.Port)
         {
             _logger = logger;
@@ -61,6 +62,7 @@ namespace QuantumCore.Game
             _experienceManager = experienceManager;
             _animationManager = animationManager;
             _commandManager = commandManager;
+            _databaseManager = databaseManager;
             Instance = this;
             _options = options.Value;
 
@@ -89,8 +91,8 @@ namespace QuantumCore.Game
             }
 
             // Initialize static components
-            DatabaseManager.Init(_options.AccountString, _options.GameString);
-            CacheManager.Init(_options.RedisHost, _options.RedisPort);
+            _databaseManager.Init(_options.AccountString, _options.GameString);
+            CacheManager.Init(_databaseManager, _options.RedisHost, _options.RedisPort);
             
             // Load game configuration
             ConfigManager.Load();

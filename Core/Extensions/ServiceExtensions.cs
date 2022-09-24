@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.Core.Logging.Enrichers;
 using QuantumCore.Core.Networking;
+using QuantumCore.Database;
 using QuantumCore.Game;
 using QuantumCore.Game.Commands;
 using QuantumCore.Game.PlayerUtils;
@@ -29,6 +30,7 @@ public static class ServiceExtensions
         services.AddSingleton<IAnimationManager, AnimationManager>();
         services.AddSingleton<IExperienceManager, ExperienceManager>();
         services.AddSingleton<ICommandManager, CommandManager>();
+        services.AddSingleton<IDatabaseManager, DatabaseManager>();
         services.AddPluginFramework()
             .AddPluginCatalog(new FolderPluginCatalog("plugins"))
             .AddPluginType<ISingletonPlugin>()
