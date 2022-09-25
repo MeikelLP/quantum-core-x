@@ -26,14 +26,14 @@ namespace QuantumCore.Game.World.Entities
 
         public string Name => Player.Name;
         public IConnection Connection { get; }
-        public Player Player { get; private set; }
-        public Inventory Inventory { get; private set; }
+        public PlayerData Player { get; private set; }
+        public IInventory Inventory { get; private set; }
         public IEntity Target { get; set; }
         public IList<Guid> Groups { get; private set; }
-        public Shop Shop { get; set; }
-        public QuickSlotBar QuickSlotBar { get; }
-        public Quest.Quest CurrentQuest { get; set; }
-        public Dictionary<string, Quest.Quest> Quests { get; } = new();
+        public IShop Shop { get; set; }
+        public IQuickSlotBar QuickSlotBar { get; }
+        public IQuest CurrentQuest { get; set; }
+        public Dictionary<string, IQuest> Quests { get; } = new();
 
         public override byte HealthPercentage {
             get {
@@ -107,7 +107,30 @@ namespace QuantumCore.Game.World.Entities
             _experienceManager = experienceManager;
             _questManager = questManager;
             _cacheManager = cacheManager;
-            Player = player;
+            Player = new PlayerData {
+                Id = player.Id,
+                AccountId = player.AccountId,
+                Name = player.Name,
+                PlayerClass = player.PlayerClass,
+                SkillGroup = player.SkillGroup,
+                PlayTime = player.PlayTime,
+                Level = player.Level,
+                Experience = player.Experience,
+                Gold = player.Gold,
+                St = player.St,
+                Ht = player.Ht,
+                Dx = player.Dx,
+                Iq = player.Iq,
+                PositionX = player.PositionX,
+                PositionY = player.PositionY,
+                Health = player.Health,
+                Mana = player.Mana,
+                Stamina = player.Stamina,
+                BodyPart = player.BodyPart,
+                HairPart = player.HairPart,
+                GivenStatusPoints = player.GivenStatusPoints,
+                AvailableStatusPoints = player.AvailableStatusPoints,
+            };
             PositionX = player.PositionX;
             PositionY = player.PositionY;
             Inventory = new Inventory(itemManager, databaseManager, _cacheManager, player.Id, 1, 5, 9, 2);
@@ -144,12 +167,12 @@ namespace QuantumCore.Game.World.Entities
             }
         }
 
-        public T GetQuestInstance<T>() where T : Quest.Quest
+        public T GetQuestInstance<T>() where T : IQuest
         {
             var id = typeof(T).FullName;
             if (id == null)
             {
-                return null;
+                return default;
             }
 
             return (T) Quests[id];
@@ -621,7 +644,7 @@ namespace QuantumCore.Game.World.Entities
             (Map as Map)?.AddGroundItem(item, PositionX, PositionY);
         }
 
-        public async Task Pickup(GroundItem groundItem)
+        public async Task Pickup(IGroundItem groundItem)
         {
             var item = groundItem.Item;
             if (item.ItemId == 1)

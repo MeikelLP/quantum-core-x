@@ -1,6 +1,6 @@
 using System;
 
-namespace QuantumCore.Game.PlayerUtils
+namespace QuantumCore.API.Core.Models
 {
     [Flags]
     public enum EAntiFlags

@@ -2,25 +2,11 @@ using System;
 using System.Threading.Tasks;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
-using QuantumCore.Database;
-using QuantumCore.Game.World.Entities;
+using QuantumCore.API.Game.World;
 
 namespace QuantumCore.Game.PlayerUtils
 {
-    public enum EquipmentSlots
-    {
-        Body,
-        Head,
-        Shoes,
-        Bracelet,
-        Weapon,
-        Necklace,
-        Earring,
-        Costume = 19,
-        Hair = 20
-    }
-    
-    public class Equipment
+    public class Equipment : IEquipment
     {
         public Guid Owner { get; }
         public ItemInstance Body { get; private set; }
@@ -149,7 +135,7 @@ namespace QuantumCore.Game.PlayerUtils
             return false;
         }
 
-        public async Task Send(PlayerEntity player)
+        public async Task Send(IPlayerEntity player)
         {
             if (Body != null)
             {

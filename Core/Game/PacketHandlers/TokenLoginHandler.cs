@@ -2,10 +2,10 @@
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using QuantumCore.API;
 using QuantumCore.API.Game.Types;
 using QuantumCore.Auth.Cache;
 using QuantumCore.Core.Cache;
-using QuantumCore.Core.Networking;
 using QuantumCore.Core.Utils;
 using QuantumCore.Database;
 using QuantumCore.Game.Packets;

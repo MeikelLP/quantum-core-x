@@ -1,7 +1,7 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 
-namespace QuantumCore.Core.Networking;
+namespace QuantumCore.API;
 
 public interface IPacketHandler
 {

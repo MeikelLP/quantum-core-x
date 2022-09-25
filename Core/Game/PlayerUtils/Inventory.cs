@@ -18,7 +18,7 @@ namespace QuantumCore.Game.PlayerUtils
         Inventory = 1
     }
     
-    public class Inventory
+    public class Inventory : IInventory
     {
         private class Page
         {
@@ -155,7 +155,7 @@ namespace QuantumCore.Game.PlayerUtils
                 return _items.AsReadOnly();
             }
         }
-        public Equipment EquipmentWindow { get; private set; }
+        public IEquipment EquipmentWindow { get; private set; }
 
         public long Size {
             get {

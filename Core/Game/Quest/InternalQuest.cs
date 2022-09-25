@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game.World;
 
 namespace QuantumCore.Game.Quest;

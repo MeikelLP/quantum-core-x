@@ -5,30 +5,22 @@ using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.World;
 using QuantumCore.Core.Utils;
 using QuantumCore.Game.Packets.Shop;
-using QuantumCore.Game.PlayerUtils;
 using QuantumCore.Game.World.Entities;
 using Serilog;
+using ShopItem = QuantumCore.API.Core.Models.ShopItem;
 
 namespace QuantumCore.Game.World;
 
-public class Shop
+public class Shop : IShop
 {
     // todo: implement player shop, this require to remove an item on purchase
     //       and we also have to make sure to only execute one buy at a time
     //       to prevent an item from getting sold multiple times
-    
-    public class ShopItem
-    {
-        public uint ItemId { get; set; }
-        public byte Count { get; set; }
-        public uint Price { get; set; }
-        public byte Position { get; set; }
-    }
 
     public uint Vid { get; set; }
     public string Name { get; set; }
     public IReadOnlyList<ShopItem> Items { get { return _items; } }
-    public List<PlayerEntity> Visitors { get; } = new();
+    public List<IPlayerEntity> Visitors { get; } = new();
 
     private Grid<ShopItem> _grid = new(4, 5);
     private readonly List<ShopItem> _items = new();

@@ -2,18 +2,21 @@
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using QuantumCore.API;
+using QuantumCore.API.Game;
+using QuantumCore.API.Game.World;
 using QuantumCore.Auth;
 using QuantumCore.Core.Networking;
 using QuantumCore.Game.World.Entities;
 
 namespace QuantumCore.Game
 {
-    public class GameConnection : Connection
+    public class GameConnection : Connection, IGameConnection
     {
-        public GameServer Server { get; }
+        public IGameServer Server { get; }
         public Guid? AccountId { get; set; }
         public string Username { get; set; }
-        public PlayerEntity Player { get; set; }
+        public IPlayerEntity Player { get; set; }
 
         public GameConnection(GameServer server, TcpClient client, IPacketManager packetManager, ILogger<AuthConnection> logger, PluginExecutor pluginExecutor) 
             : base(logger, pluginExecutor, packetManager)

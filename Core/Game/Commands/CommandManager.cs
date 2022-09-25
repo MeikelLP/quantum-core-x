@@ -9,6 +9,8 @@ using System.Threading.Tasks;
 using QuantumCore.Database;
 using Dapper;
 using Microsoft.Extensions.Logging;
+using QuantumCore.API;
+using QuantumCore.API.Game.World;
 using QuantumCore.Core.Cache;
 using QuantumCore.Game.World.Entities;
 
@@ -127,7 +129,7 @@ namespace QuantumCore.Game.Commands
             return false;
         }
 
-        public bool CanUseCommand(PlayerEntity player, string cmd)
+        public bool CanUseCommand(IPlayerEntity player, string cmd)
         {
             if (Commands[cmd].BypassPerm)
             {
@@ -150,7 +152,7 @@ namespace QuantumCore.Game.Commands
             return false;
         }
 
-        public async Task Handle(GameConnection connection, string chatline)
+        public async Task Handle(IGameConnection connection, string chatline)
         {
             var args = chatline.Split(" "); // todo implement quotation marks for strings
             var command = args[0].Substring(1);

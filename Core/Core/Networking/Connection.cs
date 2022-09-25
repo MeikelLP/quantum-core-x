@@ -11,6 +11,7 @@ using Microsoft.Extensions.Logging;
 using QuantumCore.Core.Packets;
 using QuantumCore.Core.Utils;
 using QuantumCore.API;
+using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game.Types;
 
 namespace QuantumCore.Core.Networking
@@ -247,7 +248,7 @@ namespace QuantumCore.Core.Networking
             await SendHandshake();
         }
 
-        public async Task<bool> HandleHandshake(GCHandshake handshake)
+        public async Task<bool> HandleHandshake(GCHandshakeData handshake)
         {
             if (!Handshaking)
             {

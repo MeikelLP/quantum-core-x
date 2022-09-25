@@ -20,7 +20,7 @@ using Weikio.PluginFramework.Abstractions;
 
 namespace QuantumCore.Core.Networking
 {
-    public abstract class ServerBase<T> : BackgroundService where T : Connection
+    public abstract class ServerBase<T> : BackgroundService where T : IConnection
     {
         private readonly ILogger _logger;
         protected IPacketManager PacketManager { get; }
@@ -67,7 +67,7 @@ namespace QuantumCore.Core.Networking
 
         public long ServerTime => _serverTimer.ElapsedMilliseconds;
 
-        internal async Task RemoveConnection(Connection connection)
+        public async Task RemoveConnection(IConnection connection)
         {
             _connections.Remove(connection.Id, out _);
             
@@ -113,12 +113,12 @@ namespace QuantumCore.Core.Networking
             }
         }
 
-        public void RegisterNewConnectionListener(Func<Connection, Task<bool>> listener)
+        public void RegisterNewConnectionListener(Func<T, Task<bool>> listener)
         {
             _connectionListeners.Add(listener);
         }
 
-        public async Task CallListener(Connection connection, object packet)
+        public async Task CallListener(IConnection connection, object packet)
         {
             var header = PacketManager.IncomingPackets.First(p => p.Value.Type == packet.GetType());
             if (!_listeners.ContainsKey(header.Key))

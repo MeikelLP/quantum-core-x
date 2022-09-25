@@ -340,7 +340,7 @@ namespace QuantumCore.Game.World
             return _groups[id];
         }
 
-        public async ValueTask<bool> SpawnEntity(Entity e)
+        public async ValueTask<bool> SpawnEntity(IEntity e)
         {
             var map = GetMapAt((uint) e.PositionX, (uint) e.PositionY);
             if (map == null) return false;

@@ -1,4 +1,8 @@
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using QuantumCore.API;
+using QuantumCore.API.Core.Models;
+using QuantumCore.API.Game.World;
 using QuantumCore.Core.Cache;
 using QuantumCore.Game.Packets;
 using QuantumCore.Game.Packets.General;
@@ -8,11 +12,11 @@ using Serilog;
 
 namespace QuantumCore.Game.PlayerUtils;
 
-public class QuickSlotBar
+public class QuickSlotBar : IQuickSlotBar
 {
     private readonly ICacheManager _cacheManager;
-    public PlayerEntity Player { get; }
-    public QuickSlot[] Slots { get; } = new QuickSlot[8];
+    public IPlayerEntity Player { get; }
+    public QuickSlotData[] Slots { get; } = new QuickSlotData[8];
     
     public QuickSlotBar(ICacheManager cacheManager, PlayerEntity player)
     {
@@ -26,7 +30,7 @@ public class QuickSlotBar
         
         if (await _cacheManager.Exists(key) > 0)
         {
-            var slots = await _cacheManager.Get<QuickSlot[]>(key);
+            var slots = await _cacheManager.Get<QuickSlotData[]>(key);
             if (slots.Length != Slots.Length)
             {
                 Log.Warning("Removing cached quick slots, length mismatch");
@@ -63,12 +67,12 @@ public class QuickSlotBar
             
             await Player.Connection.Send(new QuickBarAddOut {
                 Position = (byte) i,
-                Slot = slot
+                Slot = new QuickSlot{Position = slot.Position, Type = slot.Type}
             });
         }
     }
 
-    public async Task Add(byte position, QuickSlot slot)
+    public async Task Add(byte position, QuickSlotData slot)
     {
         if (position >= 8)
         {
@@ -80,7 +84,7 @@ public class QuickSlotBar
         Slots[position] = slot;
         await Player.Connection.Send(new QuickBarAddOut {
             Position = position,
-            Slot = slot
+            Slot = new QuickSlot{Position = slot.Position, Type = slot.Type}
         });
     }
 

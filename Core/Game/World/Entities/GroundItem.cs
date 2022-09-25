@@ -9,7 +9,7 @@ using QuantumCore.Game.PlayerUtils;
 
 namespace QuantumCore.Game.World.Entities;
 
-public class GroundItem : Entity
+public class GroundItem : Entity, IGroundItem
 {
     private readonly ItemInstance _item;
     private readonly uint _amount;

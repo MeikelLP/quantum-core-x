@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Dapper;
 using Dapper.Contrib.Extensions;
 using Microsoft.Extensions.Logging;
+using QuantumCore.API;
 using QuantumCore.Core.Cache;
 using QuantumCore.Core.Networking;
 using QuantumCore.Core.Utils;

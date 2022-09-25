@@ -1,6 +1,7 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
-using QuantumCore.Core.Networking;
+using QuantumCore.API;
+using QuantumCore.API.Core.Models;
 using QuantumCore.Game.Packets.QuickBar;
 
 namespace QuantumCore.Game.PacketHandlers.Game;
@@ -16,6 +17,9 @@ public class QuickBarAddHandler : IPacketHandler<QuickBarAdd>
             return;
         }
 
-        await player.QuickSlotBar.Add(ctx.Packet.Position, ctx.Packet.Slot);
+        await player.QuickSlotBar.Add(ctx.Packet.Position, new QuickSlotData {
+            Position = ctx.Packet.Slot.Position,
+            Type = ctx.Packet.Slot.Position
+        });
     }
 }

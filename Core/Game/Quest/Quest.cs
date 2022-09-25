@@ -1,12 +1,14 @@
 using System.Diagnostics;
 using System.Threading.Tasks;
+using QuantumCore.API;
+using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game.World;
 using QuantumCore.Game.Packets.Quest;
 using QuantumCore.Game.World.Entities;
 
 namespace QuantumCore.Game.Quest;
 
-public abstract class Quest
+public abstract class Quest : IQuest
 {
     public QuestState State { get; }
     public IPlayerEntity Player { get; }

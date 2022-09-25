@@ -23,7 +23,7 @@ using QuantumCore.Game.Quest;
 
 namespace QuantumCore.Game
 {
-    public class GameServer : ServerBase<GameConnection>, IGame
+    public class GameServer : ServerBase<GameConnection>, IGame, IGameServer
     {
         private readonly ILogger<GameServer> _logger;
         private readonly PluginExecutor _pluginExecutor;
@@ -38,6 +38,7 @@ namespace QuantumCore.Game
         private readonly IQuestManager _questManager;
         private readonly IChatManager _chatManager;
         public IWorld World => _world;
+
         private readonly GameOptions _options;
         private World.World _world;
 
