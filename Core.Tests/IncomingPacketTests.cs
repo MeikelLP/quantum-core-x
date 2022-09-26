@@ -40,6 +40,20 @@ public class IncomingPacketTests
     }
 
     [Fact]
+    public void WrongLengthThrowsArgumentException()
+    {
+        var packetCache = _packetManager.GetIncomingPacket(0x06);
+        Assert.Throws<ArgumentException>(() => packetCache.Deserialize(null, Array.Empty<byte>()));
+    }
+
+    [Fact]
+    public void InvalidTypeThrowsArgumentException()
+    {
+        var packetCache = _packetManager.GetIncomingPacket(0x06);
+        Assert.Throws<ArgumentException>(() => packetCache.Deserialize(new CreateCharacter(), Array.Empty<byte>()));
+    }
+
+    [Fact]
     public void Attack()
     {
         var expected = new AutoFaker<Attack>()
