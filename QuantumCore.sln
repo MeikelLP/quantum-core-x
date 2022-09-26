@@ -10,6 +10,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Plugins", "Plugins", "{6D10
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PrometheusPlugin", "PrometheusPlugin\PrometheusPlugin.csproj", "{631F3027-FFC5-4F91-8ED5-8B0A8DF97ABE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core.Tests", "Core.Tests\Core.Tests.csproj", "{D02F020D-2464-48F3-B89E-EF4BABCB7713}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -32,6 +34,10 @@ Global
 		{631F3027-FFC5-4F91-8ED5-8B0A8DF97ABE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{631F3027-FFC5-4F91-8ED5-8B0A8DF97ABE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{631F3027-FFC5-4F91-8ED5-8B0A8DF97ABE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D02F020D-2464-48F3-B89E-EF4BABCB7713}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D02F020D-2464-48F3-B89E-EF4BABCB7713}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D02F020D-2464-48F3-B89E-EF4BABCB7713}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D02F020D-2464-48F3-B89E-EF4BABCB7713}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{930E5131-B018-4255-BC08-ACE8F2C1BAC5} = {6D101418-9A2D-41CB-BEA9-47F915395CE8}
