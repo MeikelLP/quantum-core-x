@@ -42,6 +42,22 @@ public class PacketTests
     }
 
     [Fact]
+    public void NullReturnsArrayWithDefaultValues()
+    {
+        var packetCache = _packetManager.GetIncomingPacket(0x06);
+        var cache = packetCache.Serialize(null);
+
+        cache.Should().Equal(new byte[] { 0, 0 });
+    }
+
+    [Fact]
+    public void InvalidTypeThrowsArgumentException()
+    {
+        var packetCache = _packetManager.GetIncomingPacket(0x06);
+        Assert.Throws<ArgumentException>(() => packetCache.Serialize(new CreateCharacter()));
+    }
+
+    [Fact]
     public void SpawnCharacter()
     {
         var packetCache = _packetManager.GetOutgoingPacket(0x01);
