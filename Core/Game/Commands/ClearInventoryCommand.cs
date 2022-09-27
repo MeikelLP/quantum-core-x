@@ -4,41 +4,53 @@ using QuantumCore.API.Game;
 using QuantumCore.API.Game.World;
 using QuantumCore.Core.Cache;
 using QuantumCore.Extensions;
-using QuantumCore.Game.World.Entities;
 
 namespace QuantumCore.Game.Commands
 {
     [Command("ip", "Clears inventory and equipped items")]
-    public static class ClearInventoryCommand
+    public class ClearInventoryCommand : ICommandHandler
     {
-        [CommandMethod]
-        public static async Task ClearInventory(IPlayerEntity player, ICacheManager cacheManager)
-        {
-            if (!(player is PlayerEntity p))
-            {
-                return;
-            }
+        private readonly ICacheManager _cacheManager;
 
-            var items = p.Inventory.Items
-                .Append(p.Inventory.EquipmentWindow.Body)
-                .Append(p.Inventory.EquipmentWindow.Bracelet)
-                .Append(p.Inventory.EquipmentWindow.Costume)
-                .Append(p.Inventory.EquipmentWindow.Earrings)
-                .Append(p.Inventory.EquipmentWindow.Hair)
-                .Append(p.Inventory.EquipmentWindow.Head)
-                .Append(p.Inventory.EquipmentWindow.Necklace)
-                .Append(p.Inventory.EquipmentWindow.Shoes)
-                .Append(p.Inventory.EquipmentWindow.Weapon)
+        public ClearInventoryCommand(ICacheManager cacheManager)
+        {
+            _cacheManager = cacheManager;
+        }
+        
+        public async Task ExecuteAsync(CommandContext ctx)
+        {
+            var items = ctx.Player.Inventory.Items
+                .Append(ctx.Player.Inventory.EquipmentWindow.Body)
+                .Append(ctx.Player.Inventory.EquipmentWindow.Bracelet)
+                .Append(ctx.Player.Inventory.EquipmentWindow.Costume)
+                .Append(ctx.Player.Inventory.EquipmentWindow.Earrings)
+                .Append(ctx.Player.Inventory.EquipmentWindow.Hair)
+                .Append(ctx.Player.Inventory.EquipmentWindow.Head)
+                .Append(ctx.Player.Inventory.EquipmentWindow.Necklace)
+                .Append(ctx.Player.Inventory.EquipmentWindow.Shoes)
+                .Append(ctx.Player.Inventory.EquipmentWindow.Weapon)
                 .Where(x => x is not null)
                 .ToArray();
             foreach (var item in items)
             {
-                await p.RemoveItem(item);
-                await p.SendRemoveItem(item.Window, (ushort)item.Position);
-                await item.Destroy(cacheManager);
+                await ctx.Player.RemoveItem(item);
+                await ctx.Player.SendRemoveItem(item.Window, (ushort)item.Position);
+                await item.Destroy(_cacheManager);
             }
 
-            await p.SendInventory();
+            await ctx.Player.SendInventory();
         }
     }
+
+    public interface ICommandHandler
+    {
+        Task ExecuteAsync(CommandContext context);
+    }
+    public interface ICommandHandler<T>
+    {
+        Task ExecuteAsync(CommandContext<T> context);
+    }
+
+    public record struct CommandContext<T>(IPlayerEntity Player, T Arguments);
+    public record struct CommandContext(IPlayerEntity Player);
 }

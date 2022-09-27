@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
 using System.Threading.Tasks;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
@@ -235,6 +234,7 @@ namespace QuantumCore.Game.PlayerUtils
                 if (pos != -1)
                 {
                     await instance.Set(_cacheManager, Owner, Window, (uint) (pos + i * _width * _height));
+                    _items.Add(instance);
                     return true;
                 }
             }

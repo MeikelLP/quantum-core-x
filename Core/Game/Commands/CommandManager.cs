@@ -1,10 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
+using CommandLine;
 using Dapper;
+using Microsoft.CodeAnalysis;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.Game;
@@ -22,33 +26,49 @@ namespace QuantumCore.Game.Commands
         private readonly ICacheManager _cacheManager;
         private readonly IWorld _world;
         public Dictionary<string, CommandCache> Commands { get; } = new ();
+
+        private readonly Dictionary<string, CommandDescriptor> _commandHandlers = new();
         public Dictionary<Guid, PermissionGroup> Groups { get; } = new ();
 
-        public readonly Guid Operator_Group = Guid.Parse("45bff707-1836-42b7-956d-00b9b69e0ee0");
+        public static readonly Guid Operator_Group = Guid.Parse("45bff707-1836-42b7-956d-00b9b69e0ee0");
+        private readonly IServiceProvider _serviceProvider;
 
-        public CommandManager(ILogger<CommandManager> logger, IDatabaseManager databaseManager, ICacheManager cacheManager, IWorld world)
+        public CommandManager(ILogger<CommandManager> logger, IDatabaseManager databaseManager, ICacheManager cacheManager, IWorld world, IServiceProvider serviceProvider)
         {
             _logger = logger;
             _databaseManager = databaseManager;
             _cacheManager = cacheManager;
             _world = world;
+            _serviceProvider = serviceProvider;
         }
         
         public void Register(string ns, Assembly assembly = null)
         {
             _logger.LogDebug("Registring commands from namespace {Namespace}", ns);
-            if (assembly == null) assembly = Assembly.GetAssembly(typeof(CommandManager));
-
+            if (assembly == null) assembly = Assembly.GetAssembly(typeof(CommandManager))!;
+            
             var types = assembly.GetTypes().Where(t => string.Equals(t.Namespace, ns, StringComparison.Ordinal))
-                .Where(t => t.GetCustomAttribute<CommandAttribute>() != null).ToArray();
+                .Where(t => (typeof(ICommandHandler<>).IsAssignableFrom(t) 
+                            || typeof(ICommandHandler).IsAssignableFrom(t)) && t.IsClass && !t.IsAbstract)
+                .ToArray();
 
             foreach (var type in types)
             {
-                var attr = type.GetCustomAttribute<CommandAttribute>();
-                _logger.LogDebug("Registring command {CommandName} from {TypeName}", attr.Name, type.Name);
-                var bypass = type.GetCustomAttribute<CommandNoPermissionAttribute>();
-
-                Commands[attr.Name] = new CommandCache(_world, attr, type, bypass != null);
+                var cmdAttr = type.GetCustomAttribute<CommandAttribute>();
+                if (cmdAttr is null)
+                {
+                    _logger.LogWarning("Command handler {Type} is implementing {HandlerInterface} but is missing a {AttributeName}", type.Name, nameof(ICommandHandler), nameof(CommandAttribute));
+                    continue;
+                }
+                var cmd = cmdAttr.Name;
+                var desc = cmdAttr.Description;
+                var bypass = type.GetCustomAttribute<CommandNoPermissionAttribute>() is not null;
+                Type optionsType = null;
+                if (typeof(ICommandHandler<>).IsAssignableFrom(type))
+                {
+                    optionsType = type.GetInterfaces().FirstOrDefault(x => x == typeof(ICommandHandler<>));
+                }
+                _commandHandlers.Add(cmd, new CommandDescriptor(type, cmd, desc, optionsType, bypass));
             }
         }
 
@@ -132,7 +152,7 @@ namespace QuantumCore.Game.Commands
 
         public bool CanUseCommand(IPlayerEntity player, string cmd)
         {
-            if (Commands[cmd].BypassPerm)
+            if (_commandHandlers[cmd].BypassPerm)
             {
                 return true;
             }
@@ -155,13 +175,11 @@ namespace QuantumCore.Game.Commands
 
         public async Task Handle(IGameConnection connection, string chatline)
         {
-            var args = chatline.Split(" "); // todo implement quotation marks for strings
-            var command = args[0].Substring(1);
+            var args = CommandLineParser.SplitCommandLineIntoArguments(chatline, false).ToArray();
+            var command = args[0][1..];
 
-            if (Commands.ContainsKey(command))
+            if (_commandHandlers.TryGetValue(command, out var commandCache))
             {
-                var cmd = Commands[command];
-
                 if (!CanUseCommand(connection.Player, command))
                 {
                     await connection.Send(new ChatOutcoming()
@@ -174,40 +192,34 @@ namespace QuantumCore.Game.Commands
                     return;
                 }
 
-                var objects = new object[args.Length];
-                objects[0] = connection.Player;
-
-                for (var i = 1; i < args.Length; i++)
+                if (commandCache.OptionsType is not null)
                 {
-                    var str = args[i];
+                    var parserResult = Parser.Default.ParseArguments(args, _commandHandlers.Values.Select(x => x.Type).ToArray());
+                    var methodInfo = typeof(ParserResultExtensions).GetMethod(nameof(ParserResultExtensions.MapResult),
+                        new[] { typeof(Func<,>), typeof(Func<,>) })!;
+                    var genericMethod = methodInfo.MakeGenericMethod(commandCache.Type, commandCache.OptionsType);
+                    var successParam = Expression.Parameter(commandCache.OptionsType, "x");
+                    var successExpression = Expression.Lambda(successParam, successParam);
+                    var options =
+                        genericMethod.Invoke(null, new object[] { parserResult, successExpression.Compile() });
 
-                    if (str.Contains('.') || str.Contains(','))
-                    {
-                        var numStr = str.Replace(".", ",");
+                    var ctx = Activator.CreateInstance(typeof(CommandContext).MakeGenericType(commandCache.OptionsType),
+                        new object[] {
+                                connection.Player,
+                                options
+                        });
+                    var cmdExecuteMethodInfo = typeof(ICommandHandler<>).MakeGenericType(commandCache.OptionsType)
+                        .GetMethod(nameof(ICommandHandler<object>.ExecuteAsync))!;
+                    var cmd = ActivatorUtilities.CreateInstance(_serviceProvider,
+                        typeof(ICommandHandler<>).MakeGenericType(commandCache.OptionsType));
 
-                        if (float.TryParse(numStr, out var f))
-                        {
-                            objects[i] = f;
-                        }
-                        else
-                        {
-                            objects[i] = str;
-                        }
-                    }
-                    else
-                    {
-                        if (int.TryParse(str, out var n))
-                        {
-                            objects[i] = n;
-                        }
-                        else
-                        {
-                            objects[i] = str;
-                        }
-                    }
+                    await (Task) cmdExecuteMethodInfo.Invoke(cmd, new object[] { ctx })!;
                 }
-
-                await cmd.Run(objects);
+                else
+                {
+                    var cmd = (ICommandHandler) ActivatorUtilities.CreateInstance(_serviceProvider, commandCache.Type);
+                    await cmd.ExecuteAsync(new CommandContext(connection.Player));
+                }
             }
             else
             {
