@@ -96,7 +96,7 @@ namespace QuantumCore.Game.World.Entities
         private readonly IQuestManager _questManager;
         private readonly ICacheManager _cacheManager;
 
-        public PlayerEntity(Player player, GameConnection connection, IItemManager itemManager, IJobManager jobManager, 
+        public PlayerEntity(Player player, IConnection connection, IItemManager itemManager, IJobManager jobManager, 
             IExperienceManager experienceManager, IAnimationManager animationManager, IDatabaseManager databaseManager,
             IQuestManager questManager, ICacheManager cacheManager) 
             : base(animationManager, World.Instance.GenerateVid())
