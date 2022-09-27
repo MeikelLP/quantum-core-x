@@ -128,6 +128,27 @@ public class OutgoingPacketTests
     }
 
     [Fact]
+    public void ChatOutcoming()
+    {
+        var packetCache = _packetManager.GetOutgoingPacket(0x04);
+        var obj = new AutoFaker<ChatOutcoming>().Generate();
+        var bytes = packetCache.Serialize(obj);
+
+        bytes.Should().Equal(
+            new byte[]
+                {
+                    0x04
+                }
+                .Concat(BitConverter.GetBytes(obj.Size))
+                .Append((byte)obj.MessageType)
+                .Concat(BitConverter.GetBytes(obj.Vid))
+                .Append(obj.Empire)
+                .Concat(Encoding.ASCII.GetBytes(obj.Message))
+                .Append((byte)0)
+        );
+    }
+
+    [Fact]
     public void CreateCharacterSuccess()
     {
         var packetCache = _packetManager.GetOutgoingPacket(0x08);
