@@ -3,7 +3,7 @@ using QuantumCore.API;
 using QuantumCore.API.Game;
 using QuantumCore.API.Game.World;
 using QuantumCore.Core.Cache;
-using QuantumCore.Extensions;
+using QuantumCore.Game.Extensions;
 using QuantumCore.Game.World.Entities;
 
 namespace QuantumCore.Game.Commands
@@ -43,20 +43,7 @@ namespace QuantumCore.Game.Commands
             {
                 return;
             }
-
-            // Create item
-            var instance = _itemManager.CreateItem(item, count);
-            // Add item to players inventory
-            if (!await p.Inventory.PlaceItem(instance))
-            {
-                // No space left in inventory, drop item with player name
-                return;
-            }
-            // Store item in cache
-            await instance.Persist(_cacheManager);
-
-            // Send item to client
-            await p.SendItem(instance);
+            await p.AddItemAmountAsync(_itemManager, _cacheManager, itemId, count);
         }
     }
 }
