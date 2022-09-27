@@ -1,23 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
-using QuantumCore.API.Game;
 using QuantumCore.API.Game.World;
 using QuantumCore.Core.Cache;
-// using QuantumCore.Core.API;
 using QuantumCore.Core.Event;
 using QuantumCore.Core.Utils;
-using QuantumCore.Database;
 using QuantumCore.Game.World.Entities;
 using Serilog;
 using Tomlyn;
 using Tomlyn.Model;
+// using QuantumCore.Core.API;
 
 namespace QuantumCore.Game.World
 {
@@ -42,13 +38,15 @@ namespace QuantumCore.Game.World
         private readonly IMonsterManager _monsterManager;
         private readonly IAnimationManager _animationManager;
         private readonly ICacheManager _cacheManager;
+        private readonly IWorld _world;
 
-        public Map(IMonsterManager monsterManager, IAnimationManager animationManager, ICacheManager cacheManager,
+        public Map(IMonsterManager monsterManager, IAnimationManager animationManager, ICacheManager cacheManager, IWorld world,
             string name, uint x, uint y, uint width, uint height)
         {
             _monsterManager = monsterManager;
             _animationManager = animationManager;
             _cacheManager = cacheManager;
+            _world = world;
             Name = name;
             PositionX = x;
             PositionY = y;
@@ -176,7 +174,7 @@ namespace QuantumCore.Game.World
             {
                 case ESpawnPointType.Group:
                 {
-                    var group = World.Instance.GetGroup(CoreRandom.GetRandom(spawnPoint.Groups));
+                    var group = _world.GetGroup(CoreRandom.GetRandom(spawnPoint.Groups));
                     if (group != null)
                     {
                         var baseX = spawnPoint.X + RandomNumberGenerator.GetInt32(-spawnPoint.Range, spawnPoint.Range);
@@ -186,11 +184,11 @@ namespace QuantumCore.Game.World
 
                         foreach (var member in group.Members)
                         {
-                            var monster = new MonsterEntity(_monsterManager, _animationManager, member.Id,
+                            var monster = new MonsterEntity(_monsterManager, _animationManager, _world, member.Id,
                                 (int) (PositionX + (baseX + RandomNumberGenerator.GetInt32(-5, 5)) * 100),
                                 (int) (PositionY + (baseY + RandomNumberGenerator.GetInt32(-5, 5)) * 100),
                                 RandomNumberGenerator.GetInt32(0, 360));
-                            await World.Instance.SpawnEntity(monster);
+                            await _world.SpawnEntity(monster);
 
                             groupInstance.Monsters.Add(monster);
                             monster.Group = groupInstance;
@@ -216,8 +214,8 @@ namespace QuantumCore.Game.World
 
                     spawnPoint.CurrentGroup = groupInstance;
 
-                    var monster = new MonsterEntity(_monsterManager, _animationManager, spawnPoint.Monster, x, y, (spawnPoint.Direction - 1) * 45);
-                    await World.Instance.SpawnEntity(monster);
+                    var monster = new MonsterEntity(_monsterManager, _animationManager, _world, spawnPoint.Monster, x, y, (spawnPoint.Direction - 1) * 45);
+                    await _world.SpawnEntity(monster);
                     
                     groupInstance.Monsters.Add(monster);
                     monster.Group = groupInstance;
@@ -282,7 +280,7 @@ namespace QuantumCore.Game.World
         /// <param name="amount">Only used for gold as we have a higher limit here</param>
         public void AddGroundItem(ItemInstance item, int x, int y, uint amount = 0)
         {
-            var groundItem = new GroundItem(_animationManager,  World.Instance.GenerateVid(), item, amount) {
+            var groundItem = new GroundItem(_animationManager, _world.GenerateVid(), item, amount) {
                 PositionX = x, 
                 PositionY = y
             };

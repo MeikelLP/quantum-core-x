@@ -3,16 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
-using QuantumCore.Game.Packets;
-using QuantumCore.API.Game;
 using System.Threading.Tasks;
-using QuantumCore.Database;
 using Dapper;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
+using QuantumCore.API.Game;
 using QuantumCore.API.Game.World;
 using QuantumCore.Core.Cache;
-using QuantumCore.Game.World.Entities;
+using QuantumCore.Database;
+using QuantumCore.Game.Packets;
 
 namespace QuantumCore.Game.Commands
 {
@@ -21,16 +20,18 @@ namespace QuantumCore.Game.Commands
         private readonly ILogger<CommandManager> _logger;
         private readonly IDatabaseManager _databaseManager;
         private readonly ICacheManager _cacheManager;
+        private readonly IWorld _world;
         public Dictionary<string, CommandCache> Commands { get; } = new ();
         public Dictionary<Guid, PermissionGroup> Groups { get; } = new ();
 
         public readonly Guid Operator_Group = Guid.Parse("45bff707-1836-42b7-956d-00b9b69e0ee0");
 
-        public CommandManager(ILogger<CommandManager> logger, IDatabaseManager databaseManager, ICacheManager cacheManager)
+        public CommandManager(ILogger<CommandManager> logger, IDatabaseManager databaseManager, ICacheManager cacheManager, IWorld world)
         {
             _logger = logger;
             _databaseManager = databaseManager;
             _cacheManager = cacheManager;
+            _world = world;
         }
         
         public void Register(string ns, Assembly assembly = null)
@@ -47,7 +48,7 @@ namespace QuantumCore.Game.Commands
                 _logger.LogDebug("Registring command {CommandName} from {TypeName}", attr.Name, type.Name);
                 var bypass = type.GetCustomAttribute<CommandNoPermissionAttribute>();
 
-                Commands[attr.Name] = new CommandCache(attr, type, bypass != null);
+                Commands[attr.Name] = new CommandCache(_world, attr, type, bypass != null);
             }
         }
 

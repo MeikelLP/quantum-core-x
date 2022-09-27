@@ -17,14 +17,16 @@ namespace QuantumCore.Game.Commands
 
     public class CommandCache
     {
+        private readonly IWorld _world;
         public string Description { get; protected set; }
 
         public List<CommandFunction> Functions = new List<CommandFunction>();
 
         public bool BypassPerm { get; }
 
-        public CommandCache(CommandAttribute attr, Type t, bool bypass)
+        public CommandCache(IWorld world, CommandAttribute attr, Type t, bool bypass)
         {
+            _world = world;
             Description = attr.Description;
             BypassPerm = bypass;
 
@@ -108,7 +110,7 @@ namespace QuantumCore.Game.Commands
                         {
                             if (callArguments[i].GetType() == typeof(string))
                             {
-                                var player = World.World.Instance.GetPlayer((string) callArguments[i]);
+                                var player = _world.GetPlayer((string) callArguments[i]);
                                 if (player == null)
                                 {
                                     await ((IPlayerEntity) callArguments[0]).SendChatInfo($"Cannot find player {(string)callArguments[i]}");

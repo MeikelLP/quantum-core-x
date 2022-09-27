@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
+using QuantumCore.API.Game.World;
 using QuantumCore.Core.Cache;
 using QuantumCore.Core.Logging.Enrichers;
 using QuantumCore.Core.Networking;
@@ -10,6 +11,7 @@ using QuantumCore.Game;
 using QuantumCore.Game.Commands;
 using QuantumCore.Game.PlayerUtils;
 using QuantumCore.Game.Quest;
+using QuantumCore.Game.World;
 using Serilog;
 using Weikio.PluginFramework.Abstractions;
 
@@ -42,6 +44,7 @@ public static class ServiceExtensions
         services.AddSingleton<IChatManager, ChatManager>();
         services.AddSingleton<IQuestManager, QuestManager>();
         services.AddSingleton<ICacheManager, CacheManager>();
+        services.AddSingleton<IWorld, World>();
         services.AddPluginFramework()
             .AddPluginCatalog(pluginCatalog)
             .AddPluginType<ISingletonPlugin>()

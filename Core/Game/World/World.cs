@@ -12,13 +12,13 @@ using QuantumCore.API;
 using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game.World;
 using QuantumCore.Core.Cache;
-// using QuantumCore.Core.API;
 using QuantumCore.Core.Utils;
 using QuantumCore.Game.Quest;
 using QuantumCore.Game.World.Entities;
 using Serilog;
 using Tomlyn;
 using Tomlyn.Model;
+// using QuantumCore.Core.API;
 
 namespace QuantumCore.Game.World
 {
@@ -39,8 +39,6 @@ namespace QuantumCore.Game.World
         private readonly IMonsterManager _monsterManager;
         private readonly IAnimationManager _animationManager;
         private readonly ICacheManager _cacheManager;
-
-        public static IWorld Instance { get; set; }
         
         public World(ILogger<World> logger, PluginExecutor pluginExecutor, IItemManager itemManager, 
             IMonsterManager monsterManager, IAnimationManager animationManager, ICacheManager cacheManager)
@@ -52,7 +50,6 @@ namespace QuantumCore.Game.World
             _animationManager = animationManager;
             _cacheManager = cacheManager;
             _vid = 0;
-            Instance = this;
         }
         
         public async Task Load()
@@ -191,7 +188,7 @@ namespace QuantumCore.Game.World
                         }
                         else
                         {
-                            map = new Map(_monsterManager, _animationManager, _cacheManager, mapName, positionX, positionY, width, height);    
+                            map = new Map(_monsterManager, _animationManager, _cacheManager, this, mapName, positionX, positionY, width, height);    
                         }
                         
                         
@@ -373,7 +370,7 @@ namespace QuantumCore.Game.World
             return ++_vid;
         }
 
-        private void AddPlayer(IPlayerEntity e)
+        private void AddPlayer(PlayerEntity e)
         {
             if (_players.ContainsKey(e.Name))
                 _players[e.Name] = e;

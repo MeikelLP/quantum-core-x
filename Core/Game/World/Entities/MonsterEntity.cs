@@ -1,17 +1,12 @@
 using System;
-using System.Security.Cryptography;
 using System.Threading.Tasks;
-using FluentMigrator.Runner.Generators.Postgres;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.World;
 using QuantumCore.API.Game.World.AI;
-using QuantumCore.Core.Networking;
-using QuantumCore.Core.Types;
 using QuantumCore.Core.Utils;
 using QuantumCore.Game.Packets;
-using QuantumCore.Game.PlayerUtils;
 using QuantumCore.Game.World.AI;
 using Serilog;
 
@@ -45,7 +40,8 @@ namespace QuantumCore.Game.World.Entities
         private bool _behaviourInitialized;
         private double _deadTime = 5000;
         
-        public MonsterEntity(IMonsterManager monsterManager, IAnimationManager animationManager, uint id, int x, int y, float rotation = 0) : base(animationManager, World.Instance.GenerateVid())
+        public MonsterEntity(IMonsterManager monsterManager, IAnimationManager animationManager, IWorld world, uint id, int x, int y, float rotation = 0) 
+            : base(animationManager, world.GenerateVid())
         {
             _proto = monsterManager.GetMonster(id);
             PositionX = x;

@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using QuantumCore.API.Game;
 using QuantumCore.API.Game.World;
-using QuantumCore.Game.Packets;
 using QuantumCore.Game.World;
-using QuantumCore.Game.World.Entities;
 
 namespace QuantumCore.Game.Commands
 {
@@ -23,9 +18,8 @@ namespace QuantumCore.Game.Commands
         }
 
         [CommandMethod("Teleports you to a map by their name")]
-        public static async Task GoToMap(IPlayerEntity player, string mapName)
+        public static async Task GoToMap(IWorld world, IPlayerEntity player, string mapName)
         {
-            var world = World.World.Instance;
             var maps = world.FindMapsByName(mapName);
             if (maps.Count > 1)
             {

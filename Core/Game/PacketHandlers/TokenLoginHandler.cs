@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.Game.Types;
+using QuantumCore.API.Game.World;
 using QuantumCore.Auth.Cache;
 using QuantumCore.Core.Cache;
 using QuantumCore.Core.Utils;
@@ -17,12 +18,14 @@ namespace QuantumCore.Game.PacketHandlers
         private readonly IDatabaseManager _databaseManager;
         private readonly ILogger<TokenLoginHandler> _logger;
         private readonly ICacheManager _cacheManager;
+        private readonly IWorld _world;
 
-        public TokenLoginHandler(IDatabaseManager databaseManager, ILogger<TokenLoginHandler> logger, ICacheManager cacheManager)
+        public TokenLoginHandler(IDatabaseManager databaseManager, ILogger<TokenLoginHandler> logger, ICacheManager cacheManager, IWorld world)
         {
             _databaseManager = databaseManager;
             _logger = logger;
             _cacheManager = cacheManager;
+            _world = world;
         }
         
         public async Task ExecuteAsync(PacketContext<TokenLogin> ctx, CancellationToken cancellationToken = default)
@@ -63,7 +66,7 @@ namespace QuantumCore.Game.PacketHandlers
             var i = 0;
             await foreach (var player in Player.GetPlayers(_databaseManager, _cacheManager, token.AccountId).WithCancellation(cancellationToken))
             {
-                var host = World.World.Instance.GetMapHost(player.PositionX, player.PositionY);
+                var host = _world.GetMapHost(player.PositionX, player.PositionY);
                 
                 // todo character slot position
                 characters.CharacterList[i] = Character.FromEntity(player);

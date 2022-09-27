@@ -12,10 +12,13 @@ namespace QuantumCore.Game.Commands
     {
         private readonly IMonsterManager _monsterManager;
         private readonly IAnimationManager _animationManager;
+        private readonly IWorld _world;
 
-        public SpawnCommand(IMonsterManager monsterManager)
+        public SpawnCommand(IMonsterManager monsterManager, IAnimationManager animationManager, IWorld world)
         {
             _monsterManager = monsterManager;
+            _animationManager = animationManager;
+            _world = world;
         }
         
         [CommandMethod]
@@ -34,8 +37,8 @@ namespace QuantumCore.Game.Commands
                 var y = player.PositionY + RandomNumberGenerator.GetInt32(-1500, 1501);
 
                 // Create entity instance
-                var monster = new MonsterEntity(_monsterManager, _animationManager, monsterId, x, y);
-                await World.World.Instance.SpawnEntity(monster);
+                var monster = new MonsterEntity(_monsterManager, _animationManager, _world, monsterId, x, y);
+                await _world.SpawnEntity(monster);
             }
         }
     }

@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.Game.Types;
-using QuantumCore.Core.Networking;
+using QuantumCore.API.Game.World;
 using QuantumCore.Game.Packets;
 
 namespace QuantumCore.Game.PacketHandlers.Loading
@@ -11,10 +11,12 @@ namespace QuantumCore.Game.PacketHandlers.Loading
     public class EnterGameHandler : IPacketHandler<EnterGame>
     {
         private readonly ILogger<EnterGameHandler> _logger;
+        private readonly IWorld _world;
 
-        public EnterGameHandler(ILogger<EnterGameHandler> logger)
+        public EnterGameHandler(ILogger<EnterGameHandler> logger, IWorld world)
         {
             _logger = logger;
+            _world = world;
         }
         
         public async Task ExecuteAsync(PacketContext<EnterGame> ctx, CancellationToken token = default)
@@ -37,7 +39,7 @@ namespace QuantumCore.Game.PacketHandlers.Loading
             await player.Show(ctx.Connection);
             
             // Spawn the player
-            if (!await World.World.Instance.SpawnEntity(player))
+            if (!await _world.SpawnEntity(player))
             {
                 _logger.LogWarning("Failed to spawn player entity");
                 ctx.Connection.Close();

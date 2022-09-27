@@ -91,7 +91,9 @@ namespace QuantumCore.Core.Networking
             var listener = (TcpListener) ar.AsyncState;
             var client = listener!.EndAcceptTcpClient(ar);
             
+            // will dispose once connection finished executing (canceled or disconnect) 
             await using var scope = _serverLifetimeProvider.CreateAsyncScope();
+
             // cannot inject tcp client here
             var connection = ActivatorUtilities.CreateInstance<T>(scope.ServiceProvider, client);
             _connections.TryAdd(connection.Id, connection);

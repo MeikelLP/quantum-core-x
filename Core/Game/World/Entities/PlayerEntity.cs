@@ -8,14 +8,11 @@ using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.World;
 using QuantumCore.Core.Cache;
-using QuantumCore.Core.Constants;
-using QuantumCore.Core.Networking;
 using QuantumCore.Core.Utils;
 using QuantumCore.Database;
 using QuantumCore.Extensions;
 using QuantumCore.Game.Packets;
 using QuantumCore.Game.PlayerUtils;
-using QuantumCore.Game.Quest;
 using Serilog;
 
 namespace QuantumCore.Game.World.Entities
@@ -95,11 +92,12 @@ namespace QuantumCore.Game.World.Entities
         private readonly IExperienceManager _experienceManager;
         private readonly IQuestManager _questManager;
         private readonly ICacheManager _cacheManager;
+        private readonly IWorld _world;
 
-        public PlayerEntity(Player player, GameConnection connection, IItemManager itemManager, IJobManager jobManager, 
+        public PlayerEntity(Player player, GameConnection connection, IItemManager itemManager, IJobManager jobManager,
             IExperienceManager experienceManager, IAnimationManager animationManager, IDatabaseManager databaseManager,
-            IQuestManager questManager, ICacheManager cacheManager) 
-            : base(animationManager, World.Instance.GenerateVid())
+            IQuestManager questManager, ICacheManager cacheManager, IWorld world) 
+            : base(animationManager, world.GenerateVid())
         {
             Connection = connection;
             _itemManager = itemManager;
@@ -107,6 +105,7 @@ namespace QuantumCore.Game.World.Entities
             _experienceManager = experienceManager;
             _questManager = questManager;
             _cacheManager = cacheManager;
+            _world = world;
             Player = new PlayerData {
                 Id = player.Id,
                 AccountId = player.AccountId,
@@ -180,12 +179,12 @@ namespace QuantumCore.Game.World.Entities
 
         private async Task Warp(int x, int y)
         {
-            await World.Instance.DespawnEntity(this);
+            await _world.DespawnEntity(this);
             
             PositionX = x;
             PositionY = y;
             
-            var host = World.Instance.GetMapHost(PositionX, PositionY);
+            var host = _world.GetMapHost(PositionX, PositionY);
 
             await Persist();
             Log.Information("Warp!");
@@ -208,7 +207,7 @@ namespace QuantumCore.Game.World.Entities
                 return;
             }
 
-            await World.Instance.DespawnEntity(this);
+            await _world.DespawnEntity(this);
 
             PositionX = x;
             PositionY = y;
@@ -217,7 +216,7 @@ namespace QuantumCore.Game.World.Entities
             Stop();
 
             // Spawn the player
-            if (!await World.Instance.SpawnEntity(this))
+            if (!await _world.SpawnEntity(this))
             {
                 Log.Warning("Failed to spawn player entity");
                 Connection.Close();

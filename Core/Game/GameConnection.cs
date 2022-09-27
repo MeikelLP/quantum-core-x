@@ -3,24 +3,25 @@ using System.Net.Sockets;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
-using QuantumCore.API.Game;
 using QuantumCore.API.Game.World;
 using QuantumCore.Auth;
 using QuantumCore.Core.Networking;
-using QuantumCore.Game.World.Entities;
 
 namespace QuantumCore.Game
 {
     public class GameConnection : Connection, IGameConnection
     {
+        private readonly IWorld _world;
         public IGameServer Server { get; }
         public Guid? AccountId { get; set; }
         public string Username { get; set; }
         public IPlayerEntity Player { get; set; }
 
-        public GameConnection(GameServer server, TcpClient client, IPacketManager packetManager, ILogger<AuthConnection> logger, PluginExecutor pluginExecutor) 
+        public GameConnection(GameServer server, TcpClient client, IPacketManager packetManager, 
+            ILogger<AuthConnection> logger, PluginExecutor pluginExecutor, IWorld world) 
             : base(logger, pluginExecutor, packetManager)
         {
+            _world = world;
             Server = server;
             Init(client);
         }
@@ -34,7 +35,7 @@ namespace QuantumCore.Game
         {
             if (Player != null)
             {
-                await World.World.Instance.DespawnEntity(Player);
+                await _world.DespawnEntity(Player);
             }
 
             await Server.RemoveConnection(this);

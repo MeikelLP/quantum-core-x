@@ -5,6 +5,7 @@ using Dapper;
 using Dapper.Contrib.Extensions;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
+using QuantumCore.API.Game.World;
 using QuantumCore.Core.Cache;
 using QuantumCore.Core.Networking;
 using QuantumCore.Core.Utils;
@@ -20,14 +21,16 @@ public class CreateCharacterHandler : ISelectPacketHandler<CreateCharacter>
     private readonly IDatabaseManager _databaseManager;
     private readonly IJobManager _jobManager;
     private readonly ICacheManager _cacheManager;
+    private readonly IWorld _world;
 
     public CreateCharacterHandler(ILogger<CreateCharacterHandler> logger, IDatabaseManager databaseManager, 
-        IJobManager jobManager, ICacheManager cacheManager)
+        IJobManager jobManager, ICacheManager cacheManager, IWorld world)
     {
         _logger = logger;
         _databaseManager = databaseManager;
         _jobManager = jobManager;
         _cacheManager = cacheManager;
+        _world = world;
     }
     
     public async Task ExecuteAsync(PacketContext<CreateCharacter> ctx, CancellationToken token = default)
@@ -81,7 +84,7 @@ public class CreateCharacterHandler : ISelectPacketHandler<CreateCharacter>
         var idx = await list.Push(player.Id);
         
         // Query responsible host for the map
-        var host = World.World.Instance.GetMapHost(player.PositionX, player.PositionY);
+        var host = _world.GetMapHost(player.PositionX, player.PositionY);
         
         // Send success response
         var character = Character.FromEntity(player);
