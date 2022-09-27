@@ -60,13 +60,7 @@ public class OutgoingPacketTests
     public void SpawnCharacter()
     {
         var packetCache = _packetManager.GetOutgoingPacket(0x01);
-        var obj = new AutoFaker<SpawnCharacter>()
-            .RuleFor(x => x.Affects, faker => new[]
-            {
-                faker.Random.UInt(),
-                faker.Random.UInt()
-            })
-            .Generate();
+        var obj = new AutoFaker<SpawnCharacter>().Generate();
         var bytes = packetCache.Serialize(obj);
 
         bytes.Should().Equal(
@@ -84,7 +78,7 @@ public class OutgoingPacketTests
                 .Append(obj.MoveSpeed)
                 .Append(obj.AttackSpeed)
                 .Append(obj.State)
-                .Concat(obj.Affects.SelectMany(BitConverter.GetBytes))
+                .Concat(BitConverter.GetBytes(obj.Affects))
         );
     }
 
@@ -279,11 +273,6 @@ public class OutgoingPacketTests
                 faker.Random.UShort(),
                 faker.Random.UShort()
             })
-            .RuleFor(x => x.Affects, faker => new[]
-            {
-                faker.Random.UInt(),
-                faker.Random.UInt()
-            })
             .Generate();
         var bytes = packetCache.Serialize(obj);
 
@@ -297,7 +286,7 @@ public class OutgoingPacketTests
                 .Append(obj.MoveSpeed)
                 .Append(obj.AttackSpeed)
                 .Append(obj.State)
-                .Concat(obj.Affects.SelectMany(BitConverter.GetBytes))
+                .Concat(BitConverter.GetBytes(obj.Affects))
                 .Concat(BitConverter.GetBytes(obj.GuildId))
                 .Concat(BitConverter.GetBytes(obj.RankPoints))
                 .Append(obj.PkMode)

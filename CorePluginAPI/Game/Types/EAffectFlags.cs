@@ -1,0 +1,50 @@
+﻿using System;
+
+namespace QuantumCore.API.Game.Types;
+
+[Flags]
+public enum EAffectFlags : ulong
+{
+    NONE = 0,
+    GAME_MASTER = 1UL << 0,
+    INVISIBILITY = 1UL << 1,
+    SPAWN = 1UL << 2,
+    POISON = 1UL << 3,
+    SLOW = 1UL << 4,
+    STUN = 1UL << 5,
+    DUNGEON_READY = 1UL << 6,
+    DUNGEON_UNIQUE = 1UL << 7,
+    BUILDING_CONSTRUCTION_SMALL = 1UL << 8,
+    BUILDING_CONSTRUCTION_LARGE = 1UL << 9,
+    BUILDING_UPGRADE = 1UL << 10,
+    MOV_SPEED_POTION = 1UL << 11,
+    AFF_ATT_SPEED_POTION = 1UL << 12,
+    AFF_FISH_MIND = 1UL << 13,
+    JEONGWIHON = 1UL << 14,
+    GEOMGYEONG = 1UL << 15,
+    CHEONGEUN = 1UL << 16,
+    GYEONGGONG = 1UL << 17,
+    EUNHYUNG = 1UL << 18,
+    GWIGUM = 1UL << 19,
+    TERROR = 1UL << 20,
+    JUMAGAP = 1UL << 21,
+    HOSIN = 1UL << 22,
+    BOHO = 1UL << 23,
+    KWAESOK = 1UL << 24,
+    MANASHIELD = 1UL << 25,
+    MUYEONG = 1UL << 26,
+    REVIVE_INVISIBLE = 1UL << 27,
+    FIRE = 1UL << 28,
+    GICHEON = 1UL << 29,
+    JEUNGRYEOK = 1UL << 30,
+    TANHWAN_DASH = 1UL << 31,
+    PABEOP = 1UL << 32,
+    CHEONGEUN_WITH_FALL = 1UL << 33,
+    POLYMORPH = 1UL << 34,
+    WAR_FLAG1 = 1UL << 35,
+    WAR_FLAG2 = 1UL << 36,
+    WAR_FLAG3 = 1UL << 37,
+    CHINA_FIREWORK = 1UL << 38,
+    HAIR = 1UL << 39,
+    GERMANY = 1UL << 40
+};

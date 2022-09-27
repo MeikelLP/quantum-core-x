@@ -52,5 +52,6 @@ namespace QuantumCore.API.Game.World
         Task Show(IConnection connection);
         void Disconnect();
         string ToString();
+        ValueTask<bool> TryAddEffect(EffectData data);
     }
 }

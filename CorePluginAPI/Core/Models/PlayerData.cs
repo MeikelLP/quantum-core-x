@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using QuantumCore.API.Game.Types;
 
 namespace QuantumCore.API.Core.Models;
 
@@ -26,4 +28,5 @@ public class PlayerData
     public uint HairPart { get; set; }
     public uint GivenStatusPoints { get; set; }
     public uint AvailableStatusPoints { get; set; }
+    public List<EffectData> Effects { get; set; } = new();
 }

@@ -8,14 +8,12 @@ using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.World;
 using QuantumCore.Core.Cache;
-using QuantumCore.Core.Constants;
-using QuantumCore.Core.Networking;
 using QuantumCore.Core.Utils;
 using QuantumCore.Database;
 using QuantumCore.Extensions;
+using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Packets;
 using QuantumCore.Game.PlayerUtils;
-using QuantumCore.Game.Quest;
 using Serilog;
 
 namespace QuantumCore.Game.World.Entities
@@ -136,10 +134,13 @@ namespace QuantumCore.Game.World.Entities
             Inventory = new Inventory(itemManager, databaseManager, _cacheManager, player.Id, 1, 5, 9, 2);
             QuickSlotBar = new QuickSlotBar(_cacheManager, this);
 
-            MovementSpeed = 150;
+            MovementSpeed = 100;
             EntityClass = player.PlayerClass;
 
             Groups = new List<Guid>();
+            // TODO copy from persistent storage
+            // Player.Effects.AddRange(player.Effects); // copy into our collection - do not use the collection reference
+            MovementSpeed = (byte)(100 + Player.Effects.Where(x => x.Type == EEffectType.POINT_MOV_SPEED).Sum(x => x.Value));
         }
 
         public async Task Load()
@@ -436,6 +437,17 @@ namespace QuantumCore.Game.World.Entities
             return item.Values[5];
         }
 
+        public async ValueTask<bool> TryAddEffect(EffectData data)
+        {
+            if (Player.Effects.Any(x => x.Type == data.Type)) return false;
+
+            Player.Effects.Add(data);
+            // SendAffectAdd(data);
+            await Persist();
+
+            return true;
+        }
+
         public override async ValueTask AddPoint(EPoints point, int value)
         {
             if (value == 0)
@@ -490,7 +502,9 @@ namespace QuantumCore.Game.World.Entities
                     break;
                 case EPoints.StatusPoints:
                     Player.AvailableStatusPoints += (uint) value;
-
+                    break;
+                case EPoints.MoveSpeed:
+                    MovementSpeed = (byte) Math.Clamp(MovementSpeed + value, 0, byte.MaxValue);
                     break;
                 default:
                     Log.Error($"Failed to add point to {point}, unsupported");
@@ -595,6 +609,8 @@ namespace QuantumCore.Game.World.Entities
                     }
 
                     return 0;
+                case EPoints.MoveSpeed:
+                    return MovementSpeed;
             }
         }
 
@@ -949,7 +965,8 @@ namespace QuantumCore.Game.World.Entities
                     (ushort) (Inventory.EquipmentWindow.Hair?.ItemId ?? 0)
                 },
                 MoveSpeed = MovementSpeed,
-                AttackSpeed = _attackSpeed
+                AttackSpeed = _attackSpeed,
+                Affects = (ulong)Player.Effects.GetAffectFlags() 
             };
             
             await Connection.Send(packet);

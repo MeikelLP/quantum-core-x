@@ -150,6 +150,10 @@ namespace QuantumCore.Core.Packets
                 bw.Write((byte) value);
             else if (type == typeof(float))
                 bw.Write((float) value);
+            else if (type == typeof(ulong))
+                bw.Write((ulong) value);
+            else if (type == typeof(long))
+                bw.Write((long) value);
             else if (type == typeof(string))
             {
                 var str = (string) value;
@@ -473,7 +477,11 @@ namespace QuantumCore.Core.Packets
                     type = field.EnumType;
                 }
 
-                if (type == typeof(uint) || type == typeof(int))
+                if (type == typeof(ulong) || type == typeof(ulong))
+                {
+                    Size += sizeof(ulong) * multiplier;
+                }
+                else if (type == typeof(uint) || type == typeof(int))
                 {
                     Size += 4 * multiplier;
                 }
