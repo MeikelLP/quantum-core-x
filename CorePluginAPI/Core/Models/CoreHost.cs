@@ -1,6 +1,6 @@
 ﻿using System.Net;
 
-namespace QuantumCore.Core.Utils;
+namespace QuantumCore.API.Core.Models;
 
 public struct CoreHost
 {
