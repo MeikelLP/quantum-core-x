@@ -42,7 +42,7 @@ namespace QuantumCore.Core.Cache
             return obj;
         }
 
-        public RedisList<T> CreateList<T>(string name) => _redis.CreateList<T>(name);
+        public IRedisListWrapper<T> CreateList<T>(string name) => new RedisListWrapper<T>(_redis.CreateList<T>(name));
         public ValueTask<long> Del(string key) => _redis.Del(key);
         public ValueTask<string> Set(string key, object item) => _redis.Set(key, item);
         public ValueTask<T> Get<T>(string key) => _redis.Get<T>(key);

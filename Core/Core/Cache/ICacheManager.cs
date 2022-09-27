@@ -5,7 +5,7 @@ namespace QuantumCore.Core.Cache;
 
 public interface ICacheManager
 {
-    RedisList<T> CreateList<T>(string name);
+    IRedisListWrapper<T> CreateList<T>(string name);
     ValueTask<long> Del(string key);
     ValueTask<string> Set(string key, object item);
     ValueTask<T> Get<T>(string key);
