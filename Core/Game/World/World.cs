@@ -9,10 +9,12 @@ using System.Threading.Tasks;
 using BeetleX.Redis;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
+using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game.World;
 using QuantumCore.Core.Cache;
 // using QuantumCore.Core.API;
 using QuantumCore.Core.Utils;
+using QuantumCore.Game.Quest;
 using QuantumCore.Game.World.Entities;
 using Serilog;
 using Tomlyn;
@@ -27,7 +29,7 @@ namespace QuantumCore.Game.World
         private uint _vid;
         private readonly Grid<IMap> _world = new(0, 0);
         private readonly Dictionary<string, IMap> _maps = new();
-        private readonly Dictionary<string, PlayerEntity> _players = new();
+        private readonly Dictionary<string, IPlayerEntity> _players = new();
         private readonly Dictionary<int, SpawnGroup> _groups = new();
 
         private readonly Dictionary<int, Shop> _staticShops = new();
@@ -38,7 +40,7 @@ namespace QuantumCore.Game.World
         private readonly IAnimationManager _animationManager;
         private readonly ICacheManager _cacheManager;
 
-        public static World Instance { get; private set; }
+        public static IWorld Instance { get; set; }
         
         public World(ILogger<World> logger, PluginExecutor pluginExecutor, IItemManager itemManager, 
             IMonsterManager monsterManager, IAnimationManager animationManager, ICacheManager cacheManager)
@@ -142,7 +144,7 @@ namespace QuantumCore.Game.World
                 {
                     foreach (var group in groups)
                     {
-                        var g = SpawnGroup.FromToml(group);
+                        var g = WorldUtils.GroupFromToml(group);
                         _groups[g.Id] = g;
                     }
                 }
@@ -371,7 +373,7 @@ namespace QuantumCore.Game.World
             return ++_vid;
         }
 
-        private void AddPlayer(PlayerEntity e)
+        private void AddPlayer(IPlayerEntity e)
         {
             if (_players.ContainsKey(e.Name))
                 _players[e.Name] = e;
@@ -379,7 +381,7 @@ namespace QuantumCore.Game.World
                 _players.Add(e.Name, e);
         }
 
-        public void RemovePlayer(PlayerEntity e)
+        public void RemovePlayer(IPlayerEntity e)
         {
             _players.Remove(e.Name);
         }
