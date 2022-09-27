@@ -22,7 +22,7 @@ namespace QuantumCore.Game.World.Entities
         public override EEntityType Type => EEntityType.Player;
 
         public string Name => Player.Name;
-        public IConnection Connection { get; }
+        public IGameConnection Connection { get; }
         public PlayerData Player { get; private set; }
         public IInventory Inventory { get; private set; }
         public IEntity Target { get; set; }
@@ -94,7 +94,7 @@ namespace QuantumCore.Game.World.Entities
         private readonly ICacheManager _cacheManager;
         private readonly IWorld _world;
 
-        public PlayerEntity(Player player, GameConnection connection, IItemManager itemManager, IJobManager jobManager,
+        public PlayerEntity(Player player, IGameConnection connection, IItemManager itemManager, IJobManager jobManager,
             IExperienceManager experienceManager, IAnimationManager animationManager, IDatabaseManager databaseManager,
             IQuestManager questManager, ICacheManager cacheManager, IWorld world) 
             : base(animationManager, world.GenerateVid())
