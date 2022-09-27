@@ -52,16 +52,15 @@ public static class ItemExtensions
         {
             Log.Debug($"Query items for player {player} in window {window} from database");
             using var db = databaseManager.GetGameDatabase();
-            var ids = await db.QueryAsync(
+            var ids = await db.QueryAsync<Guid>(
                 "SELECT Id FROM items WHERE PlayerId = @PlayerId AND `Window` = @Window",
                 new { PlayerId = player, Window = window });
 
-            foreach (var row in ids)
+            foreach (var id in ids)
             {
-                Guid itemId = row.Id;
-                await list.Push(itemId);
+                await list.Push(id);
 
-                yield return await GetItem(databaseManager, cacheManager, itemId);
+                yield return await GetItem(databaseManager, cacheManager, id);
             }
         }
     }
