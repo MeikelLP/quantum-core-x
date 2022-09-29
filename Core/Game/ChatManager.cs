@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Threading.Tasks;
-using BeetleX.Redis;
 using QuantumCore.API;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.World;
@@ -21,7 +20,7 @@ public class ChatManager : IChatManager
         public string Message { get; set; }
     }
 
-    private Subscriber _subscriber;
+    private IRedisSubscriber _subscriber;
     private Guid _id;
 
     public ChatManager(ICacheManager cacheManager)

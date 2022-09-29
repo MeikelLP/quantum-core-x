@@ -50,7 +50,7 @@ namespace QuantumCore.Core.Cache
         public ValueTask<long> Expire(string key, int seconds) => _redis.Expire(key, seconds);
         public ValueTask<bool> Ping() => _redis.Ping();
         public ValueTask<long> Publish(string key, object obj) => _redis.Publish(key, obj);
-        public Subscriber Subscribe() => _redis.Subscribe();
+        public IRedisSubscriber Subscribe() => new RedisSubscriber(_redis.Subscribe());
         public ValueTask<string[]> Keys(string key) => _redis.Keys(key);
         public ValueTask<long> Persist(string key) => _redis.Persist(key);
     }

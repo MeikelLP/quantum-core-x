@@ -1,5 +1,4 @@
 using System.Threading.Tasks;
-using BeetleX.Redis;
 
 namespace QuantumCore.Core.Cache;
 
@@ -14,7 +13,7 @@ public interface ICacheManager
     ValueTask<long> Expire(string key, int seconds);
     ValueTask<bool> Ping();
     ValueTask<long> Publish(string key, object obj);
-    Subscriber Subscribe();
+    IRedisSubscriber Subscribe();
     ValueTask<string[]> Keys(string key);
     ValueTask<long> Persist(string key);
 }

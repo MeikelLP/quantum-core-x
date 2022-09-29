@@ -34,7 +34,7 @@ namespace QuantumCore.Game.World
 
         private readonly Dictionary<int, Shop> _staticShops = new();
 
-        private Subscriber _mapSubscriber;
+        private IRedisSubscriber _mapSubscriber;
         private readonly IItemManager _itemManager;
         private readonly IMonsterManager _monsterManager;
         private readonly IAnimationManager _animationManager;
