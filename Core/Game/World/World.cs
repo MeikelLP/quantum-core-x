@@ -6,8 +6,8 @@ using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using BeetleX.Redis;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game.World;
@@ -18,7 +18,6 @@ using QuantumCore.Game.World.Entities;
 using Serilog;
 using Tomlyn;
 using Tomlyn.Model;
-// using QuantumCore.Core.API;
 
 namespace QuantumCore.Game.World
 {
@@ -39,9 +38,10 @@ namespace QuantumCore.Game.World
         private readonly IMonsterManager _monsterManager;
         private readonly IAnimationManager _animationManager;
         private readonly ICacheManager _cacheManager;
-        
+        private readonly IOptions<GameOptions> _options;
+
         public World(ILogger<World> logger, PluginExecutor pluginExecutor, IItemManager itemManager, 
-            IMonsterManager monsterManager, IAnimationManager animationManager, ICacheManager cacheManager)
+            IMonsterManager monsterManager, IAnimationManager animationManager, ICacheManager cacheManager, IOptions<GameOptions> options)
         {
             _logger = logger;
             _pluginExecutor = pluginExecutor;
@@ -49,6 +49,7 @@ namespace QuantumCore.Game.World
             _monsterManager = monsterManager;
             _animationManager = animationManager;
             _cacheManager = cacheManager;
+            _options = options;
             _vid = 0;
         }
         
@@ -188,7 +189,7 @@ namespace QuantumCore.Game.World
                         }
                         else
                         {
-                            map = new Map(_monsterManager, _animationManager, _cacheManager, this, mapName, positionX, positionY, width, height);    
+                            map = new Map(_monsterManager, _animationManager, _cacheManager, this, _options, mapName, positionX, positionY, width, height);    
                         }
                         
                         

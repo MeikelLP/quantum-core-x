@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Options;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game.World;
@@ -13,6 +14,7 @@ using QuantumCore.Game.World.Entities;
 using Serilog;
 using Tomlyn;
 using Tomlyn.Model;
+
 // using QuantumCore.Core.API;
 
 namespace QuantumCore.Game.World
@@ -39,14 +41,16 @@ namespace QuantumCore.Game.World
         private readonly IAnimationManager _animationManager;
         private readonly ICacheManager _cacheManager;
         private readonly IWorld _world;
+        private readonly GameOptions _options;
 
-        public Map(IMonsterManager monsterManager, IAnimationManager animationManager, ICacheManager cacheManager, IWorld world,
+        public Map(IMonsterManager monsterManager, IAnimationManager animationManager, ICacheManager cacheManager, IWorld world, IOptions<GameOptions> options,
             string name, uint x, uint y, uint width, uint height)
         {
             _monsterManager = monsterManager;
             _animationManager = animationManager;
             _cacheManager = cacheManager;
             _world = world;
+            _options = options.Value;
             Name = name;
             PositionX = x;
             PositionY = y;
@@ -59,8 +63,8 @@ namespace QuantumCore.Game.World
         {
             Log.Debug($"Load map '{Name}' at {PositionX}x{PositionY} (size {Width}x{Height})");
 
-            await _cacheManager.Set($"maps:{Name}", IpUtils.PublicIP + ":" + GameServer.Instance.Port);
-            await _cacheManager.Publish("maps", $"{Name} {IpUtils.PublicIP}:{GameServer.Instance.Port}");
+            await _cacheManager.Set($"maps:{Name}", IpUtils.PublicIP + ":" + _options.Port);
+            await _cacheManager.Publish("maps", $"{Name} {IpUtils.PublicIP}:{_options.Port}");
 
             // Load map spawn data
             var spawnFile = Path.Join("data", "maps", Name, "spawn.toml");
