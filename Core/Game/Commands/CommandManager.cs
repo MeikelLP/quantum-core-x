@@ -48,8 +48,8 @@ namespace QuantumCore.Game.Commands
             if (assembly == null) assembly = Assembly.GetAssembly(typeof(CommandManager))!;
             
             var types = assembly.GetTypes().Where(t => string.Equals(t.Namespace, ns, StringComparison.Ordinal))
-                .Where(t => (typeof(ICommandHandler<>).IsAssignableFrom(t) 
-                            || typeof(ICommandHandler).IsAssignableFrom(t)) && t.IsClass && !t.IsAbstract)
+                .Where(t => (t.GetInterfaces().Any(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(ICommandHandler<>))
+                             || typeof(ICommandHandler).IsAssignableFrom(t)) && t.IsClass && !t.IsAbstract)
                 .ToArray();
 
             foreach (var type in types)
@@ -64,9 +64,11 @@ namespace QuantumCore.Game.Commands
                 var desc = cmdAttr.Description;
                 var bypass = type.GetCustomAttribute<CommandNoPermissionAttribute>() is not null;
                 Type optionsType = null;
-                if (typeof(ICommandHandler<>).IsAssignableFrom(type))
+                var intf = type.GetInterfaces().FirstOrDefault(x =>
+                    x.IsGenericType && x.GetGenericTypeDefinition() == typeof(ICommandHandler<>));
+                if (intf is not null)
                 {
-                    optionsType = type.GetInterfaces().FirstOrDefault(x => x == typeof(ICommandHandler<>));
+                    optionsType = intf.GenericTypeArguments[0];
                 }
                 _commandHandlers.Add(cmd, new CommandDescriptor(type, cmd, desc, optionsType, bypass));
             }
@@ -175,8 +177,8 @@ namespace QuantumCore.Game.Commands
 
         public async Task Handle(IGameConnection connection, string chatline)
         {
-            var args = CommandLineParser.SplitCommandLineIntoArguments(chatline, false).ToArray();
-            var command = args[0][1..];
+            var args = CommandLineParser.SplitCommandLineIntoArguments(chatline.TrimStart('/'), false).ToArray();
+            var command = args[0];
 
             if (_commandHandlers.TryGetValue(command, out var commandCache))
             {
@@ -194,24 +196,54 @@ namespace QuantumCore.Game.Commands
 
                 if (commandCache.OptionsType is not null)
                 {
-                    var parserResult = Parser.Default.ParseArguments(args, _commandHandlers.Values.Select(x => x.Type).ToArray());
-                    var methodInfo = typeof(ParserResultExtensions).GetMethod(nameof(ParserResultExtensions.MapResult),
-                        new[] { typeof(Func<,>), typeof(Func<,>) })!;
-                    var genericMethod = methodInfo.MakeGenericMethod(commandCache.Type, commandCache.OptionsType);
+                    var parserMethod = typeof(Parser)
+                        .GetMethods()
+                        .Single(x => x.Name == nameof(Parser.ParseArguments) && x.GetParameters().Length == 1)
+                        .MakeGenericMethod(commandCache.OptionsType);
+                    
+                    // basically makes a ICommandHandler<TCommandOptions> for the given command
+                    // creates a context with the given CommandContext<TCommandContext>
+                    // invokes the command
+                    // this may be improved in the future (caching)
+
+                    var parserResult = parserMethod.Invoke(Parser.Default, new object [] { args.Skip(1).ToArray() });
+                    var methodInfo = typeof(ParserResultExtensions).GetMethods().Single(x =>
+                    {
+                        var nameMatches = x.Name == nameof(ParserResultExtensions.MapResult);
+                        if (!nameMatches) return false; // return early
+                        var parameters = x.GetParameters();
+                        if (parameters.Length != 3) return false; // return early
+                        var param1 = parameters[0].ParameterType;
+                        var param2 = parameters[1].ParameterType;
+                        var param3 = parameters[2].ParameterType;
+                        return param1.IsGenericType &&
+                               param1.GetGenericTypeDefinition() == typeof(ParserResult<>) &&
+                               param1.GenericTypeArguments[0].IsGenericParameter &&
+                               
+                               param2.IsGenericType &&
+                               param2.GetGenericTypeDefinition() == typeof(Func<,>) &&
+                               
+                               param3.IsGenericType &&
+                               param3.GetGenericTypeDefinition() == typeof(Func<,>) &&
+                               param3.GenericTypeArguments[0] == typeof(IEnumerable<Error>);
+                    })!;
+                    var genericMethod = methodInfo.MakeGenericMethod(commandCache.OptionsType, commandCache.OptionsType);
                     var successParam = Expression.Parameter(commandCache.OptionsType, "x");
                     var successExpression = Expression.Lambda(successParam, successParam);
+                    var errorParam = Expression.Parameter(typeof(IEnumerable<Error>), "x");
+                    var errorConstant = Expression.Constant(Activator.CreateInstance(commandCache.OptionsType));
+                    var errorExpression = Expression.Lambda(errorConstant, errorParam);
                     var options =
-                        genericMethod.Invoke(null, new object[] { parserResult, successExpression.Compile() });
+                        genericMethod.Invoke(null, new object[] { parserResult, successExpression.Compile(), errorExpression.Compile() });
 
-                    var ctx = Activator.CreateInstance(typeof(CommandContext).MakeGenericType(commandCache.OptionsType),
+                    var ctx = Activator.CreateInstance(typeof(CommandContext<>).MakeGenericType(commandCache.OptionsType),
                         new object[] {
                                 connection.Player,
                                 options
                         });
                     var cmdExecuteMethodInfo = typeof(ICommandHandler<>).MakeGenericType(commandCache.OptionsType)
                         .GetMethod(nameof(ICommandHandler<object>.ExecuteAsync))!;
-                    var cmd = ActivatorUtilities.CreateInstance(_serviceProvider,
-                        typeof(ICommandHandler<>).MakeGenericType(commandCache.OptionsType));
+                    var cmd = ActivatorUtilities.CreateInstance(_serviceProvider, commandCache.Type);
 
                     await (Task) cmdExecuteMethodInfo.Invoke(cmd, new object[] { ctx })!;
                 }
