@@ -1,29 +1,20 @@
 ﻿using System.Threading.Tasks;
 using QuantumCore.API.Game;
 using QuantumCore.API.Game.Types;
-using QuantumCore.API.Game.World;
-using QuantumCore.Game.PlayerUtils;
-using QuantumCore.Game.World.Entities;
 
 namespace QuantumCore.Game.Commands
 {
     [Command("debug_damage", "Print debug information regarding damage calculation")]
-    public class DebugCommandDamage
+    public class DebugCommandDamage : ICommandHandler
     {
-        [CommandMethod]
-        public static async Task Command(IPlayerEntity iplayer)
+        public async Task ExecuteAsync(CommandContext context)
         {
-            if (iplayer is not PlayerEntity player)
-            {
-                return;
-            }
-            
-            var minWeapon = player.GetPoint(EPoints.MinWeaponDamage);
-            var maxWeapon = player.GetPoint(EPoints.MaxWeaponDamage);
-            var minAttack = player.GetPoint(EPoints.MinAttackDamage);
-            var maxAttack = player.GetPoint(EPoints.MaxAttackDamage);
-            await player.SendChatMessage($"Weapon Damage: {minWeapon}-{maxWeapon}");
-            await player.SendChatMessage($"Attack Damage: {minAttack}-{maxAttack}");
+            var minWeapon = context.Player.GetPoint(EPoints.MinWeaponDamage);
+            var maxWeapon = context.Player.GetPoint(EPoints.MaxWeaponDamage);
+            var minAttack = context.Player.GetPoint(EPoints.MinAttackDamage);
+            var maxAttack = context.Player.GetPoint(EPoints.MaxAttackDamage);
+            await context.Player.SendChatMessage($"Weapon Damage: {minWeapon}-{maxWeapon}");
+            await context.Player.SendChatMessage($"Attack Damage: {minAttack}-{maxAttack}");
         }
     }
 }

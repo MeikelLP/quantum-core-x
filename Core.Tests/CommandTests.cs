@@ -1,10 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Threading.Tasks;
 using AutoBogus;
 using Bogus;
 using Dapper;
+using FluentAssertions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -13,12 +15,14 @@ using Moq;
 using Moq.Dapper;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
+using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.World;
 using QuantumCore.Core.Cache;
 using QuantumCore.Database;
 using QuantumCore.Extensions;
 using QuantumCore.Game;
 using QuantumCore.Game.Commands;
+using QuantumCore.Game.Packets;
 using QuantumCore.Game.PlayerUtils;
 using QuantumCore.Game.World;
 using QuantumCore.Game.World.Entities;
@@ -29,22 +33,29 @@ using Xunit.Abstractions;
 
 namespace Core.Tests;
 
-public class CommandTests
+public class CommandTests : IAsyncLifetime
 {
     private readonly ICommandManager _commandManager;
     private readonly IGameConnection _connection;
     private readonly ServiceProvider _services;
     private readonly IPlayerEntity _player;
     private readonly Faker<Player> _playerDataFaker;
+    private readonly List<object> _sentObjects = new();
 
     public CommandTests(ITestOutputHelper testOutputHelper)
     {        
         _playerDataFaker = new AutoFaker<Player>()
+            .RuleFor(x => x.Level, _ => (byte)1)
+            .RuleFor(x => x.St, _ => (byte)1)
+            .RuleFor(x => x.Dx, _ => (byte)1)
             .RuleFor(x => x.PositionX, _ => (int)(10 * Map.MapUnit))
             .RuleFor(x => x.PositionY, _ => (int)(26 * Map.MapUnit));
+        var jobManagerMock = new Mock<IJobManager>();
+        jobManagerMock.Setup(x => x.Get(It.IsAny<byte>())).Returns(new Job());
         var itemManagerMock = new Mock<IItemManager>();
         itemManagerMock.Setup(x => x.GetItem(It.IsAny<uint>())).Returns(() => new AutoFaker<ItemData>().Generate());
         var connectionMock = new Mock<IGameConnection>();
+        connectionMock.Setup(x => x.Send(It.IsAny<object>())).Callback<object>(obj => _sentObjects.Add(obj));
         var cacheManagerMock = new Mock<ICacheManager>();
         var redisListWrapperMock = new Mock<IRedisListWrapper<Guid>>();
         var redisSubscriberWrapperMock = new Mock<IRedisSubscriber>();
@@ -68,7 +79,7 @@ public class CommandTests
             .Replace(new ServiceDescriptor(typeof(IItemManager), _ => itemManagerMock.Object, ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(ICacheManager), _ => cacheManagerMock.Object, ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(IDatabaseManager), _ => databaseManagerMock.Object, ServiceLifetime.Singleton))
-            .Replace(new ServiceDescriptor(typeof(IJobManager), _ => new Mock<IJobManager>().Object, ServiceLifetime.Singleton))
+            .Replace(new ServiceDescriptor(typeof(IJobManager), _ => jobManagerMock.Object, ServiceLifetime.Singleton))
             .AddSingleton<IConfiguration>(_ => new ConfigurationBuilder().Build())
             .AddSingleton(_ => connectionMock.Object)
             .AddSingleton<IPlayerEntity, PlayerEntity>()
@@ -81,10 +92,19 @@ public class CommandTests
         _player = _services.GetRequiredService<IPlayerEntity>();
     }
 
+    public async Task InitializeAsync()
+    {
+        await _player.Load();
+    }
+
+    public Task DisposeAsync()
+    {
+        return Task.CompletedTask;
+    }
+
     [Fact]
     public async Task ClearInventoryCommand()
     {
-        await _player.Load();
         await _player.Inventory.PlaceItem(new ItemInstance
         {
             Id = Guid.NewGuid(),
@@ -102,8 +122,6 @@ public class CommandTests
     public async Task CommandTeleportTo()
     {
         var world = await PrepareWorldAsync();
-        
-        await _player.Load();
         var player2 = ActivatorUtilities.CreateInstance<PlayerEntity>(_services, _playerDataFaker.Generate());
         await world.SpawnEntity(_player);
         await world.SpawnEntity(player2);
@@ -122,8 +140,6 @@ public class CommandTests
     public async Task CommandTeleportHere()
     {
         var world = await PrepareWorldAsync();
-
-        await _player.Load();
         var player2 = ActivatorUtilities.CreateInstance<PlayerEntity>(_services, _playerDataFaker.Generate());
         await world.SpawnEntity(_player);
         await world.SpawnEntity(player2);
@@ -142,6 +158,15 @@ public class CommandTests
     [Fact]
     public async Task DebugCommand()
     {
+        await _commandManager.Handle(_connection, "debug_damage");
+
+        // simple calculation just for this test
+        var minAttack = _player.GetPoint(EPoints.Level) + _player.GetPoint(EPoints.St);
+        var maxAttack = _player.GetPoint(EPoints.Level) + _player.GetPoint(EPoints.St);
+        const int minWeapon = 0;
+        const int maxWeapon = 0;
+        _sentObjects.Should().ContainEquivalentOf(new ChatOutcoming { Message = $"Weapon Damage: {minWeapon}-{maxWeapon}" }, cfg => cfg.Including(x => x.Message));
+        _sentObjects.Should().ContainEquivalentOf(new ChatOutcoming { Message = $"Attack Damage: {minAttack}-{maxAttack}" }, cfg => cfg.Including(x => x.Message));
     }
 
     [Fact]
