@@ -1,24 +1,48 @@
 ﻿using System.Threading.Tasks;
+using CommandLine;
+using JetBrains.Annotations;
 using QuantumCore.API.Game;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.World;
 
 namespace QuantumCore.Game.Commands;
 
-[Command("exp", "Gives experience to a player")]
-public class ExperienceCommand
+[Command("exp", "Give experience to other players")]
+public class ExperienceCommand : ICommandHandler<ExperienceOtherOptions>
 {
-    [CommandMethod]
-    public static async Task Self(IPlayerEntity player, int experience)
+    private readonly IWorld _world;
+
+    public ExperienceCommand(IWorld world)
     {
-        await player.AddPoint(EPoints.Experience, experience);
-        await player.SendPoints();
+        _world = world;
     }
 
-    [CommandMethod]
-    public static async Task Other(IPlayerEntity player, IPlayerEntity target, int experience)
+    public async Task ExecuteAsync(CommandContext<ExperienceOtherOptions> context)
     {
-        await target.AddPoint(EPoints.Experience, experience);
-        await target.SendPoints();
+        var target = context.Player;
+        if (!string.IsNullOrWhiteSpace(context.Arguments.Target))
+        {
+            target = _world.GetPlayer(context.Arguments.Target);
+        }
+
+        if (target is null)
+        {
+            await context.Player.SendChatMessage("Target not found!");
+        }
+        else
+        {
+            await target.AddPoint(EPoints.Experience, context.Arguments.Value);
+            await target.SendPoints();   
+        }
     }
+}
+
+public class ExperienceOtherOptions
+{
+    [Value(0)]
+    public int Value { get; set; }
+
+    [Value(1)] 
+    [CanBeNull] 
+    public string Target { get; set; }
 }

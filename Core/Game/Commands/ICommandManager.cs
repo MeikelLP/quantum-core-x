@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using QuantumCore.API;
 using QuantumCore.API.Game;
 using QuantumCore.API.Game.World;
-using QuantumCore.Game.World.Entities;
 
 namespace QuantumCore.Game.Commands;
 
@@ -17,6 +16,5 @@ public interface ICommandManager
     bool HavePerm(Guid group, string cmd);
     bool CanUseCommand(IPlayerEntity player, string cmd);
     Task Handle(IGameConnection connection, string chatline);
-    Dictionary<string, CommandCache> Commands { get; }
     Dictionary<Guid, PermissionGroup> Groups { get; }
 }

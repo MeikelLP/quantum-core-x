@@ -25,8 +25,6 @@ namespace QuantumCore.Game.Commands
         private readonly IDatabaseManager _databaseManager;
         private readonly ICacheManager _cacheManager;
         private readonly IWorld _world;
-        public Dictionary<string, CommandCache> Commands { get; } = new ();
-
         private readonly Dictionary<string, CommandDescriptor> _commandHandlers = new();
         public Dictionary<Guid, PermissionGroup> Groups { get; } = new ();
 

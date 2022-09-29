@@ -48,8 +48,11 @@ public class CommandTests : IAsyncLifetime
             .RuleFor(x => x.Level, _ => (byte)1)
             .RuleFor(x => x.St, _ => (byte)1)
             .RuleFor(x => x.Dx, _ => (byte)1)
+            .RuleFor(x => x.Experience, _ => (uint)0)
             .RuleFor(x => x.PositionX, _ => (int)(10 * Map.MapUnit))
             .RuleFor(x => x.PositionY, _ => (int)(26 * Map.MapUnit));
+        var experienceManagerMock = new Mock<IExperienceManager>();
+        experienceManagerMock.Setup(x => x.GetNeededExperience(It.IsAny<byte>())).Returns(1000);
         var jobManagerMock = new Mock<IJobManager>();
         jobManagerMock.Setup(x => x.Get(It.IsAny<byte>())).Returns(new Job());
         var itemManagerMock = new Mock<IItemManager>();
@@ -80,6 +83,7 @@ public class CommandTests : IAsyncLifetime
             .Replace(new ServiceDescriptor(typeof(ICacheManager), _ => cacheManagerMock.Object, ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(IDatabaseManager), _ => databaseManagerMock.Object, ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(IJobManager), _ => jobManagerMock.Object, ServiceLifetime.Singleton))
+            .Replace(new ServiceDescriptor(typeof(IExperienceManager), _ => experienceManagerMock.Object, ServiceLifetime.Singleton))
             .AddSingleton<IConfiguration>(_ => new ConfigurationBuilder().Build())
             .AddSingleton(_ => connectionMock.Object)
             .AddSingleton<IPlayerEntity, PlayerEntity>()
@@ -170,8 +174,24 @@ public class CommandTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task ExperienceCommand()
+    public async Task ExperienceSelfCommand()
     {
+        await _commandManager.Handle(_connection, "/exp 500");
+
+        _player.GetPoint(EPoints.Experience).Should().Be(500);
+    }
+
+    [Fact]
+    public async Task ExperienceOtherCommand()
+    {
+        var world = await PrepareWorldAsync();
+        var player2 = ActivatorUtilities.CreateInstance<PlayerEntity>(_services, _playerDataFaker.Generate());
+        await world.SpawnEntity(_player);
+        await world.SpawnEntity(player2);
+        
+        await _commandManager.Handle(_connection, $"/exp 500 {player2.Name}");
+
+        player2.GetPoint(EPoints.Experience).Should().Be(500);
     }
 
     [Fact]
