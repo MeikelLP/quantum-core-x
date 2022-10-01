@@ -56,7 +56,10 @@ public class CommandTests : IAsyncLifetime
         var jobManagerMock = new Mock<IJobManager>();
         jobManagerMock.Setup(x => x.Get(It.IsAny<byte>())).Returns(new Job());
         var itemManagerMock = new Mock<IItemManager>();
-        itemManagerMock.Setup(x => x.GetItem(It.IsAny<uint>())).Returns(() => new AutoFaker<ItemData>().Generate());
+        itemManagerMock.Setup(x => x.GetItem(It.IsAny<uint>())).Returns<uint>(id => new AutoFaker<ItemData>()
+            .RuleFor(x => x.Id, _ => id)
+            .RuleFor(x => x.Size, _ => (byte)1)
+            .Generate());
         var connectionMock = new Mock<IGameConnection>();
         connectionMock.Setup(x => x.Send(It.IsAny<object>())).Callback<object>(obj => _sentObjects.Add(obj));
         var cacheManagerMock = new Mock<ICacheManager>();
@@ -195,8 +198,34 @@ public class CommandTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task GiveItemCommand()
+    public async Task GiveSelfItemCommand()
     {
+        await _commandManager.Handle(_connection, "/give $self 1 10");
+
+        _player.Inventory.Items.Should().NotBeEmpty();
+        _player.Inventory.Items.Should().ContainEquivalentOf(new ItemInstance
+        {
+            ItemId = 1,
+            Count = 10
+        }, cfg => cfg.Including(x => x.ItemId).Including(x => x.Count));
+    }
+
+    [Fact]
+    public async Task GiveOtherItemCommand()
+    {
+        var world = await PrepareWorldAsync();
+        var player2 = ActivatorUtilities.CreateInstance<PlayerEntity>(_services, _playerDataFaker.Generate());
+        await world.SpawnEntity(_player);
+        await world.SpawnEntity(player2);
+        
+        await _commandManager.Handle(_connection, $"/give \"{player2.Name}\" 1 10");
+
+        player2.Inventory.Items.Should().NotBeEmpty();
+        player2.Inventory.Items.Should().ContainEquivalentOf(new ItemInstance
+        {
+            ItemId = 1,
+            Count = 10
+        }, cfg => cfg.Including(x => x.ItemId).Including(x => x.Count));
     }
 
     [Fact]

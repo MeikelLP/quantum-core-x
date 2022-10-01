@@ -1,62 +1,73 @@
+using System;
 using System.Threading.Tasks;
+using CommandLine;
 using QuantumCore.API;
+using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game;
 using QuantumCore.API.Game.World;
 using QuantumCore.Core.Cache;
 using QuantumCore.Extensions;
-using QuantumCore.Game.World.Entities;
 
 namespace QuantumCore.Game.Commands
 {
     [Command("give", "Puts the given item in the inventory")]
-    public class GiveItemCommand
+    public class GiveItemCommand : ICommandHandler<GiveCommandOptions>
     {
         private readonly IItemManager _itemManager;
         private readonly ICacheManager _cacheManager;
+        private readonly IWorld _world;
 
-        public GiveItemCommand(IItemManager itemManager, ICacheManager cacheManager)
+        public GiveItemCommand(IItemManager itemManager, ICacheManager cacheManager, IWorld world)
         {
             _itemManager = itemManager;
             _cacheManager = cacheManager;
+            _world = world;
         }
-        
-        [CommandMethod]
-        public async Task GiveMyself(IPlayerEntity player, uint itemId, byte count = 1)
+
+        public async Task ExecuteAsync(CommandContext<GiveCommandOptions> context)
         {
-            await GiveAnother(player, player, itemId, count);
+            var target = string.Equals(context.Arguments.Target, "$self", StringComparison.InvariantCultureIgnoreCase)
+                ? context.Player
+                : _world.GetPlayer(context.Arguments.Target);
+
+            if (target is null)
+            {
+                await context.Player.SendChatMessage("Target not found");
+            }
+            else
+            {
+                var item = _itemManager.GetItem(context.Arguments.ItemId);
+                if (item == null)
+                {
+                    await context.Player.SendChatInfo("Item not found");
+                    return;
+                }
+
+                var instance = new ItemInstance { Id = Guid.NewGuid(), ItemId = item.Id, Count = context.Arguments.Count };
+                // Add item to players inventory
+                if (!await target.Inventory.PlaceItem(instance))
+                {
+                    // No space left in inventory, drop item with player name
+                    await context.Player.SendChatInfo("No place in inventory");
+                    return;
+                }
+                // Store item in cache
+                await instance.Persist(_cacheManager);
+
+                // Send item to client
+                await target.SendItem(instance);
+            }
         }
+    }
 
-        [CommandMethod]
-        public async Task GiveAnother(IPlayerEntity player, IPlayerEntity target, uint itemId, byte count = 1)
-        {
-            // todo replace item with item instance and let command manager do the lookup!
-            // So we can also allow to give the item to another user
-            var item = _itemManager.GetItem(itemId);
-            if (item == null)
-            {
-                await player.SendChatInfo("Item not found");
-                return;
-            }
+    public class GiveCommandOptions
+    {
+        [Value(0)] public string Target { get; set; } = "$self";
 
-            // todo migrate to plugin api style as soon as more is implemented
-            if (!(target is PlayerEntity p))
-            {
-                return;
-            }
+        [Value(1)]
+        public uint ItemId { get; set; }
 
-            // Create item
-            var instance = _itemManager.CreateItem(item, count);
-            // Add item to players inventory
-            if (!await p.Inventory.PlaceItem(instance))
-            {
-                // No space left in inventory, drop item with player name
-                return;
-            }
-            // Store item in cache
-            await instance.Persist(_cacheManager);
-
-            // Send item to client
-            await p.SendItem(instance);
-        }
+        [Value(2)]
+        public byte Count { get; set; } = 1;
     }
 }

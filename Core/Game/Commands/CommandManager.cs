@@ -243,7 +243,21 @@ namespace QuantumCore.Game.Commands
                         .GetMethod(nameof(ICommandHandler<object>.ExecuteAsync))!;
                     var cmd = ActivatorUtilities.CreateInstance(_serviceProvider, commandCache.Type);
 
-                    await (Task) cmdExecuteMethodInfo.Invoke(cmd, new object[] { ctx })!;
+                    try
+                    {
+                        await (Task) cmdExecuteMethodInfo.Invoke(cmd, new object[] { ctx })!;
+                    }
+                    catch (Exception e)
+                    {
+                        _logger.LogError(e, "Failed to execute command {Type}!", commandCache.Type.Name);
+                        await connection.Send(new ChatOutcoming()
+                        {
+                            MessageType = ChatMessageTypes.Info,
+                            Vid = 0,
+                            Empire = 0,
+                            Message = $"Failed to execute command {command}"
+                        });
+                    }
                 }
                 else
                 {
