@@ -138,7 +138,7 @@ public class CommandTests : IAsyncLifetime
         Assert.Equal((int)(10 * Map.MapUnit), _player.PositionX);
         Assert.Equal((int)(26 * Map.MapUnit), _player.PositionY);
         
-        await _commandManager.Handle(_connection, $"/tp {player2.Name}");
+        await _commandManager.Handle(_connection, $"/tp \"{player2.Name}\"");
         
         Assert.Equal((int)(11 * Map.MapUnit), _player.PositionX);
         Assert.Equal((int)(27 * Map.MapUnit), _player.PositionY);
@@ -157,7 +157,7 @@ public class CommandTests : IAsyncLifetime
         Assert.Equal((int)(11 * Map.MapUnit), player2.PositionX);
         Assert.Equal((int)(27 * Map.MapUnit), player2.PositionY);
         
-        await _commandManager.Handle(_connection, $"/tphere {player2.Name}");
+        await _commandManager.Handle(_connection, $"/tphere \"{player2.Name}\"");
 
         Assert.Equal((int)(10 * Map.MapUnit), player2.PositionX);
         Assert.Equal((int)(26 * Map.MapUnit), player2.PositionY);
