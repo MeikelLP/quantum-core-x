@@ -48,6 +48,7 @@ public class CommandTests : IAsyncLifetime
             .RuleFor(x => x.Level, _ => (byte)1)
             .RuleFor(x => x.St, _ => (byte)1)
             .RuleFor(x => x.Dx, _ => (byte)1)
+            .RuleFor(x => x.Gold, _ => (uint)0)
             .RuleFor(x => x.Experience, _ => (uint)0)
             .RuleFor(x => x.PositionX, _ => (int)(10 * Map.MapUnit))
             .RuleFor(x => x.PositionY, _ => (int)(26 * Map.MapUnit));
@@ -229,8 +230,25 @@ public class CommandTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task GoldCommand()
+    public async Task GoldCommand_Self()
     {
+        _player.GetPoint(EPoints.Gold).Should().Be(0);
+        await _commandManager.Handle(_connection, "/gold 10");
+
+        _player.GetPoint(EPoints.Gold).Should().Be(10);
+    }
+
+    [Fact]
+    public async Task GoldCommand_Other()
+    {
+        var world = await PrepareWorldAsync();
+        var player2 = ActivatorUtilities.CreateInstance<PlayerEntity>(_services, _playerDataFaker.Generate());
+        await world.SpawnEntity(_player);
+        await world.SpawnEntity(player2);
+        
+        player2.GetPoint(EPoints.Gold).Should().Be(0);
+        await _commandManager.Handle(_connection, $"/gold 10 \"{player2.Name}\"");
+        player2.GetPoint(EPoints.Gold).Should().Be(10);
     }
 
     [Fact]

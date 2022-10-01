@@ -1,28 +1,45 @@
 using System.Threading.Tasks;
+using CommandLine;
 using QuantumCore.API.Game;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.World;
-using QuantumCore.Game.PlayerUtils;
-using QuantumCore.Game.World.Entities;
 
 namespace QuantumCore.Game.Commands;
 
 [Command("gold", "Adds the given amount of gold")]
-public static class GoldCommand
+public class GoldCommand : ICommandHandler<GoldCommandOptions>
 {
-    [CommandMethod("Gives yourself the specified amount of gold, if amount is negative gold will be removed")]
-    public static async Task GiveMyself(IPlayerEntity player, int amount)
+    private readonly IWorld _world;
+
+    public GoldCommand(IWorld world)
     {
-        await GiveAnother(player, player, amount);
+        _world = world;
     }
 
-    [CommandMethod("Gives the player the specified amount of gold, if amount is negative gold will be removed")]
-    public static async Task GiveAnother(IPlayerEntity player, IPlayerEntity target, int amount)
+    public async Task ExecuteAsync(CommandContext<GoldCommandOptions> context)
     {
-        if (target is PlayerEntity p)
+        var target = context.Player;
+        if (!string.IsNullOrWhiteSpace(context.Arguments.Target))
         {
-            await p.AddPoint(EPoints.Gold, amount);
-            await p.SendPoints();
+            target = _world.GetPlayer(context.Arguments.Target);
         }
+
+        if (target is null)
+        {
+            await context.Player.SendChatMessage("Target not found");
+            return;
+        }
+        
+        await target.AddPoint(EPoints.Gold, context.Arguments.Value);
+        await target.SendPoints();
     }
+}
+
+public class GoldCommandOptions
+{
+    [Value(0)]
+    public int Value { get; set; }
+    
+    [Value(1)]
+    public string Target { get; set; }
 }
