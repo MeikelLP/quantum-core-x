@@ -1,19 +1,25 @@
 using System.Threading.Tasks;
 using QuantumCore.API.Game;
 using QuantumCore.API.Game.World;
-using QuantumCore.Core.Constants;
-using QuantumCore.Game.World.Entities;
+
 namespace QuantumCore.Game.Commands
 {
-	[Command("logout", "Logout from the game")]
+    [Command("logout", "Logout from the game")]
     [CommandNoPermission]
-    public static class LogoutCommand
+    public class LogoutCommand : ICommandHandler
     {
-    	[CommandMethod]
-        public static async Task Logout(IPlayerEntity player)
+        private readonly IWorld _world;
+
+        public LogoutCommand(IWorld world)
         {
-            await player.SendChatInfo("Logging out. Please wait.");
-            player.Disconnect();
+            _world = world;
+        }
+        
+        public async Task ExecuteAsync(CommandContext context)
+        {
+            await context.Player.SendChatInfo("Logging out. Please wait.");
+            await _world.DespawnEntity(context.Player);
+            context.Player.Disconnect();
         }
     }
 }

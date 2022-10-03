@@ -356,7 +356,7 @@ namespace QuantumCore.Game.World
 
         public async Task DespawnEntity(IEntity entity)
         {
-            if (entity is PlayerEntity player)
+            if (entity is IPlayerEntity player)
             {
                 RemovePlayer(player);
             }

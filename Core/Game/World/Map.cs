@@ -314,7 +314,6 @@ namespace QuantumCore.Game.World
 
             // Remove entity from entities list in the next update
             _pendingRemovals.Add(entity);
-            
         }
 
         public List<IEntity> GetEntities()

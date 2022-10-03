@@ -343,7 +343,14 @@ public class CommandTests : IAsyncLifetime
     [Fact]
     public async Task LogoutCommand()
     {
-        throw new NotImplementedException();
+        var world = await PrepareWorldAsync();
+        await world.SpawnEntity(_player);
+        
+        world.GetPlayer(_player.Name).Should().NotBeNull();
+        
+        await _commandManager.Handle(_connection, "/logout");
+
+        world.GetPlayer(_player.Name).Should().BeNull();
     }
 
     [Fact]
