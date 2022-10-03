@@ -294,7 +294,25 @@ public class CommandTests : IAsyncLifetime
     [Fact]
     public async Task KickCommand()
     {
-        throw new NotImplementedException();
+        var world = await PrepareWorldAsync();
+        var player2 = ActivatorUtilities.CreateInstance<PlayerEntity>(_services, _playerDataFaker.Generate());
+        await world.SpawnEntity(_player);
+        await world.SpawnEntity(player2);
+
+        await _commandManager.Handle(_connection, $"/kick \"{player2.Name}\"");
+        
+        Assert.Null(world.GetPlayer(player2.Name));
+    }
+
+    [Fact]
+    public async Task KickCommand_Invalid()
+    {
+        await _commandManager.Handle(_connection, "/kick something");
+
+        _sentObjects.Should().ContainEquivalentOf(new ChatOutcoming
+        {
+            Message = "Target not found"
+        }, cfg => cfg.Including(x => x.Message));
     }
 
     [Fact]
