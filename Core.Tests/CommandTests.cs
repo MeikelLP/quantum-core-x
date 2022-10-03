@@ -316,9 +316,28 @@ public class CommandTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task LevelCommand()
+    public async Task LevelCommand_Self()
     {
-        throw new NotImplementedException();
+        _player.GetPoint(EPoints.Level).Should().Be(1);
+        
+        await _commandManager.Handle(_connection, "/level 30");
+
+        _player.GetPoint(EPoints.Level).Should().Be(30);
+    }
+
+    [Fact]
+    public async Task LevelCommand_Other()
+    {
+        var world = await PrepareWorldAsync();
+        var player2 = ActivatorUtilities.CreateInstance<PlayerEntity>(_services, _playerDataFaker.Generate());
+        await world.SpawnEntity(_player);
+        await world.SpawnEntity(player2);
+
+        player2.GetPoint(EPoints.Level).Should().Be(1);
+        
+        await _commandManager.Handle(_connection, $"/level 30 \"{player2.Name}\"");
+
+        player2.GetPoint(EPoints.Level).Should().Be(30);
     }
 
     [Fact]

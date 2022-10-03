@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using CommandLine;
 using QuantumCore.API.Game;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.World;
@@ -6,19 +7,38 @@ using QuantumCore.API.Game.World;
 namespace QuantumCore.Game.Commands;
 
 [Command("level", "Sets the level of the current player or of another player")]
-public class LevelCommand
+public class LevelCommand : ICommandHandler<LevelCommandOptions>
 {
-    [CommandMethod]
-    public static async Task SetMyLevel(IPlayerEntity player, byte level)
+    private readonly IWorld _world;
+
+    public LevelCommand(IWorld world)
     {
-        await player.SetPoint(EPoints.Level, level);
-        await player.SendPoints();
+        _world = world;
     }
 
-    [CommandMethod]
-    public static async Task SetOtherLevel(IPlayerEntity player, IPlayerEntity target, byte level)
+    public async Task ExecuteAsync(CommandContext<LevelCommandOptions> context)
     {
-        await target.SetPoint(EPoints.Level, level);
-        await target.SendPoints();
+        var target = !string.IsNullOrWhiteSpace(context.Arguments.Target)
+            ? _world.GetPlayer(context.Arguments.Target)
+            : context.Player;
+
+        if (target is null)
+        {
+            await context.Player.SendChatMessage("Target not found");
+        }
+        else
+        {
+            await target.SetPoint(EPoints.Level, context.Arguments.Level);
+            await target.SendPoints();
+        }
     }
+}
+
+public class LevelCommandOptions
+{
+    [Value(0, Required = true)]
+    public byte Level { get; set; }
+
+    [Value(1)]
+    public string Target { get; set; }
 }
