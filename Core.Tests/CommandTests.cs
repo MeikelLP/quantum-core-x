@@ -252,65 +252,99 @@ public class CommandTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task GotoCommand()
+    public async Task GotoCommand_Coords()
     {
+        var world = await PrepareWorldAsync();
+        await world.SpawnEntity(_player);
+
+        await _player.Move((int)(Map.MapUnit * 10), (int)(Map.MapUnit * 26));
+
+        Assert.Equal((int)(10 * Map.MapUnit), _player.PositionX);
+        Assert.Equal((int)(26 * Map.MapUnit), _player.PositionY);
+        
+        await _commandManager.Handle(_connection, $"/goto {11} {27}");
+
+        Assert.Equal((int)(_player.Map.PositionX + 11 * 100), _player.PositionX);
+        Assert.Equal((int)(_player.Map.PositionY + 27 * 100), _player.PositionY);
+    }
+
+    [Fact]
+    public async Task GotoCommand_Map()
+    {
+        var world = await PrepareWorldAsync();
+        await world.SpawnEntity(_player);
+        
+        
+        Assert.Equal((int)(10 * Map.MapUnit), _player.PositionX);
+        Assert.Equal((int)(26 * Map.MapUnit), _player.PositionY);
+        
+        await _commandManager.Handle(_connection, "/goto --map map_b2");
+
+        // target position is half of X & Y
+        Assert.Equal((int)(13 * Map.MapUnit), _player.PositionX);
+        Assert.Equal((int)(29 * Map.MapUnit), _player.PositionY);
     }
 
     [Fact]
     public async Task HelpCommand()
     {
-    }
-
-    [Fact]
-    public async Task ICommandManager()
-    {
+        throw new NotImplementedException();
     }
 
     [Fact]
     public async Task KickCommand()
     {
+        throw new NotImplementedException();
     }
 
     [Fact]
     public async Task LevelCommand()
     {
+        throw new NotImplementedException();
     }
 
     [Fact]
     public async Task LogoutCommand()
     {
+        throw new NotImplementedException();
     }
 
     [Fact]
     public async Task PhaseSelectCommand()
     {
+        throw new NotImplementedException();
     }
 
     [Fact]
     public async Task QuitCommand()
     {
+        throw new NotImplementedException();
     }
 
     [Fact]
     public async Task RestartCommands()
     {
+        throw new NotImplementedException();
     }
 
     [Fact]
     public async Task SpawnCommand()
     {
+        throw new NotImplementedException();
     }
 
     [Fact]
     public async Task StatCommand()
     {
+        throw new NotImplementedException();
     }
 
     private async Task<IWorld> PrepareWorldAsync()
     {
         if (!Directory.Exists("data")) Directory.CreateDirectory("data");
-        await File.WriteAllTextAsync("data/atlasinfo.txt", "map_a2	256000	665600	6	6");
-        await File.WriteAllTextAsync("settings.toml", @"maps = [""map_a2""]");
+        await File.WriteAllTextAsync("data/atlasinfo.txt", $"map_a2	{Map.MapUnit * 10}	{Map.MapUnit * 26}	6	6\n" +
+                                                           $"map_b2	{Map.MapUnit * 10}	{Map.MapUnit * 26}	6	6");
+        await File.WriteAllTextAsync("settings.toml", @"maps = [""map_a2"", ""map_b2""]");
         ConfigManager.Load();
         var world = _services.GetRequiredService<IWorld>();
         await world.Load();

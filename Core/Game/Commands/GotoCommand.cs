@@ -1,4 +1,6 @@
 ﻿using System.Threading.Tasks;
+using CommandLine;
+using JetBrains.Annotations;
 using QuantumCore.API.Game;
 using QuantumCore.API.Game.World;
 using QuantumCore.Game.World;
@@ -6,39 +8,67 @@ using QuantumCore.Game.World;
 namespace QuantumCore.Game.Commands
 {
     [Command("goto", "Warp to a position")]
-    public static class GotoCommand
+    public class GotoCommand : ICommandHandler<GotoCommandOptions>
     {
-        [CommandMethod("X and Y cordinates to teleport to")]
-        public static async Task GoToCoordinate(IPlayerEntity player, int x, int y)
+        private readonly IWorld _world;
+
+        public GotoCommand(IWorld world)
         {
-            if (x < 0 || y < 0)
-                await player.SendChatInfo("The X and Y position must be positive");
-            else
-                await player.Move((int) player.Map.PositionX + (x*100), (int)player.Map.PositionY + (y*100));
+            _world = world;
         }
 
-        [CommandMethod("Teleports you to a map by their name")]
-        public static async Task GoToMap(IWorld world, IPlayerEntity player, string mapName)
+        public async Task ExecuteAsync(CommandContext<GotoCommandOptions> context)
         {
-            var maps = world.FindMapsByName(mapName);
-            if (maps.Count > 1)
+            if (!string.IsNullOrWhiteSpace(context.Arguments.Map))
             {
-                await player.SendChatInfo("Map name is ambiguous:");
-                foreach (var map in maps)
+                var maps = _world.FindMapsByName(context.Arguments.Map);
+                if (maps.Count > 1)
                 {
-                    await player.SendChatInfo($"- {map.Name}");   
+                    await context.Player.SendChatInfo("Map name is ambiguous:");
+                    foreach (var map in maps)
+                    {
+                        await context.Player.SendChatInfo($"- {map.Name}");
+                    }
+
+                    return;
+                }
+
+                if (maps.Count == 0)
+                {
+                    await context.Player.SendChatInfo("Unknown map");
+                    return;
+                }
+            
+                // todo read goto position from map instead of using center
+
+                var targetMap = maps[0];
+                var x = (int)(targetMap.PositionX + targetMap.Width * Map.MapUnit / 2);
+                var y = (int)(targetMap.PositionY + targetMap.Height * Map.MapUnit / 2);
+                await context.Player.Move(x, y);
+            }
+            else
+            {
+                if (context.Arguments.X < 0 || context.Arguments.Y < 0)
+                    await context.Player.SendChatInfo("The X and Y position must be positive");
+                else
+                {
+                    var x = (int) context.Player.Map.PositionX + (context.Arguments.X*100);
+                    var y = (int) context.Player.Map.PositionY + (context.Arguments.Y*100);
+                    await context.Player.Move(x, y);
                 }
             }
-
-            if (maps.Count == 0)
-            {
-                await player.SendChatInfo("Unknown map");
-            }
-            
-            // todo read goto position from map instead of using center
-
-            var targetMap = maps[0];
-            await player.Move((int)(targetMap.PositionX + targetMap.Width * Map.MapUnit / 2), (int)(targetMap.PositionY + targetMap.Height * Map.MapUnit / 2));
         }
+    }
+
+    public class GotoCommandOptions
+    {
+        [Option('m', "map")] 
+        [CanBeNull] public string Map { get; set; }
+
+        [Value(0)]
+        public int X { get; set; }
+
+        [Value(1)]
+        public int Y { get; set; }
     }
 }
