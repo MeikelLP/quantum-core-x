@@ -9,6 +9,7 @@ using QuantumCore.Auth.Cache;
 using QuantumCore.Core.Cache;
 using QuantumCore.Core.Utils;
 using QuantumCore.Database;
+using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Packets;
 
 namespace QuantumCore.Game.PacketHandlers
@@ -78,7 +79,7 @@ namespace QuantumCore.Game.PacketHandlers
 
             // Send empire to the client and characters
             await ctx.Connection.Send(new Empire { EmpireId = 1 }); // todo read from database
-            await ctx.Connection.SetPhase(EPhases.Select);
+            await ctx.Connection.SetPhaseAsync(EPhases.Select);
             await ctx.Connection.Send(characters);
         }
     }

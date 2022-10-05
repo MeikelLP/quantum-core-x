@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
 using QuantumCore.API.Core.Models;
-using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.World;
 
 namespace QuantumCore.API;
@@ -13,5 +12,4 @@ public interface IGameConnection : IConnection
     string Username { get; set; }
     IPlayerEntity Player { get; set; }
     Task<bool> HandleHandshake(GCHandshakeData handshake);
-    Task SetPhase(EPhases phase);
 }

@@ -11,6 +11,7 @@ using QuantumCore.Core.Cache;
 using QuantumCore.Core.Utils;
 using QuantumCore.Database;
 using QuantumCore.Extensions;
+using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Packets;
 using QuantumCore.Game.PlayerUtils;
 using Serilog;
@@ -287,7 +288,7 @@ namespace QuantumCore.Game.World.Entities
             // todo spawn with invisible affect
             
             await SendChatCommand("CloseRestartWindow");
-            (Connection as GameConnection)?.SetPhase(EPhases.Game);
+            await Connection.SetPhaseAsync(EPhases.Game);
 
             var remove = new RemoveCharacter { Vid = Vid };
             

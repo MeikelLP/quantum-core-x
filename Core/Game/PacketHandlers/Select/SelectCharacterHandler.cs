@@ -8,6 +8,7 @@ using QuantumCore.API.Game.Types;
 using QuantumCore.Core.Cache;
 using QuantumCore.Core.Networking;
 using QuantumCore.Database;
+using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Packets;
 using QuantumCore.Game.World.Entities;
 
@@ -43,7 +44,7 @@ public class SelectCharacterHandler : ISelectPacketHandler<SelectCharacter>
         var accountId = ctx.Connection.AccountId ?? default; // todo clean solution
 
         // Let the client load the game
-        await ctx.Connection.SetPhase(EPhases.Loading);
+        await ctx.Connection.SetPhaseAsync(EPhases.Loading);
 
         // Load player
         var player = await Player.GetPlayer(_databaseManager, _cacheManager, accountId, ctx.Packet.Slot);

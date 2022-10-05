@@ -2,28 +2,30 @@ using System.Threading.Tasks;
 using QuantumCore.API.Game;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.World;
+using QuantumCore.Game.Extensions;
 
 namespace QuantumCore.Game.Commands
 {
-	[Command("phase_select", "Go back to character selection")]
+    [Command("phase_select", "Go back to character selection")]
     [CommandNoPermission]
-    public static class PhaseSelectCommand
+    public class PhaseSelectCommand : ICommandHandler
     {
-    	[CommandMethod]
-        public static async Task PhaseSelect(IWorld world, IPlayerEntity player)
+        private readonly IWorld _world;
+
+        public PhaseSelectCommand(IWorld world)
         {
-            await player.SendChatInfo("Going back to character selection. Please wait.");
+            _world = world;
+        }
+
+        public async Task ExecuteAsync(CommandContext context)
+        {
+            await context.Player.SendChatInfo("Going back to character selection. Please wait.");
 
             // todo implement wait
-            
+
             // Despawn player
-            await world.DespawnEntity(player);
-            
-            // Bring client back to select menu
-            if (player.Connection is GameConnection gc)
-            {
-                await gc.SetPhase(EPhases.Select);
-            }
+            await _world.DespawnEntity(context.Player);
+            await context.Player.Connection.SetPhaseAsync(EPhases.Select);
         }
     }
 }

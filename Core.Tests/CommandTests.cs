@@ -18,6 +18,7 @@ using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.World;
 using QuantumCore.Core.Cache;
+using QuantumCore.Core.Packets;
 using QuantumCore.Database;
 using QuantumCore.Extensions;
 using QuantumCore.Game;
@@ -63,6 +64,7 @@ public class CommandTests : IAsyncLifetime
             .Generate());
         var connectionMock = new Mock<IGameConnection>();
         connectionMock.Setup(x => x.Send(It.IsAny<object>())).Callback<object>(obj => _sentObjects.Add(obj));
+        connectionMock.SetupAllProperties();
         var cacheManagerMock = new Mock<ICacheManager>();
         var redisListWrapperMock = new Mock<IRedisListWrapper<Guid>>();
         var redisSubscriberWrapperMock = new Mock<IRedisSubscriber>();
@@ -356,7 +358,23 @@ public class CommandTests : IAsyncLifetime
     [Fact]
     public async Task PhaseSelectCommand()
     {
-        throw new NotImplementedException();
+        var world = await PrepareWorldAsync();
+        await world.SpawnEntity(_player);
+        
+        world.GetPlayer(_player.Name).Should().NotBeNull();
+        _sentObjects.Should().NotContainEquivalentOf(new GCPhase
+        {
+            Phase = (byte)EPhases.Select
+        });
+        
+        await _commandManager.Handle(_connection, "/phase_select");
+
+        _player.Connection.Phase.Should().Be(EPhases.Select);
+        _sentObjects.Should().ContainEquivalentOf(new GCPhase
+        {
+            Phase = (byte)EPhases.Select
+        });
+        world.GetPlayer(_player.Name).Should().BeNull();
     }
 
     [Fact]

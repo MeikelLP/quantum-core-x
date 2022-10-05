@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.World;
+using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Packets;
 
 namespace QuantumCore.Game.PacketHandlers.Loading
@@ -30,7 +31,7 @@ namespace QuantumCore.Game.PacketHandlers.Loading
             }
             
             // Enable game phase
-            await ctx.Connection.SetPhase(EPhases.Game);
+            await ctx.Connection.SetPhaseAsync(EPhases.Game);
             
             await ctx.Connection.Send(new GameTime { Time = (uint) ctx.Connection.Server.ServerTime });
             await ctx.Connection.Send(new Channel { ChannelNo = 1 }); // todo

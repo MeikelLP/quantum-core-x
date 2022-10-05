@@ -8,7 +8,7 @@ namespace QuantumCore.API
     public interface IConnection
     {
         Guid Id { get; }
-        EPhases Phase { get; }
+        EPhases Phase { get; set; }
         Task ExecuteTask { get; }
         void Close();
         Task Send(object packet);

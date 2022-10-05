@@ -8,11 +8,12 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using QuantumCore.Core.Packets;
-using QuantumCore.Core.Utils;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game.Types;
+using QuantumCore.Core.Packets;
+using QuantumCore.Core.Utils;
+using QuantumCore.Game.Extensions;
 
 namespace QuantumCore.Core.Networking
 {
@@ -31,8 +32,8 @@ namespace QuantumCore.Core.Networking
         public Guid Id { get; }
         public uint Handshake { get; private set; }
         public bool Handshaking { get; private set; }
-        public EPhases Phase { get; private set; }
-        
+        public EPhases Phase { get; set; }
+
         protected Connection(ILogger logger, PluginExecutor pluginExecutor, IPacketManager packetManager)
         {
             _logger = logger;
@@ -244,7 +245,7 @@ namespace QuantumCore.Core.Networking
             // Generate random handshake and start the handshaking
             Handshake = CoreRandom.GenerateUInt32();
             Handshaking = true;
-            await SetPhase(EPhases.Handshake);
+            await this.SetPhaseAsync(EPhases.Handshake);
             await SendHandshake();
         }
 
@@ -290,15 +291,6 @@ namespace QuantumCore.Core.Networking
             }
 
             return true;
-        }
-
-        public async Task SetPhase(EPhases phase)
-        {
-            Phase = phase;
-            await Send(new GCPhase
-            {
-                Phase = (byte) phase
-            });
         }
 
         private async Task SendHandshake()

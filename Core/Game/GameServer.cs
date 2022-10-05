@@ -11,15 +11,13 @@ using QuantumCore.API;
 using QuantumCore.API.Game;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.World;
-using QuantumCore.Core.Cache;
 using QuantumCore.Core.Event;
 using QuantumCore.Core.Networking;
-using QuantumCore.Core.Packets;
 using QuantumCore.Core.Utils;
 using QuantumCore.Database;
 using QuantumCore.Game.Commands;
+using QuantumCore.Game.Extensions;
 using QuantumCore.Game.PlayerUtils;
-using QuantumCore.Game.Quest;
 
 namespace QuantumCore.Game
 {
@@ -133,7 +131,7 @@ namespace QuantumCore.Game
             // Put all new connections into login phase
             RegisterNewConnectionListener(async connection =>
             {
-                await connection.SetPhase(EPhases.Login);
+                await connection.SetPhaseAsync(EPhases.Login);
                 return true;
             });
 

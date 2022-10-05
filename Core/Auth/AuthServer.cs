@@ -2,19 +2,15 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Dapper;
-using Dapper.Contrib.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using QuantumCore.API;
 using QuantumCore.API.Game.Types;
-using QuantumCore.Auth.Cache;
-using QuantumCore.Auth.Packets;
 using QuantumCore.Core.Cache;
 using QuantumCore.Core.Networking;
-using QuantumCore.Core.Utils;
 using QuantumCore.Database;
+using QuantumCore.Game.Extensions;
 
 namespace QuantumCore.Auth
 {
@@ -54,9 +50,9 @@ namespace QuantumCore.Auth
             }
         }
 
-        private async Task<bool> NewConnection(Connection connection)
+        private async Task<bool> NewConnection(IConnection connection)
         {
-            await connection.SetPhase(EPhases.Auth);
+            await connection.SetPhaseAsync(EPhases.Auth);
             return true;
         }
     }
