@@ -380,7 +380,14 @@ public class CommandTests : IAsyncLifetime
     [Fact]
     public async Task QuitCommand()
     {
-        throw new NotImplementedException();
+        var world = await PrepareWorldAsync();
+        await world.SpawnEntity(_player);
+        
+        world.GetPlayer(_player.Name).Should().NotBeNull();
+        
+        await _commandManager.Handle(_connection, "/quit");
+
+        world.GetPlayer(_player.Name).Should().BeNull();
     }
 
     [Fact]
