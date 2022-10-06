@@ -20,7 +20,7 @@ jobs:
         run: |
           wget https://github.com/kaitai-io/kaitai_struct_compiler/releases/download/0.9/kaitai-struct-compiler-0.9.zip
           unzip kaitai-struct-compiler-0.9.zip
-          PATH="/kaitai-struct-compiler-0.9/bin/:${PATH}"
+          PATH="${PWD}/kaitai-struct-compiler-0.9/bin/:${PATH}"
           sudo apt-get update && sudo apt-get install -y openjdk-8-jre
           ./generate_kaitai.sh
       - name: Install dependencies
