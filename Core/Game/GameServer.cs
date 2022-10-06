@@ -35,10 +35,9 @@ namespace QuantumCore.Game
         private readonly IDatabaseManager _databaseManager;
         private readonly IQuestManager _questManager;
         private readonly IChatManager _chatManager;
-        public IWorld World => _world;
+        public IWorld World { get; }
 
         private readonly GameOptions _options;
-        private World.World _world;
 
         private readonly Stopwatch _gameTime = new Stopwatch();
         private long _previousTicks = 0;
@@ -53,7 +52,7 @@ namespace QuantumCore.Game
             PluginExecutor pluginExecutor, IServiceProvider serviceProvider, IItemManager itemManager, 
             IMonsterManager monsterManager, IJobManager jobManager, IExperienceManager experienceManager,
             IAnimationManager animationManager, ICommandManager commandManager, IDatabaseManager databaseManager, 
-            IEnumerable<IPacketHandler> packetHandlers, IQuestManager questManager, IChatManager chatManager)
+            IEnumerable<IPacketHandler> packetHandlers, IQuestManager questManager, IChatManager chatManager, IWorld world)
             : base(packetManager, logger, pluginExecutor, serviceProvider, packetHandlers, options.Value.Port)
         {
             _logger = logger;
@@ -68,6 +67,7 @@ namespace QuantumCore.Game
             _databaseManager = databaseManager;
             _questManager = questManager;
             _chatManager = chatManager;
+            World = world;
             Instance = this;
             _options = options.Value;
 
@@ -79,7 +79,7 @@ namespace QuantumCore.Game
         {
             EventSystem.Update(elapsedTime);
             
-            _world.Update(elapsedTime);
+            World.Update(elapsedTime);
         }
 
         protected async override Task ExecuteAsync(CancellationToken stoppingToken)
@@ -119,8 +119,7 @@ namespace QuantumCore.Game
 
             // Load game world
             _logger.LogInformation("Initialize world"); 
-            _world = ActivatorUtilities.CreateInstance<World.World>(_serviceProvider);
-            await _world.Load();
+            await World.Load();
 
             // Register all default commands
             _commandManager.Register("QuantumCore.Game.Commands");
