@@ -200,7 +200,7 @@ public class CommandTests : IAsyncLifetime
         await world.SpawnEntity(_player);
         await world.SpawnEntity(player2);
         
-        await _commandManager.Handle(_connection, $"/exp 500 {player2.Name}");
+        await _commandManager.Handle(_connection, $"/exp 500 \"{player2.Name}\"");
 
         player2.GetPoint(EPoints.Experience).Should().Be(500);
     }
