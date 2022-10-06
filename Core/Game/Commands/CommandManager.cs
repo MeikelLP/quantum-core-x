@@ -31,6 +31,12 @@ namespace QuantumCore.Game.Commands
         public static readonly Guid Operator_Group = Guid.Parse("45bff707-1836-42b7-956d-00b9b69e0ee0");
         private readonly IServiceProvider _serviceProvider;
 
+        private static readonly Parser ParserInstance = new Parser(settings =>
+            {
+                settings.CaseInsensitiveEnumValues = true;
+            }
+        );
+
         public CommandManager(ILogger<CommandManager> logger, IDatabaseManager databaseManager, ICacheManager cacheManager, IWorld world, IServiceProvider serviceProvider)
         {
             _logger = logger;
@@ -204,7 +210,7 @@ namespace QuantumCore.Game.Commands
                     // invokes the command
                     // this may be improved in the future (caching)
 
-                    var parserResult = parserMethod.Invoke(Parser.Default, new object [] { args.Skip(1).ToArray() });
+                    var parserResult = parserMethod.Invoke(ParserInstance, new object [] { args.Skip(1).ToArray() });
                     var methodInfo = typeof(ParserResultExtensions).GetMethods().Single(x =>
                     {
                         var nameMatches = x.Name == nameof(ParserResultExtensions.MapResult);

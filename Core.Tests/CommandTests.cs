@@ -49,6 +49,7 @@ public class CommandTests : IAsyncLifetime
         _playerDataFaker = new AutoFaker<Player>()
             .RuleFor(x => x.Level, _ => (byte)1)
             .RuleFor(x => x.St, _ => (byte)1)
+            .RuleFor(x => x.Ht, _ => (byte)1)
             .RuleFor(x => x.Dx, _ => (byte)1)
             .RuleFor(x => x.Gold, _ => (uint)0)
             .RuleFor(x => x.Experience, _ => (uint)0)
@@ -438,7 +439,12 @@ public class CommandTests : IAsyncLifetime
     [Fact]
     public async Task StatCommand()
     {
-        throw new NotImplementedException();
+        await _player.AddPoint(EPoints.StatusPoints, 1);
+        _player.GetPoint(EPoints.Ht).Should().Be(1);
+        
+        await _commandManager.Handle(_connection, "/stat ht");
+        
+        _player.GetPoint(EPoints.Ht).Should().Be(2);
     }
 
     private async Task<IWorld> PrepareWorldAsync()

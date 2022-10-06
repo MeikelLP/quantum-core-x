@@ -1,43 +1,29 @@
 ﻿using System.Threading.Tasks;
+using CommandLine;
 using QuantumCore.API.Game;
 using QuantumCore.API.Game.Types;
-using QuantumCore.API.Game.World;
 
 namespace QuantumCore.Game.Commands;
 
 [Command("stat", "Adds a status point")]
 [CommandNoPermission]
-public class StatCommand
+public class StatCommand : ICommandHandler<StatCommandOptions>
 {
-    [CommandMethod]
-    public static async Task Execute(IPlayerEntity player, string status)
+    public async Task ExecuteAsync(CommandContext<StatCommandOptions> context)
     {
-        EPoints point;
-        switch (status)
-        {
-            case "st":
-                point = EPoints.St;
-                break;
-            case "dx":
-                point = EPoints.Dx;
-                break;
-            case "ht":
-                point = EPoints.Ht;
-                break;
-            case "iq":
-                point = EPoints.Iq;
-                break;
-            default:
-                return;
-        }
-
-        if (player.GetPoint(EPoints.StatusPoints) <= 0)
+        if (context.Player.GetPoint(EPoints.StatusPoints) <= 0)
         {
             return;
         }
         
-        await player.AddPoint(point, 1);
-        await player.AddPoint(EPoints.StatusPoints, -1);
-        await player.SendPoints();
+        await context.Player.AddPoint(context.Arguments.Point, 1);
+        await context.Player.AddPoint(EPoints.StatusPoints, -1);
+        await context.Player.SendPoints();
     }
+}
+
+public class StatCommandOptions
+{
+    [Value(0)]
+    public EPoints Point { get; set; }
 }
