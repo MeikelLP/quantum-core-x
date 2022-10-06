@@ -42,6 +42,7 @@ public class CommandTests : IAsyncLifetime
     private readonly IPlayerEntity _player;
     private readonly Faker<Player> _playerDataFaker;
     private readonly List<object> _sentObjects = new();
+    private readonly IMonsterManager _monsterManager;
 
     public CommandTests(ITestOutputHelper testOutputHelper)
     {        
@@ -53,6 +54,8 @@ public class CommandTests : IAsyncLifetime
             .RuleFor(x => x.Experience, _ => (uint)0)
             .RuleFor(x => x.PositionX, _ => (int)(10 * Map.MapUnit))
             .RuleFor(x => x.PositionY, _ => (int)(26 * Map.MapUnit));
+        var monsterManagerMock = new Mock<IMonsterManager>();
+        monsterManagerMock.Setup(x => x.GetMonster(It.IsAny<uint>())).Returns<uint>(id => new AutoFaker<MonsterData>().RuleFor(x => x.Id, _ => id).Generate());
         var experienceManagerMock = new Mock<IExperienceManager>();
         experienceManagerMock.Setup(x => x.GetNeededExperience(It.IsAny<byte>())).Returns(1000);
         var jobManagerMock = new Mock<IJobManager>();
@@ -85,6 +88,7 @@ public class CommandTests : IAsyncLifetime
                     .WriteTo.TestOutput(testOutputHelper)
                     .CreateLogger());
             })
+            .Replace(new ServiceDescriptor(typeof(IMonsterManager), _ => monsterManagerMock.Object, ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(IItemManager), _ => itemManagerMock.Object, ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(ICacheManager), _ => cacheManagerMock.Object, ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(IDatabaseManager), _ => databaseManagerMock.Object, ServiceLifetime.Singleton))
@@ -96,6 +100,7 @@ public class CommandTests : IAsyncLifetime
             .AddSingleton(_ => _playerDataFaker.Generate())
             .BuildServiceProvider();
         _commandManager = _services.GetRequiredService<ICommandManager>();
+        _monsterManager = _services.GetRequiredService<IMonsterManager>();
         _commandManager.Register("QuantumCore.Game.Commands", typeof(SpawnCommand).Assembly);
         _connection = _services.GetRequiredService<IGameConnection>();
         connectionMock.Setup(x => x.Player).Returns(_services.GetRequiredService<IPlayerEntity>()); // this would usually happen during char select
@@ -391,15 +396,43 @@ public class CommandTests : IAsyncLifetime
     }
 
     [Fact]
-    public async Task RestartCommands()
+    public void RestartHereCommand()
     {
-        throw new NotImplementedException();
+        // TODO
     }
 
     [Fact]
-    public async Task SpawnCommand()
+    public void RestartTownCommand()
     {
-        throw new NotImplementedException();
+        // TODO
+    }
+
+    [Fact]
+    public async Task SpawnCommand_WithoutCount()
+    {
+        var world = await PrepareWorldAsync();
+        await world.SpawnEntity(_player);
+        await _player.Move((int)(Map.MapUnit * 13), (int)(Map.MapUnit * 29)); // center of the map
+        await File.WriteAllTextAsync("settings.toml", @"maps = [""map_a2"", ""map_b2""]");
+        _player.Map.GetEntities().Count.Should().Be(1);
+
+        await _commandManager.Handle(_connection, "/spawn 101");
+        
+        _player.Map.GetEntities().Count.Should().Be(2);
+    }
+
+    [Fact]
+    public async Task SpawnCommand_WithCount()
+    {
+        var world = await PrepareWorldAsync();
+        await world.SpawnEntity(_player);
+        await _player.Move((int)(Map.MapUnit * 13), (int)(Map.MapUnit * 29)); // center of the map
+        await File.WriteAllTextAsync("settings.toml", @"maps = [""map_a2"", ""map_b2""]");
+        _player.Map.GetEntities().Count.Should().Be(1);
+
+        await _commandManager.Handle(_connection, "/spawn 101 10");
+        
+        _player.Map.GetEntities().Count.Should().Be(11);
     }
 
     [Fact]

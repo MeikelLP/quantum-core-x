@@ -309,6 +309,10 @@ namespace QuantumCore.Game.World
             // Remove map from the entity
             entity.Map = null;
 
+            lock (_entities)
+            {
+                _entities.Remove(entity);
+            }
             // Remove entity from the quad tree
             _quadTree.Remove(entity);
 
