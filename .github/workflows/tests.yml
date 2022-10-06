@@ -17,14 +17,12 @@ jobs:
         with:
           dotnet-version: ${{ matrix.dotnet-version }}
       - name: Download katai struct compiler
-        uses: actions/github-script@v6
-        with:
-          script: |
-            wget https://github.com/kaitai-io/kaitai_struct_compiler/releases/download/0.9/kaitai-struct-compiler-0.9.zip
-            unzip kaitai-struct-compiler-0.9.zip
-            PATH="/kaitai-struct-compiler-0.9/bin/:${PATH}"
-            apt-get update && apt-get install openjdk-8-jre
-            ./generate_kaitai.sh
+        run: |
+          wget https://github.com/kaitai-io/kaitai_struct_compiler/releases/download/0.9/kaitai-struct-compiler-0.9.zip
+          unzip kaitai-struct-compiler-0.9.zip
+          PATH="/kaitai-struct-compiler-0.9/bin/:${PATH}"
+          apt-get update && apt-get install openjdk-8-jre
+          ./generate_kaitai.sh
       - name: Install dependencies
         run: dotnet restore
       - name: Build
