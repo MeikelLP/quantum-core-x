@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
@@ -11,7 +12,6 @@ using QuantumCore.Core.Cache;
 using QuantumCore.Core.Event;
 using QuantumCore.Core.Utils;
 using QuantumCore.Game.World.Entities;
-using Serilog;
 using Tomlyn;
 using Tomlyn.Model;
 
@@ -41,15 +41,17 @@ namespace QuantumCore.Game.World
         private readonly IAnimationManager _animationManager;
         private readonly ICacheManager _cacheManager;
         private readonly IWorld _world;
+        private readonly ILogger _logger;
         private readonly GameOptions _options;
 
-        public Map(IMonsterManager monsterManager, IAnimationManager animationManager, ICacheManager cacheManager, IWorld world, IOptions<GameOptions> options,
+        public Map(IMonsterManager monsterManager, IAnimationManager animationManager, ICacheManager cacheManager, IWorld world, IOptions<GameOptions> options, ILogger logger,
             string name, uint x, uint y, uint width, uint height)
         {
             _monsterManager = monsterManager;
             _animationManager = animationManager;
             _cacheManager = cacheManager;
             _world = world;
+            _logger = logger;
             _options = options.Value;
             Name = name;
             PositionX = x;
@@ -61,9 +63,9 @@ namespace QuantumCore.Game.World
 
         public async Task Initialize()
         {
-            Log.Debug($"Load map '{Name}' at {PositionX}x{PositionY} (size {Width}x{Height})");
+            _logger.LogDebug("Load map {Name} at {PositionX}|{PositionY} (size {Width}x{Height})", Name, PositionX, PositionY, Width, Height);
 
-            await _cacheManager.Set($"maps:{Name}", IpUtils.PublicIP + ":" + _options.Port);
+            await _cacheManager.Set($"maps:{Name}", $"{IpUtils.PublicIP}:{_options.Port}");
             await _cacheManager.Publish("maps", $"{Name} {IpUtils.PublicIP}:{_options.Port}");
 
             // Load map spawn data
@@ -85,7 +87,7 @@ namespace QuantumCore.Game.World
                     _spawnPoints.Add(SpawnPoint.FromToml(point));
                 }
                 
-                Log.Debug($"Loaded {_spawnPoints.Count} spawn points");
+                _logger.LogDebug("Loaded {SpawnPointsCount} spawn points", _spawnPoints.Count);
             }
             
             // Populate map
@@ -227,7 +229,7 @@ namespace QuantumCore.Game.World
                     break;
                 }
                 default:
-                    Log.Warning($"Unknown spawn point type: {spawnPoint.Type}");
+                    _logger.LogWarning("Unknown spawn point type: {SpawnPointType}", spawnPoint.Type);
                     break;
             }
         }
@@ -298,7 +300,7 @@ namespace QuantumCore.Game.World
         /// <param name="entity"></param>
         public async Task DespawnEntity(IEntity entity)
         {
-            Log.Debug($"Despawn {entity}");
+            _logger.LogDebug("Despawn {Entity}", entity);
 
             // Call despawn handlers
             await entity.OnDespawn();

@@ -189,7 +189,7 @@ namespace QuantumCore.Game.World
                         }
                         else
                         {
-                            map = new Map(_monsterManager, _animationManager, _cacheManager, this, _options, mapName, positionX, positionY, width, height);    
+                            map = new Map(_monsterManager, _animationManager, _cacheManager, this, _options, _logger, mapName, positionX, positionY, width, height);    
                         }
                         
                         
