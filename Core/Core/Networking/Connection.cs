@@ -70,7 +70,7 @@ namespace QuantumCore.Core.Networking
             {
                 try
                 {
-                    var read = await _stream.ReadAsync(buffer, 0, 1);
+                    var read = await _stream.ReadAsync(buffer.AsMemory(0, 1), stoppingToken);
                     if (read != 1)
                     {
                         _logger.LogInformation("Failed to read, closing connection");
@@ -89,7 +89,7 @@ namespace QuantumCore.Core.Networking
                     }
 
                     var data = new byte[packetDetails.Size - 1];
-                    read = await _stream.ReadAsync(data, 0, data.Length);
+                    read = await _stream.ReadAsync(data, stoppingToken);
 
                     packetTotalSize += read;
                     var allData = new byte[packetTotalSize];
@@ -120,7 +120,7 @@ namespace QuantumCore.Core.Networking
                         packet = Activator.CreateInstance(packetDetails.Type);
 
                         var subData = new byte[packetDetails.Size - data.Length - 1];
-                        read = await _stream.ReadAsync(subData, 0, subData.Length);
+                        read = await _stream.ReadAsync(subData, stoppingToken);
                         
                         packetTotalSize += read;
                         var oldSize = data.Length;
@@ -138,7 +138,7 @@ namespace QuantumCore.Core.Networking
                         
                         // Read dynamic data
                         var dynamicData = new byte[size];
-                        read = await _stream.ReadAsync(dynamicData, 0, size);
+                        read = await _stream.ReadAsync(dynamicData.AsMemory(0, size), stoppingToken);
                         packetTotalSize += read;
                         var oldSize = data.Length;
                         Array.Resize(ref allData, data.Length + read);
@@ -158,7 +158,7 @@ namespace QuantumCore.Core.Networking
                     if (packetDetails.HasSequence)
                     {
                         var sequence = new byte[1];
-                        read = await _stream.ReadAsync(sequence, 0, 1);
+                        read = await _stream.ReadAsync(sequence.AsMemory(0, 1), stoppingToken);
                         packetTotalSize += read;
                         var oldSize = data.Length;
                         Array.Resize(ref allData, data.Length + read);
@@ -172,13 +172,11 @@ namespace QuantumCore.Core.Networking
                     }
                     
                     //_logger.LogDebug($"Recv {packet}");
-                    // TODO token
-                    await _pluginExecutor.ExecutePlugins<IPacketOperationListener>(_logger, x => x.OnPrePacketReceivedAsync(packet, allData, CancellationToken.None));
+                    await _pluginExecutor.ExecutePlugins<IPacketOperationListener>(_logger, x => x.OnPrePacketReceivedAsync(packet, allData, stoppingToken));
 
                     await OnReceive(packet);
 
-                    // TODO token
-                    await _pluginExecutor.ExecutePlugins<IPacketOperationListener>(_logger, x => x.OnPostPacketReceivedAsync(packet, allData, CancellationToken.None));
+                    await _pluginExecutor.ExecutePlugins<IPacketOperationListener>(_logger, x => x.OnPostPacketReceivedAsync(packet, allData, stoppingToken));
                 }
                 catch (Exception e)
                 {
