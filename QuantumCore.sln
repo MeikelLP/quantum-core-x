@@ -4,11 +4,11 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core", "Core\Core.csproj", 
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CorePluginAPI", "CorePluginAPI\CorePluginAPI.csproj", "{017859C8-BBF8-47B1-B320-B6944BAFA8BD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExamplePlugin", "ExamplePlugin\ExamplePlugin.csproj", "{930E5131-B018-4255-BC08-ACE8F2C1BAC5}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExamplePlugin", "Plugins\ExamplePlugin\ExamplePlugin.csproj", "{930E5131-B018-4255-BC08-ACE8F2C1BAC5}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Plugins", "Plugins", "{6D101418-9A2D-41CB-BEA9-47F915395CE8}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PrometheusPlugin", "PrometheusPlugin\PrometheusPlugin.csproj", "{631F3027-FFC5-4F91-8ED5-8B0A8DF97ABE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PrometheusPlugin", "Plugins\PrometheusPlugin\PrometheusPlugin.csproj", "{631F3027-FFC5-4F91-8ED5-8B0A8DF97ABE}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core.Tests", "Core.Tests\Core.Tests.csproj", "{D02F020D-2464-48F3-B89E-EF4BABCB7713}"
 EndProject
