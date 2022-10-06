@@ -296,7 +296,15 @@ public class CommandTests : IAsyncLifetime
     [Fact]
     public async Task HelpCommand()
     {
-        throw new NotImplementedException();
+        await _commandManager.Handle(_connection, "/help");
+
+        _sentObjects.Should().ContainEquivalentOf(new ChatOutcoming
+        {
+            Message = "The following commands are available:\n"
+        }, cfg => cfg
+            .Including(x => x.Message)
+            .Using<string>(ctx => ctx.Subject.Should().StartWith(ctx.Expectation)).WhenTypeIs<string>()
+        );
     }
 
     [Fact]
