@@ -35,7 +35,7 @@ namespace QuantumCore.Game.PacketHandlers
 
             if (await _cacheManager.Exists(key) <= 0)
             {
-                _logger.LogWarning($"Received invalid auth token {ctx.Packet.Key} / {ctx.Packet.Username}");
+                _logger.LogWarning("Received invalid auth token {Key} / {Username}", ctx.Packet.Key, ctx.Packet.Username);
                 ctx.Connection.Close();
                 return;
             }

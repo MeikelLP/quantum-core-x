@@ -57,7 +57,7 @@ namespace QuantumCore.Core.Networking
 
         protected async override Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            _logger.LogInformation($"New connection from {_client.Client.RemoteEndPoint}");
+            _logger.LogInformation("New connection from {RemoteEndPoint}", _client.Client.RemoteEndPoint?.ToString());
 
             _stream = _client.GetStream();
 
@@ -83,7 +83,7 @@ namespace QuantumCore.Core.Networking
                     var packetDetails = _packetManager.GetIncomingPacket(buffer[0]);
                     if (packetDetails == null)
                     {
-                        _logger.LogInformation($"Received unknown header {buffer[0]:X2}");
+                        _logger.LogInformation("Received unknown header 0x{Header:X2}", buffer[0]);
                         _client.Close();
                         break;
                     }
@@ -112,7 +112,7 @@ namespace QuantumCore.Core.Networking
                             _packetManager.GetIncomingPacket((ushort) (packetDetails.Header << 8 | subHeader));
                         if (packetDetails == null)
                         {
-                            _logger.LogInformation($"Received unknown sub header {subHeader:X2} for header {buffer[0]:X2}");
+                            _logger.LogInformation("Received unknown sub header 0x{SubHeader:X2} for header 0x{Header:X2}", subHeader, buffer[0]);
                             _client.Close();
                             break;
                         }
@@ -145,7 +145,7 @@ namespace QuantumCore.Core.Networking
                         dynamicData.CopyTo(allData, oldSize);
                         if (read != size)
                         {
-                            _logger.LogInformation($"Failed to read dynamic data read {read} but expected {size}");
+                            _logger.LogInformation("Failed to read dynamic data read {Read} but expected {Size}", read, size);
                             _client.Close();
                             break;
                         }
@@ -260,7 +260,7 @@ namespace QuantumCore.Core.Networking
             if (handshake.Handshake != Handshake)
             {
                 // We received a wrong handshake
-                _logger.LogInformation($"Received wrong handshake ({Handshake} != {handshake.Handshake})");
+                _logger.LogInformation("Received wrong handshake ({Handshake} != {HandshakeHandshake})", Handshake, handshake.Handshake);
                 _client.Close();
                 return false;
             }

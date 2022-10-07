@@ -7,11 +7,9 @@ using QuantumCore.API;
 using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game.World;
 using QuantumCore.API.Game.World.AI;
-using QuantumCore.Core.Types;
 using QuantumCore.Core.Utils;
 using QuantumCore.Game.Packets;
 using QuantumCore.Game.World.Entities;
-using Serilog;
 
 namespace QuantumCore.Game.World.AI
 {

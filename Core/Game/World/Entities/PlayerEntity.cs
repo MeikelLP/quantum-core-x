@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game.Types;
@@ -14,7 +15,6 @@ using QuantumCore.Extensions;
 using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Packets;
 using QuantumCore.Game.PlayerUtils;
-using Serilog;
 
 namespace QuantumCore.Game.World.Entities
 {
@@ -94,10 +94,11 @@ namespace QuantumCore.Game.World.Entities
         private readonly IQuestManager _questManager;
         private readonly ICacheManager _cacheManager;
         private readonly IWorld _world;
+        private readonly ILogger<PlayerEntity> _logger;
 
         public PlayerEntity(Player player, IGameConnection connection, IItemManager itemManager, IJobManager jobManager,
             IExperienceManager experienceManager, IAnimationManager animationManager, IDatabaseManager databaseManager,
-            IQuestManager questManager, ICacheManager cacheManager, IWorld world) 
+            IQuestManager questManager, ICacheManager cacheManager, IWorld world, ILogger<PlayerEntity> logger) 
             : base(animationManager, world.GenerateVid())
         {
             Connection = connection;
@@ -107,6 +108,7 @@ namespace QuantumCore.Game.World.Entities
             _questManager = questManager;
             _cacheManager = cacheManager;
             _world = world;
+            _logger = logger;
             Player = new PlayerData {
                 Id = player.Id,
                 AccountId = player.AccountId,
@@ -133,8 +135,8 @@ namespace QuantumCore.Game.World.Entities
             };
             PositionX = player.PositionX;
             PositionY = player.PositionY;
-            Inventory = new Inventory(itemManager, databaseManager, _cacheManager, player.Id, 1, 5, 9, 2);
-            QuickSlotBar = new QuickSlotBar(_cacheManager, this);
+            Inventory = new Inventory(itemManager, databaseManager, _cacheManager, _logger, player.Id, 1, 5, 9, 2);
+            QuickSlotBar = new QuickSlotBar(_cacheManager, _logger, this);
 
             MovementSpeed = 150;
             EntityClass = player.PlayerClass;
@@ -188,7 +190,7 @@ namespace QuantumCore.Game.World.Entities
             var host = _world.GetMapHost(PositionX, PositionY);
 
             await Persist();
-            Log.Information("Warp!");
+            _logger.LogInformation("Warp!");
             var packet = new Warp {
                 PositionX = PositionX,
                 PositionY = PositionY,
@@ -219,7 +221,7 @@ namespace QuantumCore.Game.World.Entities
             // Spawn the player
             if (!await _world.SpawnEntity(this))
             {
-                Log.Warning("Failed to spawn player entity");
+                _logger.LogWarning("Failed to spawn player entity");
                 Connection.Close();
             }
 
@@ -248,7 +250,7 @@ namespace QuantumCore.Game.World.Entities
                 _defence += (uint)proto.Values[1] + (uint)proto.Values[5] * 2;
             }
             
-            Log.Debug($"Calculate defence value for {Name}, result: {_defence}");
+            _logger.LogDebug("Calculate defence value for {Name}, result: {Defence}", Name, _defence);
             
             // todo add defence bonus from quests
         }
@@ -493,7 +495,7 @@ namespace QuantumCore.Game.World.Entities
 
                     break;
                 default:
-                    Log.Error($"Failed to add point to {point}, unsupported");
+                    _logger.LogError("Failed to add point to {Point}, unsupported", point);
                     break;
             }
         }
@@ -521,7 +523,7 @@ namespace QuantumCore.Game.World.Entities
                     Player.Gold = value;
                     break;
                 default:
-                    Log.Error($"Failed to set point to {point}, unsupported");
+                    _logger.LogError("Failed to set point to {Point}, unsupported", point);
                     break;
             }
         }
@@ -591,7 +593,7 @@ namespace QuantumCore.Game.World.Entities
                 default:
                     if (Enum.GetValues<EPoints>().Contains(point))
                     {
-                        Log.Warning($"Point {point} is not implemented on player");
+                        _logger.LogWarning("Point {Point} is not implemented on player", point);
                     }
 
                     return 0;

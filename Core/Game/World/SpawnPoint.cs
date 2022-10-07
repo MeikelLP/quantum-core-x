@@ -1,5 +1,5 @@
 using System.Collections.Generic;
-using Serilog;
+using Microsoft.Extensions.Logging;
 using Tomlyn.Model;
 
 namespace QuantumCore.Game.World
@@ -23,7 +23,7 @@ namespace QuantumCore.Game.World
         public uint Monster { get; set; }
         public MonsterGroup CurrentGroup { get; set; }
 
-        public static SpawnPoint FromToml(TomlTable toml)
+        public static SpawnPoint FromToml(ILogger logger, TomlTable toml)
         {
             var sp = new SpawnPoint();
             
@@ -47,7 +47,7 @@ namespace QuantumCore.Game.World
                     sp.Direction = (int)(toml["direction"] as long? ?? 0);
                     break;
                 default:
-                    Log.Warning($"Unknown spawn type '{type}'");
+                    logger.LogWarning("Unknown spawn type {Type}", type);
                     break;
             }
 

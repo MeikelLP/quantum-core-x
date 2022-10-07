@@ -1,26 +1,32 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using QuantumCore.API;
-using QuantumCore.Core.Networking;
 using QuantumCore.Game.Packets;
 using QuantumCore.Game.World.Entities;
-using Serilog;
 
 namespace QuantumCore.Game.PacketHandlers.Game;
 
 public class CharacterMoveHandler : IPacketHandler<CharacterMove>
 {
+    private readonly ILogger<CharacterMoveHandler> _logger;
+
+    public CharacterMoveHandler(ILogger<CharacterMoveHandler> logger)
+    {
+        _logger = logger;
+    }
+    
     public async Task ExecuteAsync(PacketContext<CharacterMove> ctx, CancellationToken token = default)
     {
         if (ctx.Packet.MovementType > (int) CharacterMove.CharacterMovementType.Max &&
             ctx.Packet.MovementType != (int) CharacterMove.CharacterMovementType.Skill)
         {
-            Log.Error($"Received unknown movement type ({ctx.Packet.MovementType})");
+            _logger.LogError("Received unknown movement type ({MovementType})", ctx.Packet.MovementType);
             ctx.Connection.Close();
             return;
         }
             
-        Log.Debug($"Received movement packet with type {(CharacterMove.CharacterMovementType)ctx.Packet.MovementType}");
+        _logger.LogDebug("Received movement packet with type {MovementType}", (CharacterMove.CharacterMovementType)ctx.Packet.MovementType);
         if (ctx.Packet.MovementType == (int) CharacterMove.CharacterMovementType.Move)
         {
             ctx.Connection.Player.Rotation = ctx.Packet.Rotation * 5;

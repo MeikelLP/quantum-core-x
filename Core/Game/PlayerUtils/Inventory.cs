@@ -9,6 +9,7 @@ using QuantumCore.Core.Utils;
 using QuantumCore.Database;
 using QuantumCore.Extensions;
 using Serilog;
+using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace QuantumCore.Game.PlayerUtils
 {
@@ -169,8 +170,9 @@ namespace QuantumCore.Game.PlayerUtils
         private readonly List<ItemInstance> _items = new List<ItemInstance>();
         private readonly IDatabaseManager _databaseManager;
         private readonly ICacheManager _cacheManager;
+        private readonly ILogger _logger;
 
-        public Inventory(IItemManager itemManager, IDatabaseManager databaseManager, ICacheManager cacheManager, 
+        public Inventory(IItemManager itemManager, IDatabaseManager databaseManager, ICacheManager cacheManager, ILogger logger, 
             Guid owner, byte window, ushort width, ushort height, ushort pages)
         {
             Owner = owner;
@@ -179,6 +181,7 @@ namespace QuantumCore.Game.PlayerUtils
             _itemManager = itemManager;
             _databaseManager = databaseManager;
             _cacheManager = cacheManager;
+            _logger = logger;
             _width = width;
             _height = height;
 
@@ -206,8 +209,7 @@ namespace QuantumCore.Game.PlayerUtils
                 {
                     if (!EquipmentWindow.SetItem(item))
                     {
-                        Log.Warning(
-                            $"Failed to load item {item.Id} in position {item.Position} as it is outside the inventory!");
+                        Log.Warning("Failed to load item {Id} in position {Position} as it is outside the inventory!", item.Id, item.Position);
                     }
 
                     continue;

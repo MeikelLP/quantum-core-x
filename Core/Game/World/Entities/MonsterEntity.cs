@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game.Types;
@@ -8,12 +9,12 @@ using QuantumCore.API.Game.World.AI;
 using QuantumCore.Core.Utils;
 using QuantumCore.Game.Packets;
 using QuantumCore.Game.World.AI;
-using Serilog;
 
 namespace QuantumCore.Game.World.Entities
 {
     public class MonsterEntity : Entity
     {
+        private readonly ILogger _logger;
         public override EEntityType Type => EEntityType.Monster;
 
         public IBehaviour Behaviour {
@@ -26,7 +27,6 @@ namespace QuantumCore.Game.World.Entities
 
         public override byte HealthPercentage {
             get {
-                Log.Debug($"Health Percentage of {Vid}");
                 return (byte)(Math.Min(Math.Max(Health / (double)_proto.Hp, 0), 1) * 100);
             }
         }
@@ -40,9 +40,10 @@ namespace QuantumCore.Game.World.Entities
         private bool _behaviourInitialized;
         private double _deadTime = 5000;
         
-        public MonsterEntity(IMonsterManager monsterManager, IAnimationManager animationManager, IWorld world, uint id, int x, int y, float rotation = 0) 
+        public MonsterEntity(IMonsterManager monsterManager, IAnimationManager animationManager, IWorld world, ILogger logger, uint id, int x, int y, float rotation = 0) 
             : base(animationManager, world.GenerateVid())
         {
+            _logger = logger;
             _proto = monsterManager.GetMonster(id);
             PositionX = x;
             PositionY = y;
@@ -179,7 +180,7 @@ namespace QuantumCore.Game.World.Entities
                 case EPoints.Experience:
                     return _proto.Experience;
             }
-            Log.Warning($"Point {point} is not implemented on monster");
+            _logger.LogWarning("Point {Point} is not implemented on monster", point);
             return 0;
         }
 

@@ -1,9 +1,7 @@
-﻿using System.Diagnostics;
-using System.Linq;
+﻿using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
-using Serilog;
 
 namespace QuantumCore.Core.Utils
 {
@@ -41,12 +39,10 @@ namespace QuantumCore.Core.Utils
                 if (ip != null)
                 {
                     PublicIP = ip;
-                    Log.Debug($"Public IP is {PublicIP}");
                     return;
                 }
             }
 
-            Log.Warning($"Failed to look up public ip!");
             PublicIP = IPAddress.Loopback;
         }
     }

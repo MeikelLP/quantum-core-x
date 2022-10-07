@@ -8,7 +8,6 @@ using QuantumCore.API;
 using QuantumCore.Auth.Cache;
 using QuantumCore.Auth.Packets;
 using QuantumCore.Core.Cache;
-using QuantumCore.Core.Networking;
 using QuantumCore.Core.Utils;
 using QuantumCore.Database;
 
@@ -38,7 +37,7 @@ public class LoginRequestHandler : IPacketHandler<LoginRequest>
             // Hash the password to prevent timing attacks
             BCrypt.Net.BCrypt.HashPassword(ctx.Packet.Password);
             
-            _logger.LogDebug($"Account {ctx.Packet.Username} not found");
+            _logger.LogDebug("Account {Username} not found", ctx.Packet.Username);
             await ctx.Connection.Send(new LoginFailed
             {
                 Status = "WRONGPWD"
@@ -54,7 +53,7 @@ public class LoginRequestHandler : IPacketHandler<LoginRequest>
         {
             if (!BCrypt.Net.BCrypt.Verify(ctx.Packet.Password, account.Password))
             {
-                _logger.LogDebug($"Wrong password supplied for account {ctx.Packet.Username}");
+                _logger.LogDebug("Wrong password supplied for account {Username}", ctx.Packet.Username);
                 status = "WRONGPWD";
             }
             else
@@ -69,7 +68,7 @@ public class LoginRequestHandler : IPacketHandler<LoginRequest>
         }
         catch (Exception e)
         {
-            _logger.LogWarning($"Failed to verify password for account {ctx.Packet.Username}: {e.Message}");
+            _logger.LogWarning("Failed to verify password for account {Username}: {Message}", ctx.Packet.Username, e.Message);
             status = "WRONGPWD";
         }
 

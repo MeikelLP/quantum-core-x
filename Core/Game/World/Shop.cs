@@ -1,12 +1,12 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.World;
 using QuantumCore.Core.Utils;
 using QuantumCore.Game.Packets.Shop;
 using QuantumCore.Game.World.Entities;
-using Serilog;
 using ShopItem = QuantumCore.API.Core.Models.ShopItem;
 
 namespace QuantumCore.Game.World;
@@ -25,10 +25,12 @@ public class Shop : IShop
     private Grid<ShopItem> _grid = new(4, 5);
     private readonly List<ShopItem> _items = new();
     private readonly IItemManager _itemManager;
+    private readonly ILogger _logger;
 
-    public Shop(IItemManager itemManager)
+    public Shop(IItemManager itemManager, ILogger logger)
     {
         _itemManager = itemManager;
+        _logger = logger;
     }
 
     public void AddItem(uint itemId, byte count, uint price)
@@ -88,7 +90,7 @@ public class Shop : IShop
         var item = _items.Find(item => item.Position == position);
         if (item == null)
         {
-            Log.Information($"{player} tried to buy non existing item");
+            _logger.LogInformation("{Player} tried to buy non existing item", player);
             p.Connection.Close();
             return;
         }

@@ -84,7 +84,7 @@ namespace QuantumCore.Game.World
                 foreach (var point in spawnPoints)
                 {
                     // Construct/parse spawn point
-                    _spawnPoints.Add(SpawnPoint.FromToml(point));
+                    _spawnPoints.Add(SpawnPoint.FromToml(_logger, point));
                 }
                 
                 _logger.LogDebug("Loaded {SpawnPointsCount} spawn points", _spawnPoints.Count);
@@ -190,7 +190,7 @@ namespace QuantumCore.Game.World
 
                         foreach (var member in group.Members)
                         {
-                            var monster = new MonsterEntity(_monsterManager, _animationManager, _world, member.Id,
+                            var monster = new MonsterEntity(_monsterManager, _animationManager, _world, _logger, member.Id,
                                 (int) (PositionX + (baseX + RandomNumberGenerator.GetInt32(-5, 5)) * 100),
                                 (int) (PositionY + (baseY + RandomNumberGenerator.GetInt32(-5, 5)) * 100),
                                 RandomNumberGenerator.GetInt32(0, 360));
@@ -220,7 +220,7 @@ namespace QuantumCore.Game.World
 
                     spawnPoint.CurrentGroup = groupInstance;
 
-                    var monster = new MonsterEntity(_monsterManager, _animationManager, _world, spawnPoint.Monster, x, y, (spawnPoint.Direction - 1) * 45);
+                    var monster = new MonsterEntity(_monsterManager, _animationManager, _world, _logger, spawnPoint.Monster, x, y, (spawnPoint.Direction - 1) * 45);
                     await _world.SpawnEntity(monster);
                     
                     groupInstance.Monsters.Add(monster);

@@ -15,7 +15,6 @@ using QuantumCore.Core.Cache;
 using QuantumCore.Core.Utils;
 using QuantumCore.Game.Quest;
 using QuantumCore.Game.World.Entities;
-using Serilog;
 using Tomlyn;
 using Tomlyn.Model;
 
@@ -80,20 +79,20 @@ namespace QuantumCore.Game.World
 
                 if (model["shop"] is not TomlTableArray shops)
                 {
-                    Log.Warning("Failed to read shops.toml");
+                    _logger.LogWarning("Failed to read shops.toml");
                     return;
                 }
                 
                 foreach (var shopDef in shops)
                 {
                     var id = (int)(long) shopDef["id"];
-                    var shop = new Shop (_itemManager){Name = (string) shopDef["name"]};
+                    var shop = new Shop (_itemManager, _logger){Name = (string) shopDef["name"]};
 
                     if (shopDef.ContainsKey("items"))
                     {
                         if (shopDef["items"] is not TomlTableArray items)
                         {
-                            Log.Warning($"Can't read items of shop {shop.Name}");
+                            _logger.LogWarning("Can't read items of shop {ShopName}", shop.Name);
                             return;
                         }
 
@@ -243,7 +242,7 @@ namespace QuantumCore.Game.World
                 remoteMap.Host = IPAddress.Parse(parts[0]);
                 remoteMap.Port = ushort.Parse(parts[1]);
                 
-                Log.Debug($"Map {remoteMap.Name} is available at {remoteMap.Host}:{remoteMap.Port}");
+                _logger.LogDebug("Map {Name} is available at {Host}:{Port}", remoteMap.Name, remoteMap.Host, remoteMap.Port);
             }
 
             _mapSubscriber = _cacheManager.Subscribe();
@@ -265,7 +264,7 @@ namespace QuantumCore.Game.World
                 remoteMap.Host = IPAddress.Parse(parts[0]);
                 remoteMap.Port = ushort.Parse(parts[1]);
                 
-                Log.Debug($"Map {remoteMap.Name} is now available at {remoteMap.Host}:{remoteMap.Port}");
+                _logger.LogDebug("Map {Name} is now available at {Host}:{Port}", remoteMap.Name, remoteMap.Host, remoteMap.Port);
             });
             
             _mapSubscriber.Listen();
@@ -319,7 +318,7 @@ namespace QuantumCore.Game.World
             var map = GetMapAt((uint) x, (uint) y);
             if (map == null)
             {
-                Log.Warning($"No available host for map at {x}x{y}");
+                _logger.LogWarning("No available host for map at {X}|{Y}", x, y);
                 return new CoreHost {Ip = IPAddress.None, Port = 0};
             }
 

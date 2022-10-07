@@ -2,19 +2,24 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Microsoft.Extensions.Logging;
 using QuantumCore.Core.Packets;
-using QuantumCore.Core.Utils;
-using Serilog;
 
 namespace QuantumCore.Core.Networking;
 
 public class DefaultPacketManager : IPacketManager
 {
+    private readonly ILogger<DefaultPacketManager> _logger;
     private readonly List<Type> _incomingTypes = new();
     private readonly List<Type> _outgoingTypes = new();
     public Dictionary<ushort, PacketCache> OutgoingPackets {get;} = new();
     public Dictionary<ushort, PacketCache> IncomingPackets {get;} = new();
 
+    public DefaultPacketManager(ILogger<DefaultPacketManager> logger)
+    {
+        _logger = logger;
+    }
+    
     public bool IsRegisteredOutgoing(Type packet)
     {
         return _outgoingTypes.Contains(packet);
@@ -32,14 +37,14 @@ public class DefaultPacketManager : IPacketManager
 
     public void RegisterNamespace(string space, Assembly assembly = null)
     {
-        Log.Debug($"Register packet namespace {space}");
+        _logger.LogDebug("Register packet namespace {Namespace}", space);
         if (assembly == null) assembly = Assembly.GetAssembly(typeof(DefaultPacketManager));
 
         var types = assembly.GetTypes().Where(t => t.Namespace?.StartsWith(space, StringComparison.Ordinal) ?? false)
             .Where(t => t.GetCustomAttribute<PacketAttribute>() != null).ToArray();
         foreach (var type in types)
         {
-            Log.Debug($"Register Packet {type.Name}");
+            _logger.LogDebug("Register Packet {Name}", type.Name);
             var packet = type.GetCustomAttribute<PacketAttribute>();
             if (packet == null)
             {
@@ -76,8 +81,7 @@ public class DefaultPacketManager : IPacketManager
             {
                 if (IncomingPackets.ContainsKey(header))
                 {
-                    Log.Information(
-                        $"Header 0x{packet.Header} is already in use for incoming packets. ({type.Name} & {IncomingPackets[packet.Header].Type.Name})");
+                    _logger.LogInformation("Header 0x{PacketHeader:X2} is already in use for incoming packets. ({Name} & {TypeName})", packet.Header, type.Name, IncomingPackets[packet.Header].Type.Name);
                 }
                 else
                 {
@@ -90,8 +94,7 @@ public class DefaultPacketManager : IPacketManager
             {
                 if (OutgoingPackets.ContainsKey(header))
                 {
-                    Log.Information(
-                        $"Header 0x{packet.Header} is already in use for outgoing packets. ({type.Name} & {OutgoingPackets[packet.Header].Type.Name})");
+                    _logger.LogInformation("Header 0x{Header:X2} is already in use for outgoing packets. ({Name} & {TypeName})", packet.Header, type.Name, OutgoingPackets[packet.Header].Type.Name);
                 }
                 else
                 {

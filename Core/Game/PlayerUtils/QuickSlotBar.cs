@@ -1,26 +1,26 @@
-using System.Runtime.InteropServices;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game.World;
 using QuantumCore.Core.Cache;
-using QuantumCore.Game.Packets;
 using QuantumCore.Game.Packets.General;
 using QuantumCore.Game.Packets.QuickBar;
 using QuantumCore.Game.World.Entities;
-using Serilog;
 
 namespace QuantumCore.Game.PlayerUtils;
 
 public class QuickSlotBar : IQuickSlotBar
 {
     private readonly ICacheManager _cacheManager;
+    private readonly ILogger _logger;
     public IPlayerEntity Player { get; }
     public QuickSlotData[] Slots { get; } = new QuickSlotData[8];
     
-    public QuickSlotBar(ICacheManager cacheManager, PlayerEntity player)
+    public QuickSlotBar(ICacheManager cacheManager, ILogger logger, PlayerEntity player)
     {
         _cacheManager = cacheManager;
+        _logger = logger;
         Player = player;
     }
 
@@ -33,7 +33,7 @@ public class QuickSlotBar : IQuickSlotBar
             var slots = await _cacheManager.Get<QuickSlotData[]>(key);
             if (slots.Length != Slots.Length)
             {
-                Log.Warning("Removing cached quick slots, length mismatch");
+                _logger.LogWarning("Removing cached quick slots, length mismatch");
                 await _cacheManager.Del(key);
             }
             else

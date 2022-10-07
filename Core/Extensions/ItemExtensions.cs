@@ -6,7 +6,6 @@ using Dapper.Contrib.Extensions;
 using QuantumCore.API.Core.Models;
 using QuantumCore.Core.Cache;
 using QuantumCore.Database;
-using Serilog;
 
 namespace QuantumCore.Extensions;
 
@@ -18,11 +17,9 @@ public static class ItemExtensions
 
         if (await cacheManager.Exists(key) > 0)
         {
-            Log.Debug($"Read item {id} from cache");
             return await cacheManager.Get<ItemInstance>(key);
         }
 
-        Log.Debug($"Load item {id} from database");
         using var db = databaseManager.GetGameDatabase();
 
         var item = db.Get<ItemInstance>(id);
@@ -40,7 +37,6 @@ public static class ItemExtensions
         // Check if the window list exists
         if (await cacheManager.Exists(key) > 0)
         {
-            Log.Debug($"Found items for player {player} in window {window} in cache");
             var itemIds = await list.Range(0, -1);
 
             foreach (var id in itemIds)
@@ -50,7 +46,6 @@ public static class ItemExtensions
         }
         else
         {
-            Log.Debug($"Query items for player {player} in window {window} from database");
             using var db = databaseManager.GetGameDatabase();
             var ids = await db.QueryAsync<Guid>(
                 "SELECT Id FROM items WHERE PlayerId = @PlayerId AND `Window` = @Window",

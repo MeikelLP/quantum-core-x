@@ -11,7 +11,6 @@ using QuantumCore.Database;
 using QuantumCore.Extensions;
 using QuantumCore.Game.Packets;
 using QuantumCore.Game.PlayerUtils;
-using Serilog;
 
 namespace QuantumCore.Game.PacketHandlers.Select;
 
@@ -66,7 +65,7 @@ public class DeleteCharacterHandler : ISelectPacketHandler<DeleteCharacter>
         if (player == null)
         {
             ctx.Connection.Close();
-            Log.Warning("Invalid or not exist character");
+            _logger.LogWarning("Invalid or not exist character");
             return;
         }
 

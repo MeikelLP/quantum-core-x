@@ -3,9 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Dapper;
 using Dapper.Contrib.Extensions;
-using QuantumCore.API.Game;
 using QuantumCore.Core.Cache;
-using Serilog;
 
 namespace QuantumCore.Database
 {
@@ -62,12 +60,10 @@ namespace QuantumCore.Database
             var playerKey = "player:" + playerId;
             if (await cacheManager.Exists(playerKey) > 0)
             {
-                Log.Debug($"Read character {playerId} from cache");
                 return await cacheManager.Get<Player>(playerKey);
             }
             else
             {
-                Log.Debug($"Query character {playerId} from the database");
                 var player = db.Get<Player>(playerId);
                 //var player = await SqlMapperExtensions.Get<Player>(db, playerId);
                 await cacheManager.Set(playerKey, player);
@@ -84,7 +80,6 @@ namespace QuantumCore.Database
             // Check if we have players cached
             if (await cacheManager.Exists(key) > 0)
             {
-                Log.Debug($"Found players for account {account} in cache");
                 // We have the characters cached
                 var cachedIds = await list.Range(0, -1);
 
@@ -95,7 +90,6 @@ namespace QuantumCore.Database
             }
             else
             {
-                Log.Debug($"Query players for account {account} from the database");
                 using var db = databaseManager.GetGameDatabase();
                 var ids = await db.QueryAsync("SELECT Id FROM players WHERE AccountId = @AccountId",
                     new {AccountId = account});

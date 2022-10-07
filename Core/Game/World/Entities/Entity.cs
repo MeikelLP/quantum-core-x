@@ -1,19 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Threading.Tasks;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
 using QuantumCore.API.Core.Utils;
-using QuantumCore.API.Game;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.World;
 using QuantumCore.Core.Constants;
-using QuantumCore.Core.Networking;
 using QuantumCore.Core.Utils;
 using QuantumCore.Game.Packets;
-using QuantumCore.Game.PlayerUtils;
-using Serilog;
 
 namespace QuantumCore.Game.World.Entities
 {
@@ -208,18 +203,15 @@ namespace QuantumCore.Game.World.Entities
                         break;
                     case 1:
                         // todo range attack
-                        Log.Warning("Range attack is not yet implemented");
                         break;
                     case 2:
                         // todo magic attack
-                        Log.Warning("Magic attack is not yet implemented");
                         break;
                 }
             }
             else
             {
                 // todo implement skills
-                Log.Warning("Skill aren't yet implemented");
             }
         }
 

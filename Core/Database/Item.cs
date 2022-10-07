@@ -1,10 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using Dapper;
-using Dapper.Contrib.Extensions;
-using QuantumCore.API.Core.Models;
-using Serilog;
 
 namespace QuantumCore.Database
 {

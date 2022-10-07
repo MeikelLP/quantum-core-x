@@ -6,19 +6,20 @@ using FluentMigrator.Runner.Exceptions;
 using FluentMigrator.Runner.Initialization;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using QuantumCore.Core;
 using QuantumCore.Migrations;
-using Serilog;
 
 namespace QuantumCore.Database
 {
     public class Migrate : IHostedService
     {
+        private readonly ILogger<Migrate> _logger;
         private readonly MigrateOptions _options;
         
-        public Migrate(IOptions<MigrateOptions> options)
+        public Migrate(IOptions<MigrateOptions> options, ILogger<Migrate> logger)
         {
+            _logger = logger;
             _options = options.Value;
         }
 
@@ -35,7 +36,7 @@ namespace QuantumCore.Database
                 }
                 catch (MissingMigrationsException)
                 {
-                    Log.Information("No migrations found for account database");
+                    _logger.LogInformation("No migrations found for account database");
                 }
             }
 
@@ -49,7 +50,7 @@ namespace QuantumCore.Database
                 }
                 catch (MissingMigrationsException)
                 {
-                    Log.Information("No migrations found for game database");
+                    _logger.LogInformation("No migrations found for game database");
                 }
             }
         }
