@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using CommandLine;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -42,6 +43,13 @@ namespace QuantumCore
             
             var host = Host.CreateDefaultBuilder(args)
                 .UseConsoleLifetime(x => x.SuppressStatusMessages = true)
+                .ConfigureAppConfiguration(cfg =>
+                {
+                    cfg.AddTomlFile("data/jobs.toml");
+                    cfg.AddTomlFile("data/shops.toml", true);
+                    cfg.AddTomlFile("data/groups.toml", true);
+                    cfg.AddTomlFile("settings.toml");
+                })
                 .ConfigureServices((ctx, services) =>
                 {
                     switch (obj)

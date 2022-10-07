@@ -1,8 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using QuantumCore.API;
@@ -12,8 +14,6 @@ using QuantumCore.Core.Cache;
 using QuantumCore.Core.Event;
 using QuantumCore.Core.Utils;
 using QuantumCore.Game.World.Entities;
-using Tomlyn;
-using Tomlyn.Model;
 
 // using QuantumCore.Core.API;
 
@@ -68,27 +68,14 @@ namespace QuantumCore.Game.World
             await _cacheManager.Set($"maps:{Name}", $"{IpUtils.PublicIP}:{_options.Port}");
             await _cacheManager.Publish("maps", $"{Name} {IpUtils.PublicIP}:{_options.Port}");
 
-            // Load map spawn data
-            var spawnFile = Path.Join("data", "maps", Name, "spawn.toml");
-            if (File.Exists(spawnFile))
-            {
-                var spawns = Toml.Parse(File.ReadAllText(spawnFile));
-                var model = spawns.ToModel();
-                var spawnPoints = model["spawn"] as TomlTableArray;
-                if (spawnPoints == null)
-                {
-                    // No spawn points defined
-                    return;
-                }
-                
-                foreach (var point in spawnPoints)
-                {
-                    // Construct/parse spawn point
-                    _spawnPoints.Add(SpawnPoint.FromToml(_logger, point));
-                }
-                
-                _logger.LogDebug("Loaded {SpawnPointsCount} spawn points", _spawnPoints.Count);
-            }
+            var cfg = new ConfigurationBuilder()
+                .AddTomlFile(Path.Join("data", "maps", Name, "spawn.toml"), true)
+                .Build();
+
+            _spawnPoints.AddRange(cfg.GetSection("spawn").Get<SpawnPoint[]>() ?? Array.Empty<SpawnPoint>());
+            
+            _logger.LogDebug("Loaded {SpawnPointsCount} spawn points", _spawnPoints.Count);
+            
             
             // Populate map
             foreach(var spawnPoint in _spawnPoints) 

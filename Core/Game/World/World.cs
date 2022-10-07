@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using QuantumCore.API;
@@ -14,10 +15,7 @@ using QuantumCore.API.Game.World;
 using QuantumCore.API.PluginTypes;
 using QuantumCore.Core.Cache;
 using QuantumCore.Core.Utils;
-using QuantumCore.Game.Quest;
 using QuantumCore.Game.World.Entities;
-using Tomlyn;
-using Tomlyn.Model;
 
 namespace QuantumCore.Game.World
 {
@@ -39,9 +37,11 @@ namespace QuantumCore.Game.World
         private readonly IAnimationManager _animationManager;
         private readonly ICacheManager _cacheManager;
         private readonly IOptions<GameOptions> _options;
+        private readonly IConfiguration _configuration;
 
         public World(ILogger<World> logger, PluginExecutor pluginExecutor, IItemManager itemManager, 
-            IMonsterManager monsterManager, IAnimationManager animationManager, ICacheManager cacheManager, IOptions<GameOptions> options)
+            IMonsterManager monsterManager, IAnimationManager animationManager, ICacheManager cacheManager, IOptions<GameOptions> options,
+            IConfiguration configuration)
         {
             _logger = logger;
             _pluginExecutor = pluginExecutor;
@@ -50,6 +50,7 @@ namespace QuantumCore.Game.World
             _animationManager = animationManager;
             _cacheManager = cacheManager;
             _options = options;
+            _configuration = configuration;
             _vid = 0;
         }
         
@@ -72,80 +73,31 @@ namespace QuantumCore.Game.World
 
         private void LoadShops()
         {
-            var path = Path.Join("data", "shops.toml");
-            if (File.Exists(path))
+            var shops = _configuration.GetSection("shops").Get<ShopDefinition[]>();
+            if (shops is null) return;
+            foreach (var shopDef in shops)
             {
-                var toml = Toml.Parse(File.ReadAllText(path));
-                var model = toml.ToModel();
-
-                if (model["shop"] is not TomlTableArray shops)
-                {
-                    _logger.LogWarning("Failed to read shops.toml");
-                    return;
-                }
+                var shop = new Shop (_itemManager, _logger);
                 
-                foreach (var shopDef in shops)
+                _staticShops[shopDef.Id] = shop;
+                
+                if (shopDef.Npc.HasValue)
                 {
-                    var id = (int)(long) shopDef["id"];
-                    var shop = new Shop (_itemManager, _logger){Name = (string) shopDef["name"]};
-
-                    if (shopDef.ContainsKey("items"))
+                    GameEventManager.RegisterNpcClickEvent(shop.Name, shopDef.Npc.Value, async player =>
                     {
-                        if (shopDef["items"] is not TomlTableArray items)
-                        {
-                            _logger.LogWarning("Can't read items of shop {ShopName}", shop.Name);
-                            return;
-                        }
-
-                        foreach (var itemDef in items)
-                        {
-                            var itemId = (uint) (long) itemDef["id"];
-                            byte count = 1;
-                            if (itemDef.ContainsKey("count"))
-                            {
-                                count = (byte) (long) itemDef["count"];
-                            }
-
-                            var price = 0u;
-                            if (itemDef.ContainsKey("price"))
-                            {
-                                price = (uint) (long) itemDef["price"];
-                            }
-
-                            shop.AddItem(itemId, count, price);
-                        }
-                    }
-                    
-                    _staticShops[id] = shop;
-                    
-                    if (shopDef.ContainsKey("npc"))
-                    {
-                        var npc = (uint) (long) shopDef["npc"];
-                        GameEventManager.RegisterNpcClickEvent(shop.Name, npc, async player =>
-                        {
-                            await shop.Open(player);
-                        });
-                    }
+                        await shop.Open(player);
+                    });
                 }
             }
         }
 
         private void LoadGroups()
         {
-            // Load groups
-            var path = Path.Join("data", "groups.toml");
-            if (File.Exists(path))
+            var groups = _configuration.GetSection("group").Get<SpawnGroup[]>();
+            if (groups is null) return;
+            foreach (var g in groups)
             {
-                var toml = Toml.Parse(File.ReadAllText(path));
-                var model = toml.ToModel();
-                if (model["group"] is TomlTableArray groups)
-                {
-                    foreach (var group in groups)
-                    {
-                        var g = WorldUtils.GroupFromToml(group);
-                        _groups[g.Id] = g;
-                    }
-                }
+                _groups[g.Id] = g;
             }
         }
 
@@ -159,10 +111,11 @@ namespace QuantumCore.Game.World
                 
             // Load atlasinfo.txt and initialize all maps the game core hosts
             if (!File.Exists("data/atlasinfo.txt"))
-            {
-                 throw new FileNotFoundException("Unable to find file data/atlasinfo.txt");
+            { 
+                throw new FileNotFoundException("Unable to find file data/atlasinfo.txt");
             }
 
+            var maps = _configuration.GetSection("maps").Get<string[]>() ?? Array.Empty<string>();
             using var reader = new StreamReader("data/atlasinfo.txt");
             string line;
             var lineNo = 0;
@@ -183,7 +136,7 @@ namespace QuantumCore.Game.World
                         var height = uint.Parse(match.Groups[5].Value);
 
                         IMap map;
-                        if (!ConfigManager.Maps.Contains(mapName))
+                        if (!maps.Contains(mapName))
                         {
                             map = new RemoteMap(mapName, positionX, positionY, width, height);
                         }

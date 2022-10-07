@@ -1,11 +1,7 @@
 ﻿using System.Collections.Generic;
-using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API.Game.Types;
-using Tomlyn;
-using Tomlyn.Model;
 
 namespace QuantumCore.Game.PlayerUtils
 {
@@ -14,9 +10,14 @@ namespace QuantumCore.Game.PlayerUtils
         private readonly List<Job> _jobs = new();
         private readonly ILogger<JobManager> _logger;
 
-        public JobManager(ILogger<JobManager> logger)
+        public JobManager(ILogger<JobManager> logger, IConfiguration configuration)
         {
             _logger = logger;
+            
+            foreach (var job in configuration.GetSection("job").Get<Job[]>())
+            {
+                _jobs.Add(job);
+            }
         }
 
         public byte GetJobFromClass(byte playerClass)
@@ -37,51 +38,6 @@ namespace QuantumCore.Game.PlayerUtils
                     return 3;
                 default:
                     return 0;
-            }
-        }
-        
-        public async Task LoadAsync(CancellationToken token = default)
-        {
-            _logger.LogInformation("Loading jobs.toml");
-            
-            var path = Path.Join("data", "jobs.toml");
-            var toml = Toml.Parse(await File.ReadAllTextAsync(path, token));
-            var model = toml.ToModel();
-            if (model["job"] is TomlTableArray groups)
-            {
-                foreach (var job in groups)
-                {
-                    var id = (int)(job["id"] as long? ?? -1) + 1;
-
-                    if (id == 0)
-                        continue;
-                        
-                    // for (var i = Jobs.Count - 1; i < id; i++)
-                    //     Jobs.Add(new Job());
-
-                    var newJob = new Job {
-                        Ht = (byte) (job["ht"] as long? ?? 0), 
-                        Dx = (byte) (job["dx"] as long? ?? 0), 
-                        St = (byte) (job["st"] as long? ?? 0),
-                        Iq = (byte) (job["iq"] as long? ?? 0),
-                        StartHp = (uint) (job["start_hp"] as long? ?? 0),
-                        StartSp = (uint) (job["start_sp"] as long? ?? 0),
-                        HpPerHt = (uint) (job["hp_per_ht"] as long? ?? 0),
-                        SpPerIq = (uint) (job["sp_per_iq"] as long? ?? 0),
-                        HpPerLevel = (uint) (job["hp_per_level"] as long? ?? 0),
-                        SpPerLevel = (uint) (job["sp_per_level"] as long? ?? 0)
-                    };
-                    if (job.ContainsKey("attack_status") && job["attack_status"] is string attackStatus)
-                    {
-                        newJob.AttackStatus = StringToPoints(attackStatus);
-                    }
-                    else
-                    {
-                        _logger.LogError("Missing attack status in job {Name}, falling back to ST!", job["name"]);
-                        newJob.AttackStatus = EPoints.St;
-                    }
-                    _jobs.Add(newJob);
-                }
             }
         }
 

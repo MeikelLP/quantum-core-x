@@ -21,7 +21,6 @@ using QuantumCore.Core.Cache;
 using QuantumCore.Core.Packets;
 using QuantumCore.Database;
 using QuantumCore.Extensions;
-using QuantumCore.Game;
 using QuantumCore.Game.Commands;
 using QuantumCore.Game.Packets;
 using QuantumCore.Game.PlayerUtils;
@@ -42,7 +41,6 @@ public class CommandTests : IAsyncLifetime
     private readonly IPlayerEntity _player;
     private readonly Faker<Player> _playerDataFaker;
     private readonly List<object> _sentObjects = new();
-    private readonly IMonsterManager _monsterManager;
 
     public CommandTests(ITestOutputHelper testOutputHelper)
     {        
@@ -101,7 +99,6 @@ public class CommandTests : IAsyncLifetime
             .AddSingleton(_ => _playerDataFaker.Generate())
             .BuildServiceProvider();
         _commandManager = _services.GetRequiredService<ICommandManager>();
-        _monsterManager = _services.GetRequiredService<IMonsterManager>();
         _commandManager.Register("QuantumCore.Game.Commands", typeof(SpawnCommand).Assembly);
         _connection = _services.GetRequiredService<IGameConnection>();
         connectionMock.Setup(x => x.Player).Returns(_services.GetRequiredService<IPlayerEntity>()); // this would usually happen during char select
@@ -461,7 +458,6 @@ public class CommandTests : IAsyncLifetime
         await File.WriteAllTextAsync("data/atlasinfo.txt", $"map_a2	{Map.MapUnit * 10}	{Map.MapUnit * 26}	6	6\n" +
                                                            $"map_b2	{Map.MapUnit * 10}	{Map.MapUnit * 26}	6	6");
         await File.WriteAllTextAsync("settings.toml", @"maps = [""map_a2"", ""map_b2""]");
-        ConfigManager.Load();
         var world = _services.GetRequiredService<IWorld>();
         await world.Load();
         return world;

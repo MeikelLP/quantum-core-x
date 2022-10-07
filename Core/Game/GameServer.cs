@@ -99,14 +99,10 @@ namespace QuantumCore.Game
             // Initialize static components
             _databaseManager.Init(_options.AccountString, _options.GameString);
             
-            // Load game configuration
-            ConfigManager.Load();
-            
             // Load game data
             await Task.WhenAll(
                 _itemManager.LoadAsync(stoppingToken), 
                 _monsterManager.LoadAsync(stoppingToken), 
-                _jobManager.LoadAsync(stoppingToken), 
                 _experienceManager.LoadAsync(stoppingToken),
                 _animationManager.LoadAsync(stoppingToken),
                 _commandManager.LoadAsync(stoppingToken)

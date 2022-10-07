@@ -11,6 +11,12 @@ using ShopItem = QuantumCore.API.Core.Models.ShopItem;
 
 namespace QuantumCore.Game.World;
 
+public class ShopDefinition
+{
+    public int Id { get; set; }
+    public uint? Npc { get; set; }
+}
+
 public class Shop : IShop
 {
     // todo: implement player shop, this require to remove an item on purchase

@@ -10,6 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Alexinea.Extensions.Configuration.Toml" Version="6.0.0" />
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.0" />
     <PackageReference Include="BeetleX.Redis" Version="1.0.0.8" />
     <PackageReference Include="CommandLineParser" Version="2.8.0" />
@@ -34,12 +35,15 @@
     <PackageReference Include="Serilog.Sinks.File" Version="5.0.0-dev-00887" />
     <PackageReference Include="Serilog.Sinks.RollingFile" Version="3.3.1-dev-00771" />
     <PackageReference Include="JetBrains.Annotations" Version="2020.2.0-eap" />
-    <PackageReference Include="Tomlyn" Version="0.1.2" />
     <PackageReference Include="Weikio.PluginFramework.AspNetCore" Version="1.5.1" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\CorePluginAPI\CorePluginAPI.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="Game\ConfigManager.cs" />
   </ItemGroup>
 
 </Project>
