@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -31,7 +32,17 @@ namespace QuantumCore.Core.Types
                 if(i < 0) continue;
                 
                 var keyword = line.Substring(0, i);
-                var value = line.Substring(line.IndexOf(' ')).Split(new []{' ', '\t'}).Select(s => s.Trim())
+                var startIndex = line.IndexOf(' ');
+                if (startIndex == -1)
+                {
+                    startIndex = line.IndexOf('\t');
+                }
+
+                if (startIndex == -1)
+                {
+                    throw new InvalidOperationException("Line does not contain ' ' or '\t' char. One of those are required");
+                }
+                var value = line.Substring(startIndex).Split(new []{' ', '\t'}).Select(s => s.Trim())
                     .Where(s => !string.IsNullOrWhiteSpace(s)).ToArray();
                 _values[keyword] = string.Join(' ', value);
             }
