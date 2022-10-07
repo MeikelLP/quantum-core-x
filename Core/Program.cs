@@ -27,7 +27,17 @@ namespace QuantumCore
 
         private static async Task RunAsync(object obj, string[] args)
         {
-            var pluginCatalog = new FolderPluginCatalog("plugins");
+            var pluginCatalog = new FolderPluginCatalog("plugins", cfg =>
+            {
+                var sampleType = typeof(IConnectionLifetimeListener);
+                var types = sampleType.Assembly.GetExportedTypes()
+                    .Where(x => x.Namespace == sampleType.Namespace)
+                    .ToArray();
+                foreach (var type in types)
+                {
+                    cfg.Implements(type);
+                }
+            });
             await pluginCatalog.Initialize();
             
             var host = Host.CreateDefaultBuilder(args)
