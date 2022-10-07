@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
+using QuantumCore.API.PluginTypes;
 using QuantumCore.Game.Packets;
 using QuantumCore.Game.World.Entities;
 

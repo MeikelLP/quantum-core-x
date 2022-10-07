@@ -2,7 +2,7 @@
 using System.Threading.Tasks;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
-using QuantumCore.Core.Networking;
+using QuantumCore.API.PluginTypes;
 using QuantumCore.Core.Packets;
 
 namespace QuantumCore.Game.PacketHandlers;

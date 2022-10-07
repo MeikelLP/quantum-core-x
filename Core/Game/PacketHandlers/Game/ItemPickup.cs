@@ -1,7 +1,7 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 using QuantumCore.API;
-using QuantumCore.Core.Networking;
+using QuantumCore.API.PluginTypes;
 using QuantumCore.Game.Packets;
 using QuantumCore.Game.World.Entities;
 

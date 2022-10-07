@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using QuantumCore.API;
+using QuantumCore.API.PluginTypes;
 
 namespace ExamplePlugin;
 

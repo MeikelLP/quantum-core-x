@@ -1,7 +1,7 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 
-namespace QuantumCore.API;
+namespace QuantumCore.API.PluginTypes;
 
 public interface IGameTickListener
 {

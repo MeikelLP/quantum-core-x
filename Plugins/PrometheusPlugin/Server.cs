@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Prometheus;
-using QuantumCore.API;
+using QuantumCore.API.PluginTypes;
 
 namespace PrometheusPlugin
 {

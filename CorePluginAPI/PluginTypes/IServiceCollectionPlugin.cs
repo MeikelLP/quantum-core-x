@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 
-namespace QuantumCore.API;
+namespace QuantumCore.API.PluginTypes;
 
 public interface IServiceCollectionPlugin
 {

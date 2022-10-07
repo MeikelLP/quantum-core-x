@@ -1,6 +1,7 @@
 ﻿using System.Threading;
 using System.Threading.Tasks;
 using QuantumCore.API;
+using QuantumCore.API.PluginTypes;
 
 namespace QuantumCore.Core.Networking;
 

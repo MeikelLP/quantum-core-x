@@ -1,5 +1,5 @@
 ﻿using Prometheus;
-using QuantumCore.API;
+using QuantumCore.API.PluginTypes;
 
 namespace PrometheusPlugin;
 
