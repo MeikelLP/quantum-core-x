@@ -123,9 +123,6 @@ namespace QuantumCore.Game
 
             // Register all default commands
             _commandManager.Register("QuantumCore.Game.Commands");
-
-            // Register game server features
-            PacketManager.RegisterNamespace("QuantumCore.Game.Packets");
             
             // Put all new connections into login phase
             RegisterNewConnectionListener(async connection =>
@@ -139,8 +136,6 @@ namespace QuantumCore.Game
             // Start server timer
             _serverTimer.Start();
 
-            // Register Core Features
-            PacketManager.RegisterNamespace("QuantumCore.Core.Packets");
             _logger.LogInformation("Start listening for connections...");
 
             StartListening();
