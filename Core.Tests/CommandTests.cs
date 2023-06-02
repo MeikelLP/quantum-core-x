@@ -93,7 +93,13 @@ public class CommandTests : IAsyncLifetime
             .Replace(new ServiceDescriptor(typeof(IDatabaseManager), _ => databaseManagerMock.Object, ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(IJobManager), _ => jobManagerMock.Object, ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(IExperienceManager), _ => experienceManagerMock.Object, ServiceLifetime.Singleton))
-            .AddSingleton<IConfiguration>(_ => new ConfigurationBuilder().Build())
+            .AddSingleton<IConfiguration>(_ => new ConfigurationBuilder()
+                .AddInMemoryCollection(new Dictionary<string, string>()
+                {
+                    { "maps:0", "map_a2"},
+                    { "maps:1", "map_b2"}
+                })
+                .Build())
             .AddSingleton(_ => connectionMock.Object)
             .AddSingleton<IPlayerEntity, PlayerEntity>()
             .AddSingleton(_ => _playerDataFaker.Generate())
@@ -457,7 +463,6 @@ public class CommandTests : IAsyncLifetime
         if (!Directory.Exists("data")) Directory.CreateDirectory("data");
         await File.WriteAllTextAsync("data/atlasinfo.txt", $"map_a2	{Map.MapUnit * 10}	{Map.MapUnit * 26}	6	6\n" +
                                                            $"map_b2	{Map.MapUnit * 10}	{Map.MapUnit * 26}	6	6");
-        await File.WriteAllTextAsync("settings.toml", @"maps = [""map_a2"", ""map_b2""]");
         var world = _services.GetRequiredService<IWorld>();
         await world.Load();
         return world;
