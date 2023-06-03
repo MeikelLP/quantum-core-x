@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using CommandLine;
 using Microsoft.Extensions.Configuration;
@@ -28,18 +29,26 @@ namespace QuantumCore
 
         private static async Task RunAsync(object obj, string[] args)
         {
-            var pluginCatalog = new FolderPluginCatalog("plugins", cfg =>
+            // workaround for https://github.com/dotnet/project-system/issues/3619
+            Directory.SetCurrentDirectory(Path.GetDirectoryName(Assembly.GetEntryAssembly()!.Location)!);
+            
+            // init plugins if any
+            IPluginCatalog pluginCatalog = new EmptyPluginCatalog();
+            if (Directory.Exists("plugins"))
             {
-                var sampleType = typeof(IConnectionLifetimeListener);
-                var types = sampleType.Assembly.GetExportedTypes()
-                    .Where(x => x.Namespace == sampleType.Namespace)
-                    .ToArray();
-                foreach (var type in types)
+                pluginCatalog = new FolderPluginCatalog("plugins", cfg =>
                 {
-                    cfg.Implements(type);
-                }
-            });
-            await pluginCatalog.Initialize();
+                    var sampleType = typeof(IConnectionLifetimeListener);
+                    var types = sampleType.Assembly.GetExportedTypes()
+                        .Where(x => x.Namespace == sampleType.Namespace)
+                        .ToArray();
+                    foreach (var type in types)
+                    {
+                        cfg.Implements(type);
+                    }
+                });
+                await pluginCatalog.Initialize();
+            }
             
             var host = Host.CreateDefaultBuilder(args)
                 .UseConsoleLifetime(x => x.SuppressStatusMessages = true)
@@ -94,12 +103,6 @@ namespace QuantumCore
                     }
                 })
                 .Build();
-
-            // plugins
-            if (!Directory.Exists("plugins"))
-            {
-                Directory.CreateDirectory("plugins");
-            }
 
             await Task.WhenAll(host.Services.GetRequiredService<IEnumerable<IPluginCatalog>>()
                 .Select(x => x.Initialize()));
