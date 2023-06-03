@@ -1,0 +1,13 @@
+{
+    "$schema": "http://json.schemastore.org/launchsettings.json",
+    "profiles": {
+        "Game": {
+            "commandName": "Project",
+            "commandLineArgs": "game --redis-host localhost --game-database-host localhost --game-database-user root --game-database-password supersecure.123 --account-database-host localhost --account-database-user root --account-database-password supersecure.123"
+        },
+        "Auth": {
+            "commandName": "Project",
+            "commandLineArgs": "auth --redis-host localhost --game-database-host localhost --game-database-user root --game-database-password supersecure.123 --account-database-host localhost --account-database-user root --account-database-password supersecure.123"
+        }
+    }
+}
