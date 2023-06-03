@@ -1,17 +1,25 @@
-# QC#
-[![pipeline status](https://gitlab.com/quantum-core/core-dotnet/badges/master/pipeline.svg)](https://gitlab.com/quantum-core/core-dotnet/commits/master)
+# Quantum Core X
 
-**QC#** (QuantumCore) is a reinvented open source implementation of the Metin2 server.
+[![dotnet test](https://github.com/MeikelLP/quantum-core-x/actions/workflows/tests.yml/badge.svg)](https://github.com/MeikelLP/quantum-core-x/actions/workflows/tests.yml)
 
-It is based on [QuantumCore's C++](https://gitlab.com/quantum-core/core/) version, and is the version which will get continued to be supported.
+**QCX** (Quantum Core X) is an open source implementation of the Metin2 server.
+
+This project is a fork of [QuantumCore C#](https://gitlab.com/quantum-core/core-dotnet/) and will not be backward compatible. This fork has the goal to extend from what has already been implemented and make the project as maintainable and modern as possible while also implementing more and more of the missing features.
 
 Metin2, and all Metin2 art, images, and lore are copyrighted by [Webzen](http://webzen.com/ "Webzen").
 
+## Getting Started
+
+You can either
+
+* be a [**developer**](docs/getting-started/developer.md) and help develop QCX or
+* be a [**user**](docs/getting-started/user.md) and setup your own instance of QCX
+
 ## Maintainers
+
 This project is currently maintained by:
-- NoFr1ends
-- Arves100
-- pollux
+
+* [MeikelLP](https://github.com/MeikelLP)
 
 ## Authors & contributors
 For a full list of all authors and contributors see [AUTHORS.md](AUTHORS.md)
