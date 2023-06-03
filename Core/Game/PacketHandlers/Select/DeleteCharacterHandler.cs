@@ -5,8 +5,8 @@ using Dapper;
 using Dapper.Contrib.Extensions;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
+using QuantumCore.API.PluginTypes;
 using QuantumCore.Core.Cache;
-using QuantumCore.Core.Networking;
 using QuantumCore.Database;
 using QuantumCore.Extensions;
 using QuantumCore.Game.Packets;
@@ -14,7 +14,7 @@ using QuantumCore.Game.PlayerUtils;
 
 namespace QuantumCore.Game.PacketHandlers.Select;
 
-public class DeleteCharacterHandler : ISelectPacketHandler<DeleteCharacter>
+public class DeleteCharacterHandler : IGamePacketHandler<DeleteCharacter>
 {
     private readonly ILogger<DeleteCharacterHandler> _logger;
     private readonly IDatabaseManager _databaseManager;
@@ -27,7 +27,7 @@ public class DeleteCharacterHandler : ISelectPacketHandler<DeleteCharacter>
         _cacheManager = cacheManager;
     }
     
-    public async Task ExecuteAsync(PacketContext<DeleteCharacter> ctx, CancellationToken token = default)
+    public async Task ExecuteAsync(GamePacketContext<DeleteCharacter> ctx, CancellationToken token = default)
     {
         _logger.LogDebug("Deleting character in slot {Slot}", ctx.Packet.Slot);
 

@@ -6,9 +6,9 @@ using QuantumCore.Game.Packets.QuickBar;
 
 namespace QuantumCore.Game.PacketHandlers.Game;
 
-public class QuickBarRemoveHandler : IPacketHandler<QuickBarRemove>
+public class QuickBarRemoveHandler : IGamePacketHandler<QuickBarRemove>
 {
-    public async Task ExecuteAsync(PacketContext<QuickBarRemove> ctx, CancellationToken token = default)
+    public async Task ExecuteAsync(GamePacketContext<QuickBarRemove> ctx, CancellationToken token = default)
     {
         var player = ctx.Connection.Player;
         if (player == null)

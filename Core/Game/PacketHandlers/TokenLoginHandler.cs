@@ -15,7 +15,7 @@ using QuantumCore.Game.Packets;
 
 namespace QuantumCore.Game.PacketHandlers
 {
-    public class TokenLoginHandler : IPacketHandler<TokenLogin>
+    public class TokenLoginHandler : IGamePacketHandler<TokenLogin>
     {
         private readonly IDatabaseManager _databaseManager;
         private readonly ILogger<TokenLoginHandler> _logger;
@@ -30,7 +30,7 @@ namespace QuantumCore.Game.PacketHandlers
             _world = world;
         }
         
-        public async Task ExecuteAsync(PacketContext<TokenLogin> ctx, CancellationToken cancellationToken = default)
+        public async Task ExecuteAsync(GamePacketContext<TokenLogin> ctx, CancellationToken cancellationToken = default)
         {
             var key = "token:" + ctx.Packet.Key;
 

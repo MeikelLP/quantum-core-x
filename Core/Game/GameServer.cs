@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -49,12 +50,12 @@ namespace QuantumCore.Game
 
         public static GameServer Instance { get; private set; }
         
-        public GameServer(IOptions<GameOptions> options, IPacketManager packetManager, ILogger<GameServer> logger, 
+        public GameServer(IOptions<GameOptions> options, IConfiguration configuration, IPacketManager packetManager, ILogger<GameServer> logger, 
             PluginExecutor pluginExecutor, IServiceProvider serviceProvider, IItemManager itemManager, 
             IMonsterManager monsterManager, IJobManager jobManager, IExperienceManager experienceManager,
             IAnimationManager animationManager, ICommandManager commandManager, IDatabaseManager databaseManager, 
             IEnumerable<IPacketHandler> packetHandlers, IQuestManager questManager, IChatManager chatManager, IWorld world)
-            : base(packetManager, logger, pluginExecutor, serviceProvider, packetHandlers, options.Value.Port)
+            : base(packetManager, logger, pluginExecutor, serviceProvider, packetHandlers, configuration.GetValue<string>("Mode"), options.Value.Port)
         {
             _logger = logger;
             _pluginExecutor = pluginExecutor;

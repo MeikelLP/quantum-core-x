@@ -7,7 +7,7 @@ using QuantumCore.Game.Packets;
 
 namespace QuantumCore.Game.PacketHandlers.Game;
 
-public class AttackHandler : IPacketHandler<Attack>
+public class AttackHandler : IGamePacketHandler<Attack>
 {
     private readonly ILogger<AttackHandler> _logger;
 
@@ -16,7 +16,7 @@ public class AttackHandler : IPacketHandler<Attack>
         _logger = logger;
     }
         
-    public async Task ExecuteAsync(PacketContext<Attack> ctx, CancellationToken token = default)
+    public async Task ExecuteAsync(GamePacketContext<Attack> ctx, CancellationToken token = default)
     {
         var attacker = ctx.Connection.Player;
         if (attacker == null)

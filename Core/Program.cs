@@ -58,6 +58,15 @@ namespace QuantumCore
                     cfg.AddTomlFile("data/shops.toml", true);
                     cfg.AddTomlFile("data/groups.toml", true);
                     cfg.AddTomlFile("settings.toml");
+                    switch (obj)
+                    {
+                        case AuthOptions:
+                            cfg.AddInMemoryCollection(new Dictionary<string, string> { { "Mode", "auth" } });
+                            break;
+                        case GameOptions:
+                            cfg.AddInMemoryCollection(new Dictionary<string, string> { { "Mode", "game" } });
+                            break;
+                    }
                 })
                 .ConfigureServices((ctx, services) =>
                 {

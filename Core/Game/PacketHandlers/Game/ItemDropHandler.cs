@@ -6,9 +6,9 @@ using QuantumCore.Game.Packets;
 
 namespace QuantumCore.Game.PacketHandlers.Game;
 
-public class ItemDropHandler : IPacketHandler<ItemDrop>
+public class ItemDropHandler : IGamePacketHandler<ItemDrop>
 {
-    public async Task ExecuteAsync(PacketContext<ItemDrop> ctx, CancellationToken token = default)
+    public async Task ExecuteAsync(GamePacketContext<ItemDrop> ctx, CancellationToken token = default)
     {
         var player = ctx.Connection.Player;
         if (player == null)

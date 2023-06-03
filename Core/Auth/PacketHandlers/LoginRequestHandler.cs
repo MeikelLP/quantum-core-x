@@ -14,7 +14,7 @@ using QuantumCore.Database;
 
 namespace QuantumCore.Auth.PacketHandlers;
 
-public class LoginRequestHandler : IPacketHandler<LoginRequest>
+public class LoginRequestHandler : IAuthPacketHandler<LoginRequest>
 {
     private readonly IDatabaseManager _databaseManager;
     private readonly ILogger<LoginRequestHandler> _logger;
@@ -27,7 +27,7 @@ public class LoginRequestHandler : IPacketHandler<LoginRequest>
         _cacheManager = cacheManager;
     }
 
-    public async Task ExecuteAsync(PacketContext<LoginRequest> ctx, CancellationToken token = default)
+    public async Task ExecuteAsync(AuthPacketContext<LoginRequest> ctx, CancellationToken token = default)
     {
         using var db = _databaseManager.GetAccountDatabase();
         var account = await db.QueryFirstOrDefaultAsync<Account>(

@@ -6,9 +6,9 @@ using QuantumCore.Game.Packets.Shop;
 
 namespace QuantumCore.Game.PacketHandlers.Game;
 
-public class ShopSellHandler : IPacketHandler<ShopSell>
+public class ShopSellHandler : IGamePacketHandler<ShopSell>
 {
-    public Task ExecuteAsync(PacketContext<ShopSell> ctx, CancellationToken token = default)
+    public Task ExecuteAsync(GamePacketContext<ShopSell> ctx, CancellationToken token = default)
     {
         var player = ctx.Connection.Player;
         if (player == null)

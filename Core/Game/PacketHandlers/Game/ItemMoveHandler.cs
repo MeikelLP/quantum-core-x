@@ -7,7 +7,7 @@ using QuantumCore.Game.Packets;
 
 namespace QuantumCore.Game.PacketHandlers.Game;
 
-public class ItemMoveHandler : IPacketHandler<ItemMove>
+public class ItemMoveHandler : IGamePacketHandler<ItemMove>
 {
     private readonly ILogger<ItemMoveHandler> _logger;
 
@@ -16,7 +16,7 @@ public class ItemMoveHandler : IPacketHandler<ItemMove>
         _logger = logger;
     }
         
-    public async Task ExecuteAsync(PacketContext<ItemMove> ctx, CancellationToken token = default)
+    public async Task ExecuteAsync(GamePacketContext<ItemMove> ctx, CancellationToken token = default)
     {
         var player = ctx.Connection.Player;
         if (player == null)

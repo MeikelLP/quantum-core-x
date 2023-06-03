@@ -35,17 +35,19 @@ namespace QuantumCore.Core.Networking
         private ServiceProvider _serverLifetimeProvider;
         private readonly PluginExecutor _pluginExecutor;
         private readonly IEnumerable<IPacketHandler> _packetHandlers;
+        private readonly string _serverMode;
         protected IServiceCollection Services { get; }
 
         public int Port { get; }
 
         public ServerBase(IPacketManager packetManager, ILogger logger, PluginExecutor pluginExecutor,
-            IServiceProvider serviceProvider, IEnumerable<IPacketHandler> packetHandlers,
+            IServiceProvider serviceProvider, IEnumerable<IPacketHandler> packetHandlers, string mode,
             int port, string bindIp = "0.0.0.0")
         {
             _logger = logger;
             _pluginExecutor = pluginExecutor;
             _packetHandlers = packetHandlers;
+            _serverMode = mode;
             PacketManager = packetManager;
             Port = port;
             
@@ -135,25 +137,55 @@ namespace QuantumCore.Core.Networking
             var packetType = handlerType.GetPacketType();
             
             // TODO caching
-            var handlerExecuteMethod =
-                    handlerType.GetMethod(nameof(ISelectPacketHandler<object>.ExecuteAsync))!;
-            var contextPacketProperty = typeof(PacketContext<>).MakeGenericType(packetType)
-                .GetProperty(nameof(PacketContext<object>.Packet))!;
-            var contextConnectionProperty = typeof(PacketContext<>).MakeGenericType(packetType)
-                .GetProperty(nameof(PacketContext<object>.Connection))!;
-
-            var context = Activator.CreateInstance(typeof(PacketContext<>).MakeGenericType(packetType));
-            contextPacketProperty.SetValue(context, packet);
-            contextConnectionProperty.SetValue(context, connection);
+            object context;
+            if (_serverMode == "game")
+            {
+                context = GetGameContextPacket(connection, packet, packetType);
+            }
+            else if (_serverMode == "auth")
+            {
+                context = GetAuthContextPacket(connection, packet, packetType);
+            }
+            else
+            {
+                throw new ArgumentException("Unknown server mode");
+            }
 
             try
             {
+                var handlerExecuteMethod = handlerType.GetMethod("ExecuteAsync")!;
                 await (Task) handlerExecuteMethod.Invoke(handler, new[] { context, new CancellationToken() })!;
             }
             catch (Exception e)
             {
                 _logger.LogError(e, "Failed to execute packet handler");
             }
+        }
+
+        private static object GetGameContextPacket(IConnection connection, object packet, Type packetType)
+        {
+            var contextPacketProperty = typeof(GamePacketContext<>).MakeGenericType(packetType)
+                .GetProperty(nameof(GamePacketContext<object>.Packet))!;
+            var contextConnectionProperty = typeof(GamePacketContext<>).MakeGenericType(packetType)
+                .GetProperty(nameof(GamePacketContext<object>.Connection))!;
+
+            var context = Activator.CreateInstance(typeof(GamePacketContext<>).MakeGenericType(packetType));
+            contextPacketProperty.SetValue(context, packet);
+            contextConnectionProperty.SetValue(context, connection);
+            return context;
+        }
+
+        private static object GetAuthContextPacket(IConnection connection, object packet, Type packetType)
+        {
+            var contextPacketProperty = typeof(AuthPacketContext<>).MakeGenericType(packetType)
+                .GetProperty(nameof(AuthPacketContext<object>.Packet))!;
+            var contextConnectionProperty = typeof(AuthPacketContext<>).MakeGenericType(packetType)
+                .GetProperty(nameof(AuthPacketContext<object>.Connection))!;
+
+            var context = Activator.CreateInstance(typeof(AuthPacketContext<>).MakeGenericType(packetType));
+            contextPacketProperty.SetValue(context, packet);
+            contextConnectionProperty.SetValue(context, connection);
+            return context;
         }
 
         public void CallConnectionListener(T connection)
@@ -169,7 +201,15 @@ namespace QuantumCore.Core.Networking
 
         public void RegisterListeners()
         {
-            foreach (var packetHandler in _packetHandlers)
+            var handlers = _packetHandlers.Where(x => x
+                    .GetType()
+                    .GetInterfaces()
+                    .Where(i => i.IsGenericType)
+                    .Any(i => _serverMode == "auth"
+                ? i.GetGenericTypeDefinition() == typeof(IAuthPacketHandler<>)
+                : i.GetGenericTypeDefinition() == typeof(IGamePacketHandler<>)))
+                .ToArray();
+            foreach (var packetHandler in handlers)
             {
                 var packetType = packetHandler.GetType().GetPacketType();
 

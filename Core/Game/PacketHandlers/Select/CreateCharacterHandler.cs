@@ -6,8 +6,8 @@ using Dapper.Contrib.Extensions;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.Game.World;
+using QuantumCore.API.PluginTypes;
 using QuantumCore.Core.Cache;
-using QuantumCore.Core.Networking;
 using QuantumCore.Core.Utils;
 using QuantumCore.Database;
 using QuantumCore.Game.Packets;
@@ -15,7 +15,7 @@ using QuantumCore.Game.PlayerUtils;
 
 namespace QuantumCore.Game.PacketHandlers.Select;
 
-public class CreateCharacterHandler : ISelectPacketHandler<CreateCharacter>
+public class CreateCharacterHandler : IGamePacketHandler<CreateCharacter>
 {
     private readonly ILogger<CreateCharacterHandler> _logger;
     private readonly IDatabaseManager _databaseManager;
@@ -33,7 +33,7 @@ public class CreateCharacterHandler : ISelectPacketHandler<CreateCharacter>
         _world = world;
     }
     
-    public async Task ExecuteAsync(PacketContext<CreateCharacter> ctx, CancellationToken token = default)
+    public async Task ExecuteAsync(GamePacketContext<CreateCharacter> ctx, CancellationToken token = default)
     {
         _logger.LogDebug("Create character in slot {Slot}", ctx.Packet.Slot);
         if (ctx.Connection.AccountId == null)

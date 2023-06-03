@@ -6,9 +6,9 @@ using QuantumCore.Game.Packets;
 
 namespace QuantumCore.Game.PacketHandlers.Game;
 
-public class ClickNpcHandler : IPacketHandler<ClickNpc>
+public class ClickNpcHandler : IGamePacketHandler<ClickNpc>
 {
-    public async Task ExecuteAsync(PacketContext<ClickNpc> ctx, CancellationToken token = default)
+    public async Task ExecuteAsync(GamePacketContext<ClickNpc> ctx, CancellationToken token = default)
     { 
         var player = ctx.Connection.Player;
         if (player == null)

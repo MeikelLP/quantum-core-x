@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -22,10 +23,10 @@ namespace QuantumCore.Auth
         private readonly IDatabaseManager _databaseManager;
         private readonly ICacheManager _cacheManager;
 
-        public AuthServer(IOptions<AuthOptions> options, IPacketManager packetManager, ILogger<AuthServer> logger, 
+        public AuthServer(IOptions<AuthOptions> options, IConfiguration configuration, IPacketManager packetManager, ILogger<AuthServer> logger, 
             PluginExecutor pluginExecutor, IServiceProvider serviceProvider, IDatabaseManager databaseManager, 
             IEnumerable<IPacketHandler> packetHandlers, ICacheManager cacheManager)
-            : base(packetManager, logger, pluginExecutor, serviceProvider, packetHandlers, options.Value.Port)
+            : base(packetManager, logger, pluginExecutor, serviceProvider, packetHandlers, configuration.GetValue<string>("Mode"), options.Value.Port)
         {
             _logger = logger;
             _databaseManager = databaseManager;
@@ -43,6 +44,7 @@ namespace QuantumCore.Auth
             // Register auth server features
             PacketManager.RegisterNamespace("QuantumCore.Auth.Packets");
             RegisterNewConnectionListener(NewConnection);
+            RegisterListeners();
             
             var pong = await _cacheManager.Ping();
             if (!pong)
