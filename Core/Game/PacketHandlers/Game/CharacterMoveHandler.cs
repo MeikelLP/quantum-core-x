@@ -8,7 +8,7 @@ using QuantumCore.Game.World.Entities;
 
 namespace QuantumCore.Game.PacketHandlers.Game;
 
-public class CharacterMoveHandler : IPacketHandler<CharacterMove>
+public class CharacterMoveHandler : IGamePacketHandler<CharacterMove>
 {
     private readonly ILogger<CharacterMoveHandler> _logger;
 
@@ -17,7 +17,7 @@ public class CharacterMoveHandler : IPacketHandler<CharacterMove>
         _logger = logger;
     }
     
-    public async Task ExecuteAsync(PacketContext<CharacterMove> ctx, CancellationToken token = default)
+    public async Task ExecuteAsync(GamePacketContext<CharacterMove> ctx, CancellationToken token = default)
     {
         if (ctx.Packet.MovementType > (int) CharacterMove.CharacterMovementType.Max &&
             ctx.Packet.MovementType != (int) CharacterMove.CharacterMovementType.Skill)

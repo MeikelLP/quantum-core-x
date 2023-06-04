@@ -7,7 +7,7 @@ using QuantumCore.Game.Packets.Quest;
 
 namespace QuantumCore.Game.PacketHandlers.Game
 {
-    public class QuestAnswerHandler : IPacketHandler<QuestAnswer>
+    public class QuestAnswerHandler : IGamePacketHandler<QuestAnswer>
     {
         private readonly ILogger<QuestAnswerHandler> _logger;
 
@@ -16,7 +16,7 @@ namespace QuantumCore.Game.PacketHandlers.Game
             _logger = logger;
         }
         
-        public Task ExecuteAsync(PacketContext<QuestAnswer> ctx, CancellationToken token = default)
+        public Task ExecuteAsync(GamePacketContext<QuestAnswer> ctx, CancellationToken token = default)
         {
             var player = ctx.Connection.Player;
             if (player == null)

@@ -7,9 +7,9 @@ using QuantumCore.Game.World.Entities;
 
 namespace QuantumCore.Game.PacketHandlers.Game;
 
-public class ItemPickupHandler : IPacketHandler<ItemPickup>
+public class ItemPickupHandler : IGamePacketHandler<ItemPickup>
 {
-    public async Task ExecuteAsync(PacketContext<ItemPickup> ctx, CancellationToken token = default)
+    public async Task ExecuteAsync(GamePacketContext<ItemPickup> ctx, CancellationToken token = default)
     {
         var player = ctx.Connection.Player;
         if (player == null)

@@ -7,16 +7,16 @@ using QuantumCore.Game.Packets;
 
 namespace QuantumCore.Game.PacketHandlers.Game;
 
-public class TargetChangeHandler : IPacketHandler<TargetChange>
+public class TargetChangeHandler : IGamePacketHandler<TargetChange>
 {
-    private readonly ILogger<TargetChange> _logger;
+    private readonly ILogger<TargetChangeHandler> _logger;
 
-    public TargetChangeHandler(ILogger<TargetChange> logger)
+    public TargetChangeHandler(ILogger<TargetChangeHandler> logger)
     {
         _logger = logger;
     }
         
-    public async Task ExecuteAsync(PacketContext<TargetChange> ctx, CancellationToken token = default)
+    public async Task ExecuteAsync(GamePacketContext<TargetChange> ctx, CancellationToken token = default)
     {
         var player = ctx.Connection.Player;
         if (player == null)

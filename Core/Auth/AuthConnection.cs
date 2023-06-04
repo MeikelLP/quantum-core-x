@@ -1,12 +1,12 @@
 ﻿using System.Net.Sockets;
 using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using QuantumCore.API;
 using QuantumCore.Core.Networking;
 
 namespace QuantumCore.Auth
 {
-    public class AuthConnection : Connection
+    public class AuthConnection : Connection, IAuthConnection
     {
         private AuthServer _server;
 

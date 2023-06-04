@@ -10,7 +10,7 @@ using QuantumCore.Game.Packets;
 
 namespace QuantumCore.Game.PacketHandlers.Loading
 {
-    public class EnterGameHandler : IPacketHandler<EnterGame>
+    public class EnterGameHandler : IGamePacketHandler<EnterGame>
     {
         private readonly ILogger<EnterGameHandler> _logger;
         private readonly IWorld _world;
@@ -21,7 +21,7 @@ namespace QuantumCore.Game.PacketHandlers.Loading
             _world = world;
         }
         
-        public async Task ExecuteAsync(PacketContext<EnterGame> ctx, CancellationToken token = default)
+        public async Task ExecuteAsync(GamePacketContext<EnterGame> ctx, CancellationToken token = default)
         {
             var player = ctx.Connection.Player;
             if (player == null)

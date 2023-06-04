@@ -5,8 +5,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.Game.Types;
+using QuantumCore.API.PluginTypes;
 using QuantumCore.Core.Cache;
-using QuantumCore.Core.Networking;
 using QuantumCore.Database;
 using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Packets;
@@ -14,14 +14,14 @@ using QuantumCore.Game.World.Entities;
 
 namespace QuantumCore.Game.PacketHandlers.Select;
 
-public class SelectCharacterHandler : ISelectPacketHandler<SelectCharacter>
+public class SelectGameCharacterHandler : IGamePacketHandler<SelectCharacter>
 {
-    private readonly ILogger<SelectCharacterHandler> _logger;
+    private readonly ILogger<SelectGameCharacterHandler> _logger;
     private readonly IServiceProvider _provider;
     private readonly IDatabaseManager _databaseManager;
     private readonly ICacheManager _cacheManager;
 
-    public SelectCharacterHandler(ILogger<SelectCharacterHandler> logger, IServiceProvider provider, 
+    public SelectGameCharacterHandler(ILogger<SelectGameCharacterHandler> logger, IServiceProvider provider, 
         IDatabaseManager databaseManager, ICacheManager cacheManager)
     {
         _logger = logger;
@@ -30,7 +30,7 @@ public class SelectCharacterHandler : ISelectPacketHandler<SelectCharacter>
         _cacheManager = cacheManager;
     }
     
-    public async Task ExecuteAsync(PacketContext<SelectCharacter> ctx, CancellationToken token = default)
+    public async Task ExecuteAsync(GamePacketContext<SelectCharacter> ctx, CancellationToken token = default)
     {
         _logger.LogDebug("Selected character in slot {Slot}", ctx.Packet.Slot);
         if (ctx.Connection.AccountId == null)

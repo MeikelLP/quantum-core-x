@@ -7,7 +7,7 @@ using QuantumCore.Game.Packets;
 
 namespace QuantumCore.Game.PacketHandlers.Game;
 
-public class ChatIncomingHandler : IPacketHandler<ChatIncoming>
+public class ChatIncomingHandler : IGamePacketHandler<ChatIncoming>
 {
     private readonly ICommandManager _commandManager;
     private readonly IChatManager _chatManager;
@@ -18,7 +18,7 @@ public class ChatIncomingHandler : IPacketHandler<ChatIncoming>
         _chatManager = chatManager;
     }
         
-    public async Task ExecuteAsync(PacketContext<ChatIncoming> ctx, CancellationToken token = default)
+    public async Task ExecuteAsync(GamePacketContext<ChatIncoming> ctx, CancellationToken token = default)
     {
         if (ctx.Packet.MessageType == ChatMessageTypes.Normal)
         {
