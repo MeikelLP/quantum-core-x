@@ -544,6 +544,7 @@ namespace QuantumCore.Game.World.Entities
                     var info = _jobManager.Get(Player.PlayerClass);
                     if (info == null)
                     {
+                        _logger.LogWarning("Job not found: {Job}" , Player.PlayerClass);
                         return 0;
                     }
 
