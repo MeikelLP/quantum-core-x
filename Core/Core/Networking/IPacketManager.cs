@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reflection;
-using QuantumCore.Core.Packets;
 
 namespace QuantumCore.Core.Networking
 {
@@ -11,7 +10,10 @@ namespace QuantumCore.Core.Networking
         public PacketCache GetOutgoingPacket(ushort header);
         public PacketCache GetIncomingPacket(ushort header);
         void RegisterNamespace(string space, Assembly assembly = null);
+        void Register<T>();
         Dictionary<ushort, PacketCache> OutgoingPackets { get; }
         Dictionary<ushort, PacketCache> IncomingPackets { get; }
+        IPacketCache GetPacket<T>();
+        IPacketCache GetPacket(Type type);
     }
 }

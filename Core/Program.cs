@@ -49,7 +49,6 @@ namespace QuantumCore
                 });
                 await pluginCatalog.Initialize();
             }
-            
             var host = Host.CreateDefaultBuilder(args)
                 .UseConsoleLifetime(x => x.SuppressStatusMessages = true)
                 .ConfigureAppConfiguration(cfg =>

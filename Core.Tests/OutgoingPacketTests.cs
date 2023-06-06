@@ -22,7 +22,7 @@ namespace Core.Tests;
 
 public class OutgoingPacketTests
 {
-    private readonly IPacketManager _packetManager;
+    private readonly IPacketSerializer _serializer;
 
     public OutgoingPacketTests(ITestOutputHelper testOutputHelper)
     {
@@ -36,15 +36,13 @@ public class OutgoingPacketTests
                     .CreateLogger());
             })
             .BuildServiceProvider();
-        _packetManager = services.GetRequiredService<IPacketManager>();
-        _packetManager.RegisterNamespace("QuantumCore.Game.Packets", typeof(ItemMove).Assembly);
+        _serializer = services.GetRequiredService<IPacketSerializer>();
     }
 
     [Fact]
     public void NullReturnsArrayWithDefaultValues()
     {
-        var packetCache = _packetManager.GetIncomingPacket(0x06);
-        var cache = packetCache.Serialize(null);
+        var cache = _serializer.Serialize((ServerStatusPacket)null);
 
         cache.Should().Equal(new byte[] { 0, 0 });
     }
@@ -52,14 +50,12 @@ public class OutgoingPacketTests
     [Fact]
     public void InvalidTypeThrowsArgumentException()
     {
-        var packetCache = _packetManager.GetIncomingPacket(0x06);
-        Assert.Throws<ArgumentException>(() => packetCache.Serialize(new CreateCharacter()));
+        Assert.Throws<ArgumentException>(() => _serializer.Serialize(new CreateCharacter()));
     }
 
     [Fact]
     public void SpawnCharacter()
     {
-        var packetCache = _packetManager.GetOutgoingPacket(0x01);
         var obj = new AutoFaker<SpawnCharacter>()
             .RuleFor(x => x.Affects, faker => new[]
             {
@@ -67,7 +63,7 @@ public class OutgoingPacketTests
                 faker.Random.UInt()
             })
             .Generate();
-        var bytes = packetCache.Serialize(obj);
+        var bytes = _serializer.Serialize(obj);
 
         bytes.Should().Equal(
             new byte[]
@@ -91,9 +87,8 @@ public class OutgoingPacketTests
     [Fact]
     public void RemoveCharacter()
     {
-        var packetCache = _packetManager.GetOutgoingPacket(0x02);
         var obj = new AutoFaker<RemoveCharacter>().Generate();
-        var bytes = packetCache.Serialize(obj);
+        var bytes = _serializer.Serialize(obj);
 
         bytes.Should().Equal(
             new byte[]
@@ -107,9 +102,8 @@ public class OutgoingPacketTests
     [Fact]
     public void CharacterMoveOut()
     {
-        var packetCache = _packetManager.GetOutgoingPacket(0x03);
         var obj = new AutoFaker<CharacterMoveOut>().Generate();
-        var bytes = packetCache.Serialize(obj);
+        var bytes = _serializer.Serialize(obj);
 
         bytes.Should().Equal(
             new byte[]
@@ -130,9 +124,8 @@ public class OutgoingPacketTests
     [Fact]
     public void ChatOutcoming()
     {
-        var packetCache = _packetManager.GetOutgoingPacket(0x04);
         var obj = new AutoFaker<ChatOutcoming>().Generate();
-        var bytes = packetCache.Serialize(obj);
+        var bytes = _serializer.Serialize(obj);
 
         bytes.Should().Equal(
             new byte[]
@@ -151,13 +144,12 @@ public class OutgoingPacketTests
     [Fact]
     public void CreateCharacterSuccess()
     {
-        var packetCache = _packetManager.GetOutgoingPacket(0x08);
         var charFaker = new Faker<Character>()
             .RuleFor(x => x.Name, faker => faker.Lorem.Letter(25));
         var obj = new AutoFaker<CreateCharacterSuccess>()
             .RuleFor(x => x.Character, _ => charFaker.Generate())
             .Generate();
-        var bytes = packetCache.Serialize(obj);
+        var bytes = _serializer.Serialize(obj);
 
         bytes.Should().Equal(
             new byte[]
@@ -189,9 +181,8 @@ public class OutgoingPacketTests
     [Fact]
     public void CreateCharacterFailure()
     {
-        var packetCache = _packetManager.GetOutgoingPacket(0x09);
         var obj = new AutoFaker<CreateCharacterFailure>().Generate();
-        var bytes = packetCache.Serialize(obj);
+        var bytes = _serializer.Serialize(obj);
 
         bytes.Should().Equal(
             new byte[]
@@ -205,9 +196,8 @@ public class OutgoingPacketTests
     [Fact]
     public void DeleteCharacterSuccess()
     {
-        var packetCache = _packetManager.GetOutgoingPacket(0x0A);
         var obj = new AutoFaker<DeleteCharacterSuccess>().Generate();
-        var bytes = packetCache.Serialize(obj);
+        var bytes = _serializer.Serialize(obj);
 
         bytes.Should().Equal(
             new byte[]
@@ -221,9 +211,8 @@ public class OutgoingPacketTests
     [Fact]
     public void DeleteCharacterFail()
     {
-        var packetCache = _packetManager.GetOutgoingPacket(0x0B);
         var obj = new AutoFaker<DeleteCharacterFail>().Generate();
-        var bytes = packetCache.Serialize(obj);
+        var bytes = _serializer.Serialize(obj);
 
         bytes.Should().Equal(
             new byte[]
@@ -236,9 +225,8 @@ public class OutgoingPacketTests
     [Fact]
     public void CharacterDead()
     {
-        var packetCache = _packetManager.GetOutgoingPacket(0x0e);
         var obj = new AutoFaker<CharacterDead>().Generate();
-        var bytes = packetCache.Serialize(obj);
+        var bytes = _serializer.Serialize(obj);
 
         bytes.Should().Equal(
             new byte[]
@@ -251,12 +239,11 @@ public class OutgoingPacketTests
     [Fact]
     public void CharacterPoints()
     {
-        var packetCache = _packetManager.GetOutgoingPacket(0x10);
         var obj = new AutoFaker<CharacterPoints>()
             .RuleFor(x => x.Points,
                 faker => { return Enumerable.Range(0, 255).Select(_ => faker.Random.UInt()).ToArray(); })
             .Generate();
-        var bytes = packetCache.Serialize(obj);
+        var bytes = _serializer.Serialize(obj);
 
         bytes.Should().Equal(
             new byte[]
@@ -270,7 +257,6 @@ public class OutgoingPacketTests
     [Fact]
     public void CharacterUpdate()
     {
-        var packetCache = _packetManager.GetOutgoingPacket(0x13);
         var obj = new AutoFaker<CharacterUpdate>()
             .RuleFor(x => x.Parts, faker => new[]
             {
@@ -285,7 +271,7 @@ public class OutgoingPacketTests
                 faker.Random.UInt()
             })
             .Generate();
-        var bytes = packetCache.Serialize(obj);
+        var bytes = _serializer.Serialize(obj);
 
         bytes.Should().Equal(
             new byte[]
@@ -309,7 +295,6 @@ public class OutgoingPacketTests
     [Fact]
     public void SetItem()
     {
-        var packetCache = _packetManager.GetOutgoingPacket(0x15);
         var itemBonusFaker = new AutoFaker<ItemBonus>();
         var obj = new AutoFaker<SetItem>()
             .RuleFor(x => x.Sockets, faker => new []
@@ -329,7 +314,7 @@ public class OutgoingPacketTests
                 itemBonusFaker.Generate(),
             })
             .Generate();
-        var bytes = packetCache.Serialize(obj);
+        var bytes = _serializer.Serialize(obj);
 
         bytes.Should().Equal(
             new byte[]
@@ -354,9 +339,8 @@ public class OutgoingPacketTests
     [Fact]
     public void GroundItemAdd()
     {
-        var packetCache = _packetManager.GetOutgoingPacket(0x1A);
         var obj = new AutoFaker<GroundItemAdd>().Generate();
-        var bytes = packetCache.Serialize(obj);
+        var bytes = _serializer.Serialize(obj);
 
         bytes.Should().Equal(
             new byte[]
@@ -374,9 +358,8 @@ public class OutgoingPacketTests
     [Fact]
     public void GroundItemRemove()
     {
-        var packetCache = _packetManager.GetOutgoingPacket(0x1B);
         var obj = new AutoFaker<GroundItemRemove>().Generate();
-        var bytes = packetCache.Serialize(obj);
+        var bytes = _serializer.Serialize(obj);
 
         bytes.Should().Equal(
             new byte[]
@@ -390,9 +373,8 @@ public class OutgoingPacketTests
     [Fact]
     public void QuickBarAddOut()
     {
-        var packetCache = _packetManager.GetOutgoingPacket(0x1C);
         var obj = new AutoFaker<QuickBarAddOut>().Generate();
-        var bytes = packetCache.Serialize(obj);
+        var bytes = _serializer.Serialize(obj);
 
         bytes.Should().Equal(
             new byte[]
@@ -408,9 +390,8 @@ public class OutgoingPacketTests
     [Fact]
     public void QuickBarRemoveOut()
     {
-        var packetCache = _packetManager.GetOutgoingPacket(0x1D);
         var obj = new AutoFaker<QuickBarRemoveOut>().Generate();
-        var bytes = packetCache.Serialize(obj);
+        var bytes = _serializer.Serialize(obj);
 
         bytes.Should().Equal(
             new byte[]
@@ -424,9 +405,8 @@ public class OutgoingPacketTests
     [Fact]
     public void QuickBarSwapOut()
     {
-        var packetCache = _packetManager.GetOutgoingPacket(0x1E);
         var obj = new AutoFaker<QuickBarSwapOut>().Generate();
-        var bytes = packetCache.Serialize(obj);
+        var bytes = _serializer.Serialize(obj);
 
         bytes.Should().Equal(
             new byte[]
@@ -441,7 +421,6 @@ public class OutgoingPacketTests
     [Fact]
     public void Characters()
     {
-        var packetCache = _packetManager.GetOutgoingPacket(0x20);
         var characterFaker = new AutoFaker<Character>()
             .RuleFor(x => x.Name, faker => faker.Lorem.Letter(25));
         var obj = new AutoFaker<Characters>()
@@ -470,7 +449,7 @@ public class OutgoingPacketTests
                 };
             })
             .Generate();
-        var bytes = packetCache.Serialize(obj);
+        var bytes = _serializer.Serialize(obj);
 
         bytes.Should().Equal(
             new byte[]
@@ -506,7 +485,6 @@ public class OutgoingPacketTests
     [Fact]
     public void ShopOpen()
     {
-        var packetCache = _packetManager.GetOutgoingPacket(0x26 << 8 | 0x00);
         var itemBonusFaker = new AutoFaker<ItemBonus>();
         var shopItemFaker = new AutoFaker<ShopItem>()
             .RuleFor(x => x.Sockets, faker => new []
@@ -528,7 +506,7 @@ public class OutgoingPacketTests
         var obj = new AutoFaker<ShopOpen>()
             .RuleFor(x => x.Items, _ => Enumerable.Range(0, 40).Select(_ => shopItemFaker.Generate()).ToArray())
             .Generate();
-        var bytes = packetCache.Serialize(obj);
+        var bytes = _serializer.Serialize(obj);
 
         bytes.Should().Equal(
             new byte[]
@@ -554,9 +532,8 @@ public class OutgoingPacketTests
     [Fact]
     public void ShopNotEnoughMoney()
     {
-        var packetCache = _packetManager.GetOutgoingPacket(0x26 << 8 | 0x05);
         var obj = new AutoFaker<ShopNotEnoughMoney>().Generate();
-        var bytes = packetCache.Serialize(obj);
+        var bytes = _serializer.Serialize(obj);
 
         bytes.Should().Equal(
             new byte[]
@@ -571,9 +548,8 @@ public class OutgoingPacketTests
     [Fact]
     public void ShopNoSpaceLeft()
     {
-        var packetCache = _packetManager.GetOutgoingPacket(0x26 << 8 | 0x07);
         var obj = new AutoFaker<ShopNoSpaceLeft>().Generate();
-        var bytes = packetCache.Serialize(obj);
+        var bytes = _serializer.Serialize(obj);
 
         bytes.Should().Equal(
             new byte[]
@@ -588,9 +564,8 @@ public class OutgoingPacketTests
     [Fact]
     public void QuestScript()
     {
-        var packetCache = _packetManager.GetOutgoingPacket(0x2D);
         var obj = new AutoFaker<QuestScript>().Generate();
-        var bytes = packetCache.Serialize(obj);
+        var bytes = _serializer.Serialize(obj);
 
         bytes.Should().Equal(
             new byte[]
@@ -608,9 +583,8 @@ public class OutgoingPacketTests
     [Fact]
     public void SetTarget()
     {
-        var packetCache = _packetManager.GetOutgoingPacket(0x3f);
         var obj = new AutoFaker<SetTarget>().Generate();
-        var bytes = packetCache.Serialize(obj);
+        var bytes = _serializer.Serialize(obj);
 
         bytes.Should().Equal(
             new byte[]
@@ -625,9 +599,8 @@ public class OutgoingPacketTests
     [Fact]
     public void Warp()
     {
-        var packetCache = _packetManager.GetOutgoingPacket(0x41);
         var obj = new AutoFaker<Warp>().Generate();
-        var bytes = packetCache.Serialize(obj);
+        var bytes = _serializer.Serialize(obj);
 
         bytes.Should().Equal(
             new byte[]
@@ -644,9 +617,8 @@ public class OutgoingPacketTests
     [Fact]
     public void GameTime()
     {
-        var packetCache = _packetManager.GetOutgoingPacket(0x6a);
         var obj = new AutoFaker<GameTime>().Generate();
-        var bytes = packetCache.Serialize(obj);
+        var bytes = _serializer.Serialize(obj);
 
         bytes.Should().Equal(
             new byte[]
@@ -660,11 +632,10 @@ public class OutgoingPacketTests
     [Fact]
     public void CharacterDetails()
     {
-        var packetCache = _packetManager.GetOutgoingPacket(0x71);
         var obj = new AutoFaker<CharacterDetails>()
             .RuleFor(x => x.Name, faker => faker.Lorem.Letter(25))
             .Generate();
-        var bytes = packetCache.Serialize(obj);
+        var bytes = _serializer.Serialize(obj);
 
         bytes.Should().Equal(
             new byte[]
@@ -685,9 +656,8 @@ public class OutgoingPacketTests
     [Fact]
     public void Channel()
     {
-        var packetCache = _packetManager.GetOutgoingPacket(0x79);
         var obj = new AutoFaker<Channel>().Generate();
-        var bytes = packetCache.Serialize(obj);
+        var bytes = _serializer.Serialize(obj);
 
         bytes.Should().Equal(
             new byte[]
@@ -701,9 +671,8 @@ public class OutgoingPacketTests
     [Fact]
     public void DamageInfo()
     {
-        var packetCache = _packetManager.GetOutgoingPacket(0x87);
         var obj = new AutoFaker<DamageInfo>().Generate();
-        var bytes = packetCache.Serialize(obj);
+        var bytes = _serializer.Serialize(obj);
 
         bytes.Should().Equal(
             new byte[]
@@ -719,7 +688,6 @@ public class OutgoingPacketTests
     [Fact]
     public void CharacterInfo()
     {
-        var packetCache = _packetManager.GetOutgoingPacket(0x88);
         var obj = new AutoFaker<CharacterInfo>()
             .RuleFor(x => x.Name, faker => faker.Lorem.Letter(25))
             .RuleFor(x => x.Parts, faker => new[]
@@ -730,7 +698,7 @@ public class OutgoingPacketTests
                 faker.Random.UShort()
             })
             .Generate();
-        var bytes = packetCache.Serialize(obj);
+        var bytes = _serializer.Serialize(obj);
 
         bytes.Should().Equal(
             new byte[]

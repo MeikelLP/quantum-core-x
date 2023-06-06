@@ -1,3 +1,5 @@
+using QuantumCore.Core.Networking;
+
 namespace QuantumCore.Core.Packets
 {
     [Packet(0xfd, EDirection.Outgoing)]

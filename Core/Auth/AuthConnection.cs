@@ -11,8 +11,8 @@ namespace QuantumCore.Auth
         private AuthServer _server;
 
         public AuthConnection(AuthServer server, TcpClient client, IPacketManager packetManager, 
-            ILogger<AuthConnection> logger, PluginExecutor pluginExecutor) 
-            : base(logger, pluginExecutor, packetManager)
+            ILogger<AuthConnection> logger, PluginExecutor pluginExecutor, IPacketSerializer serializer) 
+            : base(logger, pluginExecutor, packetManager, serializer)
         {
             _server = server;
             Init(client);

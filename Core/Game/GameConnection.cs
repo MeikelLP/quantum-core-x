@@ -18,8 +18,8 @@ namespace QuantumCore.Game
         public IPlayerEntity Player { get; set; }
 
         public GameConnection(GameServer server, TcpClient client, IPacketManager packetManager, 
-            ILogger<AuthConnection> logger, PluginExecutor pluginExecutor, IWorld world) 
-            : base(logger, pluginExecutor, packetManager)
+            ILogger<AuthConnection> logger, PluginExecutor pluginExecutor, IWorld world, IPacketSerializer serializer) 
+            : base(logger, pluginExecutor, packetManager, serializer)
         {
             _world = world;
             Server = server;

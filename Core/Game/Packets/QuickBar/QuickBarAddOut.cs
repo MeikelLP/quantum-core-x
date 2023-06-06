@@ -1,4 +1,4 @@
-using QuantumCore.Core.Packets;
+using QuantumCore.Core.Networking;
 using QuantumCore.Game.Packets.General;
 
 namespace QuantumCore.Game.Packets.QuickBar;

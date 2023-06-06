@@ -1,9 +1,9 @@
 using System;
-using System.Diagnostics;
+using System.Buffers;
 using System.IO;
 using System.Linq;
 using System.Net.Sockets;
-using System.Reflection;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
@@ -15,6 +15,7 @@ using QuantumCore.API.PluginTypes;
 using QuantumCore.Core.Packets;
 using QuantumCore.Core.Utils;
 using QuantumCore.Game.Extensions;
+using QuantumCore.Networking;
 
 namespace QuantumCore.Core.Networking
 {
@@ -25,6 +26,7 @@ namespace QuantumCore.Core.Networking
         private TcpClient _client;
 
         private IPacketManager _packetManager;
+        private readonly IPacketSerializer _serializer;
 
         private Stream _stream;
 
@@ -35,11 +37,12 @@ namespace QuantumCore.Core.Networking
         public bool Handshaking { get; private set; }
         public EPhases Phase { get; set; }
 
-        protected Connection(ILogger logger, PluginExecutor pluginExecutor, IPacketManager packetManager)
+        protected Connection(ILogger logger, PluginExecutor pluginExecutor, IPacketManager packetManager, IPacketSerializer serializer)
         {
             _logger = logger;
             _pluginExecutor = pluginExecutor;
             _packetManager = packetManager;
+            _serializer = serializer;
             Id = Guid.NewGuid();
         }
 
@@ -105,7 +108,7 @@ namespace QuantumCore.Core.Networking
                     }
 
                     var packet = Activator.CreateInstance(packetDetails.Type);
-                    var subHeader = packetDetails.Deserialize(packet, data);
+                    var subHeader = 0;// TODO _serializer.Deserialize(packetDetails.Type, data);
 
                     if (packetDetails.IsSubHeader)
                     {
@@ -128,14 +131,14 @@ namespace QuantumCore.Core.Networking
                         Array.Resize(ref data, data.Length + read);
                         data.CopyTo(allData, oldSize);
 
-                        packetDetails.Deserialize(packet, data.Concat(subData).ToArray());
+                        packet = _serializer.Deserialize(packetDetails.Type, data.Concat(subData).ToArray());
                     }
                     
                     // Check if packet has dynamic data
                     if (packetDetails.IsDynamic)
                     {
                         // Calculate dynamic size
-                        var size = packetDetails.GetDynamicSize(packet) - (int)packetDetails.Size;
+                        var size = (ushort)packetDetails.GetDynamicSize(packet) - (int)packetDetails.Size;
                         
                         // Read dynamic data
                         var dynamicData = new byte[size];
@@ -176,6 +179,7 @@ namespace QuantumCore.Core.Networking
                     await _pluginExecutor.ExecutePlugins<IPacketOperationListener>(_logger, x => x.OnPrePacketReceivedAsync(packet, allData, stoppingToken));
 
                     await OnReceive(packet);
+                    _logger.LogInformation("Received: {Type} (0x{Header:X}) {Data}", packet.GetType(), packetDetails.Header, JsonSerializer.Serialize(packet));
 
                     await _pluginExecutor.ExecutePlugins<IPacketOperationListener>(_logger, x => x.OnPostPacketReceivedAsync(packet, allData, stoppingToken));
                 }
@@ -196,7 +200,8 @@ namespace QuantumCore.Core.Networking
             OnClose();
         }
 
-        public async Task Send(object packet)
+        public async Task Send<T>(T packet) 
+            where T : IPacketSerializable
         {
             if (!_client.Connected)
             {
@@ -204,37 +209,28 @@ namespace QuantumCore.Core.Networking
                 return;
             }
             
-            // Verify that the packet is a packet and registered
-            var attr = packet.GetType().GetCustomAttribute<PacketAttribute>();
-            if (attr == null) throw new ArgumentException("Given packet is not a packet", nameof(packet));
-
-            if (!_packetManager.IsRegisteredOutgoing(packet.GetType()))
-                throw new ArgumentException("Given packet is not a registered outgoing packet", nameof(packet));
-
-            var packetDetails = _packetManager.GetOutgoingPacket(attr.Header);
+            var bytes = ArrayPool<byte>.Shared.Rent(packet.GetSize());
+            packet.Serialize(bytes);
             
-            // Check if packet have sub packets
-            if (packetDetails.IsSubHeader)
+            try
             {
-                var subAttr = packet.GetType().GetCustomAttribute<SubPacketAttribute>();
-                Debug.Assert(subAttr != null);
-                packetDetails = _packetManager.GetOutgoingPacket((ushort) (attr.Header << 8 | subAttr.SubHeader));
+                // TODO token
+                await _pluginExecutor.ExecutePlugins<IPacketOperationListener>(_logger, x => x.OnPrePacketSentAsync(packet, CancellationToken.None));
+                // Serialize object
+                var data = _serializer.Serialize(packet);
+                _logger.LogDebug("Sending bytes: {Bytes:X}", data);
+                await _stream.WriteAsync(data);
+                await _stream.FlushAsync();
+                // TODO token
+                await _pluginExecutor.ExecutePlugins<IPacketOperationListener>(_logger, x => x.OnPostPacketReceivedAsync(packet, data, CancellationToken.None));
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Failed to send packet");
             }
             
-            // Check if packet has dynamic data
-            if (packetDetails.IsDynamic)
-            {
-                packetDetails.UpdateDynamicSize(packet, packetDetails.Size);
-            }
-
-            // TODO token
-            await _pluginExecutor.ExecutePlugins<IPacketOperationListener>(_logger, x => x.OnPrePacketSentAsync(packet, CancellationToken.None));
-            // Serialize object
-            var data = packetDetails.Serialize(packet);
-            await _stream.WriteAsync(data);
-            await _stream.FlushAsync();
-            // TODO token
-            await _pluginExecutor.ExecutePlugins<IPacketOperationListener>(_logger, x => x.OnPostPacketReceivedAsync(packet, data, CancellationToken.None));
+            ArrayPool<byte>.Shared.Return(bytes);
+            _logger.LogInformation("Sending: {Type} => {Packet}", packet.GetType(), JsonSerializer.Serialize(packet));
         }
 
         public async Task StartHandshake()
@@ -296,22 +292,13 @@ namespace QuantumCore.Core.Networking
         {
             var time = GetServerTime();
             _lastHandshakeTime = time;
-            await Send(new GCHandshake
-            {
-                Handshake = Handshake,
-                Time = (uint) time
-            });
+            await Send(new GCHandshake(Handshake, (uint)time, 0));
         }
 
         private async Task SendHandshake(uint time, uint delta)
         {
             _lastHandshakeTime = time;
-            await Send(new GCHandshake
-            {
-                Handshake = Handshake,
-                Time = time,
-                Delta = delta
-            });
+            await Send(new GCHandshake(Handshake, time, delta));
         }
     }
 }
