@@ -3,7 +3,7 @@
 namespace QuantumCore.Networking;
 
 [MeansImplicitUse]
-[AttributeUsage(AttributeTargets.Struct)]
+[AttributeUsage(AttributeTargets.Struct | AttributeTargets.Class)]
 public class PacketGeneratorAttribute : Attribute
 {
 }
