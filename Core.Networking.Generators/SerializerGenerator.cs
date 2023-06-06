@@ -11,8 +11,15 @@ public class SerializerGenerator : ISourceGenerator
 {
     public void Execute(GeneratorExecutionContext context)
     {
-        var generatorAttributeType = context.Compilation.GetTypeByMetadataName("QuantumCore.Networking.PacketGeneratorAttribute")!.OriginalDefinition;
-        var packetAttributeType = context.Compilation.GetTypeByMetadataName("QuantumCore.Core.Networking.PacketAttribute")!.OriginalDefinition;
+        var generatorAttributeType =
+            context.Compilation.GetTypeByMetadataName("QuantumCore.Networking.PacketGeneratorAttribute")!
+                .OriginalDefinition;
+        var packetAttributeType =
+            context.Compilation.GetTypeByMetadataName("QuantumCore.Core.Networking.PacketAttribute")!
+                .OriginalDefinition;
+        var packetFieldAttributeType =
+            context.Compilation.GetTypeByMetadataName("QuantumCore.Core.Networking.FieldAttribute")!
+                .OriginalDefinition;
 
         var classWithAttributes = context.Compilation.SyntaxTrees
             .Where(st => st
@@ -33,7 +40,9 @@ public class SerializerGenerator : ISourceGenerator
                 .Where(cd => cd
                     .DescendantNodes()
                     .OfType<AttributeSyntax>()
-                    .Any(attr => SymbolEqualityComparer.Default.Equals(semanticModel.GetTypeInfo(attr).Type, generatorAttributeType))
+                    .Any(attr =>
+                        SymbolEqualityComparer.Default.Equals(semanticModel.GetTypeInfo(attr).Type,
+                            generatorAttributeType))
                 )
                 .ToArray();
             foreach (var type in declaredClass)
@@ -44,22 +53,25 @@ public class SerializerGenerator : ISourceGenerator
                     .FirstOrDefault(a => a
                         .DescendantTokens()
                         .Any(dt => dt.IsKind(SyntaxKind.IdentifierToken) &&
-                                            SymbolEqualityComparer.Default.Equals(semanticModel.GetTypeInfo(dt.Parent!).Type, packetAttributeType)));
+                                   SymbolEqualityComparer.Default.Equals(semanticModel.GetTypeInfo(dt.Parent!).Type,
+                                       packetAttributeType)));
 
                 if (attr is null)
                 {
                     throw new InvalidOperationException(
                         "PacketGeneratorAttribute requires PacketAttribute to be set as well");
                 }
+
                 var name = type.Identifier.Text;
-                var ns = tree.GetRoot().DescendantNodes().OfType<BaseNamespaceDeclarationSyntax>().First()?.Name.ToString()!;
-                var fields = GetFieldsOfType(type);
+                var ns = tree.GetRoot().DescendantNodes().OfType<BaseNamespaceDeclarationSyntax>().First()?.Name
+                    .ToString()!;
+                var fields = GetFieldsOfType(semanticModel, packetFieldAttributeType, type);
                 var fullSize = fields.Sum(x => GetSize(x.Type)) + 1;
                 var header = attr.ArgumentList!.Arguments[0].ToString();
-                var isStruct = type is StructDeclarationSyntax or RecordDeclarationSyntax { ClassOrStructKeyword.Text: "struct" }; 
+                var typeKeyWords = GetTypeKeyWords(type);
 
                 var source = new StringBuilder();
-                ApplyHeader(source, type is RecordDeclarationSyntax, isStruct, ns, name);
+                ApplyHeader(source, typeKeyWords, ns, name);
                 source.AppendLine(GenerateWriteHeader(header));
                 var byteIndex = 1;
                 foreach (var field in fields)
@@ -68,32 +80,73 @@ public class SerializerGenerator : ISourceGenerator
                     source.AppendLine(GenerateWriteField(field.Name, fieldSize, byteIndex, field.Type == "bool"));
                     byteIndex += fieldSize;
                 }
-                
+
                 ApplyFooter(source, fullSize);
-                
+
                 context.AddSource($"{name}.g.cs", SourceText.From(source.ToString(), Encoding.UTF8));
             }
         }
     }
 
-    private IEnumerable<(string Name, string Type)> GetFieldsOfType(TypeDeclarationSyntax type)
+    private static string GetTypeKeyWords(TypeDeclarationSyntax type)
     {
+        string typeKeyWords;
+        if (type is StructDeclarationSyntax)
+        {
+            typeKeyWords = "struct";
+        }
+        else if (type is RecordDeclarationSyntax recordDeclarationSyntax)
+        {
+            typeKeyWords = recordDeclarationSyntax.ClassOrStructKeyword.Text == "struct"
+                ? "record struct"
+                : "record";
+        }
+        else
+        {
+            typeKeyWords = "class";
+        }
+
+        return typeKeyWords;
+    }
+
+    private IReadOnlyList<(string Name, string Type, int? Order)> GetFieldsOfType(SemanticModel semanticModel,
+        INamedTypeSymbol packetFieldAttributeType,
+        TypeDeclarationSyntax type)
+    {
+        // use ridiculously high number to start counting forward to not collide with user defined values 
+        var order = int.MaxValue / 2;
+        var fields = new List<(string Name, string Type, int? Order)>();
         if (type is RecordDeclarationSyntax record)
         {
-            return record.ParameterList!.Parameters
-                .Select(x => (x.Identifier.Text,
+            fields.AddRange(record.ParameterList!.Parameters
+                .Select(x => (
+                    x.Identifier.Text,
                     x.Type is PredefinedTypeSyntax predefinedTypeSyntax
                         ? predefinedTypeSyntax.Keyword.Text
-                        : throw new InvalidOperationException()))
-                .ToArray();
+                        : throw new InvalidOperationException(),
+                    (int?)order++
+                    )
+                )
+            );
         }
-        return type.Members
+
+        fields.AddRange(type.Members
             .OfType<PropertyDeclarationSyntax>()
-            .Select(x => (x.Identifier.Text,
-                x.Type is PredefinedTypeSyntax predefinedTypeSyntax
-                    ? predefinedTypeSyntax.Keyword.Text
-                    : throw new InvalidOperationException()))
-            .ToArray();
+            .Select(x =>
+            {
+                var orderStr = x.AttributeLists.SelectMany(attr => attr.Attributes).FirstOrDefault(attr =>
+                    SymbolEqualityComparer.Default.Equals(semanticModel.GetTypeInfo(attr).Type,
+                        packetFieldAttributeType))?.ArgumentList!.Arguments[0].Expression.ToString();
+                return (
+                    x.Identifier.Text,
+                    x.Type is PredefinedTypeSyntax predefinedTypeSyntax
+                        ? predefinedTypeSyntax.Keyword.Text
+                        : throw new InvalidOperationException(),
+                    orderStr != null ? int.Parse(orderStr) : (int?)order++
+                );
+            })
+        );
+        return fields.OrderBy(x => x.Order).ToList();
     }
 
     public void Initialize(GeneratorInitializationContext context)
@@ -112,17 +165,18 @@ public class SerializerGenerator : ISourceGenerator
             var byteCast = isBool ? "(byte)" : "";
             return $"            bytes[offset + {index}] = {byteCast}this.{name};";
         }
+
         return $"            System.BitConverter.GetBytes(this.{name}).CopyTo(bytes, offset + {index});";
     }
 
-    private static void ApplyHeader(StringBuilder sb, bool isRecord, bool isStruct, string ns, string name)
+    private static void ApplyHeader(StringBuilder sb, string typeKeywords, string ns, string name)
     {
         sb.AppendLine($@"/// <auto-generated/>
 using QuantumCore.Networking;
 
 namespace {ns} {{
 
-    public partial {(isRecord ? "record " : "")}{(isStruct ? "struct" : "class")} {name} : IPacketSerializable
+    public partial {typeKeywords} {name} : IPacketSerializable
     {{
         public void Serialize(byte[] bytes, int offset = 0) {{");
     }

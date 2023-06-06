@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace QuantumCore.Core.Networking;
+﻿namespace QuantumCore.Core.Networking;
 
 [AttributeUsage(AttributeTargets.Property)]
 public class FieldAttribute : Attribute
