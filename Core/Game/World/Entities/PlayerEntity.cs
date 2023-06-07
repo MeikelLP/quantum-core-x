@@ -127,6 +127,8 @@ namespace QuantumCore.Game.World.Entities
                 Iq = player.Iq,
                 PositionX = player.PositionX,
                 PositionY = player.PositionY,
+                MaxHealth = player.MaxHealth,
+                MaxMana = player.MaxMana,
                 Health = player.Health,
                 Mana = player.Mana,
                 Stamina = player.Stamina,
@@ -507,6 +509,33 @@ namespace QuantumCore.Game.World.Entities
                 case EPoints.Iq:
                     Player.Iq += (byte) value;
                     break;
+                case EPoints.Hp:
+                    if (value <= 0)
+                    {
+                        //Setting the Hp to 0 does not register as killing the player
+                        Health = 1;
+                    }
+                    else if(value > Player.MaxHealth)
+                    {
+                        Health = Player.MaxHealth;
+                    }else
+                    {
+                        Health = value;
+                    }
+                    break;
+                case EPoints.Sp:
+                    if (value <= 0)
+                    {
+                        Mana = 0;
+                    }
+                    else if(value > Player.MaxMana)
+                    {
+                        Mana = Player.MaxMana;
+                    }else
+                    {
+                        Mana = value;
+                    }
+                    break;
                 case EPoints.StatusPoints:
                     Player.AvailableStatusPoints += (uint) value;
 
@@ -567,8 +596,9 @@ namespace QuantumCore.Game.World.Entities
                         return 0;
                     }
 
-                    return info.StartHp + info.HpPerHt * GetPoint(EPoints.Ht) +
-                           info.HpPerLevel * GetPoint(EPoints.Level);
+                    Player.MaxHealth = info.StartHp + info.HpPerHt * GetPoint(EPoints.Ht) + 
+                                       info.HpPerLevel * GetPoint(EPoints.Level);
+                    return (uint) Player.MaxHealth;
                 case EPoints.MaxSp:
                     if(info == null)
                     {
@@ -577,8 +607,9 @@ namespace QuantumCore.Game.World.Entities
 
                     }
 
-                    return info.StartSp + info.SpPerIq * GetPoint(EPoints.Iq) +
-                           info.SpPerLevel * GetPoint(EPoints.Level);
+                    Player.MaxMana = info.StartSp + info.SpPerIq * GetPoint(EPoints.Iq) +
+                                     info.SpPerLevel * GetPoint(EPoints.Level);
+                    return (uint) Player.MaxMana;
                 case EPoints.St:
                     return Player.St;
                 case EPoints.Ht:

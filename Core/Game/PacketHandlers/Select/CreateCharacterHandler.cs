@@ -70,6 +70,8 @@ public class CreateCharacterHandler : IGamePacketHandler<CreateCharacter>
             Ht = job.Ht,
             Health =  job.StartHp, 
             Mana = job.StartSp,
+            MaxHealth = job.StartHp + job.HpPerHt * job.Ht + job.HpPerLevel,
+            MaxMana = job.StartSp + job.SpPerIq * job.Iq + job.SpPerLevel
         };
 
 
