@@ -21,7 +21,7 @@ public class SerializerGenerator : ISourceGenerator
             context.Compilation.GetTypeByMetadataName("QuantumCore.Core.Networking.FieldAttribute")!
                 .OriginalDefinition;
 
-        var classWithAttributes = context.Compilation.SyntaxTrees
+        var filesWithClasses = context.Compilation.SyntaxTrees
             .Where(st => st
                 .GetRoot()
                 .DescendantNodes()
@@ -30,10 +30,10 @@ public class SerializerGenerator : ISourceGenerator
                     .DescendantNodes()
                     .OfType<AttributeSyntax>()
                     .Any()));
-        foreach (var tree in classWithAttributes)
+        foreach (var file in filesWithClasses)
         {
-            var semanticModel = context.Compilation.GetSemanticModel(tree);
-            var declaredClass = tree
+            var semanticModel = context.Compilation.GetSemanticModel(file);
+            var declaredTypes = file
                 .GetRoot()
                 .DescendantNodes()
                 .OfType<TypeDeclarationSyntax>()
@@ -45,47 +45,62 @@ public class SerializerGenerator : ISourceGenerator
                             generatorAttributeType))
                 )
                 .ToArray();
-            foreach (var type in declaredClass)
+            foreach (var type in declaredTypes)
             {
-                var attr = type
-                    .DescendantNodes()
-                    .OfType<AttributeSyntax>()
-                    .FirstOrDefault(a => a
-                        .DescendantTokens()
-                        .Any(dt => dt.IsKind(SyntaxKind.IdentifierToken) &&
-                                   SymbolEqualityComparer.Default.Equals(semanticModel.GetTypeInfo(dt.Parent!).Type,
-                                       packetAttributeType)));
+                var (name, source) =
+                    GenerateFile(type, semanticModel, packetAttributeType, file, packetFieldAttributeType);
 
-                if (attr is null)
-                {
-                    throw new InvalidOperationException(
-                        "PacketGeneratorAttribute requires PacketAttribute to be set as well");
-                }
-
-                var name = type.Identifier.Text;
-                var ns = tree.GetRoot().DescendantNodes().OfType<BaseNamespaceDeclarationSyntax>().First()?.Name
-                    .ToString()!;
-                var fields = GetFieldsOfType(semanticModel, packetFieldAttributeType, type);
-                var fullSize = fields.Sum(x => GetSize(x.Type)) + 1;
-                var header = attr.ArgumentList!.Arguments[0].ToString();
-                var typeKeyWords = GetTypeKeyWords(type);
-
-                var source = new StringBuilder();
-                ApplyHeader(source, typeKeyWords, ns, name);
-                source.AppendLine(GenerateWriteHeader(header));
-                var byteIndex = 1;
-                foreach (var field in fields)
-                {
-                    var fieldSize = GetSize(field.Type);
-                    source.AppendLine(GenerateWriteField(field.Name, fieldSize, byteIndex, field.Type == "bool"));
-                    byteIndex += fieldSize;
-                }
-
-                ApplyFooter(source, fullSize);
-
-                context.AddSource($"{name}.g.cs", SourceText.From(source.ToString(), Encoding.UTF8));
+                context.AddSource($"{name}.g.cs", SourceText.From(source, Encoding.UTF8));
             }
         }
+    }
+
+    private (string Name, string Source) GenerateFile(TypeDeclarationSyntax type, SemanticModel semanticModel,
+        ISymbol packetAttributeType, SyntaxTree tree, INamedTypeSymbol packetFieldAttributeType)
+    {
+        var attr = type
+            .DescendantNodes()
+            .OfType<AttributeSyntax>()
+            .FirstOrDefault(a => a
+                .DescendantTokens()
+                .Any(dt => dt.IsKind(SyntaxKind.IdentifierToken) &&
+                           SymbolEqualityComparer.Default.Equals(semanticModel.GetTypeInfo(dt.Parent!).Type,
+                               packetAttributeType)));
+
+        if (attr is null)
+        {
+            throw new InvalidOperationException(
+                "PacketGeneratorAttribute requires PacketAttribute to be set as well");
+        }
+
+        var name = type.Identifier.Text;
+        var ns = tree.GetRoot().DescendantNodes().OfType<BaseNamespaceDeclarationSyntax>().First()?.Name
+            .ToString()!;
+        var fields = GetFieldsOfType(semanticModel, packetFieldAttributeType, type);
+        var staticSize = fields.Sum(x => GetStaticSize(x.Type)) + 1;
+        var dynamicSize = string.Join(" + ",
+            fields.Where(x => x.Type == "string").Select(x => $"{x.Name}.Length"));
+        var header = attr.ArgumentList!.Arguments[0].ToString();
+        var typeKeyWords = GetTypeKeyWords(type);
+
+        var source = new StringBuilder();
+        ApplyHeader(source, typeKeyWords, ns, name);
+        source.AppendLine(GenerateWriteHeader(header));
+        var staticByteIndex = 1;
+        var dynamicByteIndex = "";
+        foreach (var field in fields)
+        {
+            var fieldSize = GetStaticSize(field.Type);
+            source.AppendLine(GenerateWriteField(field.Name, field.Type, fieldSize, staticByteIndex, dynamicByteIndex));
+            if (field.Type == "string")
+            {
+                dynamicByteIndex += $" + this.{field.Name}.Length";
+            }
+            staticByteIndex += fieldSize;
+        }
+
+        ApplyFooter(source, staticSize, dynamicSize);
+        return (name, source.ToString());
     }
 
     private static string GetTypeKeyWords(TypeDeclarationSyntax type)
@@ -120,11 +135,11 @@ public class SerializerGenerator : ISourceGenerator
         {
             fields.AddRange(record.ParameterList!.Parameters
                 .Select(x => (
-                    x.Identifier.Text,
-                    x.Type is PredefinedTypeSyntax predefinedTypeSyntax
-                        ? predefinedTypeSyntax.Keyword.Text
-                        : throw new InvalidOperationException(),
-                    (int?)order++
+                        x.Identifier.Text,
+                        x.Type is PredefinedTypeSyntax predefinedTypeSyntax
+                            ? predefinedTypeSyntax.Keyword.Text
+                            : throw new InvalidOperationException(),
+                        (int?)order++
                     )
                 )
             );
@@ -158,15 +173,20 @@ public class SerializerGenerator : ISourceGenerator
         return $"            bytes[0] = {header};";
     }
 
-    private static string GenerateWriteField(string name, int size, int index, bool isBool = false)
+    private static string GenerateWriteField(string name, string type, int size, int offset, string dynamicOffset)
     {
+        var offsetStr = $"offset + {offset}{dynamicOffset}";
         if (size == 1)
         {
-            var byteCast = isBool ? "(byte)" : "";
-            return $"            bytes[offset + {index}] = {byteCast}this.{name};";
+            var byteCast = type == "bool" ? "(byte)" : "";
+            return $"            bytes[{offsetStr}] = {byteCast}this.{name};";
+        }
+        else if (size == 0 && type == "string")
+        {
+            return $"            System.Text.Encoding.ASCII.GetBytes(this.{name}).CopyTo(bytes, {offsetStr});";
         }
 
-        return $"            System.BitConverter.GetBytes(this.{name}).CopyTo(bytes, offset + {index});";
+        return $"            System.BitConverter.GetBytes(this.{name}).CopyTo(bytes, {offsetStr});";
     }
 
     private static void ApplyHeader(StringBuilder sb, string typeKeywords, string ns, string name)
@@ -181,19 +201,23 @@ namespace {ns} {{
         public void Serialize(byte[] bytes, int offset = 0) {{");
     }
 
-    private static void ApplyFooter(StringBuilder sb, int size)
+    private static void ApplyFooter(StringBuilder sb, int size, string dynamicSize)
     {
         sb.Append(
-            $@"        }}
+            @"        }
 
-        public ushort GetSize() {{
-            return {size};
-        }}
-    }}
-}}".Trim('\n'));
+        public ushort GetSize() {
+            return ");
+        sb.Append(!string.IsNullOrWhiteSpace(dynamicSize)
+            ? $"(ushort)({size} + {(!string.IsNullOrWhiteSpace(dynamicSize) ? dynamicSize : "")})"
+            : size.ToString());
+        sb.Append(@";
+        }
+    }
+}".Trim('\n'));
     }
 
-    private static int GetSize(string fieldType)
+    private static int GetStaticSize(string fieldType)
     {
         switch (fieldType)
         {
@@ -208,8 +232,11 @@ namespace {ns} {{
             case "short":
             case "ushort":
                 return 2;
+            case "string":
+                // dynamic size - does not contribute to static size
+                return 0;
             default:
-                throw new NotImplementedException("Don't know how to handle Enum, Array or string");
+                throw new NotImplementedException("Don't know how to handle enum or array");
         }
     }
 }
