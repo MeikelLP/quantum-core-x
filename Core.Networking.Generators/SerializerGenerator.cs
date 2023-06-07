@@ -126,15 +126,7 @@ public class SerializerGenerator : ISourceGenerator
         if (type is RecordDeclarationSyntax record)
         {
             fields.AddRange(record.ParameterList!.Parameters
-                .Select(x => new FieldData {
-                        Name = x.Identifier.Text,
-                        Type = GetTypeFromProperty(x.Type!),
-                        IsArray = x.Type is ArrayTypeSyntax,
-                        ArrayLength = null, // record parameters cannot declare default values for arrays
-                        ElementSize = GetStaticSize(GetTypeFromProperty(x.Type!)),
-                        Order = null
-                    }
-                )
+                .Select(x => BuildFieldData(semanticModel, x.Type!, x.Identifier))
             );
         }
 
@@ -145,14 +137,8 @@ public class SerializerGenerator : ISourceGenerator
                 var orderStr = x.AttributeLists.SelectMany(attr => attr.Attributes).FirstOrDefault(attr =>
                     SymbolEqualityComparer.Default.Equals(semanticModel.GetTypeInfo(attr).Type,
                         packetFieldAttributeType))?.ArgumentList!.Arguments[0].Expression.ToString();
-                return new FieldData {
-                    Name = x.Identifier.Text,
-                    Type = GetTypeFromProperty(x.Type),
-                    IsArray = x.Type is ArrayTypeSyntax,
-                    ArrayLength = GetArrayLength(x),
-                    ElementSize = GetStaticSize(GetTypeFromProperty(x.Type)),
-                    Order = orderStr != null ? int.Parse(orderStr) : null
-                };
+                var arrayLength = GetArrayLength(x);
+                return BuildFieldData(semanticModel, x.Type, x.Identifier, arrayLength, orderStr);
             })
         );
         var finalArr = new List<FieldData>(fields.Count);
@@ -166,13 +152,47 @@ public class SerializerGenerator : ISourceGenerator
         return finalArr;
     }
 
-    private static string GetTypeFromProperty(TypeSyntax x)
+    private static FieldData BuildFieldData(SemanticModel semanticModel, TypeSyntax type, SyntaxToken name, int? arrayLength = null, string? orderStr = null)
+    {
+        var fieldTypeName = GetTypeFromProperty(semanticModel, type);
+        var isArray = type is ArrayTypeSyntax;
+        var enumType = isArray ? null : (INamedTypeSymbol)semanticModel.GetTypeInfo(type).Type!;
+        var isEnum = enumType?.TypeKind is TypeKind.Enum;
+        return new FieldData
+        {
+            Name = name.Text,
+            Type = fieldTypeName,
+            IsArray = isArray,
+            IsEnum = isEnum,
+            ArrayLength = arrayLength,
+            ElementSize = GetStaticSize(fieldTypeName),
+            Order = orderStr != null ? int.Parse(orderStr) : null
+        };
+    }
+
+    private static string GetTypeFromProperty(SemanticModel semanticModel, TypeSyntax x)
     {
         return x switch
         {
             ArrayTypeSyntax arrayTypeSyntax => ((PredefinedTypeSyntax)arrayTypeSyntax.ElementType).Keyword.Text,
             PredefinedTypeSyntax predefinedTypeSyntax => predefinedTypeSyntax.Keyword.Text,
+            IdentifierNameSyntax identifierNameSyntax  => ((INamedTypeSymbol)semanticModel.GetTypeInfo(identifierNameSyntax).Type!).TypeKind is TypeKind.Enum
+                ? ExplicitPrimitiveTypeNameToSimple(((INamedTypeSymbol)semanticModel.GetTypeInfo(identifierNameSyntax).Type!).EnumUnderlyingType!.Name)
+                : throw new InvalidOperationException($"Don't know how to handle IdentifierNameSyntax {x}"),
             _ => throw new InvalidOperationException($"Don't know how to handle syntax node {x}")
+        };
+    }
+
+    private static string ExplicitPrimitiveTypeNameToSimple(string explicitPrimitiveTypeName)
+    {
+        return explicitPrimitiveTypeName switch
+        {
+            "Int32" => "int",
+            "Single" => "float",
+            "Double" => "double",
+            "Int64" => "long",
+            "Byte" => "byte",
+            _ => throw new ArgumentOutOfRangeException(nameof(explicitPrimitiveTypeName))
         };
     }
 
@@ -209,14 +229,16 @@ public class SerializerGenerator : ISourceGenerator
         switch (field)
         {
             case { IsArray: true, Type: "byte" }:
-                return $"this.{field.Name}.CopyTo(bytes, {offsetStr});";
+                return $"{prefix}this.{field.Name}.CopyTo(bytes, {offsetStr});";
             case { ElementSize: 0, Type: "string" }:
                 return $"{prefix}System.Text.Encoding.ASCII.GetBytes(this.{field.Name}).CopyTo(bytes, {offsetStr});";
+            case { IsEnum: true, Type: not "byte" }:
+                return $"{prefix}System.BitConverter.GetBytes(({field.Type})this.{field.Name}).CopyTo(bytes, {offsetStr});";
             default:
             {
                 if (field.ElementSize == 1)
                 {
-                    var byteCast = field.Type == "bool" ? "(byte)" : "";
+                    var byteCast = field.Type == "bool" || field.IsEnum ? "(byte)" : "";
                     return $"{prefix}bytes[{offsetStr}] = {byteCast}this.{field.Name};";
                 }
 
@@ -267,10 +289,12 @@ namespace {ns} {{
         switch (fieldType)
         {
             case "int":
+            case "Int32":
             case "uint":
             case "float":
                 return 4;
             case "byte":
+            case "Byte":
             case "sbyte":
             case "bool":
                 return 1;
@@ -281,7 +305,7 @@ namespace {ns} {{
                 // dynamic size - does not contribute to static size
                 return 0;
             default:
-                throw new NotImplementedException("Don't know how to handle enum or array");
+                throw new NotImplementedException($"Don't know how to handle {fieldType}");
         }
     }
 }
