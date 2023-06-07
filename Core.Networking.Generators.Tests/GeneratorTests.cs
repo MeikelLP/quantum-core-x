@@ -60,7 +60,7 @@ namespace QuantumCore.Core.Packets {
     public partial record struct GCHandshake : IPacketSerializable
     {
         public void Serialize(byte[] bytes, int offset = 0) {
-            bytes[0] = 0xff;
+            bytes[offset + 0] = 0xff;
             System.BitConverter.GetBytes(this.Handshake).CopyTo(bytes, offset + 1);
             System.BitConverter.GetBytes(this.Time).CopyTo(bytes, offset + 5);
             System.BitConverter.GetBytes(this.Delta).CopyTo(bytes, offset + 9);
@@ -110,7 +110,7 @@ namespace QuantumCore.Core.Packets {
     public partial record GCHandshake : IPacketSerializable
     {
         public void Serialize(byte[] bytes, int offset = 0) {
-            bytes[0] = 0xff;
+            bytes[offset + 0] = 0xff;
             System.BitConverter.GetBytes(this.Handshake).CopyTo(bytes, offset + 1);
             System.BitConverter.GetBytes(this.Time).CopyTo(bytes, offset + 5);
             System.BitConverter.GetBytes(this.Delta).CopyTo(bytes, offset + 9);
@@ -163,7 +163,7 @@ namespace QuantumCore.Core.Packets {
     public partial record struct GCHandshake : IPacketSerializable
     {
         public void Serialize(byte[] bytes, int offset = 0) {
-            bytes[0] = 0xff;
+            bytes[offset + 0] = 0xff;
             System.BitConverter.GetBytes(this.Size).CopyTo(bytes, offset + 1);
             System.BitConverter.GetBytes(this.Handshake).CopyTo(bytes, offset + 5);
             System.BitConverter.GetBytes(this.Time).CopyTo(bytes, offset + 9);
@@ -177,7 +177,7 @@ namespace QuantumCore.Core.Packets {
     }
 
     [Fact]
-    public void Record_WithDynamic()
+    public void Record_WithDynamicString()
     {
         var inputCompilation = CreateCompilation(@"
 using QuantumCore.Core.Networking;
@@ -216,21 +216,21 @@ namespace QuantumCore.Core.Packets {
     public partial record struct GCHandshake : IPacketSerializable
     {
         public void Serialize(byte[] bytes, int offset = 0) {
-            bytes[0] = 0xff;
-            System.BitConverter.GetBytes(this.Size).CopyTo(bytes, offset + 1);
-            bytes[offset + 5] = this.Type;
+            bytes[offset + 0] = 0xff;
+            bytes[offset + 1] = this.Type;
+            System.BitConverter.GetBytes(this.Size).CopyTo(bytes, offset + 2);
             System.Text.Encoding.ASCII.GetBytes(this.Message).CopyTo(bytes, offset + 6);
         }
 
         public ushort GetSize() {
-            return (ushort)(6 + Message.Length);
+            return (ushort)(6 + this.Message.Length);
         }
     }
 }");
     }
 
     [Fact]
-    public void Record_WithDynamic_FieldAfter()
+    public void Record_WithDynamicByteArray()
     {
         var inputCompilation = CreateCompilation(@"
 using QuantumCore.Core.Networking;
@@ -240,9 +240,9 @@ namespace QuantumCore.Core.Packets;
 
 [Packet(0xff, EDirection.Incoming | EDirection.Outgoing)]
 [PacketGenerator]
-public partial record struct GCHandshake(byte Type, string Message, byte Location) {
+public partial record struct GCHandshake(byte Type, byte[] Flags) {
     [Field(1)]
-    public uint Size => (uint)Message.Length;
+    public uint Size => (uint)Flags.Length;
 }
 ".Trim());
 
@@ -269,15 +269,120 @@ namespace QuantumCore.Core.Packets {
     public partial record struct GCHandshake : IPacketSerializable
     {
         public void Serialize(byte[] bytes, int offset = 0) {
-            bytes[0] = 0xff;
-            System.BitConverter.GetBytes(this.Size).CopyTo(bytes, offset + 1);
-            bytes[offset + 5] = this.Type;
+            bytes[offset + 0] = 0xff;
+            bytes[offset + 1] = this.Type;
+            System.BitConverter.GetBytes(this.Size).CopyTo(bytes, offset + 2);
+            this.Flags.CopyTo(bytes, offset + 6);
+        }
+
+        public ushort GetSize() {
+            return (ushort)(6 + this.Flags.Length);
+        }
+    }
+}");
+    }
+    
+    [Fact]
+    public void Record_WithFixedByteArray()
+    {
+        var inputCompilation = CreateCompilation(@"
+using QuantumCore.Core.Networking;
+using QuantumCore.Networking;
+
+namespace QuantumCore.Core.Packets;
+
+[Packet(0xff, EDirection.Incoming | EDirection.Outgoing)]
+[PacketGenerator]
+public partial record struct GCHandshake(byte Type)
+{
+    public byte[] Flags { get; init; } = new byte[4];
+}
+".Trim());
+
+        GeneratorDriver driver = CSharpGeneratorDriver.Create(new SerializerGenerator());
+
+        driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation,
+            out var diagnostics);
+
+        var runResult = driver.GetRunResult();
+        diagnostics.Should().BeEmpty();
+        outputCompilation.GetDiagnostics().Should().BeEmpty();
+
+        runResult.GeneratedTrees.Should().HaveCount(1);
+        runResult.Diagnostics.Should().BeEmpty();
+
+        runResult.Results[0].GeneratedSources.Should().HaveCount(1);
+        runResult.Results[0].Diagnostics.Should().BeEmpty();
+        runResult.Results[0].Exception.Should().BeNull();
+        runResult.Results[0].GeneratedSources[0].SourceText.ToString().Should().BeEquivalentTo(@"/// <auto-generated/>
+using QuantumCore.Networking;
+
+namespace QuantumCore.Core.Packets {
+
+    public partial record struct GCHandshake : IPacketSerializable
+    {
+        public void Serialize(byte[] bytes, int offset = 0) {
+            bytes[offset + 0] = 0xff;
+            bytes[offset + 1] = this.Type;
+            this.Flags.CopyTo(bytes, offset + 2);
+        }
+
+        public ushort GetSize() {
+            return 6;
+        }
+    }
+}");
+    }
+
+    [Fact]
+    public void Record_WithDynamic_FieldAfter()
+    {
+        var inputCompilation = CreateCompilation(@"
+using QuantumCore.Core.Networking;
+using QuantumCore.Networking;
+
+namespace QuantumCore.Core.Packets;
+
+[Packet(0xff, EDirection.Incoming | EDirection.Outgoing)]
+[PacketGenerator]
+public partial record struct GCHandshake(byte Type, string Message, byte Location) {
+    [Field(1)]
+    public uint Size => (uint)this.Message.Length;
+}
+".Trim());
+
+        GeneratorDriver driver = CSharpGeneratorDriver.Create(new SerializerGenerator());
+
+        driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation,
+            out var diagnostics);
+
+        var runResult = driver.GetRunResult();
+        diagnostics.Should().BeEmpty();
+        outputCompilation.GetDiagnostics().Should().BeEmpty();
+
+        runResult.GeneratedTrees.Should().HaveCount(1);
+        runResult.Diagnostics.Should().BeEmpty();
+
+        runResult.Results[0].GeneratedSources.Should().HaveCount(1);
+        runResult.Results[0].Diagnostics.Should().BeEmpty();
+        runResult.Results[0].Exception.Should().BeNull();
+        runResult.Results[0].GeneratedSources[0].SourceText.ToString().Should().BeEquivalentTo(@"/// <auto-generated/>
+using QuantumCore.Networking;
+
+namespace QuantumCore.Core.Packets {
+
+    public partial record struct GCHandshake : IPacketSerializable
+    {
+        public void Serialize(byte[] bytes, int offset = 0) {
+            bytes[offset + 0] = 0xff;
+            bytes[offset + 1] = this.Type;
+            System.BitConverter.GetBytes(this.Size).CopyTo(bytes, offset + 2);
             System.Text.Encoding.ASCII.GetBytes(this.Message).CopyTo(bytes, offset + 6);
             bytes[offset + 6 + this.Message.Length] = this.Location;
         }
 
         public ushort GetSize() {
-            return (ushort)(7 + Message.Length);
+            return (ushort)(7 + this.Message.Length);
         }
     }
 }");
@@ -324,7 +429,7 @@ namespace QuantumCore.Core.Packets {
     public partial record struct GCHandshake : IPacketSerializable
     {
         public void Serialize(byte[] bytes, int offset = 0) {
-            bytes[0] = 0xff;
+            bytes[offset + 0] = 0xff;
             System.BitConverter.GetBytes(this.Handshake).CopyTo(bytes, offset + 1);
             System.BitConverter.GetBytes(this.Time).CopyTo(bytes, offset + 5);
             System.BitConverter.GetBytes(this.Delta).CopyTo(bytes, offset + 9);
@@ -343,7 +448,7 @@ namespace QuantumCore.Core.Packets {
     public partial record struct GCPhase : IPacketSerializable
     {
         public void Serialize(byte[] bytes, int offset = 0) {
-            bytes[0] = 0xfd;
+            bytes[offset + 0] = 0xfd;
             bytes[offset + 1] = this.Phase;
         }
 
@@ -394,7 +499,7 @@ namespace QuantumCore.Core.Packets {
     public partial struct GCHandshake : IPacketSerializable
     {
         public void Serialize(byte[] bytes, int offset = 0) {
-            bytes[0] = 0xff;
+            bytes[offset + 0] = 0xff;
             System.BitConverter.GetBytes(this.Handshake).CopyTo(bytes, offset + 1);
             System.BitConverter.GetBytes(this.Time).CopyTo(bytes, offset + 5);
             System.BitConverter.GetBytes(this.Delta).CopyTo(bytes, offset + 9);
@@ -447,7 +552,7 @@ namespace QuantumCore.Core.Packets {
     public partial class GCHandshake : IPacketSerializable
     {
         public void Serialize(byte[] bytes, int offset = 0) {
-            bytes[0] = 0xff;
+            bytes[offset + 0] = 0xff;
             System.BitConverter.GetBytes(this.Handshake).CopyTo(bytes, offset + 1);
             System.BitConverter.GetBytes(this.Time).CopyTo(bytes, offset + 5);
             System.BitConverter.GetBytes(this.Delta).CopyTo(bytes, offset + 9);
@@ -499,7 +604,7 @@ namespace QuantumCore.Core.Packets {
     public partial record GCHandshake : IPacketSerializable
     {
         public void Serialize(byte[] bytes, int offset = 0) {
-            bytes[0] = 0xff;
+            bytes[offset + 0] = 0xff;
             System.BitConverter.GetBytes(this.Handshake).CopyTo(bytes, offset + 1);
             System.BitConverter.GetBytes(this.Time).CopyTo(bytes, offset + 5);
             System.BitConverter.GetBytes(this.Delta).CopyTo(bytes, offset + 9);
@@ -555,7 +660,7 @@ namespace QuantumCore.Core.Packets {
 //     public partial record struct GCHandshake : IPacketSerializable
 //     {
 //         public void Serialize(byte[] bytes, int offset = 0) {
-//             bytes[0] = 0xff;
+//             bytes[offset + 0] = 0xff;
 //             System.BitConverter.GetBytes(this.Handshake).CopyTo(bytes, offset + 1);
 //             System.BitConverter.GetBytes(this.Time).CopyTo(bytes, offset + 5);
 //             System.BitConverter.GetBytes(this.Delta).CopyTo(bytes, offset + 9);

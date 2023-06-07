@@ -77,9 +77,9 @@ public class SerializerGenerator : ISourceGenerator
         var ns = tree.GetRoot().DescendantNodes().OfType<BaseNamespaceDeclarationSyntax>().First()?.Name
             .ToString()!;
         var fields = GetFieldsOfType(semanticModel, packetFieldAttributeType, type);
-        var staticSize = fields.Sum(x => GetStaticSize(x.Type)) + 1;
+        var staticSize = fields.Sum(x => x.FieldSize) + 1;
         var dynamicSize = string.Join(" + ",
-            fields.Where(x => x.Type == "string").Select(x => $"{x.Name}.Length"));
+            fields.Where(x => x.HasDynamicLength).Select(x => $"this.{x.Name}.Length"));
         var header = attr.ArgumentList!.Arguments[0].ToString();
         var typeKeyWords = GetTypeKeyWords(type);
 
@@ -90,12 +90,13 @@ public class SerializerGenerator : ISourceGenerator
         var dynamicByteIndex = "";
         foreach (var field in fields)
         {
-            var fieldSize = GetStaticSize(field.Type);
-            source.AppendLine(GenerateWriteField(field.Name, field.Type, fieldSize, staticByteIndex, dynamicByteIndex));
+            var fieldSize = field.ArrayLength ?? 1 * field.ElementSize;
+            source.AppendLine(GenerateWriteField(field, staticByteIndex, dynamicByteIndex));
             if (field.Type == "string")
             {
                 dynamicByteIndex += $" + this.{field.Name}.Length";
             }
+
             staticByteIndex += fieldSize;
         }
 
@@ -105,42 +106,34 @@ public class SerializerGenerator : ISourceGenerator
 
     private static string GetTypeKeyWords(TypeDeclarationSyntax type)
     {
-        string typeKeyWords;
-        if (type is StructDeclarationSyntax)
+        var typeKeyWords = type switch
         {
-            typeKeyWords = "struct";
-        }
-        else if (type is RecordDeclarationSyntax recordDeclarationSyntax)
-        {
-            typeKeyWords = recordDeclarationSyntax.ClassOrStructKeyword.Text == "struct"
-                ? "record struct"
-                : "record";
-        }
-        else
-        {
-            typeKeyWords = "class";
-        }
+            StructDeclarationSyntax => "struct",
+            RecordDeclarationSyntax { ClassOrStructKeyword.Text: "struct" } => "record struct",
+            RecordDeclarationSyntax => "record",
+            _ => "class"
+        };
 
         return typeKeyWords;
     }
 
-    private IReadOnlyList<(string Name, string Type, int? Order)> GetFieldsOfType(SemanticModel semanticModel,
-        INamedTypeSymbol packetFieldAttributeType,
+    private IReadOnlyList<FieldData> GetFieldsOfType(
+        SemanticModel semanticModel,
+        ISymbol packetFieldAttributeType,
         TypeDeclarationSyntax type)
     {
-        // use ridiculously high number to start counting forward to not collide with user defined values 
-        var order = int.MaxValue / 2;
-        var fields = new List<(string Name, string Type, int? Order)>();
+        var fields = new List<FieldData>();
         if (type is RecordDeclarationSyntax record)
         {
             fields.AddRange(record.ParameterList!.Parameters
-                .Select(x => (
-                        x.Identifier.Text,
-                        x.Type is PredefinedTypeSyntax predefinedTypeSyntax
-                            ? predefinedTypeSyntax.Keyword.Text
-                            : throw new InvalidOperationException(),
-                        (int?)order++
-                    )
+                .Select(x => new FieldData {
+                        Name = x.Identifier.Text,
+                        Type = GetTypeFromProperty(x.Type!),
+                        IsArray = x.Type is ArrayTypeSyntax,
+                        ArrayLength = null, // record parameters cannot declare default values for arrays
+                        ElementSize = GetStaticSize(GetTypeFromProperty(x.Type!)),
+                        Order = null
+                    }
                 )
             );
         }
@@ -152,16 +145,52 @@ public class SerializerGenerator : ISourceGenerator
                 var orderStr = x.AttributeLists.SelectMany(attr => attr.Attributes).FirstOrDefault(attr =>
                     SymbolEqualityComparer.Default.Equals(semanticModel.GetTypeInfo(attr).Type,
                         packetFieldAttributeType))?.ArgumentList!.Arguments[0].Expression.ToString();
-                return (
-                    x.Identifier.Text,
-                    x.Type is PredefinedTypeSyntax predefinedTypeSyntax
-                        ? predefinedTypeSyntax.Keyword.Text
-                        : throw new InvalidOperationException(),
-                    orderStr != null ? int.Parse(orderStr) : (int?)order++
-                );
+                return new FieldData {
+                    Name = x.Identifier.Text,
+                    Type = GetTypeFromProperty(x.Type),
+                    IsArray = x.Type is ArrayTypeSyntax,
+                    ArrayLength = GetArrayLength(x),
+                    ElementSize = GetStaticSize(GetTypeFromProperty(x.Type)),
+                    Order = orderStr != null ? int.Parse(orderStr) : null
+                };
             })
         );
-        return fields.OrderBy(x => x.Order).ToList();
+        var finalArr = new List<FieldData>(fields.Count);
+        // first add all fields normally
+        finalArr.AddRange(fields.Where(x => !x.Order.HasValue));
+        // then insert overriden fields to their desired position
+        foreach (var field in fields.Where(x => x.Order.HasValue).OrderBy(x => x.Order))
+        {
+            finalArr.Insert(field.Order!.Value, field);
+        }
+        return finalArr;
+    }
+
+    private static string GetTypeFromProperty(TypeSyntax x)
+    {
+        return x switch
+        {
+            ArrayTypeSyntax arrayTypeSyntax => ((PredefinedTypeSyntax)arrayTypeSyntax.ElementType).Keyword.Text,
+            PredefinedTypeSyntax predefinedTypeSyntax => predefinedTypeSyntax.Keyword.Text,
+            _ => throw new InvalidOperationException($"Don't know how to handle syntax node {x}")
+        };
+    }
+
+    private static int? GetArrayLength(PropertyDeclarationSyntax x)
+    {
+        if (x is
+            {
+                Type: ArrayTypeSyntax, Initializer: not null, Initializer.Value: ArrayCreationExpressionSyntax
+                {
+                    Type.RankSpecifiers.Count: 1
+            
+                } arrayCreationExpressionSyntax
+            } && arrayCreationExpressionSyntax.Type.RankSpecifiers[0].Sizes.OfType<LiteralExpressionSyntax>().Any())
+        {
+            return (int?) arrayCreationExpressionSyntax.Type.RankSpecifiers[0].Sizes.OfType<LiteralExpressionSyntax>().First().Token.Value;
+        }
+
+        return null;
     }
 
     public void Initialize(GeneratorInitializationContext context)
@@ -170,23 +199,32 @@ public class SerializerGenerator : ISourceGenerator
 
     private static string GenerateWriteHeader(string header)
     {
-        return $"            bytes[0] = {header};";
+        return $"            bytes[offset + 0] = {header};";
     }
 
-    private static string GenerateWriteField(string name, string type, int size, int offset, string dynamicOffset)
+    private static string GenerateWriteField(FieldData field, int offset, string dynamicOffset)
     {
         var offsetStr = $"offset + {offset}{dynamicOffset}";
-        if (size == 1)
+        const string prefix = "            ";
+        switch (field)
         {
-            var byteCast = type == "bool" ? "(byte)" : "";
-            return $"            bytes[{offsetStr}] = {byteCast}this.{name};";
-        }
-        else if (size == 0 && type == "string")
-        {
-            return $"            System.Text.Encoding.ASCII.GetBytes(this.{name}).CopyTo(bytes, {offsetStr});";
+            case { IsArray: true, Type: "byte" }:
+                return $"this.{field.Name}.CopyTo(bytes, {offsetStr});";
+            case { ElementSize: 0, Type: "string" }:
+                return $"{prefix}System.Text.Encoding.ASCII.GetBytes(this.{field.Name}).CopyTo(bytes, {offsetStr});";
+            default:
+            {
+                if (field.ElementSize == 1)
+                {
+                    var byteCast = field.Type == "bool" ? "(byte)" : "";
+                    return $"{prefix}bytes[{offsetStr}] = {byteCast}this.{field.Name};";
+                }
+
+                break;
+            }
         }
 
-        return $"            System.BitConverter.GetBytes(this.{name}).CopyTo(bytes, {offsetStr});";
+        return $"{prefix}System.BitConverter.GetBytes(this.{field.Name}).CopyTo(bytes, {offsetStr});";
     }
 
     private static void ApplyHeader(StringBuilder sb, string typeKeywords, string ns, string name)
@@ -203,14 +241,15 @@ namespace {ns} {{
 
     private static void ApplyFooter(StringBuilder sb, int size, string dynamicSize)
     {
-        sb.Append(
-            @"        }
+        sb.Append(@"        }
 
         public ushort GetSize() {
             return ");
+
         sb.Append(!string.IsNullOrWhiteSpace(dynamicSize)
             ? $"(ushort)({size} + {(!string.IsNullOrWhiteSpace(dynamicSize) ? dynamicSize : "")})"
             : size.ToString());
+
         sb.Append(@";
         }
     }
@@ -219,6 +258,12 @@ namespace {ns} {{
 
     private static int GetStaticSize(string fieldType)
     {
+        if (fieldType.EndsWith("[]"))
+        {
+            // may have dynamic size
+            return 0;
+        }
+
         switch (fieldType)
         {
             case "int":
