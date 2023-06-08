@@ -9,54 +9,98 @@ namespace QuantumCore.Networking;
 [Generator]
 public class SerializerGenerator : ISourceGenerator
 {
+    private INamedTypeSymbol _packetFieldAttributeType = null!;
+    private INamedTypeSymbol _packetAttributeType = null!;
+    private INamedTypeSymbol _generatorAttributeType = null!;
+    private IDictionary<string, (TypeDeclarationSyntax TypeDeclaration, bool GenerateFor)> _relevantTypes = null!;
+    private IEnumerable<SemanticModel> _semanticModels = null!;
+
     public void Execute(GeneratorExecutionContext context)
     {
-        var generatorAttributeType =
+        _generatorAttributeType =
             context.Compilation.GetTypeByMetadataName("QuantumCore.Networking.PacketGeneratorAttribute")!
                 .OriginalDefinition;
-        var packetAttributeType =
+        _packetAttributeType =
             context.Compilation.GetTypeByMetadataName("QuantumCore.Core.Networking.PacketAttribute")!
                 .OriginalDefinition;
-        var packetFieldAttributeType =
+        _packetFieldAttributeType =
             context.Compilation.GetTypeByMetadataName("QuantumCore.Core.Networking.FieldAttribute")!
                 .OriginalDefinition;
 
-        var filesWithClasses = context.Compilation.SyntaxTrees
-            .Where(st => st
-                .GetRoot()
-                .DescendantNodes()
-                .OfType<TypeDeclarationSyntax>()
-                .Any(p => p
-                    .DescendantNodes()
-                    .OfType<AttributeSyntax>()
-                    .Any()));
-        foreach (var file in filesWithClasses)
+        _semanticModels = context.Compilation.SyntaxTrees.Select(x => context.Compilation.GetSemanticModel(x));
+        _relevantTypes = GetRelevantTypes(context.Compilation.SyntaxTrees);
+        var typesToGenerateFor = _relevantTypes.Where(x => x.Value.GenerateFor).ToArray();
+        foreach (var pair in typesToGenerateFor)
         {
-            var semanticModel = context.Compilation.GetSemanticModel(file);
-            var declaredTypes = file
-                .GetRoot()
-                .DescendantNodes()
-                .OfType<TypeDeclarationSyntax>()
-                .Where(cd => cd
-                    .DescendantNodes()
-                    .OfType<AttributeSyntax>()
-                    .Any(attr =>
-                        SymbolEqualityComparer.Default.Equals(semanticModel.GetTypeInfo(attr).Type,
-                            generatorAttributeType))
-                )
-                .ToArray();
-            foreach (var type in declaredTypes)
-            {
-                var (name, source) =
-                    GenerateFile(type, semanticModel, packetAttributeType, file, packetFieldAttributeType);
+            var (name, source) = GenerateFile(pair.Value.TypeDeclaration, pair.Value.TypeDeclaration.SyntaxTree);
 
-                context.AddSource($"{name}.g.cs", SourceText.From(source, Encoding.UTF8));
-            }
+            context.AddSource($"{name}.g.cs", SourceText.From(source, Encoding.UTF8));
         }
     }
 
-    private (string Name, string Source) GenerateFile(TypeDeclarationSyntax type, SemanticModel semanticModel,
-        ISymbol packetAttributeType, SyntaxTree tree, INamedTypeSymbol packetFieldAttributeType)
+    private ITypeSymbol? GetTypeInfo(BaseTypeDeclarationSyntax type)
+    {
+        return _semanticModels.Select(x => x.GetDeclaredSymbol(type)).FirstOrDefault();
+    }
+
+    private ITypeSymbol? GetTypeInfo(SyntaxNode type)
+    {
+        return _semanticModels.FirstOrDefault(x => x.GetTypeInfo(type).Type != null)?.GetTypeInfo(type).Type;
+    }
+
+    private IDictionary<string, (TypeDeclarationSyntax TypeDeclaration, bool GenerateFor)> GetRelevantTypes(IEnumerable<SyntaxTree> syntaxTrees)
+    {
+        var allTypeDeclarations = syntaxTrees
+            .SelectMany(x => x.GetRoot().DescendantNodes().OfType<TypeDeclarationSyntax>())
+            .ToArray();
+        var typesToGenerateFor = allTypeDeclarations
+            .Where(x => x
+                .AttributeLists
+                .SelectMany(list => list.Attributes)
+                .Any(attr => SymbolEqualityComparer.Default.Equals(GetTypeInfo(attr), _generatorAttributeType))
+            )
+            .ToDictionary(x => GetTypeInfo(x)!.GetFullName(), x => (x, true));
+        var noGeneratorButRelevantTypes = new Dictionary<string, (TypeDeclarationSyntax, bool)>();
+        foreach (var keyPair in typesToGenerateFor)
+        {
+            var fields = GetMemberDefinitions(keyPair.Value.x);
+            var includedCustomTypes = fields
+                .Select(GetTypeInfo)
+                .Where(IsCustomType!)
+                .ToArray();
+            foreach (var includedCustomType in includedCustomTypes)
+            {
+                var customType = allTypeDeclarations.FirstOrDefault(x => SymbolEqualityComparer.Default.Equals(GetTypeInfo(x), includedCustomType))
+                    ?? throw new InvalidOperationException("Type cannot be used as it is not defined in the same assembly as packet type");
+                noGeneratorButRelevantTypes.Add(GetTypeInfo(customType)!.GetFullName(), (customType, false));
+            }
+        }
+        return typesToGenerateFor
+            .Concat(noGeneratorButRelevantTypes)
+            .ToDictionary(x => x.Key, x => x.Value);
+    }
+
+    private IEnumerable<TypeSyntax> GetMemberDefinitions(TypeDeclarationSyntax type)
+    {
+        var fields = new List<TypeSyntax>();
+        if (type is RecordDeclarationSyntax record)
+        {
+            fields.AddRange(record.ParameterList!.Parameters.Select(p => p.Type!));
+        }
+        
+        fields.AddRange(type
+            .DescendantNodes()
+            .OfType<PropertyDeclarationSyntax>()
+            .Select(x => x.Type));
+        fields.AddRange(type
+            .DescendantNodes()
+            .OfType<FieldDeclarationSyntax>()
+            .Select(x => x.Declaration.Type));
+
+        return fields;
+    }
+
+    private (string Name, string Source) GenerateFile(TypeDeclarationSyntax type, SyntaxTree tree)
     {
         var attr = type
             .DescendantNodes()
@@ -64,8 +108,8 @@ public class SerializerGenerator : ISourceGenerator
             .FirstOrDefault(a => a
                 .DescendantTokens()
                 .Any(dt => dt.IsKind(SyntaxKind.IdentifierToken) &&
-                           SymbolEqualityComparer.Default.Equals(semanticModel.GetTypeInfo(dt.Parent!).Type,
-                               packetAttributeType)));
+                           SymbolEqualityComparer.Default.Equals(GetTypeInfo(dt.Parent!),
+                               _packetAttributeType)));
 
         if (attr is null)
         {
@@ -74,10 +118,9 @@ public class SerializerGenerator : ISourceGenerator
         }
 
         var name = type.Identifier.Text;
-        var ns = tree.GetRoot().DescendantNodes().OfType<BaseNamespaceDeclarationSyntax>().First()?.Name
-            .ToString()!;
-        var fields = GetFieldsOfType(semanticModel, packetFieldAttributeType, type);
-        var staticSize = fields.Sum(x => x.FieldSize) + 1;
+        var ns = tree.GetRoot().DescendantNodes().OfType<BaseNamespaceDeclarationSyntax>().First()?.Name.ToString()!;
+        var fields = GetFieldsOfType(type);
+        var staticSize = GetStaticSizeOfType(fields) + 1; // + header size
         var dynamicSize = string.Join(" + ",
             fields.Where(x => x.HasDynamicLength).Select(x => $"this.{x.Name}.Length"));
         var header = attr.ArgumentList!.Arguments[0].ToString();
@@ -91,8 +134,8 @@ public class SerializerGenerator : ISourceGenerator
         foreach (var field in fields)
         {
             var fieldSize = field.ArrayLength ?? 1 * field.ElementSize;
-            source.AppendLine(GenerateWriteField(field, staticByteIndex, dynamicByteIndex));
-            if (field.Type == "string")
+            source.AppendLine(GenerateMethodLine(field, staticByteIndex, dynamicByteIndex));
+            if (field.SemanticType.Name == "String")
             {
                 dynamicByteIndex += $" + this.{field.Name}.Length";
             }
@@ -102,6 +145,11 @@ public class SerializerGenerator : ISourceGenerator
 
         ApplyFooter(source, staticSize, dynamicSize);
         return (name, source.ToString());
+    }
+
+    private static int GetStaticSizeOfType(IReadOnlyList<FieldData> fields)
+    {
+        return fields.Sum(x => x.FieldSize);
     }
 
     private static string GetTypeKeyWords(TypeDeclarationSyntax type)
@@ -117,16 +165,13 @@ public class SerializerGenerator : ISourceGenerator
         return typeKeyWords;
     }
 
-    private IReadOnlyList<FieldData> GetFieldsOfType(
-        SemanticModel semanticModel,
-        ISymbol packetFieldAttributeType,
-        TypeDeclarationSyntax type)
+    private IReadOnlyList<FieldData> GetFieldsOfType(TypeDeclarationSyntax type)
     {
         var fields = new List<FieldData>();
         if (type is RecordDeclarationSyntax record)
         {
             fields.AddRange(record.ParameterList!.Parameters
-                .Select(x => BuildFieldData(semanticModel, x.Type!, x.Identifier))
+                .Select(x => BuildFieldData(x.Type!, x.Identifier))
             );
         }
 
@@ -135,10 +180,10 @@ public class SerializerGenerator : ISourceGenerator
             .Select(x =>
             {
                 var orderStr = x.AttributeLists.SelectMany(attr => attr.Attributes).FirstOrDefault(attr =>
-                    SymbolEqualityComparer.Default.Equals(semanticModel.GetTypeInfo(attr).Type,
-                        packetFieldAttributeType))?.ArgumentList!.Arguments[0].Expression.ToString();
+                    SymbolEqualityComparer.Default.Equals(GetTypeInfo(attr),
+                        _packetFieldAttributeType))?.ArgumentList!.Arguments[0].Expression.ToString();
                 var arrayLength = GetArrayLength(x);
-                return BuildFieldData(semanticModel, x.Type, x.Identifier, arrayLength, orderStr);
+                return BuildFieldData(x.Type, x.Identifier, arrayLength, orderStr);
             })
         );
         var finalArr = new List<FieldData>(fields.Count);
@@ -149,36 +194,45 @@ public class SerializerGenerator : ISourceGenerator
         {
             finalArr.Insert(field.Order!.Value, field);
         }
+
         return finalArr;
     }
 
-    private static FieldData BuildFieldData(SemanticModel semanticModel, TypeSyntax type, SyntaxToken name, int? arrayLength = null, string? orderStr = null)
+    private FieldData BuildFieldData(TypeSyntax type, SyntaxToken name, int? arrayLength = null,
+        string? orderStr = null)
     {
-        var fieldTypeName = GetTypeFromProperty(semanticModel, type);
         var isArray = type is ArrayTypeSyntax;
-        var enumType = isArray ? null : (INamedTypeSymbol)semanticModel.GetTypeInfo(type).Type!;
+        var fieldType = GetTypeInfo(type)!;
+        var enumType = isArray ? null : (INamedTypeSymbol)fieldType;
         var isEnum = enumType?.TypeKind is TypeKind.Enum;
         return new FieldData
         {
             Name = name.Text,
-            Type = fieldTypeName,
+            SemanticType = fieldType,
             IsArray = isArray,
             IsEnum = isEnum,
+            IsCustom = IsCustomType(fieldType),
             ArrayLength = arrayLength,
-            ElementSize = GetStaticSize(fieldTypeName),
+            ElementSize = GetStaticSize(fieldType, arrayLength),
             Order = orderStr != null ? int.Parse(orderStr) : null
         };
     }
 
-    private static string GetTypeFromProperty(SemanticModel semanticModel, TypeSyntax x)
+    private static bool IsCustomType(ITypeSymbol fieldType)
+    {
+        return !fieldType.GetFullName()!.StartsWith("System.") && fieldType.TypeKind is not TypeKind.Enum and not TypeKind.Array;
+    }
+
+    private string GetTypeFromProperty(TypeSyntax x)
     {
         return x switch
         {
             ArrayTypeSyntax arrayTypeSyntax => ((PredefinedTypeSyntax)arrayTypeSyntax.ElementType).Keyword.Text,
             PredefinedTypeSyntax predefinedTypeSyntax => predefinedTypeSyntax.Keyword.Text,
-            IdentifierNameSyntax identifierNameSyntax  => ((INamedTypeSymbol)semanticModel.GetTypeInfo(identifierNameSyntax).Type!).TypeKind is TypeKind.Enum
-                ? ExplicitPrimitiveTypeNameToSimple(((INamedTypeSymbol)semanticModel.GetTypeInfo(identifierNameSyntax).Type!).EnumUnderlyingType!.Name)
-                : throw new InvalidOperationException($"Don't know how to handle IdentifierNameSyntax {x}"),
+            IdentifierNameSyntax identifierNameSyntax => ((INamedTypeSymbol)GetTypeInfo(identifierNameSyntax)!).TypeKind is TypeKind.Enum
+                ? ExplicitPrimitiveTypeNameToSimple(
+                    ((INamedTypeSymbol)GetTypeInfo(identifierNameSyntax)!).EnumUnderlyingType!.Name)
+                : $"$custom->{((INamedTypeSymbol)GetTypeInfo(identifierNameSyntax)!).Name}",
             _ => throw new InvalidOperationException($"Don't know how to handle syntax node {x}")
         };
     }
@@ -203,11 +257,11 @@ public class SerializerGenerator : ISourceGenerator
                 Type: ArrayTypeSyntax, Initializer: not null, Initializer.Value: ArrayCreationExpressionSyntax
                 {
                     Type.RankSpecifiers.Count: 1
-            
                 } arrayCreationExpressionSyntax
             } && arrayCreationExpressionSyntax.Type.RankSpecifiers[0].Sizes.OfType<LiteralExpressionSyntax>().Any())
         {
-            return (int?) arrayCreationExpressionSyntax.Type.RankSpecifiers[0].Sizes.OfType<LiteralExpressionSyntax>().First().Token.Value;
+            return (int?)arrayCreationExpressionSyntax.Type.RankSpecifiers[0].Sizes.OfType<LiteralExpressionSyntax>()
+                .First().Token.Value;
         }
 
         return null;
@@ -222,31 +276,53 @@ public class SerializerGenerator : ISourceGenerator
         return $"            bytes[offset + 0] = {header};";
     }
 
-    private static string GenerateWriteField(FieldData field, int offset, string dynamicOffset)
+    private string GenerateMethodLine(FieldData field, int offset, string dynamicOffset, string fieldNamePrefix = "")
     {
         var offsetStr = $"offset + {offset}{dynamicOffset}";
         const string prefix = "            ";
+        var fieldName = $"this.{fieldNamePrefix}{field.Name}";
         switch (field)
         {
-            case { IsArray: true, Type: "byte" }:
-                return $"{prefix}this.{field.Name}.CopyTo(bytes, {offsetStr});";
-            case { ElementSize: 0, Type: "string" }:
-                return $"{prefix}System.Text.Encoding.ASCII.GetBytes(this.{field.Name}).CopyTo(bytes, {offsetStr});";
-            case { IsEnum: true, Type: not "byte" }:
-                return $"{prefix}System.BitConverter.GetBytes(({field.Type})this.{field.Name}).CopyTo(bytes, {offsetStr});";
+            case { IsArray: true, SemanticType: IArrayTypeSymbol { ElementType.Name: "Byte" } }:
+                return $"{prefix}{fieldName}.CopyTo(bytes, {offsetStr});";
+            case { ElementSize: 0, SemanticType.Name: "String" }:
+                return $"{prefix}System.Text.Encoding.ASCII.GetBytes({fieldName}).CopyTo(bytes, {offsetStr});";
+            case { IsEnum: true, SemanticType: INamedTypeSymbol { EnumUnderlyingType.Name: not "Byte" }}:
+                var cast = ((INamedTypeSymbol)field.SemanticType).EnumUnderlyingType!;
+                return
+                    $"{prefix}System.BitConverter.GetBytes(({cast.GetFullName()}){fieldName}).CopyTo(bytes, {offsetStr});";
             default:
             {
-                if (field.ElementSize == 1)
+                if (field.IsCustom)
                 {
-                    var byteCast = field.Type == "bool" || field.IsEnum ? "(byte)" : "";
-                    return $"{prefix}bytes[{offsetStr}] = {byteCast}this.{field.Name};";
+                    var fieldTypeFullName = field.SemanticType.GetFullName();
+                    if (!_relevantTypes.TryGetValue(fieldTypeFullName!, out var type))
+                    {
+                        throw new InvalidOperationException(
+                            $"Could not find type declaration for type {fieldTypeFullName}");
+                    }
+
+                    var subFields = GetFieldsOfType(type.TypeDeclaration);
+                    var lines = new List<string>();
+                    foreach (var subField in subFields)
+                    {
+                        var subLine = GenerateMethodLine(subField, offset, dynamicOffset, $"{field.Name}.");
+                        lines.Add(subLine);
+                    }
+
+                    return string.Join("\n", lines);
+                } 
+                else if (field.ElementSize == 1)
+                {
+                    var byteCast = field.SemanticType.Name == "Boolean" || field.IsEnum ? "(byte)" : "";
+                    return $"{prefix}bytes[{offsetStr}] = {byteCast}{fieldName};";
                 }
 
                 break;
             }
         }
 
-        return $"{prefix}System.BitConverter.GetBytes(this.{field.Name}).CopyTo(bytes, {offsetStr});";
+        return $"{prefix}System.BitConverter.GetBytes({fieldName}).CopyTo(bytes, {offsetStr});";
     }
 
     private static void ApplyHeader(StringBuilder sb, string typeKeywords, string ns, string name)
@@ -278,34 +354,56 @@ namespace {ns} {{
 }".Trim('\n'));
     }
 
-    private static int GetStaticSize(string fieldType)
+    private int GetStaticSize(ITypeSymbol semanticType, int? arrayLength = null)
     {
-        if (fieldType.EndsWith("[]"))
-        {
-            // may have dynamic size
-            return 0;
-        }
+        var typeName = semanticType.Name;
 
-        switch (fieldType)
+        switch (typeName)
         {
-            case "int":
             case "Int32":
-            case "uint":
-            case "float":
+            case "UInt32":
+            case "Single":
                 return 4;
-            case "byte":
             case "Byte":
-            case "sbyte":
-            case "bool":
+            case "SByte":
+            case "Boolean":
                 return 1;
-            case "short":
-            case "ushort":
+            case "Int16":
+            case "UInt16":
                 return 2;
-            case "string":
+            case "String":
                 // dynamic size - does not contribute to static size
                 return 0;
             default:
-                throw new NotImplementedException($"Don't know how to handle {fieldType}");
+                if (IsCustomType(semanticType))
+                {
+                    // probably a custom type
+                    if (!_relevantTypes.TryGetValue(semanticType.GetFullName()!, out var customType))
+                    {
+                        throw new InvalidOperationException(
+                            $"Could not find syntax tree for custom type {semanticType.GetFullName()}");
+                    }
+                    var fields = GetFieldsOfType(customType.TypeDeclaration);
+                    return GetStaticSizeOfType(fields);
+                }
+                else if (semanticType is IArrayTypeSymbol arr)
+                {
+                    if (arrayLength is null)
+                    {
+                        // may have dynamic size
+                        return 0;
+                    }
+                    else
+                    {
+                        return GetStaticSize(arr.ElementType);
+                    }
+                } 
+                else if (semanticType.TypeKind is TypeKind.Enum && semanticType is INamedTypeSymbol namedTypeSymbol)
+                {
+                    return GetStaticSize(namedTypeSymbol.EnumUnderlyingType!);
+                }
+
+                throw new NotImplementedException($"Don't know how to handle {semanticType.Name}");
         }
     }
 }
