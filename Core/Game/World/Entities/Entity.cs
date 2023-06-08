@@ -48,6 +48,7 @@ namespace QuantumCore.Game.World.Entities
         }
 
         public long Health { get; set; }
+        public long Mana { get; set; }
         public abstract byte HealthPercentage { get; }
         public bool Dead { get; protected set; }
         
