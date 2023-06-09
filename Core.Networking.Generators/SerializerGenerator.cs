@@ -15,6 +15,12 @@ public class SerializerGenerator : ISourceGenerator
     private IDictionary<string, (TypeDeclarationSyntax TypeDeclaration, bool GenerateFor)> _relevantTypes = null!;
     private IEnumerable<SemanticModel> _semanticModels = null!;
 
+    private static string[] _supportedTypesByBitConverter =
+        { "Half", "Double", "Single", "Int16", "Int32", "Int64", "UInt16", "UInt32", "UInt64", "Char" };
+
+    private static string[] _noCastTypes = { "Byte", "SByte" };
+    private static string[] _castableToByteTypes = { "Boolean" };
+
     public void Execute(GeneratorExecutionContext context)
     {
         _generatorAttributeType =
@@ -48,7 +54,8 @@ public class SerializerGenerator : ISourceGenerator
         return _semanticModels.FirstOrDefault(x => x.GetTypeInfo(type).Type != null)?.GetTypeInfo(type).Type;
     }
 
-    private IDictionary<string, (TypeDeclarationSyntax TypeDeclaration, bool GenerateFor)> GetRelevantTypes(IEnumerable<SyntaxTree> syntaxTrees)
+    private IDictionary<string, (TypeDeclarationSyntax TypeDeclaration, bool GenerateFor)> GetRelevantTypes(
+        IEnumerable<SyntaxTree> syntaxTrees)
     {
         var allTypeDeclarations = syntaxTrees
             .SelectMany(x => x.GetRoot().DescendantNodes().OfType<TypeDeclarationSyntax>())
@@ -65,16 +72,28 @@ public class SerializerGenerator : ISourceGenerator
         {
             var fields = GetMemberDefinitions(keyPair.Value.x);
             var includedCustomTypes = fields
-                .Select(GetTypeInfo)
+                .Select(x =>
+                {
+                    var typeInfo = GetTypeInfo(x);
+                    if (typeInfo is IArrayTypeSymbol arr && IsCustomType(arr.ElementType))
+                    {
+                        return arr.ElementType;
+                    }
+
+                    return typeInfo;
+                })
                 .Where(IsCustomType!)
                 .ToArray();
             foreach (var includedCustomType in includedCustomTypes)
             {
-                var customType = allTypeDeclarations.FirstOrDefault(x => SymbolEqualityComparer.Default.Equals(GetTypeInfo(x), includedCustomType))
-                    ?? throw new InvalidOperationException("Type cannot be used as it is not defined in the same assembly as packet type");
+                var customType = allTypeDeclarations.FirstOrDefault(x =>
+                                     SymbolEqualityComparer.Default.Equals(GetTypeInfo(x), includedCustomType))
+                                 ?? throw new InvalidOperationException(
+                                     "Type cannot be used as it is not defined in the same assembly as packet type");
                 noGeneratorButRelevantTypes.Add(GetTypeInfo(customType)!.GetFullName(), (customType, false));
             }
         }
+
         return typesToGenerateFor
             .Concat(noGeneratorButRelevantTypes)
             .ToDictionary(x => x.Key, x => x.Value);
@@ -87,7 +106,7 @@ public class SerializerGenerator : ISourceGenerator
         {
             fields.AddRange(record.ParameterList!.Parameters.Select(p => p.Type!));
         }
-        
+
         fields.AddRange(type
             .DescendantNodes()
             .OfType<PropertyDeclarationSyntax>()
@@ -122,7 +141,13 @@ public class SerializerGenerator : ISourceGenerator
         var fields = GetFieldsOfType(type);
         var staticSize = GetStaticSizeOfType(fields) + 1; // + header size
         var dynamicSize = string.Join(" + ",
-            fields.Where(x => x.HasDynamicLength).Select(x => $"this.{x.Name}.Length"));
+            fields.Where(x => x.HasDynamicLength).Select(x =>
+            {
+                var multiplier = x.IsArray && x.ElementSize > 1
+                    ? $" * {x.ElementSize}" 
+                    : "";
+                return $"this.{x.Name}.Length{multiplier}";
+            }));
         var header = attr.ArgumentList!.Arguments[0].ToString();
         var typeKeyWords = GetTypeKeyWords(type);
 
@@ -130,17 +155,11 @@ public class SerializerGenerator : ISourceGenerator
         ApplyHeader(source, typeKeyWords, ns, name);
         source.AppendLine(GenerateWriteHeader(header));
         var staticByteIndex = 1;
-        var dynamicByteIndex = "";
+        var dynamicByteIndex = new StringBuilder();
         foreach (var field in fields)
         {
-            var fieldSize = field.ArrayLength ?? 1 * field.ElementSize;
-            source.AppendLine(GenerateMethodLine(field, staticByteIndex, dynamicByteIndex));
-            if (field.SemanticType.Name == "String")
-            {
-                dynamicByteIndex += $" + this.{field.Name}.Length";
-            }
-
-            staticByteIndex += fieldSize;
+            var line = GenerateMethodLine(field, $"this.{field.Name}", ref staticByteIndex, dynamicByteIndex, "", "            ");
+            source.AppendLine(line);
         }
 
         ApplyFooter(source, staticSize, dynamicSize);
@@ -220,7 +239,8 @@ public class SerializerGenerator : ISourceGenerator
 
     private static bool IsCustomType(ITypeSymbol fieldType)
     {
-        return !fieldType.GetFullName()!.StartsWith("System.") && fieldType.TypeKind is not TypeKind.Enum and not TypeKind.Array;
+        return !fieldType.GetFullName()!.StartsWith("System.") &&
+               fieldType.TypeKind is not TypeKind.Enum and not TypeKind.Array;
     }
 
     private string GetTypeFromProperty(TypeSyntax x)
@@ -229,10 +249,11 @@ public class SerializerGenerator : ISourceGenerator
         {
             ArrayTypeSyntax arrayTypeSyntax => ((PredefinedTypeSyntax)arrayTypeSyntax.ElementType).Keyword.Text,
             PredefinedTypeSyntax predefinedTypeSyntax => predefinedTypeSyntax.Keyword.Text,
-            IdentifierNameSyntax identifierNameSyntax => ((INamedTypeSymbol)GetTypeInfo(identifierNameSyntax)!).TypeKind is TypeKind.Enum
-                ? ExplicitPrimitiveTypeNameToSimple(
-                    ((INamedTypeSymbol)GetTypeInfo(identifierNameSyntax)!).EnumUnderlyingType!.Name)
-                : $"$custom->{((INamedTypeSymbol)GetTypeInfo(identifierNameSyntax)!).Name}",
+            IdentifierNameSyntax identifierNameSyntax =>
+                ((INamedTypeSymbol)GetTypeInfo(identifierNameSyntax)!).TypeKind is TypeKind.Enum
+                    ? ExplicitPrimitiveTypeNameToSimple(
+                        ((INamedTypeSymbol)GetTypeInfo(identifierNameSyntax)!).EnumUnderlyingType!.Name)
+                    : $"$custom->{((INamedTypeSymbol)GetTypeInfo(identifierNameSyntax)!).Name}",
             _ => throw new InvalidOperationException($"Don't know how to handle syntax node {x}")
         };
     }
@@ -276,53 +297,175 @@ public class SerializerGenerator : ISourceGenerator
         return $"            bytes[offset + 0] = {header};";
     }
 
-    private string GenerateMethodLine(FieldData field, int offset, string dynamicOffset, string fieldNamePrefix = "")
+    private string GenerateMethodLine(FieldData field, string fieldExpression, ref int offset, StringBuilder dynamicOffset, string tempDynamicOffset, string indentPrefix)
     {
-        var offsetStr = $"offset + {offset}{dynamicOffset}";
-        const string prefix = "            ";
-        var fieldName = $"this.{fieldNamePrefix}{field.Name}";
-        switch (field)
+        var finalLine = field switch
         {
-            case { IsArray: true, SemanticType: IArrayTypeSymbol { ElementType.Name: "Byte" } }:
-                return $"{prefix}{fieldName}.CopyTo(bytes, {offsetStr});";
-            case { ElementSize: 0, SemanticType.Name: "String" }:
-                return $"{prefix}System.Text.Encoding.ASCII.GetBytes({fieldName}).CopyTo(bytes, {offsetStr});";
-            case { IsEnum: true, SemanticType: INamedTypeSymbol { EnumUnderlyingType.Name: not "Byte" }}:
-                var cast = ((INamedTypeSymbol)field.SemanticType).EnumUnderlyingType!;
-                return
-                    $"{prefix}System.BitConverter.GetBytes(({cast.GetFullName()}){fieldName}).CopyTo(bytes, {offsetStr});";
-            default:
+            // handle byte[]
+            { IsArray: true, SemanticType: IArrayTypeSymbol { ElementType.Name: "Byte" } } =>
+                $"{indentPrefix}{fieldExpression}.CopyTo(bytes, offset + {offset}{dynamicOffset});",
+            // handle Custom[]
+            { IsArray: true } => GetLineForArray(field, fieldExpression, ref offset, dynamicOffset, tempDynamicOffset, indentPrefix),
+            // handle string
+            { SemanticType.Name: "String" } => GetLineForString(fieldExpression, ref offset, dynamicOffset, tempDynamicOffset, indentPrefix),
+            // handle enum
+            { IsEnum: true } => GetLineForSingleValue((INamedTypeSymbol)field.SemanticType, fieldExpression, ref offset, dynamicOffset, tempDynamicOffset, indentPrefix),
+            // misc
+            _ => GenerateLineForMisc(field, fieldExpression, ref offset, dynamicOffset, tempDynamicOffset, indentPrefix)
+        };
+
+
+        var fieldSize = field.ArrayLength ?? 1 * field.ElementSize;
+        offset += fieldSize;
+
+        // handle anything else
+        return finalLine;
+    }
+
+    private static string GetLineForString(string fieldExpression, ref int offset, StringBuilder dynamicOffset,
+        string tempDynamicOffset, string indentPrefix)
+    {
+        var offsetStr = $"offset + {offset}{dynamicOffset}{tempDynamicOffset}";
+        dynamicOffset.Append($" + {fieldExpression}.Length");
+        return $"{indentPrefix}System.Text.Encoding.ASCII.GetBytes({fieldExpression}).CopyTo(bytes, {offsetStr});";
+    }
+
+    private static string GetLineForSingleValue(INamedTypeSymbol namedTypeSymbol, string fieldExpression, ref int offset,
+        StringBuilder dynamicOffset, string tempDynamicOffset, string indentPrefix)
+    {
+        var cast = namedTypeSymbol.GetFullName();
+
+        var offsetStr = $"offset + {offset}{dynamicOffset}{tempDynamicOffset}";
+        if (namedTypeSymbol.TypeKind is TypeKind.Enum)
+        {
+            var enumUnderlyingTypeName = namedTypeSymbol.EnumUnderlyingType!.Name;
+            var enumCast = namedTypeSymbol.EnumUnderlyingType.GetFullName();
+
+            if (_supportedTypesByBitConverter.Contains(enumUnderlyingTypeName))
             {
-                if (field.IsCustom)
-                {
-                    var fieldTypeFullName = field.SemanticType.GetFullName();
-                    if (!_relevantTypes.TryGetValue(fieldTypeFullName!, out var type))
-                    {
-                        throw new InvalidOperationException(
-                            $"Could not find type declaration for type {fieldTypeFullName}");
-                    }
+                return $"{indentPrefix}System.BitConverter.GetBytes(({enumCast}){fieldExpression}).CopyTo(bytes, {offsetStr});";
+            }
+            if (_castableToByteTypes.Contains(enumUnderlyingTypeName))
+            {
+                return $"{indentPrefix}bytes[{offsetStr}] = ({enumCast}){fieldExpression};";
+            }
 
-                    var subFields = GetFieldsOfType(type.TypeDeclaration);
-                    var lines = new List<string>();
-                    foreach (var subField in subFields)
-                    {
-                        var subLine = GenerateMethodLine(subField, offset, dynamicOffset, $"{field.Name}.");
-                        lines.Add(subLine);
-                    }
-
-                    return string.Join("\n", lines);
-                } 
-                else if (field.ElementSize == 1)
-                {
-                    var byteCast = field.SemanticType.Name == "Boolean" || field.IsEnum ? "(byte)" : "";
-                    return $"{prefix}bytes[{offsetStr}] = {byteCast}{fieldName};";
-                }
-
-                break;
+            if (_noCastTypes.Contains(enumUnderlyingTypeName))
+            {
+                return $"{indentPrefix}bytes[{offsetStr}] = (byte){fieldExpression};";
             }
         }
 
-        return $"{prefix}System.BitConverter.GetBytes({fieldName}).CopyTo(bytes, {offsetStr});";
+        if (_supportedTypesByBitConverter.Contains(namedTypeSymbol.Name))
+        {
+            return $"{indentPrefix}System.BitConverter.GetBytes({fieldExpression}).CopyTo(bytes, {offsetStr});";
+        }
+
+        if (_noCastTypes.Contains(namedTypeSymbol.Name))
+        {
+            return $"{indentPrefix}bytes[{offsetStr}] = {fieldExpression};";
+        }
+
+        if (_castableToByteTypes.Contains(namedTypeSymbol.Name))
+        {
+            return $"{indentPrefix}bytes[{offsetStr}] = ({cast}){fieldExpression};";
+        }
+
+        throw new InvalidOperationException($"Don't know how to handle type {namedTypeSymbol.Name}");
+    }
+
+    private string GenerateLineForMisc(FieldData field, string fieldExpression, ref int offset, StringBuilder dynamicOffset,
+        string tempDynamicOffset, string indentPrefix = "")
+    {
+        if (field.IsCustom)
+        {
+            // handle custom type
+            var fieldTypeFullName = field.SemanticType.GetFullName();
+            if (!_relevantTypes.TryGetValue(fieldTypeFullName!, out var type))
+            {
+                throw new InvalidOperationException(
+                    $"Could not find type declaration for type {fieldTypeFullName}");
+            }
+
+            var subFields = GetFieldsOfType(type.TypeDeclaration);
+            var lines = new List<string>();
+            foreach (var subField in subFields)
+            {
+                var subLine = GenerateMethodLine(subField, $"{fieldExpression}.{subField.Name}", ref offset, dynamicOffset, tempDynamicOffset, indentPrefix);
+                lines.Add(subLine);
+            }
+
+            return string.Join("\r\n", lines);
+        }
+        else if (field.SemanticType is INamedTypeSymbol namedTypeSymbol)
+        {
+            return GetLineForSingleValue(namedTypeSymbol, fieldExpression, ref offset, dynamicOffset, tempDynamicOffset, indentPrefix);
+        }
+
+        throw new NotImplementedException("???");
+    }
+
+    private string GetLineForArray(FieldData field, string fieldExpression, ref int offset, StringBuilder dynamicOffset,
+        string tempDynamicOffset, string indentPrefix)
+    {
+        if (field.SemanticType is IArrayTypeSymbol arr && IsCustomType(arr.ElementType))
+        {
+            if (field.ArrayLength.HasValue)
+            {
+                var subTypeFullName = arr.ElementType.GetFullName()!;
+                if (!_relevantTypes.TryGetValue(subTypeFullName, out var subType))
+                {
+                    throw new InvalidOperationException($"Could not find required type {subTypeFullName}");
+                }
+
+                // iterate over each item in array
+                var lines = new List<string>();
+                for (int i = 0; i < field.ArrayLength.Value; i++)
+                {
+                    // recursive call to generate lines for each field in sub type
+                    var type = GetFieldsOfType(subType.TypeDeclaration);
+                    for (var ii = 0; ii < type.Count; ii++)
+                    {
+                        var member = type[ii];
+                        var line = GenerateMethodLine(member, $"{fieldExpression}[{i}].{member.Name}", ref offset, dynamicOffset, tempDynamicOffset, indentPrefix);
+                        lines.Add(line);
+                    }
+                }
+
+                return string.Join("\r\n", lines);
+            }
+            else
+            {
+                var subTypeFullName = arr.ElementType.GetFullName()!;
+                if (!_relevantTypes.TryGetValue(subTypeFullName, out var subType))
+                {
+                    throw new InvalidOperationException($"Could not find required type {subTypeFullName}");
+                }
+                
+                // iterate over each item in array
+                var lines = new List<string>
+                {
+                    $"{indentPrefix}for (var i = 0; i < {fieldExpression}.Length; i++)",
+                    $"{indentPrefix}{{"
+                };
+                // recursive call to generate lines for each field in sub type
+                var type = GetFieldsOfType(subType.TypeDeclaration);
+
+                for (var ii = 0; ii < type.Count; ii++)
+                {
+                    var member = type[ii];
+                    var subFieldExpression = $"{fieldExpression}[i].{member.Name}";
+                    var line = GenerateMethodLine(member, subFieldExpression, ref offset, dynamicOffset, $" + i * {member.ElementSize}", $"{indentPrefix}    ");
+                    lines.Add(line);
+                }
+                lines.Add($"{indentPrefix}}}");
+
+                return string.Join("\r\n", lines);
+            }
+        }
+
+        throw new NotImplementedException(
+            $"Don't know how to handle array of {((IArrayTypeSymbol)field.SemanticType).ElementType}");
     }
 
     private static void ApplyHeader(StringBuilder sb, string typeKeywords, string ns, string name)
@@ -383,6 +526,7 @@ namespace {ns} {{
                         throw new InvalidOperationException(
                             $"Could not find syntax tree for custom type {semanticType.GetFullName()}");
                     }
+
                     var fields = GetFieldsOfType(customType.TypeDeclaration);
                     return GetStaticSizeOfType(fields);
                 }
@@ -391,13 +535,13 @@ namespace {ns} {{
                     if (arrayLength is null)
                     {
                         // may have dynamic size
-                        return 0;
+                        return GetStaticSize(arr.ElementType);
                     }
                     else
                     {
                         return GetStaticSize(arr.ElementType);
                     }
-                } 
+                }
                 else if (semanticType.TypeKind is TypeKind.Enum && semanticType is INamedTypeSymbol namedTypeSymbol)
                 {
                     return GetStaticSize(namedTypeSymbol.EnumUnderlyingType!);
