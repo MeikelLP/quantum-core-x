@@ -378,8 +378,10 @@ public class SerializerGenerator : ISourceGenerator
         };
 
 
-        var fieldSize = field.ArrayLength ?? 1 * field.ElementSize;
-        offset += fieldSize;
+        if (!field.IsArray)
+        {
+            offset += field.ElementSize;
+        }
 
         // handle anything else
         return finalLine;
