@@ -38,9 +38,23 @@ public class SerializerGenerator : ISourceGenerator
         var typesToGenerateFor = _relevantTypes.Where(x => x.Value.GenerateFor).ToArray();
         foreach (var pair in typesToGenerateFor)
         {
-            var (name, source) = GenerateFile(pair.Value.TypeDeclaration, pair.Value.TypeDeclaration.SyntaxTree);
-        
-            context.AddSource($"{name}.g.cs", SourceText.From(source, Encoding.UTF8));
+            try
+            {
+                var (name, source) = GenerateFile(pair.Value.TypeDeclaration, pair.Value.TypeDeclaration.SyntaxTree);
+            
+                context.AddSource($"{name}.g.cs", SourceText.From(source, Encoding.UTF8));
+            }
+            catch (Exception e)
+            {
+                context.ReportDiagnostic(Diagnostic.Create(
+                    new DiagnosticDescriptor(
+                        "QCX-G000001",
+                        "Failed to generate packet serializer",
+                        "Type {0} is setup incorrectly. Exception: {1} => {2}",
+                        "generators",
+                        DiagnosticSeverity.Error,
+                        true), pair.Value.TypeDeclaration.GetLocation(), pair.Value.TypeDeclaration.Identifier.Text, e.GetType(), e.Message));
+            }
         }
     }
 
@@ -184,7 +198,11 @@ public class SerializerGenerator : ISourceGenerator
         var ns = tree.GetRoot().DescendantNodes().OfType<BaseNamespaceDeclarationSyntax>().First()?.Name.ToString()!;
         var fields = GetFieldsOfType(type);
         var staticSize = GetStaticSizeOfType(fields) + 1; // + header size
-        var header = attr.ArgumentList!.Arguments[0].ToString();
+        if (attr.ArgumentList!.Arguments.Count == 0)
+        {
+            throw new InvalidOperationException("PacketGeneratorAttribute must have parameters defined");
+        }
+        var header = attr.ArgumentList.Arguments[0].ToString();
         var typeKeyWords = GetTypeKeyWords(type);
 
         var source = new StringBuilder();
@@ -234,9 +252,12 @@ public class SerializerGenerator : ISourceGenerator
             .OfType<PropertyDeclarationSyntax>()
             .Select(x =>
             {
-                var orderStr = x.AttributeLists.SelectMany(attr => attr.Attributes).FirstOrDefault(attr =>
+                var orderStr = x.AttributeLists
+                    .SelectMany(attr => attr.Attributes)
+                    .FirstOrDefault(attr =>
                     SymbolEqualityComparer.Default.Equals(GetTypeInfo(attr),
-                        _packetFieldAttributeType))?.ArgumentList!.Arguments[0].Expression.ToString();
+                        _packetFieldAttributeType)
+                    )?.ArgumentList!.Arguments[0].Expression.ToString();
                 var arrayLength = GetArrayLength(x);
                 return BuildFieldData(x.Type, x.Identifier, arrayLength, orderStr);
             })
@@ -247,7 +268,13 @@ public class SerializerGenerator : ISourceGenerator
         // then insert overriden fields to their desired position
         foreach (var field in fields.Where(x => x.Order.HasValue).OrderBy(x => x.Order))
         {
-            finalArr.Insert(field.Order!.Value, field);
+            var desPosition = field.Order!.Value;
+            if (desPosition >= fields.Count)
+            {
+                throw new InvalidOperationException(
+                    $"Field cannot have a higher number ({desPosition}) than actual fields count {fields.Count}");
+            }
+            finalArr.Insert(desPosition, field);
         }
 
         return finalArr;
@@ -315,9 +342,12 @@ public class SerializerGenerator : ISourceGenerator
                 {
                     Type.RankSpecifiers.Count: 1
                 } arrayCreationExpressionSyntax
-            } && arrayCreationExpressionSyntax.Type.RankSpecifiers[0].Sizes.OfType<LiteralExpressionSyntax>().Any())
+            } && 
+                arrayCreationExpressionSyntax.Type.RankSpecifiers.Any() && 
+                arrayCreationExpressionSyntax.Type.RankSpecifiers.First().Sizes.OfType<LiteralExpressionSyntax>().Any())
         {
-            return (int?)arrayCreationExpressionSyntax.Type.RankSpecifiers[0].Sizes.OfType<LiteralExpressionSyntax>()
+            return (int?)arrayCreationExpressionSyntax.Type.RankSpecifiers
+                .First().Sizes.OfType<LiteralExpressionSyntax>()
                 .First().Token.Value;
         }
 
