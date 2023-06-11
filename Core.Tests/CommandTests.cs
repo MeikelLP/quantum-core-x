@@ -77,7 +77,9 @@ public class CommandTests : IAsyncLifetime
         var databaseManagerMock = new Mock<IDatabaseManager>();
         var dbMock = new Mock<IDbConnection>();
         dbMock.SetupDapperAsync(c => c.QueryAsync<Guid>(It.IsAny<string>(), null, null, null, null));
+        dbMock.SetupDapperAsync(c => c.QueryAsync<byte>(It.IsAny<string>(), It.IsAny<object>(), null, null, null));
         databaseManagerMock.Setup(x => x.GetGameDatabase()).Returns(dbMock.Object);
+        databaseManagerMock.Setup(x => x.GetAccountDatabase()).Returns(dbMock.Object);
         _services = new ServiceCollection()
             .AddCoreServices(new EmptyPluginCatalog())
             .AddLogging(x =>
