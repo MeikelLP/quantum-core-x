@@ -127,8 +127,6 @@ namespace QuantumCore.Game.World.Entities
                 Iq = player.Iq,
                 PositionX = player.PositionX,
                 PositionY = player.PositionY,
-                MaxHealth = player.MaxHealth,
-                MaxMana = player.MaxMana,
                 Health = player.Health,
                 Mana = player.Mana,
                 Stamina = player.Stamina,
@@ -512,33 +510,36 @@ namespace QuantumCore.Game.World.Entities
                 case EPoints.Hp:
                     if (value <= 0)
                     {
-                        //Setting the Hp to 0 does not register as killing the player
-                        Health = 1;
+                        // 0 gets ignored by client
+                        // Setting the Hp to 0 does not register as killing the player
                     }
-                    else if(value > Player.MaxHealth)
+                    else if (value > GetPoint(EPoints.MaxHp))
                     {
-                        Health = Player.MaxHealth;
-                    }else
+                        Health = GetPoint(EPoints.MaxHp);
+                    }
+                    else
                     {
                         Health = value;
                     }
+
                     break;
                 case EPoints.Sp:
                     if (value <= 0)
                     {
-                        Mana = 0;
+                        // 0 gets ignored by client
                     }
-                    else if(value > Player.MaxMana)
+                    else if (value > GetPoint(EPoints.MaxSp))
                     {
-                        Mana = Player.MaxMana;
-                    }else
+                        Mana = GetPoint(EPoints.MaxSp);
+                    }
+                    else
                     {
                         Mana = value;
                     }
+
                     break;
                 case EPoints.StatusPoints:
                     Player.AvailableStatusPoints += (uint) value;
-
                     break;
                 default:
                     _logger.LogError("Failed to add point to {Point}, unsupported", point);

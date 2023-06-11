@@ -24,8 +24,6 @@ namespace QuantumCore.Database
         public byte Iq { get; set; }
         public int PositionX { get; set; }
         public int PositionY { get; set; }
-        public long MaxHealth { get; set; }
-        public long MaxMana { get; set; }
         public long Health { get; set; }
         public long Mana { get; set; }
         public long Stamina { get; set; }
