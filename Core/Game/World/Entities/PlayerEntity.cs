@@ -596,20 +596,17 @@ namespace QuantumCore.Game.World.Entities
                         return 0;
                     }
 
-                    Player.MaxHealth = info.StartHp + info.HpPerHt * GetPoint(EPoints.Ht) + 
-                                       info.HpPerLevel * GetPoint(EPoints.Level);
-                    return (uint) Player.MaxHealth;
+                    return info.StartHp + info.HpPerHt * GetPoint(EPoints.Ht) +
+                           info.HpPerLevel * GetPoint(EPoints.Level);
                 case EPoints.MaxSp:
-                    if(info == null)
+                    info = _jobManager.Get(Player.PlayerClass);
+                    if (info == null)
                     {
                         _logger.LogWarning("Job not found: {Job}", Player.PlayerClass);
                         return 0;
-
                     }
-
-                    Player.MaxMana = info.StartSp + info.SpPerIq * GetPoint(EPoints.Iq) +
-                                     info.SpPerLevel * GetPoint(EPoints.Level);
-                    return (uint) Player.MaxMana;
+                    return info.StartSp + info.SpPerIq * GetPoint(EPoints.Iq) +
+                           info.SpPerLevel * GetPoint(EPoints.Level);
                 case EPoints.St:
                     return Player.St;
                 case EPoints.Ht:
