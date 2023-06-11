@@ -577,7 +577,6 @@ namespace QuantumCore.Game.World.Entities
 
         public override uint GetPoint(EPoints point)
         {
-            var info = _jobManager.Get(Player.PlayerClass);
             switch (point)
             {
                 case EPoints.Level:
@@ -591,6 +590,7 @@ namespace QuantumCore.Game.World.Entities
                 case EPoints.Sp:
                     return (uint) Mana;
                 case EPoints.MaxHp:
+                    var info = _jobManager.Get(Player.PlayerClass);
                     if (info == null)
                     {
                         _logger.LogWarning("Job not found: {Job}" , Player.PlayerClass);
