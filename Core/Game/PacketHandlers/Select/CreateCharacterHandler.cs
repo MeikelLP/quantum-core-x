@@ -69,7 +69,7 @@ public class CreateCharacterHandler : IGamePacketHandler<CreateCharacter>
             Dx = job.Dx, 
             Ht = job.Ht,
             Health =  job.StartHp, 
-            Mana = job.StartSp,
+            Mana = job.StartSp
         };
 
 

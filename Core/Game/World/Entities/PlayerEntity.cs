@@ -507,9 +507,39 @@ namespace QuantumCore.Game.World.Entities
                 case EPoints.Iq:
                     Player.Iq += (byte) value;
                     break;
+                case EPoints.Hp:
+                    if (value <= 0)
+                    {
+                        // 0 gets ignored by client
+                        // Setting the Hp to 0 does not register as killing the player
+                    }
+                    else if (value > GetPoint(EPoints.MaxHp))
+                    {
+                        Health = GetPoint(EPoints.MaxHp);
+                    }
+                    else
+                    {
+                        Health = value;
+                    }
+
+                    break;
+                case EPoints.Sp:
+                    if (value <= 0)
+                    {
+                        // 0 gets ignored by client
+                    }
+                    else if (value > GetPoint(EPoints.MaxSp))
+                    {
+                        Mana = GetPoint(EPoints.MaxSp);
+                    }
+                    else
+                    {
+                        Mana = value;
+                    }
+
+                    break;
                 case EPoints.StatusPoints:
                     Player.AvailableStatusPoints += (uint) value;
-
                     break;
                 default:
                     _logger.LogError("Failed to add point to {Point}, unsupported", point);
