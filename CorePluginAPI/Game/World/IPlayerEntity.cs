@@ -11,7 +11,6 @@ namespace QuantumCore.API.Game.World
         string Name { get; }
         IGameConnection Connection { get; }
         PlayerData Player { get; }
-        byte Empire { get; }
         IInventory Inventory { get; }
         IEntity Target { get; set; }
         IList<Guid> Groups { get; }
