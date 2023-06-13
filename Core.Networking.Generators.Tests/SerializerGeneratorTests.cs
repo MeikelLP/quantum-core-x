@@ -76,9 +76,9 @@ namespace QuantumCore.Core.Packets {
 
         public static GCHandshake Deserialize(byte[] bytes, int offset = 0)
         {
-            var __Handshake = System.BitConverter.ToUInt32(bytes[(offset + 1)..(offset + 1 + 4)]);
-            var __Time = System.BitConverter.ToUInt32(bytes[(offset + 5)..(offset + 5 + 4)]);
-            var __Delta = System.BitConverter.ToUInt32(bytes[(offset + 9)..(offset + 9 + 4)]);
+            var __Handshake = System.BitConverter.ToUInt32(bytes[(offset + 0)..(offset + 0 + 4)]);
+            var __Time = System.BitConverter.ToUInt32(bytes[(offset + 4)..(offset + 4 + 4)]);
+            var __Delta = System.BitConverter.ToUInt32(bytes[(offset + 8)..(offset + 8 + 4)]);
             var obj = new QuantumCore.Core.Packets.GCHandshake(
                 __Handshake,
                 __Time,
@@ -88,6 +88,7 @@ namespace QuantumCore.Core.Packets {
         }
 
         public static T Deserialize<T>(byte[] bytes, int offset = 0)
+            where T : IPacketSerializable
         {
             return (T)(object)Deserialize(bytes, offset);
         }
@@ -109,7 +110,7 @@ namespace QuantumCore.Core.Packets;
 public partial record GCHandshake(uint Handshake, uint Time, uint Delta);
 ".Trim());
 
-        GeneratorDriver driver = CSharpGeneratorDriver.Create(new SerializerGenerator());
+        GeneratorDriver driver = CSharpGeneratorDriver.Create(new PacketSerializerGenerator());
 
         driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation,
             out var diagnostics);
@@ -146,9 +147,9 @@ namespace QuantumCore.Core.Packets {
 
         public static GCHandshake Deserialize(byte[] bytes, int offset = 0)
         {
-            var __Handshake = System.BitConverter.ToUInt32(bytes[(offset + 1)..(offset + 1 + 4)]);
-            var __Time = System.BitConverter.ToUInt32(bytes[(offset + 5)..(offset + 5 + 4)]);
-            var __Delta = System.BitConverter.ToUInt32(bytes[(offset + 9)..(offset + 9 + 4)]);
+            var __Handshake = System.BitConverter.ToUInt32(bytes[(offset + 0)..(offset + 0 + 4)]);
+            var __Time = System.BitConverter.ToUInt32(bytes[(offset + 4)..(offset + 4 + 4)]);
+            var __Delta = System.BitConverter.ToUInt32(bytes[(offset + 8)..(offset + 8 + 4)]);
             var obj = new QuantumCore.Core.Packets.GCHandshake(
                 __Handshake,
                 __Time,
@@ -158,6 +159,7 @@ namespace QuantumCore.Core.Packets {
         }
 
         public static T Deserialize<T>(byte[] bytes, int offset = 0)
+            where T : IPacketSerializable
         {
             return (T)(object)Deserialize(bytes, offset);
         }
@@ -183,7 +185,7 @@ public enum HandshakeType : byte {
 public partial record GCHandshake(uint Handshake, HandshakeType Type);
 ".Trim());
 
-        GeneratorDriver driver = CSharpGeneratorDriver.Create(new SerializerGenerator());
+        GeneratorDriver driver = CSharpGeneratorDriver.Create(new PacketSerializerGenerator());
 
         driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation,
             out var diagnostics);
@@ -219,8 +221,8 @@ namespace QuantumCore.Core.Packets {
 
         public static GCHandshake Deserialize(byte[] bytes, int offset = 0)
         {
-            var __Handshake = System.BitConverter.ToUInt32(bytes[(offset + 1)..(offset + 1 + 4)]);
-            var __Type = (QuantumCore.Core.Packets.HandshakeType)bytes[(offset + 5)];
+            var __Handshake = System.BitConverter.ToUInt32(bytes[(offset + 0)..(offset + 0 + 4)]);
+            var __Type = (QuantumCore.Core.Packets.HandshakeType)bytes[(offset + 4)];
             var obj = new QuantumCore.Core.Packets.GCHandshake(
                 __Handshake,
                 __Type
@@ -229,6 +231,7 @@ namespace QuantumCore.Core.Packets {
         }
 
         public static T Deserialize<T>(byte[] bytes, int offset = 0)
+            where T : IPacketSerializable
         {
             return (T)(object)Deserialize(bytes, offset);
         }
@@ -254,7 +257,7 @@ public enum HandshakeType : int {
 public partial record GCHandshake(uint Handshake, HandshakeType Type);
 ".Trim());
 
-        GeneratorDriver driver = CSharpGeneratorDriver.Create(new SerializerGenerator());
+        GeneratorDriver driver = CSharpGeneratorDriver.Create(new PacketSerializerGenerator());
 
         driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation,
             out var diagnostics);
@@ -290,8 +293,8 @@ namespace QuantumCore.Core.Packets {
 
         public static GCHandshake Deserialize(byte[] bytes, int offset = 0)
         {
-            var __Handshake = System.BitConverter.ToUInt32(bytes[(offset + 1)..(offset + 1 + 4)]);
-            var __Type = (QuantumCore.Core.Packets.HandshakeType)System.BitConverter.ToInt32(bytes[(offset + 5)..(offset + 5 + 4)]);
+            var __Handshake = System.BitConverter.ToUInt32(bytes[(offset + 0)..(offset + 0 + 4)]);
+            var __Type = (QuantumCore.Core.Packets.HandshakeType)System.BitConverter.ToInt32(bytes[(offset + 4)..(offset + 4 + 4)]);
             var obj = new QuantumCore.Core.Packets.GCHandshake(
                 __Handshake,
                 __Type
@@ -300,6 +303,7 @@ namespace QuantumCore.Core.Packets {
         }
 
         public static T Deserialize<T>(byte[] bytes, int offset = 0)
+            where T : IPacketSerializable
         {
             return (T)(object)Deserialize(bytes, offset);
         }
@@ -324,7 +328,7 @@ public partial record struct GCHandshake(uint Handshake, uint Time) {
 }
 ".Trim());
 
-        GeneratorDriver driver = CSharpGeneratorDriver.Create(new SerializerGenerator());
+        GeneratorDriver driver = CSharpGeneratorDriver.Create(new PacketSerializerGenerator());
 
         driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation,
             out var diagnostics);
@@ -361,9 +365,9 @@ namespace QuantumCore.Core.Packets {
 
         public static GCHandshake Deserialize(byte[] bytes, int offset = 0)
         {
-            var __Size = System.BitConverter.ToUInt32(bytes[(offset + 1)..(offset + 1 + 4)]);
-            var __Handshake = System.BitConverter.ToUInt32(bytes[(offset + 5)..(offset + 5 + 4)]);
-            var __Time = System.BitConverter.ToUInt32(bytes[(offset + 9)..(offset + 9 + 4)]);
+            var __Size = System.BitConverter.ToUInt32(bytes[(offset + 0)..(offset + 0 + 4)]);
+            var __Handshake = System.BitConverter.ToUInt32(bytes[(offset + 4)..(offset + 4 + 4)]);
+            var __Time = System.BitConverter.ToUInt32(bytes[(offset + 8)..(offset + 8 + 4)]);
             var obj = new QuantumCore.Core.Packets.GCHandshake(
                 __Handshake,
                 __Time
@@ -372,6 +376,7 @@ namespace QuantumCore.Core.Packets {
         }
 
         public static T Deserialize<T>(byte[] bytes, int offset = 0)
+            where T : IPacketSerializable
         {
             return (T)(object)Deserialize(bytes, offset);
         }
@@ -396,7 +401,7 @@ public partial record struct GCHandshake(byte Type, string Message) {
 }
 ".Trim());
 
-        GeneratorDriver driver = CSharpGeneratorDriver.Create(new SerializerGenerator());
+        GeneratorDriver driver = CSharpGeneratorDriver.Create(new PacketSerializerGenerator());
 
         driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation,
             out var diagnostics);
@@ -433,9 +438,9 @@ namespace QuantumCore.Core.Packets {
 
         public static GCHandshake Deserialize(byte[] bytes, int offset = 0)
         {
-            var __Type = bytes[(offset + 1)];
-            var __Size = System.BitConverter.ToUInt32(bytes[(offset + 2)..(offset + 2 + 4)]);
-            var __Message = System.Text.Encoding.ASCII.GetString(bytes[(offset + 6)..(System.Index)(offset + 6 + __Size)]);
+            var __Type = bytes[(offset + 0)];
+            var __Size = System.BitConverter.ToUInt32(bytes[(offset + 1)..(offset + 1 + 4)]);
+            var __Message = System.Text.Encoding.ASCII.GetString(bytes[(offset + 5)..(System.Index)(offset + 5 + __Size)]);
             var obj = new QuantumCore.Core.Packets.GCHandshake(
                 __Type,
                 __Message
@@ -444,6 +449,7 @@ namespace QuantumCore.Core.Packets {
         }
 
         public static T Deserialize<T>(byte[] bytes, int offset = 0)
+            where T : IPacketSerializable
         {
             return (T)(object)Deserialize(bytes, offset);
         }
@@ -468,7 +474,7 @@ public partial record struct GCHandshake(byte Type, byte[] Flags) {
 }
 ".Trim());
 
-        GeneratorDriver driver = CSharpGeneratorDriver.Create(new SerializerGenerator());
+        GeneratorDriver driver = CSharpGeneratorDriver.Create(new PacketSerializerGenerator());
 
         driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation,
             out var diagnostics);
@@ -505,9 +511,9 @@ namespace QuantumCore.Core.Packets {
 
         public static GCHandshake Deserialize(byte[] bytes, int offset = 0)
         {
-            var __Type = bytes[(offset + 1)];
-            var __Size = System.BitConverter.ToUInt32(bytes[(offset + 2)..(offset + 2 + 4)]);
-            var __Flags = bytes[(offset + 6)..(System.Index)(offset + 6 + __Size)];
+            var __Type = bytes[(offset + 0)];
+            var __Size = System.BitConverter.ToUInt32(bytes[(offset + 1)..(offset + 1 + 4)]);
+            var __Flags = bytes[(offset + 5)..(System.Index)(offset + 5 + __Size)];
             var obj = new QuantumCore.Core.Packets.GCHandshake(
                 __Type,
                 __Flags
@@ -516,6 +522,7 @@ namespace QuantumCore.Core.Packets {
         }
 
         public static T Deserialize<T>(byte[] bytes, int offset = 0)
+            where T : IPacketSerializable
         {
             return (T)(object)Deserialize(bytes, offset);
         }
@@ -540,7 +547,7 @@ public partial record struct GCHandshake(byte Type)
 }
 ".Trim());
 
-        GeneratorDriver driver = CSharpGeneratorDriver.Create(new SerializerGenerator());
+        GeneratorDriver driver = CSharpGeneratorDriver.Create(new PacketSerializerGenerator());
 
         driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation,
             out var diagnostics);
@@ -576,8 +583,8 @@ namespace QuantumCore.Core.Packets {
 
         public static GCHandshake Deserialize(byte[] bytes, int offset = 0)
         {
-            var __Type = bytes[(offset + 1)];
-            var __Flags = bytes[(offset + 2)..(offset + 2 + 4)];
+            var __Type = bytes[(offset + 0)];
+            var __Flags = bytes[(offset + 1)..(offset + 1 + 4)];
             var obj = new QuantumCore.Core.Packets.GCHandshake(
                 __Type
             )
@@ -588,6 +595,7 @@ namespace QuantumCore.Core.Packets {
         }
 
         public static T Deserialize<T>(byte[] bytes, int offset = 0)
+            where T : IPacketSerializable
         {
             return (T)(object)Deserialize(bytes, offset);
         }
@@ -612,7 +620,7 @@ public partial record struct GCHandshake(byte Type)
 }
 ".Trim());
 
-        GeneratorDriver driver = CSharpGeneratorDriver.Create(new SerializerGenerator());
+        GeneratorDriver driver = CSharpGeneratorDriver.Create(new PacketSerializerGenerator());
 
         driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation,
             out var diagnostics);
@@ -649,11 +657,11 @@ namespace QuantumCore.Core.Packets {
 
         public static GCHandshake Deserialize(byte[] bytes, int offset = 0)
         {
-            var __Type = bytes[(offset + 1)];
+            var __Type = bytes[(offset + 0)];
             var __Flags = new []
             {
-                System.BitConverter.ToUInt16(bytes[(offset + 2)..(offset + 2 + 2)]),
-                System.BitConverter.ToUInt16(bytes[(offset + 4)..(offset + 4 + 2)])
+                System.BitConverter.ToUInt16(bytes[(offset + 1)..(offset + 1 + 2)]),
+                System.BitConverter.ToUInt16(bytes[(offset + 3)..(offset + 3 + 2)])
             };
             var obj = new QuantumCore.Core.Packets.GCHandshake(
                 __Type
@@ -665,6 +673,7 @@ namespace QuantumCore.Core.Packets {
         }
 
         public static T Deserialize<T>(byte[] bytes, int offset = 0)
+            where T : IPacketSerializable
         {
             return (T)(object)Deserialize(bytes, offset);
         }
@@ -690,7 +699,7 @@ public partial record struct GCHandshake()
 }
 ".Trim());
 
-        GeneratorDriver driver = CSharpGeneratorDriver.Create(new SerializerGenerator());
+        GeneratorDriver driver = CSharpGeneratorDriver.Create(new PacketSerializerGenerator());
 
         driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation,
             out var diagnostics);
@@ -728,8 +737,8 @@ namespace QuantumCore.Core.Packets {
         {
             var __Names = new []
             {
-                System.Text.Encoding.ASCII.GetString(bytes[(offset + 1)..(offset + 1 + 12)]),
-                System.Text.Encoding.ASCII.GetString(bytes[(offset + 13)..(offset + 13 + 12)])
+                System.Text.Encoding.ASCII.GetString(bytes[(offset + 0)..(offset + 0 + 12)]),
+                System.Text.Encoding.ASCII.GetString(bytes[(offset + 12)..(offset + 12 + 12)])
             };
             var obj = new QuantumCore.Core.Packets.GCHandshake
             {
@@ -739,6 +748,7 @@ namespace QuantumCore.Core.Packets {
         }
 
         public static T Deserialize<T>(byte[] bytes, int offset = 0)
+            where T : IPacketSerializable
         {
             return (T)(object)Deserialize(bytes, offset);
         }
@@ -764,7 +774,7 @@ public partial record struct GCHandshake(byte Type, ushort[] Flags)
 }
 ".Trim());
 
-        GeneratorDriver driver = CSharpGeneratorDriver.Create(new SerializerGenerator());
+        GeneratorDriver driver = CSharpGeneratorDriver.Create(new PacketSerializerGenerator());
 
         driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation,
             out var diagnostics);
@@ -804,12 +814,12 @@ namespace QuantumCore.Core.Packets {
 
         public static GCHandshake Deserialize(byte[] bytes, int offset = 0)
         {
-            var __Type = bytes[(offset + 1)];
-            var __Size = System.BitConverter.ToUInt32(bytes[(offset + 2)..(offset + 2 + 4)]);
+            var __Type = bytes[(offset + 0)];
+            var __Size = System.BitConverter.ToUInt32(bytes[(offset + 1)..(offset + 1 + 4)]);
             var __Flags = new System.UInt16[__Size];
             for (var i = 0; i < __Size; i++)
             {
-                __Flags[i] = System.BitConverter.ToUInt16(bytes[(offset + 6 + 2 * i)..(offset + 6 + 2 * i + 2)]);
+                __Flags[i] = System.BitConverter.ToUInt16(bytes[(offset + 5 + 2 * i)..(offset + 5 + 2 * i + 2)]);
             }
             var obj = new QuantumCore.Core.Packets.GCHandshake(
                 __Type,
@@ -819,6 +829,7 @@ namespace QuantumCore.Core.Packets {
         }
 
         public static T Deserialize<T>(byte[] bytes, int offset = 0)
+            where T : IPacketSerializable
         {
             return (T)(object)Deserialize(bytes, offset);
         }
@@ -843,7 +854,7 @@ public partial record struct GCHandshake(byte Type, ushort[] Flags)
 }
 ".Trim());
 
-        GeneratorDriver driver = CSharpGeneratorDriver.Create(new SerializerGenerator());
+        GeneratorDriver driver = CSharpGeneratorDriver.Create(new PacketSerializerGenerator());
 
         driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out _,
             out var diagnostics);
@@ -870,7 +881,7 @@ public partial record struct GCHandshake(byte Type, string Message, byte Locatio
 }
 ".Trim());
 
-        GeneratorDriver driver = CSharpGeneratorDriver.Create(new SerializerGenerator());
+        GeneratorDriver driver = CSharpGeneratorDriver.Create(new PacketSerializerGenerator());
 
         driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation,
             out var diagnostics);
@@ -908,10 +919,10 @@ namespace QuantumCore.Core.Packets {
 
         public static GCHandshake Deserialize(byte[] bytes, int offset = 0)
         {
-            var __Type = bytes[(offset + 1)];
-            var __Size = System.BitConverter.ToUInt32(bytes[(offset + 2)..(offset + 2 + 4)]);
-            var __Message = System.Text.Encoding.ASCII.GetString(bytes[(offset + 6)..(System.Index)(offset + 6 + __Size)]);
-            var __Location = bytes[(System.Index)(offset + 6 + __Size)];
+            var __Type = bytes[(offset + 0)];
+            var __Size = System.BitConverter.ToUInt32(bytes[(offset + 1)..(offset + 1 + 4)]);
+            var __Message = System.Text.Encoding.ASCII.GetString(bytes[(offset + 5)..(System.Index)(offset + 5 + __Size)]);
+            var __Location = bytes[(System.Index)(offset + 5 + __Size)];
             var obj = new QuantumCore.Core.Packets.GCHandshake(
                 __Type,
                 __Message,
@@ -921,6 +932,7 @@ namespace QuantumCore.Core.Packets {
         }
 
         public static T Deserialize<T>(byte[] bytes, int offset = 0)
+            where T : IPacketSerializable
         {
             return (T)(object)Deserialize(bytes, offset);
         }
@@ -946,7 +958,7 @@ public partial record struct GCHandshake(uint Handshake, uint Time, uint Delta);
 public partial record struct GCPhase(byte Phase);
 ".Trim());
 
-        GeneratorDriver driver = CSharpGeneratorDriver.Create(new SerializerGenerator());
+        GeneratorDriver driver = CSharpGeneratorDriver.Create(new PacketSerializerGenerator());
 
         driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation,
             out var diagnostics);
@@ -984,9 +996,9 @@ namespace QuantumCore.Core.Packets {
 
         public static GCHandshake Deserialize(byte[] bytes, int offset = 0)
         {
-            var __Handshake = System.BitConverter.ToUInt32(bytes[(offset + 1)..(offset + 1 + 4)]);
-            var __Time = System.BitConverter.ToUInt32(bytes[(offset + 5)..(offset + 5 + 4)]);
-            var __Delta = System.BitConverter.ToUInt32(bytes[(offset + 9)..(offset + 9 + 4)]);
+            var __Handshake = System.BitConverter.ToUInt32(bytes[(offset + 0)..(offset + 0 + 4)]);
+            var __Time = System.BitConverter.ToUInt32(bytes[(offset + 4)..(offset + 4 + 4)]);
+            var __Delta = System.BitConverter.ToUInt32(bytes[(offset + 8)..(offset + 8 + 4)]);
             var obj = new QuantumCore.Core.Packets.GCHandshake(
                 __Handshake,
                 __Time,
@@ -996,6 +1008,7 @@ namespace QuantumCore.Core.Packets {
         }
 
         public static T Deserialize<T>(byte[] bytes, int offset = 0)
+            where T : IPacketSerializable
         {
             return (T)(object)Deserialize(bytes, offset);
         }
@@ -1022,7 +1035,7 @@ namespace QuantumCore.Core.Packets {
 
         public static GCPhase Deserialize(byte[] bytes, int offset = 0)
         {
-            var __Phase = bytes[(offset + 1)];
+            var __Phase = bytes[(offset + 0)];
             var obj = new QuantumCore.Core.Packets.GCPhase(
                 __Phase
             );
@@ -1030,6 +1043,7 @@ namespace QuantumCore.Core.Packets {
         }
 
         public static T Deserialize<T>(byte[] bytes, int offset = 0)
+            where T : IPacketSerializable
         {
             return (T)(object)Deserialize(bytes, offset);
         }
@@ -1054,7 +1068,7 @@ public partial struct GCHandshake {
     public uint Delta { get; set; }
 }");
 
-        GeneratorDriver driver = CSharpGeneratorDriver.Create(new SerializerGenerator());
+        GeneratorDriver driver = CSharpGeneratorDriver.Create(new PacketSerializerGenerator());
 
         driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation,
             out var diagnostics);
@@ -1091,9 +1105,9 @@ namespace QuantumCore.Core.Packets {
 
         public static GCHandshake Deserialize(byte[] bytes, int offset = 0)
         {
-            var __Handshake = System.BitConverter.ToUInt32(bytes[(offset + 1)..(offset + 1 + 4)]);
-            var __Time = System.BitConverter.ToUInt32(bytes[(offset + 5)..(offset + 5 + 4)]);
-            var __Delta = System.BitConverter.ToUInt32(bytes[(offset + 9)..(offset + 9 + 4)]);
+            var __Handshake = System.BitConverter.ToUInt32(bytes[(offset + 0)..(offset + 0 + 4)]);
+            var __Time = System.BitConverter.ToUInt32(bytes[(offset + 4)..(offset + 4 + 4)]);
+            var __Delta = System.BitConverter.ToUInt32(bytes[(offset + 8)..(offset + 8 + 4)]);
             var obj = new QuantumCore.Core.Packets.GCHandshake
             {
                 Handshake = __Handshake,
@@ -1104,6 +1118,7 @@ namespace QuantumCore.Core.Packets {
         }
 
         public static T Deserialize<T>(byte[] bytes, int offset = 0)
+            where T : IPacketSerializable
         {
             return (T)(object)Deserialize(bytes, offset);
         }
@@ -1128,7 +1143,7 @@ public partial class GCHandshake {
     public uint Delta { get; set; }
 }");
 
-        GeneratorDriver driver = CSharpGeneratorDriver.Create(new SerializerGenerator());
+        GeneratorDriver driver = CSharpGeneratorDriver.Create(new PacketSerializerGenerator());
 
         driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation,
             out var diagnostics);
@@ -1165,9 +1180,9 @@ namespace QuantumCore.Core.Packets {
 
         public static GCHandshake Deserialize(byte[] bytes, int offset = 0)
         {
-            var __Handshake = System.BitConverter.ToUInt32(bytes[(offset + 1)..(offset + 1 + 4)]);
-            var __Time = System.BitConverter.ToUInt32(bytes[(offset + 5)..(offset + 5 + 4)]);
-            var __Delta = System.BitConverter.ToUInt32(bytes[(offset + 9)..(offset + 9 + 4)]);
+            var __Handshake = System.BitConverter.ToUInt32(bytes[(offset + 0)..(offset + 0 + 4)]);
+            var __Time = System.BitConverter.ToUInt32(bytes[(offset + 4)..(offset + 4 + 4)]);
+            var __Delta = System.BitConverter.ToUInt32(bytes[(offset + 8)..(offset + 8 + 4)]);
             var obj = new QuantumCore.Core.Packets.GCHandshake
             {
                 Handshake = __Handshake,
@@ -1178,6 +1193,7 @@ namespace QuantumCore.Core.Packets {
         }
 
         public static T Deserialize<T>(byte[] bytes, int offset = 0)
+            where T : IPacketSerializable
         {
             return (T)(object)Deserialize(bytes, offset);
         }
@@ -1207,7 +1223,7 @@ public class SomeData {
     public uint SomeSubData { get; set; }
 }");
 
-        GeneratorDriver driver = CSharpGeneratorDriver.Create(new SerializerGenerator());
+        GeneratorDriver driver = CSharpGeneratorDriver.Create(new PacketSerializerGenerator());
 
         driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation,
             out var diagnostics);
@@ -1245,12 +1261,12 @@ namespace QuantumCore.Core.Packets {
 
         public static GCHandshake Deserialize(byte[] bytes, int offset = 0)
         {
-            var __Handshake = System.BitConverter.ToUInt32(bytes[(offset + 1)..(offset + 1 + 4)]);
-            var __Time = System.BitConverter.ToUInt32(bytes[(offset + 5)..(offset + 5 + 4)]);
-            var __Delta = System.BitConverter.ToUInt32(bytes[(offset + 9)..(offset + 9 + 4)]);
+            var __Handshake = System.BitConverter.ToUInt32(bytes[(offset + 0)..(offset + 0 + 4)]);
+            var __Time = System.BitConverter.ToUInt32(bytes[(offset + 4)..(offset + 4 + 4)]);
+            var __Delta = System.BitConverter.ToUInt32(bytes[(offset + 8)..(offset + 8 + 4)]);
             var __Sub = new QuantumCore.Core.Packets.SomeData
             {
-                SomeSubData = System.BitConverter.ToUInt32(bytes[(offset + 13)..(offset + 13 + 4)])
+                SomeSubData = System.BitConverter.ToUInt32(bytes[(offset + 12)..(offset + 12 + 4)])
             };
             var obj = new QuantumCore.Core.Packets.GCHandshake
             {
@@ -1263,6 +1279,7 @@ namespace QuantumCore.Core.Packets {
         }
 
         public static T Deserialize<T>(byte[] bytes, int offset = 0)
+            where T : IPacketSerializable
         {
             return (T)(object)Deserialize(bytes, offset);
         }
@@ -1286,7 +1303,7 @@ public partial record GCHandshake(uint Handshake, uint Time) {
 }
 ".Trim());
 
-        GeneratorDriver driver = CSharpGeneratorDriver.Create(new SerializerGenerator());
+        GeneratorDriver driver = CSharpGeneratorDriver.Create(new PacketSerializerGenerator());
 
         driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation,
             out var diagnostics);
@@ -1323,9 +1340,9 @@ namespace QuantumCore.Core.Packets {
 
         public static GCHandshake Deserialize(byte[] bytes, int offset = 0)
         {
-            var __Handshake = System.BitConverter.ToUInt32(bytes[(offset + 1)..(offset + 1 + 4)]);
-            var __Time = System.BitConverter.ToUInt32(bytes[(offset + 5)..(offset + 5 + 4)]);
-            var __Delta = System.BitConverter.ToUInt32(bytes[(offset + 9)..(offset + 9 + 4)]);
+            var __Handshake = System.BitConverter.ToUInt32(bytes[(offset + 0)..(offset + 0 + 4)]);
+            var __Time = System.BitConverter.ToUInt32(bytes[(offset + 4)..(offset + 4 + 4)]);
+            var __Delta = System.BitConverter.ToUInt32(bytes[(offset + 8)..(offset + 8 + 4)]);
             var obj = new QuantumCore.Core.Packets.GCHandshake(
                 __Handshake,
                 __Time
@@ -1337,6 +1354,7 @@ namespace QuantumCore.Core.Packets {
         }
 
         public static T Deserialize<T>(byte[] bytes, int offset = 0)
+            where T : IPacketSerializable
         {
             return (T)(object)Deserialize(bytes, offset);
         }
@@ -1367,7 +1385,7 @@ public class SomeData {
     public uint SomeSubData2 { get; set; }
 }");
 
-        GeneratorDriver driver = CSharpGeneratorDriver.Create(new SerializerGenerator());
+        GeneratorDriver driver = CSharpGeneratorDriver.Create(new PacketSerializerGenerator());
 
         driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation,
             out var diagnostics);
@@ -1412,30 +1430,30 @@ namespace QuantumCore.Core.Packets {
 
         public static GCHandshake Deserialize(byte[] bytes, int offset = 0)
         {
-            var __Handshake = System.BitConverter.ToUInt32(bytes[(offset + 1)..(offset + 1 + 4)]);
-            var __Time = System.BitConverter.ToUInt32(bytes[(offset + 5)..(offset + 5 + 4)]);
-            var __Delta = System.BitConverter.ToUInt32(bytes[(offset + 9)..(offset + 9 + 4)]);
+            var __Handshake = System.BitConverter.ToUInt32(bytes[(offset + 0)..(offset + 0 + 4)]);
+            var __Time = System.BitConverter.ToUInt32(bytes[(offset + 4)..(offset + 4 + 4)]);
+            var __Delta = System.BitConverter.ToUInt32(bytes[(offset + 8)..(offset + 8 + 4)]);
             var __Subs = new []
             {
                 new QuantumCore.Core.Packets.SomeData
                 {
-                    SomeSubData = System.BitConverter.ToUInt32(bytes[(offset + 13)..(offset + 13 + 4)]),
-                    SomeSubData2 = System.BitConverter.ToUInt32(bytes[(offset + 17)..(offset + 17 + 4)])
+                    SomeSubData = System.BitConverter.ToUInt32(bytes[(offset + 12)..(offset + 12 + 4)]),
+                    SomeSubData2 = System.BitConverter.ToUInt32(bytes[(offset + 16)..(offset + 16 + 4)])
                 },
                 new QuantumCore.Core.Packets.SomeData
                 {
-                    SomeSubData = System.BitConverter.ToUInt32(bytes[(offset + 21)..(offset + 21 + 4)]),
-                    SomeSubData2 = System.BitConverter.ToUInt32(bytes[(offset + 25)..(offset + 25 + 4)])
+                    SomeSubData = System.BitConverter.ToUInt32(bytes[(offset + 20)..(offset + 20 + 4)]),
+                    SomeSubData2 = System.BitConverter.ToUInt32(bytes[(offset + 24)..(offset + 24 + 4)])
                 },
                 new QuantumCore.Core.Packets.SomeData
                 {
-                    SomeSubData = System.BitConverter.ToUInt32(bytes[(offset + 29)..(offset + 29 + 4)]),
-                    SomeSubData2 = System.BitConverter.ToUInt32(bytes[(offset + 33)..(offset + 33 + 4)])
+                    SomeSubData = System.BitConverter.ToUInt32(bytes[(offset + 28)..(offset + 28 + 4)]),
+                    SomeSubData2 = System.BitConverter.ToUInt32(bytes[(offset + 32)..(offset + 32 + 4)])
                 },
                 new QuantumCore.Core.Packets.SomeData
                 {
-                    SomeSubData = System.BitConverter.ToUInt32(bytes[(offset + 37)..(offset + 37 + 4)]),
-                    SomeSubData2 = System.BitConverter.ToUInt32(bytes[(offset + 41)..(offset + 41 + 4)])
+                    SomeSubData = System.BitConverter.ToUInt32(bytes[(offset + 36)..(offset + 36 + 4)]),
+                    SomeSubData2 = System.BitConverter.ToUInt32(bytes[(offset + 40)..(offset + 40 + 4)])
                 }
             };
             var obj = new QuantumCore.Core.Packets.GCHandshake
@@ -1449,6 +1467,7 @@ namespace QuantumCore.Core.Packets {
         }
 
         public static T Deserialize<T>(byte[] bytes, int offset = 0)
+            where T : IPacketSerializable
         {
             return (T)(object)Deserialize(bytes, offset);
         }
@@ -1479,7 +1498,7 @@ public class SomeData {
     public uint SomeSubData { get; set; }
 }");
 
-        GeneratorDriver driver = CSharpGeneratorDriver.Create(new SerializerGenerator());
+        GeneratorDriver driver = CSharpGeneratorDriver.Create(new PacketSerializerGenerator());
 
         driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation,
             out var diagnostics);
@@ -1521,14 +1540,14 @@ namespace QuantumCore.Core.Packets {
 
         public static GCHandshake Deserialize(byte[] bytes, int offset = 0)
         {
-            var __Handshake = System.BitConverter.ToUInt32(bytes[(offset + 1)..(offset + 1 + 4)]);
-            var __Time = System.BitConverter.ToUInt32(bytes[(offset + 5)..(offset + 5 + 4)]);
-            var __Delta = System.BitConverter.ToUInt32(bytes[(offset + 9)..(offset + 9 + 4)]);
-            var __Size = System.BitConverter.ToUInt32(bytes[(offset + 13)..(offset + 13 + 4)]);
+            var __Handshake = System.BitConverter.ToUInt32(bytes[(offset + 0)..(offset + 0 + 4)]);
+            var __Time = System.BitConverter.ToUInt32(bytes[(offset + 4)..(offset + 4 + 4)]);
+            var __Delta = System.BitConverter.ToUInt32(bytes[(offset + 8)..(offset + 8 + 4)]);
+            var __Size = System.BitConverter.ToUInt32(bytes[(offset + 12)..(offset + 12 + 4)]);
             var __Subs = new QuantumCore.Core.Packets.SomeData[__Size];
             for (var i = 0; i < __Size; i++)
             {
-                __Subs[i].SomeSubData = System.BitConverter.ToUInt32(bytes[(offset + 17 + 4 * i)..(offset + 17 + 4 * i + 4)]);
+                __Subs[i].SomeSubData = System.BitConverter.ToUInt32(bytes[(offset + 16 + 4 * i)..(offset + 16 + 4 * i + 4)]);
             }
             var obj = new QuantumCore.Core.Packets.GCHandshake
             {
@@ -1541,6 +1560,7 @@ namespace QuantumCore.Core.Packets {
         }
 
         public static T Deserialize<T>(byte[] bytes, int offset = 0)
+            where T : IPacketSerializable
         {
             return (T)(object)Deserialize(bytes, offset);
         }
@@ -1570,7 +1590,7 @@ public partial class CharacterInfo {
     public byte Empire { get; set; }
 }");
 
-        GeneratorDriver driver = CSharpGeneratorDriver.Create(new SerializerGenerator());
+        GeneratorDriver driver = CSharpGeneratorDriver.Create(new PacketSerializerGenerator());
 
         driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation,
             out var diagnostics);
@@ -1611,16 +1631,16 @@ namespace QuantumCore.Core.Packets {
 
         public static CharacterInfo Deserialize(byte[] bytes, int offset = 0)
         {
-            var __Vid = System.BitConverter.ToUInt32(bytes[(offset + 1)..(offset + 1 + 4)]);
-            var __Name = System.Text.Encoding.ASCII.GetString(bytes[(offset + 5)..(offset + 5 + 25)]);
+            var __Vid = System.BitConverter.ToUInt32(bytes[(offset + 0)..(offset + 0 + 4)]);
+            var __Name = System.Text.Encoding.ASCII.GetString(bytes[(offset + 4)..(offset + 4 + 25)]);
             var __Parts = new []
             {
-                System.BitConverter.ToUInt16(bytes[(offset + 30)..(offset + 30 + 2)]),
-                System.BitConverter.ToUInt16(bytes[(offset + 32)..(offset + 32 + 2)]),
-                System.BitConverter.ToUInt16(bytes[(offset + 34)..(offset + 34 + 2)]),
-                System.BitConverter.ToUInt16(bytes[(offset + 36)..(offset + 36 + 2)])
+                System.BitConverter.ToUInt16(bytes[(offset + 29)..(offset + 29 + 2)]),
+                System.BitConverter.ToUInt16(bytes[(offset + 31)..(offset + 31 + 2)]),
+                System.BitConverter.ToUInt16(bytes[(offset + 33)..(offset + 33 + 2)]),
+                System.BitConverter.ToUInt16(bytes[(offset + 35)..(offset + 35 + 2)])
             };
-            var __Empire = bytes[(offset + 38)];
+            var __Empire = bytes[(offset + 37)];
             var obj = new QuantumCore.Core.Packets.CharacterInfo
             {
                 Vid = __Vid,
@@ -1632,6 +1652,7 @@ namespace QuantumCore.Core.Packets {
         }
 
         public static T Deserialize<T>(byte[] bytes, int offset = 0)
+            where T : IPacketSerializable
         {
             return (T)(object)Deserialize(bytes, offset);
         }
@@ -1657,7 +1678,7 @@ namespace QuantumCore.Auth.Packets
     }
 }");
 
-        GeneratorDriver driver = CSharpGeneratorDriver.Create(new SerializerGenerator());
+        GeneratorDriver driver = CSharpGeneratorDriver.Create(new PacketSerializerGenerator());
 
         driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out _,
             out var diagnostics);
@@ -1688,7 +1709,7 @@ public partial record struct Characters ()
 namespace QuantumCore.Game.Packets;
 
 public record Character(uint Id);";
-        GeneratorDriver driver = CSharpGeneratorDriver.Create(new SerializerGenerator());
+        GeneratorDriver driver = CSharpGeneratorDriver.Create(new PacketSerializerGenerator());
         var inputCompilation = CreateCompilation(file1, file2);
 
         driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation,
@@ -1729,10 +1750,10 @@ namespace QuantumCore.Game.Packets {
             var __CharacterList = new []
             {
                 new QuantumCore.Game.Packets.Character(
-                    System.BitConverter.ToUInt32(bytes[(offset + 1)..(offset + 1 + 4)])
+                    System.BitConverter.ToUInt32(bytes[(offset + 0)..(offset + 0 + 4)])
                 ),
                 new QuantumCore.Game.Packets.Character(
-                    System.BitConverter.ToUInt32(bytes[(offset + 5)..(offset + 5 + 4)])
+                    System.BitConverter.ToUInt32(bytes[(offset + 4)..(offset + 4 + 4)])
                 )
             };
             var obj = new QuantumCore.Game.Packets.Characters
@@ -1743,6 +1764,7 @@ namespace QuantumCore.Game.Packets {
         }
 
         public static T Deserialize<T>(byte[] bytes, int offset = 0)
+            where T : IPacketSerializable
         {
             return (T)(object)Deserialize(bytes, offset);
         }
