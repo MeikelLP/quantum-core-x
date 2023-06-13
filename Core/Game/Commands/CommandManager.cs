@@ -210,7 +210,7 @@ namespace QuantumCore.Game.Commands
                         {
                             MessageType = ChatMessageTypes.Info,
                             Vid = 0,
-                            Empire = connection.Player.Empire,
+                            Empire = 0,
                             Message = $"You don't have enough permission to use this command"
                         });
                         return;
@@ -278,7 +278,7 @@ namespace QuantumCore.Game.Commands
                             {
                                 MessageType = ChatMessageTypes.Info,
                                 Vid = 0,
-                                Empire = connection.Player.Empire,
+                                Empire = 0,
                                 Message = $"Failed to execute command {command}"
                             });
                         }
@@ -295,7 +295,7 @@ namespace QuantumCore.Game.Commands
                     {
                         MessageType = ChatMessageTypes.Info,
                         Vid = 0,
-                        Empire = connection.Player.Empire,
+                        Empire = 0,
                         Message = $"Unknown command {command}"
                     });
                 }
