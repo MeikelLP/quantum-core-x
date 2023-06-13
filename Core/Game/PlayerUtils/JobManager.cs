@@ -14,6 +14,7 @@ namespace QuantumCore.Game.PlayerUtils
         {
             _logger = logger;
             
+            // Converts each Job from json into a Job class
             foreach (var job in configuration.GetSection("job").Get<Job[]>())
             {
                 _jobs.Add(job);

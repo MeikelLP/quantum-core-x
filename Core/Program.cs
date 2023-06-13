@@ -53,7 +53,7 @@ namespace QuantumCore
                 .UseConsoleLifetime(x => x.SuppressStatusMessages = true)
                 .ConfigureAppConfiguration(cfg =>
                 {
-                    cfg.AddTomlFile("data/jobs.toml");
+                    cfg.AddJsonFile("data/jobs.json");
                     cfg.AddTomlFile("data/shops.toml", true);
                     cfg.AddTomlFile("data/groups.toml", true);
                     cfg.AddTomlFile("settings.toml");

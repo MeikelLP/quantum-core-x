@@ -87,7 +87,9 @@ namespace QuantumCore.Game.World.Entities
         private const int PersistInterval = 1000;
         private int _persistTime = 0;
         private const int HealthRegenInterval = 3 * 1000;
+        private const int ManaRegenInterval = 3 * 1000;
         private double _healthRegenTime = HealthRegenInterval;
+        private double _manaRegenTime = ManaRegenInterval;
         private readonly IItemManager _itemManager;
         private readonly IJobManager _jobManager;
         private readonly IExperienceManager _experienceManager;
@@ -149,6 +151,7 @@ namespace QuantumCore.Game.World.Entities
             await Inventory.Load();
             await QuickSlotBar.Load();
             Health = (int) GetPoint(EPoints.MaxHp); // todo: cache hp of player 
+            Mana = (int) GetPoint(EPoints.MaxSp);
             await LoadPermGroups();
             
             _questManager.InitializePlayer(this);
@@ -308,6 +311,7 @@ namespace QuantumCore.Game.World.Entities
             });
 
             Health = 50;
+            Mana = 50;
             await SendPoints();
         }
 
@@ -391,10 +395,23 @@ namespace QuantumCore.Game.World.Entities
                 if (_healthRegenTime <= 0)
                 {
                     var factor = State == EEntityState.Idle ? 0.05 : 0.01;
-                    Health = Math.Min((int)maxHp, Health + 15 + (int)(maxHp * factor));
+                    Health = Math.Min((int) maxHp, Health + 15 + (int) (maxHp * factor));
                     await SendPoints();
 
                     _healthRegenTime += HealthRegenInterval;
+                }
+            }
+            var maxSp = GetPoint(EPoints.MaxSp);
+            if (Mana < maxSp)
+            {
+                _manaRegenTime -= elapsedTime;
+                if (_manaRegenTime <= 0)
+                {
+                    var factor = State == EEntityState.Idle ? 0.05 : 0.01;
+                    Mana = Math.Min((int) maxSp, Mana + 15 + (int) (maxSp * factor));
+                    await SendPoints();
+
+                    _manaRegenTime += ManaRegenInterval;
                 }
             }
 
@@ -490,9 +507,39 @@ namespace QuantumCore.Game.World.Entities
                 case EPoints.Iq:
                     Player.Iq += (byte) value;
                     break;
+                case EPoints.Hp:
+                    if (value <= 0)
+                    {
+                        // 0 gets ignored by client
+                        // Setting the Hp to 0 does not register as killing the player
+                    }
+                    else if (value > GetPoint(EPoints.MaxHp))
+                    {
+                        Health = GetPoint(EPoints.MaxHp);
+                    }
+                    else
+                    {
+                        Health = value;
+                    }
+
+                    break;
+                case EPoints.Sp:
+                    if (value <= 0)
+                    {
+                        // 0 gets ignored by client
+                    }
+                    else if (value > GetPoint(EPoints.MaxSp))
+                    {
+                        Mana = GetPoint(EPoints.MaxSp);
+                    }
+                    else
+                    {
+                        Mana = value;
+                    }
+
+                    break;
                 case EPoints.StatusPoints:
                     Player.AvailableStatusPoints += (uint) value;
-
                     break;
                 default:
                     _logger.LogError("Failed to add point to {Point}, unsupported", point);
@@ -540,15 +587,27 @@ namespace QuantumCore.Game.World.Entities
                     return _experienceManager.GetNeededExperience(Player.Level);
                 case EPoints.Hp:
                     return (uint) Health;
+                case EPoints.Sp:
+                    return (uint) Mana;
                 case EPoints.MaxHp:
                     var info = _jobManager.Get(Player.PlayerClass);
                     if (info == null)
                     {
+                        _logger.LogWarning("Job not found: {Job}" , Player.PlayerClass);
                         return 0;
                     }
 
                     return info.StartHp + info.HpPerHt * GetPoint(EPoints.Ht) +
                            info.HpPerLevel * GetPoint(EPoints.Level);
+                case EPoints.MaxSp:
+                    info = _jobManager.Get(Player.PlayerClass);
+                    if (info == null)
+                    {
+                        _logger.LogWarning("Job not found: {Job}", Player.PlayerClass);
+                        return 0;
+                    }
+                    return info.StartSp + info.SpPerIq * GetPoint(EPoints.Iq) +
+                           info.SpPerLevel * GetPoint(EPoints.Level);
                 case EPoints.St:
                     return Player.St;
                 case EPoints.Ht:
