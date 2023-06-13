@@ -1,0 +1,29 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using QuantumCore.Core.Packets;
+
+namespace QuantumCore.Game.Packets.Affects
+{
+    [Packet(0x7E, EDirection.Outgoing)]
+    public class AffectAdd
+    {
+        [Field(0)]
+        public AffectAddPacket Elem { get; set; }
+    }
+    public class AffectAddPacket
+    {
+        [Field(0)]
+        public uint Type { get; set; }
+        [Field(1)]
+        public byte ApplyOn { get; set; }
+        [Field(2)]
+        public uint ApplyValue { get; set; }
+        [Field(3)]
+        public uint Flag { get; set; }
+        [Field(4)]
+        public uint Duration { get; set; }
+    }
+}
