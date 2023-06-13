@@ -6,7 +6,7 @@ using Microsoft.CodeAnalysis.Text;
 namespace QuantumCore.Networking;
 
 [Generator]
-public class SerializerGenerator : ISourceGenerator
+public class PacketSerializerGenerator : ISourceGenerator
 {
     private SerializeGenerator _serializeGenerator = null!;
     private DeserializeGenerator _deserializeGenerator = null!;

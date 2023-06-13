@@ -39,7 +39,7 @@ namespace QuantumCore.Core.Packets;
 public partial record struct GCHandshake(uint Handshake, uint Time, uint Delta);
 ".Trim());
 
-        GeneratorDriver driver = CSharpGeneratorDriver.Create(new SerializerGenerator());
+        GeneratorDriver driver = CSharpGeneratorDriver.Create(new PacketSerializerGenerator());
 
         driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation,
             out var diagnostics);
