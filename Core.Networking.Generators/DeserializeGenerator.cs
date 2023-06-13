@@ -18,7 +18,7 @@ internal class DeserializeGenerator
     public string Generate(TypeDeclarationSyntax type, string dynamicByteIndex)
     {
         var fields = _context.GetFieldsOfType(type);
-        var source = new StringBuilder($"        public static {type.Identifier.Text} Deserialize(byte[] bytes, int offset = 0)\r\n");
+        var source = new StringBuilder($"        public static {type.Identifier.Text} Deserialize(ReadOnlySpan<byte> bytes, in int offset = 0)\r\n");
         source.AppendLine("        {");
         var staticByteIndex = 0;
         var dynamicByteIndexLocal = new StringBuilder(dynamicByteIndex);
@@ -72,7 +72,7 @@ internal class DeserializeGenerator
         source.AppendLine($"{indentPrefix}return obj;");
         source.AppendLine("        }");
         source.AppendLine();
-        source.AppendLine(@"        public static T Deserialize<T>(byte[] bytes, int offset = 0)
+        source.AppendLine(@"        public static T Deserialize<T>(ReadOnlySpan<byte> bytes, in int offset = 0)
             where T : IPacketSerializable
         {
             return (T)(object)Deserialize(bytes, offset);
@@ -151,7 +151,7 @@ internal class DeserializeGenerator
         var offsetStr = GetOffsetString(offset, dynamicOffset, tempDynamicOffset);
         var endOffsetStr = GetOffsetString(offset, dynamicOffset, $"{tempDynamicOffset} + {field.ArrayLength!.Value}");
         offset += field.ArrayLength!.Value;
-        return $"bytes[{offsetStr}..{endOffsetStr}]";
+        return $"bytes[{offsetStr}..{endOffsetStr}].ToArray()";
     }
 
     private string GetLineForDynamicByteArray(FieldData field, ref int offset,
@@ -160,7 +160,7 @@ internal class DeserializeGenerator
         var offsetStr = GetOffsetString(offset, dynamicOffset, tempDynamicOffset);
         dynamicOffset.Append($" + {GetVariableNameForExpression(field.SizeFieldName!)}");
         var endOffsetStr = GetOffsetString(offset, dynamicOffset, tempDynamicOffset);
-        return $"bytes[{offsetStr}..{endOffsetStr}]";
+        return $"bytes[{offsetStr}..{endOffsetStr}].ToArray()";
     }
 
     private static string GetVariableNameForExpression(string fieldExpression)

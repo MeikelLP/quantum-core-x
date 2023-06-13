@@ -17,7 +17,7 @@ internal class SerializeGenerator
     {
         var header = _context.GetHeaderForType(type);
         var fields = _context.GetFieldsOfType(type);
-        var source = new StringBuilder("        public void Serialize(byte[] bytes, int offset = 0)\r\n");
+        var source = new StringBuilder("        public void Serialize(byte[] bytes, in int offset = 0)\r\n");
         source.AppendLine("        {");
         source.AppendLine(GenerateWriteHeader(header));
         var staticByteIndex = 1;
