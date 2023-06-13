@@ -79,7 +79,7 @@ namespace QuantumCore.Core.Packets {
             var __Handshake = System.BitConverter.ToUInt32(bytes[(offset + 1)..(offset + 1 + 4)]);
             var __Time = System.BitConverter.ToUInt32(bytes[(offset + 5)..(offset + 5 + 4)]);
             var __Delta = System.BitConverter.ToUInt32(bytes[(offset + 9)..(offset + 9 + 4)]);
-            var obj = new GCHandshake(
+            var obj = new QuantumCore.Core.Packets.GCHandshake(
                 __Handshake,
                 __Time,
                 __Delta
@@ -149,7 +149,7 @@ namespace QuantumCore.Core.Packets {
             var __Handshake = System.BitConverter.ToUInt32(bytes[(offset + 1)..(offset + 1 + 4)]);
             var __Time = System.BitConverter.ToUInt32(bytes[(offset + 5)..(offset + 5 + 4)]);
             var __Delta = System.BitConverter.ToUInt32(bytes[(offset + 9)..(offset + 9 + 4)]);
-            var obj = new GCHandshake(
+            var obj = new QuantumCore.Core.Packets.GCHandshake(
                 __Handshake,
                 __Time,
                 __Delta
@@ -221,7 +221,7 @@ namespace QuantumCore.Core.Packets {
         {
             var __Handshake = System.BitConverter.ToUInt32(bytes[(offset + 1)..(offset + 1 + 4)]);
             var __Type = (QuantumCore.Core.Packets.HandshakeType)bytes[(offset + 5)];
-            var obj = new GCHandshake(
+            var obj = new QuantumCore.Core.Packets.GCHandshake(
                 __Handshake,
                 __Type
             );
@@ -292,7 +292,7 @@ namespace QuantumCore.Core.Packets {
         {
             var __Handshake = System.BitConverter.ToUInt32(bytes[(offset + 1)..(offset + 1 + 4)]);
             var __Type = (QuantumCore.Core.Packets.HandshakeType)System.BitConverter.ToInt32(bytes[(offset + 5)..(offset + 5 + 4)]);
-            var obj = new GCHandshake(
+            var obj = new QuantumCore.Core.Packets.GCHandshake(
                 __Handshake,
                 __Type
             );
@@ -364,7 +364,7 @@ namespace QuantumCore.Core.Packets {
             var __Size = System.BitConverter.ToUInt32(bytes[(offset + 1)..(offset + 1 + 4)]);
             var __Handshake = System.BitConverter.ToUInt32(bytes[(offset + 5)..(offset + 5 + 4)]);
             var __Time = System.BitConverter.ToUInt32(bytes[(offset + 9)..(offset + 9 + 4)]);
-            var obj = new GCHandshake(
+            var obj = new QuantumCore.Core.Packets.GCHandshake(
                 __Handshake,
                 __Time
             );
@@ -436,7 +436,7 @@ namespace QuantumCore.Core.Packets {
             var __Type = bytes[(offset + 1)];
             var __Size = System.BitConverter.ToUInt32(bytes[(offset + 2)..(offset + 2 + 4)]);
             var __Message = System.Text.Encoding.ASCII.GetString(bytes[(offset + 6)..(System.Index)(offset + 6 + __Size)]);
-            var obj = new GCHandshake(
+            var obj = new QuantumCore.Core.Packets.GCHandshake(
                 __Type,
                 __Message
             );
@@ -508,7 +508,7 @@ namespace QuantumCore.Core.Packets {
             var __Type = bytes[(offset + 1)];
             var __Size = System.BitConverter.ToUInt32(bytes[(offset + 2)..(offset + 2 + 4)]);
             var __Flags = bytes[(offset + 6)..(System.Index)(offset + 6 + __Size)];
-            var obj = new GCHandshake(
+            var obj = new QuantumCore.Core.Packets.GCHandshake(
                 __Type,
                 __Flags
             );
@@ -578,7 +578,7 @@ namespace QuantumCore.Core.Packets {
         {
             var __Type = bytes[(offset + 1)];
             var __Flags = bytes[(offset + 2)..(offset + 2 + 4)];
-            var obj = new GCHandshake(
+            var obj = new QuantumCore.Core.Packets.GCHandshake(
                 __Type
             )
             {
@@ -655,7 +655,7 @@ namespace QuantumCore.Core.Packets {
                 System.BitConverter.ToUInt16(bytes[(offset + 2)..(offset + 2 + 2)]),
                 System.BitConverter.ToUInt16(bytes[(offset + 4)..(offset + 4 + 2)])
             };
-            var obj = new GCHandshake(
+            var obj = new QuantumCore.Core.Packets.GCHandshake(
                 __Type
             )
             {
@@ -731,7 +731,7 @@ namespace QuantumCore.Core.Packets {
                 System.Text.Encoding.ASCII.GetString(bytes[(offset + 1)..(offset + 1 + 12)]),
                 System.Text.Encoding.ASCII.GetString(bytes[(offset + 13)..(offset + 13 + 12)])
             };
-            var obj = new GCHandshake
+            var obj = new QuantumCore.Core.Packets.GCHandshake
             {
                 Names = __Names
             };
@@ -811,7 +811,7 @@ namespace QuantumCore.Core.Packets {
             {
                 __Flags[i] = System.BitConverter.ToUInt16(bytes[(offset + 6 + 2 * i)..(offset + 6 + 2 * i + 2)]);
             }
-            var obj = new GCHandshake(
+            var obj = new QuantumCore.Core.Packets.GCHandshake(
                 __Type,
                 __Flags
             );
@@ -912,7 +912,7 @@ namespace QuantumCore.Core.Packets {
             var __Size = System.BitConverter.ToUInt32(bytes[(offset + 2)..(offset + 2 + 4)]);
             var __Message = System.Text.Encoding.ASCII.GetString(bytes[(offset + 6)..(System.Index)(offset + 6 + __Size)]);
             var __Location = bytes[(System.Index)(offset + 6 + __Size)];
-            var obj = new GCHandshake(
+            var obj = new QuantumCore.Core.Packets.GCHandshake(
                 __Type,
                 __Message,
                 __Location
@@ -987,7 +987,7 @@ namespace QuantumCore.Core.Packets {
             var __Handshake = System.BitConverter.ToUInt32(bytes[(offset + 1)..(offset + 1 + 4)]);
             var __Time = System.BitConverter.ToUInt32(bytes[(offset + 5)..(offset + 5 + 4)]);
             var __Delta = System.BitConverter.ToUInt32(bytes[(offset + 9)..(offset + 9 + 4)]);
-            var obj = new GCHandshake(
+            var obj = new QuantumCore.Core.Packets.GCHandshake(
                 __Handshake,
                 __Time,
                 __Delta
@@ -1023,7 +1023,7 @@ namespace QuantumCore.Core.Packets {
         public static GCPhase Deserialize(byte[] bytes, int offset = 0)
         {
             var __Phase = bytes[(offset + 1)];
-            var obj = new GCPhase(
+            var obj = new QuantumCore.Core.Packets.GCPhase(
                 __Phase
             );
             return obj;
@@ -1094,7 +1094,7 @@ namespace QuantumCore.Core.Packets {
             var __Handshake = System.BitConverter.ToUInt32(bytes[(offset + 1)..(offset + 1 + 4)]);
             var __Time = System.BitConverter.ToUInt32(bytes[(offset + 5)..(offset + 5 + 4)]);
             var __Delta = System.BitConverter.ToUInt32(bytes[(offset + 9)..(offset + 9 + 4)]);
-            var obj = new GCHandshake
+            var obj = new QuantumCore.Core.Packets.GCHandshake
             {
                 Handshake = __Handshake,
                 Time = __Time,
@@ -1168,7 +1168,7 @@ namespace QuantumCore.Core.Packets {
             var __Handshake = System.BitConverter.ToUInt32(bytes[(offset + 1)..(offset + 1 + 4)]);
             var __Time = System.BitConverter.ToUInt32(bytes[(offset + 5)..(offset + 5 + 4)]);
             var __Delta = System.BitConverter.ToUInt32(bytes[(offset + 9)..(offset + 9 + 4)]);
-            var obj = new GCHandshake
+            var obj = new QuantumCore.Core.Packets.GCHandshake
             {
                 Handshake = __Handshake,
                 Time = __Time,
@@ -1248,11 +1248,11 @@ namespace QuantumCore.Core.Packets {
             var __Handshake = System.BitConverter.ToUInt32(bytes[(offset + 1)..(offset + 1 + 4)]);
             var __Time = System.BitConverter.ToUInt32(bytes[(offset + 5)..(offset + 5 + 4)]);
             var __Delta = System.BitConverter.ToUInt32(bytes[(offset + 9)..(offset + 9 + 4)]);
-            var __Sub = new SomeData
+            var __Sub = new QuantumCore.Core.Packets.SomeData
             {
                 SomeSubData = System.BitConverter.ToUInt32(bytes[(offset + 13)..(offset + 13 + 4)])
             };
-            var obj = new GCHandshake
+            var obj = new QuantumCore.Core.Packets.GCHandshake
             {
                 Handshake = __Handshake,
                 Time = __Time,
@@ -1326,7 +1326,7 @@ namespace QuantumCore.Core.Packets {
             var __Handshake = System.BitConverter.ToUInt32(bytes[(offset + 1)..(offset + 1 + 4)]);
             var __Time = System.BitConverter.ToUInt32(bytes[(offset + 5)..(offset + 5 + 4)]);
             var __Delta = System.BitConverter.ToUInt32(bytes[(offset + 9)..(offset + 9 + 4)]);
-            var obj = new GCHandshake(
+            var obj = new QuantumCore.Core.Packets.GCHandshake(
                 __Handshake,
                 __Time
             )
@@ -1417,28 +1417,28 @@ namespace QuantumCore.Core.Packets {
             var __Delta = System.BitConverter.ToUInt32(bytes[(offset + 9)..(offset + 9 + 4)]);
             var __Subs = new []
             {
-                new SomeData
+                new QuantumCore.Core.Packets.SomeData
                 {
                     SomeSubData = System.BitConverter.ToUInt32(bytes[(offset + 13)..(offset + 13 + 4)]),
                     SomeSubData2 = System.BitConverter.ToUInt32(bytes[(offset + 17)..(offset + 17 + 4)])
                 },
-                new SomeData
+                new QuantumCore.Core.Packets.SomeData
                 {
                     SomeSubData = System.BitConverter.ToUInt32(bytes[(offset + 21)..(offset + 21 + 4)]),
                     SomeSubData2 = System.BitConverter.ToUInt32(bytes[(offset + 25)..(offset + 25 + 4)])
                 },
-                new SomeData
+                new QuantumCore.Core.Packets.SomeData
                 {
                     SomeSubData = System.BitConverter.ToUInt32(bytes[(offset + 29)..(offset + 29 + 4)]),
                     SomeSubData2 = System.BitConverter.ToUInt32(bytes[(offset + 33)..(offset + 33 + 4)])
                 },
-                new SomeData
+                new QuantumCore.Core.Packets.SomeData
                 {
                     SomeSubData = System.BitConverter.ToUInt32(bytes[(offset + 37)..(offset + 37 + 4)]),
                     SomeSubData2 = System.BitConverter.ToUInt32(bytes[(offset + 41)..(offset + 41 + 4)])
                 }
             };
-            var obj = new GCHandshake
+            var obj = new QuantumCore.Core.Packets.GCHandshake
             {
                 Handshake = __Handshake,
                 Time = __Time,
@@ -1530,7 +1530,7 @@ namespace QuantumCore.Core.Packets {
             {
                 __Subs[i].SomeSubData = System.BitConverter.ToUInt32(bytes[(offset + 17 + 4 * i)..(offset + 17 + 4 * i + 4)]);
             }
-            var obj = new GCHandshake
+            var obj = new QuantumCore.Core.Packets.GCHandshake
             {
                 Handshake = __Handshake,
                 Time = __Time,
@@ -1621,7 +1621,7 @@ namespace QuantumCore.Core.Packets {
                 System.BitConverter.ToUInt16(bytes[(offset + 36)..(offset + 36 + 2)])
             };
             var __Empire = bytes[(offset + 38)];
-            var obj = new CharacterInfo
+            var obj = new QuantumCore.Core.Packets.CharacterInfo
             {
                 Vid = __Vid,
                 Name = __Name,
@@ -1728,14 +1728,14 @@ namespace QuantumCore.Game.Packets {
         {
             var __CharacterList = new []
             {
-                new Character(
+                new QuantumCore.Game.Packets.Character(
                     System.BitConverter.ToUInt32(bytes[(offset + 1)..(offset + 1 + 4)])
                 ),
-                new Character(
+                new QuantumCore.Game.Packets.Character(
                     System.BitConverter.ToUInt32(bytes[(offset + 5)..(offset + 5 + 4)])
                 )
             };
-            var obj = new Characters
+            var obj = new QuantumCore.Game.Packets.Characters
             {
                 CharacterList = __CharacterList
             };

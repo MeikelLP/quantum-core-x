@@ -48,7 +48,7 @@ internal class DeserializeGenerator
         }
         else
         {
-            source.AppendLine($"{indentPrefix}var obj = new {type.Identifier.Text}");
+            source.AppendLine($"{indentPrefix}var obj = new {_context.GetTypeInfo(type).GetFullName()}");
             source.AppendLine($"{indentPrefix}{{");
             for (var i = 0; i < fields.Count; i++)
             {
@@ -347,7 +347,7 @@ internal class DeserializeGenerator
         {
             throw new InvalidOperationException($"Could not find required type {typeFullName}");
         }
-        sb.Append($"new {type.TypeDeclaration.Identifier.Text}");
+        sb.Append($"new {_context.GetTypeInfo(type.TypeDeclaration).GetFullName()}");
         
         // recursive call to generate lines for each field in sub type
         var members = _context.GetFieldsOfType(type.TypeDeclaration);
