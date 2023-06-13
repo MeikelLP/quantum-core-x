@@ -16,7 +16,7 @@ namespace QuantumCore.Game.World.Entities
     {
         private readonly IAnimationManager _animationManager;
         public uint Vid { get; }
-        public byte Empire { get; protected set; }
+        public byte Empire { get; private set; }
         public abstract EEntityType Type { get; }
         public uint EntityClass { get; protected set; }
         public EEntityState State { get; protected set; }
@@ -83,7 +83,6 @@ namespace QuantumCore.Game.World.Entities
         {
             _animationManager = animationManager;
             Vid = vid;
-            Empire = 0;
         }
 
         protected abstract ValueTask OnNewNearbyEntity(IEntity entity);
