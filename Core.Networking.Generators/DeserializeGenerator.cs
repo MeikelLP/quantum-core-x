@@ -20,7 +20,7 @@ internal class DeserializeGenerator
         var fields = _context.GetFieldsOfType(type);
         var source = new StringBuilder($"        public static {type.Identifier.Text} Deserialize(byte[] bytes, int offset = 0)\r\n");
         source.AppendLine("        {");
-        var staticByteIndex = 1;
+        var staticByteIndex = 0;
         var dynamicByteIndexLocal = new StringBuilder(dynamicByteIndex);
         const string indentPrefix = "            ";
         // declare and initialize variables
@@ -73,6 +73,7 @@ internal class DeserializeGenerator
         source.AppendLine("        }");
         source.AppendLine();
         source.AppendLine(@"        public static T Deserialize<T>(byte[] bytes, int offset = 0)
+            where T : IPacketSerializable
         {
             return (T)(object)Deserialize(bytes, offset);
         }");
