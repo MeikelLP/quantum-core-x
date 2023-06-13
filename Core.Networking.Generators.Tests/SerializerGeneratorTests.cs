@@ -1671,7 +1671,7 @@ namespace QuantumCore.Auth.Packets
 {
     [Packet(0x07, EDirection.Outgoing)]
     [PacketGenerator]
-    public class LoginFailed
+    public partial class LoginFailed
     {
         [Field(1, Length = 9)]
         public string Status { get; set; }
@@ -1680,10 +1680,10 @@ namespace QuantumCore.Auth.Packets
 
         GeneratorDriver driver = CSharpGeneratorDriver.Create(new PacketSerializerGenerator());
 
-        driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out _,
+        driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation,
             out var diagnostics);
 
-        driver.GetRunResult();
+        var result = driver.GetRunResult();
         diagnostics.Should().HaveCount(1);
         diagnostics[0].GetMessage().Should().Be(@"Type LoginFailed is setup incorrectly. Exception: System.InvalidOperationException => Field cannot have a higher number (1) than actual fields count 1");
     }

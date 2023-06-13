@@ -1,5 +1,4 @@
-﻿using System.Collections.Immutable;
-using Microsoft.CodeAnalysis;
+﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -7,87 +6,66 @@ namespace QuantumCore.Networking;
 
 internal class GeneratorContext
 {
-    internal ImmutableArray<SemanticModel> SemanticModels {get;}
-    internal INamedTypeSymbol GeneratorAttributeType {get;}
-    internal INamedTypeSymbol PacketFieldAttributeType {get;}
-    internal INamedTypeSymbol PacketAttributeType { get; }
-    internal IReadOnlyDictionary<string,(TypeDeclarationSyntax TypeDeclaration, bool GenerateFor)> TypesToGenerateFor { get; }
-    internal IReadOnlyDictionary<string,(TypeDeclarationSyntax TypeDeclaration, bool GenerateFor)> RelevantTypes { get; }
+    public SerializerTypeInfo Type { get; }
 
-    internal GeneratorContext(GeneratorExecutionContext context)
+    internal GeneratorContext(SerializerTypeInfo type)
     {
-        GeneratorAttributeType =
-            context.Compilation.GetTypeByMetadataName("QuantumCore.Networking.PacketGeneratorAttribute")!
-                .OriginalDefinition;
-        PacketFieldAttributeType =
-            context.Compilation.GetTypeByMetadataName("QuantumCore.Core.Networking.FieldAttribute")!
-                .OriginalDefinition;
-        PacketAttributeType =
-            context.Compilation.GetTypeByMetadataName("QuantumCore.Core.Networking.PacketAttribute")!
-                .OriginalDefinition;
-        SemanticModels = context.Compilation.SyntaxTrees
-            .Select(x => context.Compilation.GetSemanticModel(x))
-            .ToImmutableArray();
-        RelevantTypes = GetRelevantTypes(context.Compilation.SyntaxTrees);
-        TypesToGenerateFor = RelevantTypes
-            .Where(x => x.Value.GenerateFor)
-            .OrderBy(x => x.Key)
-            .ToImmutableDictionary();
+        Type = type;
     }
 
-    private IReadOnlyDictionary<string, (TypeDeclarationSyntax TypeDeclaration, bool GenerateFor)> GetRelevantTypes(
-        IEnumerable<SyntaxTree> syntaxTrees)
-    {
-        var allTypeDeclarations = syntaxTrees
-            .SelectMany(x => x.GetRoot().DescendantNodes().OfType<TypeDeclarationSyntax>())
-            .ToArray();
-        Dictionary<string, (TypeDeclarationSyntax Type, bool ShouldGenerateFor)> typesToGenerateFor;
-        typesToGenerateFor = allTypeDeclarations
-            .Where(x => x
-                .AttributeLists
-                .SelectMany(list => list.Attributes)
-                .Any(attr => SymbolEqualityComparer.Default.Equals(GetTypeInfo(attr), GeneratorAttributeType))
-            )
-            .GroupBy(x => GetTypeInfo(x).GetFullName()!)
-            .ToDictionary(x => x.Key, x => (Type: x.First(), ShouldGenerateFor: true));
-        var noGeneratorButRelevantTypes = new Dictionary<string, (TypeDeclarationSyntax, bool)>();
-        foreach (var keyPair in typesToGenerateFor)
-        {
-            var fields = GetMemberDefinitions(keyPair.Value.Type);
-            var includedCustomTypes = fields
-                .Select(x =>
-                {
-                    var typeInfo = GetTypeInfo(x);
-                    if (typeInfo is IArrayTypeSymbol arr && IsCustomType(arr.ElementType))
-                    {
-                        return arr.ElementType;
-                    }
-
-                    return typeInfo;
-                })
-                .Where(IsCustomType!)
-                .GroupBy(x => x.GetFullName())
-                .Select(x => x.First())
-                .ToArray();
-            foreach (var includedCustomType in includedCustomTypes)
-            {
-                var includedCustomTypeSymbol = allTypeDeclarations.FirstOrDefault(x =>
-                                     SymbolEqualityComparer.Default.Equals(GetTypeInfo(x), includedCustomType))
-                                 ?? throw new InvalidOperationException(
-                                     "Type cannot be used as it is not defined in the same assembly as packet type");
-                var fullName = GetTypeInfo(includedCustomTypeSymbol)!.GetFullName()!;
-                if (!noGeneratorButRelevantTypes.ContainsKey(fullName))
-                {
-                    noGeneratorButRelevantTypes.Add(fullName, (includedCustomTypeSymbol, false));
-                }
-            }
-        }
-
-        return typesToGenerateFor!
-            .Concat(noGeneratorButRelevantTypes)
-            .OrderBy(x => x.Key)
-            .ToDictionary(x => x.Key, x => x.Value);
-    }
+    // private IReadOnlyDictionary<string, (TypeDeclarationSyntax TypeDeclaration, bool GenerateFor)> GetRelevantTypes(
+    //     IEnumerable<SyntaxTree> syntaxTrees)
+    // {
+    //     var allTypeDeclarations = syntaxTrees
+    //         .SelectMany(x => x.GetRoot().DescendantNodes().OfType<TypeDeclarationSyntax>())
+    //         .ToArray();
+    //     Dictionary<string, (TypeDeclarationSyntax Type, bool ShouldGenerateFor)> typesToGenerateFor;
+    //     typesToGenerateFor = allTypeDeclarations
+    //         .Where(x => x
+    //             .AttributeLists
+    //             .SelectMany(list => list.Attributes)
+    //             .Any(attr => GetTypeInfo(attr).GetFullName(), GeneratorAttributeType)
+    //         )
+    //         .GroupBy(x => GetTypeInfo(x).GetFullName()!)
+    //         .ToDictionary(x => x.Key, x => (Type: x.First(), ShouldGenerateFor: true));
+    //     var noGeneratorButRelevantTypes = new Dictionary<string, (TypeDeclarationSyntax, bool)>();
+    //     foreach (var keyPair in typesToGenerateFor)
+    //     {
+    //         var fields = GetMemberDefinitions(keyPair.Value.Type);
+    //         var includedCustomTypes = fields
+    //             .Select(x =>
+    //             {
+    //                 var typeInfo = GetTypeInfo(x);
+    //                 if (typeInfo is IArrayTypeSymbol arr && IsCustomType(arr.ElementType))
+    //                 {
+    //                     return arr.ElementType;
+    //                 }
+    //
+    //                 return typeInfo;
+    //             })
+    //             .Where(IsCustomType!)
+    //             .GroupBy(x => x.GetFullName())
+    //             .Select(x => x.First())
+    //             .ToArray();
+    //         foreach (var includedCustomType in includedCustomTypes)
+    //         {
+    //             var includedCustomTypeSymbol = allTypeDeclarations.FirstOrDefault(x =>
+    //                                  SymbolEqualityComparer.Default.Equals(GetTypeInfo(x), includedCustomType))
+    //                              ?? throw new InvalidOperationException(
+    //                                  "Type cannot be used as it is not defined in the same assembly as packet type");
+    //             var fullName = GetTypeInfo(includedCustomTypeSymbol)!.GetFullName()!;
+    //             if (!noGeneratorButRelevantTypes.ContainsKey(fullName))
+    //             {
+    //                 noGeneratorButRelevantTypes.Add(fullName, (includedCustomTypeSymbol, false));
+    //             }
+    //         }
+    //     }
+    //
+    //     return typesToGenerateFor!
+    //         .Concat(noGeneratorButRelevantTypes)
+    //         .OrderBy(x => x.Key)
+    //         .ToDictionary(x => x.Key, x => x.Value);
+    // }
 
     private IEnumerable<TypeSyntax> GetMemberDefinitions(TypeDeclarationSyntax type)
     {
@@ -128,8 +106,7 @@ internal class GeneratorContext
                 var fieldAttrArgs = x.AttributeLists
                     .SelectMany(attr => attr.Attributes)
                     .FirstOrDefault(attr =>
-                        SymbolEqualityComparer.Default.Equals(GetTypeInfo(attr),
-                            PacketFieldAttributeType)
+                        GetTypeInfo(attr).GetFullName() == "QuantumCore.Core.Networking.FieldAttribute"
                     )?.ArgumentList!.Arguments;
                 var orderStr = fieldAttrArgs?[0].Expression.ToString();
                 var lengthAttrStr = fieldAttrArgs?.FirstOrDefault(par => par.NameEquals?.Name.Identifier.Text == "Length")?.Expression.ToString();
@@ -273,13 +250,8 @@ internal class GeneratorContext
                 if (IsCustomType(semanticType))
                 {
                     // probably a custom type
-                    if (!RelevantTypes.TryGetValue(semanticType.GetFullName()!, out var customType))
-                    {
-                        throw new InvalidOperationException(
-                            $"Could not find syntax tree for custom type {semanticType.GetFullName()}");
-                    }
-
-                    var fields = GetFieldsOfType(customType.TypeDeclaration);
+                    var customType = GetTypeDeclaration(semanticType);
+                    var fields = GetFieldsOfType(customType);
                     return GetStaticSizeOfType(fields);
                 }
                 else if (semanticType is IArrayTypeSymbol arr)
@@ -302,37 +274,37 @@ internal class GeneratorContext
                 throw new NotImplementedException($"Don't know how to handle {semanticType.Name}");
         }
     }
-    
+
+    public TypeDeclarationSyntax GetTypeDeclaration(ITypeSymbol semanticType)
+    {
+        return semanticType.DeclaringSyntaxReferences
+            .Select(x => x.GetSyntax())
+            .OfType<TypeDeclarationSyntax>()
+            .First();
+    }
+
     internal ITypeSymbol? GetTypeInfo(BaseTypeDeclarationSyntax type)
     {
-        return SemanticModels.Select(x =>
+        if (Type.SemanticModel.SyntaxTree == type.SyntaxTree)
         {
-            try
-            {
-                return x.GetDeclaredSymbol(type);
-            }
-            catch (ArgumentException)
-            {
-                // not found - try next
-                return null;
-            }
-        }).FirstOrDefault(x => x is not null);
+            return Type.SemanticModel.GetDeclaredSymbol(type);
+        }
+        else
+        {
+            return Type.SemanticModel.Compilation.GetSemanticModel(type.SyntaxTree).GetDeclaredSymbol(type);
+        }
     }
 
     internal ITypeSymbol? GetTypeInfo(SyntaxNode type)
     {
-        return SemanticModels.FirstOrDefault(x =>
+        if (Type.SemanticModel.SyntaxTree == type.SyntaxTree)
         {
-            try
-            {
-                return x.GetTypeInfo(type).Type != null;
-            }
-            catch (ArgumentException)
-            {
-                // not found in this syntax tree - try next
-                return false;
-            }
-        })?.GetTypeInfo(type).Type;
+            return Type.SemanticModel.GetTypeInfo(type).Type;
+        }
+        else
+        {
+            return Type.SemanticModel.Compilation.GetSemanticModel(type.SyntaxTree).GetTypeInfo(type).Type;
+        }
     }
 
     internal static int GetStaticSizeOfType(IReadOnlyList<FieldData> fields)
@@ -367,8 +339,7 @@ internal class GeneratorContext
             .FirstOrDefault(a => a
                 .DescendantTokens()
                 .Any(dt => dt.IsKind(SyntaxKind.IdentifierToken) &&
-                           SymbolEqualityComparer.Default.Equals(GetTypeInfo(dt.Parent!),
-                               PacketAttributeType)));
+                           GetTypeInfo(dt.Parent!).GetFullName() == "QuantumCore.Core.Networking.PacketAttribute"));
 
         if (attr is null)
         {

@@ -5,8 +5,8 @@ using Microsoft.CodeAnalysis.Text;
 
 namespace QuantumCore.Networking;
 
-[Generator]
-public class PacketSerializerGenerator : ISourceGenerator
+[Generator(LanguageNames.CSharp)]
+public class PacketSerializerGenerator : IIncrementalGenerator
 {
     private SerializeGenerator _serializeGenerator = null!;
     private DeserializeGenerator _deserializeGenerator = null!;
@@ -14,34 +14,7 @@ public class PacketSerializerGenerator : ISourceGenerator
 
     public void Execute(GeneratorExecutionContext context)
     {
-        _generatorContext = new GeneratorContext(context);
-        _serializeGenerator = new SerializeGenerator(_generatorContext);
-        _deserializeGenerator = new DeserializeGenerator(_generatorContext);
-        foreach (var pair in _generatorContext.TypesToGenerateFor)
-        {
-            try
-            {
-                var (name, source) = GenerateFile(pair.Value.TypeDeclaration, pair.Value.TypeDeclaration.SyntaxTree);
-
-                context.AddSource($"{name}.g.cs", SourceText.From(source, Encoding.UTF8));
-            }
-            catch (DiagnosticException e)
-            {
-                context.ReportDiagnostic(e.Diagnostic);
-            }
-            catch (Exception e)
-            {
-                context.ReportDiagnostic(Diagnostic.Create(
-                    new DiagnosticDescriptor(
-                        "QCX-G000001",
-                        "Failed to generate packet serializer",
-                        "Type {0} is setup incorrectly. Exception: {1} => {2}",
-                        "generators",
-                        DiagnosticSeverity.Error,
-                        true), pair.Value.TypeDeclaration.GetLocation(), pair.Value.TypeDeclaration.Identifier.Text,
-                    e.GetType(), e.Message));
-            }
-        }
+        
     }
 
     private (string Name, string Source) GenerateFile(TypeDeclarationSyntax type, SyntaxTree tree)
@@ -72,9 +45,68 @@ public class PacketSerializerGenerator : ISourceGenerator
     }
 
     // TODO deserialize
-
-    public void Initialize(GeneratorInitializationContext context)
+    
+    private static bool CouldBeEnumerationAsync(
+        SyntaxNode syntaxNode,
+        CancellationToken cancellationToken)
     {
+        return syntaxNode is StructDeclarationSyntax or ClassDeclarationSyntax or RecordDeclarationSyntax &&
+               IsPartial((TypeDeclarationSyntax)syntaxNode);
+    }
+
+    private static bool IsPartial(TypeDeclarationSyntax declaration)
+    {
+        return declaration.Modifiers.Any(x => x.Text == "partial");
+    }
+    
+    private static SerializerTypeInfo GetTypeInfo(
+        GeneratorAttributeSyntaxContext context,
+        CancellationToken cancellationToken)
+    {
+        return new SerializerTypeInfo((INamedTypeSymbol)context.TargetSymbol, context.TargetNode, context.SemanticModel);
+    }
+
+    public void Initialize(IncrementalGeneratorInitializationContext context)
+    {
+        var assemblyName = context.CompilationProvider.Select(static (c, _) => c.AssemblyName);
+        var sourceFiles = context.SyntaxProvider
+            .ForAttributeWithMetadataName("QuantumCore.Networking.PacketGeneratorAttribute", CouldBeEnumerationAsync, GetTypeInfo)
+            .Collect()
+            .SelectMany((info, _) => info.Distinct());
+        
+        var combined = sourceFiles.Combine(assemblyName);
+
+        context.RegisterSourceOutput(combined, (spc, compilationPair) =>
+        {
+            var (typeInfo, assembly) = compilationPair;
+            _generatorContext = new GeneratorContext(typeInfo);
+            _serializeGenerator = new SerializeGenerator(_generatorContext);
+            _deserializeGenerator = new DeserializeGenerator(_generatorContext);
+            var typeDeclarationSyntax = (TypeDeclarationSyntax)_generatorContext.Type.Node;
+            try
+            {
+                var (name, source) = GenerateFile(typeDeclarationSyntax, _generatorContext.Type.Node.SyntaxTree);
+
+                spc.AddSource($"{name}.g.cs", SourceText.From(source, Encoding.UTF8));
+            }
+            catch (DiagnosticException e)
+            {
+                spc.ReportDiagnostic(e.Diagnostic);
+            }
+            catch (Exception e)
+            {
+                spc.ReportDiagnostic(Diagnostic.Create(
+                    new DiagnosticDescriptor(
+                        "QCX-G000001",
+                        "Failed to generate packet serializer",
+                        "Type {0} is setup incorrectly. Exception: {1} => {2}",
+                        "generators",
+                        DiagnosticSeverity.Error,
+                        true), typeDeclarationSyntax.GetLocation(), typeDeclarationSyntax.Identifier.Text,
+                    e.GetType(), e.Message));
+            }
+            
+        });
     }
 
     private static void ApplyHeader(StringBuilder sb, string typeKeywords, string ns, string name)
@@ -86,5 +118,19 @@ namespace {ns} {{
 
     public partial {typeKeywords} {name} : IPacketSerializable
     {{");
+    }
+}
+
+internal class SerializerTypeInfo
+{
+    public INamedTypeSymbol Symbol { get; }
+    public SyntaxNode Node { get; }
+    public SemanticModel SemanticModel { get; }
+
+    public SerializerTypeInfo(INamedTypeSymbol symbol, SyntaxNode node, SemanticModel semanticModel)
+    {
+        Symbol = symbol;
+        Node = node;
+        SemanticModel = semanticModel;
     }
 }

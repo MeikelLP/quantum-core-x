@@ -144,14 +144,8 @@ internal class SerializeGenerator
         if (field.IsCustom)
         {
             // handle custom type
-            var fieldTypeFullName = field.SemanticType.GetFullName();
-            if (!_context.RelevantTypes.TryGetValue(fieldTypeFullName!, out var type))
-            {
-                throw new InvalidOperationException(
-                    $"Could not find type declaration for type {fieldTypeFullName}");
-            }
-
-            var subFields = _context.GetFieldsOfType(type.TypeDeclaration);
+            var type = _context.GetTypeDeclaration(field.SemanticType);
+            var subFields = _context.GetFieldsOfType(type);
             var lines = new List<string>();
             foreach (var subField in subFields)
             {
@@ -207,13 +201,9 @@ internal class SerializeGenerator
 
             if (GeneratorContext.IsCustomType(arr.ElementType))
             {
-                if (!_context.RelevantTypes.TryGetValue(subTypeFullName, out var subType))
-                {
-                    throw new InvalidOperationException($"Could not find required type {subTypeFullName}");
-                }
-
                 // recursive call to generate lines for each field in sub type
-                var subTypes = _context.GetFieldsOfType(subType.TypeDeclaration);
+                var subType = _context.GetTypeDeclaration(arr.ElementType);
+                var subTypes = _context.GetFieldsOfType(subType);
 
                 for (var ii = 0; ii < subTypes.Count; ii++)
                 {
@@ -258,13 +248,9 @@ internal class SerializeGenerator
             {
                 if (GeneratorContext.IsCustomType(arr.ElementType))
                 {
-                    if (!_context.RelevantTypes.TryGetValue(subTypeFullName, out var subType))
-                    {
-                        throw new InvalidOperationException($"Could not find required type {subTypeFullName}");
-                    }
-
                     // recursive call to generate lines for each field in sub type
-                    var members = _context.GetFieldsOfType(subType.TypeDeclaration);
+                    var subType = _context.GetTypeDeclaration(arr.ElementType);
+                    var members = _context.GetFieldsOfType(subType);
                     for (var ii = 0; ii < members.Count; ii++)
                     {
                         var member = members[ii];

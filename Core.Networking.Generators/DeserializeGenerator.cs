@@ -43,7 +43,7 @@ internal class DeserializeGenerator
         dynamicByteIndexLocal = new StringBuilder(dynamicByteIndex);
         if (type is RecordDeclarationSyntax)
         {
-            var line = GetLineForInitializer(_context.GetTypeInfo(type).GetFullName()!, ref staticByteIndex, dynamicByteIndexLocal, "", indentPrefix, false);
+            var line = GetLineForInitializer(_context.GetTypeInfo(type)!, ref staticByteIndex, dynamicByteIndexLocal, "", indentPrefix, false);
             source.AppendLine($"{indentPrefix}var obj = {line};");
         }
         else
@@ -223,7 +223,7 @@ internal class DeserializeGenerator
         if (field.IsCustom)
         {
             // handle custom type
-            return GetLineForInitializer(field.SemanticType.GetFullName()!, ref offset, dynamicOffset, tempDynamicOffset,
+            return GetLineForInitializer(field.SemanticType, ref offset, dynamicOffset, tempDynamicOffset,
                 indentPrefix, isVariableMode);
         }
         else if (field.SemanticType is INamedTypeSymbol namedTypeSymbol)
@@ -273,11 +273,8 @@ internal class DeserializeGenerator
             var variableName = GetVariableNameForExpression(field.Name);
             if (GeneratorContext.IsCustomType(arr.ElementType))
             {
-                if (!_context.RelevantTypes.TryGetValue(arr.ElementType.GetFullName()!, out var type))
-                {
-                    throw new InvalidOperationException($"Type {arr.ElementType.GetFullName()} was not found in relevant types");
-                }
-                var subFields = _context.GetFieldsOfType(type.TypeDeclaration);
+                var type = _context.GetTypeDeclaration(arr.ElementType);
+                var subFields = _context.GetFieldsOfType(type);
                 foreach (var subField in subFields)
                 {
                     var line = GetMethodLine(subField, ref offset, dynamicOffset, $"{tempDynamicOffset} + {field.ElementSize} * i", indent, true);
@@ -315,7 +312,7 @@ internal class DeserializeGenerator
             {
                 if (GeneratorContext.IsCustomType(arr.ElementType))
                 {
-                    var initializer = GetLineForInitializer(subTypeFullName, ref offset, dynamicOffset, tempDynamicOffset, $"    {indentPrefix}", isVariableMode);
+                    var initializer = GetLineForInitializer(arr.ElementType, ref offset, dynamicOffset, tempDynamicOffset, $"    {indentPrefix}", isVariableMode);
                     sb.Append($"{indentPrefix}    {initializer}");
                 }
                 else
@@ -340,18 +337,15 @@ internal class DeserializeGenerator
         }
     }
 
-    private string GetLineForInitializer(string typeFullName, ref int offset, StringBuilder dynamicOffset, string tempDynamicOffset, string indentPrefix, bool isVariableMode)
+    private string GetLineForInitializer(ITypeSymbol t, ref int offset, StringBuilder dynamicOffset, string tempDynamicOffset, string indentPrefix, bool isVariableMode)
     {
         var sb = new StringBuilder();
 
-        if (!_context.RelevantTypes.TryGetValue(typeFullName, out var type))
-        {
-            throw new InvalidOperationException($"Could not find required type {typeFullName}");
-        }
-        sb.Append($"new {_context.GetTypeInfo(type.TypeDeclaration).GetFullName()}");
+        var type = _context.GetTypeDeclaration(t);
+        sb.Append($"new {_context.GetTypeInfo(type).GetFullName()}");
         
         // recursive call to generate lines for each field in sub type
-        var members = _context.GetFieldsOfType(type.TypeDeclaration);
+        var members = _context.GetFieldsOfType(type);
         var recordParamMembers = members.Where(x => x.IsRecordParameter).ToArray();
         var propertyMembers = members.Where(x => !x.IsReadonly && !x.IsRecordParameter).ToArray();
         if (recordParamMembers.Length > 0)
