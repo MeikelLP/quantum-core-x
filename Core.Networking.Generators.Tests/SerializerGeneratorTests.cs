@@ -62,6 +62,8 @@ namespace QuantumCore.Core.Packets {
 
     public partial record struct GCHandshake : IPacketSerializable
     {
+        public static byte Header => 0xff;
+
         public void Serialize(byte[] bytes, in int offset = 0)
         {
             bytes[offset + 0] = 0xff;
@@ -143,6 +145,8 @@ namespace QuantumCore.Core.Packets {
 
     public partial record GCHandshake : IPacketSerializable
     {
+        public static byte Header => 0xff;
+
         public void Serialize(byte[] bytes, in int offset = 0)
         {
             bytes[offset + 0] = 0xff;
@@ -228,6 +232,8 @@ namespace QuantumCore.Core.Packets {
 
     public partial record GCHandshake : IPacketSerializable
     {
+        public static byte Header => 0xff;
+
         public void Serialize(byte[] bytes, in int offset = 0)
         {
             bytes[offset + 0] = 0xff;
@@ -304,6 +310,8 @@ namespace QuantumCore.Core.Packets {
 
     public partial record GCHandshake : IPacketSerializable
     {
+        public static byte Header => 0xff;
+
         public void Serialize(byte[] bytes, in int offset = 0)
         {
             bytes[offset + 0] = 0xff;
@@ -382,6 +390,8 @@ namespace QuantumCore.Core.Packets {
 
     public partial record struct GCHandshake : IPacketSerializable
     {
+        public static byte Header => 0xff;
+
         public void Serialize(byte[] bytes, in int offset = 0)
         {
             bytes[offset + 0] = 0xff;
@@ -465,6 +475,8 @@ namespace QuantumCore.Core.Packets {
 
     public partial record struct GCHandshake : IPacketSerializable
     {
+        public static byte Header => 0xff;
+
         public void Serialize(byte[] bytes, in int offset = 0)
         {
             bytes[offset + 0] = 0xff;
@@ -542,6 +554,8 @@ namespace QuantumCore.Core.Packets {
 
     public partial record struct GCHandshake : IPacketSerializable
     {
+        public static byte Header => 0xff;
+
         public void Serialize(byte[] bytes, in int offset = 0)
         {
             bytes[offset + 0] = 0xff;
@@ -619,6 +633,8 @@ namespace QuantumCore.Core.Packets {
 
     public partial record struct GCHandshake : IPacketSerializable
     {
+        public static byte Header => 0xff;
+
         public void Serialize(byte[] bytes, in int offset = 0)
         {
             bytes[offset + 0] = 0xff;
@@ -693,6 +709,8 @@ namespace QuantumCore.Core.Packets {
 
     public partial record struct GCHandshake : IPacketSerializable
     {
+        public static byte Header => 0xff;
+
         public void Serialize(byte[] bytes, in int offset = 0)
         {
             bytes[offset + 0] = 0xff;
@@ -775,6 +793,8 @@ namespace QuantumCore.Core.Packets {
 
     public partial record struct GCHandshake : IPacketSerializable
     {
+        public static byte Header => 0xff;
+
         public void Serialize(byte[] bytes, in int offset = 0)
         {
             bytes[offset + 0] = 0xff;
@@ -851,6 +871,8 @@ namespace QuantumCore.Core.Packets {
 
     public partial record struct GCHandshake : IPacketSerializable
     {
+        public static byte Header => 0xff;
+
         public void Serialize(byte[] bytes, in int offset = 0)
         {
             bytes[offset + 0] = 0xff;
@@ -963,6 +985,8 @@ namespace QuantumCore.Core.Packets {
 
     public partial record struct GCHandshake : IPacketSerializable
     {
+        public static byte Header => 0xff;
+
         public void Serialize(byte[] bytes, in int offset = 0)
         {
             bytes[offset + 0] = 0xff;
@@ -1045,6 +1069,8 @@ namespace QuantumCore.Core.Packets {
 
     public partial record struct GCHandshake : IPacketSerializable
     {
+        public static byte Header => 0xff;
+
         public void Serialize(byte[] bytes, in int offset = 0)
         {
             bytes[offset + 0] = 0xff;
@@ -1096,6 +1122,8 @@ namespace QuantumCore.Core.Packets {
 
     public partial record struct GCPhase : IPacketSerializable
     {
+        public static byte Header => 0xfd;
+
         public void Serialize(byte[] bytes, in int offset = 0)
         {
             bytes[offset + 0] = 0xfd;
@@ -1165,6 +1193,8 @@ namespace QuantumCore.Core.Packets {
 
     public partial struct GCHandshake : IPacketSerializable
     {
+        public static byte Header => 0xff;
+
         public void Serialize(byte[] bytes, in int offset = 0)
         {
             bytes[offset + 0] = 0xff;
@@ -1250,6 +1280,8 @@ namespace QuantumCore.Core.Packets {
 
     public partial class GCHandshake : IPacketSerializable
     {
+        public static byte Header => 0xff;
+
         public void Serialize(byte[] bytes, in int offset = 0)
         {
             bytes[offset + 0] = 0xff;
@@ -1340,6 +1372,8 @@ namespace QuantumCore.Core.Packets {
 
     public partial class GCHandshake : IPacketSerializable
     {
+        public static byte Header => 0xff;
+
         public void Serialize(byte[] bytes, in int offset = 0)
         {
             bytes[offset + 0] = 0xff;
@@ -1433,6 +1467,8 @@ namespace QuantumCore.Core.Packets {
 
     public partial record GCHandshake : IPacketSerializable
     {
+        public static byte Header => 0xff;
+
         public void Serialize(byte[] bytes, in int offset = 0)
         {
             bytes[offset + 0] = 0xff;
@@ -1525,6 +1561,8 @@ namespace QuantumCore.Core.Packets {
 
     public partial class GCHandshake : IPacketSerializable
     {
+        public static byte Header => 0xff;
+
         public void Serialize(byte[] bytes, in int offset = 0)
         {
             bytes[offset + 0] = 0xff;
@@ -1672,6 +1710,8 @@ namespace QuantumCore.Core.Packets {
 
     public partial class GCHandshake : IPacketSerializable
     {
+        public static byte Header => 0xff;
+
         public void Serialize(byte[] bytes, in int offset = 0)
         {
             bytes[offset + 0] = 0xff;
@@ -1780,6 +1820,8 @@ namespace QuantumCore.Core.Packets {
 
     public partial class CharacterInfo : IPacketSerializable
     {
+        public static byte Header => 0x88;
+
         public void Serialize(byte[] bytes, in int offset = 0)
         {
             bytes[offset + 0] = 0x88;
@@ -1909,6 +1951,8 @@ namespace QuantumCore.Game.Packets {
 
     public partial record struct Characters : IPacketSerializable
     {
+        public static byte Header => 0x20;
+
         public void Serialize(byte[] bytes, in int offset = 0)
         {
             bytes[offset + 0] = 0x20;
