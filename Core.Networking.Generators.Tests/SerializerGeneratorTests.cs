@@ -65,9 +65,18 @@ namespace QuantumCore.Core.Packets {
         public void Serialize(byte[] bytes, in int offset = 0)
         {
             bytes[offset + 0] = 0xff;
-            System.BitConverter.GetBytes(this.Handshake).CopyTo(bytes, offset + 1);
-            System.BitConverter.GetBytes(this.Time).CopyTo(bytes, offset + 5);
-            System.BitConverter.GetBytes(this.Delta).CopyTo(bytes, offset + 9);
+            bytes[offset + 1] = (byte)(this.Handshake >> 0);
+            bytes[offset + 2] = (byte)(this.Handshake >> 8);
+            bytes[offset + 3] = (byte)(this.Handshake >> 16);
+            bytes[offset + 4] = (byte)(this.Handshake >> 24);
+            bytes[offset + 5] = (byte)(this.Time >> 0);
+            bytes[offset + 6] = (byte)(this.Time >> 8);
+            bytes[offset + 7] = (byte)(this.Time >> 16);
+            bytes[offset + 8] = (byte)(this.Time >> 24);
+            bytes[offset + 9] = (byte)(this.Delta >> 0);
+            bytes[offset + 10] = (byte)(this.Delta >> 8);
+            bytes[offset + 11] = (byte)(this.Delta >> 16);
+            bytes[offset + 12] = (byte)(this.Delta >> 24);
         }
 
         public ushort GetSize()
@@ -137,9 +146,18 @@ namespace QuantumCore.Core.Packets {
         public void Serialize(byte[] bytes, in int offset = 0)
         {
             bytes[offset + 0] = 0xff;
-            System.BitConverter.GetBytes(this.Handshake).CopyTo(bytes, offset + 1);
-            System.BitConverter.GetBytes(this.Time).CopyTo(bytes, offset + 5);
-            System.BitConverter.GetBytes(this.Delta).CopyTo(bytes, offset + 9);
+            bytes[offset + 1] = (byte)(this.Handshake >> 0);
+            bytes[offset + 2] = (byte)(this.Handshake >> 8);
+            bytes[offset + 3] = (byte)(this.Handshake >> 16);
+            bytes[offset + 4] = (byte)(this.Handshake >> 24);
+            bytes[offset + 5] = (byte)(this.Time >> 0);
+            bytes[offset + 6] = (byte)(this.Time >> 8);
+            bytes[offset + 7] = (byte)(this.Time >> 16);
+            bytes[offset + 8] = (byte)(this.Time >> 24);
+            bytes[offset + 9] = (byte)(this.Delta >> 0);
+            bytes[offset + 10] = (byte)(this.Delta >> 8);
+            bytes[offset + 11] = (byte)(this.Delta >> 16);
+            bytes[offset + 12] = (byte)(this.Delta >> 24);
         }
 
         public ushort GetSize()
@@ -213,8 +231,11 @@ namespace QuantumCore.Core.Packets {
         public void Serialize(byte[] bytes, in int offset = 0)
         {
             bytes[offset + 0] = 0xff;
-            System.BitConverter.GetBytes(this.Handshake).CopyTo(bytes, offset + 1);
-            bytes[offset + 5] = (byte)this.Type;
+            bytes[offset + 1] = (byte)(this.Handshake >> 0);
+            bytes[offset + 2] = (byte)(this.Handshake >> 8);
+            bytes[offset + 3] = (byte)(this.Handshake >> 16);
+            bytes[offset + 4] = (byte)(this.Handshake >> 24);
+            bytes[offset + 5] = (System.Byte)this.Type;
         }
 
         public ushort GetSize()
@@ -286,8 +307,14 @@ namespace QuantumCore.Core.Packets {
         public void Serialize(byte[] bytes, in int offset = 0)
         {
             bytes[offset + 0] = 0xff;
-            System.BitConverter.GetBytes(this.Handshake).CopyTo(bytes, offset + 1);
-            System.BitConverter.GetBytes((System.Int32)this.Type).CopyTo(bytes, offset + 5);
+            bytes[offset + 1] = (byte)(this.Handshake >> 0);
+            bytes[offset + 2] = (byte)(this.Handshake >> 8);
+            bytes[offset + 3] = (byte)(this.Handshake >> 16);
+            bytes[offset + 4] = (byte)(this.Handshake >> 24);
+            bytes[offset + 5] = (byte)((System.Int32)this.Type >> 0);
+            bytes[offset + 6] = (byte)((System.Int32)this.Type >> 8);
+            bytes[offset + 7] = (byte)((System.Int32)this.Type >> 16);
+            bytes[offset + 8] = (byte)((System.Int32)this.Type >> 24);
         }
 
         public ushort GetSize()
@@ -358,9 +385,18 @@ namespace QuantumCore.Core.Packets {
         public void Serialize(byte[] bytes, in int offset = 0)
         {
             bytes[offset + 0] = 0xff;
-            System.BitConverter.GetBytes(this.Size).CopyTo(bytes, offset + 1);
-            System.BitConverter.GetBytes(this.Handshake).CopyTo(bytes, offset + 5);
-            System.BitConverter.GetBytes(this.Time).CopyTo(bytes, offset + 9);
+            bytes[offset + 1] = (byte)(this.Size >> 0);
+            bytes[offset + 2] = (byte)(this.Size >> 8);
+            bytes[offset + 3] = (byte)(this.Size >> 16);
+            bytes[offset + 4] = (byte)(this.Size >> 24);
+            bytes[offset + 5] = (byte)(this.Handshake >> 0);
+            bytes[offset + 6] = (byte)(this.Handshake >> 8);
+            bytes[offset + 7] = (byte)(this.Handshake >> 16);
+            bytes[offset + 8] = (byte)(this.Handshake >> 24);
+            bytes[offset + 9] = (byte)(this.Time >> 0);
+            bytes[offset + 10] = (byte)(this.Time >> 8);
+            bytes[offset + 11] = (byte)(this.Time >> 16);
+            bytes[offset + 12] = (byte)(this.Time >> 24);
         }
 
         public ushort GetSize()
@@ -433,7 +469,10 @@ namespace QuantumCore.Core.Packets {
         {
             bytes[offset + 0] = 0xff;
             bytes[offset + 1] = this.Type;
-            System.BitConverter.GetBytes(this.Size).CopyTo(bytes, offset + 2);
+            bytes[offset + 2] = (byte)(this.Size >> 0);
+            bytes[offset + 3] = (byte)(this.Size >> 8);
+            bytes[offset + 4] = (byte)(this.Size >> 16);
+            bytes[offset + 5] = (byte)(this.Size >> 24);
             System.Text.Encoding.ASCII.GetBytes(this.Message).CopyTo(bytes, offset + 6);
         }
 
@@ -507,7 +546,10 @@ namespace QuantumCore.Core.Packets {
         {
             bytes[offset + 0] = 0xff;
             bytes[offset + 1] = this.Type;
-            System.BitConverter.GetBytes(this.Size).CopyTo(bytes, offset + 2);
+            bytes[offset + 2] = (byte)(this.Size >> 0);
+            bytes[offset + 3] = (byte)(this.Size >> 8);
+            bytes[offset + 4] = (byte)(this.Size >> 16);
+            bytes[offset + 5] = (byte)(this.Size >> 24);
             this.Flags.CopyTo(bytes, offset + 6);
         }
 
@@ -655,8 +697,10 @@ namespace QuantumCore.Core.Packets {
         {
             bytes[offset + 0] = 0xff;
             bytes[offset + 1] = this.Type;
-            System.BitConverter.GetBytes(this.Flags[0]).CopyTo(bytes, offset + 2);
-            System.BitConverter.GetBytes(this.Flags[1]).CopyTo(bytes, offset + 4);
+            bytes[offset + 2] = (byte)(this.Flags[0] >> 0);
+            bytes[offset + 3] = (byte)(this.Flags[0] >> 8);
+            bytes[offset + 4] = (byte)(this.Flags[1] >> 0);
+            bytes[offset + 5] = (byte)(this.Flags[1] >> 8);
         }
 
         public ushort GetSize()
@@ -811,10 +855,14 @@ namespace QuantumCore.Core.Packets {
         {
             bytes[offset + 0] = 0xff;
             bytes[offset + 1] = this.Type;
-            System.BitConverter.GetBytes(this.Size).CopyTo(bytes, offset + 2);
+            bytes[offset + 2] = (byte)(this.Size >> 0);
+            bytes[offset + 3] = (byte)(this.Size >> 8);
+            bytes[offset + 4] = (byte)(this.Size >> 16);
+            bytes[offset + 5] = (byte)(this.Size >> 24);
             for (var i = 0; i < this.Flags.Length; i++)
             {
-                System.BitConverter.GetBytes(this.Flags[i]).CopyTo(bytes, offset + 6 + i * 2);
+                bytes[offset + 6 + i * 2] = (byte)(this.Flags[i] >> 0);
+                bytes[offset + 7 + i * 2] = (byte)(this.Flags[i] >> 8);
             }
         }
 
@@ -919,7 +967,10 @@ namespace QuantumCore.Core.Packets {
         {
             bytes[offset + 0] = 0xff;
             bytes[offset + 1] = this.Type;
-            System.BitConverter.GetBytes(this.Size).CopyTo(bytes, offset + 2);
+            bytes[offset + 2] = (byte)(this.Size >> 0);
+            bytes[offset + 3] = (byte)(this.Size >> 8);
+            bytes[offset + 4] = (byte)(this.Size >> 16);
+            bytes[offset + 5] = (byte)(this.Size >> 24);
             System.Text.Encoding.ASCII.GetBytes(this.Message).CopyTo(bytes, offset + 6);
             bytes[offset + 6 + this.Message.Length] = this.Location;
         }
@@ -997,9 +1048,18 @@ namespace QuantumCore.Core.Packets {
         public void Serialize(byte[] bytes, in int offset = 0)
         {
             bytes[offset + 0] = 0xff;
-            System.BitConverter.GetBytes(this.Handshake).CopyTo(bytes, offset + 1);
-            System.BitConverter.GetBytes(this.Time).CopyTo(bytes, offset + 5);
-            System.BitConverter.GetBytes(this.Delta).CopyTo(bytes, offset + 9);
+            bytes[offset + 1] = (byte)(this.Handshake >> 0);
+            bytes[offset + 2] = (byte)(this.Handshake >> 8);
+            bytes[offset + 3] = (byte)(this.Handshake >> 16);
+            bytes[offset + 4] = (byte)(this.Handshake >> 24);
+            bytes[offset + 5] = (byte)(this.Time >> 0);
+            bytes[offset + 6] = (byte)(this.Time >> 8);
+            bytes[offset + 7] = (byte)(this.Time >> 16);
+            bytes[offset + 8] = (byte)(this.Time >> 24);
+            bytes[offset + 9] = (byte)(this.Delta >> 0);
+            bytes[offset + 10] = (byte)(this.Delta >> 8);
+            bytes[offset + 11] = (byte)(this.Delta >> 16);
+            bytes[offset + 12] = (byte)(this.Delta >> 24);
         }
 
         public ushort GetSize()
@@ -1108,9 +1168,18 @@ namespace QuantumCore.Core.Packets {
         public void Serialize(byte[] bytes, in int offset = 0)
         {
             bytes[offset + 0] = 0xff;
-            System.BitConverter.GetBytes(this.Handshake).CopyTo(bytes, offset + 1);
-            System.BitConverter.GetBytes(this.Time).CopyTo(bytes, offset + 5);
-            System.BitConverter.GetBytes(this.Delta).CopyTo(bytes, offset + 9);
+            bytes[offset + 1] = (byte)(this.Handshake >> 0);
+            bytes[offset + 2] = (byte)(this.Handshake >> 8);
+            bytes[offset + 3] = (byte)(this.Handshake >> 16);
+            bytes[offset + 4] = (byte)(this.Handshake >> 24);
+            bytes[offset + 5] = (byte)(this.Time >> 0);
+            bytes[offset + 6] = (byte)(this.Time >> 8);
+            bytes[offset + 7] = (byte)(this.Time >> 16);
+            bytes[offset + 8] = (byte)(this.Time >> 24);
+            bytes[offset + 9] = (byte)(this.Delta >> 0);
+            bytes[offset + 10] = (byte)(this.Delta >> 8);
+            bytes[offset + 11] = (byte)(this.Delta >> 16);
+            bytes[offset + 12] = (byte)(this.Delta >> 24);
         }
 
         public ushort GetSize()
@@ -1184,9 +1253,18 @@ namespace QuantumCore.Core.Packets {
         public void Serialize(byte[] bytes, in int offset = 0)
         {
             bytes[offset + 0] = 0xff;
-            System.BitConverter.GetBytes(this.Handshake).CopyTo(bytes, offset + 1);
-            System.BitConverter.GetBytes(this.Time).CopyTo(bytes, offset + 5);
-            System.BitConverter.GetBytes(this.Delta).CopyTo(bytes, offset + 9);
+            bytes[offset + 1] = (byte)(this.Handshake >> 0);
+            bytes[offset + 2] = (byte)(this.Handshake >> 8);
+            bytes[offset + 3] = (byte)(this.Handshake >> 16);
+            bytes[offset + 4] = (byte)(this.Handshake >> 24);
+            bytes[offset + 5] = (byte)(this.Time >> 0);
+            bytes[offset + 6] = (byte)(this.Time >> 8);
+            bytes[offset + 7] = (byte)(this.Time >> 16);
+            bytes[offset + 8] = (byte)(this.Time >> 24);
+            bytes[offset + 9] = (byte)(this.Delta >> 0);
+            bytes[offset + 10] = (byte)(this.Delta >> 8);
+            bytes[offset + 11] = (byte)(this.Delta >> 16);
+            bytes[offset + 12] = (byte)(this.Delta >> 24);
         }
 
         public ushort GetSize()
@@ -1265,10 +1343,22 @@ namespace QuantumCore.Core.Packets {
         public void Serialize(byte[] bytes, in int offset = 0)
         {
             bytes[offset + 0] = 0xff;
-            System.BitConverter.GetBytes(this.Handshake).CopyTo(bytes, offset + 1);
-            System.BitConverter.GetBytes(this.Time).CopyTo(bytes, offset + 5);
-            System.BitConverter.GetBytes(this.Delta).CopyTo(bytes, offset + 9);
-            System.BitConverter.GetBytes(this.Sub.SomeSubData).CopyTo(bytes, offset + 13);
+            bytes[offset + 1] = (byte)(this.Handshake >> 0);
+            bytes[offset + 2] = (byte)(this.Handshake >> 8);
+            bytes[offset + 3] = (byte)(this.Handshake >> 16);
+            bytes[offset + 4] = (byte)(this.Handshake >> 24);
+            bytes[offset + 5] = (byte)(this.Time >> 0);
+            bytes[offset + 6] = (byte)(this.Time >> 8);
+            bytes[offset + 7] = (byte)(this.Time >> 16);
+            bytes[offset + 8] = (byte)(this.Time >> 24);
+            bytes[offset + 9] = (byte)(this.Delta >> 0);
+            bytes[offset + 10] = (byte)(this.Delta >> 8);
+            bytes[offset + 11] = (byte)(this.Delta >> 16);
+            bytes[offset + 12] = (byte)(this.Delta >> 24);
+            bytes[offset + 13] = (byte)(this.Sub.SomeSubData >> 0);
+            bytes[offset + 14] = (byte)(this.Sub.SomeSubData >> 8);
+            bytes[offset + 15] = (byte)(this.Sub.SomeSubData >> 16);
+            bytes[offset + 16] = (byte)(this.Sub.SomeSubData >> 24);
         }
 
         public ushort GetSize()
@@ -1346,9 +1436,18 @@ namespace QuantumCore.Core.Packets {
         public void Serialize(byte[] bytes, in int offset = 0)
         {
             bytes[offset + 0] = 0xff;
-            System.BitConverter.GetBytes(this.Handshake).CopyTo(bytes, offset + 1);
-            System.BitConverter.GetBytes(this.Time).CopyTo(bytes, offset + 5);
-            System.BitConverter.GetBytes(this.Delta).CopyTo(bytes, offset + 9);
+            bytes[offset + 1] = (byte)(this.Handshake >> 0);
+            bytes[offset + 2] = (byte)(this.Handshake >> 8);
+            bytes[offset + 3] = (byte)(this.Handshake >> 16);
+            bytes[offset + 4] = (byte)(this.Handshake >> 24);
+            bytes[offset + 5] = (byte)(this.Time >> 0);
+            bytes[offset + 6] = (byte)(this.Time >> 8);
+            bytes[offset + 7] = (byte)(this.Time >> 16);
+            bytes[offset + 8] = (byte)(this.Time >> 24);
+            bytes[offset + 9] = (byte)(this.Delta >> 0);
+            bytes[offset + 10] = (byte)(this.Delta >> 8);
+            bytes[offset + 11] = (byte)(this.Delta >> 16);
+            bytes[offset + 12] = (byte)(this.Delta >> 24);
         }
 
         public ushort GetSize()
@@ -1429,17 +1528,50 @@ namespace QuantumCore.Core.Packets {
         public void Serialize(byte[] bytes, in int offset = 0)
         {
             bytes[offset + 0] = 0xff;
-            System.BitConverter.GetBytes(this.Handshake).CopyTo(bytes, offset + 1);
-            System.BitConverter.GetBytes(this.Time).CopyTo(bytes, offset + 5);
-            System.BitConverter.GetBytes(this.Delta).CopyTo(bytes, offset + 9);
-            System.BitConverter.GetBytes(this.Subs[0].SomeSubData).CopyTo(bytes, offset + 13);
-            System.BitConverter.GetBytes(this.Subs[0].SomeSubData2).CopyTo(bytes, offset + 17);
-            System.BitConverter.GetBytes(this.Subs[1].SomeSubData).CopyTo(bytes, offset + 21);
-            System.BitConverter.GetBytes(this.Subs[1].SomeSubData2).CopyTo(bytes, offset + 25);
-            System.BitConverter.GetBytes(this.Subs[2].SomeSubData).CopyTo(bytes, offset + 29);
-            System.BitConverter.GetBytes(this.Subs[2].SomeSubData2).CopyTo(bytes, offset + 33);
-            System.BitConverter.GetBytes(this.Subs[3].SomeSubData).CopyTo(bytes, offset + 37);
-            System.BitConverter.GetBytes(this.Subs[3].SomeSubData2).CopyTo(bytes, offset + 41);
+            bytes[offset + 1] = (byte)(this.Handshake >> 0);
+            bytes[offset + 2] = (byte)(this.Handshake >> 8);
+            bytes[offset + 3] = (byte)(this.Handshake >> 16);
+            bytes[offset + 4] = (byte)(this.Handshake >> 24);
+            bytes[offset + 5] = (byte)(this.Time >> 0);
+            bytes[offset + 6] = (byte)(this.Time >> 8);
+            bytes[offset + 7] = (byte)(this.Time >> 16);
+            bytes[offset + 8] = (byte)(this.Time >> 24);
+            bytes[offset + 9] = (byte)(this.Delta >> 0);
+            bytes[offset + 10] = (byte)(this.Delta >> 8);
+            bytes[offset + 11] = (byte)(this.Delta >> 16);
+            bytes[offset + 12] = (byte)(this.Delta >> 24);
+            bytes[offset + 13] = (byte)(this.Subs[0].SomeSubData >> 0);
+            bytes[offset + 14] = (byte)(this.Subs[0].SomeSubData >> 8);
+            bytes[offset + 15] = (byte)(this.Subs[0].SomeSubData >> 16);
+            bytes[offset + 16] = (byte)(this.Subs[0].SomeSubData >> 24);
+            bytes[offset + 17] = (byte)(this.Subs[0].SomeSubData2 >> 0);
+            bytes[offset + 18] = (byte)(this.Subs[0].SomeSubData2 >> 8);
+            bytes[offset + 19] = (byte)(this.Subs[0].SomeSubData2 >> 16);
+            bytes[offset + 20] = (byte)(this.Subs[0].SomeSubData2 >> 24);
+            bytes[offset + 21] = (byte)(this.Subs[1].SomeSubData >> 0);
+            bytes[offset + 22] = (byte)(this.Subs[1].SomeSubData >> 8);
+            bytes[offset + 23] = (byte)(this.Subs[1].SomeSubData >> 16);
+            bytes[offset + 24] = (byte)(this.Subs[1].SomeSubData >> 24);
+            bytes[offset + 25] = (byte)(this.Subs[1].SomeSubData2 >> 0);
+            bytes[offset + 26] = (byte)(this.Subs[1].SomeSubData2 >> 8);
+            bytes[offset + 27] = (byte)(this.Subs[1].SomeSubData2 >> 16);
+            bytes[offset + 28] = (byte)(this.Subs[1].SomeSubData2 >> 24);
+            bytes[offset + 29] = (byte)(this.Subs[2].SomeSubData >> 0);
+            bytes[offset + 30] = (byte)(this.Subs[2].SomeSubData >> 8);
+            bytes[offset + 31] = (byte)(this.Subs[2].SomeSubData >> 16);
+            bytes[offset + 32] = (byte)(this.Subs[2].SomeSubData >> 24);
+            bytes[offset + 33] = (byte)(this.Subs[2].SomeSubData2 >> 0);
+            bytes[offset + 34] = (byte)(this.Subs[2].SomeSubData2 >> 8);
+            bytes[offset + 35] = (byte)(this.Subs[2].SomeSubData2 >> 16);
+            bytes[offset + 36] = (byte)(this.Subs[2].SomeSubData2 >> 24);
+            bytes[offset + 37] = (byte)(this.Subs[3].SomeSubData >> 0);
+            bytes[offset + 38] = (byte)(this.Subs[3].SomeSubData >> 8);
+            bytes[offset + 39] = (byte)(this.Subs[3].SomeSubData >> 16);
+            bytes[offset + 40] = (byte)(this.Subs[3].SomeSubData >> 24);
+            bytes[offset + 41] = (byte)(this.Subs[3].SomeSubData2 >> 0);
+            bytes[offset + 42] = (byte)(this.Subs[3].SomeSubData2 >> 8);
+            bytes[offset + 43] = (byte)(this.Subs[3].SomeSubData2 >> 16);
+            bytes[offset + 44] = (byte)(this.Subs[3].SomeSubData2 >> 24);
         }
 
         public ushort GetSize()
@@ -1543,13 +1675,28 @@ namespace QuantumCore.Core.Packets {
         public void Serialize(byte[] bytes, in int offset = 0)
         {
             bytes[offset + 0] = 0xff;
-            System.BitConverter.GetBytes(this.Handshake).CopyTo(bytes, offset + 1);
-            System.BitConverter.GetBytes(this.Time).CopyTo(bytes, offset + 5);
-            System.BitConverter.GetBytes(this.Delta).CopyTo(bytes, offset + 9);
-            System.BitConverter.GetBytes(this.Size).CopyTo(bytes, offset + 13);
+            bytes[offset + 1] = (byte)(this.Handshake >> 0);
+            bytes[offset + 2] = (byte)(this.Handshake >> 8);
+            bytes[offset + 3] = (byte)(this.Handshake >> 16);
+            bytes[offset + 4] = (byte)(this.Handshake >> 24);
+            bytes[offset + 5] = (byte)(this.Time >> 0);
+            bytes[offset + 6] = (byte)(this.Time >> 8);
+            bytes[offset + 7] = (byte)(this.Time >> 16);
+            bytes[offset + 8] = (byte)(this.Time >> 24);
+            bytes[offset + 9] = (byte)(this.Delta >> 0);
+            bytes[offset + 10] = (byte)(this.Delta >> 8);
+            bytes[offset + 11] = (byte)(this.Delta >> 16);
+            bytes[offset + 12] = (byte)(this.Delta >> 24);
+            bytes[offset + 13] = (byte)(this.Size >> 0);
+            bytes[offset + 14] = (byte)(this.Size >> 8);
+            bytes[offset + 15] = (byte)(this.Size >> 16);
+            bytes[offset + 16] = (byte)(this.Size >> 24);
             for (var i = 0; i < this.Subs.Length; i++)
             {
-                System.BitConverter.GetBytes(this.Subs[i].SomeSubData).CopyTo(bytes, offset + 17 + i * 4);
+                bytes[offset + 17 + i * 4] = (byte)(this.Subs[i].SomeSubData >> 0);
+                bytes[offset + 18 + i * 4] = (byte)(this.Subs[i].SomeSubData >> 8);
+                bytes[offset + 19 + i * 4] = (byte)(this.Subs[i].SomeSubData >> 16);
+                bytes[offset + 20 + i * 4] = (byte)(this.Subs[i].SomeSubData >> 24);
             }
         }
 
@@ -1636,12 +1783,19 @@ namespace QuantumCore.Core.Packets {
         public void Serialize(byte[] bytes, in int offset = 0)
         {
             bytes[offset + 0] = 0x88;
-            System.BitConverter.GetBytes(this.Vid).CopyTo(bytes, offset + 1);
+            bytes[offset + 1] = (byte)(this.Vid >> 0);
+            bytes[offset + 2] = (byte)(this.Vid >> 8);
+            bytes[offset + 3] = (byte)(this.Vid >> 16);
+            bytes[offset + 4] = (byte)(this.Vid >> 24);
             System.Text.Encoding.ASCII.GetBytes(this.Name).CopyTo(bytes, offset + 5);
-            System.BitConverter.GetBytes(this.Parts[0]).CopyTo(bytes, offset + 30);
-            System.BitConverter.GetBytes(this.Parts[1]).CopyTo(bytes, offset + 32);
-            System.BitConverter.GetBytes(this.Parts[2]).CopyTo(bytes, offset + 34);
-            System.BitConverter.GetBytes(this.Parts[3]).CopyTo(bytes, offset + 36);
+            bytes[offset + 30] = (byte)(this.Parts[0] >> 0);
+            bytes[offset + 31] = (byte)(this.Parts[0] >> 8);
+            bytes[offset + 32] = (byte)(this.Parts[1] >> 0);
+            bytes[offset + 33] = (byte)(this.Parts[1] >> 8);
+            bytes[offset + 34] = (byte)(this.Parts[2] >> 0);
+            bytes[offset + 35] = (byte)(this.Parts[2] >> 8);
+            bytes[offset + 36] = (byte)(this.Parts[3] >> 0);
+            bytes[offset + 37] = (byte)(this.Parts[3] >> 8);
             bytes[offset + 38] = this.Empire;
         }
 
@@ -1758,8 +1912,14 @@ namespace QuantumCore.Game.Packets {
         public void Serialize(byte[] bytes, in int offset = 0)
         {
             bytes[offset + 0] = 0x20;
-            System.BitConverter.GetBytes(this.CharacterList[0].Id).CopyTo(bytes, offset + 1);
-            System.BitConverter.GetBytes(this.CharacterList[1].Id).CopyTo(bytes, offset + 5);
+            bytes[offset + 1] = (byte)(this.CharacterList[0].Id >> 0);
+            bytes[offset + 2] = (byte)(this.CharacterList[0].Id >> 8);
+            bytes[offset + 3] = (byte)(this.CharacterList[0].Id >> 16);
+            bytes[offset + 4] = (byte)(this.CharacterList[0].Id >> 24);
+            bytes[offset + 5] = (byte)(this.CharacterList[1].Id >> 0);
+            bytes[offset + 6] = (byte)(this.CharacterList[1].Id >> 8);
+            bytes[offset + 7] = (byte)(this.CharacterList[1].Id >> 16);
+            bytes[offset + 8] = (byte)(this.CharacterList[1].Id >> 24);
         }
 
         public ushort GetSize()

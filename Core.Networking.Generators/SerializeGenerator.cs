@@ -88,52 +88,64 @@ internal class SerializeGenerator
         return $"{indentPrefix}{fieldExpression}.CopyTo(bytes, {offsetStr});";
     }
 
-    private static string GetLineForSingleValue(FieldData fieldData, INamedTypeSymbol namedTypeSymbol, string fieldExpression,
+    private string GetLineForSingleValue(FieldData fieldData, INamedTypeSymbol namedTypeSymbol, string fieldExpression,
         ref int offset,
         StringBuilder dynamicOffset, string tempDynamicOffset, string indentPrefix)
     {
-        var cast = namedTypeSymbol.GetFullName();
-
         var offsetStr = $"offset + {offset}{dynamicOffset}{tempDynamicOffset}";
-        if (namedTypeSymbol.TypeKind is TypeKind.Enum)
+        var type = namedTypeSymbol.TypeKind is TypeKind.Enum
+            ? namedTypeSymbol.EnumUnderlyingType!.Name
+            : namedTypeSymbol.Name;
+        var cast = namedTypeSymbol.TypeKind is TypeKind.Enum
+            ? $"({namedTypeSymbol.EnumUnderlyingType.GetFullName()})"
+            : GeneratorConstants.CastableToByteTypes.Contains(namedTypeSymbol.Name)
+                ? $"({namedTypeSymbol.GetFullName()})"
+                : "";
+
+        if (GeneratorConstants.SupportedTypesByBitConverter.Contains(type))
         {
-            var enumUnderlyingTypeName = namedTypeSymbol.EnumUnderlyingType!.Name;
-            var enumCast = namedTypeSymbol.EnumUnderlyingType.GetFullName();
+            if (type is "Int32" or "UInt32" or 
+                        "Int16" or "UInt16" or 
+                        "Int64" or "UInt64")
+            {
+                var sb = new StringBuilder();
+                for (int i = 0; i < fieldData.ElementSize; i++)
+                {
+                    var offsetStrLocal = $"offset + {offset + i}{dynamicOffset}{tempDynamicOffset}";
+                    var line = $"{indentPrefix}bytes[{offsetStrLocal}] = (byte)({cast}{fieldExpression} >> {8 * i});";
 
-            if (GeneratorConstants.SupportedTypesByBitConverter.Contains(enumUnderlyingTypeName))
-            {
-                return $"{indentPrefix}System.BitConverter.GetBytes(({enumCast}){fieldExpression}).CopyTo(bytes, {offsetStr});";
-            }
-            if (GeneratorConstants.CastableToByteTypes.Contains(enumUnderlyingTypeName))
-            {
-                return $"{indentPrefix}bytes[{offsetStr}] = ({enumCast}){fieldExpression};";
-            }
+                    if (i < fieldData.ElementSize - 1)
+                    {
+                        sb.AppendLine(line);
+                    }
+                    else
+                    {
+                        sb.Append(line);
+                    }
+                }
 
-            if (GeneratorConstants.NoCastTypes.Contains(enumUnderlyingTypeName))
+                return sb.ToString();
+            }
+            else
             {
-                return $"{indentPrefix}bytes[{offsetStr}] = (byte){fieldExpression};";
+                return $"{indentPrefix}System.BitConverter.GetBytes({cast}{fieldExpression}).CopyTo(bytes, {offsetStr});";
             }
         }
-
-        if (GeneratorConstants.SupportedTypesByBitConverter.Contains(namedTypeSymbol.Name))
+        if (GeneratorConstants.CastableToByteTypes.Contains(type))
         {
-            return $"{indentPrefix}System.BitConverter.GetBytes({fieldExpression}).CopyTo(bytes, {offsetStr});";
+            return $"{indentPrefix}bytes[{offsetStr}] = {cast}{fieldExpression};";
         }
 
-        if (GeneratorConstants.NoCastTypes.Contains(namedTypeSymbol.Name))
+        if (GeneratorConstants.NoCastTypes.Contains(type))
         {
-            return $"{indentPrefix}bytes[{offsetStr}] = {fieldExpression};";
-        }
-
-        if (GeneratorConstants.CastableToByteTypes.Contains(namedTypeSymbol.Name))
-        {
-            return $"{indentPrefix}bytes[{offsetStr}] = ({cast}){fieldExpression};";
+            return $"{indentPrefix}bytes[{offsetStr}] = {cast}{fieldExpression};";
         }
 
         if (namedTypeSymbol.GetFullName() == "System.String")
         {
             return GetLineForString(fieldData, fieldExpression, ref offset, dynamicOffset, tempDynamicOffset, indentPrefix);
         }
+        
 
         throw new InvalidOperationException($"Don't know how to handle type {namedTypeSymbol.Name}");
     }
