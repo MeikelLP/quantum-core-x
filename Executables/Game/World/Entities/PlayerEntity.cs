@@ -30,6 +30,7 @@ namespace QuantumCore.Game.World.Entities
         public IQuickSlotBar QuickSlotBar { get; }
         public IQuest CurrentQuest { get; set; }
         public Dictionary<string, IQuest> Quests { get; } = new();
+        public List<Affect> Affects { get; set; } = new();
 
         public override byte HealthPercentage {
             get {
@@ -80,6 +81,7 @@ namespace QuantumCore.Game.World.Entities
         }
         
         private byte _attackSpeed = 140;
+        private byte _movementSpeed = 150;
         private uint _defence;
 
         private const int PersistInterval = 1000;
@@ -140,10 +142,59 @@ namespace QuantumCore.Game.World.Entities
             Inventory = new Inventory(itemManager, db, _cacheManager, _logger, player.Id, 1, 5, 9, 2);
             QuickSlotBar = new QuickSlotBar(_cacheManager, _logger, this);
 
-            MovementSpeed = 150;
+            MovementSpeed = GetMovementSpeed();
             EntityClass = player.PlayerClass;
 
             Groups = new List<Guid>();
+        }
+
+        public byte GetMovementSpeed()
+        {
+            return (byte) (GetMoveMotionSpeed() * 10000 / CalculateDuration(GetLimitPoint(EPoints.MoveSpeed), 10000));
+        }
+
+        public int GetLimitPoint(EPoints point)
+        {
+            var MinLimit = 0;
+            switch (point)
+            {
+                case EPoints.MoveSpeed:
+                    if(Player.GetType() == typeof(Player))
+                    {
+                        return 250;
+                    }
+                    return 200;
+                default:
+                    return MinLimit;
+            }
+        }
+
+        private static int CalculateDuration(int iSpd, int iDur)
+        {
+            var i = 100 - iSpd;
+
+            if (i > 0)
+            {
+                i = 100 + i;
+            }
+            else
+            {
+                i = i < 0 ? 10000 / (100 - i) : 100;
+            }
+
+            return iDur * i / 100;
+        }
+
+        public static float GetMoveMotionSpeed()
+        {
+            // TODO: get motion mode
+            return 300f;
+        }
+
+        public byte GetMotionMode()
+        {
+            //TODO: Motion types for wearable weapons
+            return 0; // General motion mode
         }
 
         public async Task Load()
@@ -656,6 +707,8 @@ namespace QuantumCore.Game.World.Entities
                     return _defence;
                 case EPoints.StatusPoints:
                     return Player.AvailableStatusPoints;
+                case EPoints.MoveSpeed:
+                    return GetMovementSpeed();
                 default:
                     if (Enum.GetValues<EPoints>().Contains(point))
                     {
