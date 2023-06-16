@@ -105,7 +105,7 @@ namespace QuantumCore.Game.World.Entities
 
         public PlayerEntity(Player player, IGameConnection connection, IItemManager itemManager, IJobManager jobManager,
             IExperienceManager experienceManager, IAnimationManager animationManager, IDbConnection db,
-            IQuestManager questManager, ICacheManager cacheManager, IWorld world, ILogger<PlayerEntity> logger) 
+            IQuestManager questManager, ICacheManager cacheManager, IWorld world, ILogger<PlayerEntity> logger, IAffectController affectController) 
             : base(animationManager, world.GenerateVid())
         {
             Connection = connection;
