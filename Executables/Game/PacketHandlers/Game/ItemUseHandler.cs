@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.PluginTypes;
+using QuantumCore.Game.Items;
 using QuantumCore.Game.Packets;
 using QuantumCore.Game.PlayerUtils;
 
@@ -9,12 +10,14 @@ namespace QuantumCore.Game.PacketHandlers.Game;
 public class ItemUseHandler : IGamePacketHandler<ItemUse>
 {
     private readonly IItemManager _itemManager;
+    private readonly IAffectController _affectController;
     private readonly ILogger<ItemUseHandler> _logger;
 
-    public ItemUseHandler(IItemManager itemManager, ILogger<ItemUseHandler> logger)
+    public ItemUseHandler(IItemManager itemManager, IAffectController affectController, ILogger<ItemUseHandler> logger)
     {
         _itemManager = itemManager;
         _logger = logger;
+        _affectController = affectController;
     }
         
     public async Task ExecuteAsync(GamePacketContext<ItemUse> ctx, CancellationToken token = default)
@@ -92,6 +95,34 @@ public class ItemUseHandler : IGamePacketHandler<ItemUse>
                     await player.SendRemoveItem(ctx.Packet.Window, ctx.Packet.Position);
                     await player.SendItem(item);
                 }
+            }
+        }else
+        {
+            switch (itemProto.Type)
+            {
+                case (byte) EItemType.Use:
+                    _logger.LogDebug("Use item");
+                    switch (itemProto.Subtype)
+                    {
+                        case (byte) EUseSubTypes.AbilityUp:
+                            _logger.LogDebug("Use ability up");
+                            var type = itemProto.Values[0];
+                            var duration = itemProto.Values[1];
+                            var value = itemProto.Values[2];
+                            var applyInfo = Enum.GetName(typeof(EApplyTypes), type);
+                            var applyType = (EPointTypes) Enum.Parse(typeof(EPointTypes), applyInfo);
+                            switch (type)
+                            {
+                                case (byte) EApplyTypes.MoveSpeed:
+                                    _ = _affectController.AddAffect(player, (int) EAffectTypes.AffectMoveSpeed, (int) applyType, value, (int) EAffectBits.MoveSpeedPotion, duration, 0);
+                                    break;
+                                case (byte) EApplyTypes.AttackSpeed:
+                                    _ = _affectController.AddAffect(player, (int) EAffectTypes.AffectAttackSpeed, (int) applyType, value, (int) EAffectBits.AttackSpeedPotion, duration, 0);
+                                    break;
+                            }
+                            break;
+                    }
+                    break;
             }
         }
     }
