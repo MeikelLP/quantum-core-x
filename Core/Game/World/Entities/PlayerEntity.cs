@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
@@ -99,7 +100,7 @@ namespace QuantumCore.Game.World.Entities
         private readonly ILogger<PlayerEntity> _logger;
 
         public PlayerEntity(Player player, IGameConnection connection, IItemManager itemManager, IJobManager jobManager,
-            IExperienceManager experienceManager, IAnimationManager animationManager, IDatabaseManager databaseManager,
+            IExperienceManager experienceManager, IAnimationManager animationManager, IDbConnection db,
             IQuestManager questManager, ICacheManager cacheManager, IWorld world, ILogger<PlayerEntity> logger) 
             : base(animationManager, world.GenerateVid())
         {
@@ -137,7 +138,7 @@ namespace QuantumCore.Game.World.Entities
             };
             PositionX = player.PositionX;
             PositionY = player.PositionY;
-            Inventory = new Inventory(itemManager, databaseManager, _cacheManager, _logger, player.Id, 1, 5, 9, 2);
+            Inventory = new Inventory(itemManager, db, _cacheManager, _logger, player.Id, 1, 5, 9, 2);
             QuickSlotBar = new QuickSlotBar(_cacheManager, _logger, this);
 
             MovementSpeed = 150;

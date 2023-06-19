@@ -20,11 +20,10 @@ namespace QuantumCore.Auth
     {
         private readonly ILogger<AuthServer> _logger;
         private readonly AuthOptions _options;
-        private readonly IDatabaseManager _databaseManager;
         private readonly ICacheManager _cacheManager;
 
         public AuthServer(IOptions<AuthOptions> options, IConfiguration configuration, IPacketManager packetManager, ILogger<AuthServer> logger, 
-            PluginExecutor pluginExecutor, IServiceProvider serviceProvider, IDatabaseManager databaseManager, 
+            PluginExecutor pluginExecutor, IServiceProvider serviceProvider, 
             IEnumerable<IPacketHandler> packetHandlers, ICacheManager cacheManager)
             : base(packetManager, logger, pluginExecutor, serviceProvider, packetHandlers, configuration.GetValue<string>("Mode"), options.Value.Port)
         {
@@ -38,9 +37,6 @@ namespace QuantumCore.Auth
 
         protected async override Task ExecuteAsync(CancellationToken token)
         {
-            // Initialize static components
-            _databaseManager.Init(_options.AccountString, _options.GameString);
-
             // Register auth server features
             PacketManager.RegisterNamespace("QuantumCore.Auth.Packets");
             RegisterNewConnectionListener(NewConnection);

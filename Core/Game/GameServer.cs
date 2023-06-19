@@ -34,7 +34,6 @@ namespace QuantumCore.Game
         private readonly IExperienceManager _experienceManager;
         private readonly IAnimationManager _animationManager;
         private readonly ICommandManager _commandManager;
-        private readonly IDatabaseManager _databaseManager;
         private readonly IQuestManager _questManager;
         private readonly IChatManager _chatManager;
         public IWorld World { get; }
@@ -53,7 +52,7 @@ namespace QuantumCore.Game
         public GameServer(IOptions<GameOptions> options, IConfiguration configuration, IPacketManager packetManager, ILogger<GameServer> logger, 
             PluginExecutor pluginExecutor, IServiceProvider serviceProvider, IItemManager itemManager, 
             IMonsterManager monsterManager, IJobManager jobManager, IExperienceManager experienceManager,
-            IAnimationManager animationManager, ICommandManager commandManager, IDatabaseManager databaseManager, 
+            IAnimationManager animationManager, ICommandManager commandManager,
             IEnumerable<IPacketHandler> packetHandlers, IQuestManager questManager, IChatManager chatManager, IWorld world)
             : base(packetManager, logger, pluginExecutor, serviceProvider, packetHandlers, configuration.GetValue<string>("Mode"), options.Value.Port)
         {
@@ -66,7 +65,6 @@ namespace QuantumCore.Game
             _experienceManager = experienceManager;
             _animationManager = animationManager;
             _commandManager = commandManager;
-            _databaseManager = databaseManager;
             _questManager = questManager;
             _chatManager = chatManager;
             World = world;
@@ -96,9 +94,6 @@ namespace QuantumCore.Game
                 // Query interfaces for our best ipv4 address
                 IpUtils.SearchPublicIp();
             }
-
-            // Initialize static components
-            _databaseManager.Init(_options.AccountString, _options.GameString);
             
             // Load game data
             await Task.WhenAll(

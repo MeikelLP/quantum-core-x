@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
@@ -15,7 +16,6 @@ using QuantumCore.API;
 using QuantumCore.API.Game;
 using QuantumCore.API.Game.World;
 using QuantumCore.Core.Cache;
-using QuantumCore.Database;
 using QuantumCore.Game.Packets;
 
 namespace QuantumCore.Game.Commands
@@ -23,7 +23,7 @@ namespace QuantumCore.Game.Commands
     public class CommandManager : ICommandManager
     {
         private readonly ILogger<CommandManager> _logger;
-        private readonly IDatabaseManager _databaseManager;
+        private readonly IDbConnection _db;
         private readonly ICacheManager _cacheManager;
         private readonly IWorld _world;
         private readonly Dictionary<string, CommandDescriptor> _commandHandlers = new();
@@ -38,10 +38,10 @@ namespace QuantumCore.Game.Commands
             }
         );
 
-        public CommandManager(ILogger<CommandManager> logger, IDatabaseManager databaseManager, ICacheManager cacheManager, IWorld world, IServiceProvider serviceProvider)
+        public CommandManager(ILogger<CommandManager> logger, IDbConnection db, ICacheManager cacheManager, IWorld world, IServiceProvider serviceProvider)
         {
             _logger = logger;
-            _databaseManager = databaseManager;
+            _db = db;
             _cacheManager = cacheManager;
             _world = world;
             _serviceProvider = serviceProvider;
@@ -81,8 +81,6 @@ namespace QuantumCore.Game.Commands
 
         private async Task ParseGroup(Guid id, string name)
         {
-            using var db = _databaseManager.GetGameDatabase();
-
             var p = new PermissionGroup
             {
                 Id = id,
@@ -93,7 +91,7 @@ namespace QuantumCore.Game.Commands
 
             if (id != Operator_Group)
             {
-                var authq = await db.QueryAsync("SELECT Command FROM perm_auth WHERE `Group` = @Group", new { Group = id });
+                var authq = await _db.QueryAsync("SELECT Command FROM perm_auth WHERE `Group` = @Group", new { Group = id });
 
                 foreach (var auth in authq)
                 {
@@ -101,7 +99,7 @@ namespace QuantumCore.Game.Commands
                 }
             }
 
-            var pq = await db.QueryAsync("SELECT Player FROM perm_users WHERE `Group` = @Group", new { Group = id });
+            var pq = await _db.QueryAsync("SELECT Player FROM perm_users WHERE `Group` = @Group", new { Group = id });
 
             foreach (var user in pq)
             {
@@ -125,9 +123,8 @@ namespace QuantumCore.Game.Commands
             {
                 await _cacheManager.Del(p);
             }
-            using var db = _databaseManager.GetGameDatabase();
 
-            var groups = await db.QueryAsync("SELECT * FROM perm_groups");
+            var groups = await _db.QueryAsync("SELECT * FROM perm_groups");
 
             foreach (var group in groups)
             {

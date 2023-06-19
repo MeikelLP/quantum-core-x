@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Data;
 using System.Threading.Tasks;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
 using QuantumCore.Core.Cache;
 using QuantumCore.Core.Utils;
-using QuantumCore.Database;
 using QuantumCore.Extensions;
 using Serilog;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
@@ -165,21 +165,21 @@ namespace QuantumCore.Game.PlayerUtils
 
         private readonly Page[] _pages;
         private readonly IItemManager _itemManager;
+        private readonly IDbConnection _db;
         private ushort _width;
         private ushort _height;
         private readonly List<ItemInstance> _items = new List<ItemInstance>();
-        private readonly IDatabaseManager _databaseManager;
         private readonly ICacheManager _cacheManager;
         private readonly ILogger _logger;
 
-        public Inventory(IItemManager itemManager, IDatabaseManager databaseManager, ICacheManager cacheManager, ILogger logger, 
+        public Inventory(IItemManager itemManager, IDbConnection db, ICacheManager cacheManager, ILogger logger, 
             Guid owner, byte window, ushort width, ushort height, ushort pages)
         {
             Owner = owner;
             Window = window;
 
             _itemManager = itemManager;
-            _databaseManager = databaseManager;
+            _db = db;
             _cacheManager = cacheManager;
             _logger = logger;
             _width = width;
@@ -201,7 +201,7 @@ namespace QuantumCore.Game.PlayerUtils
             _items.Clear();
             
             var pageSize = _width * _height;
-            await foreach(var item in _databaseManager.GetItems(_cacheManager, Owner, Window))
+            await foreach(var item in _db.GetItems(_cacheManager, Owner, Window))
             {
                 // Calculate page
                 var page = item.Position / pageSize;

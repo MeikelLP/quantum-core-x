@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data;
 using System.Threading;
 using System.Threading.Tasks;
 using Dapper;
@@ -18,19 +19,19 @@ namespace QuantumCore.Game.PacketHandlers.Select;
 public class CreateCharacterHandler : IGamePacketHandler<CreateCharacter>
 {
     private readonly ILogger<CreateCharacterHandler> _logger;
-    private readonly IDatabaseManager _databaseManager;
     private readonly IJobManager _jobManager;
     private readonly ICacheManager _cacheManager;
     private readonly IWorld _world;
+    private readonly IDbConnection _db;
 
-    public CreateCharacterHandler(ILogger<CreateCharacterHandler> logger, IDatabaseManager databaseManager, 
-        IJobManager jobManager, ICacheManager cacheManager, IWorld world)
+    public CreateCharacterHandler(ILogger<CreateCharacterHandler> logger, 
+        IJobManager jobManager, ICacheManager cacheManager, IWorld world, IDbConnection db)
     {
         _logger = logger;
-        _databaseManager = databaseManager;
         _jobManager = jobManager;
         _cacheManager = cacheManager;
         _world = world;
+        _db = db;
     }
     
     public async Task ExecuteAsync(GamePacketContext<CreateCharacter> ctx, CancellationToken token = default)
@@ -45,8 +46,7 @@ public class CreateCharacterHandler : IGamePacketHandler<CreateCharacter>
 
         var accountId = ctx.Connection.AccountId ?? default;
 
-        var db = _databaseManager.GetGameDatabase();
-        var count = await db.QuerySingleAsync<int>("SELECT COUNT(*) FROM players WHERE Name = @Name", new {Name = ctx.Packet.Name});
+        var count = await _db.QuerySingleAsync<int>("SELECT COUNT(*) FROM players WHERE Name = @Name", new {Name = ctx.Packet.Name});
         if (count > 0)
         {
             await ctx.Connection.Send(new CreateCharacterFailure());
@@ -74,7 +74,7 @@ public class CreateCharacterHandler : IGamePacketHandler<CreateCharacter>
 
 
         // Persist player
-        await _databaseManager.GetGameDatabase().InsertAsync(player);
+        await _db.InsertAsync(player);
         
         // Add player to cache
         await _cacheManager.Set("player:" + player.Id, player);

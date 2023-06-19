@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data;
 using System.Threading;
 using System.Threading.Tasks;
 using Dapper;
@@ -17,13 +18,13 @@ namespace QuantumCore.Game.PacketHandlers.Select;
 public class DeleteCharacterHandler : IGamePacketHandler<DeleteCharacter>
 {
     private readonly ILogger<DeleteCharacterHandler> _logger;
-    private readonly IDatabaseManager _databaseManager;
+    private readonly IDbConnection _db;
     private readonly ICacheManager _cacheManager;
 
-    public DeleteCharacterHandler(ILogger<DeleteCharacterHandler> logger, IDatabaseManager databaseManager, ICacheManager cacheManager)
+    public DeleteCharacterHandler(ILogger<DeleteCharacterHandler> logger, IDbConnection db, ICacheManager cacheManager)
     {
         _logger = logger;
-        _databaseManager = databaseManager;
+        _db = db;
         _cacheManager = cacheManager;
     }
     
@@ -40,8 +41,7 @@ public class DeleteCharacterHandler : IGamePacketHandler<DeleteCharacter>
 
         var accountId = ctx.Connection.AccountId ?? default;
 
-        var db = _databaseManager.GetAccountDatabase();
-        var deletecode = await db.QueryFirstOrDefaultAsync<string>("SELECT DeleteCode FROM accounts WHERE Id = @Id", new { Id = ctx.Connection.AccountId });
+        var deletecode = await _db.QueryFirstOrDefaultAsync<string>("SELECT DeleteCode FROM accounts WHERE Id = @Id", new { Id = ctx.Connection.AccountId });
 
         if (deletecode == default)
         {
@@ -61,7 +61,7 @@ public class DeleteCharacterHandler : IGamePacketHandler<DeleteCharacter>
             Slot = ctx.Packet.Slot
         });
 
-        var player = await Player.GetPlayer(_databaseManager, _cacheManager, accountId, ctx.Packet.Slot);
+        var player = await Player.GetPlayer(_db, _cacheManager, accountId, ctx.Packet.Slot);
         if (player == null)
         {
             ctx.Connection.Close();
@@ -69,12 +69,10 @@ public class DeleteCharacterHandler : IGamePacketHandler<DeleteCharacter>
             return;
         }
 
-        db = _databaseManager.GetGameDatabase();
-
         var delPlayer = new PlayerDeleted(player);
-        await db.InsertAsync(delPlayer); // add the player to the players_deleted table
+        await _db.InsertAsync(delPlayer); // add the player to the players_deleted table
 
-        await db.DeleteAsync(player); // delete the player from the players table
+        await _db.DeleteAsync(player); // delete the player from the players table
 
         // Delete player redis data
         var key = "player:" + player.Id;
@@ -88,7 +86,7 @@ public class DeleteCharacterHandler : IGamePacketHandler<DeleteCharacter>
 
         //for (byte i = (byte)WindowType.Inventory; i < (byte) WindowType.Inventory; i++)
         {
-            var items = _databaseManager.GetItems(_cacheManager, player.Id, (byte) WindowType.Inventory);
+            var items = _db.GetItems(_cacheManager, player.Id, (byte) WindowType.Inventory);
 
             await foreach (var item in items)
             {
@@ -101,6 +99,6 @@ public class DeleteCharacterHandler : IGamePacketHandler<DeleteCharacter>
         }
 
         // Delete all items in db
-        await db.QueryAsync("DELETE FROM items WHERE PlayerId=@PlayerId", new { PlayerId = player.Id });
+        await _db.QueryAsync("DELETE FROM items WHERE PlayerId=@PlayerId", new { PlayerId = player.Id });
     }
 }

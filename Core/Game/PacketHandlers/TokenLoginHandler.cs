@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Data;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -17,14 +19,14 @@ namespace QuantumCore.Game.PacketHandlers
 {
     public class TokenLoginHandler : IGamePacketHandler<TokenLogin>
     {
-        private readonly IDatabaseManager _databaseManager;
+        private readonly IDbConnection _db;
         private readonly ILogger<TokenLoginHandler> _logger;
         private readonly ICacheManager _cacheManager;
         private readonly IWorld _world;
 
-        public TokenLoginHandler(IDatabaseManager databaseManager, ILogger<TokenLoginHandler> logger, ICacheManager cacheManager, IWorld world)
+        public TokenLoginHandler(IDbConnection db, ILogger<TokenLoginHandler> logger, ICacheManager cacheManager, IWorld world)
         {
-            _databaseManager = databaseManager;
+            _db = db;
             _logger = logger;
             _cacheManager = cacheManager;
             _world = world;
@@ -66,7 +68,8 @@ namespace QuantumCore.Game.PacketHandlers
             // Load players of account
             var characters = new Characters();
             var i = 0;
-            await foreach (var player in Player.GetPlayers(_databaseManager, _cacheManager, token.AccountId).WithCancellation(cancellationToken))
+            var charactersFromCacheOrDb = await Player.GetPlayers(_db, _cacheManager, token.AccountId).ToArrayAsync(cancellationToken);
+            foreach (var player in charactersFromCacheOrDb)
             {
                 var host = _world.GetMapHost(player.PositionX, player.PositionY);
                 

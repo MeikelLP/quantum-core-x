@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Data;
 using System.Threading;
 using System.Threading.Tasks;
 using Dapper;
@@ -16,21 +17,20 @@ namespace QuantumCore.Auth.PacketHandlers;
 
 public class LoginRequestHandler : IAuthPacketHandler<LoginRequest>
 {
-    private readonly IDatabaseManager _databaseManager;
+    private readonly IDbConnection _db;
     private readonly ILogger<LoginRequestHandler> _logger;
     private readonly ICacheManager _cacheManager;
 
-    public LoginRequestHandler(IDatabaseManager databaseManager, ILogger<LoginRequestHandler> logger, ICacheManager cacheManager)
+    public LoginRequestHandler(IDbConnection db, ILogger<LoginRequestHandler> logger, ICacheManager cacheManager)
     {
-        _databaseManager = databaseManager;
+        _db = db;
         _logger = logger;
         _cacheManager = cacheManager;
     }
 
     public async Task ExecuteAsync(AuthPacketContext<LoginRequest> ctx, CancellationToken token = default)
     {
-        using var db = _databaseManager.GetAccountDatabase();
-        var account = await db.QueryFirstOrDefaultAsync<Account>(
+        var account = await _db.QueryFirstOrDefaultAsync<Account>(
             "SELECT * FROM accounts WHERE Username = @Username", new {Username = ctx.Packet.Username});
         // Check if account was found
         if (account == default(Account))
@@ -60,7 +60,7 @@ public class LoginRequestHandler : IAuthPacketHandler<LoginRequest>
             else
             {
                 // Check account status stored in the database
-                var dbStatus = await db.GetAsync<AccountStatus>(account.Status);
+                var dbStatus = await _db.GetAsync<AccountStatus>(account.Status);
                 if (!dbStatus.AllowLogin)
                 {
                     status = dbStatus.ClientStatus;
