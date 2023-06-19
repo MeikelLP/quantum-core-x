@@ -1,9 +1,11 @@
 using QuantumCore.Core.Networking;
+using QuantumCore.Networking;
 
 namespace QuantumCore.Game.Packets;
 
 [Packet(0x53, EDirection.Incoming, Sequence = true)]
-public class ItemGive
+[PacketGenerator]
+public partial class ItemGive
 {
     [Field(0)]
     public uint TargetVid { get; set; }

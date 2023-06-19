@@ -1,21 +1,21 @@
 ﻿using QuantumCore.Core.Networking;
+using QuantumCore.Networking;
 
 namespace QuantumCore.Game.Packets;
 
 [Packet(0xCE, EDirection.Incoming)]
-public class StateCheckPacket
+[PacketGenerator]
+public partial class StateCheckPacket
 {
 }
 
 [Packet(0xD2, EDirection.Outgoing)]
-public class ServerStatusPacket
+[PacketGenerator]
+public partial class ServerStatusPacket
 {
-    [Field(0)]
-    [Size]
-    public uint Size { get; set; }
+    [Field(0)] [Size] public uint Size => (uint)Statuses.Length;
     
     [Field(1)]
-    [Dynamic]
     public ServerStatus[] Statuses { get; set; }
     
     [Field(2)] public byte IsSuccess { get; set; }

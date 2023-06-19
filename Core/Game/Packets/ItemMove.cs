@@ -1,9 +1,11 @@
 using QuantumCore.Core.Networking;
+using QuantumCore.Networking;
 
 namespace QuantumCore.Game.Packets
 {
     [Packet(0x0d, EDirection.Incoming, Sequence = true)]
-    public class ItemMove
+    [PacketGenerator]
+    public partial class ItemMove
     {
         [Field(0)]
         public byte FromWindow { get; set; }

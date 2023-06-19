@@ -12,7 +12,7 @@ public static class GameConnectionExtensions
         connection.Phase = phase;
         await connection.Send(new GCPhase
         {
-            Phase = (byte) connection.Phase
+            Phase = connection.Phase
         });
     }
 }

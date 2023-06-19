@@ -1,10 +1,12 @@
 using QuantumCore.Core.Networking;
 using QuantumCore.Game.Packets.General;
+using QuantumCore.Networking;
 
 namespace QuantumCore.Game.Packets
 {
     [Packet(0x15, EDirection.Outgoing)]
-    public class SetItem
+    [PacketGenerator]
+    public partial class SetItem
     {
         [Field(0)]
         public byte Window { get; set; }

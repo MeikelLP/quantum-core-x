@@ -1,9 +1,11 @@
 ﻿using QuantumCore.Core.Networking;
+using QuantumCore.Networking;
 
 namespace QuantumCore.Game.Packets
 {
     [Packet(0x01, EDirection.Outgoing)]
-    public class SpawnCharacter
+    [PacketGenerator]
+    public partial class SpawnCharacter
     {
         [Field(0)]
         public uint Vid { get; set; }

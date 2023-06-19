@@ -1,9 +1,11 @@
 ﻿using QuantumCore.Core.Networking;
+using QuantumCore.Networking;
 
 namespace QuantumCore.Game.Packets
 {
     [Packet(0x71, EDirection.Outgoing)]
-    public class CharacterDetails
+    [PacketGenerator]
+    public partial class CharacterDetails
     {
         [Field(0)]
         public uint Vid { get; set; }

@@ -1,9 +1,11 @@
 using QuantumCore.Core.Networking;
+using QuantumCore.Networking;
 
 namespace QuantumCore.Game.Packets
 {
     [Packet(0x04, EDirection.Incoming, Sequence = true)]
-    public class CreateCharacter
+    [PacketGenerator]
+    public partial class CreateCharacter
     {
         [Field(0)]
         public byte Slot { get; set; }

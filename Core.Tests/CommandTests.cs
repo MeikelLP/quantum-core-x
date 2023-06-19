@@ -379,7 +379,7 @@ public class CommandTests : IAsyncLifetime
         world.GetPlayer(_player.Name).Should().NotBeNull();
         _sentObjects.Should().NotContainEquivalentOf(new GCPhase
         {
-            Phase = (byte)EPhases.Select
+            Phase = EPhases.Select
         });
         
         await _commandManager.Handle(_connection, "/phase_select");
@@ -387,7 +387,7 @@ public class CommandTests : IAsyncLifetime
         _player.Connection.Phase.Should().Be(EPhases.Select);
         _sentObjects.Should().ContainEquivalentOf(new GCPhase
         {
-            Phase = (byte)EPhases.Select
+            Phase = EPhases.Select
         });
         world.GetPlayer(_player.Name).Should().BeNull();
     }
