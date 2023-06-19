@@ -27,8 +27,7 @@ namespace QuantumCore.Extensions;
 
 public static class ServiceExtensions
 {
-    private const string MessageTemplate = "[{Timestamp:HH:mm:ss.fff}][{Level:u3}][{ProcessName:u5}|{MachineName}:" +
-                                           "{EnvironmentUserName}]{Caller} >> {Message:lj} " +
+    private const string MessageTemplate = "[{Timestamp:HH:mm:ss.fff}][{Level:u3}]{Message:lj} " +
                                            "{NewLine:1}{Exception:1}";
 
     public static IServiceCollection AddDatabase(this IServiceCollection services, string mode)
