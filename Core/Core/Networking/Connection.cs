@@ -1,7 +1,6 @@
 using System;
 using System.Buffers;
 using System.IO;
-using System.Linq;
 using System.Net.Sockets;
 using System.Text.Json;
 using System.Threading;
@@ -25,8 +24,7 @@ namespace QuantumCore.Core.Networking
         private readonly PluginExecutor _pluginExecutor;
         private TcpClient _client;
 
-        private IPacketManager _packetManager;
-        private readonly IPacketSerializer _serializer;
+        private readonly IPacketReader _packetReader;
 
         private Stream _stream;
 
@@ -37,12 +35,11 @@ namespace QuantumCore.Core.Networking
         public bool Handshaking { get; private set; }
         public EPhases Phase { get; set; }
 
-        protected Connection(ILogger logger, PluginExecutor pluginExecutor, IPacketManager packetManager, IPacketSerializer serializer)
+        protected Connection(ILogger logger, PluginExecutor pluginExecutor, IPacketReader packetReader)
         {
             _logger = logger;
             _pluginExecutor = pluginExecutor;
-            _packetManager = packetManager;
-            _serializer = serializer;
+            _packetReader = packetReader;
             Id = Guid.NewGuid();
         }
 
@@ -55,7 +52,7 @@ namespace QuantumCore.Core.Networking
 
         protected abstract Task OnClose();
 
-        protected abstract Task OnReceive(object packet);
+        protected abstract Task OnReceive(IPacketSerializable packet);
 
         protected abstract long GetServerTime();
 
@@ -64,131 +61,29 @@ namespace QuantumCore.Core.Networking
             _logger.LogInformation("New connection from {RemoteEndPoint}", _client.Client.RemoteEndPoint?.ToString());
 
             _stream = _client.GetStream();
-
             await StartHandshake();
 
-            var buffer = new byte[1];
-            var packetTotalSize = 1;
-
-            while (!stoppingToken.IsCancellationRequested)
+            try
             {
-                try
+                await foreach (var packet in _packetReader.EnumerateAsync(_stream, stoppingToken))
                 {
-                    var read = await _stream.ReadAsync(buffer.AsMemory(0, 1), stoppingToken);
-                    if (read != 1)
-                    {
-                        _logger.LogInformation("Failed to read, closing connection");
-                        _client.Close();
-                        break;
-                    }
+                    _logger.LogDebug(" IN: {Type} {Data}", packet.GetType(), JsonSerializer.Serialize(packet));
+                    await _pluginExecutor.ExecutePlugins<IPacketOperationListener>(_logger, x => x.OnPrePacketReceivedAsync(packet, Array.Empty<byte>(), stoppingToken));
 
-                    packetTotalSize = 1;
-                    
-                    var packetDetails = _packetManager.GetIncomingPacket(buffer[0]);
-                    if (packetDetails == null)
-                    {
-                        _logger.LogInformation("Received unknown header 0x{Header:X2}", buffer[0]);
-                        _client.Close();
-                        break;
-                    }
+                    await OnReceive((IPacketSerializable)packet);
 
-                    var data = new byte[packetDetails.Size - 1];
-                    read = await _stream.ReadAsync(data, stoppingToken);
-
-                    packetTotalSize += read;
-                    var allData = new byte[packetTotalSize];
-                    allData[0] = buffer[0];
-                    data.CopyTo(allData, 1);
-
-                    if (read != data.Length)
-                    {
-                        _logger.LogInformation("Failed to read, closing connection");
-                        _client.Close();
-                        break;
-                    }
-
-                    var packet = Activator.CreateInstance(packetDetails.Type);
-                    var subHeader = 0;// TODO _serializer.Deserialize(packetDetails.Type, data);
-
-                    if (packetDetails.IsSubHeader)
-                    {
-                        packetDetails =
-                            _packetManager.GetIncomingPacket((ushort) (packetDetails.Header << 8 | subHeader));
-                        if (packetDetails == null)
-                        {
-                            _logger.LogInformation("Received unknown sub header 0x{SubHeader:X2} for header 0x{Header:X2}", subHeader, buffer[0]);
-                            _client.Close();
-                            break;
-                        }
-
-                        packet = Activator.CreateInstance(packetDetails.Type);
-
-                        var subData = new byte[packetDetails.Size - data.Length - 1];
-                        read = await _stream.ReadAsync(subData, stoppingToken);
-                        
-                        packetTotalSize += read;
-                        var oldSize = data.Length;
-                        Array.Resize(ref data, data.Length + read);
-                        data.CopyTo(allData, oldSize);
-
-                        packet = _serializer.Deserialize(packetDetails.Type, data.Concat(subData).ToArray());
-                    }
-                    
-                    // Check if packet has dynamic data
-                    if (packetDetails.IsDynamic)
-                    {
-                        // Calculate dynamic size
-                        var size = (ushort)packetDetails.GetDynamicSize(packet) - (int)packetDetails.Size;
-                        
-                        // Read dynamic data
-                        var dynamicData = new byte[size];
-                        read = await _stream.ReadAsync(dynamicData.AsMemory(0, size), stoppingToken);
-                        packetTotalSize += read;
-                        var oldSize = data.Length;
-                        Array.Resize(ref allData, data.Length + read);
-                        dynamicData.CopyTo(allData, oldSize);
-                        if (read != size)
-                        {
-                            _logger.LogInformation("Failed to read dynamic data read {Read} but expected {Size}", read, size);
-                            _client.Close();
-                            break;
-                        }
-                        
-                        // Copy and deserialize dynamic data into the packet object
-                        packetDetails.DeserializeDynamic(packet, dynamicData);
-                    }
-                    
-                    // Check if packet has a sequence
-                    if (packetDetails.HasSequence)
-                    {
-                        var sequence = new byte[1];
-                        read = await _stream.ReadAsync(sequence.AsMemory(0, 1), stoppingToken);
-                        packetTotalSize += read;
-                        var oldSize = data.Length;
-                        Array.Resize(ref allData, data.Length + read);
-                        sequence.CopyTo(allData, oldSize);
-                        if (read != 1)
-                        {
-                            _client.Close();
-                            break;
-                        }
-                        //_logger.LogDebug($"Read sequence {sequence[0]:X2}");
-                    }
-                    
-                    //_logger.LogDebug($"Recv {packet}");
-                    await _pluginExecutor.ExecutePlugins<IPacketOperationListener>(_logger, x => x.OnPrePacketReceivedAsync(packet, allData, stoppingToken));
-
-                    await OnReceive(packet);
-                    _logger.LogInformation("Received: {Type} (0x{Header:X}) {Data}", packet.GetType(), packetDetails.Header, JsonSerializer.Serialize(packet));
-
-                    await _pluginExecutor.ExecutePlugins<IPacketOperationListener>(_logger, x => x.OnPostPacketReceivedAsync(packet, allData, stoppingToken));
+                    await _pluginExecutor.ExecutePlugins<IPacketOperationListener>(_logger, x => x.OnPostPacketReceivedAsync(packet, Array.Empty<byte>(), stoppingToken));
                 }
-                catch (Exception e)
-                {
-                    _logger.LogInformation(e, "Failed to process network data");
-                    _client.Close();
-                    break;
-                }
+            }
+            catch (IOException e)
+            {
+                _logger.LogDebug(e, "Connection was closed. Probably by the other party");
+                Close();
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Failed to read from stream");
+                Close();
             }
 
             Close();
@@ -208,8 +103,10 @@ namespace QuantumCore.Core.Networking
                 _logger.LogWarning("Tried to send data to a closed connection");
                 return;
             }
-            
-            var bytes = ArrayPool<byte>.Shared.Rent(packet.GetSize());
+
+            var size = packet.GetSize();
+            var bytes = ArrayPool<byte>.Shared.Rent(size);
+            Array.Clear(bytes, 0, size);
             packet.Serialize(bytes);
             
             try
@@ -217,12 +114,11 @@ namespace QuantumCore.Core.Networking
                 // TODO token
                 await _pluginExecutor.ExecutePlugins<IPacketOperationListener>(_logger, x => x.OnPrePacketSentAsync(packet, CancellationToken.None));
                 // Serialize object
-                var data = _serializer.Serialize(packet);
-                _logger.LogDebug("Sending bytes: {Bytes:X}", data);
-                await _stream.WriteAsync(data);
+                _logger.LogDebug("Sending bytes: {Bytes:X}", bytes);
+                await _stream.WriteAsync(bytes.AsMemory(0, size));
                 await _stream.FlushAsync();
                 // TODO token
-                await _pluginExecutor.ExecutePlugins<IPacketOperationListener>(_logger, x => x.OnPostPacketReceivedAsync(packet, data, CancellationToken.None));
+                await _pluginExecutor.ExecutePlugins<IPacketOperationListener>(_logger, x => x.OnPostPacketReceivedAsync(packet, bytes, CancellationToken.None));
             }
             catch (Exception e)
             {
@@ -230,12 +126,16 @@ namespace QuantumCore.Core.Networking
             }
             
             ArrayPool<byte>.Shared.Return(bytes);
-            _logger.LogInformation("Sending: {Type} => {Packet}", packet.GetType(), JsonSerializer.Serialize(packet));
+            _logger.LogInformation("OUT: {Type} => {Packet}", packet.GetType(), JsonSerializer.Serialize(packet));
         }
 
         public async Task StartHandshake()
         {
-            if (Handshaking) return;
+            if (Handshaking)
+            {
+                _logger.LogDebug("Already handshaking");
+                return;
+            }
 
             // Generate random handshake and start the handshaking
             Handshake = CoreRandom.GenerateUInt32();

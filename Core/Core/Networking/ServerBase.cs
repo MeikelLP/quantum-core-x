@@ -15,8 +15,8 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.PluginTypes;
-using QuantumCore.Core.Packets;
 using QuantumCore.Extensions;
+using QuantumCore.Networking;
 using Weikio.PluginFramework.Abstractions;
 
 namespace QuantumCore.Core.Networking
@@ -60,7 +60,6 @@ namespace QuantumCore.Core.Networking
             _logger.LogInformation("Initialize tcp server listening on {IP}:{Port}", bindIp, port);
 
             // Register Core Features
-            PacketManager.RegisterNamespace("QuantumCore.Core.Packets");
             var cfg = serviceProvider.GetRequiredService<IConfiguration>();
             Services = new ServiceCollection()
                 .AddCoreServices(serviceProvider.GetRequiredService<IPluginCatalog>())
@@ -124,28 +123,23 @@ namespace QuantumCore.Core.Networking
             _connectionListeners.Add(listener);
         }
 
-        public async Task CallListener(IConnection connection, object packet)
+        public async Task CallListener(IConnection connection, IPacketSerializable packet)
         {
-            var header = PacketManager.IncomingPackets.First(p => p.Value.Type == packet.GetType());
-            if (!_listeners.ContainsKey(header.Key))
+            if (!PacketManager.TryGetPacketInfo(packet, out var details) || details.PacketHandlerType is null)
             {
-                _logger.LogWarning("Don't know how to handle header {Header}", header.Key);
+                _logger.LogWarning("Could not find a handler for packet {PacketType}", packet.GetType());
                 return;
             }
-
-            var handler = _listeners[header.Key];
-            var handlerType = handler.GetType();
-            var packetType = handlerType.GetPacketType();
             
             // TODO caching
             object context;
             if (_serverMode == "game")
             {
-                context = GetGameContextPacket(connection, packet, packetType);
+                context = GetGameContextPacket(connection, packet, details.PacketType);
             }
             else if (_serverMode == "auth")
             {
-                context = GetAuthContextPacket(connection, packet, packetType);
+                context = GetAuthContextPacket(connection, packet, details.PacketType);
             }
             else
             {
@@ -154,8 +148,11 @@ namespace QuantumCore.Core.Networking
 
             try
             {
-                var handlerExecuteMethod = handlerType.GetMethod("ExecuteAsync")!;
-                await (Task) handlerExecuteMethod.Invoke(handler, new[] { context, new CancellationToken() })!;
+                await using var scope = _serverLifetimeProvider.CreateAsyncScope();
+
+                var packetHandler = ActivatorUtilities.CreateInstance(scope.ServiceProvider, details.PacketHandlerType);
+                var handlerExecuteMethod = details.PacketHandlerType.GetMethod("ExecuteAsync")!;
+                await (Task) handlerExecuteMethod.Invoke(packetHandler, new[] { context, new CancellationToken() })!;
             }
             catch (Exception e)
             {

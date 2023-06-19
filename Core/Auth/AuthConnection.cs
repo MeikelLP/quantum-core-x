@@ -3,16 +3,17 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.Core.Networking;
+using QuantumCore.Networking;
 
 namespace QuantumCore.Auth
 {
     public class AuthConnection : Connection, IAuthConnection
     {
-        private AuthServer _server;
+        private readonly AuthServer _server;
 
-        public AuthConnection(AuthServer server, TcpClient client, IPacketManager packetManager, 
-            ILogger<AuthConnection> logger, PluginExecutor pluginExecutor, IPacketSerializer serializer) 
-            : base(logger, pluginExecutor, packetManager, serializer)
+        public AuthConnection(AuthServer server, TcpClient client, ILogger<AuthConnection> logger, 
+            PluginExecutor pluginExecutor, IPacketReader packetReader) 
+            : base(logger, pluginExecutor, packetReader)
         {
             _server = server;
             Init(client);
@@ -28,7 +29,7 @@ namespace QuantumCore.Auth
             await _server.RemoveConnection(this);
         }
 
-        protected async override Task OnReceive(object packet)
+        protected async override Task OnReceive(IPacketSerializable packet)
         {
             await _server.CallListener(this, packet);
         }

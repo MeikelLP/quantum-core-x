@@ -11,8 +11,8 @@ using QuantumCore.API.Game.Types;
 using QuantumCore.API.PluginTypes;
 using QuantumCore.Core.Cache;
 using QuantumCore.Core.Networking;
-using QuantumCore.Database;
 using QuantumCore.Game.Extensions;
+using QuantumCore.Networking;
 
 namespace QuantumCore.Auth
 {
@@ -28,7 +28,6 @@ namespace QuantumCore.Auth
             : base(packetManager, logger, pluginExecutor, serviceProvider, packetHandlers, configuration.GetValue<string>("Mode"), options.Value.Port)
         {
             _logger = logger;
-            _databaseManager = databaseManager;
             _cacheManager = cacheManager;
             _options = options.Value;
             
@@ -38,7 +37,6 @@ namespace QuantumCore.Auth
         protected async override Task ExecuteAsync(CancellationToken token)
         {
             // Register auth server features
-            PacketManager.RegisterNamespace("QuantumCore.Auth.Packets");
             RegisterNewConnectionListener(NewConnection);
             RegisterListeners();
             

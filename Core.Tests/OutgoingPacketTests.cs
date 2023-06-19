@@ -42,15 +42,13 @@ public class OutgoingPacketTests
     [Fact]
     public void NullReturnsArrayWithDefaultValues()
     {
-        var cache = _serializer.Serialize((ServerStatusPacket)null);
-
-        cache.Should().Equal(new byte[] { 0, 0 });
+        Assert.Throws<NullReferenceException>(() => _serializer.Serialize((ServerStatusPacket)null!));
     }
 
     [Fact]
-    public void InvalidTypeThrowsArgumentException()
+    public void NullableStringThrows()
     {
-        Assert.Throws<ArgumentException>(() => _serializer.Serialize(new CreateCharacter()));
+        Assert.Throws<ArgumentNullException>(() => _serializer.Serialize(new CreateCharacter()));
     }
 
     [Fact]
@@ -433,10 +431,10 @@ public class OutgoingPacketTests
             })
             .RuleFor(x => x.GuildNames, faker => new[]
             {
-                faker.Lorem.Letter(13),
-                faker.Lorem.Letter(13),
-                faker.Lorem.Letter(13),
-                faker.Lorem.Letter(13)
+                faker.Lorem.Lines(),
+                faker.Lorem.Lines(),
+                faker.Lorem.Lines(),
+                faker.Lorem.Lines()
             })
             .RuleFor(x => x.CharacterList, _ =>
             {
@@ -476,7 +474,20 @@ public class OutgoingPacketTests
                     .Concat(BitConverter.GetBytes(c.Port))
                     .Append(c.SkillGroup)))
                 .Concat(obj.GuildIds.SelectMany(BitConverter.GetBytes))
-                .Concat(obj.GuildNames.SelectMany(Encoding.ASCII.GetBytes))
+                .Concat(obj.GuildNames.SelectMany(x =>
+                {
+                    if (x.Length > 13)
+                    {
+                        return Encoding.ASCII.GetBytes(x[..13]);
+                    }
+                    var encoded = Encoding.ASCII.GetBytes(x);
+                    if (encoded.Length < 13)
+                    {
+                        Array.Resize(ref encoded, 13);
+                    }
+
+                    return encoded;
+                }))
                 .Concat(BitConverter.GetBytes(obj.Unknown1))
                 .Concat(BitConverter.GetBytes(obj.Unknown2))
         );

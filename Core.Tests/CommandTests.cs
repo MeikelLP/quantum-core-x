@@ -65,7 +65,7 @@ public class CommandTests : IAsyncLifetime
             .RuleFor(x => x.Size, _ => (byte)1)
             .Generate());
         var connectionMock = new Mock<IGameConnection>();
-        connectionMock.Setup(x => x.Send(It.IsAny<object>())).Callback<object>(obj => _sentObjects.Add(obj));
+        // connectionMock.Setup(x => x.Send(It.IsAny<object>())).Callback<object>(obj => _sentObjects.Add(obj));
         connectionMock.SetupAllProperties();
         var cacheManagerMock = new Mock<ICacheManager>();
         var redisListWrapperMock = new Mock<IRedisListWrapper<Guid>>();

@@ -3,11 +3,11 @@ using Microsoft.Extensions.Configuration;
 
 namespace QuantumCore.Networking;
 
-public class NewPacketManager : INewPacketManager
+public class PacketManager : IPacketManager
 {
     private readonly Dictionary<(byte Header, byte? SubHeader), PacketInfo> _infos = new();
 
-    public NewPacketManager(IConfiguration config, Type[] packetTypes, Type[]? packetHandlerTypes = null)
+    public PacketManager(IConfiguration config, Type[] packetTypes, Type[]? packetHandlerTypes = null)
     {
         const BindingFlags flags = BindingFlags.Static | BindingFlags.Public;
         foreach (var packetType in packetTypes)

@@ -14,12 +14,12 @@ using QuantumCore.API.PluginTypes;
 using QuantumCore.Core.Cache;
 using QuantumCore.Core.Logging.Enrichers;
 using QuantumCore.Core.Networking;
-using QuantumCore.Database;
 using QuantumCore.Game;
 using QuantumCore.Game.Commands;
 using QuantumCore.Game.PlayerUtils;
 using QuantumCore.Game.Quest;
 using QuantumCore.Game.World;
+using QuantumCore.Networking;
 using Serilog;
 using Weikio.PluginFramework.Abstractions;
 
@@ -96,7 +96,23 @@ public static class ServiceExtensions
                 .AsImplementedInterfaces()
                 .WithSingletonLifetime();
         });
-        services.AddSingleton<IPacketManager, DefaultPacketManager>();
+        services.AddSingleton<IPacketManager>(provider =>
+        {
+            var packetTypes = AppDomain.CurrentDomain.GetAssemblies().SelectMany(x => x.ExportedTypes)
+                .Where(x => x.IsAssignableTo(typeof(IPacketSerializable)) &&
+                            x.GetCustomAttribute<PacketAttribute>()?.Direction.HasFlag(EDirection.Incoming) == true)
+                .OrderBy(x => x.FullName)
+                .ToArray();
+            var handlerTypes = AppDomain.CurrentDomain.GetAssemblies().SelectMany(x => x.ExportedTypes)
+                .Where(x => 
+                    x.IsAssignableTo(typeof(IPacketHandler)) && 
+                    x is { IsClass: true, IsAbstract: false, IsInterface: false })
+                .OrderBy(x => x.FullName)
+                .ToArray();
+            return new PacketManager(provider.GetRequiredService<IConfiguration>(), packetTypes, handlerTypes);
+        });
+        services.AddSingleton<IPacketReader, PacketReader>();
+        // services.AddSingleton<IPacketManager, DefaultPacketManager>();
         services.AddSingleton<PluginExecutor>();
         services.AddSingleton<IItemManager, ItemManager>();
         services.AddSingleton<IMonsterManager, MonsterManager>();
@@ -104,10 +120,10 @@ public static class ServiceExtensions
         services.AddSingleton<IAnimationManager, AnimationManager>();
         services.AddSingleton<IExperienceManager, ExperienceManager>();
         services.AddSingleton<ICommandManager, CommandManager>();
-        services.AddSingleton<IDatabaseManager, DatabaseManager>();
         services.AddSingleton<IChatManager, ChatManager>();
         services.AddSingleton<IQuestManager, QuestManager>();
         services.AddSingleton<ICacheManager, CacheManager>();
+        services.AddSingleton<IPacketSerializer, DefaultPacketSerializer>();
         services.AddSingleton<IWorld, World>();
         services.AddPluginFramework()
             .AddPluginCatalog(pluginCatalog)
