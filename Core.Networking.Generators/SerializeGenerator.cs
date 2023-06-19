@@ -16,20 +16,26 @@ internal class SerializeGenerator
     public string Generate(TypeDeclarationSyntax type, StringBuilder dynamicByteIndex)
     {
         var header = _context.GetHeaderForType(type);
+        var subHeader = _context.GetSubHeaderForType(type);
+        var hasSequence = _context.HasTypeSequence(type);
         var fields = _context.GetFieldsOfType(type);
         var source = new StringBuilder("        public void Serialize(byte[] bytes, in int offset = 0)\r\n");
         source.AppendLine("        {");
-        source.AppendLine(GenerateWriteHeader(header));
-        var staticByteIndex = 1;
+        source.AppendLine(GenerateWriteHeader(header, subHeader));
+        var staticByteIndex = subHeader is not null ? 2 : 1;
         foreach (var field in fields)
         {
             var line = GenerateMethodLine(field, $"this.{field.Name}", ref staticByteIndex, dynamicByteIndex, "", "            ");
             source.AppendLine(line);
         }
 
-        source.AppendLine(@"        }");
+        if (hasSequence)
+        {
+            source.AppendLine($"            bytes[{staticByteIndex}] = default;");
+        }
+        source.AppendLine("        }");
         source.AppendLine();
-        GenerateGetSizeMethod(type, source, dynamicByteIndex.ToString());
+        GenerateGetSizeMethod(type, source, dynamicByteIndex.ToString(), subHeader is not null, hasSequence);
 
         return source.ToString();
     }
@@ -67,7 +73,11 @@ internal class SerializeGenerator
             // only append to dynamic offset if type has non static length
             dynamicOffset.Append($" + {fieldExpression}.Length");
         }
-        return $"{indentPrefix}System.Text.Encoding.ASCII.GetBytes({fieldExpression}).CopyTo(bytes, {offsetStr});";
+
+        var lengthString = fieldData.SizeFieldName is not null
+            ? $"this.{fieldData.SizeFieldName}"
+            : fieldData.FieldSize.ToString();
+        return $"{indentPrefix}bytes.WriteString({fieldExpression}, {offsetStr}, (int){lengthString});";
     }
 
     private static string GetLineForFixedByteArray(FieldData field, string fieldExpression,
@@ -287,10 +297,18 @@ internal class SerializeGenerator
         return string.Join("\r\n", lines);
     }
 
-    private void GenerateGetSizeMethod(TypeDeclarationSyntax type, StringBuilder sb, string dynamicSize)
+    private void GenerateGetSizeMethod(TypeDeclarationSyntax type, StringBuilder sb, string dynamicSize, bool hasSubHeader, bool hasSequence)
     {
         var fields = _context.GetFieldsOfType(type);
-        var size = GeneratorContext.GetStaticSizeOfType(fields) + 1; // + header size
+        var size = GeneratorContext.GetStaticSizeOfType(fields) + 1; // + header
+        if (hasSubHeader)
+        {
+            size++;
+        }
+        if (hasSequence)
+        {
+            size++;
+        }
         sb.AppendLine("        public ushort GetSize()");
         sb.AppendLine("        {");
 
@@ -302,8 +320,16 @@ internal class SerializeGenerator
         sb.AppendLine("        }");
     }
 
-    private static string GenerateWriteHeader(string header)
+    private static string GenerateWriteHeader(string header, string? subHeader)
     {
-        return $"            bytes[offset + 0] = {header};";
+        var sb = new StringBuilder();
+        sb.Append($"            bytes[offset + 0] = {header};");
+        if (subHeader is not null)
+        {
+            sb.AppendLine();
+            sb.Append($"            bytes[offset + 1] = {subHeader};");
+        }
+
+        return sb.ToString();
     }
 }

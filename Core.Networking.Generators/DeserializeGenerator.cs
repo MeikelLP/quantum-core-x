@@ -17,59 +17,11 @@ internal class DeserializeGenerator
 
     public string Generate(TypeDeclarationSyntax type, string dynamicByteIndex)
     {
-        var fields = _context.GetFieldsOfType(type);
-        var source = new StringBuilder($"        public static {type.Identifier.Text} Deserialize(ReadOnlySpan<byte> bytes, in int offset = 0)\r\n");
+        var source =
+            new StringBuilder(
+                $"        public static {type.Identifier.Text} Deserialize(ReadOnlySpan<byte> bytes, in int offset = 0)\r\n");
         source.AppendLine("        {");
-        var staticByteIndex = 0;
-        var dynamicByteIndexLocal = new StringBuilder(dynamicByteIndex);
-        const string indentPrefix = "            ";
-        // declare and initialize variables
-        foreach (var field in fields)
-        {
-            var line = GetMethodLine(field, ref staticByteIndex, dynamicByteIndexLocal, "", indentPrefix, true);
-            source.Append($"{indentPrefix}var {GetVariableNameForExpression(field.Name)} = {line}");
-            if (field is not { IsArray: true, HasDynamicLength: true } || (field.IsArray && (field.SemanticType as IArrayTypeSymbol)?.ElementType.Name == "Byte"))
-            {
-                // dynamic arrays have a for loop after their declaration so don't put a ;
-                source.AppendLine(";");
-            }
-            else
-            {
-                source.AppendLine();
-            }
-        }
-        
-        // apply variables
-        dynamicByteIndexLocal = new StringBuilder(dynamicByteIndex);
-        if (type is RecordDeclarationSyntax)
-        {
-            var line = GetLineForInitializer(_context.GetTypeInfo(type)!, ref staticByteIndex, dynamicByteIndexLocal, "", indentPrefix, false);
-            source.AppendLine($"{indentPrefix}var obj = {line};");
-        }
-        else
-        {
-            source.AppendLine($"{indentPrefix}var obj = new {_context.GetTypeInfo(type).GetFullName()}");
-            source.AppendLine($"{indentPrefix}{{");
-            for (var i = 0; i < fields.Count; i++)
-            {
-                var field = fields[i];
-                if (field.IsReadonly) continue;
-                var line = $"{indentPrefix}    {field.Name} = {GetVariableNameForExpression(field.Name)}";
-                source.Append(line);
-
-                if (i < fields.Count - 1)
-                {
-                    source.AppendLine(",");
-                }
-                else
-                {
-                    source.AppendLine();
-                }
-            }
-
-            source.AppendLine($"{indentPrefix}}};");
-        }
-        source.AppendLine($"{indentPrefix}return obj;");
+        source.AppendLine(GenerateMethodBody(type, dynamicByteIndex, "            ", false));
         source.AppendLine("        }");
         source.AppendLine();
         source.AppendLine(@"        public static T Deserialize<T>(ReadOnlySpan<byte> bytes, in int offset = 0)
@@ -77,22 +29,158 @@ internal class DeserializeGenerator
         {
             return (T)(object)Deserialize(bytes, offset);
         }");
+        source.AppendLine();
+        source.AppendLine(
+            "        public static async ValueTask<object> DeserializeFromStreamAsync(Stream stream)");
+        source.AppendLine("        {");
+        source.AppendLine("            var buffer = ArrayPool<byte>.Shared.Rent(NetworkingConstants.BufferSize);");
+        source.AppendLine("            try");
+        source.AppendLine("            {");
+        source.AppendLine(GenerateMethodBody(type, "", "                ", true));
+        source.AppendLine("            }");
+        source.AppendLine("            catch (Exception)");
+        source.AppendLine("            {");
+        source.AppendLine("                throw;");
+        source.AppendLine("            }");
+        source.AppendLine("            finally");
+        source.AppendLine("            {");
+        source.AppendLine("                ArrayPool<byte>.Shared.Return(buffer);");
+        source.AppendLine("            }");
+        source.AppendLine("        }");
 
         return source.ToString();
     }
 
-    internal string GetMethodLine(FieldData field, ref int offset, StringBuilder dynamicOffset, string tempDynamicOffset, string indentPrefix, bool isVariableMode)
+    private string GenerateMethodBody(TypeDeclarationSyntax type, string dynamicByteIndex, string indentPrefix, bool isStreamMode)
+    {
+        var staticByteIndex = 0;
+        var dynamicByteIndexLocal = new StringBuilder(dynamicByteIndex);
+        var fields = _context.GetFieldsOfType(type);
+        var sb = new StringBuilder();
+        // declare and initialize variables
+        foreach (var field in fields)
+        {
+            var line = GetMethodLine(field, ref staticByteIndex, dynamicByteIndexLocal, "", indentPrefix, true, isStreamMode);
+            sb.Append($"{indentPrefix}var {GetVariableNameForExpression(field.Name)} = {line}");
+            if (field is not { IsArray: true, HasDynamicLength: true } || (field.IsArray &&
+                                                                           (field.SemanticType as IArrayTypeSymbol)
+                                                                           ?.ElementType.Name == "Byte"))
+            {
+                // dynamic arrays have a for loop after their declaration so don't put a ;
+                sb.AppendLine(";");
+            }
+            else
+            {
+                sb.AppendLine();
+            }
+        }
+
+        // apply variables
+        dynamicByteIndexLocal = new StringBuilder(dynamicByteIndex);
+        if (type is RecordDeclarationSyntax)
+        {
+            var line = GetLineForInitializer(_context.GetTypeInfo(type)!, ref staticByteIndex, dynamicByteIndexLocal,
+                "", indentPrefix, false, false);
+            sb.AppendLine($"{indentPrefix}var obj = {line};");
+        }
+        else
+        {
+            sb.AppendLine($"{indentPrefix}var obj = new {_context.GetTypeInfo(type).GetFullName()}");
+            sb.AppendLine($"{indentPrefix}{{");
+            for (var i = 0; i < fields.Count; i++)
+            {
+                var field = fields[i];
+                if (field.IsReadonly) continue;
+                var line = $"{indentPrefix}    {field.Name} = {GetVariableNameForExpression(field.Name)}";
+                sb.Append(line);
+
+                if (i < fields.Count - 1)
+                {
+                    sb.AppendLine(",");
+                }
+                else
+                {
+                    sb.AppendLine();
+                }
+            }
+
+            sb.AppendLine($"{indentPrefix}}};");
+        }
+
+        sb.Append($"{indentPrefix}return obj;");
+
+        return sb.ToString();
+    }
+
+    private static string GetStreamReaderLine(FieldData field, INamedTypeSymbol type)
+    {
+        var typeName = type.Name;
+        if (field.IsEnum)
+        {
+            return $"({field.SemanticType.GetFullName()}) await stream.ReadEnumFromStreamAsync<{((INamedTypeSymbol)field.SemanticType).EnumUnderlyingType}>(buffer)";
+        }
+
+        if (field.IsArray && ((IArrayTypeSymbol)field.SemanticType).ElementType.Name == "Byte")
+        {
+            return $"await stream.ReadByteArrayFromStreamAsync(buffer, {field.ArrayLength})";
+        }
+
+        if (typeName is "String")
+        {
+            var size = field.HasDynamicLength 
+                ? GetVariableNameForExpression(field.SizeFieldName!)
+                : field.FieldSize.ToString();
+            return $"await stream.ReadStringFromStreamAsync(buffer, (int){size})";
+        }
+
+        if (typeName is "Half" or "UInt16" or "Int16")
+        {
+            return $"await stream.ReadValueFromStreamAsync<{typeName}>(buffer)";
+        }
+        if (typeName is "Single" or "UInt32" or "Int32")
+        {
+            return $"await stream.ReadValueFromStreamAsync<{typeName}>(buffer)";
+        }
+        if (typeName is "Int64" or "UInt64" or "Double")
+        {
+            return $"await stream.ReadValueFromStreamAsync<{typeName}>(buffer)";
+        }
+
+        if (typeName == "Byte")
+        {
+            return $"await stream.ReadValueFromStreamAsync<{typeName}>(buffer)";
+        }
+
+        throw new NotImplementedException($"Don't know how to handle type of field {field.Name}");
+    }
+
+    private static string GetLengthOfField(FieldData fieldData)
+    {
+        if (fieldData.HasDynamicLength)
+        {
+            return GetVariableNameForExpression(fieldData.SizeFieldName!);
+        }
+        else
+        {
+            return fieldData.FieldSize.ToString();
+        }
+    }
+
+    internal string GetMethodLine(FieldData field, ref int offset, StringBuilder dynamicOffset,
+        string tempDynamicOffset, string indentPrefix, bool isVariableMode, bool isStreamMode)
     {
         var finalLine = field switch
         {
             // handle Custom[]
-            { IsArray: true } => GetLineForArray(field, ref offset, dynamicOffset, tempDynamicOffset, indentPrefix, isVariableMode),
+            { IsArray: true } => GetLineForArray(field, ref offset, dynamicOffset, tempDynamicOffset, indentPrefix,
+                isVariableMode, isStreamMode),
             // handle string
-            { SemanticType.Name: "String" } => GetValueForString(field, ref offset, dynamicOffset, tempDynamicOffset),
+            { SemanticType.Name: "String" } => GetValueForString(field, ref offset, dynamicOffset, tempDynamicOffset, isStreamMode),
             // handle enum
-            { IsEnum: true } => GetValueForSingleValue(field, (INamedTypeSymbol)field.SemanticType, ref offset, dynamicOffset, tempDynamicOffset),
+            { IsEnum: true } => GetValueForSingleValue(field, (INamedTypeSymbol)field.SemanticType, ref offset,
+                dynamicOffset, tempDynamicOffset, isStreamMode),
             // misc
-            _ => GetLineForMisc(field, ref offset, dynamicOffset, tempDynamicOffset, indentPrefix, isVariableMode)
+            _ => GetLineForMisc(field, ref offset, dynamicOffset, tempDynamicOffset, indentPrefix, isVariableMode, isStreamMode)
         };
 
 
@@ -106,61 +194,96 @@ internal class DeserializeGenerator
     }
 
     private static string GetValueForString(FieldData fieldData, ref int offset, StringBuilder dynamicOffset,
-        string tempDynamicOffset)
+        string tempDynamicOffset, bool isStreamMode)
     {
+        if (isStreamMode)
+        {
+            return GetStreamReaderLine(fieldData, (INamedTypeSymbol)fieldData.SemanticType);
+        }
         var offsetStr = GetOffsetString(offset, dynamicOffset, tempDynamicOffset);
         if (fieldData.SizeFieldName is not null)
         {
             var variableName = GetVariableNameForExpression(fieldData.SizeFieldName);
             dynamicOffset.Append($" + {variableName}");
         }
-        var endOffsetStr = GetOffsetString(offset, dynamicOffset, fieldData.ElementSize > 0 
-            ? $"{tempDynamicOffset} + {fieldData.ElementSize}" 
+
+        var endOffsetStr = GetOffsetString(offset, dynamicOffset, fieldData.ElementSize > 0
+            ? $"{tempDynamicOffset} + {fieldData.ElementSize}"
             : tempDynamicOffset);
         return $"System.Text.Encoding.ASCII.GetString(bytes[{offsetStr}..{endOffsetStr}])";
     }
 
-    private static string GetOffsetString(in int offset, StringBuilder dynamicOffset, string tempDynamicOffset, int? elementSize = null)
+    private static string GetOffsetString(in int offset, StringBuilder dynamicOffset, string tempDynamicOffset,
+        int? arrayLength = null, bool doNotPrependOffsetVariable = false)
     {
-        if (elementSize.HasValue)
+        var prefix = doNotPrependOffsetVariable 
+            ? "" 
+            : "offset + ";
+
+        if (prefix is "" && dynamicOffset.Length == 0 && tempDynamicOffset is "")
+        {
+            return offset.ToString();
+        }
+        
+        
+        if (arrayLength.HasValue)
         {
             if (dynamicOffset.Length > 0)
             {
-                return $"(System.Index)(offset + {offset}{dynamicOffset}{tempDynamicOffset})..(System.Index)(offset + {offset}{dynamicOffset}{tempDynamicOffset} + {elementSize})";
+                return
+                    $"(System.Index)({prefix}{offset}{dynamicOffset}{tempDynamicOffset})..(System.Index)({prefix}{offset}{dynamicOffset}{tempDynamicOffset} + {arrayLength})";
             }
             else
             {
-                return $"(offset + {offset}{tempDynamicOffset})..(offset + {offset}{tempDynamicOffset} + {elementSize})";
+                return
+                    $"({prefix}{offset}{tempDynamicOffset})..({prefix}{offset}{tempDynamicOffset} + {arrayLength})";
             }
         }
         else
         {
             if (dynamicOffset.Length > 0)
             {
-                return $"(System.Index)(offset + {offset}{dynamicOffset}{tempDynamicOffset})";
+                return $"(System.Index)({prefix}{offset}{dynamicOffset}{tempDynamicOffset})";
             }
             else
             {
-                return $"(offset + {offset}{tempDynamicOffset})";
+                return $"({prefix}{offset}{tempDynamicOffset})";
             }
         }
     }
 
-    private static string GetLineForFixedByteArray(FieldData field, ref int offset, StringBuilder dynamicOffset, string tempDynamicOffset)
+    private static string GetLineForFixedByteArray(FieldData field, ref int offset, StringBuilder dynamicOffset,
+        string tempDynamicOffset, bool isStreamMode)
     {
         var offsetStr = GetOffsetString(offset, dynamicOffset, tempDynamicOffset);
-        var endOffsetStr = GetOffsetString(offset, dynamicOffset, $"{tempDynamicOffset} + {field.ArrayLength!.Value}");
-        offset += field.ArrayLength!.Value;
-        return $"bytes[{offsetStr}..{endOffsetStr}].ToArray()";
+        var size = field.ArrayLength!.Value;
+        offset += size;
+        if (isStreamMode)
+        {
+            return $"await stream.ReadByteArrayFromStreamAsync(buffer, {size})";
+        }
+        else
+        {
+            var endOffsetStr = GetOffsetString(offset, dynamicOffset, $"{tempDynamicOffset} + {size}");
+            return $"bytes[{offsetStr}..{endOffsetStr}].ToArray()";
+        }
     }
 
     private string GetLineForDynamicByteArray(FieldData field, ref int offset,
-        StringBuilder dynamicOffset, string tempDynamicOffset)
+        StringBuilder dynamicOffset, string tempDynamicOffset, bool isStreamMode)
     {
         var offsetStr = GetOffsetString(offset, dynamicOffset, tempDynamicOffset);
-        dynamicOffset.Append($" + {GetVariableNameForExpression(field.SizeFieldName!)}");
-        var endOffsetStr = GetOffsetString(offset, dynamicOffset, tempDynamicOffset);
-        return $"bytes[{offsetStr}..{endOffsetStr}].ToArray()";
+        var size = GetVariableNameForExpression(field.SizeFieldName!);
+        dynamicOffset.Append($" + {size}");
+        if (isStreamMode)
+        {
+            return $"await stream.ReadByteArrayFromStreamAsync(buffer, (int){size})";
+        }
+        else
+        {
+            var endOffsetStr = GetOffsetString(offset, dynamicOffset, tempDynamicOffset);
+            return $"bytes[{offsetStr}..{endOffsetStr}].ToArray()";
+        }
     }
 
     private static string GetVariableNameForExpression(string fieldExpression)
@@ -169,15 +292,20 @@ internal class DeserializeGenerator
     }
 
     private static string GetValueForSingleValue(FieldData field, INamedTypeSymbol namedTypeSymbol, ref int offset,
-        StringBuilder dynamicOffset, string tempDynamicOffset)
+        StringBuilder dynamicOffset, string tempDynamicOffset, bool isStreamMode)
     {
+        if (isStreamMode)
+        {
+            return GetStreamReaderLine(field, namedTypeSymbol);
+        }
+        
         var cast = namedTypeSymbol.GetFullName();
         var typeName = namedTypeSymbol.TypeKind is TypeKind.Enum
             ? namedTypeSymbol.EnumUnderlyingType!.Name
             : namedTypeSymbol.Name;
         int? elementSize = GeneratorConstants.SupportedTypesByBitConverter.Contains(typeName)
-            ? GetSizeOfPrimitiveType(typeName) 
-            :null;
+            ? GetSizeOfPrimitiveType(typeName)
+            : null;
         var offsetStr = GetOffsetString(offset, dynamicOffset, tempDynamicOffset, elementSize);
         if (namedTypeSymbol.TypeKind is TypeKind.Enum)
         {
@@ -187,6 +315,7 @@ internal class DeserializeGenerator
             {
                 return $"({cast})System.BitConverter.To{namedTypeSymbol.EnumUnderlyingType.Name}(bytes[{offsetStr}])";
             }
+
             if (GeneratorConstants.CastableToByteTypes.Contains(enumUnderlyingTypeName) ||
                 GeneratorConstants.NoCastTypes.Contains(enumUnderlyingTypeName))
             {
@@ -211,31 +340,31 @@ internal class DeserializeGenerator
 
         if (namedTypeSymbol.Name == "String")
         {
-            return GetValueForString(field, ref offset, dynamicOffset, tempDynamicOffset);
+            return GetValueForString(field, ref offset, dynamicOffset, tempDynamicOffset, isStreamMode);
         }
 
         throw new InvalidOperationException($"Don't know how to handle type {namedTypeSymbol.Name}");
     }
 
     private string GetLineForMisc(FieldData field, ref int offset, StringBuilder dynamicOffset,
-        string tempDynamicOffset, string indentPrefix, bool isVariableMode)
+        string tempDynamicOffset, string indentPrefix, bool isVariableMode, bool isStreamMode)
     {
         if (field.IsCustom)
         {
             // handle custom type
             return GetLineForInitializer(field.SemanticType, ref offset, dynamicOffset, tempDynamicOffset,
-                indentPrefix, isVariableMode);
+                indentPrefix, isVariableMode, isStreamMode);
         }
         else if (field.SemanticType is INamedTypeSymbol namedTypeSymbol)
         {
-            return GetValueForSingleValue(field, namedTypeSymbol, ref offset, dynamicOffset, tempDynamicOffset);
+            return GetValueForSingleValue(field, namedTypeSymbol, ref offset, dynamicOffset, tempDynamicOffset, isStreamMode);
         }
 
         throw new NotImplementedException("???");
     }
 
     private string GetLineForArray(FieldData field, ref int offset, StringBuilder dynamicOffset,
-        string tempDynamicOffset, string indentPrefix, bool isVariableMode)
+        string tempDynamicOffset, string indentPrefix, bool isVariableMode, bool isStreamMode)
     {
         if (field.SemanticType is not IArrayTypeSymbol arr)
         {
@@ -246,28 +375,30 @@ internal class DeserializeGenerator
         {
             return GetVariableNameForExpression(field.Name);
         }
+
         if (field.ArrayLength.HasValue)
         {
-            return GetLineForFixedArray(field, ref offset, dynamicOffset, tempDynamicOffset, arr, indentPrefix, isVariableMode);
+            return GetLineForFixedArray(field, ref offset, dynamicOffset, tempDynamicOffset, arr, indentPrefix,
+                isVariableMode, isStreamMode);
         }
         else
         {
-            return GetLineForDynamicArray(field, ref offset, dynamicOffset, tempDynamicOffset, arr, indentPrefix);
+            return GetLineForDynamicArray(field, ref offset, dynamicOffset, tempDynamicOffset, arr, indentPrefix, isStreamMode);
         }
-
     }
 
     private string GetLineForDynamicArray(FieldData field, ref int offset,
-        StringBuilder dynamicOffset, string tempDynamicOffset, IArrayTypeSymbol arr, string indent)
+        StringBuilder dynamicOffset, string tempDynamicOffset, IArrayTypeSymbol arr, string indent, bool isStreamMode)
     {
         var sb = new StringBuilder();
         if (arr.ElementType.Name == "Byte")
         {
-            sb.Append(GetLineForDynamicByteArray(field, ref offset, dynamicOffset, tempDynamicOffset));
+            sb.Append(GetLineForDynamicByteArray(field, ref offset, dynamicOffset, tempDynamicOffset, isStreamMode));
         }
         else
         {
-            sb.AppendLine($"new {arr.ElementType.GetFullName()}[{GetVariableNameForExpression(field.SizeFieldName!)}];");
+            sb.AppendLine(
+                $"new {arr.ElementType.GetFullName()}[{GetVariableNameForExpression(field.SizeFieldName!)}];");
             sb.AppendLine($"{indent}for (var i = 0; i < {GetVariableNameForExpression(field.SizeFieldName!)}; i++)");
             sb.AppendLine($"{indent}{{");
             var variableName = GetVariableNameForExpression(field.Name);
@@ -277,30 +408,35 @@ internal class DeserializeGenerator
                 var subFields = _context.GetFieldsOfType(type);
                 foreach (var subField in subFields)
                 {
-                    var line = GetMethodLine(subField, ref offset, dynamicOffset, $"{tempDynamicOffset} + {field.ElementSize} * i", indent, true);
+                    var line = GetMethodLine(subField, ref offset, dynamicOffset,
+                        $"{tempDynamicOffset} + {field.ElementSize} * i", indent, true, isStreamMode);
                     sb.AppendLine($"{indent}    {variableName}[i].{subField.Name} = {line};");
                 }
             }
             else
             {
-                var line = GetValueForSingleValue(field, (INamedTypeSymbol)arr.ElementType, ref offset, dynamicOffset, $"{tempDynamicOffset} + {field.ElementSize} * i");
+                var line = GetValueForSingleValue(field, (INamedTypeSymbol)arr.ElementType, ref offset, dynamicOffset,
+                    $"{tempDynamicOffset} + {field.ElementSize} * i", isStreamMode);
                 sb.AppendLine($"{indent}    {variableName}[i] = {line};");
             }
+
             sb.Append($"{indent}}}");
         }
+
         dynamicOffset.Append($" + {GetVariableNameForExpression(field.SizeFieldName!)}");
 
         return sb.ToString();
     }
 
     private string GetLineForFixedArray(FieldData field, ref int offset,
-        StringBuilder dynamicOffset, string tempDynamicOffset, IArrayTypeSymbol arr, string indentPrefix, bool isVariableMode)
+        StringBuilder dynamicOffset, string tempDynamicOffset, IArrayTypeSymbol arr, string indentPrefix,
+        bool isVariableMode, bool isStreamMode)
     {
         var subTypeFullName = arr.ElementType.GetFullName()!;
-        
+
         if (subTypeFullName == "System.Byte")
         {
-            return GetLineForFixedByteArray(field, ref offset, dynamicOffset, tempDynamicOffset);
+            return GetLineForFixedByteArray(field, ref offset, dynamicOffset, tempDynamicOffset, isStreamMode);
         }
         else
         {
@@ -312,16 +448,18 @@ internal class DeserializeGenerator
             {
                 if (GeneratorContext.IsCustomType(arr.ElementType))
                 {
-                    var initializer = GetLineForInitializer(arr.ElementType, ref offset, dynamicOffset, tempDynamicOffset, $"    {indentPrefix}", isVariableMode);
+                    var initializer = GetLineForInitializer(arr.ElementType, ref offset, dynamicOffset,
+                        tempDynamicOffset, $"    {indentPrefix}", isVariableMode, isStreamMode);
                     sb.Append($"{indentPrefix}    {initializer}");
                 }
                 else
                 {
                     var elementType = (INamedTypeSymbol)((IArrayTypeSymbol)field.SemanticType).ElementType;
-                    var line = GetValueForSingleValue(field, elementType, ref offset, dynamicOffset, tempDynamicOffset);
+                    var line = GetValueForSingleValue(field, elementType, ref offset, dynamicOffset, tempDynamicOffset, isStreamMode);
                     offset += field.ElementSize;
                     sb.Append($"{indentPrefix}    {line}");
                 }
+
                 if (i < field.ArrayLength.Value - 1)
                 {
                     sb.AppendLine(",");
@@ -331,31 +469,34 @@ internal class DeserializeGenerator
                     sb.AppendLine();
                 }
             }
+
             sb.Append($"{indentPrefix}}}");
 
             return sb.ToString();
         }
     }
 
-    private string GetLineForInitializer(ITypeSymbol t, ref int offset, StringBuilder dynamicOffset, string tempDynamicOffset, string indentPrefix, bool isVariableMode)
+    private string GetLineForInitializer(ITypeSymbol t, ref int offset, StringBuilder dynamicOffset,
+        string tempDynamicOffset, string indentPrefix, bool isVariableMode, bool isStreamMode)
     {
         var sb = new StringBuilder();
 
         var type = _context.GetTypeDeclaration(t);
         sb.Append($"new {_context.GetTypeInfo(type).GetFullName()}");
-        
+
         // recursive call to generate lines for each field in sub type
         var members = _context.GetFieldsOfType(type);
         var recordParamMembers = members.Where(x => x.IsRecordParameter).ToArray();
         var propertyMembers = members.Where(x => !x.IsReadonly && !x.IsRecordParameter).ToArray();
         if (recordParamMembers.Length > 0)
         {
-            sb.AppendLine("(");
+            sb.AppendLine();
+            sb.AppendLine($"{indentPrefix}(");
             for (var ii = 0; ii < recordParamMembers.Length; ii++)
             {
                 var member = recordParamMembers[ii];
-                var valueStr = isVariableMode 
-                    ? GetMethodLine(member, ref offset, dynamicOffset, tempDynamicOffset, indentPrefix, isVariableMode)
+                var valueStr = isVariableMode
+                    ? GetMethodLine(member, ref offset, dynamicOffset, tempDynamicOffset, indentPrefix, isVariableMode, isStreamMode)
                     : GetVariableNameForExpression(member.Name);
                 var line = $"{indentPrefix}    {valueStr}";
                 line = TrimAssignmentRegex.Replace(line, "$1$2");
@@ -381,11 +522,11 @@ internal class DeserializeGenerator
             for (var ii = 0; ii < propertyMembers.Length; ii++)
             {
                 var member = propertyMembers[ii];
-                var valueStr = isVariableMode 
-                    ? GetMethodLine(member, ref offset, dynamicOffset, tempDynamicOffset, indentPrefix, isVariableMode)
+                var valueStr = isVariableMode
+                    ? GetMethodLine(member, ref offset, dynamicOffset, tempDynamicOffset, indentPrefix, isVariableMode, isStreamMode)
                     : GetVariableNameForExpression(member.Name);
                 var line = $"{indentPrefix}    {member.Name} = {valueStr}";
-                
+
                 sb.Append(line);
                 if (ii < propertyMembers.Length - 1)
                 {

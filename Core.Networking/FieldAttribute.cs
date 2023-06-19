@@ -11,5 +11,5 @@ public class FieldAttribute : Attribute
     public int Position { get; set; }
     public int Length { get; set; } = -1;
     public int ArrayLength { get; set; } = -1;
-    public Type EnumType { get; set; } = null;
+    public Type EnumType { get; set; }
 }

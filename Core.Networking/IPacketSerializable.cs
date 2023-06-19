@@ -15,7 +15,7 @@ public interface IPacketSerializable
     /// </summary>
     /// <param name="bytes">Existing byte array to write into</param>
     /// <param name="offset">Start offset</param>
-    void Serialize(byte[] bytes, int offset = 0);
+    void Serialize(byte[] bytes, in int offset = 0);
     
     /// <summary>
     /// Deserializes from the given array and returns a new instance
@@ -24,6 +24,36 @@ public interface IPacketSerializable
     /// </summary>
     /// <param name="bytes">Existing byte array to read from</param>
     /// <param name="offset">Start offset</param>
-    static abstract T Deserialize<T>(byte[] bytes, int offset = 0)
+    static abstract T Deserialize<T>(ReadOnlySpan<byte> bytes, in int offset = 0)
         where T : IPacketSerializable;
+
+    /// <summary>
+    /// Deserializes from the given stream and returns a new instance
+    /// Assumes that the stream has already read the header
+    /// </summary>
+    /// <param name="stream">The stream to read from</param>
+    static abstract ValueTask<object> DeserializeFromStreamAsync(Stream stream);
+
+    /// <summary>
+    /// Gets the header of the packet
+    /// </summary>
+    static abstract byte Header { get; }
+
+    /// <summary>
+    /// Gets the sub header of the packet if any
+    /// </summary>
+    static abstract byte? SubHeader { get; }
+
+    /// <summary>
+    /// Does not contain a dynamic field?
+    /// May be string or array
+    /// This is required to read bytes continuously while deserializing
+    /// </summary>
+    static abstract bool HasStaticSize { get; }
+    
+    /// <summary>
+    /// Does this package have a sequence?
+    /// A sequence is a terminating byte at the end of the package - usually \0
+    /// </summary>
+    static abstract bool HasSequence { get; }
 }

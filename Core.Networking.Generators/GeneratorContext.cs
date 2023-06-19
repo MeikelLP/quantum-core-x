@@ -13,82 +13,6 @@ internal class GeneratorContext
         Type = type;
     }
 
-    // private IReadOnlyDictionary<string, (TypeDeclarationSyntax TypeDeclaration, bool GenerateFor)> GetRelevantTypes(
-    //     IEnumerable<SyntaxTree> syntaxTrees)
-    // {
-    //     var allTypeDeclarations = syntaxTrees
-    //         .SelectMany(x => x.GetRoot().DescendantNodes().OfType<TypeDeclarationSyntax>())
-    //         .ToArray();
-    //     Dictionary<string, (TypeDeclarationSyntax Type, bool ShouldGenerateFor)> typesToGenerateFor;
-    //     typesToGenerateFor = allTypeDeclarations
-    //         .Where(x => x
-    //             .AttributeLists
-    //             .SelectMany(list => list.Attributes)
-    //             .Any(attr => GetTypeInfo(attr).GetFullName(), GeneratorAttributeType)
-    //         )
-    //         .GroupBy(x => GetTypeInfo(x).GetFullName()!)
-    //         .ToDictionary(x => x.Key, x => (Type: x.First(), ShouldGenerateFor: true));
-    //     var noGeneratorButRelevantTypes = new Dictionary<string, (TypeDeclarationSyntax, bool)>();
-    //     foreach (var keyPair in typesToGenerateFor)
-    //     {
-    //         var fields = GetMemberDefinitions(keyPair.Value.Type);
-    //         var includedCustomTypes = fields
-    //             .Select(x =>
-    //             {
-    //                 var typeInfo = GetTypeInfo(x);
-    //                 if (typeInfo is IArrayTypeSymbol arr && IsCustomType(arr.ElementType))
-    //                 {
-    //                     return arr.ElementType;
-    //                 }
-    //
-    //                 return typeInfo;
-    //             })
-    //             .Where(IsCustomType!)
-    //             .GroupBy(x => x.GetFullName())
-    //             .Select(x => x.First())
-    //             .ToArray();
-    //         foreach (var includedCustomType in includedCustomTypes)
-    //         {
-    //             var includedCustomTypeSymbol = allTypeDeclarations.FirstOrDefault(x =>
-    //                                  SymbolEqualityComparer.Default.Equals(GetTypeInfo(x), includedCustomType))
-    //                              ?? throw new InvalidOperationException(
-    //                                  "Type cannot be used as it is not defined in the same assembly as packet type");
-    //             var fullName = GetTypeInfo(includedCustomTypeSymbol)!.GetFullName()!;
-    //             if (!noGeneratorButRelevantTypes.ContainsKey(fullName))
-    //             {
-    //                 noGeneratorButRelevantTypes.Add(fullName, (includedCustomTypeSymbol, false));
-    //             }
-    //         }
-    //     }
-    //
-    //     return typesToGenerateFor!
-    //         .Concat(noGeneratorButRelevantTypes)
-    //         .OrderBy(x => x.Key)
-    //         .ToDictionary(x => x.Key, x => x.Value);
-    // }
-
-    private IEnumerable<TypeSyntax> GetMemberDefinitions(TypeDeclarationSyntax type)
-    {
-        var fields = new List<TypeSyntax>();
-        if (type is RecordDeclarationSyntax record)
-        {
-            fields.AddRange(record.ParameterList!.Parameters.Select(p => p.Type!));
-        }
-
-        fields.AddRange(type
-            .DescendantNodes()
-            .OfType<PropertyDeclarationSyntax>()
-            .Select(x => x.Type));
-        fields.AddRange(type
-            .DescendantNodes()
-            .OfType<FieldDeclarationSyntax>()
-            .Select(x => x.Declaration.Type));
-
-        return fields;
-    }
-    
-    
-
     internal IReadOnlyList<FieldData> GetFieldsOfType(TypeDeclarationSyntax type)
     {
         var fields = new List<FieldData>();
@@ -109,17 +33,20 @@ internal class GeneratorContext
                         GetTypeInfo(attr).GetFullName() == "QuantumCore.Core.Networking.FieldAttribute"
                     )?.ArgumentList!.Arguments;
                 var orderStr = fieldAttrArgs?[0].Expression.ToString();
-                var lengthAttrStr = fieldAttrArgs?.FirstOrDefault(par => par.NameEquals?.Name.Identifier.Text == "Length")?.Expression.ToString();
+                var lengthAttrStr = fieldAttrArgs
+                    ?.FirstOrDefault(par => par.NameEquals?.Name.Identifier.Text == "Length")?.Expression.ToString();
                 int? stringLengthAttr = null;
                 if (int.TryParse(lengthAttrStr, out var lengthAttrParsed))
                 {
                     stringLengthAttr = lengthAttrParsed;
                 }
+
                 var arrayLength = GetArrayLength(x);
-                return BuildFieldData(type, x.Type, x.Identifier, arrayLength, orderStr, false, x is { ExpressionBody: not null }, stringLengthAttr);
+                return BuildFieldData(type, x.Type, x.Identifier, arrayLength, orderStr, false,
+                    x is { ExpressionBody: not null }, stringLengthAttr);
             })
         );
-        
+
         var finalArr = new List<FieldData>(fields.Count);
         // first add all fields normally
         finalArr.AddRange(fields.Where(x => !x.Order.HasValue));
@@ -129,10 +56,20 @@ internal class GeneratorContext
             var desPosition = field.Order!.Value;
             if (desPosition >= fields.Count)
             {
-                throw new InvalidOperationException(
-                    $"Field cannot have a higher number ({desPosition}) than actual fields count {fields.Count}");
+                throw new DiagnosticException("QCX-G000004",
+                    $"Field cannot have a higher number ({desPosition}) than actual fields count {fields.Count}",
+                    field.SyntaxNode.GetLocation());
             }
-            finalArr.Insert(desPosition, field);
+
+            try
+            {
+                finalArr.Insert(desPosition, field);
+            }
+            catch (ArgumentOutOfRangeException)
+            {
+                throw new DiagnosticException("QCX-G000005",
+                    $"Field configuration for type {type.Identifier.Text} is invalid", field.SyntaxNode.GetLocation());
+            }
         }
 
         for (var i = 0; i < finalArr.Count; i++)
@@ -144,7 +81,8 @@ internal class GeneratorContext
                 var index = finalArr.FindIndex(x => x.Name == sizeFieldName);
                 if (index > i)
                 {
-                    throw new DiagnosticException("QCX-G000003", "Size fields must be have a position before their array", field.SyntaxNode.GetLocation());
+                    throw new DiagnosticException("QCX-G000003",
+                        "Size fields must be have a position before their array", field.SyntaxNode.GetLocation());
                 }
             }
         }
@@ -160,8 +98,8 @@ internal class GeneratorContext
                 {
                     Type.RankSpecifiers.Count: 1
                 } arrayCreationExpressionSyntax
-            } && 
-            arrayCreationExpressionSyntax.Type.RankSpecifiers.Any() && 
+            } &&
+            arrayCreationExpressionSyntax.Type.RankSpecifiers.Any() &&
             arrayCreationExpressionSyntax.Type.RankSpecifiers.First().Sizes.OfType<LiteralExpressionSyntax>().Any())
         {
             return (int?)arrayCreationExpressionSyntax.Type.RankSpecifiers
@@ -172,7 +110,8 @@ internal class GeneratorContext
         return null;
     }
 
-    private FieldData BuildFieldData(TypeDeclarationSyntax declaringType, TypeSyntax type, SyntaxToken name, int? arrayLength = null,
+    private FieldData BuildFieldData(TypeDeclarationSyntax declaringType, TypeSyntax type, SyntaxToken name,
+        int? arrayLength = null,
         string? orderStr = null, bool isRecordParameter = false, bool isReadonly = false, int? stringLength = null)
     {
         var isArray = type is ArrayTypeSyntax;
@@ -180,7 +119,7 @@ internal class GeneratorContext
         var enumType = isArray ? null : (INamedTypeSymbol)fieldType;
         var isEnum = enumType?.TypeKind is TypeKind.Enum;
         string? sizeFieldName = null;
-        
+
         if (fieldType.Name == "String" || isArray)
         {
             var expression = declaringType.Members
@@ -201,13 +140,14 @@ internal class GeneratorContext
         {
             elementSize = stringLength.Value;
         }
+
         if ((fieldType.Name == "String" && stringLength is null && sizeFieldName is null) ||
             (type is ArrayTypeSyntax && sizeFieldName is null && arrayLength is null))
         {
             throw new DiagnosticException("QCX-G000002",
                 "String or array must have a defined a static length either via FieldAttribute or an array constructor as default value. Dynamic fields must have a field that refers to it's size like \"public uint Size => Message.Length;\"",
                 name.Parent!.GetLocation());
-        } 
+        }
 
         return new FieldData
         {
@@ -225,13 +165,17 @@ internal class GeneratorContext
             SizeFieldName = sizeFieldName
         };
     }
-    
+
     private int GetStaticSize(ITypeSymbol semanticType, int? arrayLength = null)
     {
         var typeName = semanticType.Name;
 
         switch (typeName)
         {
+            case "Int64":
+            case "UInt64":
+            case "Double":
+                return 8;
             case "Int32":
             case "UInt32":
             case "Single":
@@ -346,11 +290,32 @@ internal class GeneratorContext
             throw new InvalidOperationException(
                 "PacketGeneratorAttribute requires PacketAttribute to be set as well");
         }
-        
+
         if (attr.ArgumentList!.Arguments.Count == 0)
         {
             throw new InvalidOperationException("PacketGeneratorAttribute must have parameters defined");
         }
+
         return attr.ArgumentList.Arguments[0].ToString();
+    }
+
+    public string? GetSubHeaderForType(TypeDeclarationSyntax type)
+    {
+        var attr = type
+            .DescendantNodes()
+            .OfType<AttributeSyntax>()
+            .FirstOrDefault(a => a
+                .DescendantTokens()
+                .Any(dt => dt.IsKind(SyntaxKind.IdentifierToken) &&
+                           GetTypeInfo(dt.Parent!).GetFullName() == "QuantumCore.Core.Networking.SubPacketAttribute"));
+        return attr?.ArgumentList?.Arguments[0].ToString();
+    }
+
+    public bool HasTypeSequence(TypeDeclarationSyntax type)
+    {
+        var attr = type.AttributeLists.SelectMany(x => x.Attributes).FirstOrDefault(x => x.Name.ToString() == "Packet");
+        return attr?.ArgumentList?.Arguments.Any(x =>
+            x.NameEquals?.Name.Identifier.Text == "Sequence" &&
+            ((LiteralExpressionSyntax)x.Expression).Token.Text == "true") ?? false;
     }
 }
