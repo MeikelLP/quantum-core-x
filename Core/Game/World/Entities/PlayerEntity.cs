@@ -483,6 +483,11 @@ namespace QuantumCore.Game.World.Entities
                     GiveStatusPoints();
                     break;
                 case EPoints.Experience:
+                    if (_experienceManager.GetNeededExperience((byte)GetPoint(EPoints.Level)) == 0)
+                    {
+                        // we cannot add experience if no level up is possible
+                        return;
+                    }
                     if (value < 0 && Player.Experience <= -value)
                     {
                         Player.Experience = 0;
