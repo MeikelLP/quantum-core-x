@@ -14,6 +14,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
+using QuantumCore.API.Game.World;
 using QuantumCore.API.PluginTypes;
 using QuantumCore.Extensions;
 using QuantumCore.Networking;
@@ -63,6 +64,7 @@ namespace QuantumCore.Core.Networking
             var cfg = serviceProvider.GetRequiredService<IConfiguration>();
             Services = new ServiceCollection()
                 .AddCoreServices(serviceProvider.GetRequiredService<IPluginCatalog>())
+                .Replace(new ServiceDescriptor(typeof(IWorld), serviceProvider.GetRequiredService<IWorld>()))
                 .AddDatabase(mode)
                 .AddSingleton(_ => cfg)
                 .Replace(new ServiceDescriptor(typeof(IPacketManager), _ => packetManager, ServiceLifetime.Singleton));
