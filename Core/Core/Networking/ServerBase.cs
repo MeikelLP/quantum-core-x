@@ -159,6 +159,7 @@ namespace QuantumCore.Core.Networking
             catch (Exception e)
             {
                 _logger.LogError(e, "Failed to execute packet handler");
+                connection.Close();
             }
         }
 
