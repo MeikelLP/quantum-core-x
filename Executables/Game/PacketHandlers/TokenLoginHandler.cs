@@ -80,7 +80,7 @@ namespace QuantumCore.Game.PacketHandlers
 
             // Send empire to the client and characters
             var empire = await _db.QueryFirstOrDefaultAsync<byte>(
-                "SELECT Empire FROM accounts WHERE Id = @AccountId", new {AccountId = token.AccountId});
+                "SELECT Empire FROM account.accounts WHERE Id = @AccountId", new {AccountId = token.AccountId});
 
             await ctx.Connection.Send(new Empire { EmpireId = empire });
             await ctx.Connection.SetPhaseAsync(EPhases.Select);

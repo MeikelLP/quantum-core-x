@@ -150,7 +150,7 @@ namespace QuantumCore.Game.World.Entities
         public async Task Load()
         {
             Empire = await _db.QueryFirstOrDefaultAsync<byte>(
-                "SELECT Empire FROM accounts WHERE Id = @AccountId", new {AccountId = Player.AccountId});
+                "SELECT Empire FROM account.accounts WHERE Id = @AccountId", new {AccountId = Player.AccountId});
             await Inventory.Load();
             await QuickSlotBar.Load();
             Health = (int) GetPoint(EPoints.MaxHp); // todo: cache hp of player 
