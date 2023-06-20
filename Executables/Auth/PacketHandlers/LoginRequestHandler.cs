@@ -1,8 +1,4 @@
 using System.Data;
-using System;
-using System.Data;
-using System.Threading;
-using System.Threading.Tasks;
 using Dapper;
 using Dapper.Contrib.Extensions;
 using Microsoft.Extensions.Logging;
@@ -32,7 +28,7 @@ public class LoginRequestHandler : IAuthPacketHandler<LoginRequest>
     public async Task ExecuteAsync(AuthPacketContext<LoginRequest> ctx, CancellationToken token = default)
     {
         var account = await _db.QueryFirstOrDefaultAsync<Account>(
-            "SELECT * FROM accounts WHERE Username = @Username", new {Username = ctx.Packet.Username});
+            "SELECT * FROM account.accounts WHERE Username = @Username", new {Username = ctx.Packet.Username});
         // Check if account was found
         if (account == default(Account))
         {

@@ -1,9 +1,7 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.PluginTypes;
-using QuantumCore.Game.Packets;
+using Version = QuantumCore.Game.Packets.Version;
 
 namespace QuantumCore.Game.PacketHandlers.Game;
 

@@ -1,9 +1,5 @@
 using System.Diagnostics;
 using System.Net;
-using Microsoft.Extensions.DependencyInjection;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using QuantumCore.API;
@@ -64,7 +60,6 @@ namespace QuantumCore.Game
             _chatManager = chatManager;
             World = world;
             Instance = this;
-            _options = options.Value;
         }
 
         private void Update(double elapsedTime)
@@ -108,7 +103,6 @@ namespace QuantumCore.Game
 
             // Register all default commands
             _commandManager.Register("QuantumCore.Game.Commands");
-            PacketManager.RegisterNamespace("QuantumCore.Game.Packets");
             
             // Put all new connections into login phase
             RegisterNewConnectionListener(async connection =>

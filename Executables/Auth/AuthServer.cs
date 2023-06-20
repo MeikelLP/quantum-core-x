@@ -1,9 +1,3 @@
-using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using QuantumCore.API;
@@ -12,7 +6,6 @@ using QuantumCore.API.PluginTypes;
 using QuantumCore.Core.Cache;
 using QuantumCore.Core.Networking;
 using QuantumCore.Core.Packets;
-using QuantumCore.Game.Extensions;
 using QuantumCore.Networking;
 
 namespace QuantumCore.Auth
@@ -20,7 +13,6 @@ namespace QuantumCore.Auth
     public class AuthServer : ServerBase<AuthConnection>
     {
         private readonly ILogger<AuthServer> _logger;
-        private readonly AuthOptions _options;
         private readonly ICacheManager _cacheManager;
 
         public AuthServer(IOptions<HostingOptions> hostingOptions, IPacketManager packetManager, ILogger<AuthServer> logger, 
@@ -30,7 +22,6 @@ namespace QuantumCore.Auth
         {
             _logger = logger;
             _cacheManager = cacheManager;
-            _options = options.Value;
         }
 
         protected async override Task ExecuteAsync(CancellationToken token)
@@ -50,7 +41,7 @@ namespace QuantumCore.Auth
         {
             await connection.Send(new GCPhase
             {
-                Phase = (byte) EPhases.Auth
+                Phase = EPhases.Auth
             });
             return true;
         }

@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using QuantumCore.Game;
 using QuantumCore.Game.Packets;
 using QuantumCore.Game.Packets.Shop;
@@ -29,7 +30,7 @@ public class NetworkingTests
             .AddLogging()
             .AddSingleton<IPacketManager>(provider =>
             {
-                return new PacketManager(provider.GetRequiredService<IConfiguration>(), new[]
+                return new PacketManager(provider.GetRequiredService<ILogger<PacketManager>>(), new[]
                 {
                     typeof(Attack),
                     typeof(CharacterDead),

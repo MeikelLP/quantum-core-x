@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using FluentAssertions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using QuantumCore.Core.Networking;
 using QuantumCore.Networking;
 using Xunit;
@@ -45,7 +46,7 @@ public class PacketSerializerTests
                     { "Mode", "game" }
                 })
                 .Build())
-            .AddSingleton<IPacketManager>(provider => new PacketManager(provider.GetRequiredService<IConfiguration>(), new []
+            .AddSingleton<IPacketManager>(provider => new PacketManager(provider.GetRequiredService<ILogger<PacketManager>>(), new []
             {
                 typeof(MyPacket)
             }))

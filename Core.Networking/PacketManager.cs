@@ -1,5 +1,5 @@
 ﻿using System.Reflection;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace QuantumCore.Networking;
 
@@ -7,7 +7,7 @@ public class PacketManager : IPacketManager
 {
     private readonly Dictionary<(byte Header, byte? SubHeader), PacketInfo> _infos = new();
 
-    public PacketManager(IConfiguration config, Type[] packetTypes, Type[]? packetHandlerTypes = null)
+    public PacketManager(ILogger<PacketManager> logger, IEnumerable<Type> packetTypes, Type[]? packetHandlerTypes = null)
     {
         const BindingFlags flags = BindingFlags.Static | BindingFlags.Public;
         foreach (var packetType in packetTypes)
@@ -16,18 +16,24 @@ public class PacketManager : IPacketManager
             var subHeader = (byte?)packetType.GetProperty(nameof(IPacketSerializable.SubHeader), flags)!.GetValue(null);
 
             // last or default so it can be overriden via plugins - last one is chosen
-            var typeName = config.GetValue<string>("Mode") == "game"
-                ? "QuantumCore.API.PluginTypes.IGamePacketHandler`1"
-                : "QuantumCore.API.PluginTypes.IAuthPacketHandler`1";
             var packetHandlerType = packetHandlerTypes?
                 .LastOrDefault(x =>
                     x is { IsAbstract: false, IsInterface: false } &&
                     x
                         .GetInterfaces()
-                        .Any(i => i.FullName!.StartsWith(typeName) &&
-                                  i.IsGenericType && i.GenericTypeArguments.First() == packetType)
+                        .Any(i => i.IsGenericType && i.GenericTypeArguments.First() == packetType)
                 );
             _infos.Add((header, subHeader), new PacketInfo(packetType, packetHandlerType));
+            if (subHeader.HasValue)
+            {
+                logger.LogDebug("Registered header 0x{Header:X2} with handler {HandlerType}", header,
+                    packetHandlerType);
+            }
+            else
+            {
+                logger.LogDebug("Registered header 0x{Header:X2}|0x{SubHeader:X2} with handler {HandlerType}", header,
+                    subHeader, packetHandlerType);
+            }
         }
     }
 
