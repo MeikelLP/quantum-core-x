@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Dapper;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.Game.Types;
@@ -79,7 +80,11 @@ namespace QuantumCore.Game.PacketHandlers
             }
 
             // Send empire to the client and characters
-            await ctx.Connection.Send(new Empire { EmpireId = 1 }); // todo read from database
+            using var db = _databaseManager.GetAccountDatabase();
+            var empire = await db.QueryFirstOrDefaultAsync<byte>(
+                "SELECT Empire FROM accounts WHERE Id = @AccountId", new {AccountId = token.AccountId});
+
+            await ctx.Connection.Send(new Empire { EmpireId = empire });
             await ctx.Connection.SetPhaseAsync(EPhases.Select);
             await ctx.Connection.Send(characters);
         }
