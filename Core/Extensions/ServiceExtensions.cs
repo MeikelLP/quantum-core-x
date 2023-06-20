@@ -1,18 +1,13 @@
-﻿using System.IO;
+﻿using System.Data;
+using System.IO;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using QuantumCore.API;
-using QuantumCore.API.Game.World;
+using Microsoft.Extensions.Options;
+using MySqlConnector;
 using QuantumCore.API.PluginTypes;
 using QuantumCore.Core.Cache;
 using QuantumCore.Core.Logging.Enrichers;
 using QuantumCore.Core.Networking;
-using QuantumCore.Database;
-using QuantumCore.Game;
-using QuantumCore.Game.Commands;
-using QuantumCore.Game.PlayerUtils;
-using QuantumCore.Game.Quest;
-using QuantumCore.Game.World;
 using Serilog;
 using Weikio.PluginFramework.Abstractions;
 
@@ -23,29 +18,38 @@ public static class ServiceExtensions
     private const string MessageTemplate = "[{Timestamp:HH:mm:ss.fff}][{Level:u3}][{ProcessName:u5}|{MachineName}:" +
                                            "{EnvironmentUserName}]{Caller} >> {Message:lj} " +
                                            "{NewLine:1}{Exception:1}";
+
+    public static IServiceCollection AddQuantumCoreDatabase(this IServiceCollection services)
+    {
+        services.AddOptions<DatabaseOptions>()
+            .BindConfiguration("Database")
+            .ValidateDataAnnotations();
+        services.AddScoped<IDbConnection>(provider =>
+        {
+            var options = provider.GetRequiredService<IOptions<DatabaseOptions>>().Value;
+            return new MySqlConnection(options.ConnectionString);
+        });
+
+        return services;
+    }
+    public static IServiceCollection AddQuantumCoreCache(this IServiceCollection services)
+    {
+        services.AddOptions<CacheOptions>()
+            .BindConfiguration("Cache")
+            .ValidateDataAnnotations();
+        services.AddSingleton<ICacheManager, CacheManager>();
+
+        return services;
+    }
+
     public static IServiceCollection AddCoreServices(this IServiceCollection services, IPluginCatalog pluginCatalog)
     {
+        services.AddOptions<HostingOptions>()
+            .BindConfiguration("Hosting")
+            .ValidateDataAnnotations();
         services.AddCustomLogging();
-        services.Scan(scan =>
-        {
-            scan.FromAssemblyOf<GameServer>()
-                .AddClasses(classes => classes.AssignableTo<IPacketHandler>())
-                .AsImplementedInterfaces()
-                .WithSingletonLifetime();
-        });
         services.AddSingleton<IPacketManager, DefaultPacketManager>();
         services.AddSingleton<PluginExecutor>();
-        services.AddSingleton<IItemManager, ItemManager>();
-        services.AddSingleton<IMonsterManager, MonsterManager>();
-        services.AddSingleton<IJobManager, JobManager>();
-        services.AddSingleton<IAnimationManager, AnimationManager>();
-        services.AddSingleton<IExperienceManager, ExperienceManager>();
-        services.AddSingleton<ICommandManager, CommandManager>();
-        services.AddSingleton<IDatabaseManager, DatabaseManager>();
-        services.AddSingleton<IChatManager, ChatManager>();
-        services.AddSingleton<IQuestManager, QuestManager>();
-        services.AddSingleton<ICacheManager, CacheManager>();
-        services.AddSingleton<IWorld, World>();
         services.AddPluginFramework()
             .AddPluginCatalog(pluginCatalog)
             .AddPluginType<ISingletonPlugin>()
