@@ -4,6 +4,7 @@ using System.Data;
 using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
+using Dapper;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
@@ -26,6 +27,7 @@ namespace QuantumCore.Game.World.Entities
         public string Name => Player.Name;
         public IGameConnection Connection { get; }
         public PlayerData Player { get; private set; }
+        public byte Empire { get; private set; }
         public IInventory Inventory { get; private set; }
         public IEntity Target { get; set; }
         public IList<Guid> Groups { get; private set; }
@@ -94,6 +96,7 @@ namespace QuantumCore.Game.World.Entities
         private readonly IItemManager _itemManager;
         private readonly IJobManager _jobManager;
         private readonly IExperienceManager _experienceManager;
+        private readonly IDatabaseManager _databaseManager;
         private readonly IQuestManager _questManager;
         private readonly ICacheManager _cacheManager;
         private readonly IWorld _world;
@@ -108,6 +111,7 @@ namespace QuantumCore.Game.World.Entities
             _itemManager = itemManager;
             _jobManager = jobManager;
             _experienceManager = experienceManager;
+            _databaseManager = databaseManager;
             _questManager = questManager;
             _cacheManager = cacheManager;
             _world = world;
@@ -149,6 +153,9 @@ namespace QuantumCore.Game.World.Entities
 
         public async Task Load()
         {
+            using var db = _databaseManager.GetAccountDatabase();
+            Empire = await db.QueryFirstOrDefaultAsync<byte>(
+                "SELECT Empire FROM accounts WHERE Id = @AccountId", new {AccountId = Player.AccountId});
             await Inventory.Load();
             await QuickSlotBar.Load();
             Health = (int) GetPoint(EPoints.MaxHp); // todo: cache hp of player 
@@ -921,7 +928,7 @@ namespace QuantumCore.Game.World.Entities
                 Class = Player.PlayerClass,
                 PositionX = PositionX,
                 PositionY = PositionY,
-                Empire = 1
+                Empire = Empire
             };
             await Connection.Send(details);
         }
@@ -990,7 +997,7 @@ namespace QuantumCore.Game.World.Entities
             {
                 Vid = Vid,
                 Name = Player.Name,
-                Empire = 1, // todo
+                Empire = Empire,
                 Level = Player.Level,
                 Parts = new ushort[] {
                     (ushort)(Inventory.EquipmentWindow.Body?.ItemId ?? 0), 
@@ -1031,7 +1038,7 @@ namespace QuantumCore.Game.World.Entities
             {
                 MessageType = ChatMessageTypes.Normal,
                 Vid = Vid,
-                Empire = 1,
+                Empire = Empire,
                 Message = message
             };
             await Connection.Send(chat);
@@ -1043,7 +1050,7 @@ namespace QuantumCore.Game.World.Entities
             {
                 MessageType = ChatMessageTypes.Command,
                 Vid = 0,
-                Empire = 1,
+                Empire = Empire,
                 Message = message
             };
             await Connection.Send(chat);
@@ -1055,7 +1062,7 @@ namespace QuantumCore.Game.World.Entities
             {
                 MessageType = ChatMessageTypes.Info,
                 Vid = 0,
-                Empire = 1,
+                Empire = Empire,
                 Message = message
             };
             await Connection.Send(chat);

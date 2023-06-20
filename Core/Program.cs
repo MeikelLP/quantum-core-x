@@ -82,7 +82,9 @@ namespace QuantumCore
                             services.AddHostedService<GameServer>();
                             break;
                         case MigrateOptions migrate:
-                            services.AddSingleton<IOptions<MigrateOptions>>(_ => new OptionsWrapper<MigrateOptions>(migrate));
+                            services.AddSingleton<IOptions<MigrateOptions>>(_ =>
+                                new OptionsWrapper<MigrateOptions>(migrate));
+                            services.AddCoreServices(pluginCatalog);
                             services.AddHostedService<Migrate>();
                             break;
                         default:
@@ -115,8 +117,16 @@ namespace QuantumCore
             var pluginExecutor = host.Services.GetRequiredService<PluginExecutor>();
             var logger = host.Services.GetRequiredService<ILogger<Program>>();
             await pluginExecutor.ExecutePlugins<ISingletonPlugin>(logger, x => x.InitializeAsync());
-            
-            await host.RunAsync();
+
+            if (obj is MigrateOptions)
+            {
+                await host.StartAsync();
+                logger.LogInformation("Finished migrating");
+            }
+            else
+            {
+                await host.RunAsync();
+            }
         }
     }
 }

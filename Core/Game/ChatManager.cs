@@ -73,7 +73,7 @@ public class ChatManager : IChatManager
         {
             MessageType = ChatMessageTypes.Normal,
             Vid = entity.Vid,
-            Empire = 1, // todo
+            Empire = entity.Empire,
             Message = message
         };
 
