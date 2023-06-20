@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using QuantumCore.API;
 using QuantumCore.API.PluginTypes;
 using QuantumCore.Extensions;
@@ -39,7 +40,7 @@ namespace QuantumCore.Core.Networking
 
         public ServerBase(IPacketManager packetManager, ILogger logger, PluginExecutor pluginExecutor,
             IServiceProvider serviceProvider, IEnumerable<IPacketHandler> packetHandlers, string mode,
-            int port, string bindIp = "0.0.0.0")
+            IOptions<HostingOptions> hostingOptions)
         {
             _logger = logger;
             _pluginExecutor = pluginExecutor;
@@ -47,15 +48,15 @@ namespace QuantumCore.Core.Networking
             _packetHandlers = packetHandlers;
             _serverMode = mode;
             PacketManager = packetManager;
-            Port = port;
+            Port = hostingOptions.Value.Port;
             
             // Start server timer
             _serverTimer.Start();
             
-            var localAddr = IPAddress.Parse(bindIp);
+            var localAddr = IPAddress.Parse(hostingOptions.Value.IpAddress);
             Listener = new TcpListener(localAddr, Port);
 
-            _logger.LogInformation("Initialize tcp server listening on {IP}:{Port}", bindIp, port);
+            _logger.LogInformation("Initialize tcp server listening on {IP}:{Port}", localAddr, Port);
         }
 
         public long ServerTime => _serverTimer.ElapsedMilliseconds;

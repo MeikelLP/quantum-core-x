@@ -140,7 +140,9 @@ namespace QuantumCore.Core.Networking
             // Generate random handshake and start the handshaking
             Handshake = CoreRandom.GenerateUInt32();
             Handshaking = true;
-            await this.SetPhaseAsync(EPhases.Handshake);
+            await Send(new GCPhase{
+                Phase = (byte)EPhases.Handshake
+            });
             await SendHandshake();
         }
 

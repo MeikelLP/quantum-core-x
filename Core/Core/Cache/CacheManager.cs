@@ -13,13 +13,13 @@ namespace QuantumCore.Core.Cache
         private readonly ILogger<CacheManager> _logger;
         private readonly RedisDB _redis;
 
-        public CacheManager(IDbConnection db, ILogger<CacheManager> logger, IOptions<GeneralOptions> options)
+        public CacheManager(IDbConnection db, ILogger<CacheManager> logger, IOptions<CacheOptions> options)
         {
             _db = db;
             _logger = logger;
             _redis = new RedisDB { DataFormater = new JsonFormater() };
             _logger.LogInformation("Initialize Cache Manager");
-            _redis.Host.AddWriteHost(options.Value.RedisHost, options.Value.RedisPort);
+            _redis.Host.AddWriteHost(options.Value.Host, options.Value.Port);
         }
 
         public async ValueTask<T> GetOrCreate<T>(object id) where T : class

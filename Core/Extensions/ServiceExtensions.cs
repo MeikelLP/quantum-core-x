@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Data;
 using System.IO;
 using System.Linq;
@@ -14,11 +14,6 @@ using QuantumCore.API.PluginTypes;
 using QuantumCore.Core.Cache;
 using QuantumCore.Core.Logging.Enrichers;
 using QuantumCore.Core.Networking;
-using QuantumCore.Game;
-using QuantumCore.Game.Commands;
-using QuantumCore.Game.PlayerUtils;
-using QuantumCore.Game.Quest;
-using QuantumCore.Game.World;
 using QuantumCore.Networking;
 using Serilog;
 using Weikio.PluginFramework.Abstractions;
@@ -30,71 +25,35 @@ public static class ServiceExtensions
     private const string MessageTemplate = "[{Timestamp:HH:mm:ss.fff}][{Level:u3}]{Message:lj} " +
                                            "{NewLine:1}{Exception:1}";
 
-    public static IServiceCollection AddDatabase(this IServiceCollection services, string mode)
+    public static IServiceCollection AddQuantumCoreDatabase(this IServiceCollection services)
     {
+        services.AddOptions<DatabaseOptions>()
+            .BindConfiguration("Database")
+            .ValidateDataAnnotations();
         services.AddScoped<IDbConnection>(provider =>
         {
-            GeneralOptions options = mode == "game"
-                ? provider.GetRequiredService<IOptions<GameOptions>>().Value
-                : provider.GetRequiredService<IOptions<AuthOptions>>().Value;
-            return new MySqlConnection(mode == "game" ? options.GameString : options.AccountString);
+            var options = provider.GetRequiredService<IOptions<DatabaseOptions>>().Value;
+            return new MySqlConnection(options.ConnectionString);
         });
+
+        return services;
+    }
+    public static IServiceCollection AddQuantumCoreCache(this IServiceCollection services)
+    {
+        services.AddOptions<CacheOptions>()
+            .BindConfiguration("Cache")
+            .ValidateDataAnnotations();
+        services.AddSingleton<ICacheManager, CacheManager>();
+
         return services;
     }
 
     public static IServiceCollection AddCoreServices(this IServiceCollection services, IPluginCatalog pluginCatalog)
     {
-        // TODO improve
-        services.AddOptions<GeneralOptions>().Configure<IConfiguration>((options, config) =>
-        {
-            options.AccountDatabase ??= config.GetValue<string>("account-database");
-            options.AccountDatabaseHost = config.GetValue<string>("account-database-host");
-            options.AccountDatabaseUser = config.GetValue<string>("account-database-user");
-            options.AccountDatabasePassword = config.GetValue<string>("account-database-password");
-            options.GameDatabase ??= config.GetValue<string>("game-database");
-            options.GameDatabaseHost = config.GetValue<string>("game-database-host");
-            options.GameDatabaseUser = config.GetValue<string>("game-database-user");
-            options.GameDatabasePassword = config.GetValue<string>("game-database-password");
-            options.RedisHost = config.GetValue<string>("redis-host");
-            options.RedisPort = config.GetValue<int>("redis-port");
-            config.Bind(options);
-        });
-        services.AddOptions<AuthOptions>().Configure<IConfiguration>((options, config) =>
-        {
-            options.AccountDatabase ??= config.GetValue<string>("account-database");
-            options.AccountDatabaseHost = config.GetValue<string>("account-database-host");
-            options.AccountDatabaseUser = config.GetValue<string>("account-database-user");
-            options.AccountDatabasePassword = config.GetValue<string>("account-database-password");
-            options.GameDatabase ??= config.GetValue<string>("game-database");
-            options.GameDatabaseHost = config.GetValue<string>("game-database-host");
-            options.GameDatabaseUser = config.GetValue<string>("game-database-user");
-            options.GameDatabasePassword = config.GetValue<string>("game-database-password");
-            options.RedisHost = config.GetValue<string>("redis-host");
-            options.RedisPort = config.GetValue<int>("redis-port");
-            config.Bind(options);
-        });
-        services.AddOptions<GameOptions>().Configure<IConfiguration>((options, config) =>
-        {
-            options.AccountDatabase ??= config.GetValue<string>("account-database");
-            options.AccountDatabaseHost = config.GetValue<string>("account-database-host");
-            options.AccountDatabaseUser = config.GetValue<string>("account-database-user");
-            options.AccountDatabasePassword = config.GetValue<string>("account-database-password");
-            options.GameDatabase ??= config.GetValue<string>("game-database");
-            options.GameDatabaseHost = config.GetValue<string>("game-database-host");
-            options.GameDatabaseUser = config.GetValue<string>("game-database-user");
-            options.GameDatabasePassword = config.GetValue<string>("game-database-password");
-            options.RedisHost = config.GetValue<string>("redis-host");
-            options.RedisPort = config.GetValue<int>("redis-port");
-            config.Bind(options);
-        });
+        services.AddOptions<HostingOptions>()
+            .BindConfiguration("Hosting")
+            .ValidateDataAnnotations();
         services.AddCustomLogging();
-        services.Scan(scan =>
-        {
-            scan.FromAssemblyOf<GameServer>()
-                .AddClasses(classes => classes.AssignableTo<IPacketHandler>())
-                .AsImplementedInterfaces()
-                .WithSingletonLifetime();
-        });
         services.AddSingleton<IPacketManager>(provider =>
         {
             var packetTypes = AppDomain.CurrentDomain.GetAssemblies().SelectMany(x => x.ExportedTypes)
@@ -111,19 +70,6 @@ public static class ServiceExtensions
             return new PacketManager(provider.GetRequiredService<IConfiguration>(), packetTypes, handlerTypes);
         });
         services.AddSingleton<IPacketReader, PacketReader>();
-        // services.AddSingleton<IPacketManager, DefaultPacketManager>();
-        services.AddSingleton<PluginExecutor>();
-        services.AddSingleton<IItemManager, ItemManager>();
-        services.AddSingleton<IMonsterManager, MonsterManager>();
-        services.AddSingleton<IJobManager, JobManager>();
-        services.AddSingleton<IAnimationManager, AnimationManager>();
-        services.AddSingleton<IExperienceManager, ExperienceManager>();
-        services.AddSingleton<ICommandManager, CommandManager>();
-        services.AddSingleton<IChatManager, ChatManager>();
-        services.AddSingleton<IQuestManager, QuestManager>();
-        services.AddSingleton<ICacheManager, CacheManager>();
-        services.AddSingleton<IPacketSerializer, DefaultPacketSerializer>();
-        services.AddSingleton<IWorld, World>();
         services.AddPluginFramework()
             .AddPluginCatalog(pluginCatalog)
             .AddPluginType<ISingletonPlugin>()

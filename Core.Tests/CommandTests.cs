@@ -22,6 +22,7 @@ using QuantumCore.Core.Packets;
 using QuantumCore.Database;
 using QuantumCore.Extensions;
 using QuantumCore.Game.Commands;
+using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Packets;
 using QuantumCore.Game.PlayerUtils;
 using QuantumCore.Game.World;
@@ -78,6 +79,7 @@ public class CommandTests : IAsyncLifetime
         dbMock.SetupDapperAsync(c => c.QueryAsync<Guid>(It.IsAny<string>(), null, null, null, null));
         _services = new ServiceCollection()
             .AddCoreServices(new EmptyPluginCatalog())
+            .AddGameServices()
             .AddLogging(x =>
             {
                 x.ClearProviders();
