@@ -5,7 +5,6 @@ using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using QuantumCore.API;
@@ -70,9 +69,6 @@ namespace QuantumCore.Game
             World = world;
             Instance = this;
             _options = options.Value;
-
-            Services.AddSingleton(_ => this);
-            Services.AddSingleton<IGame>(_ => this);
         }
 
         private void Update(double elapsedTime)

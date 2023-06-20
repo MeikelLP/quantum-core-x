@@ -8,21 +8,18 @@ using System.Net.Sockets;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
-using QuantumCore.API.Game.World;
 using QuantumCore.API.PluginTypes;
 using QuantumCore.Extensions;
 using QuantumCore.Networking;
-using Weikio.PluginFramework.Abstractions;
 
 namespace QuantumCore.Core.Networking
 {
-    public abstract class ServerBase<T> : BackgroundService where T : IConnection
+    public abstract class ServerBase<T> : BackgroundService, IServerBase 
+        where T : IConnection
     {
         private readonly ILogger _logger;
         protected IPacketManager PacketManager { get; }
@@ -33,11 +30,10 @@ namespace QuantumCore.Core.Networking
         private readonly CancellationTokenSource _stoppingToken = new();
         protected TcpListener Listener { get; }
 
-        private ServiceProvider _serverLifetimeProvider;
         private readonly PluginExecutor _pluginExecutor;
+        private readonly IServiceProvider _serviceProvider;
         private readonly IEnumerable<IPacketHandler> _packetHandlers;
         private readonly string _serverMode;
-        protected IServiceCollection Services { get; }
 
         public int Port { get; }
 
@@ -47,6 +43,7 @@ namespace QuantumCore.Core.Networking
         {
             _logger = logger;
             _pluginExecutor = pluginExecutor;
+            _serviceProvider = serviceProvider;
             _packetHandlers = packetHandlers;
             _serverMode = mode;
             PacketManager = packetManager;
@@ -59,15 +56,6 @@ namespace QuantumCore.Core.Networking
             Listener = new TcpListener(localAddr, Port);
 
             _logger.LogInformation("Initialize tcp server listening on {IP}:{Port}", bindIp, port);
-
-            // Register Core Features
-            var cfg = serviceProvider.GetRequiredService<IConfiguration>();
-            Services = new ServiceCollection()
-                .AddCoreServices(serviceProvider.GetRequiredService<IPluginCatalog>())
-                .Replace(new ServiceDescriptor(typeof(IWorld), serviceProvider.GetRequiredService<IWorld>()))
-                .AddDatabase(mode)
-                .AddSingleton(_ => cfg)
-                .Replace(new ServiceDescriptor(typeof(IPacketManager), _ => packetManager, ServiceLifetime.Singleton));
         }
 
         public long ServerTime => _serverTimer.ElapsedMilliseconds;
@@ -84,7 +72,6 @@ namespace QuantumCore.Core.Networking
             base.StartAsync(token);
             _logger.LogInformation("Start listening for connections...");
 
-            _serverLifetimeProvider = Services.BuildServiceProvider();
             Listener.Start();
             Listener.BeginAcceptTcpClient(OnClientAccepted, Listener);
 
@@ -97,10 +84,10 @@ namespace QuantumCore.Core.Networking
             var client = listener!.EndAcceptTcpClient(ar);
             
             // will dispose once connection finished executing (canceled or disconnect) 
-            await using var scope = _serverLifetimeProvider.CreateAsyncScope();
+            await using var scope = _serviceProvider.CreateAsyncScope();
 
             // cannot inject tcp client here
-            var connection = ActivatorUtilities.CreateInstance<T>(scope.ServiceProvider, client);
+            var connection = ActivatorUtilities.CreateInstance<T>(scope.ServiceProvider, client, (IServerBase) this);
             _connections.TryAdd(connection.Id, connection);
             
             await _pluginExecutor.ExecutePlugins<IConnectionLifetimeListener>(_logger, x => x.OnConnectedAsync(_stoppingToken.Token));
@@ -150,7 +137,7 @@ namespace QuantumCore.Core.Networking
 
             try
             {
-                await using var scope = _serverLifetimeProvider.CreateAsyncScope();
+                await using var scope = _serviceProvider.CreateAsyncScope();
 
                 var packetHandler = ActivatorUtilities.CreateInstance(scope.ServiceProvider, details.PacketHandlerType);
                 var handlerExecuteMethod = details.PacketHandlerType.GetMethod("ExecuteAsync")!;
