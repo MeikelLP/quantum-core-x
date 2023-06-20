@@ -6,6 +6,7 @@ using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using QuantumCore.Core.Networking;
+using QuantumCore.Core.Packets;
 using QuantumCore.Extensions;
 using QuantumCore.Game.Packets;
 using QuantumCore.Game.Packets.Quest;
@@ -42,7 +43,7 @@ public class IncomingPacketTests
     [Fact]
     public void WrongLengthThrowsArgumentException()
     {
-        Assert.Throws<ArgumentException>(() => _serializer.Deserialize(null, Array.Empty<byte>()));
+        Assert.Throws<ArgumentOutOfRangeException>(() => _serializer.Deserialize<GCHandshake>(Array.Empty<byte>()));
     }
 
     [Fact]

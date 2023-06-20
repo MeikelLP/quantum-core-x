@@ -1,10 +1,10 @@
-﻿using System.Threading;
+﻿using System.Data;
+using System.Threading;
 using System.Threading.Tasks;
 using Dapper;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.PluginTypes;
-using QuantumCore.Database;
 using QuantumCore.Game.Packets;
 
 namespace QuantumCore.Game.PacketHandlers.Select;
@@ -12,20 +12,19 @@ namespace QuantumCore.Game.PacketHandlers.Select;
 public class EmpireHandler : IGamePacketHandler<Empire>
 {
     private readonly ILogger<EmpireHandler> _logger;
-    private readonly IDatabaseManager _databaseManager;
+    private readonly IDbConnection _db;
 
-    public EmpireHandler(ILogger<EmpireHandler> logger, IDatabaseManager databaseManager)
+    public EmpireHandler(ILogger<EmpireHandler> logger, IDbConnection db)
     {
         _logger = logger;
-        _databaseManager = databaseManager;
+        _db = db;
     }
 
     public async Task ExecuteAsync(GamePacketContext<Empire> ctx, CancellationToken token = default)
     {
         if (ctx.Packet.EmpireId is > 0 and < 4)
         {
-            using var db = _databaseManager.GetAccountDatabase();
-            var result = await db.ExecuteAsync("UPDATE accounts set Empire = @Empire WHERE Id = @AccountId"
+            var result = await _db.ExecuteAsync("UPDATE accounts set Empire = @Empire WHERE Id = @AccountId"
                 , new { AccountId = ctx.Connection.AccountId, Empire = ctx.Packet.EmpireId });
             if (result is not 1)
             {

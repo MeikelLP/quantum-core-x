@@ -96,7 +96,7 @@ namespace QuantumCore.Game.World.Entities
         private readonly IItemManager _itemManager;
         private readonly IJobManager _jobManager;
         private readonly IExperienceManager _experienceManager;
-        private readonly IDatabaseManager _databaseManager;
+        private readonly IDbConnection _db;
         private readonly IQuestManager _questManager;
         private readonly ICacheManager _cacheManager;
         private readonly IWorld _world;
@@ -111,7 +111,7 @@ namespace QuantumCore.Game.World.Entities
             _itemManager = itemManager;
             _jobManager = jobManager;
             _experienceManager = experienceManager;
-            _databaseManager = databaseManager;
+            _db = db;
             _questManager = questManager;
             _cacheManager = cacheManager;
             _world = world;
@@ -153,8 +153,7 @@ namespace QuantumCore.Game.World.Entities
 
         public async Task Load()
         {
-            using var db = _databaseManager.GetAccountDatabase();
-            Empire = await db.QueryFirstOrDefaultAsync<byte>(
+            Empire = await _db.QueryFirstOrDefaultAsync<byte>(
                 "SELECT Empire FROM accounts WHERE Id = @AccountId", new {AccountId = Player.AccountId});
             await Inventory.Load();
             await QuickSlotBar.Load();
