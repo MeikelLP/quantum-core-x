@@ -25,6 +25,9 @@ namespace QuantumCore.Game.Packets
         [Field(7, ArrayLength = 3)]
         public uint[] Sockets { get; set; } = new uint[3];
         [Field(8, ArrayLength = 7)]
-        public ItemBonus[] Bonuses { get; set; } = new ItemBonus[7];
+        public ItemBonus[] Bonuses { get; set; } = new ItemBonus[7] {
+            new ItemBonus(), new ItemBonus(), new ItemBonus(), new ItemBonus(), 
+            new ItemBonus(), new ItemBonus(), new ItemBonus()
+        };
     }
 }
