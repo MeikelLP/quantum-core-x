@@ -114,7 +114,7 @@ namespace QuantumCore.Core.Networking
                 // TODO token
                 await _pluginExecutor.ExecutePlugins<IPacketOperationListener>(_logger, x => x.OnPrePacketSentAsync(packet, CancellationToken.None));
                 // Serialize object
-                _logger.LogDebug("Sending bytes: {Bytes:X}", bytes);
+                _logger.LogDebug("Sending bytes: {Bytes:X}", bytes.AsMemory(0, size).ToArray());
                 await _stream.WriteAsync(bytes.AsMemory(0, size));
                 await _stream.FlushAsync();
                 // TODO token
