@@ -130,7 +130,7 @@ public class OutgoingPacketTests
                 {
                     0x04
                 }
-                .Concat(BitConverter.GetBytes(obj.Size))
+                .Concat(BitConverter.GetBytes((short)obj.GetSize()))
                 .Append((byte)obj.MessageType)
                 .Concat(BitConverter.GetBytes(obj.Vid))
                 .Append(obj.Empire)

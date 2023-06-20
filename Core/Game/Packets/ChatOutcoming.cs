@@ -19,8 +19,6 @@ public partial class ChatOutcoming
     public byte Empire { get; set; }
 
     public string Message { get; set; }
-    
-    public byte EndOfMessage => 0x00;
 
     public override string ToString()
     {

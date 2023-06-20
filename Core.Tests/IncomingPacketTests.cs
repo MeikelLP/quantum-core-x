@@ -77,16 +77,14 @@ public class IncomingPacketTests
     public void ChatIncoming()
     {
         var expected = new AutoFaker<ChatIncoming>().Generate();
-        var bytes1 = Array.Empty<byte>()
-            .Concat(BitConverter.GetBytes(expected.Size))
+        var bytes = Array.Empty<byte>()
+            .Concat(BitConverter.GetBytes((ushort)(expected.Size + 1 + 3))) // size includes all package size + 0 terminating byte at end of string
             .Append((byte)expected.MessageType)
-            .ToArray();
-        var bytes2 = Array.Empty<byte>()
             .Concat(Encoding.ASCII.GetBytes(expected.Message))
             .Append((byte)0) // null byte for end of message
             .ToArray();
 
-        var result = _serializer.Deserialize<ChatIncoming>(bytes1.Concat(bytes2).ToArray());
+        var result = _serializer.Deserialize<ChatIncoming>(bytes);
 
         result.Should().BeEquivalentTo(expected);
     }

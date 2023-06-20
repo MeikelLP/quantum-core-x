@@ -64,7 +64,7 @@ public static class SerializerExtensions
         {
             var asciiBytes = Encoding.ASCII.GetBytes(str, 0, Math.Min(str.Length, length));
             asciiBytes.CopyTo(bytes.AsMemory(index, length));
-            bytes[index + length] = 0; // terminate string
+            bytes[index + length - 1] = 0; // terminate string
         }
         else
         {

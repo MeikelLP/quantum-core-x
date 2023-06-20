@@ -23,9 +23,13 @@ internal class SerializeGenerator
         source.AppendLine("        {");
         source.AppendLine(GenerateWriteHeader(header, subHeader));
         var staticByteIndex = subHeader is not null ? 2 : 1;
-        foreach (var field in fields)
+        foreach (var field in fields.ToArray())
         {
-            var line = GenerateMethodLine(field, $"this.{field.Name}", ref staticByteIndex, dynamicByteIndex, "", "            ");
+            var fieldExpression = fields.Any(x => x.SizeFieldName == field.Name) 
+                ? "this.GetSize()" 
+                : $"this.{field.Name}";
+
+            var line = GenerateMethodLine(field, fieldExpression, ref staticByteIndex, dynamicByteIndex, "", "            ");
             source.AppendLine(line);
         }
 
@@ -75,7 +79,7 @@ internal class SerializeGenerator
         }
 
         var lengthString = fieldData.SizeFieldName is not null
-            ? $"this.{fieldData.SizeFieldName}"
+            ? $"this.{fieldData.SizeFieldName} + 1"
             : fieldData.FieldSize.ToString();
         return $"{indentPrefix}bytes.WriteString({fieldExpression}, {offsetStr}, (int){lengthString});";
     }
@@ -312,8 +316,9 @@ internal class SerializeGenerator
         sb.AppendLine("        public ushort GetSize()");
         sb.AppendLine("        {");
 
-        var body = !string.IsNullOrWhiteSpace(dynamicSize)
-            ? $"            return (ushort)({size}{(!string.IsNullOrWhiteSpace(dynamicSize) ? dynamicSize : "")});"
+        var dynamicString = !string.IsNullOrWhiteSpace(dynamicSize) ? $"{dynamicSize} + 1" : "";
+        var body = dynamicString != ""
+            ? $"            return (ushort)({size}{dynamicString});"
             : $"            return {size.ToString()};";
         sb.AppendLine(body);
 

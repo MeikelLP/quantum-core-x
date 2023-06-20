@@ -56,12 +56,20 @@ internal class DeserializeGenerator
         var staticByteIndex = 0;
         var dynamicByteIndexLocal = new StringBuilder(dynamicByteIndex);
         var fields = _context.GetFieldsOfType(type);
+        var typeStaticSize = fields.Sum(x => x.ElementSize);
+        var fieldsCopy = fields.ToArray();
         var sb = new StringBuilder();
         // declare and initialize variables
         foreach (var field in fields)
         {
             var line = GetMethodLine(field, ref staticByteIndex, dynamicByteIndexLocal, "", indentPrefix, true, isStreamMode);
-            sb.Append($"{indentPrefix}var {GetVariableNameForExpression(field.Name)} = {line}");
+            
+            // packets dynamic strings will send their size in an early field but this field is the size of the whole
+            // packet not just the dynamic field's size
+            var isDynamicSizeField = fieldsCopy.Any(x => x.SizeFieldName == field.Name);
+            // + 1 because string includes a 0 byte at the end
+            var staticSizeString = isDynamicSizeField ? $" - {typeStaticSize + 1}" : ""; 
+            sb.Append($"{indentPrefix}var {GetVariableNameForExpression(field.Name)} = {line}{staticSizeString}");
             if (field is not { IsArray: true, HasDynamicLength: true } || (field.IsArray &&
                                                                            (field.SemanticType as IArrayTypeSymbol)
                                                                            ?.ElementType.Name == "Byte"))
