@@ -14,7 +14,6 @@ using QuantumCore.API.Game.Types;
 using QuantumCore.API.PluginTypes;
 using QuantumCore.Core.Packets;
 using QuantumCore.Core.Utils;
-using QuantumCore.Game.Extensions;
 
 namespace QuantumCore.Core.Networking
 {
@@ -244,7 +243,9 @@ namespace QuantumCore.Core.Networking
             // Generate random handshake and start the handshaking
             Handshake = CoreRandom.GenerateUInt32();
             Handshaking = true;
-            await this.SetPhaseAsync(EPhases.Handshake);
+            await Send(new GCPhase{
+                Phase = (byte)EPhases.Handshake
+            });
             await SendHandshake();
         }
 

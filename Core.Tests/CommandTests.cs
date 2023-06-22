@@ -22,6 +22,7 @@ using QuantumCore.Core.Packets;
 using QuantumCore.Database;
 using QuantumCore.Extensions;
 using QuantumCore.Game.Commands;
+using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Packets;
 using QuantumCore.Game.PlayerUtils;
 using QuantumCore.Game.World;
@@ -74,14 +75,11 @@ public class CommandTests : IAsyncLifetime
             .ReturnsAsync(new[] { CommandManager.Operator_Group });
         cacheManagerMock.Setup(x => x.CreateList<Guid>(It.IsAny<string>())).Returns(redisListWrapperMock.Object);
         cacheManagerMock.Setup(x => x.Subscribe()).Returns(redisSubscriberWrapperMock.Object);
-        var databaseManagerMock = new Mock<IDatabaseManager>();
         var dbMock = new Mock<IDbConnection>();
         dbMock.SetupDapperAsync(c => c.QueryAsync<Guid>(It.IsAny<string>(), null, null, null, null));
-        dbMock.SetupDapperAsync(c => c.QueryAsync<byte>(It.IsAny<string>(), It.IsAny<object>(), null, null, null));
-        databaseManagerMock.Setup(x => x.GetGameDatabase()).Returns(dbMock.Object);
-        databaseManagerMock.Setup(x => x.GetAccountDatabase()).Returns(dbMock.Object);
         _services = new ServiceCollection()
             .AddCoreServices(new EmptyPluginCatalog())
+            .AddGameServices()
             .AddLogging(x =>
             {
                 x.ClearProviders();
@@ -92,11 +90,11 @@ public class CommandTests : IAsyncLifetime
             .Replace(new ServiceDescriptor(typeof(IMonsterManager), _ => monsterManagerMock.Object, ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(IItemManager), _ => itemManagerMock.Object, ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(ICacheManager), _ => cacheManagerMock.Object, ServiceLifetime.Singleton))
-            .Replace(new ServiceDescriptor(typeof(IDatabaseManager), _ => databaseManagerMock.Object, ServiceLifetime.Singleton))
+            .Replace(new ServiceDescriptor(typeof(IDbConnection), _ => dbMock.Object, ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(IJobManager), _ => jobManagerMock.Object, ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(IExperienceManager), _ => experienceManagerMock.Object, ServiceLifetime.Singleton))
             .AddSingleton<IConfiguration>(_ => new ConfigurationBuilder()
-                .AddInMemoryCollection(new Dictionary<string, string>()
+                .AddInMemoryCollection(new Dictionary<string, string?>
                 {
                     { "maps:0", "map_a2"},
                     { "maps:1", "map_b2"}

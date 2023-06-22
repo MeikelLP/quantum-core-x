@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Threading.Tasks;
 using Dapper;
 using Dapper.Contrib.Extensions;
@@ -32,7 +33,7 @@ namespace QuantumCore.Database
         public uint GivenStatusPoints { get; set; }
         public uint AvailableStatusPoints { get; set; }
 
-        public static async Task<Player> GetPlayer(IDatabaseManager databaseManager, ICacheManager cacheManager, Guid account, byte slot)
+        public static async Task<Player> GetPlayer(IDbConnection db, ICacheManager cacheManager, Guid account, byte slot)
         {
             var key = "players:" + account;
             
@@ -40,7 +41,7 @@ namespace QuantumCore.Database
             if (await cacheManager.Exists(key) <= 0)
             {
                 var i = 0;
-                await foreach (var player in GetPlayers(databaseManager, cacheManager, account))
+                await foreach (var player in GetPlayers(db, cacheManager, account))
                 {
                     if (i == slot) return player;
                     i++;
@@ -50,13 +51,11 @@ namespace QuantumCore.Database
             }
 
             var playerId = await list.Index(slot);
-            return await GetPlayer(databaseManager, cacheManager, playerId);
+            return await GetPlayer(db, cacheManager, playerId);
         }
 
-        public static async Task<Player> GetPlayer(IDatabaseManager databaseManager, ICacheManager cacheManager, Guid playerId)
+        public static async Task<Player> GetPlayer(IDbConnection db, ICacheManager cacheManager, Guid playerId)
         {
-            using var db = databaseManager.GetGameDatabase();
-            
             var playerKey = "player:" + playerId;
             if (await cacheManager.Exists(playerKey) > 0)
             {
@@ -71,7 +70,7 @@ namespace QuantumCore.Database
             }
         }
         
-        public static async IAsyncEnumerable<Player> GetPlayers(IDatabaseManager databaseManager, ICacheManager cacheManager, Guid account)
+        public static async IAsyncEnumerable<Player> GetPlayers(IDbConnection db, ICacheManager cacheManager, Guid account)
         {
             var key = "players:" + account;
 
@@ -90,7 +89,6 @@ namespace QuantumCore.Database
             }
             else
             {
-                using var db = databaseManager.GetGameDatabase();
                 var ids = await db.QueryAsync("SELECT Id FROM players WHERE AccountId = @AccountId",
                     new {AccountId = account});
 
@@ -101,7 +99,7 @@ namespace QuantumCore.Database
                     Guid playerId = row.Id;
                     await list.Push(playerId);
 
-                    yield return await GetPlayer(databaseManager, cacheManager, playerId);
+                    yield return await GetPlayer(db, cacheManager, playerId);
                 }
             }
         }
