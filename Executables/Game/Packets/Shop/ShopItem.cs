@@ -1,5 +1,5 @@
-﻿using QuantumCore.Core.Networking;
-using QuantumCore.Game.Packets.General;
+﻿using QuantumCore.Game.Packets.General;
+using QuantumCore.Networking;
 
 namespace QuantumCore.Game.Packets.Shop
 {

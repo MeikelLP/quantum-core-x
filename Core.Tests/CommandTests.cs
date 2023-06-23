@@ -27,6 +27,7 @@ using QuantumCore.Game.Packets;
 using QuantumCore.Game.PlayerUtils;
 using QuantumCore.Game.World;
 using QuantumCore.Game.World.Entities;
+using QuantumCore.Networking;
 using Serilog;
 using Weikio.PluginFramework.Catalogs;
 using Xunit;
@@ -41,7 +42,7 @@ public class CommandTests : IAsyncLifetime
     private readonly ServiceProvider _services;
     private readonly IPlayerEntity _player;
     private readonly Faker<Player> _playerDataFaker;
-    private readonly List<object> _sentObjects = new();
+    private readonly List<PacketBase> _sentObjects = new();
 
     public CommandTests(ITestOutputHelper testOutputHelper)
     {        
@@ -66,7 +67,7 @@ public class CommandTests : IAsyncLifetime
             .RuleFor(x => x.Size, _ => (byte)1)
             .Generate());
         var connectionMock = new Mock<IGameConnection>();
-        // connectionMock.Setup(x => x.Send(It.IsAny<object>())).Callback<object>(obj => _sentObjects.Add(obj));
+        connectionMock.Setup(x => x.Send(It.IsAny<PacketBase>())).Callback<PacketBase>(obj => _sentObjects.Add(obj));
         connectionMock.SetupAllProperties();
         var cacheManagerMock = new Mock<ICacheManager>();
         var redisListWrapperMock = new Mock<IRedisListWrapper<Guid>>();

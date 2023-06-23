@@ -3,7 +3,6 @@ using System.Reflection;
 using FluentAssertions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using QuantumCore.Core.Networking;
 using QuantumCore.Networking;
 using Xunit;
 
@@ -29,7 +28,6 @@ public class SerializerGeneratorTests
     public void RecordStruct()
     {
         var inputCompilation = CreateCompilation(@"
-using QuantumCore.Core.Networking;
 using QuantumCore.Networking;
 
 namespace QuantumCore.Core.Packets;
@@ -145,7 +143,6 @@ namespace QuantumCore.Core.Packets {
     public void Record()
     {
         var inputCompilation = CreateCompilation(@"
-using QuantumCore.Core.Networking;
 using QuantumCore.Networking;
 
 namespace QuantumCore.Core.Packets;
@@ -261,7 +258,6 @@ namespace QuantumCore.Core.Packets {
     public void Record_WithEnumAsByte()
     {
         var inputCompilation = CreateCompilation(@"
-using QuantumCore.Core.Networking;
 using QuantumCore.Networking;
 
 namespace QuantumCore.Core.Packets;
@@ -370,7 +366,6 @@ namespace QuantumCore.Core.Packets {
     public void Record_WithEnumAsInt()
     {
         var inputCompilation = CreateCompilation(@"
-using QuantumCore.Core.Networking;
 using QuantumCore.Networking;
 
 namespace QuantumCore.Core.Packets;
@@ -482,7 +477,6 @@ namespace QuantumCore.Core.Packets {
     public void Record_CustomOrder()
     {
         var inputCompilation = CreateCompilation(@"
-using QuantumCore.Core.Networking;
 using QuantumCore.Networking;
 
 namespace QuantumCore.Core.Packets;
@@ -599,7 +593,6 @@ namespace QuantumCore.Core.Packets {
     public void Record_WithDynamicString()
     {
         var inputCompilation = CreateCompilation(@"
-using QuantumCore.Core.Networking;
 using QuantumCore.Networking;
 
 namespace QuantumCore.Core.Packets;
@@ -647,22 +640,22 @@ namespace QuantumCore.Core.Packets {
         {
             bytes[offset + 0] = 0xff;
             bytes[offset + 1] = this.Type;
-            bytes[offset + 2] = (byte)(this.Size >> 0);
-            bytes[offset + 3] = (byte)(this.Size >> 8);
-            bytes[offset + 4] = (byte)(this.Size >> 16);
-            bytes[offset + 5] = (byte)(this.Size >> 24);
-            bytes.WriteString(this.Message, offset + 6, (int)this.Size);
+            bytes[offset + 2] = (byte)(this.GetSize() >> 0);
+            bytes[offset + 3] = (byte)(this.GetSize() >> 8);
+            bytes[offset + 4] = (byte)(this.GetSize() >> 16);
+            bytes[offset + 5] = (byte)(this.GetSize() >> 24);
+            bytes.WriteString(this.Message, offset + 6, (int)this.Size + 1);
         }
 
         public ushort GetSize()
         {
-            return (ushort)(6 + this.Message.Length);
+            return (ushort)(6 + this.Message.Length + 1);
         }
 
         public static GCHandshake Deserialize(ReadOnlySpan<byte> bytes, in int offset = 0)
         {
             var __Type = bytes[(offset + 0)];
-            var __Size = System.BitConverter.ToUInt32(bytes[(offset + 1)..(offset + 1 + 4)]);
+            var __Size = System.BitConverter.ToUInt32(bytes[(offset + 1)..(offset + 1 + 4)]) - 6;
             var __Message = System.Text.Encoding.ASCII.GetString(bytes[(offset + 5)..(System.Index)(offset + 5 + __Size)]);
             var obj = new QuantumCore.Core.Packets.GCHandshake
             (
@@ -684,7 +677,7 @@ namespace QuantumCore.Core.Packets {
             try
             {
                 var __Type = await stream.ReadValueFromStreamAsync<Byte>(buffer);
-                var __Size = await stream.ReadValueFromStreamAsync<UInt32>(buffer);
+                var __Size = await stream.ReadValueFromStreamAsync<UInt32>(buffer) - 6;
                 var __Message = await stream.ReadStringFromStreamAsync(buffer, (int)__Size);
                 var obj = new QuantumCore.Core.Packets.GCHandshake
                 (
@@ -710,7 +703,6 @@ namespace QuantumCore.Core.Packets {
     public void Record_WithDynamicByteArray()
     {
         var inputCompilation = CreateCompilation(@"
-using QuantumCore.Core.Networking;
 using QuantumCore.Networking;
 
 namespace QuantumCore.Core.Packets;
@@ -758,10 +750,10 @@ namespace QuantumCore.Core.Packets {
         {
             bytes[offset + 0] = 0xff;
             bytes[offset + 1] = this.Type;
-            bytes[offset + 2] = (byte)(this.Size >> 0);
-            bytes[offset + 3] = (byte)(this.Size >> 8);
-            bytes[offset + 4] = (byte)(this.Size >> 16);
-            bytes[offset + 5] = (byte)(this.Size >> 24);
+            bytes[offset + 2] = (byte)(this.GetSize() >> 0);
+            bytes[offset + 3] = (byte)(this.GetSize() >> 8);
+            bytes[offset + 4] = (byte)(this.GetSize() >> 16);
+            bytes[offset + 5] = (byte)(this.GetSize() >> 24);
             this.Flags.CopyTo(bytes, offset + 6);
         }
 
@@ -773,7 +765,7 @@ namespace QuantumCore.Core.Packets {
         public static GCHandshake Deserialize(ReadOnlySpan<byte> bytes, in int offset = 0)
         {
             var __Type = bytes[(offset + 0)];
-            var __Size = System.BitConverter.ToUInt32(bytes[(offset + 1)..(offset + 1 + 4)]);
+            var __Size = System.BitConverter.ToUInt32(bytes[(offset + 1)..(offset + 1 + 4)]) - 7;
             var __Flags = bytes[(offset + 5)..(System.Index)(offset + 5 + __Size)].ToArray();
             var obj = new QuantumCore.Core.Packets.GCHandshake
             (
@@ -795,7 +787,7 @@ namespace QuantumCore.Core.Packets {
             try
             {
                 var __Type = await stream.ReadValueFromStreamAsync<Byte>(buffer);
-                var __Size = await stream.ReadValueFromStreamAsync<UInt32>(buffer);
+                var __Size = await stream.ReadValueFromStreamAsync<UInt32>(buffer) - 7;
                 var __Flags = await stream.ReadByteArrayFromStreamAsync(buffer, (int)__Size);
                 var obj = new QuantumCore.Core.Packets.GCHandshake
                 (
@@ -821,7 +813,6 @@ namespace QuantumCore.Core.Packets {
     public void Record_WithFixedByteArray()
     {
         var inputCompilation = CreateCompilation(@"
-using QuantumCore.Core.Networking;
 using QuantumCore.Networking;
 
 namespace QuantumCore.Core.Packets;
@@ -930,7 +921,6 @@ namespace QuantumCore.Core.Packets {
     public void Record_WithFixedUshortArray()
     {
         var inputCompilation = CreateCompilation(@"
-using QuantumCore.Core.Networking;
 using QuantumCore.Networking;
 
 namespace QuantumCore.Core.Packets;
@@ -1050,7 +1040,6 @@ namespace QuantumCore.Core.Packets {
     public void Class_WithSubHeader()
     {
         var inputCompilation = CreateCompilation(@"
-using QuantumCore.Core.Networking;
 using QuantumCore.Networking;
 
 namespace QuantumCore.Core.Packets;
@@ -1156,7 +1145,6 @@ namespace QuantumCore.Core.Packets {
     public void Class_WithSequence()
     {
         var inputCompilation = CreateCompilation(@"
-using QuantumCore.Core.Networking;
 using QuantumCore.Networking;
 
 namespace QuantumCore.Core.Packets;
@@ -1274,7 +1262,6 @@ namespace QuantumCore.Core.Packets {
     public void Class_NoFields()
     {
         var inputCompilation = CreateCompilation(@"
-using QuantumCore.Core.Networking;
 using QuantumCore.Networking;
 
 namespace QuantumCore.Core.Packets;
@@ -1370,7 +1357,6 @@ namespace QuantumCore.Core.Packets {
     public void Invalid_Fields_Throws()
     {
         var inputCompilation = CreateCompilation(@"
-using QuantumCore.Core.Networking;
 using QuantumCore.Networking;
 
 namespace QuantumCore.Core.Packets;
@@ -1401,7 +1387,6 @@ public partial class ShopBuy
     public void Record_WithFixedDynamicStringArray()
     {
         var inputCompilation = CreateCompilation(@"
-using QuantumCore.Core.Networking;
 using QuantumCore.Networking;
 
 namespace QuantumCore.Core.Packets;
@@ -1511,7 +1496,6 @@ namespace QuantumCore.Core.Packets {
     public void Record_WithDynamicUshortArray()
     {
         var inputCompilation = CreateCompilation(@"
-using QuantumCore.Core.Networking;
 using QuantumCore.Networking;
 
 namespace QuantumCore.Core.Packets;
@@ -1560,10 +1544,10 @@ namespace QuantumCore.Core.Packets {
         {
             bytes[offset + 0] = 0xff;
             bytes[offset + 1] = this.Type;
-            bytes[offset + 2] = (byte)(this.Size >> 0);
-            bytes[offset + 3] = (byte)(this.Size >> 8);
-            bytes[offset + 4] = (byte)(this.Size >> 16);
-            bytes[offset + 5] = (byte)(this.Size >> 24);
+            bytes[offset + 2] = (byte)(this.GetSize() >> 0);
+            bytes[offset + 3] = (byte)(this.GetSize() >> 8);
+            bytes[offset + 4] = (byte)(this.GetSize() >> 16);
+            bytes[offset + 5] = (byte)(this.GetSize() >> 24);
             for (var i = 0; i < this.Flags.Length; i++)
             {
                 bytes[offset + 6 + i * 2] = (byte)(this.Flags[i] >> 0);
@@ -1579,7 +1563,7 @@ namespace QuantumCore.Core.Packets {
         public static GCHandshake Deserialize(ReadOnlySpan<byte> bytes, in int offset = 0)
         {
             var __Type = bytes[(offset + 0)];
-            var __Size = System.BitConverter.ToUInt32(bytes[(offset + 1)..(offset + 1 + 4)]);
+            var __Size = System.BitConverter.ToUInt32(bytes[(offset + 1)..(offset + 1 + 4)]) - 8;
             var __Flags = new System.UInt16[__Size];
             for (var i = 0; i < __Size; i++)
             {
@@ -1605,7 +1589,7 @@ namespace QuantumCore.Core.Packets {
             try
             {
                 var __Type = await stream.ReadValueFromStreamAsync<Byte>(buffer);
-                var __Size = await stream.ReadValueFromStreamAsync<UInt32>(buffer);
+                var __Size = await stream.ReadValueFromStreamAsync<UInt32>(buffer) - 8;
                 var __Flags = new System.UInt16[__Size];
                 for (var i = 0; i < __Size; i++)
                 {
@@ -1635,7 +1619,6 @@ namespace QuantumCore.Core.Packets {
     public void SizeAfterArray_Error()
     {
         var inputCompilation = CreateCompilation(@"
-using QuantumCore.Core.Networking;
 using QuantumCore.Networking;
 
 namespace QuantumCore.Core.Packets;
@@ -1662,7 +1645,6 @@ public partial record struct GCHandshake(byte Type, ushort[] Flags)
     public void Record_WithDynamic_FieldAfter()
     {
         var inputCompilation = CreateCompilation(@"
-using QuantumCore.Core.Networking;
 using QuantumCore.Networking;
 
 namespace QuantumCore.Core.Packets;
@@ -1710,23 +1692,23 @@ namespace QuantumCore.Core.Packets {
         {
             bytes[offset + 0] = 0xff;
             bytes[offset + 1] = this.Type;
-            bytes[offset + 2] = (byte)(this.Size >> 0);
-            bytes[offset + 3] = (byte)(this.Size >> 8);
-            bytes[offset + 4] = (byte)(this.Size >> 16);
-            bytes[offset + 5] = (byte)(this.Size >> 24);
-            bytes.WriteString(this.Message, offset + 6, (int)this.Size);
+            bytes[offset + 2] = (byte)(this.GetSize() >> 0);
+            bytes[offset + 3] = (byte)(this.GetSize() >> 8);
+            bytes[offset + 4] = (byte)(this.GetSize() >> 16);
+            bytes[offset + 5] = (byte)(this.GetSize() >> 24);
+            bytes.WriteString(this.Message, offset + 6, (int)this.Size + 1);
             bytes[offset + 6 + this.Message.Length] = this.Location;
         }
 
         public ushort GetSize()
         {
-            return (ushort)(7 + this.Message.Length);
+            return (ushort)(7 + this.Message.Length + 1);
         }
 
         public static GCHandshake Deserialize(ReadOnlySpan<byte> bytes, in int offset = 0)
         {
             var __Type = bytes[(offset + 0)];
-            var __Size = System.BitConverter.ToUInt32(bytes[(offset + 1)..(offset + 1 + 4)]);
+            var __Size = System.BitConverter.ToUInt32(bytes[(offset + 1)..(offset + 1 + 4)]) - 7;
             var __Message = System.Text.Encoding.ASCII.GetString(bytes[(offset + 5)..(System.Index)(offset + 5 + __Size)]);
             var __Location = bytes[(System.Index)(offset + 5 + __Size)];
             var obj = new QuantumCore.Core.Packets.GCHandshake
@@ -1750,7 +1732,7 @@ namespace QuantumCore.Core.Packets {
             try
             {
                 var __Type = await stream.ReadValueFromStreamAsync<Byte>(buffer);
-                var __Size = await stream.ReadValueFromStreamAsync<UInt32>(buffer);
+                var __Size = await stream.ReadValueFromStreamAsync<UInt32>(buffer) - 7;
                 var __Message = await stream.ReadStringFromStreamAsync(buffer, (int)__Size);
                 var __Location = await stream.ReadValueFromStreamAsync<Byte>(buffer);
                 var obj = new QuantumCore.Core.Packets.GCHandshake
@@ -1778,7 +1760,6 @@ namespace QuantumCore.Core.Packets {
     public void MultipleTypesPerFile()
     {
         var inputCompilation = CreateCompilation(@"
-using QuantumCore.Core.Networking;
 using QuantumCore.Networking;
 
 namespace QuantumCore.Core.Packets;
@@ -1966,7 +1947,6 @@ namespace QuantumCore.Core.Packets {
     public void Struct()
     {
         var inputCompilation = CreateCompilation(@"
-using QuantumCore.Core.Networking;
 using QuantumCore.Networking;
 
 namespace QuantumCore.Core.Packets;
@@ -2085,7 +2065,6 @@ namespace QuantumCore.Core.Packets {
     public void Class()
     {
         var inputCompilation = CreateCompilation(@"
-using QuantumCore.Core.Networking;
 using QuantumCore.Networking;
 
 namespace QuantumCore.Core.Packets;
@@ -2204,7 +2183,6 @@ namespace QuantumCore.Core.Packets {
     public void Class_WithSubClass()
     {
         var inputCompilation = CreateCompilation(@"
-using QuantumCore.Core.Networking;
 using QuantumCore.Networking;
 
 namespace QuantumCore.Core.Packets;
@@ -2342,7 +2320,6 @@ namespace QuantumCore.Core.Packets {
     public void RecordWithMembers()
     {
         var inputCompilation = CreateCompilation(@"
-using QuantumCore.Core.Networking;
 using QuantumCore.Networking;
 
 namespace QuantumCore.Core.Packets;
@@ -2464,7 +2441,6 @@ namespace QuantumCore.Core.Packets {
     public void Class_WithFixedArrayOfSubClass()
     {
         var inputCompilation = CreateCompilation(@"
-using QuantumCore.Core.Networking;
 using QuantumCore.Networking;
 
 namespace QuantumCore.Core.Packets;
@@ -2669,7 +2645,6 @@ namespace QuantumCore.Core.Packets {
     public void Class_WithDynamicArrayOfSubClass()
     {
         var inputCompilation = CreateCompilation(@"
-using QuantumCore.Core.Networking;
 using QuantumCore.Networking;
 
 namespace QuantumCore.Core.Packets;
@@ -2734,10 +2709,10 @@ namespace QuantumCore.Core.Packets {
             bytes[offset + 10] = (byte)(this.Delta >> 8);
             bytes[offset + 11] = (byte)(this.Delta >> 16);
             bytes[offset + 12] = (byte)(this.Delta >> 24);
-            bytes[offset + 13] = (byte)(this.Size >> 0);
-            bytes[offset + 14] = (byte)(this.Size >> 8);
-            bytes[offset + 15] = (byte)(this.Size >> 16);
-            bytes[offset + 16] = (byte)(this.Size >> 24);
+            bytes[offset + 13] = (byte)(this.GetSize() >> 0);
+            bytes[offset + 14] = (byte)(this.GetSize() >> 8);
+            bytes[offset + 15] = (byte)(this.GetSize() >> 16);
+            bytes[offset + 16] = (byte)(this.GetSize() >> 24);
             for (var i = 0; i < this.Subs.Length; i++)
             {
                 bytes[offset + 17 + i * 4] = (byte)(this.Subs[i].SomeSubData >> 0);
@@ -2757,7 +2732,7 @@ namespace QuantumCore.Core.Packets {
             var __Handshake = System.BitConverter.ToUInt32(bytes[(offset + 0)..(offset + 0 + 4)]);
             var __Time = System.BitConverter.ToUInt32(bytes[(offset + 4)..(offset + 4 + 4)]);
             var __Delta = System.BitConverter.ToUInt32(bytes[(offset + 8)..(offset + 8 + 4)]);
-            var __Size = System.BitConverter.ToUInt32(bytes[(offset + 12)..(offset + 12 + 4)]);
+            var __Size = System.BitConverter.ToUInt32(bytes[(offset + 12)..(offset + 12 + 4)]) - 21;
             var __Subs = new QuantumCore.Core.Packets.SomeData[__Size];
             for (var i = 0; i < __Size; i++)
             {
@@ -2787,7 +2762,7 @@ namespace QuantumCore.Core.Packets {
                 var __Handshake = await stream.ReadValueFromStreamAsync<UInt32>(buffer);
                 var __Time = await stream.ReadValueFromStreamAsync<UInt32>(buffer);
                 var __Delta = await stream.ReadValueFromStreamAsync<UInt32>(buffer);
-                var __Size = await stream.ReadValueFromStreamAsync<UInt32>(buffer);
+                var __Size = await stream.ReadValueFromStreamAsync<UInt32>(buffer) - 21;
                 var __Subs = new QuantumCore.Core.Packets.SomeData[__Size];
                 for (var i = 0; i < __Size; i++)
                 {
@@ -2819,7 +2794,6 @@ namespace QuantumCore.Core.Packets {
     public void Class_DataAfterFixedUshortArray()
     {
         var inputCompilation = CreateCompilation(@"
-using QuantumCore.Core.Networking;
 using QuantumCore.Networking;
 
 namespace QuantumCore.Core.Packets;
@@ -2961,7 +2935,6 @@ namespace QuantumCore.Core.Packets {
     public void Invalid_PositionDoesNotExist()
     {
         var inputCompilation = CreateCompilation(@"
-using QuantumCore.Core.Networking;
 using QuantumCore.Networking;
 
 namespace QuantumCore.Auth.Packets
@@ -2991,7 +2964,6 @@ namespace QuantumCore.Auth.Packets
     public void MultipleFiles()
     {
         const string file1 = @"
-using QuantumCore.Core.Networking;
 using QuantumCore.Networking;
 
 namespace QuantumCore.Game.Packets;

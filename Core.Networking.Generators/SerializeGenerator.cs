@@ -316,7 +316,14 @@ internal class SerializeGenerator
         sb.AppendLine("        public ushort GetSize()");
         sb.AppendLine("        {");
 
-        var dynamicString = !string.IsNullOrWhiteSpace(dynamicSize) ? $"{dynamicSize} + 1" : "";
+        var dynamicString = !string.IsNullOrWhiteSpace(dynamicSize)
+            ? dynamicSize
+            : "";
+
+        if (fields.Any(x => x.SemanticType.Name == "String" && x.HasDynamicLength))
+        {
+            dynamicString = $"{dynamicString} + 1";
+        }
         var body = dynamicString != ""
             ? $"            return (ushort)({size}{dynamicString});"
             : $"            return {size.ToString()};";

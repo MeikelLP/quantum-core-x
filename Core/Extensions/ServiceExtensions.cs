@@ -10,8 +10,6 @@ using Microsoft.Extensions.Options;
 using MySqlConnector;
 using QuantumCore.API.PluginTypes;
 using QuantumCore.Core.Cache;
-using QuantumCore.Core.Logging.Enrichers;
-using QuantumCore.Core.Networking;
 using QuantumCore.Networking;
 using Serilog;
 using Weikio.PluginFramework.Abstractions;
@@ -112,9 +110,6 @@ public static class ServiceExtensions
 
         // add exception information
         config.Enrich.WithExceptionData();
-
-        // add custom enricher for caller information
-        config.Enrich.WithCaller();
 
         // sink to console
         config.WriteTo.Console(outputTemplate: MessageTemplate);

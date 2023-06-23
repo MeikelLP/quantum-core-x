@@ -1,5 +1,4 @@
-﻿using QuantumCore.Core.Networking;
-using QuantumCore.Networking;
+﻿using QuantumCore.Networking;
 
 namespace QuantumCore.Game.Packets;
 
@@ -13,7 +12,7 @@ public partial class StateCheckPacket
 [PacketGenerator]
 public partial class ServerStatusPacket
 {
-    [Field(0)] [Size] public uint Size => (uint)Statuses.Length;
+    [Field(0)] public uint Size => (uint)Statuses.Length;
     
     [Field(1)]
     public ServerStatus[] Statuses { get; set; }

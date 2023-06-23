@@ -1,7 +1,7 @@
 ﻿#nullable enable
 
-using QuantumCore.Core.Networking;
 using QuantumCore.Database;
+using QuantumCore.Networking;
 
 namespace QuantumCore.Game.Packets
 {

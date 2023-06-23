@@ -1,4 +1,3 @@
-using QuantumCore.Core.Networking;
 using QuantumCore.Networking;
 
 namespace QuantumCore.Game.Packets.Shop;
@@ -9,6 +8,5 @@ namespace QuantumCore.Game.Packets.Shop;
 public partial class ShopNoSpaceLeft
 {
     [Field(0)]
-    [Size]
     public ushort Size { get; set; }
 }

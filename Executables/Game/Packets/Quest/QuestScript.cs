@@ -1,4 +1,3 @@
-using QuantumCore.Core.Networking;
 using QuantumCore.Networking;
 
 namespace QuantumCore.Game.Packets.Quest;
@@ -7,7 +6,6 @@ namespace QuantumCore.Game.Packets.Quest;
 [PacketGenerator]
 public partial class QuestScript
 {
-    [Size]
     [Field(0)]
     public ushort Size { get; set; }
     [Field(1)]

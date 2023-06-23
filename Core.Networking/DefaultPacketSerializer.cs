@@ -1,6 +1,4 @@
-﻿using QuantumCore.Networking;
-
-namespace QuantumCore.Core.Networking;
+﻿namespace QuantumCore.Networking;
 
 public class DefaultPacketSerializer : IPacketSerializer
 {

@@ -30,7 +30,7 @@ internal class GeneratorContext
                 var fieldAttrArgs = x.AttributeLists
                     .SelectMany(attr => attr.Attributes)
                     .FirstOrDefault(attr =>
-                        GetTypeInfo(attr).GetFullName() == "QuantumCore.Core.Networking.FieldAttribute"
+                        GetTypeInfo(attr).GetFullName() == GeneratorConstants.FIELDATTRIBUTE_FULLNAME
                     )?.ArgumentList!.Arguments;
                 var orderStr = fieldAttrArgs?[0].Expression.ToString();
                 var lengthAttrStr = fieldAttrArgs
@@ -283,7 +283,7 @@ internal class GeneratorContext
             .FirstOrDefault(a => a
                 .DescendantTokens()
                 .Any(dt => dt.IsKind(SyntaxKind.IdentifierToken) &&
-                           GetTypeInfo(dt.Parent!).GetFullName() == "QuantumCore.Core.Networking.PacketAttribute"));
+                           GetTypeInfo(dt.Parent!).GetFullName() == "QuantumCore.Networking.PacketAttribute"));
 
         if (attr is null)
         {
@@ -307,7 +307,7 @@ internal class GeneratorContext
             .FirstOrDefault(a => a
                 .DescendantTokens()
                 .Any(dt => dt.IsKind(SyntaxKind.IdentifierToken) &&
-                           GetTypeInfo(dt.Parent!).GetFullName() == "QuantumCore.Core.Networking.SubPacketAttribute"));
+                           GetTypeInfo(dt.Parent!).GetFullName() == GeneratorConstants.SUBPACKETATTRIBUTE_FULLNAME));
         return attr?.ArgumentList?.Arguments[0].ToString();
     }
 

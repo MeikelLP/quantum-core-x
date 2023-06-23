@@ -1,6 +1,6 @@
 ﻿using JetBrains.Annotations;
 
-namespace QuantumCore.Core.Networking;
+namespace QuantumCore.Networking;
 
 [MeansImplicitUse]
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, Inherited = false)]

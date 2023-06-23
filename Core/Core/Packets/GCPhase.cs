@@ -1,5 +1,4 @@
 using QuantumCore.API.Game.Types;
-using QuantumCore.Core.Networking;
 using QuantumCore.Networking;
 
 namespace QuantumCore.Core.Packets

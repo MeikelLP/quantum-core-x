@@ -4,7 +4,6 @@ using FluentAssertions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using QuantumCore.Core.Networking;
 using QuantumCore.Networking;
 using Xunit;
 
@@ -14,10 +13,9 @@ namespace Core.Tests;
 [PacketGenerator]
 public partial class MyPacket
 {
-    [Field(0)] [Size] public uint Size => (uint)MyArray.Length;
+    [Field(0)] public uint Size => (uint)MyArray.Length;
         
     [Field(1)]
-    [Dynamic]
     public ComplexSubType[] MyArray { get; set; } = Array.Empty<ComplexSubType>();
 
     [Field(2)]

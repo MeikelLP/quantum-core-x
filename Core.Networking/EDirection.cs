@@ -1,4 +1,4 @@
-﻿namespace QuantumCore.Core.Networking;
+﻿namespace QuantumCore.Networking;
 
 [Flags]
 public enum EDirection

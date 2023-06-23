@@ -1,4 +1,3 @@
-using QuantumCore.Core.Networking;
 using QuantumCore.Networking;
 
 namespace QuantumCore.Auth.Packets

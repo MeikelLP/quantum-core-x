@@ -1,6 +1,6 @@
 ﻿using JetBrains.Annotations;
 
-namespace QuantumCore.Core.Networking
+namespace QuantumCore.Networking
 {
     /// <summary>
     /// Marks the packet to be a sub packet, if the position is not 0 all fields before the position

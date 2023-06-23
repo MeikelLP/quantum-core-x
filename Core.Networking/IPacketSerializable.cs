@@ -57,3 +57,31 @@ public interface IPacketSerializable
     /// </summary>
     static abstract bool HasSequence { get; }
 }
+
+public abstract class PacketBase : IPacketSerializable
+{
+    public ushort GetSize()
+    {
+        throw new NotImplementedException();
+    }
+
+    public void Serialize(byte[] bytes, in int offset = 0)
+    {
+        throw new NotImplementedException();
+    }
+
+    public static T Deserialize<T>(ReadOnlySpan<byte> bytes, in int offset = 0) where T : IPacketSerializable
+    {
+        throw new NotImplementedException();
+    }
+
+    public static ValueTask<object> DeserializeFromStreamAsync(Stream stream)
+    {
+        throw new NotImplementedException();
+    }
+
+    public static byte Header { get; }
+    public static byte? SubHeader { get; }
+    public static bool HasStaticSize { get; }
+    public static bool HasSequence { get; }
+}
