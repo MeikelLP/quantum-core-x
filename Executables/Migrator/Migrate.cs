@@ -48,7 +48,7 @@ public class Migrate : IHostedService
 
         var gameString = new MySqlConnectionStringBuilder
         {
-            Database = "account",
+            Database = "game",
             Password = _options.Password,
             Port = _options.Port,
             UserID = _options.User,
