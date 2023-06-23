@@ -6,13 +6,11 @@ namespace QuantumCore.Game.Packets.Quest;
 [PacketGenerator]
 public partial class QuestScript
 {
-    [Field(0)]
-    public ushort Size { get; set; }
+    [Field(0)] public ushort PacketSize => (ushort)Source.Length;
     [Field(1)]
     public byte Skin { get; set; }
 
-    [Field(2)] public ushort SourceSize => (ushort)Source.Length;
+    [Field(2)] 
+    public ushort SourceSize { get; set; }
     public string Source { get; set; }
-    
-    public byte EndOfSource => 0x00;
 }

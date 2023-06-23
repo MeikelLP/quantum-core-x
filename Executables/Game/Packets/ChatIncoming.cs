@@ -2,7 +2,7 @@
 
 namespace QuantumCore.Game.Packets
 {
-    [Packet(0x03, EDirection.Incoming, Sequence = true)]
+    [Packet(0x03, EDirection.Incoming)]
     [PacketGenerator]
     public partial class ChatIncoming
     {

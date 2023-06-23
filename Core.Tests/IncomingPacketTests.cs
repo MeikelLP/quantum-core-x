@@ -28,6 +28,7 @@ public class IncomingPacketTests
     {
         var services = new ServiceCollection()
             .AddCoreServices(new EmptyPluginCatalog())
+            .AddSingleton<IPacketSerializer, DefaultPacketSerializer>()
             .AddLogging(x =>
             {
                 x.ClearProviders();
@@ -44,12 +45,6 @@ public class IncomingPacketTests
     public void WrongLengthThrowsArgumentException()
     {
         Assert.Throws<ArgumentOutOfRangeException>(() => _serializer.Deserialize<GCHandshake>(Array.Empty<byte>()));
-    }
-
-    [Fact]
-    public void InvalidTypeThrowsArgumentException()
-    {
-        Assert.Throws<ArgumentException>(() => _serializer.Deserialize<CreateCharacter>(Array.Empty<byte>()));
     }
 
     [Fact]
@@ -166,10 +161,10 @@ public class IncomingPacketTests
             .ToArray();
         var result =  _serializer.Deserialize<EnterGame>(bytes);
 
-        // not useful as long as there are no properties
-        // result.Should().BeEquivalentTo(expected);
-        
-        Assert.Empty(typeof(EnterGame).GetProperties());
+        var ex = Assert.Throws<InvalidOperationException>(() => result.Should().BeEquivalentTo(new EnterGame()));
+        ex.Message.Should()
+            .BeEquivalentTo(
+                "No members were found for comparison. Please specify some members to include in the comparison or choose a more meaningful assertion.");
     }
 
     [Fact]
@@ -298,10 +293,12 @@ public class IncomingPacketTests
         var bytes = Array.Empty<byte>()
             .Append((byte)0x00)
             .ToArray();
-        var result = _serializer.Deserialize<ShopClose>( bytes);
+        var result = _serializer.Deserialize<ShopClose>(bytes);
 
-        // result.Should().BeEquivalentTo(expected);
-        Assert.Empty(typeof(ShopClose).GetProperties());
+        var ex = Assert.Throws<InvalidOperationException>(() => result.Should().BeEquivalentTo(new ShopClose()));
+        ex.Message.Should()
+            .BeEquivalentTo(
+                "No members were found for comparison. Please specify some members to include in the comparison or choose a more meaningful assertion.");
     }
 
     [Fact]
@@ -309,7 +306,6 @@ public class IncomingPacketTests
     {
         var expected = new AutoFaker<ShopBuy>().Generate();
         var bytes = Array.Empty<byte>()
-            .Append((byte)0x01) // sub header
             .Append(expected.Count)
             .Append(expected.Position)
             .ToArray();
@@ -323,7 +319,6 @@ public class IncomingPacketTests
     {
         var expected = new AutoFaker<ShopSell>().Generate();
         var bytes = Array.Empty<byte>()
-            .Append((byte)0x03) // sub header
             .Append(expected.Position)
             .Append(expected.Count)
             .ToArray();

@@ -137,7 +137,7 @@ internal class DeserializeGenerator
         {
             var size = field.HasDynamicLength 
                 ? GetVariableNameForExpression(field.SizeFieldName!)
-                : field.FieldSize.ToString();
+                : field.ElementSize.ToString();
             return $"await stream.ReadStringFromStreamAsync(buffer, (int){size})";
         }
 
@@ -272,7 +272,7 @@ internal class DeserializeGenerator
         }
         else
         {
-            var endOffsetStr = GetOffsetString(offset, dynamicOffset, $"{tempDynamicOffset} + {size}");
+            var endOffsetStr = GetOffsetString(offset, dynamicOffset, tempDynamicOffset);
             return $"bytes[{offsetStr}..{endOffsetStr}].ToArray()";
         }
     }

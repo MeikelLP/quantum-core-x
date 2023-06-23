@@ -35,7 +35,7 @@ internal class SerializeGenerator
 
         if (hasSequence)
         {
-            source.AppendLine($"            bytes[{staticByteIndex}] = default;");
+            source.AppendLine($"            bytes[offset + {staticByteIndex}{dynamicByteIndex}] = default;");
         }
         source.AppendLine("        }");
         source.AppendLine();
@@ -80,7 +80,7 @@ internal class SerializeGenerator
 
         var lengthString = fieldData.SizeFieldName is not null
             ? $"this.{fieldData.SizeFieldName} + 1"
-            : fieldData.FieldSize.ToString();
+            : fieldData.ElementSize.ToString();
         return $"{indentPrefix}bytes.WriteString({fieldExpression}, {offsetStr}, (int){lengthString});";
     }
 
@@ -236,10 +236,11 @@ internal class SerializeGenerator
                     var member = subTypes[ii];
                     var subFieldExpression = $"{fieldExpression}[i].{member.Name}";
                     var line = GenerateMethodLine(member, subFieldExpression, ref offset, dynamicOffset,
-                        $" + i * {member.ElementSize}", $"{indentPrefix}    ");
+                        $" + i * {field.ElementSize}", $"{indentPrefix}    ");
                     lines.Add(line);
                 }
-                dynamicOffset.Append($" + {fieldExpression}.Length * {subTypes.Sum(x => x.ElementSize)}");
+                offset -= field.ElementSize; // reduce the offset after the array to make the offset correct
+                dynamicOffset.Append($" + {fieldExpression}.Length * {field.ElementSize}");
             }
             else
             {

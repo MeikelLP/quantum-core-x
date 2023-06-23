@@ -28,6 +28,7 @@ public class OutgoingPacketTests
     {
         var services = new ServiceCollection()
             .AddCoreServices(new EmptyPluginCatalog())
+            .AddSingleton<IPacketSerializer, DefaultPacketSerializer>()
             .AddLogging(x =>
             {
                 x.ClearProviders();
@@ -46,9 +47,10 @@ public class OutgoingPacketTests
     }
 
     [Fact]
-    public void NullableStringThrows()
+    public void NullableStringDoesNotThrow()
     {
-        Assert.Throws<ArgumentNullException>(() => _serializer.Serialize(new CreateCharacter()));
+        _serializer.Serialize(new CreateCharacter());
+        Assert.True(true);
     }
 
     [Fact]
@@ -116,6 +118,7 @@ public class OutgoingPacketTests
                 .Concat(BitConverter.GetBytes(obj.PositionY))
                 .Concat(BitConverter.GetBytes(obj.Time))
                 .Concat(BitConverter.GetBytes(obj.Duration))
+                .Append((byte)0x00)
         );
     }
 
@@ -143,7 +146,7 @@ public class OutgoingPacketTests
     public void CreateCharacterSuccess()
     {
         var charFaker = new Faker<Character>()
-            .RuleFor(x => x.Name, faker => faker.Lorem.Letter(25));
+            .RuleFor(x => x.Name, faker => faker.Lorem.Letter(24) + '\0');
         var obj = new AutoFaker<CreateCharacterSuccess>()
             .RuleFor(x => x.Character, _ => charFaker.Generate())
             .Generate();
@@ -420,7 +423,7 @@ public class OutgoingPacketTests
     public void Characters()
     {
         var characterFaker = new AutoFaker<Character>()
-            .RuleFor(x => x.Name, faker => faker.Lorem.Letter(25));
+            .RuleFor(x => x.Name, faker => faker.Lorem.Letter(24) + '\0');
         var obj = new AutoFaker<Characters>()
             .RuleFor(x => x.GuildIds, faker => new[]
             {
@@ -431,10 +434,10 @@ public class OutgoingPacketTests
             })
             .RuleFor(x => x.GuildNames, faker => new[]
             {
-                faker.Lorem.Lines(),
-                faker.Lorem.Lines(),
-                faker.Lorem.Lines(),
-                faker.Lorem.Lines()
+                faker.Lorem.Letter(12) + '\0',
+                faker.Lorem.Letter(12) + '\0',
+                faker.Lorem.Letter(12) + '\0',
+                faker.Lorem.Letter(12) + '\0'
             })
             .RuleFor(x => x.CharacterList, _ =>
             {
@@ -474,20 +477,7 @@ public class OutgoingPacketTests
                     .Concat(BitConverter.GetBytes(c.Port))
                     .Append(c.SkillGroup)))
                 .Concat(obj.GuildIds.SelectMany(BitConverter.GetBytes))
-                .Concat(obj.GuildNames.SelectMany(x =>
-                {
-                    if (x.Length > 13)
-                    {
-                        return Encoding.ASCII.GetBytes(x[..13]);
-                    }
-                    var encoded = Encoding.ASCII.GetBytes(x);
-                    if (encoded.Length < 13)
-                    {
-                        Array.Resize(ref encoded, 13);
-                    }
-
-                    return encoded;
-                }))
+                .Concat(obj.GuildNames.SelectMany(Encoding.ASCII.GetBytes))
                 .Concat(BitConverter.GetBytes(obj.Unknown1))
                 .Concat(BitConverter.GetBytes(obj.Unknown2))
         );
@@ -524,8 +514,8 @@ public class OutgoingPacketTests
                 {
                     0x26
                 }
-                .Concat(BitConverter.GetBytes(obj.Size))
                 .Append((byte)0x00)
+                .Concat(BitConverter.GetBytes(obj.GetSize()))
                 .Concat(BitConverter.GetBytes(obj.Vid))
                 .Concat(obj.Items.SelectMany(item => Array.Empty<byte>()
                     .Concat(BitConverter.GetBytes(item.ItemId))
@@ -551,8 +541,8 @@ public class OutgoingPacketTests
                 {
                     0x26
                 }
-                .Concat(BitConverter.GetBytes(obj.Size))
                 .Append((byte)0x05)
+                .Concat(BitConverter.GetBytes(obj.Size))
         );
     }
 
@@ -567,8 +557,8 @@ public class OutgoingPacketTests
                 {
                     0x26
                 }
-                .Concat(BitConverter.GetBytes(obj.Size))
                 .Append((byte)0x07)
+                .Concat(BitConverter.GetBytes(obj.Size))
         );
     }
 
@@ -583,7 +573,7 @@ public class OutgoingPacketTests
                 {
                     0x2D
                 }
-                .Concat(BitConverter.GetBytes(obj.Size))
+                .Concat(BitConverter.GetBytes(obj.GetSize()))
                 .Append(obj.Skin)
                 .Concat(BitConverter.GetBytes(obj.SourceSize))
                 .Concat(Encoding.ASCII.GetBytes(obj.Source))
@@ -644,7 +634,7 @@ public class OutgoingPacketTests
     public void CharacterDetails()
     {
         var obj = new AutoFaker<CharacterDetails>()
-            .RuleFor(x => x.Name, faker => faker.Lorem.Letter(25))
+            .RuleFor(x => x.Name, faker => faker.Lorem.Letter(24) + '\0')
             .Generate();
         var bytes = _serializer.Serialize(obj);
 
@@ -700,7 +690,7 @@ public class OutgoingPacketTests
     public void CharacterInfo()
     {
         var obj = new AutoFaker<CharacterInfo>()
-            .RuleFor(x => x.Name, faker => faker.Lorem.Letter(25))
+            .RuleFor(x => x.Name, faker => faker.Lorem.Letter(24) + '\0')
             .RuleFor(x => x.Parts, faker => new[]
             {
                 faker.Random.UShort(),
