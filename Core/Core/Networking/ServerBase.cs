@@ -13,6 +13,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using QuantumCore.API;
 using QuantumCore.API.PluginTypes;
 using QuantumCore.Core.Packets;
@@ -42,28 +43,30 @@ namespace QuantumCore.Core.Networking
 
         public ServerBase(IPacketManager packetManager, ILogger logger, PluginExecutor pluginExecutor,
             IServiceProvider serviceProvider, IEnumerable<IPacketHandler> packetHandlers, string mode,
-            int port, string bindIp = "0.0.0.0")
+            IOptions<HostingOptions> hostingOptions)
         {
             _logger = logger;
             _pluginExecutor = pluginExecutor;
             _packetHandlers = packetHandlers;
             _serverMode = mode;
             PacketManager = packetManager;
-            Port = port;
+            Port = hostingOptions.Value.Port;
             
             // Start server timer
             _serverTimer.Start();
             
-            var localAddr = IPAddress.Parse(bindIp);
+            var localAddr = IPAddress.Parse(hostingOptions.Value.IpAddress);
             Listener = new TcpListener(localAddr, Port);
 
-            _logger.LogInformation("Initialize tcp server listening on {IP}:{Port}", bindIp, port);
+            _logger.LogInformation("Initialize tcp server listening on {IP}:{Port}", localAddr, Port);
 
             // Register Core Features
             PacketManager.RegisterNamespace("QuantumCore.Core.Packets");
             var cfg = serviceProvider.GetRequiredService<IConfiguration>();
             Services = new ServiceCollection()
                 .AddCoreServices(serviceProvider.GetRequiredService<IPluginCatalog>())
+                .AddQuantumCoreDatabase()
+                .AddQuantumCoreCache()
                 .AddSingleton(_ => cfg)
                 .Replace(new ServiceDescriptor(typeof(IPacketManager), _ => packetManager, ServiceLifetime.Singleton));
         }
