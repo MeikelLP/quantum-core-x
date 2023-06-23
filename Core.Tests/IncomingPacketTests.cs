@@ -82,6 +82,8 @@ public class IncomingPacketTests
         var result = _serializer.Deserialize<ChatIncoming>(bytes);
 
         result.Should().BeEquivalentTo(expected);
+
+        QuantumCore.Game.Packets.ChatIncoming.HasSequence.Should().BeTrue();
     }
 
     [Fact]
