@@ -17,9 +17,8 @@ internal class DeserializeGenerator
 
     public string Generate(TypeDeclarationSyntax type, string dynamicByteIndex)
     {
-        var source =
-            new StringBuilder(
-                $"        public static {type.Identifier.Text} Deserialize(ReadOnlySpan<byte> bytes, in int offset = 0)\r\n");
+        var source = new StringBuilder();
+        source.AppendLine($"        public static {type.Identifier.Text} Deserialize(ReadOnlySpan<byte> bytes, in int offset = 0)");
         source.AppendLine("        {");
         source.AppendLine(GenerateMethodBody(type, dynamicByteIndex, "            ", false));
         source.AppendLine("        }");
