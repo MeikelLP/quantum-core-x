@@ -3,7 +3,7 @@ using QuantumCore.API.Core.Models;
 using QuantumCore.API.PluginTypes;
 using QuantumCore.Core.Packets;
 
-namespace QuantumCore.Game.PacketHandlers;
+namespace QuantumCore.Auth.PacketHandlers;
 
 public class AuthGCHandshakeHandler : IAuthPacketHandler<GCHandshake>
 {
