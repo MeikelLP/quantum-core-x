@@ -24,7 +24,7 @@ namespace QuantumCore.Core.Networking
     {
         private readonly ILogger _logger;
         protected IPacketManager PacketManager { get; }
-        private readonly List<Func<T, Task<bool>>> _connectionListeners = new();
+        private readonly List<Func<IConnection, Task<bool>>> _connectionListeners = new();
         private readonly ConcurrentDictionary<Guid, IConnection> _connections = new();
         private readonly Dictionary<ushort, IPacketHandler> _listeners = new();
         private readonly Stopwatch _serverTimer = new();
@@ -108,7 +108,7 @@ namespace QuantumCore.Core.Networking
             }
         }
 
-        public void RegisterNewConnectionListener(Func<T, Task<bool>> listener)
+        public void RegisterNewConnectionListener(Func<IConnection, Task<bool>> listener)
         {
             _connectionListeners.Add(listener);
         }
@@ -177,7 +177,7 @@ namespace QuantumCore.Core.Networking
             return context;
         }
 
-        public void CallConnectionListener(T connection)
+        public void CallConnectionListener(IConnection connection)
         {
             foreach (var listener in _connectionListeners) listener(connection);
         }
