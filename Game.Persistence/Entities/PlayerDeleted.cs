@@ -4,7 +4,7 @@ using Core.Persistence;
 namespace QuantumCore.Game.Persistence.Entities;
 
 [Table("deleted_players")]
-public class PlayerDeleted : BaseModel
+internal class PlayerDeleted : BaseModel
 {
     public Guid AccountId { get; set; }
     public string Name { get; set; }
@@ -27,30 +27,4 @@ public class PlayerDeleted : BaseModel
     public uint HairPart { get; set; }
 
     public DateTime DeletedAt { get; set; } = DateTime.Now;
-
-    public PlayerDeleted(Player p)
-    {
-        AccountId = p.AccountId;
-        Name = p.Name;
-        PlayerClass = p.PlayerClass;
-        SkillGroup = p.SkillGroup;
-        PlayTime = p.PlayTime;
-        Level = p.Level;
-        Experience = p.Experience;
-        Gold = p.Gold;
-        St = p.St;
-        Ht = p.Ht;
-        Dx = p.Dx;
-        Iq = p.Iq;
-        PositionX = p.PositionX;
-        PositionY = p.PositionY;
-        Health = p.Health;
-        Mana = p.Mana;
-        Stamina = p.Stamina;
-        BodyPart = p.BodyPart;
-        HairPart = p.HairPart;
-        Id = p.Id;
-        CreatedAt = p.CreatedAt;
-        UpdatedAt = p.UpdatedAt;
-    }
 }

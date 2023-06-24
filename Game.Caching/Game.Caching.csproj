@@ -4,12 +4,10 @@
         <TargetFramework>net6.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <AssemblyName>QuantumCore.Game.Persistence</AssemblyName>
-        <RootNamespace>QuantumCore.Game.Persistence</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Core.Persistence\Core.Persistence.csproj" />
+      <ProjectReference Include="..\Core.Caching\Core.Caching.csproj" />
       <ProjectReference Include="..\CorePluginAPI\CorePluginAPI.csproj" />
     </ItemGroup>
 

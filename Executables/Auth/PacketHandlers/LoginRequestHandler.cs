@@ -12,20 +12,20 @@ namespace QuantumCore.Auth.PacketHandlers;
 
 public class LoginRequestHandler : IAuthPacketHandler<LoginRequest>
 {
-    private readonly IAccountManager _accountManager;
+    private readonly IAccountStore _accountStore;
     private readonly ILogger<LoginRequestHandler> _logger;
     private readonly ICacheManager _cacheManager;
 
-    public LoginRequestHandler(IAccountManager accountManager, ILogger<LoginRequestHandler> logger, ICacheManager cacheManager)
+    public LoginRequestHandler(IAccountStore accountStore, ILogger<LoginRequestHandler> logger, ICacheManager cacheManager)
     {
-        _accountManager = accountManager;
+        _accountStore = accountStore;
         _logger = logger;
         _cacheManager = cacheManager;
     }
 
     public async Task ExecuteAsync(AuthPacketContext<LoginRequest> ctx, CancellationToken token = default)
     {
-        var account = await _accountManager.FindByNameAsync(ctx.Packet.Username);
+        var account = await _accountStore.FindByNameAsync(ctx.Packet.Username);
         // Check if account was found
         if (account == default(Account))
         {

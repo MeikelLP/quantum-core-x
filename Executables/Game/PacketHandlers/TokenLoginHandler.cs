@@ -19,15 +19,15 @@ namespace QuantumCore.Game.PacketHandlers
         private readonly ILogger<TokenLoginHandler> _logger;
         private readonly ICacheManager _cacheManager;
         private readonly IWorld _world;
-        private readonly IPlayerFactory _playerFactory;
+        private readonly IPlayerManager _playerManager;
 
-        public TokenLoginHandler(IDbConnection db, ILogger<TokenLoginHandler> logger, ICacheManager cacheManager, IWorld world, IPlayerFactory playerFactory)
+        public TokenLoginHandler(IDbConnection db, ILogger<TokenLoginHandler> logger, ICacheManager cacheManager, IWorld world, IPlayerManager playerManager)
         {
             _db = db;
             _logger = logger;
             _cacheManager = cacheManager;
             _world = world;
-            _playerFactory = playerFactory;
+            _playerManager = playerManager;
         }
         
         public async Task ExecuteAsync(GamePacketContext<TokenLogin> ctx, CancellationToken cancellationToken = default)
@@ -66,13 +66,13 @@ namespace QuantumCore.Game.PacketHandlers
             // Load players of account
             var characters = new Characters();
             var i = 0;
-            var charactersFromCacheOrDb = await _playerFactory.GetPlayers(token.AccountId).ToArrayAsync(cancellationToken);
+            var charactersFromCacheOrDb = await _playerManager.GetPlayers(token.AccountId);
             foreach (var player in charactersFromCacheOrDb)
             {
                 var host = _world.GetMapHost(player.PositionX, player.PositionY);
                 
                 // todo character slot position
-                characters.CharacterList[i] = Character.FromEntity(player);
+                characters.CharacterList[i] = player.ToCharacter();
                 characters.CharacterList[i].Ip = IpUtils.ConvertIpToUInt(host.Ip);
                 characters.CharacterList[i].Port = host.Port;
 

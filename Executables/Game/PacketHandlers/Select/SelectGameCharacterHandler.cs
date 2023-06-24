@@ -13,14 +13,14 @@ public class SelectGameCharacterHandler : IGamePacketHandler<SelectCharacter>
 {
     private readonly ILogger<SelectGameCharacterHandler> _logger;
     private readonly IServiceProvider _provider;
-    private readonly IPlayerFactory _playerFactory;
+    private readonly IPlayerManager _playerManager;
 
     public SelectGameCharacterHandler(ILogger<SelectGameCharacterHandler> logger, IServiceProvider provider, 
-        IPlayerFactory playerFactory)
+        IPlayerManager playerManager)
     {
         _logger = logger;
         _provider = provider;
-        _playerFactory = playerFactory;
+        _playerManager = playerManager;
     }
     
     public async Task ExecuteAsync(GamePacketContext<SelectCharacter> ctx, CancellationToken token = default)
@@ -40,7 +40,7 @@ public class SelectGameCharacterHandler : IGamePacketHandler<SelectCharacter>
         await ctx.Connection.SetPhaseAsync(EPhases.Loading);
 
         // Load player
-        var player = await _playerFactory.GetPlayer(accountId, ctx.Packet.Slot);
+        var player = await _playerManager.GetPlayer(accountId, ctx.Packet.Slot);
         var entity = ActivatorUtilities.CreateInstance<PlayerEntity>(_provider, ctx.Connection, player);
         await entity.Load();
 

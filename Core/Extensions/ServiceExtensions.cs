@@ -1,11 +1,7 @@
-﻿using System.Data;
-using System.IO;
+﻿using System.IO;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using MySqlConnector;
 using QuantumCore.API.PluginTypes;
-using QuantumCore.Caching;
 using QuantumCore.Core.Logging.Enrichers;
 using QuantumCore.Core.Networking;
 using Serilog;
@@ -18,29 +14,12 @@ public static class ServiceExtensions
     private const string MessageTemplate = "[{Timestamp:HH:mm:ss.fff}][{Level:u3}]{Message:lj} " +
                                            "{NewLine:1}{Exception:1}";
 
-    public static IServiceCollection AddQuantumCoreDatabase(this IServiceCollection services)
-    {
-        services.AddOptions<DatabaseOptions>()
-            .BindConfiguration("Database")
-            .ValidateDataAnnotations();
-        services.AddScoped<IDbConnection>(provider =>
-        {
-            var options = provider.GetRequiredService<IOptions<DatabaseOptions>>().Value;
-            return new MySqlConnection(options.ConnectionString);
-        });
-
-        return services;
-    }
-    public static IServiceCollection AddQuantumCoreCache(this IServiceCollection services)
-    {
-        services.AddOptions<CacheOptions>()
-            .BindConfiguration("Cache")
-            .ValidateDataAnnotations();
-        services.AddSingleton<ICacheManager, CacheManager>();
-
-        return services;
-    }
-
+    /// <summary>
+    /// Services required by Auth & Game
+    /// </summary>
+    /// <param name="services"></param>
+    /// <param name="pluginCatalog"></param>
+    /// <returns></returns>
     public static IServiceCollection AddCoreServices(this IServiceCollection services, IPluginCatalog pluginCatalog)
     {
         services.AddOptions<HostingOptions>()

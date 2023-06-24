@@ -1,8 +1,11 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Game.Caching.Extensions;
+using Microsoft.Extensions.DependencyInjection;
 using QuantumCore.API;
 using QuantumCore.API.Game.World;
 using QuantumCore.API.PluginTypes;
+using QuantumCore.Auth.Persistence.Extensions;
 using QuantumCore.Game.Commands;
+using QuantumCore.Game.Persistence.Extensions;
 using QuantumCore.Game.PlayerUtils;
 using QuantumCore.Game.Quest;
 
@@ -19,7 +22,10 @@ public static class ServiceExtensions
                 .AsImplementedInterfaces()
                 .WithSingletonLifetime();
         });
-        services.AddSingleton<IPlayerFactory, PlayerFactory>();
+        services.AddAuthDatabase();
+        services.AddGameDatabase();
+        services.AddGameCaching();
+        services.AddSingleton<IPlayerManager, PlayerManager>();
         services.AddSingleton<IItemManager, ItemManager>();
         services.AddSingleton<IMonsterManager, MonsterManager>();
         services.AddSingleton<IJobManager, JobManager>();

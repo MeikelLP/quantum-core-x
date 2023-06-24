@@ -23,7 +23,6 @@ using QuantumCore.Extensions;
 using QuantumCore.Game.Commands;
 using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Packets;
-using QuantumCore.Game.Persistence.Entities;
 using QuantumCore.Game.PlayerUtils;
 using QuantumCore.Game.World;
 using QuantumCore.Game.World.Entities;
@@ -40,12 +39,12 @@ public class CommandTests : IAsyncLifetime
     private readonly IGameConnection _connection;
     private readonly ServiceProvider _services;
     private readonly IPlayerEntity _player;
-    private readonly Faker<Player> _playerDataFaker;
+    private readonly Faker<PlayerData> _playerDataFaker;
     private readonly List<object> _sentObjects = new();
 
     public CommandTests(ITestOutputHelper testOutputHelper)
     {        
-        _playerDataFaker = new AutoFaker<Player>()
+        _playerDataFaker = new AutoFaker<PlayerData>()
             .RuleFor(x => x.Level, _ => (byte)1)
             .RuleFor(x => x.St, _ => (byte)1)
             .RuleFor(x => x.Ht, _ => (byte)1)

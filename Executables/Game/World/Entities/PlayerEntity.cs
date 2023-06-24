@@ -11,7 +11,6 @@ using QuantumCore.Core.Utils;
 using QuantumCore.Extensions;
 using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Packets;
-using QuantumCore.Game.Persistence.Entities;
 using QuantumCore.Game.PlayerUtils;
 
 namespace QuantumCore.Game.World.Entities
@@ -98,7 +97,7 @@ namespace QuantumCore.Game.World.Entities
         private readonly IWorld _world;
         private readonly ILogger<PlayerEntity> _logger;
 
-        public PlayerEntity(Player player, IGameConnection connection, IItemManager itemManager, IJobManager jobManager,
+        public PlayerEntity(PlayerData player, IGameConnection connection, IItemManager itemManager, IJobManager jobManager,
             IExperienceManager experienceManager, IAnimationManager animationManager, IDbConnection db,
             IQuestManager questManager, ICacheManager cacheManager, IWorld world, ILogger<PlayerEntity> logger) 
             : base(animationManager, world.GenerateVid())
@@ -112,30 +111,7 @@ namespace QuantumCore.Game.World.Entities
             _cacheManager = cacheManager;
             _world = world;
             _logger = logger;
-            Player = new PlayerData {
-                Id = player.Id,
-                AccountId = player.AccountId,
-                Name = player.Name,
-                PlayerClass = player.PlayerClass,
-                SkillGroup = player.SkillGroup,
-                PlayTime = player.PlayTime,
-                Level = player.Level,
-                Experience = player.Experience,
-                Gold = player.Gold,
-                St = player.St,
-                Ht = player.Ht,
-                Dx = player.Dx,
-                Iq = player.Iq,
-                PositionX = player.PositionX,
-                PositionY = player.PositionY,
-                Health = player.Health,
-                Mana = player.Mana,
-                Stamina = player.Stamina,
-                BodyPart = player.BodyPart,
-                HairPart = player.HairPart,
-                GivenStatusPoints = player.GivenStatusPoints,
-                AvailableStatusPoints = player.AvailableStatusPoints,
-            };
+            Player = player;
             PositionX = player.PositionX;
             PositionY = player.PositionY;
             Inventory = new Inventory(itemManager, db, _cacheManager, _logger, player.Id, 1, 5, 9, 2);

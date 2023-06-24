@@ -65,8 +65,6 @@ namespace QuantumCore.Core.Networking
             var cfg = serviceProvider.GetRequiredService<IConfiguration>();
             Services = new ServiceCollection()
                 .AddCoreServices(serviceProvider.GetRequiredService<IPluginCatalog>())
-                .AddQuantumCoreDatabase()
-                .AddQuantumCoreCache()
                 .AddSingleton(_ => cfg)
                 .Replace(new ServiceDescriptor(typeof(IPacketManager), _ => packetManager, ServiceLifetime.Singleton));
         }

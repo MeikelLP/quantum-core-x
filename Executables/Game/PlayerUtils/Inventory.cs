@@ -10,11 +10,6 @@ using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace QuantumCore.Game.PlayerUtils
 {
-    public enum WindowType
-    {
-        Inventory = 1
-    }
-    
     public class Inventory : IInventory
     {
         private class Page

@@ -1,8 +1,9 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Core.Persistence.Extensions;
+using Game.Caching.Extensions;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using QuantumCore;
-using QuantumCore.Extensions;
 using QuantumCore.Game;
 using QuantumCore.Game.Extensions;
 
@@ -18,7 +19,7 @@ hostBuilder.ConfigureServices(services =>
 {
     services.AddGameServices();
     services.AddQuantumCoreDatabase();
-    services.AddQuantumCoreCache();
+    services.AddGameCaching();
     services.AddHostedService<GameServer>();
 });
 

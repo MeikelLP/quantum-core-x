@@ -1,12 +1,13 @@
 ﻿using Core.Persistence;
+using Dapper.Contrib.Extensions;
 
 namespace QuantumCore.Game.Persistence.Entities;
 
-[System.ComponentModel.DataAnnotations.Schema.Table("players")]
-public class Player : BaseModel
+[Table("players")]
+internal class Player : BaseModel
 {
     public Guid AccountId { get; set; }
-    public string Name { get; set; }
+    public string Name { get; set; } = "";
     public byte PlayerClass { get; set; }
     public byte SkillGroup { get; set; }
     public uint PlayTime { get; set; }
