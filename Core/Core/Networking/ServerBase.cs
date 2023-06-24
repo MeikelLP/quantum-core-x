@@ -8,9 +8,7 @@ using System.Net.Sockets;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -18,26 +16,25 @@ using QuantumCore.API;
 using QuantumCore.API.PluginTypes;
 using QuantumCore.Core.Packets;
 using QuantumCore.Extensions;
-using Weikio.PluginFramework.Abstractions;
 
 namespace QuantumCore.Core.Networking
 {
-    public abstract class ServerBase<T> : BackgroundService where T : IConnection
+    public abstract class ServerBase<T> : BackgroundService, IServerBase
+        where T : IConnection
     {
         private readonly ILogger _logger;
         protected IPacketManager PacketManager { get; }
-        private readonly List<Func<T, Task<bool>>> _connectionListeners = new();
+        private readonly List<Func<IConnection, Task<bool>>> _connectionListeners = new();
         private readonly ConcurrentDictionary<Guid, IConnection> _connections = new();
         private readonly Dictionary<ushort, IPacketHandler> _listeners = new();
         private readonly Stopwatch _serverTimer = new();
         private readonly CancellationTokenSource _stoppingToken = new();
         protected TcpListener Listener { get; }
 
-        private ServiceProvider _serverLifetimeProvider;
+        private readonly IServiceProvider _serviceProvider;
         private readonly PluginExecutor _pluginExecutor;
         private readonly IEnumerable<IPacketHandler> _packetHandlers;
         private readonly string _serverMode;
-        protected IServiceCollection Services { get; }
 
         public int Port { get; }
 
@@ -47,6 +44,7 @@ namespace QuantumCore.Core.Networking
         {
             _logger = logger;
             _pluginExecutor = pluginExecutor;
+            _serviceProvider = serviceProvider;
             _packetHandlers = packetHandlers;
             _serverMode = mode;
             PacketManager = packetManager;
@@ -62,13 +60,6 @@ namespace QuantumCore.Core.Networking
 
             // Register Core Features
             PacketManager.RegisterNamespace("QuantumCore.Core.Packets");
-            var cfg = serviceProvider.GetRequiredService<IConfiguration>();
-            Services = new ServiceCollection()
-                .AddCoreServices(serviceProvider.GetRequiredService<IPluginCatalog>())
-                .AddQuantumCoreDatabase()
-                .AddQuantumCoreCache()
-                .AddSingleton(_ => cfg)
-                .Replace(new ServiceDescriptor(typeof(IPacketManager), _ => packetManager, ServiceLifetime.Singleton));
         }
 
         public long ServerTime => _serverTimer.ElapsedMilliseconds;
@@ -85,7 +76,6 @@ namespace QuantumCore.Core.Networking
             base.StartAsync(token);
             _logger.LogInformation("Start listening for connections...");
 
-            _serverLifetimeProvider = Services.BuildServiceProvider();
             Listener.Start();
             Listener.BeginAcceptTcpClient(OnClientAccepted, Listener);
 
@@ -98,10 +88,10 @@ namespace QuantumCore.Core.Networking
             var client = listener!.EndAcceptTcpClient(ar);
             
             // will dispose once connection finished executing (canceled or disconnect) 
-            await using var scope = _serverLifetimeProvider.CreateAsyncScope();
+            await using var scope = _serviceProvider.CreateAsyncScope();
 
             // cannot inject tcp client here
-            var connection = ActivatorUtilities.CreateInstance<T>(scope.ServiceProvider, client);
+            var connection = ActivatorUtilities.CreateInstance<T>(scope.ServiceProvider, client, (IServerBase) this);
             _connections.TryAdd(connection.Id, connection);
             
             await _pluginExecutor.ExecutePlugins<IConnectionLifetimeListener>(_logger, x => x.OnConnectedAsync(_stoppingToken.Token));
@@ -121,7 +111,7 @@ namespace QuantumCore.Core.Networking
             }
         }
 
-        public void RegisterNewConnectionListener(Func<T, Task<bool>> listener)
+        public void RegisterNewConnectionListener(Func<IConnection, Task<bool>> listener)
         {
             _connectionListeners.Add(listener);
         }
@@ -191,7 +181,7 @@ namespace QuantumCore.Core.Networking
             return context;
         }
 
-        public void CallConnectionListener(T connection)
+        public void CallConnectionListener(IConnection connection)
         {
             foreach (var listener in _connectionListeners) listener(connection);
         }

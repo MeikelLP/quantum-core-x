@@ -1,4 +1,3 @@
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using QuantumCore.API;
@@ -22,8 +21,6 @@ namespace QuantumCore.Auth
         {
             _logger = logger;
             _cacheManager = cacheManager;
-            
-            Services.AddSingleton(_ => this);
         }
 
         protected async override Task ExecuteAsync(CancellationToken token)
