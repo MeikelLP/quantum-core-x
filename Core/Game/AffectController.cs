@@ -6,7 +6,6 @@ using QuantumCore.API.Game.World;
 using QuantumCore.Database;
 using QuantumCore.Game.PacketHandlers.Game;
 using QuantumCore.Game.Packets.Affects;
-using QuantumCore.API.Core.Models;
 using Dapper;
 using System.Linq;
 using Affect = QuantumCore.Database.Affect;
@@ -86,11 +85,11 @@ namespace QuantumCore.Game
             if (affectApi != null)
             {
                 if(affect.ApplyValue != affectAPI.ApplyValue)
-                    {
+                {
                     await playerEntity.SendChatInfo("This affect is already working!");
-                        }
-                        else
-                        {
+                }
+                else
+                {
                     await playerEntity.RemoveAffect(affectApi);
                     affectApi.Duration = affectApi.Duration.AddSeconds(duration);
                     affect.Duration = affectApi.Duration;
@@ -98,10 +97,9 @@ namespace QuantumCore.Game
                     await playerEntity.AddAffect(affectAPI);
                     await playerEntity.SendChatInfo("This affect duration is extended!");
                 }
-            } 
-            else 
+            }
+            else
             {
-                // create new affect
                 await _databaseManager.GetGameDatabase().InsertAsync(affect);
                 await playerEntity.AddAffect(affectAPI);
             }
@@ -126,7 +124,7 @@ namespace QuantumCore.Game
                 foreach(var playerAffect in playerAffects)
                 {
                     var affect = new AffectAPI
-        {
+                    {
                         PlayerId = playerAffect.PlayerId,
                         Type = playerAffect.Type,
                         ApplyOn = playerAffect.ApplyOn,

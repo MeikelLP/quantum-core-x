@@ -114,7 +114,7 @@ public class ItemUseHandler : IGamePacketHandler<ItemUse>
                             var duration = itemProto.Values[1];
                             var value = itemProto.Values[2];
                             var applyInfo = Enum.GetName(typeof(EApplyTypes), type);
-                            var applyType = (EPointTypes) Enum.Parse(typeof(EPointTypes), applyInfo);
+                            var applyType = (EPoints) Enum.Parse(typeof(EPoints), applyInfo);
                             switch (type)
                             {
                                 case (byte) EApplyTypes.MoveSpeed:
@@ -125,6 +125,20 @@ public class ItemUseHandler : IGamePacketHandler<ItemUse>
                                     break;
                             }
                             break;
+                        case (byte) EUseSubTypes.UseSpecial:
+                            var specialItemType = EAffectTypes.None;
+                            var bonus = EPoints.None;
+                            var infDuration = 60 * 365 * 24 * 60 * 60;
+                            switch (itemProto.Id)
+                            {
+                                case 72728:
+                                    specialItemType = EAffectTypes.AutoSPRecovery;
+                                    break;
+                            }
+                            _logger.LogDebug("Use special");
+                            _ = _affectController.AddAffect(player, (int) specialItemType, (int) bonus, 4, (int) itemProto.Id, infDuration, 0);
+                            break;
+
                     }
                     break;
             }
