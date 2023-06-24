@@ -9,12 +9,12 @@ namespace QuantumCore.Game
     public class GameConnection : Connection, IGameConnection
     {
         private readonly IWorld _world;
-        public IGameServer Server { get; }
+        public IServerBase Server { get; }
         public Guid? AccountId { get; set; }
         public string Username { get; set; }
         public IPlayerEntity Player { get; set; }
 
-        public GameConnection(GameServer server, TcpClient client, IPacketManager packetManager, 
+        public GameConnection(IServerBase server, TcpClient client, IPacketManager packetManager, 
             ILogger<GameConnection> logger, PluginExecutor pluginExecutor, IWorld world) 
             : base(logger, pluginExecutor, packetManager)
         {

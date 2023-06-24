@@ -7,8 +7,8 @@ using QuantumCore.Auth.Extensions;
 var hostBuilder = await QuantumCoreHostBuilder.CreateHostAsync(args);
 hostBuilder.ConfigureServices(services =>
 {
-    services.AddHostedService<AuthServer>();
     services.AddAuthServices();
+    services.AddHostedService<AuthServer>();
 });
 
 await QuantumCoreHostBuilder.RunAsync<Program>(hostBuilder.Build());
