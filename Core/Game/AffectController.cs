@@ -3,25 +3,23 @@ using System.Threading.Tasks;
 using Dapper.Contrib.Extensions;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API.Game.World;
-using QuantumCore.Database;
-using QuantumCore.Game.PacketHandlers.Game;
 using QuantumCore.Game.Packets.Affects;
 using Dapper;
 using System.Linq;
+using System.Data;
 using Affect = QuantumCore.Database.Affect;
 using AffectAPI = QuantumCore.API.Core.Models.Affect;
-using System.Numerics;
 
 namespace QuantumCore.Game
 {
     public class AffectController : IAffectController
     {
-        private readonly ILogger<ItemUseHandler> _logger;
-        private readonly IDatabaseManager _databaseManager;
+        private readonly ILogger<IAffectController> _logger;
+        private readonly IDbConnection _db;
 
-        public AffectController(ILogger<ItemUseHandler> logger, IDatabaseManager databaseManager) {
+        public AffectController(ILogger<IAffectController> logger, IDbConnection db) {
             _logger = logger;
-            _databaseManager = databaseManager;
+            _db = db;
         }
         public void SendAffectAddPacket(IPlayerEntity playerEntity, Affect affect, int duration)
         {
@@ -41,8 +39,7 @@ namespace QuantumCore.Game
 
         public async Task SendAffectRemovePacket(IPlayerEntity playerEntity, long type, byte applyOn)
         {
-            var db = _databaseManager.GetGameDatabase();
-            await db.QueryAsync("DELETE FROM affects WHERE PlayerId=@PlayerId and Type=@Type and ApplyOn=@ApplyOn", 
+            await _db.QueryAsync("DELETE FROM affects WHERE PlayerId=@PlayerId and Type=@Type and ApplyOn=@ApplyOn", 
                 new { PlayerId = playerEntity.Player.Id, Type = type, ApplyOn = applyOn });
             var affectRemovePacket = new AffectRemove
             {
@@ -56,8 +53,6 @@ namespace QuantumCore.Game
         {
             _logger.LogDebug("Add affect starting!");
             _logger.LogDebug("::AddAffect Type:{Type}, ApplyOn:{ApplyOn}, ApplyValue:{ApplyValue}, Flag:{Flag}, Duration:{Duration}, SpCost:{SpCost}", type, applyOn, applyValue, flag, duration, spCost);  
-            var db = _databaseManager.GetGameDatabase();
-            //var playerAffects = await db.QueryAsync<Affect>("SELECT * FROM affects WHERE PlayerId = @PlayerId", new { PlayerId = playerEntity.Player.Id });
             
             // Create player data
             var affect = new Affect
@@ -93,14 +88,14 @@ namespace QuantumCore.Game
                     await playerEntity.RemoveAffect(affectApi);
                     affectApi.Duration = affectApi.Duration.AddSeconds(duration);
                     affect.Duration = affectApi.Duration;
-                    await _databaseManager.GetGameDatabase().InsertAsync(affect);
+                    await _db.InsertAsync(affect);
                     await playerEntity.AddAffect(affectAPI);
                     await playerEntity.SendChatInfo("This affect duration is extended!");
                 }
             }
             else
             {
-                await _databaseManager.GetGameDatabase().InsertAsync(affect);
+                await _db.InsertAsync(affect);
                 await playerEntity.AddAffect(affectAPI);
             }
 
@@ -115,8 +110,7 @@ namespace QuantumCore.Game
         {
             _logger.LogDebug("Load affect starting!");
             _logger.LogDebug("::LoadAffect PlayerId:{}", playerEntity.Player.Id);
-            var db = _databaseManager.GetGameDatabase();
-            var playerAffects = await db.QueryAsync<Affect>("SELECT * FROM affects WHERE PlayerId = @PlayerId", new { PlayerId = playerEntity.Player.Id });
+            var playerAffects = await _db.QueryAsync<Affect>("SELECT * FROM affects WHERE PlayerId = @PlayerId", new { PlayerId = playerEntity.Player.Id });
 
 
             if (playerAffects != null && playerAffects.Any())
