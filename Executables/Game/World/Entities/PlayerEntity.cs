@@ -84,7 +84,7 @@ namespace QuantumCore.Game.World.Entities
         }
         
         private byte _attackSpeed = 140;
-        private byte _movementSpeed = 150;
+        private byte _movementSpeed = 100;
         private uint _defence;
 
         private const int PersistInterval = 1000;
@@ -156,27 +156,12 @@ namespace QuantumCore.Game.World.Entities
 
         public byte GetMovementSpeed()
         {
-            return (byte) (GetMoveMotionSpeed() * 10000 / CalculateDuration(GetLimitPoint(EPoints.MoveSpeed), 10000));
-        }
-
-        public int GetLimitPoint(EPoints point)
-        {
-            // TODO: custom limits ex: max_username_length:15
-            var MaxLimit = 255;
-            switch (point)
+            var totalApplyValue = 0;
+            if (Affects != null && Affects.Count > 0)
             {
-                case EPoints.MoveSpeed:
-                    if(Player.GetType().Equals(typeof(Player)))
-                    {
-                        MaxLimit= 200;
-                    }else
-                    {
-                        MaxLimit = 200;
-                    }
-                    break;
+                totalApplyValue = Affects.Where(a => a.ApplyOn == (int)EPoints.MoveSpeed).Sum(a => a.ApplyValue);
             }
-
-            return MaxLimit;
+            return (byte)(_movementSpeed + totalApplyValue);
         }
 
         public Affect HasAffect(Affect affect)
@@ -195,6 +180,7 @@ namespace QuantumCore.Game.World.Entities
         {
             Affects.Add(affect);
             await SendCharacterUpdate();
+            await SendPoints();
         }
 
         public async Task RemoveAffect(Affect affect)
@@ -202,34 +188,7 @@ namespace QuantumCore.Game.World.Entities
             Affects.Remove(affect);
             await _affectController.SendAffectRemovePacket(this, affect.Type, (byte) affect.ApplyOn);
             await SendCharacterUpdate();
-        }
-
-        private static int CalculateDuration(int iSpd, int iDur)
-        {
-            var i = 100 - iSpd;
-
-            if (i > 0)
-            {
-                i = 100 + i;
-            }
-            else
-            {
-                i = i < 0 ? 10000 / (100 - i) : 100;
-            }
-
-            return iDur * i / 100;
-        }
-
-        public static float GetMoveMotionSpeed()
-        {
-            // TODO: get motion mode
-            return 300f;
-        }
-
-        public byte GetMotionMode()
-        {
-            //TODO: Motion types for wearable weapons
-            return 0; // General motion mode
+            await SendPoints();
         }
 
         public async Task Load()
@@ -243,7 +202,7 @@ namespace QuantumCore.Game.World.Entities
             await LoadPermGroups();
             
             _questManager.InitializePlayer(this);
-            _affectController.LoadAffect(this);
+            await _affectController.LoadAffect(this);
             
             CalculateDefence();
         }
@@ -749,8 +708,7 @@ namespace QuantumCore.Game.World.Entities
                 case EPoints.StatusPoints:
                     return Player.AvailableStatusPoints;
                 case EPoints.MoveSpeed:
-                    var totalApplyValue =Affects.Where(a => a.ApplyOn == (int) EPoints.MoveSpeed).Sum(a => a.ApplyValue);
-                    return (uint) (GetMovementSpeed() + totalApplyValue);
+                    return GetMovementSpeed();
                 default:
                     if (Enum.GetValues<EPoints>().Contains(point))
                     {
@@ -1112,9 +1070,9 @@ namespace QuantumCore.Game.World.Entities
             var packet = new CharacterUpdate {
                 Vid = Vid,
                 Parts = new ushort[] {
-                    (ushort) (Inventory.EquipmentWindow.Body?.ItemId ?? 0),
-                    (ushort) (Inventory.EquipmentWindow.Weapon?.ItemId ?? 0), 0,
-                    (ushort) (Inventory.EquipmentWindow.Hair?.ItemId ?? 0)
+                    (ushort)(Inventory.EquipmentWindow.Body?.ItemId ?? 0),
+                    (ushort)(Inventory.EquipmentWindow.Weapon?.ItemId ?? 0), 0,
+                    (ushort)(Inventory.EquipmentWindow.Hair?.ItemId ?? 0)
                 },
                 MoveSpeed = GetMovementSpeed(),
                 AttackSpeed = _attackSpeed
