@@ -1,4 +1,4 @@
-﻿using QuantumCore.Database;
+﻿using QuantumCore.Game.Persistence;
 
 namespace QuantumCore.Game;
 

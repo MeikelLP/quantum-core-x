@@ -2,7 +2,7 @@
 using Dapper;
 using Dapper.Contrib.Extensions;
 using QuantumCore.Caching;
-using QuantumCore.Database;
+using QuantumCore.Game.Persistence;
 
 namespace QuantumCore.Game;
 
