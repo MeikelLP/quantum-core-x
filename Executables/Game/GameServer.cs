@@ -1,6 +1,5 @@
 using System.Diagnostics;
 using System.Net;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using QuantumCore.API;
@@ -60,10 +59,6 @@ namespace QuantumCore.Game
             _chatManager = chatManager;
             World = world;
             Instance = this;
-
-            Services.AddSingleton(_ => this);
-            Services.AddSingleton<IGame>(_ => this);
-            Services.AddGameServices();
         }
 
         private void Update(double elapsedTime)

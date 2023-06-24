@@ -7,9 +7,9 @@ namespace QuantumCore.Auth
 {
     public class AuthConnection : Connection, IAuthConnection
     {
-        private AuthServer _server;
+        private readonly IServerBase _server;
 
-        public AuthConnection(AuthServer server, TcpClient client, IPacketManager packetManager, 
+        public AuthConnection(IServerBase server, TcpClient client, IPacketManager packetManager, 
             ILogger<AuthConnection> logger, PluginExecutor pluginExecutor) 
             : base(logger, pluginExecutor, packetManager)
         {

@@ -7,7 +7,7 @@ namespace QuantumCore.API;
 
 public interface IGameConnection : IConnection
 {
-    IGameServer Server { get; }
+    IServerBase Server { get; }
     Guid? AccountId { get; set; }
     string Username { get; set; }
     IPlayerEntity Player { get; set; }
