@@ -1,6 +1,6 @@
 ﻿using Core.Persistence;
 
-namespace QuantumCore.Game.Persistence;
+namespace QuantumCore.Game.Persistence.Entities;
 
 [System.ComponentModel.DataAnnotations.Schema.Table("players")]
 public class Player : BaseModel

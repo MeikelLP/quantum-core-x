@@ -8,7 +8,7 @@ using QuantumCore.API.PluginTypes;
 using QuantumCore.Caching;
 using QuantumCore.Core.Utils;
 using QuantumCore.Game.Packets;
-using QuantumCore.Game.Persistence;
+using QuantumCore.Game.Persistence.Entities;
 using QuantumCore.Game.PlayerUtils;
 
 namespace QuantumCore.Game.PacketHandlers.Select;

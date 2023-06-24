@@ -23,7 +23,7 @@ using QuantumCore.Extensions;
 using QuantumCore.Game.Commands;
 using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Packets;
-using QuantumCore.Game.Persistence;
+using QuantumCore.Game.Persistence.Entities;
 using QuantumCore.Game.PlayerUtils;
 using QuantumCore.Game.World;
 using QuantumCore.Game.World.Entities;

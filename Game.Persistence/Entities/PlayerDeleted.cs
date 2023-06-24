@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations.Schema;
 using Core.Persistence;
 
-namespace QuantumCore.Game.Persistence;
+namespace QuantumCore.Game.Persistence.Entities;
 
 [Table("deleted_players")]
 public class PlayerDeleted : BaseModel

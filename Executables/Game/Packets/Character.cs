@@ -1,5 +1,5 @@
 ﻿using QuantumCore.Core.Packets;
-using QuantumCore.Game.Persistence;
+using QuantumCore.Game.Persistence.Entities;
 
 namespace QuantumCore.Game.Packets
 {
