@@ -8,7 +8,10 @@ namespace QuantumCore.Game.Items
 {
     public enum EAffectTypes
     {
+        None = 0,
         AffectMoveSpeed = 200,
-        AffectAttackSpeed = 201
+        AffectAttackSpeed = 201,
+        ReviveInvisible = 215,
+        AutoSPRecovery = 535
     }
 }

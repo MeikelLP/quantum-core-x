@@ -6,9 +6,11 @@ using QuantumCore.API.Game.World;
 using QuantumCore.Database;
 using QuantumCore.Game.PacketHandlers.Game;
 using QuantumCore.Game.Packets.Affects;
-using QuantumCore.API.Core.Models;
 using Dapper;
 using System.Linq;
+using Affect = QuantumCore.Database.Affect;
+using AffectAPI = QuantumCore.API.Core.Models.Affect;
+using System.Numerics;
 
 namespace QuantumCore.Game
 {
@@ -37,9 +39,17 @@ namespace QuantumCore.Game
             playerEntity.Connection.Send(affectAdd);
         }
 
-        public void SendAffectRemovePacket(IPlayerEntity playerEntity, Affect affect)
+        public async Task SendAffectRemovePacket(IPlayerEntity playerEntity, long type, byte applyOn)
         {
-            throw new NotImplementedException();
+            var db = _databaseManager.GetGameDatabase();
+            await db.QueryAsync("DELETE FROM affects WHERE PlayerId=@PlayerId and Type=@Type and ApplyOn=@ApplyOn", 
+                new { PlayerId = playerEntity.Player.Id, Type = type, ApplyOn = applyOn });
+            var affectRemovePacket = new AffectRemove
+            {
+                Type = (uint) type,
+                ApplyOn = applyOn,
+            };
+            await playerEntity.Connection.Send(affectRemovePacket);
         }
 
         public async Task AddAffect(IPlayerEntity playerEntity, int type, int applyOn, int applyValue, int flag, int duration, int spCost)
@@ -47,7 +57,7 @@ namespace QuantumCore.Game
             _logger.LogDebug("Add affect starting!");
             _logger.LogDebug("::AddAffect Type:{Type}, ApplyOn:{ApplyOn}, ApplyValue:{ApplyValue}, Flag:{Flag}, Duration:{Duration}, SpCost:{SpCost}", type, applyOn, applyValue, flag, duration, spCost);  
             var db = _databaseManager.GetGameDatabase();
-            var playerAffects = await db.QueryAsync<Affect>("SELECT * FROM affects WHERE PlayerId = @PlayerId", new { PlayerId = playerEntity.Player.Id });
+            //var playerAffects = await db.QueryAsync<Affect>("SELECT * FROM affects WHERE PlayerId = @PlayerId", new { PlayerId = playerEntity.Player.Id });
             
             // Create player data
             var affect = new Affect
@@ -60,37 +70,38 @@ namespace QuantumCore.Game
                 Duration = DateTime.Now.AddSeconds(duration),
                 SpCost = spCost
             };
+            var affectAPI = new AffectAPI
+            {
+                PlayerId = playerEntity.Player.Id,
+                Type = type,
+                ApplyOn = (byte) applyOn,
+                ApplyValue = applyValue,
+                Flag = flag,
+                Duration = DateTime.Now.AddSeconds(duration),
+                SpCost = spCost
+            };
 
-            if (playerAffects != null && playerAffects.Any())
+            var affectApi = playerEntity.HasAffect(affectAPI);
+            if (affectApi != null)
             {
-                var sameThing = false;
-                foreach(var playerAffect in playerAffects){
-                    if(playerAffect.Type == type) // must be uniq
-                    {
-                        sameThing = true;
-                        if (playerAffect.ApplyValue == applyValue &&  playerAffect.ApplyOn == applyOn)
-                        {
-                            // update duration of the affect 
-                            playerAffect.Duration = playerAffect.Duration.AddSeconds(duration);
-                            await _databaseManager.GetGameDatabase().UpdateAsync(playerAffect);
-                        }
-                        else
-                        {
-                            await playerEntity.SendChatInfo("This affect is already working!");
-                        }
-                    }
-                    break;
-                }
-                if(!sameThing)
+                if(affect.ApplyValue != affectAPI.ApplyValue)
                 {
-                    // create new affect
-                    await _databaseManager.GetGameDatabase().InsertAsync(affect);
+                    await playerEntity.SendChatInfo("This affect is already working!");
                 }
-            } 
-            else 
+                else
+                {
+                    await playerEntity.RemoveAffect(affectApi);
+                    affectApi.Duration = affectApi.Duration.AddSeconds(duration);
+                    affect.Duration = affectApi.Duration;
+                    await _databaseManager.GetGameDatabase().InsertAsync(affect);
+                    await playerEntity.AddAffect(affectAPI);
+                    await playerEntity.SendChatInfo("This affect duration is extended!");
+                }
+            }
+            else
             {
-                // create new affect
                 await _databaseManager.GetGameDatabase().InsertAsync(affect);
+                await playerEntity.AddAffect(affectAPI);
             }
 
             // Add affect to cache
@@ -100,9 +111,33 @@ namespace QuantumCore.Game
 
         }
 
-        bool IAffectController.RemoveAffect()
+        public async Task LoadAffect(IPlayerEntity playerEntity)
         {
-            throw new NotImplementedException();
+            _logger.LogDebug("Load affect starting!");
+            _logger.LogDebug("::LoadAffect PlayerId:{}", playerEntity.Player.Id);
+            var db = _databaseManager.GetGameDatabase();
+            var playerAffects = await db.QueryAsync<Affect>("SELECT * FROM affects WHERE PlayerId = @PlayerId", new { PlayerId = playerEntity.Player.Id });
+
+
+            if (playerAffects != null && playerAffects.Any())
+            {
+                foreach(var playerAffect in playerAffects)
+                {
+                    var affect = new AffectAPI
+                    {
+                        PlayerId = playerAffect.PlayerId,
+                        Type = playerAffect.Type,
+                        ApplyOn = playerAffect.ApplyOn,
+                        ApplyValue = playerAffect.ApplyValue,
+                        Flag = playerAffect.Flag,
+                        Duration = playerAffect.Duration,
+                        SpCost = playerAffect.SpCost
+                    }; 
+                    await playerEntity.AddAffect(affect);
+                }
+            }
+
+
         }
     }
 }

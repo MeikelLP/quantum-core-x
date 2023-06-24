@@ -14,6 +14,7 @@ namespace QuantumCore.API.Game.World
         IInventory Inventory { get; }
         IEntity Target { get; set; }
         IList<Guid> Groups { get; }
+        IList<Affect> Affects { get; }
         IShop Shop { get; set; }
         IQuickSlotBar QuickSlotBar { get; }
         IQuest CurrentQuest { get; set; }
@@ -52,5 +53,9 @@ namespace QuantumCore.API.Game.World
         Task Show(IConnection connection);
         void Disconnect();
         string ToString();
+        Affect HasAffect(Affect affect);
+        Task AddAffect(Affect affect);
+
+        Task RemoveAffect(Affect affect);
     }
 }

@@ -8,6 +8,7 @@ namespace QuantumCore.Game.Items
 {
     public enum EUseSubTypes
     {
-       AbilityUp = 7
+       AbilityUp = 7,
+       UseSpecial = 10
     };
 }

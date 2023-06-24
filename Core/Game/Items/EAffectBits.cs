@@ -10,5 +10,6 @@ namespace QuantumCore.Game.Items
     {
        MoveSpeedPotion = 12,
        AttackSpeedPotion = 13,
+       ReviveInvisible = 28
     }
 }

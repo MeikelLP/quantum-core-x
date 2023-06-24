@@ -10,8 +10,11 @@ using QuantumCore.Core.Cache;
 using QuantumCore.Core.Utils;
 using QuantumCore.Database;
 using QuantumCore.Extensions;
+using QuantumCore.Game.Extensions;
+using QuantumCore.Game.Items;
 using QuantumCore.Game.Packets;
 using QuantumCore.Game.PlayerUtils;
+using Affect = QuantumCore.API.Core.Models.Affect;
 
 namespace QuantumCore.Game.World.Entities
 {
@@ -30,7 +33,7 @@ namespace QuantumCore.Game.World.Entities
         public IQuickSlotBar QuickSlotBar { get; }
         public IQuest CurrentQuest { get; set; }
         public Dictionary<string, IQuest> Quests { get; } = new();
-        public List<Affect> Affects { get; set; } = new();
+        public IList<Affect> Affects { get; private set; }
 
         public override byte HealthPercentage {
             get {
@@ -92,6 +95,7 @@ namespace QuantumCore.Game.World.Entities
         private double _manaRegenTime = ManaRegenInterval;
         private readonly IItemManager _itemManager;
         private readonly IJobManager _jobManager;
+        private readonly IAffectController _affectController;
         private readonly IExperienceManager _experienceManager;
         private readonly IDbConnection _db;
         private readonly IQuestManager _questManager;
@@ -113,6 +117,7 @@ namespace QuantumCore.Game.World.Entities
             _cacheManager = cacheManager;
             _world = world;
             _logger = logger;
+            _affectController = affectController;
             Player = new PlayerData {
                 Id = player.Id,
                 AccountId = player.AccountId,
@@ -146,6 +151,7 @@ namespace QuantumCore.Game.World.Entities
             EntityClass = player.PlayerClass;
 
             Groups = new List<Guid>();
+            Affects = new List<Affect>();
         }
 
         public byte GetMovementSpeed()
@@ -155,18 +161,47 @@ namespace QuantumCore.Game.World.Entities
 
         public int GetLimitPoint(EPoints point)
         {
-            var MinLimit = 0;
+            // TODO: custom limits ex: max_username_length:15
+            var MaxLimit = 255;
             switch (point)
             {
                 case EPoints.MoveSpeed:
-                    if(Player.GetType() == typeof(Player))
+                    if(Player.GetType().Equals(typeof(Player)))
                     {
-                        return 250;
+                        MaxLimit= 200;
+                    }else
+                    {
+                        MaxLimit = 200;
                     }
-                    return 200;
-                default:
-                    return MinLimit;
+                    break;
             }
+
+            return MaxLimit;
+        }
+
+        public Affect HasAffect(Affect affect)
+        {
+            for (var i = 0; i < Affects.Count; i++)
+            {
+                if (Affects[i].Type == affect.Type && Affects[i].ApplyOn == affect.ApplyOn)
+                {
+                    return Affects[i];
+                }
+            }
+            return null;
+        }
+
+        public async Task AddAffect(Affect affect)
+        {
+            Affects.Add(affect);
+            await SendCharacterUpdate();
+        }
+
+        public async Task RemoveAffect(Affect affect)
+        {
+            Affects.Remove(affect);
+            await _affectController.SendAffectRemovePacket(this, affect.Type, (byte) affect.ApplyOn);
+            await SendCharacterUpdate();
         }
 
         private static int CalculateDuration(int iSpd, int iDur)
@@ -208,6 +243,7 @@ namespace QuantumCore.Game.World.Entities
             await LoadPermGroups();
             
             _questManager.InitializePlayer(this);
+            _affectController.LoadAffect(this);
             
             CalculateDefence();
         }
@@ -352,7 +388,7 @@ namespace QuantumCore.Game.World.Entities
             
             await Connection.Send(remove);
             await Show(Connection);
-            
+
             await ForEachNearbyEntity(async entity =>
             {
                 if (entity is PlayerEntity pe)
@@ -363,9 +399,12 @@ namespace QuantumCore.Game.World.Entities
                 await entity.ShowEntity(Connection);
             });
 
+            await RespawnInvisible(this, 5);
+
             Health = 50;
             Mana = 50;
             await SendPoints();
+            await SendCharacterUpdate();
         }
 
         private void GiveStatusPoints()
@@ -437,6 +476,8 @@ namespace QuantumCore.Game.World.Entities
         
         public async override Task Update(double elapsedTime)
         {
+            if (Dead) return;
+
             if (Map == null) return; // We don't have a map yet so we aren't spawned
 
             await base.Update(elapsedTime);
@@ -708,7 +749,8 @@ namespace QuantumCore.Game.World.Entities
                 case EPoints.StatusPoints:
                     return Player.AvailableStatusPoints;
                 case EPoints.MoveSpeed:
-                    return GetMovementSpeed();
+                    var totalApplyValue =Affects.Where(a => a.ApplyOn == (int) EPoints.MoveSpeed).Sum(a => a.ApplyValue);
+                    return (uint) (GetMovementSpeed() + totalApplyValue);
                 default:
                     if (Enum.GetValues<EPoints>().Contains(point))
                     {
@@ -896,6 +938,11 @@ namespace QuantumCore.Game.World.Entities
             return true;
         }
 
+        public async Task RespawnInvisible(IPlayerEntity player, int duration)
+        {
+            await _affectController.AddAffect(player, (int) EAffectTypes.ReviveInvisible, 0, 0, (int) EAffectBits.MoveSpeedPotion, duration, 0);
+        }
+
         public async Task<bool> DestroyItem(ItemInstance item)
         {
             await RemoveItem(item);
@@ -1069,7 +1116,7 @@ namespace QuantumCore.Game.World.Entities
                     (ushort) (Inventory.EquipmentWindow.Weapon?.ItemId ?? 0), 0,
                     (ushort) (Inventory.EquipmentWindow.Hair?.ItemId ?? 0)
                 },
-                MoveSpeed = MovementSpeed,
+                MoveSpeed = GetMovementSpeed(),
                 AttackSpeed = _attackSpeed
             };
             
