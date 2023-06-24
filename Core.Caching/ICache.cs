@@ -1,4 +1,4 @@
-﻿namespace QuantumCore.Core.Cache
+﻿namespace QuantumCore.Caching
 {
     public interface ICache
     {

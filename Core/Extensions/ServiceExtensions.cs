@@ -5,7 +5,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MySqlConnector;
 using QuantumCore.API.PluginTypes;
-using QuantumCore.Core.Cache;
+using QuantumCore.Caching;
 using QuantumCore.Core.Logging.Enrichers;
 using QuantumCore.Core.Networking;
 using Serilog;

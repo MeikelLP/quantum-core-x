@@ -11,7 +11,6 @@
   <ItemGroup>
     <PackageReference Include="Alexinea.Extensions.Configuration.Toml" Version="6.0.0" />
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.0" />
-    <PackageReference Include="BeetleX.Redis" Version="1.0.0.8" />
     <PackageReference Include="Dapper" Version="2.0.90" />
     <PackageReference Include="Dapper.Contrib" Version="2.0.78" />
     <PackageReference Include="FluentMigrator" Version="3.2.17" />
@@ -38,11 +37,16 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Core.Caching\Core.Caching.csproj" />
     <ProjectReference Include="..\CorePluginAPI\CorePluginAPI.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <Compile Remove="Game\ConfigManager.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Core\Cache\" />
   </ItemGroup>
 
 </Project>

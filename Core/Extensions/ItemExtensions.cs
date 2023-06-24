@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Dapper;
 using Dapper.Contrib.Extensions;
 using QuantumCore.API.Core.Models;
-using QuantumCore.Core.Cache;
+using QuantumCore.Caching;
 
 namespace QuantumCore.Extensions;
 

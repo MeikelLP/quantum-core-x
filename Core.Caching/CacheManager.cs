@@ -1,11 +1,10 @@
 ﻿using System.Data;
-using System.Threading.Tasks;
 using BeetleX.Redis;
 using Dapper.Contrib.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
-namespace QuantumCore.Core.Cache
+namespace QuantumCore.Caching
 {
     public class CacheManager : ICacheManager
     {

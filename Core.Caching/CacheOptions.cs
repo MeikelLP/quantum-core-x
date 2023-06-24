@@ -1,4 +1,4 @@
-﻿namespace QuantumCore;
+﻿namespace QuantumCore.Caching;
 
 public class CacheOptions
 {

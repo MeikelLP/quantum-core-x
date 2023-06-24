@@ -4,7 +4,7 @@ using System.Data;
 using System.Threading.Tasks;
 using Dapper;
 using Dapper.Contrib.Extensions;
-using QuantumCore.Core.Cache;
+using QuantumCore.Caching;
 
 namespace QuantumCore.Database
 {

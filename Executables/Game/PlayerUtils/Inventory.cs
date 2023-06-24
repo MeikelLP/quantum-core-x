@@ -2,7 +2,7 @@ using System.Collections.ObjectModel;
 using System.Data;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
-using QuantumCore.Core.Cache;
+using QuantumCore.Caching;
 using QuantumCore.Core.Utils;
 using QuantumCore.Extensions;
 using Serilog;

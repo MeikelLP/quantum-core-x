@@ -1,7 +1,6 @@
-﻿using System.Threading.Tasks;
-using BeetleX.Redis;
+﻿using BeetleX.Redis;
 
-namespace QuantumCore.Core.Cache;
+namespace QuantumCore.Caching;
 
 /// <summary>
 /// Wrapper for the <see cref="RedisList{T}"/>. As id does not implement any interfaces we need to wrap it in order

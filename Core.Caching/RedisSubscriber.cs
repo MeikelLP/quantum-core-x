@@ -1,7 +1,6 @@
-﻿using System;
-using BeetleX.Redis;
+﻿using BeetleX.Redis;
 
-namespace QuantumCore.Core.Cache;
+namespace QuantumCore.Caching;
 
 internal class RedisSubscriber : IRedisSubscriber
 {

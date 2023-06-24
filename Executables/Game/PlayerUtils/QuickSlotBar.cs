@@ -2,7 +2,7 @@ using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game.World;
-using QuantumCore.Core.Cache;
+using QuantumCore.Caching;
 using QuantumCore.Game.Packets.General;
 using QuantumCore.Game.Packets.QuickBar;
 using QuantumCore.Game.World.Entities;

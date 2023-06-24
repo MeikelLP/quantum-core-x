@@ -1,6 +1,4 @@
-using System.Threading.Tasks;
-
-namespace QuantumCore.Core.Cache;
+namespace QuantumCore.Caching;
 
 public interface ICacheManager
 {

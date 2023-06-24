@@ -6,7 +6,7 @@ using QuantumCore.API;
 using QuantumCore.API.PluginTypes;
 using QuantumCore.Auth.Cache;
 using QuantumCore.Auth.Packets;
-using QuantumCore.Core.Cache;
+using QuantumCore.Caching;
 using QuantumCore.Core.Utils;
 using QuantumCore.Database;
 

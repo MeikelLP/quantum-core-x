@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.PluginTypes;
-using QuantumCore.Core.Cache;
+using QuantumCore.Caching;
 using QuantumCore.Database;
 using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Packets;

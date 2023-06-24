@@ -4,7 +4,7 @@ using Dapper.Contrib.Extensions;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.PluginTypes;
-using QuantumCore.Core.Cache;
+using QuantumCore.Caching;
 using QuantumCore.Database;
 using QuantumCore.Extensions;
 using QuantumCore.Game.Packets;
