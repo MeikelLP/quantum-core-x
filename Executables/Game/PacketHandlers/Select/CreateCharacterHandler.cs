@@ -1,8 +1,4 @@
 using System.Data;
-using System;
-using System.Data;
-using System.Threading;
-using System.Threading.Tasks;
 using Dapper;
 using Dapper.Contrib.Extensions;
 using Microsoft.Extensions.Logging;

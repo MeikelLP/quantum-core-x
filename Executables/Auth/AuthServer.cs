@@ -5,7 +5,7 @@ using QuantumCore.API.Game.Types;
 using QuantumCore.API.PluginTypes;
 using QuantumCore.Core.Cache;
 using QuantumCore.Core.Networking;
-using QuantumCore.Core.Packets;
+using QuantumCore.Extensions;
 using QuantumCore.Networking;
 
 namespace QuantumCore.Auth
@@ -39,10 +39,7 @@ namespace QuantumCore.Auth
 
         private async Task<bool> NewConnection(IConnection connection)
         {
-            await connection.Send(new GCPhase
-            {
-                Phase = EPhases.Auth
-            });
+            await connection.SetPhaseAsync(EPhases.Auth);
             return true;
         }
     }

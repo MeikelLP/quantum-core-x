@@ -10,8 +10,8 @@ using QuantumCore.API.PluginTypes;
 using QuantumCore.Core.Event;
 using QuantumCore.Core.Networking;
 using QuantumCore.Core.Utils;
+using QuantumCore.Extensions;
 using QuantumCore.Game.Commands;
-using QuantumCore.Game.Extensions;
 using QuantumCore.Game.PlayerUtils;
 using QuantumCore.Networking;
 

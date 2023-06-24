@@ -31,7 +31,6 @@
     <ItemGroup>
         <ProjectReference Include="..\Core\Core.csproj" />
         <ProjectReference Include="..\Core.Networking.Generators\Core.Networking.Generators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-        <ProjectReference Include="..\Core\Core.csproj" />
         <ProjectReference Include="..\Executables\Game\Game.csproj" />
     </ItemGroup>
 
