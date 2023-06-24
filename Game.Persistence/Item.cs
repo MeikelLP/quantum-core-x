@@ -1,5 +1,3 @@
-using System;
-
 namespace QuantumCore.Database
 {
     [System.ComponentModel.DataAnnotations.Schema.Table("items")]

@@ -14,7 +14,9 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\Auth.Persistence\Auth.Persistence.csproj" />
       <ProjectReference Include="..\..\Core\Core.csproj" />
+      <ProjectReference Include="..\..\Game.Persistence\Game.Persistence.csproj" />
     </ItemGroup>
 
 </Project>

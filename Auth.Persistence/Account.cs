@@ -1,7 +1,4 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
-
-namespace QuantumCore.Database
+﻿namespace QuantumCore.Database
 {
     public class Account : BaseModel
     {

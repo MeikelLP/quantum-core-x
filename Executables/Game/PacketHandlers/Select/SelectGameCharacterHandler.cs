@@ -1,11 +1,8 @@
-﻿using System.Data;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.PluginTypes;
-using QuantumCore.Caching;
-using QuantumCore.Database;
 using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Packets;
 using QuantumCore.Game.World.Entities;
@@ -14,18 +11,16 @@ namespace QuantumCore.Game.PacketHandlers.Select;
 
 public class SelectGameCharacterHandler : IGamePacketHandler<SelectCharacter>
 {
-    private readonly IDbConnection _db;
     private readonly ILogger<SelectGameCharacterHandler> _logger;
     private readonly IServiceProvider _provider;
-    private readonly ICacheManager _cacheManager;
+    private readonly IPlayerFactory _playerFactory;
 
-    public SelectGameCharacterHandler(IDbConnection db, ILogger<SelectGameCharacterHandler> logger, IServiceProvider provider, 
-        ICacheManager cacheManager)
+    public SelectGameCharacterHandler(ILogger<SelectGameCharacterHandler> logger, IServiceProvider provider, 
+        IPlayerFactory playerFactory)
     {
-        _db = db;
         _logger = logger;
         _provider = provider;
-        _cacheManager = cacheManager;
+        _playerFactory = playerFactory;
     }
     
     public async Task ExecuteAsync(GamePacketContext<SelectCharacter> ctx, CancellationToken token = default)
@@ -45,7 +40,7 @@ public class SelectGameCharacterHandler : IGamePacketHandler<SelectCharacter>
         await ctx.Connection.SetPhaseAsync(EPhases.Loading);
 
         // Load player
-        var player = await Player.GetPlayer(_db, _cacheManager, accountId, ctx.Packet.Slot);
+        var player = await _playerFactory.GetPlayer(accountId, ctx.Packet.Slot);
         var entity = ActivatorUtilities.CreateInstance<PlayerEntity>(_provider, ctx.Connection, player);
         await entity.Load();
 

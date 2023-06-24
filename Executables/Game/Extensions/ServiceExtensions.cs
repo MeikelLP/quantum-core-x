@@ -19,6 +19,7 @@ public static class ServiceExtensions
                 .AsImplementedInterfaces()
                 .WithSingletonLifetime();
         });
+        services.AddSingleton<IPlayerFactory, PlayerFactory>();
         services.AddSingleton<IItemManager, ItemManager>();
         services.AddSingleton<IMonsterManager, MonsterManager>();
         services.AddSingleton<IJobManager, JobManager>();

@@ -8,7 +8,6 @@ using QuantumCore.API.PluginTypes;
 using QuantumCore.Auth.Cache;
 using QuantumCore.Caching;
 using QuantumCore.Core.Utils;
-using QuantumCore.Database;
 using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Packets;
 
@@ -20,13 +19,15 @@ namespace QuantumCore.Game.PacketHandlers
         private readonly ILogger<TokenLoginHandler> _logger;
         private readonly ICacheManager _cacheManager;
         private readonly IWorld _world;
+        private readonly IPlayerFactory _playerFactory;
 
-        public TokenLoginHandler(IDbConnection db, ILogger<TokenLoginHandler> logger, ICacheManager cacheManager, IWorld world)
+        public TokenLoginHandler(IDbConnection db, ILogger<TokenLoginHandler> logger, ICacheManager cacheManager, IWorld world, IPlayerFactory playerFactory)
         {
             _db = db;
             _logger = logger;
             _cacheManager = cacheManager;
             _world = world;
+            _playerFactory = playerFactory;
         }
         
         public async Task ExecuteAsync(GamePacketContext<TokenLogin> ctx, CancellationToken cancellationToken = default)
@@ -65,7 +66,7 @@ namespace QuantumCore.Game.PacketHandlers
             // Load players of account
             var characters = new Characters();
             var i = 0;
-            var charactersFromCacheOrDb = await Player.GetPlayers(_db, _cacheManager, token.AccountId).ToArrayAsync(cancellationToken);
+            var charactersFromCacheOrDb = await _playerFactory.GetPlayers(token.AccountId).ToArrayAsync(cancellationToken);
             foreach (var player in charactersFromCacheOrDb)
             {
                 var host = _world.GetMapHost(player.PositionX, player.PositionY);

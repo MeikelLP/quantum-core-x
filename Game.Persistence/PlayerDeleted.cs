@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel.DataAnnotations.Schema;
 
 namespace QuantumCore.Database
 {
-    [System.ComponentModel.DataAnnotations.Schema.Table("deleted_players")]
+    [Table("deleted_players")]
     public class PlayerDeleted : BaseModel
     {
         public Guid AccountId { get; set; }

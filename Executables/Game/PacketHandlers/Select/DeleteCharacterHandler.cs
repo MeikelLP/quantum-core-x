@@ -17,12 +17,14 @@ public class DeleteCharacterHandler : IGamePacketHandler<DeleteCharacter>
     private readonly ILogger<DeleteCharacterHandler> _logger;
     private readonly IDbConnection _db;
     private readonly ICacheManager _cacheManager;
+    private readonly IPlayerFactory _playerFactory;
 
-    public DeleteCharacterHandler(ILogger<DeleteCharacterHandler> logger, IDbConnection db, ICacheManager cacheManager)
+    public DeleteCharacterHandler(ILogger<DeleteCharacterHandler> logger, IDbConnection db, ICacheManager cacheManager, IPlayerFactory playerFactory)
     {
         _logger = logger;
         _db = db;
         _cacheManager = cacheManager;
+        _playerFactory = playerFactory;
     }
     
     public async Task ExecuteAsync(GamePacketContext<DeleteCharacter> ctx, CancellationToken token = default)
@@ -58,7 +60,7 @@ public class DeleteCharacterHandler : IGamePacketHandler<DeleteCharacter>
             Slot = ctx.Packet.Slot
         });
 
-        var player = await Player.GetPlayer(_db, _cacheManager, accountId, ctx.Packet.Slot);
+        var player = await _playerFactory.GetPlayer(accountId, ctx.Packet.Slot);
         if (player == null)
         {
             ctx.Connection.Close();

@@ -41,12 +41,4 @@
     <ProjectReference Include="..\CorePluginAPI\CorePluginAPI.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Compile Remove="Game\ConfigManager.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Core\Cache\" />
-  </ItemGroup>
-
 </Project>
