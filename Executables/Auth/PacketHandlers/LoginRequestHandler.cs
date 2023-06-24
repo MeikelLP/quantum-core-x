@@ -1,12 +1,10 @@
-﻿using System.Data;
-using Dapper;
-using Dapper.Contrib.Extensions;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.PluginTypes;
 using QuantumCore.Auth.Cache;
 using QuantumCore.Auth.Packets;
 using QuantumCore.Auth.Persistence;
+using QuantumCore.Auth.Persistence.Entities;
 using QuantumCore.Caching;
 using QuantumCore.Core.Utils;
 
@@ -14,21 +12,20 @@ namespace QuantumCore.Auth.PacketHandlers;
 
 public class LoginRequestHandler : IAuthPacketHandler<LoginRequest>
 {
-    private readonly IDbConnection _db;
+    private readonly IAccountManager _accountManager;
     private readonly ILogger<LoginRequestHandler> _logger;
     private readonly ICacheManager _cacheManager;
 
-    public LoginRequestHandler(IDbConnection db, ILogger<LoginRequestHandler> logger, ICacheManager cacheManager)
+    public LoginRequestHandler(IAccountManager accountManager, ILogger<LoginRequestHandler> logger, ICacheManager cacheManager)
     {
-        _db = db;
+        _accountManager = accountManager;
         _logger = logger;
         _cacheManager = cacheManager;
     }
 
     public async Task ExecuteAsync(AuthPacketContext<LoginRequest> ctx, CancellationToken token = default)
     {
-        var account = await _db.QueryFirstOrDefaultAsync<Account>(
-            "SELECT * FROM accounts WHERE Username = @Username", new {Username = ctx.Packet.Username});
+        var account = await _accountManager.FindByNameAsync(ctx.Packet.Username);
         // Check if account was found
         if (account == default(Account))
         {
@@ -57,10 +54,9 @@ public class LoginRequestHandler : IAuthPacketHandler<LoginRequest>
             else
             {
                 // Check account status stored in the database
-                var dbStatus = await _db.GetAsync<AccountStatus>(account.Status);
-                if (!dbStatus.AllowLogin)
+                if (!account.AccountStatus.AllowLogin)
                 {
-                    status = dbStatus.ClientStatus;
+                    status = account.AccountStatus.ClientStatus;
                 }
             }
         }

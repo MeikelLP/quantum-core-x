@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace QuantumCore.Auth.Persistence;
+namespace QuantumCore.Auth.Persistence.Entities;
 
 [Table("account_status")]
 public class AccountStatus
