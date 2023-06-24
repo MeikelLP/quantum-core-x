@@ -112,7 +112,7 @@ public class NetworkingTests
             Message = "Hello New World!"
         };
         var size = obj.GetSize();
-        var bytes = new byte[size];
+        var bytes = new byte[size + 1]; // + 1 due to sequence
         obj.Serialize(bytes);
 
         using var stream = new MemoryStream(bytes);
