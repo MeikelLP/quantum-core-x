@@ -55,7 +55,6 @@ namespace QuantumCore.API.Game.World
         string ToString();
         Affect HasAffect(Affect affect);
         Task AddAffect(Affect affect);
-
         Task RemoveAffect(Affect affect);
     }
 }

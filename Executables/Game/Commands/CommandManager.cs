@@ -196,7 +196,17 @@ namespace QuantumCore.Game.Commands
             {
                 if (_commandHandlers.TryGetValue(command, out var commandCache))
                 {
-                    
+                    if (!CanUseCommand(connection.Player, command))
+                    {
+                        await connection.Send(new ChatOutcoming()
+                        {
+                            MessageType = ChatMessageTypes.Info,
+                            Vid = 0,
+                            Empire = 0,
+                            Message = $"You don't have enough permission to use this command"
+                        });
+                        return;
+                    }
 
                     if (commandCache.OptionsType is not null)
                     {
