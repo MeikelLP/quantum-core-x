@@ -8,5 +8,5 @@ public enum ChatMessageTypes : byte
     Group = 3,
     Guild,
     Command,
-    Shout,
-};
+    Shout
+}

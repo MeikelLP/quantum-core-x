@@ -161,18 +161,6 @@ internal class DeserializeGenerator
         throw new NotImplementedException($"Don't know how to handle type of field {field.Name}");
     }
 
-    private static string GetLengthOfField(FieldData fieldData)
-    {
-        if (fieldData.HasDynamicLength)
-        {
-            return GetVariableNameForExpression(fieldData.SizeFieldName!);
-        }
-        else
-        {
-            return fieldData.FieldSize.ToString();
-        }
-    }
-
     internal string GetMethodLine(FieldData field, ref int offset, StringBuilder dynamicOffset,
         string tempDynamicOffset, string indentPrefix, bool isVariableMode, bool isStreamMode)
     {

@@ -7,7 +7,7 @@ namespace QuantumCore.Game.Packets
     public partial class ChatIncoming
     {
         [Field(0)] public ushort Size => (ushort)Message.Length;
-        [Field(1, EnumType = typeof(byte))]
+        [Field(1)]
         public ChatMessageTypes MessageType { get; set; }
         public string Message { get; set; }
 

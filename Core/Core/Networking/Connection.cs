@@ -108,14 +108,15 @@ namespace QuantumCore.Core.Networking
             var bytes = ArrayPool<byte>.Shared.Rent(size);
             Array.Clear(bytes, 0, size);
             packet.Serialize(bytes);
-            
+            var bytesToSend = bytes.AsMemory(0, size);
+
             try
             {
                 // TODO token
                 await _pluginExecutor.ExecutePlugins<IPacketOperationListener>(_logger, x => x.OnPrePacketSentAsync(packet, CancellationToken.None));
                 // Serialize object
-                _logger.LogDebug("Sending bytes: {Bytes:X}", bytes.AsMemory(0, size).ToArray());
-                await _stream.WriteAsync(bytes.AsMemory(0, size));
+                _logger.LogDebug("Sending bytes: {Bytes:X}", bytesToSend.ToArray());
+                await _stream.WriteAsync(bytesToSend);
                 await _stream.FlushAsync();
                 // TODO token
                 await _pluginExecutor.ExecutePlugins<IPacketOperationListener>(_logger, x => x.OnPostPacketReceivedAsync(packet, bytes, CancellationToken.None));
