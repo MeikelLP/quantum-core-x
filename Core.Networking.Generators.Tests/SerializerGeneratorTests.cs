@@ -59,6 +59,9 @@ using System.IO;
 using System.Threading.Tasks;
 using QuantumCore.Networking;
 
+// no async warning if no properties
+#pragma warning disable CS1998 
+
 namespace QuantumCore.Core.Packets {
 
     public partial record struct GCHandshake : IPacketSerializable
@@ -173,6 +176,9 @@ using System.Buffers;
 using System.IO;
 using System.Threading.Tasks;
 using QuantumCore.Networking;
+
+// no async warning if no properties
+#pragma warning disable CS1998 
 
 namespace QuantumCore.Core.Packets {
 
@@ -293,6 +299,9 @@ using System.IO;
 using System.Threading.Tasks;
 using QuantumCore.Networking;
 
+// no async warning if no properties
+#pragma warning disable CS1998 
+
 namespace QuantumCore.Core.Packets {
 
     public partial record GCHandshake : IPacketSerializable
@@ -400,6 +409,9 @@ using System.Buffers;
 using System.IO;
 using System.Threading.Tasks;
 using QuantumCore.Networking;
+
+// no async warning if no properties
+#pragma warning disable CS1998 
 
 namespace QuantumCore.Core.Packets {
 
@@ -510,6 +522,9 @@ using System.Buffers;
 using System.IO;
 using System.Threading.Tasks;
 using QuantumCore.Networking;
+
+// no async warning if no properties
+#pragma warning disable CS1998 
 
 namespace QuantumCore.Core.Packets {
 
@@ -627,6 +642,9 @@ using System.IO;
 using System.Threading.Tasks;
 using QuantumCore.Networking;
 
+// no async warning if no properties
+#pragma warning disable CS1998 
+
 namespace QuantumCore.Core.Packets {
 
     public partial record struct GCHandshake : IPacketSerializable
@@ -736,6 +754,9 @@ using System.Buffers;
 using System.IO;
 using System.Threading.Tasks;
 using QuantumCore.Networking;
+
+// no async warning if no properties
+#pragma warning disable CS1998 
 
 namespace QuantumCore.Core.Packets {
 
@@ -847,6 +868,9 @@ using System.IO;
 using System.Threading.Tasks;
 using QuantumCore.Networking;
 
+// no async warning if no properties
+#pragma warning disable CS1998 
+
 namespace QuantumCore.Core.Packets {
 
     public partial record struct GCHandshake : IPacketSerializable
@@ -954,6 +978,9 @@ using System.Buffers;
 using System.IO;
 using System.Threading.Tasks;
 using QuantumCore.Networking;
+
+// no async warning if no properties
+#pragma warning disable CS1998 
 
 namespace QuantumCore.Core.Packets {
 
@@ -1074,6 +1101,9 @@ using System.IO;
 using System.Threading.Tasks;
 using QuantumCore.Networking;
 
+// no async warning if no properties
+#pragma warning disable CS1998 
+
 namespace QuantumCore.Core.Packets {
 
     public partial class ShopBuy : IPacketSerializable
@@ -1182,6 +1212,9 @@ using System.Buffers;
 using System.IO;
 using System.Threading.Tasks;
 using QuantumCore.Networking;
+
+// no async warning if no properties
+#pragma warning disable CS1998 
 
 namespace QuantumCore.Core.Packets {
 
@@ -1300,6 +1333,9 @@ using System.IO;
 using System.Threading.Tasks;
 using QuantumCore.Networking;
 
+// no async warning if no properties
+#pragma warning disable CS1998 
+
 namespace QuantumCore.Game.Packets {
 
     public partial class ChatIncoming : IPacketSerializable
@@ -1392,10 +1428,6 @@ public partial class DeleteCharacterFail
 
         var runResult = driver.GetRunResult();
         diagnostics.Should().BeEmpty();
-        // TODO
-        outputCompilation.GetDiagnostics().Should().HaveCount(1)
-            .And
-            .Subject.First().GetMessage().Should().BeEquivalentTo(@"This async method lacks 'await' operators and will run synchronously. Consider using the 'await' operator to await non-blocking API calls, or 'await Task.Run(...)' to do CPU-bound work on a background thread.");
 
         runResult.GeneratedTrees.Should().HaveCount(1);
         runResult.Diagnostics.Should().BeEmpty();
@@ -1409,6 +1441,9 @@ using System.Buffers;
 using System.IO;
 using System.Threading.Tasks;
 using QuantumCore.Networking;
+
+// no async warning if no properties
+#pragma warning disable CS1998 
 
 namespace QuantumCore.Core.Packets {
 
@@ -1535,6 +1570,9 @@ using System.IO;
 using System.Threading.Tasks;
 using QuantumCore.Networking;
 
+// no async warning if no properties
+#pragma warning disable CS1998 
+
 namespace QuantumCore.Core.Packets {
 
     public partial record struct GCHandshake : IPacketSerializable
@@ -1643,6 +1681,9 @@ using System.Buffers;
 using System.IO;
 using System.Threading.Tasks;
 using QuantumCore.Networking;
+
+// no async warning if no properties
+#pragma warning disable CS1998 
 
 namespace QuantumCore.Core.Packets {
 
@@ -1792,6 +1833,9 @@ using System.IO;
 using System.Threading.Tasks;
 using QuantumCore.Networking;
 
+// no async warning if no properties
+#pragma warning disable CS1998 
+
 namespace QuantumCore.Core.Packets {
 
     public partial record struct GCHandshake : IPacketSerializable
@@ -1909,6 +1953,9 @@ using System.IO;
 using System.Threading.Tasks;
 using QuantumCore.Networking;
 
+// no async warning if no properties
+#pragma warning disable CS1998 
+
 namespace QuantumCore.Core.Packets {
 
     public partial record struct GCHandshake : IPacketSerializable
@@ -1994,6 +2041,9 @@ using System.Buffers;
 using System.IO;
 using System.Threading.Tasks;
 using QuantumCore.Networking;
+
+// no async warning if no properties
+#pragma warning disable CS1998 
 
 namespace QuantumCore.Core.Packets {
 
@@ -2093,6 +2143,9 @@ using System.Buffers;
 using System.IO;
 using System.Threading.Tasks;
 using QuantumCore.Networking;
+
+// no async warning if no properties
+#pragma warning disable CS1998 
 
 namespace QuantumCore.Core.Packets {
 
@@ -2211,6 +2264,9 @@ using System.Buffers;
 using System.IO;
 using System.Threading.Tasks;
 using QuantumCore.Networking;
+
+// no async warning if no properties
+#pragma warning disable CS1998 
 
 namespace QuantumCore.Core.Packets {
 
@@ -2334,6 +2390,9 @@ using System.Buffers;
 using System.IO;
 using System.Threading.Tasks;
 using QuantumCore.Networking;
+
+// no async warning if no properties
+#pragma warning disable CS1998 
 
 namespace QuantumCore.Core.Packets {
 
@@ -2466,6 +2525,9 @@ using System.IO;
 using System.Threading.Tasks;
 using QuantumCore.Networking;
 
+// no async warning if no properties
+#pragma warning disable CS1998 
+
 namespace QuantumCore.Core.Packets {
 
     public partial record GCHandshake : IPacketSerializable
@@ -2593,6 +2655,9 @@ using System.Buffers;
 using System.IO;
 using System.Threading.Tasks;
 using QuantumCore.Networking;
+
+// no async warning if no properties
+#pragma warning disable CS1998 
 
 namespace QuantumCore.Core.Packets {
 
@@ -2799,6 +2864,9 @@ using System.IO;
 using System.Threading.Tasks;
 using QuantumCore.Networking;
 
+// no async warning if no properties
+#pragma warning disable CS1998 
+
 namespace QuantumCore.Core.Packets {
 
     public partial class GCHandshake : IPacketSerializable
@@ -2949,6 +3017,9 @@ using System.Buffers;
 using System.IO;
 using System.Threading.Tasks;
 using QuantumCore.Networking;
+
+// no async warning if no properties
+#pragma warning disable CS1998 
 
 namespace QuantumCore.Core.Packets {
 
@@ -3118,6 +3189,9 @@ using System.Buffers;
 using System.IO;
 using System.Threading.Tasks;
 using QuantumCore.Networking;
+
+// no async warning if no properties
+#pragma warning disable CS1998 
 
 namespace QuantumCore.Game.Packets {
 

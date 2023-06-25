@@ -123,6 +123,9 @@ using System.IO;
 using System.Threading.Tasks;
 using QuantumCore.Networking;
 
+// no async warning if no properties
+#pragma warning disable CS1998 
+
 namespace {ns} {{
 
     public partial {typeKeywords} {name} : IPacketSerializable
