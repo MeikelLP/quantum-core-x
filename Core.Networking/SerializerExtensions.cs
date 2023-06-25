@@ -57,7 +57,6 @@ public static class SerializerExtensions
         return buffer[..size];
     }
         
-    // TODO write test
     public static void WriteString(this byte[] bytes, string? str, in int index, in int length)
     {
         if (!string.IsNullOrWhiteSpace(str))
