@@ -3,7 +3,7 @@ using QuantumCore.API.Core.Models;
 
 namespace Game.Caching;
 
-public interface ICachePlayerStore : IPlayerStore
+public interface ICachePlayerRepository : IPlayerRepository
 {
     Task<PlayerData?> GetPlayerAsync(Guid playerId, byte slot);
     Task SetPlayerAsync(PlayerData player);

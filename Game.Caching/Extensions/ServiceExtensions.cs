@@ -8,7 +8,7 @@ public static class ServiceExtensions
     public static IServiceCollection AddGameCaching(this IServiceCollection services)
     {
         services.AddQuantumCoreCaching();
-        services.AddSingleton<ICachePlayerStore, CachePlayerStore>();
+        services.AddSingleton<ICachePlayerRepository, CachePlayerRepository>();
 
         return services;
     }

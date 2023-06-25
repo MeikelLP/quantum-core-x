@@ -3,7 +3,7 @@ using QuantumCore.API.Core.Models;
 
 namespace QuantumCore.Game.Persistence;
 
-public interface IDbPlayerStore : IPlayerStore
+public interface IDbPlayerRepository : IPlayerRepository
 {
     Task<PlayerData[]> GetPlayersAsync(Guid accountId);
     Task<bool> IsNameInUseAsync(string name);

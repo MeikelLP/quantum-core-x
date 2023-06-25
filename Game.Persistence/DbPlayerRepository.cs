@@ -6,11 +6,11 @@ using QuantumCore.Game.Persistence.Extensions;
 
 namespace QuantumCore.Game.Persistence;
 
-public class DbPlayerStore : IDbPlayerStore
+public class DbPlayerRepository : IDbPlayerRepository
 {
     private readonly IDbConnection _db;
 
-    public DbPlayerStore(IDbConnection db)
+    public DbPlayerRepository(IDbConnection db)
     {
         _db = db;
     }

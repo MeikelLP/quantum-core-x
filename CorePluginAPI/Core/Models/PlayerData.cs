@@ -26,4 +26,5 @@ public class PlayerData
     public uint HairPart { get; set; }
     public uint GivenStatusPoints { get; set; }
     public uint AvailableStatusPoints { get; set; }
+    public byte Slot { get; set; }
 }

@@ -12,9 +12,8 @@ public interface IPlayerManager
     /// <summary>
     /// Creates a new player and persists it in the database and the cache
     /// </summary>
-    /// <param name="player"></param>
     /// <returns>The slot of the newly created player</returns>
-    Task<byte> CreateAsync(PlayerData player);
+    Task<PlayerData> CreateAsync(Guid accountId, string playerName, byte @class, byte appearance);
 
     Task DeletePlayerAsync(PlayerData player);
 }

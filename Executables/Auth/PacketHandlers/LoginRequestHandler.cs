@@ -4,7 +4,6 @@ using QuantumCore.API.PluginTypes;
 using QuantumCore.Auth.Cache;
 using QuantumCore.Auth.Packets;
 using QuantumCore.Auth.Persistence;
-using QuantumCore.Auth.Persistence.Entities;
 using QuantumCore.Caching;
 using QuantumCore.Core.Utils;
 
@@ -12,22 +11,22 @@ namespace QuantumCore.Auth.PacketHandlers;
 
 public class LoginRequestHandler : IAuthPacketHandler<LoginRequest>
 {
-    private readonly IAccountStore _accountStore;
+    private readonly IAccountRepository _accountRepository;
     private readonly ILogger<LoginRequestHandler> _logger;
     private readonly ICacheManager _cacheManager;
 
-    public LoginRequestHandler(IAccountStore accountStore, ILogger<LoginRequestHandler> logger, ICacheManager cacheManager)
+    public LoginRequestHandler(IAccountRepository accountRepository, ILogger<LoginRequestHandler> logger, ICacheManager cacheManager)
     {
-        _accountStore = accountStore;
+        _accountRepository = accountRepository;
         _logger = logger;
         _cacheManager = cacheManager;
     }
 
     public async Task ExecuteAsync(AuthPacketContext<LoginRequest> ctx, CancellationToken token = default)
     {
-        var account = await _accountStore.FindByNameAsync(ctx.Packet.Username);
+        var account = await _accountRepository.FindByNameAsync(ctx.Packet.Username);
         // Check if account was found
-        if (account == default(Account))
+        if (account == default)
         {
             // Hash the password to prevent timing attacks
             BCrypt.Net.BCrypt.HashPassword(ctx.Packet.Password);

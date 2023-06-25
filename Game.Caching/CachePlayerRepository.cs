@@ -4,10 +4,10 @@ using QuantumCore.Caching;
 
 namespace Game.Caching;
 
-public class CachePlayerStore : ICachePlayerStore
+public class CachePlayerRepository : ICachePlayerRepository
 {
     private readonly ICacheManager _cacheManager;
-    public CachePlayerStore(ICacheManager cacheManager)
+    public CachePlayerRepository(ICacheManager cacheManager)
     {
         _cacheManager = cacheManager;
     }

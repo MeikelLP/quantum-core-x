@@ -8,7 +8,7 @@ public static class ServiceExtensions
     public static IServiceCollection AddGameDatabase(this IServiceCollection services)
     {
         services.AddQuantumCoreDatabase();
-        services.AddSingleton<IDbPlayerStore, DbPlayerStore>();
+        services.AddSingleton<IDbPlayerRepository, DbPlayerRepository>();
 
         return services;
     }
