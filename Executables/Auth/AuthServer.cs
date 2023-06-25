@@ -5,7 +5,8 @@ using QuantumCore.API.Game.Types;
 using QuantumCore.API.PluginTypes;
 using QuantumCore.Core.Cache;
 using QuantumCore.Core.Networking;
-using QuantumCore.Core.Packets;
+using QuantumCore.Extensions;
+using QuantumCore.Networking;
 
 namespace QuantumCore.Auth
 {
@@ -26,7 +27,6 @@ namespace QuantumCore.Auth
         protected async override Task ExecuteAsync(CancellationToken token)
         {
             // Register auth server features
-            PacketManager.RegisterNamespace("QuantumCore.Auth.Packets", typeof(AuthServer).Assembly);
             RegisterNewConnectionListener(NewConnection);
             RegisterListeners();
             
@@ -39,10 +39,7 @@ namespace QuantumCore.Auth
 
         private async Task<bool> NewConnection(IConnection connection)
         {
-            await connection.Send(new GCPhase
-            {
-                Phase = (byte) EPhases.Auth
-            });
+            await connection.SetPhaseAsync(EPhases.Auth);
             return true;
         }
     }

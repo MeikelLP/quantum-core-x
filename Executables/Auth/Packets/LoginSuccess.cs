@@ -1,9 +1,10 @@
-﻿using QuantumCore.Core.Packets;
+﻿using QuantumCore.Networking;
 
 namespace QuantumCore.Auth.Packets
 {
     [Packet(0x96, EDirection.Outgoing)]
-    public class LoginSuccess
+    [PacketGenerator]
+    public partial class LoginSuccess
     {
         [Field(0)]
         public uint Key { get; set; }

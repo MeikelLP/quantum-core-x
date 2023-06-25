@@ -1,15 +1,14 @@
-﻿using QuantumCore.Core.Packets;
+﻿using QuantumCore.Networking;
 
 namespace QuantumCore.Game.Packets;
 
 [Packet(0x04, EDirection.Outgoing, Sequence = false)]
-public class ChatOutcoming
+[PacketGenerator]
+public partial class ChatOutcoming
 {
-    [Field(0)]
-    [Size]
-    public ushort Size { get; set; }
+    [Field(0)] public ushort Size => (ushort)Message.Length;
 
-    [Field(1, EnumType = typeof(byte))]
+    [Field(1)]
     public ChatMessageTypes MessageType { get; set; }
 
     [Field(2)]
@@ -18,7 +17,6 @@ public class ChatOutcoming
     [Field(3)]
     public byte Empire { get; set; }
 
-    [Dynamic]
     public string Message { get; set; }
 
     public override string ToString()

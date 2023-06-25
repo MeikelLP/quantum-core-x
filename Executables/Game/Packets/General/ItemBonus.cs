@@ -1,4 +1,4 @@
-﻿using QuantumCore.Core.Packets;
+﻿using QuantumCore.Networking;
 
 namespace QuantumCore.Game.Packets.General
 {

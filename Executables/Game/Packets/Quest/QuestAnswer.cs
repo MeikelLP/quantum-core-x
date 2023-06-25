@@ -1,9 +1,10 @@
-using QuantumCore.Core.Packets;
+using QuantumCore.Networking;
 
 namespace QuantumCore.Game.Packets.Quest;
 
 [Packet(0x1D, EDirection.Incoming, Sequence = true)]
-public class QuestAnswer
+[PacketGenerator]
+public partial class QuestAnswer
 {
     [Field(0)]
     public byte Answer { get; set; }

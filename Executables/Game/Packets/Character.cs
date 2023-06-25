@@ -1,5 +1,7 @@
-﻿using QuantumCore.Core.Packets;
+﻿#nullable enable
+
 using QuantumCore.Database;
+using QuantumCore.Networking;
 
 namespace QuantumCore.Game.Packets
 {
@@ -7,8 +9,8 @@ namespace QuantumCore.Game.Packets
     {
         [Field(0)]
         public uint Id { get; set; }
-        [Field(1, Length = 25)]
-        public string Name { get; set; }
+
+        [Field(1, Length = 25)] public string Name { get; set; } = "";
         [Field(2)]
         public byte Class { get; set; }
         [Field(3)]

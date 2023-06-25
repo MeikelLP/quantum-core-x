@@ -1,6 +1,6 @@
 namespace QuantumCore.API.Game.Types
 {
-    public enum EPhases
+    public enum EPhases : byte
     {
         Handshake = 1,
         Login = 2,

@@ -1,4 +1,4 @@
-﻿using System.Data;
+using System.Data;
 using System.Diagnostics;
 using Dapper;
 using Microsoft.Extensions.Logging;
@@ -10,7 +10,6 @@ using QuantumCore.Core.Cache;
 using QuantumCore.Core.Utils;
 using QuantumCore.Database;
 using QuantumCore.Extensions;
-using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Packets;
 using QuantumCore.Game.PlayerUtils;
 
@@ -479,6 +478,11 @@ namespace QuantumCore.Game.World.Entities
                     GiveStatusPoints();
                     break;
                 case EPoints.Experience:
+                    if (_experienceManager.GetNeededExperience((byte)GetPoint(EPoints.Level)) == 0)
+                    {
+                        // we cannot add experience if no level up is possible
+                        return;
+                    }
                     if (value < 0 && Player.Experience <= -value)
                     {
                         Player.Experience = 0;

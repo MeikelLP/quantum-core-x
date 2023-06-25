@@ -1,9 +1,10 @@
-﻿using QuantumCore.Core.Packets;
+﻿using QuantumCore.Networking;
 
 namespace QuantumCore.Game.Packets
 {
     [Packet(0x0a, EDirection.Incoming, Sequence = true)]
-    public class EnterGame
+    [PacketGenerator]
+    public partial class EnterGame
     {
         
     }

@@ -1,7 +1,7 @@
 using QuantumCore.API.Game;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.World;
-using QuantumCore.Game.Extensions;
+using QuantumCore.Extensions;
 
 namespace QuantumCore.Game.Commands
 {

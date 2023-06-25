@@ -2,6 +2,7 @@
 using System.Threading;
 using System.Threading.Tasks;
 using QuantumCore.API.Game.Types;
+using QuantumCore.Networking;
 
 namespace QuantumCore.API
 {
@@ -11,7 +12,7 @@ namespace QuantumCore.API
         EPhases Phase { get; set; }
         Task ExecuteTask { get; }
         void Close();
-        Task Send(object packet);
+        Task Send<T>(T packet) where T : IPacketSerializable;
         Task StartAsync(CancellationToken token = default);
     }
 }

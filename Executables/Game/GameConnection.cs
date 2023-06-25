@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.Game.World;
 using QuantumCore.Core.Networking;
+using QuantumCore.Networking;
 
 namespace QuantumCore.Game
 {
@@ -14,9 +15,9 @@ namespace QuantumCore.Game
         public string Username { get; set; }
         public IPlayerEntity Player { get; set; }
 
-        public GameConnection(IServerBase server, TcpClient client, IPacketManager packetManager, 
-            ILogger<GameConnection> logger, PluginExecutor pluginExecutor, IWorld world) 
-            : base(logger, pluginExecutor, packetManager)
+        public GameConnection(IServerBase server, TcpClient client, ILogger<GameConnection> logger, 
+            PluginExecutor pluginExecutor, IWorld world, IPacketReader packetReader) 
+            : base(logger, pluginExecutor, packetReader)
         {
             _world = world;
             Server = server;
@@ -40,7 +41,7 @@ namespace QuantumCore.Game
             // todo enable expiry on auth token
         }
 
-        protected async override Task OnReceive(object packet)
+        protected async override Task OnReceive(IPacketSerializable packet)
         {
             await Server.CallListener(this, packet);
         }

@@ -1,4 +1,4 @@
-﻿using System.Data;
+using System.Data;
 using Dapper;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
@@ -9,7 +9,7 @@ using QuantumCore.Auth.Cache;
 using QuantumCore.Core.Cache;
 using QuantumCore.Core.Utils;
 using QuantumCore.Database;
-using QuantumCore.Game.Extensions;
+using QuantumCore.Extensions;
 using QuantumCore.Game.Packets;
 
 namespace QuantumCore.Game.PacketHandlers

@@ -30,6 +30,7 @@ namespace QuantumCore.Game.Commands
             if (proto == null)
             {
                 await context.Player.SendChatInfo("No monster found with the specified id");
+                return;
             }
 
             for (var i = 0; i < context.Arguments.Count; i++)

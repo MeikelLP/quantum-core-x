@@ -14,12 +14,12 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using QuantumCore.API;
 using QuantumCore.API.PluginTypes;
-using QuantumCore.Core.Packets;
 using QuantumCore.Extensions;
+using QuantumCore.Networking;
 
 namespace QuantumCore.Core.Networking
 {
-    public abstract class ServerBase<T> : BackgroundService, IServerBase
+    public abstract class ServerBase<T> : BackgroundService, IServerBase 
         where T : IConnection
     {
         private readonly ILogger _logger;
@@ -31,8 +31,8 @@ namespace QuantumCore.Core.Networking
         private readonly CancellationTokenSource _stoppingToken = new();
         protected TcpListener Listener { get; }
 
-        private readonly IServiceProvider _serviceProvider;
         private readonly PluginExecutor _pluginExecutor;
+        private readonly IServiceProvider _serviceProvider;
         private readonly IEnumerable<IPacketHandler> _packetHandlers;
         private readonly string _serverMode;
 
@@ -57,9 +57,6 @@ namespace QuantumCore.Core.Networking
             Listener = new TcpListener(localAddr, Port);
 
             _logger.LogInformation("Initialize tcp server listening on {IP}:{Port}", localAddr, Port);
-
-            // Register Core Features
-            PacketManager.RegisterNamespace("QuantumCore.Core.Packets");
         }
 
         public long ServerTime => _serverTimer.ElapsedMilliseconds;
@@ -116,28 +113,22 @@ namespace QuantumCore.Core.Networking
             _connectionListeners.Add(listener);
         }
 
-        public async Task CallListener(IConnection connection, object packet)
+        public async Task CallListener(IConnection connection, IPacketSerializable packet)
         {
-            var header = PacketManager.IncomingPackets.First(p => p.Value.Type == packet.GetType());
-            if (!_listeners.ContainsKey(header.Key))
+            if (!PacketManager.TryGetPacketInfo(packet, out var details) || details.PacketHandlerType is null)
             {
-                _logger.LogWarning("Don't know how to handle header {Header}", header.Key);
+                _logger.LogWarning("Could not find a handler for packet {PacketType}", packet.GetType());
                 return;
             }
-
-            var handler = _listeners[header.Key];
-            var handlerType = handler.GetType();
-            var packetType = handlerType.GetPacketType();
             
-            // TODO caching
             object context;
             if (_serverMode == "game")
             {
-                context = GetGameContextPacket(connection, packet, packetType);
+                context = GetGameContextPacket(connection, packet, details.PacketType);
             }
             else if (_serverMode == "auth")
             {
-                context = GetAuthContextPacket(connection, packet, packetType);
+                context = GetAuthContextPacket(connection, packet, details.PacketType);
             }
             else
             {
@@ -146,17 +137,22 @@ namespace QuantumCore.Core.Networking
 
             try
             {
-                var handlerExecuteMethod = handlerType.GetMethod("ExecuteAsync")!;
-                await (Task) handlerExecuteMethod.Invoke(handler, new[] { context, new CancellationToken() })!;
+                await using var scope = _serviceProvider.CreateAsyncScope();
+
+                var packetHandler = ActivatorUtilities.CreateInstance(scope.ServiceProvider, details.PacketHandlerType);
+                var handlerExecuteMethod = details.PacketHandlerType.GetMethod("ExecuteAsync")!;
+                await (Task) handlerExecuteMethod.Invoke(packetHandler, new[] { context, new CancellationToken() })!;
             }
             catch (Exception e)
             {
                 _logger.LogError(e, "Failed to execute packet handler");
+                connection.Close();
             }
         }
 
         private static object GetGameContextPacket(IConnection connection, object packet, Type packetType)
         {
+            // TODO caching
             var contextPacketProperty = typeof(GamePacketContext<>).MakeGenericType(packetType)
                 .GetProperty(nameof(GamePacketContext<object>.Packet))!;
             var contextConnectionProperty = typeof(GamePacketContext<>).MakeGenericType(packetType)
@@ -170,6 +166,7 @@ namespace QuantumCore.Core.Networking
 
         private static object GetAuthContextPacket(IConnection connection, object packet, Type packetType)
         {
+            // TODO caching
             var contextPacketProperty = typeof(AuthPacketContext<>).MakeGenericType(packetType)
                 .GetProperty(nameof(AuthPacketContext<object>.Packet))!;
             var contextConnectionProperty = typeof(AuthPacketContext<>).MakeGenericType(packetType)

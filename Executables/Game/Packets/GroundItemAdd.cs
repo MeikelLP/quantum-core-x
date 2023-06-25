@@ -1,9 +1,10 @@
-﻿using QuantumCore.Core.Packets;
+﻿using QuantumCore.Networking;
 
 namespace QuantumCore.Game.Packets;
 
 [Packet(0x1A, EDirection.Outgoing)]
-public class GroundItemAdd
+[PacketGenerator]
+public partial class GroundItemAdd
 {
     [Field(0)]
     public int PositionX { get; set; }
