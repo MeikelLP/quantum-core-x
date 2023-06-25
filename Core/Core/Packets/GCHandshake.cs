@@ -1,17 +1,7 @@
-namespace QuantumCore.Core.Packets
-{
-    [Packet(0xff, EDirection.Incoming | EDirection.Outgoing)]
-    public class GCHandshake
-    {
-        [Field(0)] public uint Handshake { get; set; }
+using QuantumCore.Networking;
 
-        [Field(1)] public uint Time { get; set; }
+namespace QuantumCore.Core.Packets;
 
-        [Field(2)] public uint Delta { get; set; }
-
-        public override string ToString()
-        {
-            return base.ToString() + $" Handshake = {Handshake}, Time = {Time}, Delta = {Delta}";
-        }
-    }
-}
+[Packet(0xff, EDirection.Incoming | EDirection.Outgoing)]
+[PacketGenerator]
+public partial record GCHandshake(uint Handshake, uint Time, uint Delta);

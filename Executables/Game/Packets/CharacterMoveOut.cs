@@ -1,9 +1,10 @@
-﻿using QuantumCore.Core.Packets;
+﻿using QuantumCore.Networking;
 
 namespace QuantumCore.Game.Packets
 {
     [Packet(0x03, EDirection.Outgoing, Sequence = true)]
-    public class CharacterMoveOut
+    [PacketGenerator]
+    public partial class CharacterMoveOut
     {
         [Field(0)]
         public byte MovementType { get; set; }

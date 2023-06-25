@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using AutoBogus;
 using Bogus;
@@ -26,12 +27,59 @@ using QuantumCore.Game.Packets;
 using QuantumCore.Game.PlayerUtils;
 using QuantumCore.Game.World;
 using QuantumCore.Game.World.Entities;
+using QuantumCore.Networking;
 using Serilog;
 using Weikio.PluginFramework.Catalogs;
 using Xunit;
 using Xunit.Abstractions;
 
+// cannot cast MockedGameConnection to IGameConnection ??? 
+#pragma warning disable CS8602
+
 namespace Core.Tests;
+
+// Custom mock instead of Mock<T> because IPacketSerializable for IGameConnection.Send<T> cannot be used as generic
+// parameter
+internal class MockedGameConnection : IGameConnection
+{
+    public readonly List<ChatOutcoming> SentMessages = new();
+    public readonly List<GCPhase> SentPhases = new();
+    public Guid Id { get; }
+    public EPhases Phase { get; set; }
+    public Task ExecuteTask { get; }
+    public void Close()
+    {
+    }
+    
+
+    public Task Send<T>(T packet) where T : IPacketSerializable
+    {
+        // ReSharper disable once SuspiciousTypeConversion.Global
+        if (packet is ChatOutcoming chat)
+        {
+            SentMessages.Add(chat);
+        } else if (packet is GCPhase phase)
+        {
+            SentPhases.Add(phase);
+        }
+
+        return Task.CompletedTask;
+    }
+
+    public Task StartAsync(CancellationToken token = default)
+    {
+        return Task.CompletedTask;
+    }
+
+    public IServerBase Server { get; }
+    public Guid? AccountId { get; set; }
+    public string Username { get; set; }
+    public IPlayerEntity Player { get; set; }
+    public Task<bool> HandleHandshake(GCHandshakeData handshake)
+    {
+        return Task.FromResult<bool>(true);
+    }
+}
 
 public class CommandTests : IAsyncLifetime
 {
@@ -40,7 +88,6 @@ public class CommandTests : IAsyncLifetime
     private readonly ServiceProvider _services;
     private readonly IPlayerEntity _player;
     private readonly Faker<PlayerData> _playerDataFaker;
-    private readonly List<object> _sentObjects = new();
 
     public CommandTests(ITestOutputHelper testOutputHelper)
     {        
@@ -64,9 +111,6 @@ public class CommandTests : IAsyncLifetime
             .RuleFor(x => x.Id, _ => id)
             .RuleFor(x => x.Size, _ => (byte)1)
             .Generate());
-        var connectionMock = new Mock<IGameConnection>();
-        connectionMock.Setup(x => x.Send(It.IsAny<object>())).Callback<object>(obj => _sentObjects.Add(obj));
-        connectionMock.SetupAllProperties();
         var cacheManagerMock = new Mock<ICacheManager>();
         var redisListWrapperMock = new Mock<IRedisListWrapper<Guid>>();
         var redisSubscriberWrapperMock = new Mock<IRedisSubscriber>();
@@ -99,15 +143,15 @@ public class CommandTests : IAsyncLifetime
                     { "maps:1", "map_b2"}
                 })
                 .Build())
-            .AddSingleton(_ => connectionMock.Object)
+            .AddSingleton<IGameConnection>(_ => new MockedGameConnection())
             .AddSingleton<IPlayerEntity, PlayerEntity>()
             .AddSingleton(_ => _playerDataFaker.Generate())
             .BuildServiceProvider();
         _commandManager = _services.GetRequiredService<ICommandManager>();
         _commandManager.Register("QuantumCore.Game.Commands", typeof(SpawnCommand).Assembly);
         _connection = _services.GetRequiredService<IGameConnection>();
-        connectionMock.Setup(x => x.Player).Returns(_services.GetRequiredService<IPlayerEntity>()); // this would usually happen during char select
         _player = _services.GetRequiredService<IPlayerEntity>();
+        _connection.Player = _player;
     }
 
     public async Task InitializeAsync()
@@ -183,8 +227,8 @@ public class CommandTests : IAsyncLifetime
         var maxAttack = _player.GetPoint(EPoints.Level) + _player.GetPoint(EPoints.St);
         const int minWeapon = 0;
         const int maxWeapon = 0;
-        _sentObjects.Should().ContainEquivalentOf(new ChatOutcoming { Message = $"Weapon Damage: {minWeapon}-{maxWeapon}" }, cfg => cfg.Including(x => x.Message));
-        _sentObjects.Should().ContainEquivalentOf(new ChatOutcoming { Message = $"Attack Damage: {minAttack}-{maxAttack}" }, cfg => cfg.Including(x => x.Message));
+        (_connection as MockedGameConnection).SentMessages.Should().ContainEquivalentOf(new ChatOutcoming { Message = $"Weapon Damage: {minWeapon}-{maxWeapon}" }, cfg => cfg.Including(x => x.Message));
+        (_connection as MockedGameConnection).SentMessages.Should().ContainEquivalentOf(new ChatOutcoming { Message = $"Attack Damage: {minAttack}-{maxAttack}" }, cfg => cfg.Including(x => x.Message));
     }
 
     [Fact]
@@ -300,7 +344,7 @@ public class CommandTests : IAsyncLifetime
     {
         await _commandManager.Handle(_connection, "/help");
 
-        _sentObjects.Should().ContainEquivalentOf(new ChatOutcoming
+        (_connection as MockedGameConnection).SentMessages.Should().ContainEquivalentOf(new ChatOutcoming
         {
             Message = "The following commands are available:\n"
         }, cfg => cfg
@@ -327,7 +371,7 @@ public class CommandTests : IAsyncLifetime
     {
         await _commandManager.Handle(_connection, "/kick something");
 
-        _sentObjects.Should().ContainEquivalentOf(new ChatOutcoming
+        (_connection as MockedGameConnection).SentMessages.Should().ContainEquivalentOf(new ChatOutcoming
         {
             Message = "Target not found"
         }, cfg => cfg.Including(x => x.Message));
@@ -378,17 +422,17 @@ public class CommandTests : IAsyncLifetime
         await world.SpawnEntity(_player);
         
         world.GetPlayer(_player.Name).Should().NotBeNull();
-        _sentObjects.Should().NotContainEquivalentOf(new GCPhase
+        (_connection as MockedGameConnection).SentPhases.Should().NotContainEquivalentOf(new GCPhase
         {
-            Phase = (byte)EPhases.Select
+            Phase = EPhases.Select
         });
         
         await _commandManager.Handle(_connection, "/phase_select");
 
         _player.Connection.Phase.Should().Be(EPhases.Select);
-        _sentObjects.Should().ContainEquivalentOf(new GCPhase
+        (_connection as MockedGameConnection).SentPhases.Should().ContainEquivalentOf(new GCPhase
         {
-            Phase = (byte)EPhases.Select
+            Phase = EPhases.Select
         });
         world.GetPlayer(_player.Name).Should().BeNull();
     }

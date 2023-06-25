@@ -1,9 +1,10 @@
-using QuantumCore.Core.Packets;
+using QuantumCore.Networking;
 
 namespace QuantumCore.Game.Packets.QuickBar;
 
 [Packet(0x11, EDirection.Incoming, Sequence = true)]
-public class QuickBarRemove
+[PacketGenerator]
+public partial class QuickBarRemove
 {
     [Field(0)]
     public byte Position { get; set; }

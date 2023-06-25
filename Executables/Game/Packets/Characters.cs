@@ -1,12 +1,16 @@
-﻿using QuantumCore.Core.Packets;
+﻿#nullable enable
+using QuantumCore.Networking;
 
 namespace QuantumCore.Game.Packets
 {
     [Packet(0x20, EDirection.Outgoing)]
-    public class Characters
+    [PacketGenerator]
+    public partial class Characters
     {
         [Field(0, ArrayLength = 4)]
-        public Character[] CharacterList { get; set; } = new Character[4];
+        public Character[] CharacterList { get; set; } = new Character[4] {
+            new Character(), new Character(), new Character(), new Character()
+        };
         [Field(1, ArrayLength = 4)]
         public uint[] GuildIds { get; set; } = new uint[4];
         [Field(2, ArrayLength = 4, Length = 13)]

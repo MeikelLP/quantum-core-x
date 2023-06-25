@@ -1,9 +1,10 @@
-﻿using QuantumCore.Core.Packets;
+﻿using QuantumCore.Networking;
 
 namespace QuantumCore.Game.Packets
 {
     [Packet(0x41, EDirection.Outgoing)]
-    public class Warp
+    [PacketGenerator]
+    public partial class Warp
     {
         [Field(0)]
         public int PositionX { get; set; }

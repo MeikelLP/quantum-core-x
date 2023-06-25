@@ -1,15 +1,16 @@
-using QuantumCore.Core.Packets;
+using QuantumCore.Networking;
 
 namespace QuantumCore.Game.Packets
 {
     [Packet(0x02, EDirection.Incoming, Sequence = true)]
-    public class Attack
+    [PacketGenerator]
+    public partial class Attack
     {
         [Field(0)]
         public byte AttackType { get; set; }
         [Field(1)]
         public uint Vid { get; set; }
         [Field(2, ArrayLength = 2)]
-        public byte[] Unknown { get; set; } = {0,0};
+        public byte[] Unknown { get; set; } = new byte[2]{0,0};
     }
 }

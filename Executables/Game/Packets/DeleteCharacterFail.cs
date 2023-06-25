@@ -1,9 +1,10 @@
-﻿using QuantumCore.Core.Packets;
+using QuantumCore.Networking;
 
 namespace QuantumCore.Game.Packets
 {
     [Packet(0x0B, EDirection.Outgoing)]
-    public class DeleteCharacterFail
+    [PacketGenerator]
+    public partial class DeleteCharacterFail
     {
     }
 }

@@ -1,8 +1,12 @@
+using QuantumCore.API.Game.Types;
+using QuantumCore.Networking;
+
 namespace QuantumCore.Core.Packets
 {
     [Packet(0xfd, EDirection.Outgoing)]
-    public class GCPhase
+    [PacketGenerator]
+    public partial class GCPhase
     {
-        [Field(0)] public byte Phase { get; set; }
+        [Field(0)] public EPhases Phase { get; set; }
     }
 }

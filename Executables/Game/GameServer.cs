@@ -10,9 +10,10 @@ using QuantumCore.API.PluginTypes;
 using QuantumCore.Core.Event;
 using QuantumCore.Core.Networking;
 using QuantumCore.Core.Utils;
+using QuantumCore.Extensions;
 using QuantumCore.Game.Commands;
-using QuantumCore.Game.Extensions;
 using QuantumCore.Game.PlayerUtils;
+using QuantumCore.Networking;
 
 namespace QuantumCore.Game
 {
@@ -102,7 +103,6 @@ namespace QuantumCore.Game
 
             // Register all default commands
             _commandManager.Register("QuantumCore.Game.Commands");
-            PacketManager.RegisterNamespace("QuantumCore.Game.Packets", typeof(GameServer).Assembly);
             
             // Put all new connections into login phase
             RegisterNewConnectionListener(async connection =>

@@ -3,7 +3,7 @@ using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.PluginTypes;
-using QuantumCore.Game.Extensions;
+using QuantumCore.Extensions;
 using QuantumCore.Game.Packets;
 using QuantumCore.Game.World.Entities;
 
