@@ -121,7 +121,6 @@ namespace QuantumCore.Core.Networking
                 return;
             }
             
-            // TODO caching
             object context;
             if (_serverMode == "game")
             {
@@ -153,6 +152,7 @@ namespace QuantumCore.Core.Networking
 
         private static object GetGameContextPacket(IConnection connection, object packet, Type packetType)
         {
+            // TODO caching
             var contextPacketProperty = typeof(GamePacketContext<>).MakeGenericType(packetType)
                 .GetProperty(nameof(GamePacketContext<object>.Packet))!;
             var contextConnectionProperty = typeof(GamePacketContext<>).MakeGenericType(packetType)
@@ -166,6 +166,7 @@ namespace QuantumCore.Core.Networking
 
         private static object GetAuthContextPacket(IConnection connection, object packet, Type packetType)
         {
+            // TODO caching
             var contextPacketProperty = typeof(AuthPacketContext<>).MakeGenericType(packetType)
                 .GetProperty(nameof(AuthPacketContext<object>.Packet))!;
             var contextConnectionProperty = typeof(AuthPacketContext<>).MakeGenericType(packetType)

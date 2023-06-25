@@ -158,7 +158,7 @@ internal class DeserializeGenerator
             return $"await stream.ReadValueFromStreamAsync<{typeName}>(buffer)";
         }
 
-        throw new NotImplementedException($"Don't know how to handle type of field {field.Name}");
+        throw new ArgumentException($"Don't know how to handle type of field {field.Name}");
     }
 
     internal string GetMethodLine(FieldData field, ref int offset, StringBuilder dynamicOffset,
@@ -355,7 +355,7 @@ internal class DeserializeGenerator
             return GetValueForSingleValue(field, namedTypeSymbol, ref offset, dynamicOffset, tempDynamicOffset, isStreamMode);
         }
 
-        throw new NotImplementedException("???");
+        throw new ArgumentException($"Type of field is unknown: {field.SemanticType.GetFullName()}", nameof(field));
     }
 
     private string GetLineForArray(FieldData field, ref int offset, StringBuilder dynamicOffset,

@@ -3145,8 +3145,6 @@ namespace QuantumCore.Auth.Packets
         diagnostics.Should().HaveCount(1);
         diagnostics[0].GetMessage().Should().Be("Field cannot have a higher number (1) than actual fields count 1");
     }
-    
-    // TODO sub types
 
     [Fact]
     public void MultipleFiles()

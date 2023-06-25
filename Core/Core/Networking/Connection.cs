@@ -112,13 +112,10 @@ namespace QuantumCore.Core.Networking
 
             try
             {
-                // TODO token
                 await _pluginExecutor.ExecutePlugins<IPacketOperationListener>(_logger, x => x.OnPrePacketSentAsync(packet, CancellationToken.None));
-                // Serialize object
                 _logger.LogDebug("Sending bytes: {Bytes:X}", bytesToSend.ToArray());
                 await _stream.WriteAsync(bytesToSend);
                 await _stream.FlushAsync();
-                // TODO token
                 await _pluginExecutor.ExecutePlugins<IPacketOperationListener>(_logger, x => x.OnPostPacketReceivedAsync(packet, bytes, CancellationToken.None));
             }
             catch (Exception e)
