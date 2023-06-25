@@ -6,6 +6,7 @@ namespace QuantumCore.Networking;
 public class PacketManager : IPacketManager
 {
     private readonly Dictionary<(byte Header, byte? SubHeader), PacketInfo> _infos = new();
+    private readonly Dictionary<Type, (byte Header, byte? SubHeader)> _typeCache = new();
 
     public PacketManager(ILogger<PacketManager> logger, IEnumerable<Type> packetTypes, Type[]? packetHandlerTypes = null)
     {
@@ -44,14 +45,17 @@ public class PacketManager : IPacketManager
 
     public bool TryGetPacketInfo(IPacketSerializable packet, out PacketInfo packetInfo)
     {
-        // TODO improve - maybe with a delegate cache?
-        var header = (byte)packet.GetType()
-            .GetProperty(nameof(IPacketSerializable.Header), BindingFlags.Public | BindingFlags.Static)!
-            .GetValue(null)!;
-        var subHeader = (byte?)packet.GetType()
-            .GetProperty(nameof(IPacketSerializable.SubHeader), BindingFlags.Public | BindingFlags.Static)!
-            .GetValue(null);
-        return _infos.TryGetValue((header, subHeader), out packetInfo);
+        if(!_typeCache.TryGetValue(packet.GetType(), out var pair))
+        {
+            pair.Header = (byte)packet.GetType()
+                .GetProperty(nameof(IPacketSerializable.Header), BindingFlags.Public | BindingFlags.Static)!
+                .GetValue(null)!;
+            pair.SubHeader = (byte?)packet.GetType()
+                .GetProperty(nameof(IPacketSerializable.SubHeader), BindingFlags.Public | BindingFlags.Static)!
+                .GetValue(null);
+            _typeCache.Add(packet.GetType(), (pair.Header, pair.SubHeader));
+        }
+        return _infos.TryGetValue((pair.Header, pair.SubHeader), out packetInfo);
     }
 
     public bool IsSubPacketDefinition(in byte header)
