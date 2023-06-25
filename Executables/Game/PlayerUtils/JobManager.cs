@@ -12,11 +12,16 @@ namespace QuantumCore.Game.PlayerUtils
         public JobManager(ILogger<JobManager> logger, IConfiguration configuration)
         {
             _logger = logger;
-            
-            // Converts each Job from json into a Job class
-            foreach (var job in configuration.GetSection("job").Get<Job[]>())
+
+            var jobs = configuration.GetSection("job").Get<Job[]>();
+
+            if (jobs is not null)
             {
-                _jobs.Add(job);
+                _jobs.AddRange(jobs);
+            }
+            else
+            {
+                _logger.LogWarning("No jobs found. This may cause issues later on");
             }
         }
 
