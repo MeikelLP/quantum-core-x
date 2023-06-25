@@ -32,8 +32,7 @@ public abstract class Quest : IQuest
     {
         await _player.Connection.Send(new QuestScript {
             Skin = (byte) _currentSkin,
-            Source = _questScript,
-            // SourceSize = (ushort)(_questScript.Length + 1)
+            Source = _questScript
         });
 
         _currentSkin = QuestSkin.Normal;
