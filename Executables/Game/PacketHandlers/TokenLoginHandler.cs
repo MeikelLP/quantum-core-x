@@ -9,6 +9,7 @@ using QuantumCore.Auth.Cache;
 using QuantumCore.Caching;
 using QuantumCore.Core.Utils;
 using QuantumCore.Extensions;
+using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Packets;
 
 namespace QuantumCore.Game.PacketHandlers
