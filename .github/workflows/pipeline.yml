@@ -35,8 +35,8 @@ jobs:
     needs: 
       - test
     runs-on: ubuntu-latest
-    # todo add this in PR
-    #if: startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' # only deploy if on master or tag
+    # only deploy if on master or tag
+    if: startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master'
     steps:
       - uses: actions/checkout@v3
       - name: Login to Docker Registry
