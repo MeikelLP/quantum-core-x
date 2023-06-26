@@ -4,7 +4,7 @@
 
 * Windows with admin rights
 * [Docker Desktop](https://www.docker.com/products/docker-desktop/) or equivalent
-* [.NET SDK 6](https://dotnet.microsoft.com/en-us/download)
+* [.NET SDK 7](https://dotnet.microsoft.com/en-us/download)
 * [Visual Studio](https://visualstudio.com), [Jetbrains Rider](https://www.jetbrains.com/rider/), or any IDE you are comfortable with
 * [Katai struct compiler](https://kaitai.io/#download)
 * A TMP4 compatible client (just google for "TMP4 Client")
@@ -48,61 +48,125 @@
         metin2_map_c1	921600	204800	4	5
         ```
 
-    6. Save the following file as `jobs.toml`
+    6. Save the following file as `jobs.json`
 
-        ```toml
-        [[job]]
-        id=0
-        name="warrior" 
-        st=6
-        ht=4
-        dx=3
-        iq=3
-        start_hp=600
-        start_sp=200
-        hp_per_ht=40
-        sp_per_iq=20
-        hp_per_level=36
-        sp_per_level=44
-        [[job]]
-        id=1
-        name="assassin" 
-        st=4
-        ht=3
-        dx=6
-        iq=3
-        start_hp=650
-        start_sp=200
-        hp_per_ht=40
-        sp_per_iq=20
-        hp_per_level=36
-        sp_per_level=44
-        [[job]]
-        id=2
-        name="sura" 
-        st=5
-        ht=3
-        dx=3
-        iq=5
-        start_hp=650
-        start_sp=200
-        hp_per_ht=40
-        sp_per_iq=20
-        hp_per_level=36
-        sp_per_level=44
-        [[job]]
-        id=3
-        name="shamana" 
-        st=3
-        ht=4
-        dx=3
-        iq=6
-        start_hp=700
-        start_sp=200
-        hp_per_ht=40
-        sp_per_iq=20
-        hp_per_level=36
-        sp_per_level=44
+        ```json
+       {
+            "job": [
+            {
+                "id": 0,
+                "name": "warrior",
+                "st": 6,
+                "ht": 4,
+                "dx": 3,
+                "iq": 3,
+                "startHp": 600,
+                "startSp": 200,
+                "hpPerHt": 40,
+                "spPerIq": 20,
+                "hpPerLevel": 36,
+                "spPerLevel": 44
+            },
+            {
+                "id": 1,
+                "name": "assassin",
+                "st": 4,
+                "ht": 3,
+                "dx": 6,
+                "iq": 3,
+                "startHp": 650,
+                "startSp": 200,
+                "hpPerHt": 40,
+                "spPerIq": 20,
+                "hpPerLevel": 36,
+                "spPerLevel": 44
+            },
+            {
+                "id": 2,
+                "name": "sura",
+                "st": 5,
+                "ht": 3,
+                "dx": 3,
+                "iq": 5,
+                "startHp": 650,
+                "startSp": 200,
+                "hpPerHt": 40,
+                "spPerIq": 20,
+                "hpPerLevel": 36,
+                "spPerLevel": 44
+            },
+            {
+                "id": 3,
+                "name": "shamana",
+                "st": 3,
+                "ht": 4,
+                "dx": 3,
+                "iq": 6,
+                "startHp": 700,
+                "startSp": 200,
+                "hpPerHt": 40,
+                "spPerIq": 20,
+                "hpPerLevel": 36,
+                "spPerLevel": 44
+            },
+            {
+                "id": 4,
+                "name": "warrior",
+                "st": 6,
+                "ht": 4,
+                "dx": 3,
+                "iq": 3,
+                "startHp": 600,
+                "startSp": 200,
+                "hpPerHt": 40,
+                "spPerIq": 20,
+                "hpPerLevel": 36,
+                "spPerLevel": 44
+            },
+            {
+                "id": 5,
+                "name": "assassin",
+                "st": 4,
+                "ht": 3,
+                "dx": 6,
+                "iq": 3,
+                "startHp": 650,
+                "startSp": 200,
+                "hpPerHt": 40,
+                "spPerIq": 20,
+                "hpPerLevel": 36,
+                "spPerLevel": 44
+            },
+            {
+                "id": 6,
+                "name": "sura",
+                "st": 5,
+                "ht": 3,
+                "dx": 3,
+                "iq": 5,
+                "startHp": 650,
+                "startSp": 200,
+                "hpPerHt": 40,
+                "spPerIq": 20,
+                "hpPerLevel": 36,
+                "spPerLevel": 44
+            },
+            {
+                "id": 7,
+                "name": "shamana",
+                "st": 3,
+                "ht": 4,
+                "dx": 3,
+                "iq": 6,
+                "startHp": 700,
+                "startSp": 200,
+                "hpPerHt": 40,
+                "spPerIq": 20,
+                "hpPerLevel": 36,
+                "spPerLevel": 44
+                }
+            ]
+        }
         ```
 
     7. Save the following file as `settings.toml`
@@ -114,12 +178,12 @@
     8. Copy required data to the execution path
 
         ```sh
-        mkdir Core/bin/Debug/net6.0/data
-        cp atlasinfo.txt Core/bin/Debug/net6.0/data/
-        cp jobs.toml Core/bin/Debug/net6.0/data/
-        cp settings.toml Core/bin/Debug/net6.0/
-        cp item_proto Core/bin/Debug/net6.0/data/
-        cp mob_proto Core/bin/Debug/net6.0/data/
+        mkdir Core/bin/Debug/net7.0/data
+        cp atlasinfo.txt Core/bin/Debug/net7.0/data/
+        cp jobs.json Core/bin/Debug/net7.0/data/
+        cp settings.toml Core/bin/Debug/net7.0/
+        cp item_proto Core/bin/Debug/net7.0/data/
+        cp mob_proto Core/bin/Debug/net7.0/data/
         ```
 
 2. Setting up required services
