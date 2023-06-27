@@ -55,10 +55,33 @@ jobs:
             type=ref,event=branch
             type=ref,event=tag
             type=raw,latest,enable=${{ github.ref == format('refs/heads/{0}', 'master') }}
-      - name: Build and push Docker image
+      - name: Build and push game image
         uses: docker/build-push-action@v4.1.1
         with:
           context: .
+          images: |
+            quantum-core-x-game
+          file: Executables/Game/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+      - name: Build and push auth image
+        uses: docker/build-push-action@v4.1.1
+        with:
+          context: .
+          images: |
+            quantum-core-x-auth
+          file: Executables/Auth/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+      - name: Build and push migrator image
+        uses: docker/build-push-action@v4.1.1
+        with:
+          context: .
+          images: |
+            quantum-core-x-migrator
+          file: Executables/Migrator/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
