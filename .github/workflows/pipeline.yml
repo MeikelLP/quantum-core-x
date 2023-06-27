@@ -61,8 +61,7 @@ jobs:
         uses: docker/build-push-action@v4.1.1
         with:
           context: .
-          images: |
-            quantum-core-x-game
+          images: ghcr.io/meikellp/quantum-core-x/game
           file: Executables/Game/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
@@ -71,8 +70,7 @@ jobs:
         uses: docker/build-push-action@v4.1.1
         with:
           context: .
-          images: |
-            quantum-core-x-auth
+          images: ghcr.io/meikellp/quantum-core-x/auth
           file: Executables/Auth/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
@@ -81,8 +79,7 @@ jobs:
         uses: docker/build-push-action@v4.1.1
         with:
           context: .
-          images: |
-            quantum-core-x-migrator
+          images: ghcr.io/meikellp/quantum-core-x/migrator
           file: Executables/Migrator/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
