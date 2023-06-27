@@ -13,6 +13,7 @@ using QuantumCore.Core.Cache;
 using QuantumCore.Networking;
 using Serilog;
 using Weikio.PluginFramework.Abstractions;
+using Weikio.PluginFramework.Microsoft.DependencyInjection;
 
 namespace QuantumCore.Extensions;
 

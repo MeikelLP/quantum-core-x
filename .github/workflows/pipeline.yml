@@ -23,6 +23,8 @@ jobs:
           unzip kaitai-struct-compiler-0.9.zip
           PATH="${PWD}/kaitai-struct-compiler-0.9/bin/:${PATH}"
           sudo apt-get update && sudo apt-get install -y openjdk-8-jre
+          cd Executables/Game
+          sudo chmod +x generate_kaitai.sh
           ./generate_kaitai.sh
       - name: Install dependencies
         run: dotnet restore
@@ -50,10 +52,38 @@ jobs:
         uses: docker/metadata-action@v4.6.0
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-      - name: Build and push Docker image
+          tags: |
+            type=schedule
+            type=ref,event=branch
+            type=ref,event=tag
+            type=raw,latest,enable=${{ github.ref == format('refs/heads/{0}', 'master') }}
+      - name: Build and push game image
         uses: docker/build-push-action@v4.1.1
         with:
           context: .
+          images: |
+            quantum-core-x-game
+          file: Executables/Game/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+      - name: Build and push auth image
+        uses: docker/build-push-action@v4.1.1
+        with:
+          context: .
+          images: |
+            quantum-core-x-auth
+          file: Executables/Auth/Dockerfile
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+      - name: Build and push migrator image
+        uses: docker/build-push-action@v4.1.1
+        with:
+          context: .
+          images: |
+            quantum-core-x-migrator
+          file: Executables/Migrator/Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}

@@ -22,6 +22,7 @@
     <PackageReference Include="lzo.net" Version="0.0.6" />
     <PackageReference Include="McMaster.NETCore.Plugins" Version="1.3.1" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="6.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Options.DataAnnotations" Version="7.0.0" />
     <PackageReference Include="MySqlConnector" Version="1.3.11" />
     <PackageReference Include="Scrutor" Version="4.2.0" />
     <PackageReference Include="Serilog" Version="2.10.1-dev-01249" />
@@ -35,13 +36,13 @@
     <PackageReference Include="Serilog.Sinks.RollingFile" Version="3.3.1-dev-00771" />
     <PackageReference Include="JetBrains.Annotations" Version="2022.3.1" />
     <PackageReference Include="System.Linq.Async" Version="6.0.1" />
-    <PackageReference Include="Weikio.PluginFramework.AspNetCore" Version="1.5.1" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\CorePluginAPI\CorePluginAPI.csproj" />
     <ProjectReference Include="..\Core.Networking\Core.Networking.csproj" />
     <ProjectReference Include="..\Core.Networking.Generators\Core.Networking.Generators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+    <ProjectReference Include="..\Weikio.PluginFramework.Microsoft.DependencyInjection\Weikio.PluginFramework.Microsoft.DependencyInjection.csproj" />
   </ItemGroup>
 
 </Project>

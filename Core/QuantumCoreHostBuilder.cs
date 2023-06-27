@@ -19,7 +19,12 @@ public static class QuantumCoreHostBuilder
     public static async Task<IHostBuilder> CreateHostAsync(string[] args)
     {
         // workaround for https://github.com/dotnet/project-system/issues/3619
-        Directory.SetCurrentDirectory(Path.GetDirectoryName(Assembly.GetEntryAssembly()!.Location)!);
+        var assemblyPath = Assembly.GetEntryAssembly()?.Location;
+        if (!string.IsNullOrWhiteSpace(assemblyPath))
+        {
+            // may be null in single file deployment
+            Directory.SetCurrentDirectory(Path.GetDirectoryName(assemblyPath)!);
+        }
             
         // init plugins if any
         IPluginCatalog pluginCatalog = new EmptyPluginCatalog();
