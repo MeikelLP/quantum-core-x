@@ -23,6 +23,7 @@ jobs:
           unzip kaitai-struct-compiler-0.9.zip
           PATH="${PWD}/kaitai-struct-compiler-0.9/bin/:${PATH}"
           sudo apt-get update && sudo apt-get install -y openjdk-8-jre
+          cd Executables/Game
           ./generate_kaitai.sh
       - name: Install dependencies
         run: dotnet restore
