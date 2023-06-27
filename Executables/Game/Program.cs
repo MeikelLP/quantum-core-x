@@ -12,7 +12,6 @@ hostBuilder.ConfigureAppConfiguration(cfg =>
     cfg.AddJsonFile("data/jobs.json");
     cfg.AddTomlFile("data/shops.toml", true);
     cfg.AddTomlFile("data/groups.toml", true);
-    cfg.AddTomlFile("settings.toml");
 });
 hostBuilder.ConfigureServices(services =>
 {
