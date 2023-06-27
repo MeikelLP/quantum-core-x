@@ -26,6 +26,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core.Networking", "Core.Net
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core.Networking.Generators.Tests", "Core.Networking.Generators.Tests\Core.Networking.Generators.Tests.csproj", "{5B18DAF2-E35C-48A9-AB72-65A481DB5590}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Weikio.PluginFramework.Microsoft.DependencyInjection", "Weikio.PluginFramework.Microsoft.DependencyInjection\Weikio.PluginFramework.Microsoft.DependencyInjection.csproj", "{84A82103-9C4B-4224-9DF8-53F5E74C0AF7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -76,6 +78,10 @@ Global
 		{5B18DAF2-E35C-48A9-AB72-65A481DB5590}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5B18DAF2-E35C-48A9-AB72-65A481DB5590}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5B18DAF2-E35C-48A9-AB72-65A481DB5590}.Release|Any CPU.Build.0 = Release|Any CPU
+		{84A82103-9C4B-4224-9DF8-53F5E74C0AF7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{84A82103-9C4B-4224-9DF8-53F5E74C0AF7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{84A82103-9C4B-4224-9DF8-53F5E74C0AF7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{84A82103-9C4B-4224-9DF8-53F5E74C0AF7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{930E5131-B018-4255-BC08-ACE8F2C1BAC5} = {6D101418-9A2D-41CB-BEA9-47F915395CE8}
