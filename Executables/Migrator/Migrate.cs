@@ -1,4 +1,5 @@
-﻿using FluentMigrator.Runner;
+﻿using Dapper;
+using FluentMigrator.Runner;
 using FluentMigrator.Runner.Exceptions;
 using FluentMigrator.Runner.Initialization;
 using Microsoft.Extensions.DependencyInjection;
@@ -23,6 +24,21 @@ public class Migrate : IHostedService
 
     public async Task StartAsync(CancellationToken token)
     {
+        var masterString = new MySqlConnectionStringBuilder
+        {
+            Database = "mysql",
+            Password = _options.Password,
+            Port = _options.Port,
+            UserID = _options.User,
+            Server = _options.Host
+        };
+
+        await using (var conn = new MySqlConnection(masterString.ToString()))
+        {
+            // create initial schemas if not exists - first time only probably
+            await conn.ExecuteAsync("CREATE SCHEMA IF NOT EXISTS account;CREATE SCHEMA IF NOT EXISTS game;");
+        }
+        
         var accountString = new MySqlConnectionStringBuilder
         {
             Database = "account",
