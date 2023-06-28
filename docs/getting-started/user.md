@@ -62,17 +62,16 @@ Save the following files in a new directory
     
       # authentication service
       auth:
-        image: ghcr.io/meikellp/quantum-core-x:master
+        image: ghcr.io/meikellp/quantum-core-x/auth
         restart: unless-stopped
         ports:
           - "11002:11002"
         volumes:
           - ./auth.appsettings.json:/app/Core/appsettings.json:ro
-        command: '/app/Core auth'
     
       # game service
       game:
-        image: ghcr.io/meikellp/quantum-core-x:master
+        image: ghcr.io/meikellp/quantum-core-x/game
         restart: unless-stopped
         ports:
           - "13001:13001"
@@ -80,14 +79,13 @@ Save the following files in a new directory
           - ./game.appsettings.json:/app/Core/appsettings.json:ro
           - ./settings.toml:/app/Core/settings.toml:ro
           - ./data:/app/Core/data:ro
-        command: '/app/Core game'
     
       # migrate service - required once
       migrate:
-        image: ghcr.io/meikellp/quantum-core-x:master
+        image: ghcr.io/meikellp/quantum-core-x/migrator
         restart: no
         network_mode: host
-        command: '/app/Core migrate --host localhost --port 3306 --user root --password supersecure.123'
+        command: '--host localhost --port 3306 --user root --password supersecure.123'
     
       # redis holds live data of the game world
       # used as distributed memory between server nodes
@@ -258,6 +256,22 @@ data/
   mob_proto
 ```
 
+### Create an admin account
+
+This command will create an `admin` account with `admin` as password.
+To get the container ID of your mysql container use `docker ps`
+
+```sh
+# replace __CONTAINER_ID__ with your mysql container ID
+docker exec __CONTAINER_ID__ /bin/mysql -u root -psupersecure.123 --execute="INSERT INTO account.accounts (Id, Username, Password, Email, Status, LastLogin, CreatedAt, UpdatedAt, DeleteCode) VALUES ('584C4BC9-559F-47DD-9A7E-49EEB65DD831', 'admin', '$2y$10$dTh8zmAfA742vKZ35Oarzugv3QXJPTOYRhKpk807o9h9SWBsFcys6', 'some@mail.com', DEFAULT, null, DEFAULT, DEFAULT, DEFAULT);"
+```
+
+for more infos about account creation look at [Account Creation](../tutorials/account-creation.md)
+
+### Setup client
+
+ See [Client](client.md) to setup your client
+
 ### Startup
 
 Start the db detached first
@@ -277,3 +291,7 @@ Finally boot up all services. Add `-d` to run them in the background
 ```sh
 docker-compose up
 ```
+
+## Next steps
+
+* [Add player +permissions](../tutorials/player-permission.md)
