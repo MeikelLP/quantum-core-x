@@ -25,32 +25,31 @@ public class CachePlayerRepository : ICachePlayerRepository
 
     public async Task<PlayerData?> GetPlayerAsync(Guid account, byte slot)
     {
-        var key = $"players:{account.ToString()}";
+        var key = $"players:{account.ToString()}:{slot}";
+        var playerId = await _cacheManager.Get<Guid?>(key);
 
-        var list = _cacheManager.CreateList<Guid>(key);
-        if (await _cacheManager.Exists(key) <= 0)
+        if (playerId is not null)
         {
-            return null;
+            return await GetPlayerAsync(playerId.Value);
         }
 
-        var playerId = await list.Index(slot);
-        return await GetPlayerAsync(playerId);
+        return null;
     }
 
-    public async Task SetPlayerAsync(PlayerData player)
+    public async Task SetPlayerAsync(PlayerData player, byte slot)
     {
-        var playerKey = $"player:{player.Id.ToString()}";
-        await _cacheManager.Set(playerKey, player);
+        await _cacheManager.Set($"player:{player.Id.ToString()}", player);
+        await _cacheManager.Set($"players:{player.AccountId.ToString()}:{slot}", player);
     }
 
     public async Task CreateAsync(PlayerData player)
     {
         // Add player to cache
         await _cacheManager.Set($"player:{player.Id.ToString()}", player);
-        
-        // Add player to the list of characters
-        var list = _cacheManager.CreateList<Guid>($"players:{player.AccountId.ToString()}");
-        await list.Push(player.Id);
+
+        var existingKeys = await _cacheManager.Keys($"players:{player.AccountId.ToString()}:*");
+        var index = existingKeys.Length;
+        await _cacheManager.Set($"players:{player.AccountId.ToString()}:{index}", player.Id);
     }
 
     public async Task DeletePlayerAsync(PlayerData player)
@@ -59,9 +58,16 @@ public class CachePlayerRepository : ICachePlayerRepository
         var key = $"player:{player.Id.ToString()}";
         await _cacheManager.Del(key);
 
-        key = $"players:{player.AccountId.ToString()}";
-        var list = _cacheManager.CreateList<Guid>(key);
-        await list.Rem(1, player.Id);
+        var keys = await _cacheManager.Keys($"players:{player.AccountId.ToString()}:*");
+        foreach (var accountPlayerKey in keys)
+        {
+            var value = await _cacheManager.Get<Guid>(accountPlayerKey);
+            if (value == player.Id)
+            {
+                await _cacheManager.Del(accountPlayerKey);
+                break;
+            }
+        }
 
         // TODO delete items from players inventory
         key = $"items:{player.Id}:{(byte)WindowType.Inventory}";

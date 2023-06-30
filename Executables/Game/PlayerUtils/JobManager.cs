@@ -66,13 +66,14 @@ namespace QuantumCore.Game.PlayerUtils
         
         public Job Get(byte playerClass)
         {
-            var id = GetJobFromClass(playerClass) + 1;
-            if (_jobs.Count < id)
+            var index = GetJobFromClass(playerClass);
+            if (index > _jobs.Count)
             {
-                return _jobs[0];
+                throw new ArgumentOutOfRangeException(nameof(playerClass),
+                    $"Player class with identifier {playerClass} (index) was not found");
             }
 
-            return _jobs[id];
+            return _jobs[index];
         }
     }
 }

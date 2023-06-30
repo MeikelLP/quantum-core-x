@@ -16,7 +16,7 @@ public class AccountRepository : IAccountRepository
     public async Task<AccountData?> FindByNameAsync(string userName)
     {
         var results = await _db.QueryAsync<AccountData, AccountStatusData, AccountData>(
-            "SELECT * FROM accounts a JOIN account_status s on a.Status = s.Id WHERE a.Username = @Username", (account, status) =>
+            "SELECT * FROM account.accounts a JOIN account.account_status s on a.Status = s.Id WHERE a.Username = @Username", (account, status) =>
             {
                 account.AccountStatus = status;
                 return account;
@@ -28,7 +28,7 @@ public class AccountRepository : IAccountRepository
     public async Task<AccountData?> FindByIdAsync(Guid id)
     {
         var results = await _db.QueryAsync<AccountData, AccountStatusData, AccountData>(
-            "SELECT * FROM accounts a JOIN account_status s on a.Status = s.Id WHERE a.Id = @Id", (account, status) =>
+            "SELECT * FROM account.accounts a JOIN account.account_status s on a.Status = s.Id WHERE a.Id = @Id", (account, status) =>
             {
                 account.AccountStatus = status;
                 return account;
@@ -39,10 +39,10 @@ public class AccountRepository : IAccountRepository
 
     public async Task CreateAsync(AccountData account)
     {
-        var result = await _db.ExecuteAsync("INSERT INTO accounts (Id, Username, Password, Email, DeleteCode) " +
+        var result = await _db.ExecuteAsync("INSERT INTO account.accounts (Id, Username, Password, Email, DeleteCode) " +
                                             "VALUES (@Id, @Username, @Password, @Email, @DeleteCode)", account);
 
-        if (result != 0)
+        if (result != 1)
         {
             throw new InvalidOperationException(
                 "Creating an account did not result in 1 row changed. This should never happen");

@@ -43,7 +43,7 @@ public class AccountManager : IAccountManager
             AccountStatus = new AccountStatusData
             {
                 Id = 1,
-                Description = "",
+                Description = null,
                 AllowLogin = true,
                 ClientStatus = "OK"
             }
