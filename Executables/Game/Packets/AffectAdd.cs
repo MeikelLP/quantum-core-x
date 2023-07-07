@@ -1,14 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using QuantumCore.Core.Packets;
+﻿using QuantumCore.Networking;
 
 namespace QuantumCore.Game.Packets.Affects
 {
     [Packet(0x7E, EDirection.Outgoing)]
-    public class AffectAdd
+    [PacketGenerator]
+    public partial class AffectAdd
     {
         [Field(0, ArrayLength = 1)]
         public AffectAddPacket[] Elem { get; set; } = new AffectAddPacket[1];
