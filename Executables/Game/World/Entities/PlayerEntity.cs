@@ -185,7 +185,13 @@ namespace QuantumCore.Game.World.Entities
 
         public async Task RemoveAffect(Affect affect)
         {
-            Affects.Remove(affect);
+            for (var i = 0; i < Affects.Count; i++)
+            {
+                if (Affects[i].Type == affect.Type && Affects[i].ApplyOn == affect.ApplyOn)
+                {
+                    Affects.RemoveAt(i);
+                }
+            }
             await _affectController.SendAffectRemovePacket(this, affect.Type, (byte) affect.ApplyOn);
             await SendCharacterUpdate();
             await SendPoints();

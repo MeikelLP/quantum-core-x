@@ -1,14 +1,11 @@
-﻿using System;
-using System.Threading.Tasks;
-using Dapper.Contrib.Extensions;
+﻿using Dapper.Contrib.Extensions;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API.Game.World;
-using QuantumCore.Game.Packets.Affects;
 using Dapper;
-using System.Linq;
 using System.Data;
 using Affect = QuantumCore.Database.Affect;
 using AffectAPI = QuantumCore.API.Core.Models.Affect;
+using QuantumCore.Game.Packets.Affects;
 
 namespace QuantumCore.Game
 {

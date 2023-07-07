@@ -22,7 +22,7 @@ public class EmpireHandler : IGamePacketHandler<Empire>
     {
         if (ctx.Packet.EmpireId is > 0 and < 4)
         {
-            var result = await _db.ExecuteAsync("UPDATE accounts set Empire = @Empire WHERE Id = @AccountId"
+            var result = await _db.ExecuteAsync("UPDATE account.accounts set Empire = @Empire WHERE Id = @AccountId"
                 , new { AccountId = ctx.Connection.AccountId, Empire = ctx.Packet.EmpireId });
             if (result is not 1)
             {
