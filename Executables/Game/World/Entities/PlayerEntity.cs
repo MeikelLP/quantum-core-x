@@ -95,7 +95,7 @@ namespace QuantumCore.Game.World.Entities
         private double _manaRegenTime = ManaRegenInterval;
         private readonly IItemManager _itemManager;
         private readonly IJobManager _jobManager;
-        private readonly IAffectController _affectController;
+        private readonly IAffectManager _affectController;
         private readonly IExperienceManager _experienceManager;
         private readonly IDbConnection _db;
         private readonly IQuestManager _questManager;
@@ -105,7 +105,7 @@ namespace QuantumCore.Game.World.Entities
 
         public PlayerEntity(Player player, IGameConnection connection, IItemManager itemManager, IJobManager jobManager,
             IExperienceManager experienceManager, IAnimationManager animationManager, IDbConnection db,
-            IQuestManager questManager, ICacheManager cacheManager, IWorld world, ILogger<PlayerEntity> logger, IAffectController affectController) 
+            IQuestManager questManager, ICacheManager cacheManager, IWorld world, ILogger<PlayerEntity> logger, IAffectManager affectController) 
             : base(animationManager, world.GenerateVid())
         {
             Connection = connection;
@@ -159,6 +159,7 @@ namespace QuantumCore.Game.World.Entities
             var totalApplyValue = 0;
             if (Affects != null && Affects.Count > 0)
             {
+                // TODO: Fix the LINQ
                 totalApplyValue = Affects.Where(a => a.ApplyOn == (int)EPoints.MoveSpeed).Sum(a => a.ApplyValue);
             }
             return (byte)(_movementSpeed + totalApplyValue);

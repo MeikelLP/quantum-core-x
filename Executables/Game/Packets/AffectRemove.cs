@@ -6,9 +6,7 @@ namespace QuantumCore.Game.Packets.Affects
     [PacketGenerator]
     public partial class AffectRemove
     {
-        [Field(0)]
         public uint Type { get; set; }
-        [Field(1)]
         public byte ApplyOn { get; set; }
     }
 }

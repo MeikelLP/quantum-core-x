@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.PluginTypes;
+using QuantumCore.Core.Types;
 using QuantumCore.Game.Items;
 using QuantumCore.Game.Packets;
 using QuantumCore.Game.PlayerUtils;
@@ -14,10 +15,10 @@ namespace QuantumCore.Game.PacketHandlers.Game;
 public class ItemUseHandler : IGamePacketHandler<ItemUse>
 {
     private readonly IItemManager _itemManager;
-    private readonly IAffectController _affectController;
+    private readonly IAffectManager _affectController;
     private readonly ILogger<ItemUseHandler> _logger;
 
-    public ItemUseHandler(IItemManager itemManager, IAffectController affectController, ILogger<ItemUseHandler> logger)
+    public ItemUseHandler(IItemManager itemManager, IAffectManager affectController, ILogger<ItemUseHandler> logger)
     {
         _itemManager = itemManager;
         _logger = logger;
@@ -102,43 +103,43 @@ public class ItemUseHandler : IGamePacketHandler<ItemUse>
             }
         }else
         {
-            switch (itemProto.Type)
+            switch ((EItemType) itemProto.Type)
             {
-                case (byte) EItemType.Use:
+                case EItemType.Use:
                     _logger.LogDebug("Use item");
-                    switch (itemProto.Subtype)
+                    switch ((EUseSubTypes) itemProto.Subtype)
                     {
-                        case (byte) EUseSubTypes.AbilityUp:
+                        case EUseSubTypes.AbilityUp:
                             _logger.LogDebug("Use ability up");
                             var type = itemProto.Values[0];
                             var duration = itemProto.Values[1];
                             var value = itemProto.Values[2];
+                            // TODO: Enums.NET improve allocations
                             var applyInfo = Enum.GetName(typeof(EApplyTypes), type);
                             var applyType = (EPoints) Enum.Parse(typeof(EPoints), applyInfo);
-                            switch (type)
+                            switch ((EApplyTypes) type)
                             {
-                                case (byte) EApplyTypes.MoveSpeed:
-                                    _ = _affectController.AddAffect(player, (int) EAffectTypes.AffectMoveSpeed, (int) applyType, value, (int) EAffectBits.MoveSpeedPotion, duration, 0);
+                                case EApplyTypes.MoveSpeed:
+                                    await _affectController.AddAffect(player, (int) EAffectTypes.AffectMoveSpeed, (int) applyType, value, (int) EAffectBits.MoveSpeedPotion, duration, 0);
                                     break;
-                                case (byte) EApplyTypes.AttackSpeed:
-                                    _ = _affectController.AddAffect(player, (int) EAffectTypes.AffectAttackSpeed, (int) applyType, value, (int) EAffectBits.AttackSpeedPotion, duration, 0);
+                                case EApplyTypes.AttackSpeed:
+                                    await _affectController.AddAffect(player, (int) EAffectTypes.AffectAttackSpeed, (int) applyType, value, (int) EAffectBits.AttackSpeedPotion, duration, 0);
                                     break;
                             }
                             break;
-                        case (byte) EUseSubTypes.UseSpecial:
+                        case EUseSubTypes.UseSpecial:
                             var specialItemType = EAffectTypes.None;
                             var bonus = EPoints.None;
                             var infDuration = 60 * 365 * 24 * 60 * 60;
                             switch (itemProto.Id)
                             {
-                                case 72728:
+                                case 72728: // TODO: fix the harcoded IDs
                                     specialItemType = EAffectTypes.AutoSPRecovery;
                                     break;
                             }
                             _logger.LogDebug("Use special");
-                            _ = _affectController.AddAffect(player, (int) specialItemType, (int) bonus, 4, (int) itemProto.Id, infDuration, 0);
+                            await _affectController.AddAffect(player, (int) specialItemType, (int) bonus, 4, (int) itemProto.Id, infDuration, 0);
                             break;
-
                     }
                     break;
             }
