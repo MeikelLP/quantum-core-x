@@ -13,7 +13,10 @@ namespace QuantumCore.API.Game.World
         IMap GetMapByName(string name);
         List<IMap> FindMapsByName(string needle);
         CoreHost GetMapHost(int x, int y);
-        SpawnGroup GetGroup(int id);
+        #nullable enable
+        SpawnGroup? GetGroup(uint id);
+        SpawnGroupCollection? GetGroupCollection(uint id);
+        #nullable restore
         ValueTask<bool> SpawnEntity(IEntity e);
         Task DespawnEntity(IEntity entity);
         uint GenerateVid();

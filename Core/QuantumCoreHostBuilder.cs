@@ -25,7 +25,7 @@ public static class QuantumCoreHostBuilder
             // may be null in single file deployment
             Directory.SetCurrentDirectory(Path.GetDirectoryName(assemblyPath)!);
         }
-            
+
         // init plugins if any
         IPluginCatalog pluginCatalog = new EmptyPluginCatalog();
         if (Directory.Exists("plugins"))
@@ -48,7 +48,7 @@ public static class QuantumCoreHostBuilder
             .UseConsoleLifetime(x => x.SuppressStatusMessages = true)
             .ConfigureServices((ctx, services) =>
             {
-                services.AddCoreServices(pluginCatalog);
+                services.AddCoreServices(pluginCatalog, ctx.Configuration);
 
                 var serviceCollectionPluginTypes = pluginCatalog.GetPlugins()
                     .FindAll(x => typeof(IServiceCollectionPlugin).IsAssignableFrom(x.Type))
