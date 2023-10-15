@@ -10,6 +10,7 @@ using QuantumCore.API.Game.World;
 using QuantumCore.API.PluginTypes;
 using QuantumCore.Core.Cache;
 using QuantumCore.Core.Utils;
+using QuantumCore.Game.Services;
 using QuantumCore.Game.World.Entities;
 
 namespace QuantumCore.Game.World
@@ -22,7 +23,8 @@ namespace QuantumCore.Game.World
         private readonly Grid<IMap> _world = new(0, 0);
         private readonly Dictionary<string, IMap> _maps = new();
         private readonly Dictionary<string, IPlayerEntity> _players = new();
-        private readonly Dictionary<int, SpawnGroup> _groups = new();
+        private readonly Dictionary<uint, SpawnGroup> _groups = new();
+        private readonly Dictionary<uint, SpawnGroupCollection> _groupCollections = new();
 
         private readonly Dictionary<int, Shop> _staticShops = new();
 
@@ -33,10 +35,12 @@ namespace QuantumCore.Game.World
         private readonly ICacheManager _cacheManager;
         private readonly IOptions<HostingOptions> _options;
         private readonly IConfiguration _configuration;
+        private readonly ISpawnPointProvider _spawnPointProvider;
+        private readonly ISpawnGroupProvider _spawnGroupProvider;
 
-        public World(ILogger<World> logger, PluginExecutor pluginExecutor, IItemManager itemManager, 
+        public World(ILogger<World> logger, PluginExecutor pluginExecutor, IItemManager itemManager,
             IMonsterManager monsterManager, IAnimationManager animationManager, ICacheManager cacheManager, IOptions<HostingOptions> options,
-            IConfiguration configuration)
+            IConfiguration configuration, ISpawnPointProvider spawnPointProvider, ISpawnGroupProvider spawnGroupProvider)
         {
             _logger = logger;
             _pluginExecutor = pluginExecutor;
@@ -46,13 +50,15 @@ namespace QuantumCore.Game.World
             _cacheManager = cacheManager;
             _options = options;
             _configuration = configuration;
+            _spawnPointProvider = spawnPointProvider;
+            _spawnGroupProvider = spawnGroupProvider;
             _vid = 0;
         }
-        
+
         public async Task Load()
         {
             LoadShops();
-            LoadGroups();
+            await LoadGroups();
             LoadAtlasInfo();
             await LoadRemoteMaps();
 
@@ -73,9 +79,9 @@ namespace QuantumCore.Game.World
             foreach (var shopDef in shops)
             {
                 var shop = new Shop (_itemManager, _logger);
-                
+
                 _staticShops[shopDef.Id] = shop;
-                
+
                 if (shopDef.Npc.HasValue)
                 {
                     GameEventManager.RegisterNpcClickEvent(shop.Name, shopDef.Npc.Value, async player =>
@@ -86,13 +92,17 @@ namespace QuantumCore.Game.World
             }
         }
 
-        private void LoadGroups()
+        private async Task LoadGroups()
         {
-            var groups = _configuration.GetSection("group").Get<SpawnGroup[]>();
-            if (groups is null) return;
+            var groups = await _spawnGroupProvider.GetSpawnGroupsAsync();
             foreach (var g in groups)
             {
                 _groups[g.Id] = g;
+            }
+            var spawnGroups = await _spawnGroupProvider.GetSpawnGroupCollectionsAsync();
+            foreach (var g in spawnGroups)
+            {
+                _groupCollections[g.Id] = g;
             }
         }
 
@@ -100,13 +110,13 @@ namespace QuantumCore.Game.World
         {
             // Regex for parsing lines in the atlas info
             var regex = new Regex(@"^([a-zA-Z0-9\/_]+)[\s]+([0-9]+)[\s]+([0-9]+)[\s]+([0-9]+)[\s]+([0-9]+)$");
-                
+
             var maxX = 0u;
             var maxY = 0u;
-                
+
             // Load atlasinfo.txt and initialize all maps the game core hosts
             if (!File.Exists("data/atlasinfo.txt"))
-            { 
+            {
                 throw new FileNotFoundException("Unable to find file data/atlasinfo.txt");
             }
 
@@ -137,10 +147,10 @@ namespace QuantumCore.Game.World
                         }
                         else
                         {
-                            map = new Map(_monsterManager, _animationManager, _cacheManager, this, _options, _logger, mapName, positionX, positionY, width, height);    
+                            map = new Map(_monsterManager, _animationManager, _cacheManager, this, _options, _logger, _spawnPointProvider, mapName, positionX, positionY, width, height);
                         }
-                        
-                        
+
+
                         _maps[map.Name] = map;
 
                         if (positionX + width * Map.MapUnit > maxX) maxX = positionX + width * Map.MapUnit;
@@ -187,10 +197,10 @@ namespace QuantumCore.Game.World
                 var address = await _cacheManager.Get<string>(key);
                 var parts = address.Split(":");
                 Debug.Assert(parts.Length == 2);
-                    
+
                 remoteMap.Host = IPAddress.Parse(parts[0]);
                 remoteMap.Port = ushort.Parse(parts[1]);
-                
+
                 _logger.LogDebug("Map {Name} is available at {Host}:{Port}", remoteMap.Name, remoteMap.Host, remoteMap.Port);
             }
 
@@ -209,16 +219,16 @@ namespace QuantumCore.Game.World
                 {
                     return;
                 }
-                
+
                 remoteMap.Host = IPAddress.Parse(parts[0]);
                 remoteMap.Port = ushort.Parse(parts[1]);
-                
+
                 _logger.LogDebug("Map {Name} is now available at {Host}:{Port}", remoteMap.Name, remoteMap.Host, remoteMap.Port);
             });
-            
+
             _mapSubscriber.Listen();
         }
-        
+
         public void Update(double elapsedTime)
         {
             // HookManager.Instance.CallHook<IHookWorldUpdate>(elapsedTime);
@@ -253,7 +263,7 @@ namespace QuantumCore.Game.World
                     list.Add(map);
                     return list;
                 }
-                
+
                 if (name.Contains(needle, StringComparison.InvariantCultureIgnoreCase))
                 {
                     list.Add(map);
@@ -279,13 +289,22 @@ namespace QuantumCore.Game.World
             return new CoreHost {Ip = IpUtils.PublicIP, Port = (ushort) GameServer.Instance.Port};
         }
 
-        public SpawnGroup GetGroup(int id)
+        public SpawnGroup? GetGroup(uint id)
         {
             if (!_groups.ContainsKey(id))
             {
                 return null;
             }
             return _groups[id];
+        }
+
+        public SpawnGroupCollection? GetGroupCollection(uint id)
+        {
+            if (!_groupCollections.ContainsKey(id))
+            {
+                return null;
+            }
+            return _groupCollections[id];
         }
 
         public async ValueTask<bool> SpawnEntity(IEntity e)
@@ -308,7 +327,7 @@ namespace QuantumCore.Game.World
             {
                 RemovePlayer(player);
             }
-            
+
             await _pluginExecutor.ExecutePlugins<IGameEntityLifetimeListener>(_logger, x => x.OnPreDeletedAsync());
             entity.Map?.DespawnEntity(entity);
             await _pluginExecutor.ExecutePlugins<IGameEntityLifetimeListener>(_logger, x => x.OnPostDeletedAsync());

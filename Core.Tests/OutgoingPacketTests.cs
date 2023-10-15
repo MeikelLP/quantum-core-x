@@ -4,6 +4,7 @@ using System.Text;
 using AutoBogus;
 using Bogus;
 using FluentAssertions;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using QuantumCore.Extensions;
@@ -27,7 +28,7 @@ public class OutgoingPacketTests
     public OutgoingPacketTests(ITestOutputHelper testOutputHelper)
     {
         var services = new ServiceCollection()
-            .AddCoreServices(new EmptyPluginCatalog())
+            .AddCoreServices(new EmptyPluginCatalog(), new ConfigurationBuilder().Build())
             .AddSingleton<IPacketSerializer, DefaultPacketSerializer>()
             .AddLogging(x =>
             {
@@ -160,7 +161,7 @@ public class OutgoingPacketTests
                 .Append(obj.Slot)
                 .Concat(BitConverter.GetBytes(obj.Character.Id))
                 .Concat(Encoding.ASCII.GetBytes(obj.Character.Name))
-                .Append((byte)0) // null byte for end of string 
+                .Append((byte)0) // null byte for end of string
                 .Append(obj.Character.Level)
                 .Concat(BitConverter.GetBytes(obj.Character.Playtime))
                 .Append(obj.Character.St)
