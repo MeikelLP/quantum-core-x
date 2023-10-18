@@ -8,7 +8,7 @@ namespace QuantumCore.API.Game.World
     {
         static IWorld Instance { get; set; }
         Task Load();
-        void Update(double elapsedTime);
+        Task Update(double elapsedTime);
         IMap GetMapAt(uint x, uint y);
         IMap GetMapByName(string name);
         List<IMap> FindMapsByName(string needle);

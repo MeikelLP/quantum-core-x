@@ -162,13 +162,13 @@ namespace QuantumCore.Game.World
             _mapSubscriber.Listen();
         }
 
-        public void Update(double elapsedTime)
+        public async Task Update(double elapsedTime)
         {
             // HookManager.Instance.CallHook<IHookWorldUpdate>(elapsedTime);
 
             foreach (var map in _maps.Values)
             {
-                map.Update(elapsedTime);
+                await map.Update(elapsedTime);
             }
         }
 
