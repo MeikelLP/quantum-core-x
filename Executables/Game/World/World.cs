@@ -1,9 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Net;
-using System.Text.RegularExpressions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game.World;
@@ -30,36 +28,60 @@ namespace QuantumCore.Game.World
 
         private IRedisSubscriber _mapSubscriber;
         private readonly IItemManager _itemManager;
-        private readonly IMonsterManager _monsterManager;
-        private readonly IAnimationManager _animationManager;
         private readonly ICacheManager _cacheManager;
-        private readonly IOptions<HostingOptions> _options;
         private readonly IConfiguration _configuration;
-        private readonly ISpawnPointProvider _spawnPointProvider;
         private readonly ISpawnGroupProvider _spawnGroupProvider;
+        private readonly IAtlasProvider _atlasProvider;
 
         public World(ILogger<World> logger, PluginExecutor pluginExecutor, IItemManager itemManager,
-            IMonsterManager monsterManager, IAnimationManager animationManager, ICacheManager cacheManager, IOptions<HostingOptions> options,
-            IConfiguration configuration, ISpawnPointProvider spawnPointProvider, ISpawnGroupProvider spawnGroupProvider)
+            ICacheManager cacheManager, IConfiguration configuration, ISpawnGroupProvider spawnGroupProvider,
+            IAtlasProvider atlasProvider)
         {
             _logger = logger;
             _pluginExecutor = pluginExecutor;
             _itemManager = itemManager;
-            _monsterManager = monsterManager;
-            _animationManager = animationManager;
             _cacheManager = cacheManager;
-            _options = options;
             _configuration = configuration;
-            _spawnPointProvider = spawnPointProvider;
             _spawnGroupProvider = spawnGroupProvider;
+            _atlasProvider = atlasProvider;
             _vid = 0;
         }
 
         public async Task Load()
         {
             LoadShops();
-            await LoadGroups();
-            LoadAtlasInfo();
+            var groups = await _spawnGroupProvider.GetSpawnGroupsAsync();
+            foreach (var g in groups)
+            {
+                _groups[g.Id] = g;
+            }
+            var spawnGroups = await _spawnGroupProvider.GetSpawnGroupCollectionsAsync();
+            foreach (var g in spawnGroups)
+            {
+                _groupCollections[g.Id] = g;
+            }
+
+            var maps = await _atlasProvider.GetAsync(this);
+            foreach (var map in maps)
+            {
+                _maps[map.Name] = map;
+            }
+
+
+            // Initialize world grid and place maps on it
+            var maxX = _maps.Max(x => x.Value.PositionX + x.Value.Width * Map.MapUnit);
+            var maxY = _maps.Max(x => x.Value.PositionY + x.Value.Height * Map.MapUnit);
+            _world.Resize(maxX / Map.MapUnit, maxY / Map.MapUnit);
+            foreach (var map in _maps.Values)
+            {
+                for (var x = map.UnitX; x < map.UnitX + map.Width; x++)
+                {
+                    for (var y = map.UnitY; y < map.UnitY + map.Height; y++)
+                    {
+                        _world.Set(x, y, map);
+                    }
+                }
+            }
             await LoadRemoteMaps();
 
             // Initialize maps, spawn monsters etc
@@ -88,95 +110,6 @@ namespace QuantumCore.Game.World
                     {
                         await shop.Open(player);
                     });
-                }
-            }
-        }
-
-        private async Task LoadGroups()
-        {
-            var groups = await _spawnGroupProvider.GetSpawnGroupsAsync();
-            foreach (var g in groups)
-            {
-                _groups[g.Id] = g;
-            }
-            var spawnGroups = await _spawnGroupProvider.GetSpawnGroupCollectionsAsync();
-            foreach (var g in spawnGroups)
-            {
-                _groupCollections[g.Id] = g;
-            }
-        }
-
-        private void LoadAtlasInfo()
-        {
-            // Regex for parsing lines in the atlas info
-            var regex = new Regex(@"^([a-zA-Z0-9\/_]+)[\s]+([0-9]+)[\s]+([0-9]+)[\s]+([0-9]+)[\s]+([0-9]+)$");
-
-            var maxX = 0u;
-            var maxY = 0u;
-
-            // Load atlasinfo.txt and initialize all maps the game core hosts
-            if (!File.Exists("data/atlasinfo.txt"))
-            {
-                throw new FileNotFoundException("Unable to find file data/atlasinfo.txt");
-            }
-
-            var maps = _configuration.GetSection("maps").Get<string[]>() ?? Array.Empty<string>();
-            using var reader = new StreamReader("data/atlasinfo.txt");
-            string line;
-            var lineNo = 0;
-            while ((line = reader.ReadLine()) != null)
-            {
-                lineNo++;
-                if(string.IsNullOrWhiteSpace(line)) continue; // skip empty lines
-
-                var match = regex.Match(line);
-                if (match.Success)
-                {
-                    try
-                    {
-                        var mapName = match.Groups[1].Value;
-                        var positionX = uint.Parse(match.Groups[2].Value);
-                        var positionY = uint.Parse(match.Groups[3].Value);
-                        var width = uint.Parse(match.Groups[4].Value);
-                        var height = uint.Parse(match.Groups[5].Value);
-
-                        IMap map;
-                        if (!maps.Contains(mapName))
-                        {
-                            map = new RemoteMap(mapName, positionX, positionY, width, height);
-                        }
-                        else
-                        {
-                            map = new Map(_monsterManager, _animationManager, _cacheManager, this, _options, _logger, _spawnPointProvider, mapName, positionX, positionY, width, height);
-                        }
-
-
-                        _maps[map.Name] = map;
-
-                        if (positionX + width * Map.MapUnit > maxX) maxX = positionX + width * Map.MapUnit;
-                        if (positionY + height * Map.MapUnit > maxY) maxY = positionY + height * Map.MapUnit;
-                    }
-                    catch (FormatException)
-                    {
-                        throw new InvalidDataException($"Failed to parse atlasinfo.txt:line {lineNo} - Failed to parse number");
-                    }
-                }
-                else
-                {
-                    throw new InvalidDataException($"Failed to parse atlasinfo.txt:line {lineNo} - Failed to parse line");
-                }
-            }
-
-            // Initialize world grid and place maps on it
-            _world.Resize(maxX / Map.MapUnit, maxY / Map.MapUnit);
-            foreach (var map in _maps.Values)
-            {
-                for (var x = map.UnitX; x < map.UnitX + map.Width; x++)
-                {
-                    for (var y = map.UnitY; y < map.UnitY + map.Height; y++)
-                    {
-                        _world.Set(x, y, map);
-                    }
                 }
             }
         }
