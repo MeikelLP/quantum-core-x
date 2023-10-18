@@ -13,7 +13,7 @@ public class TargetChangeHandler : IGamePacketHandler<TargetChange>
     {
         _logger = logger;
     }
-        
+
     public async Task ExecuteAsync(GamePacketContext<TargetChange> ctx, CancellationToken token = default)
     {
         var player = ctx.Connection.Player;
@@ -33,6 +33,6 @@ public class TargetChangeHandler : IGamePacketHandler<TargetChange>
         player.Target?.TargetedBy.Remove(player);
         player.Target = entity;
         entity.TargetedBy.Add(player);
-        await player.SendTarget();
+        player.SendTarget();
     }
 }

@@ -154,7 +154,7 @@ namespace QuantumCore.Game.World.AI
             monster.Rotation =
                 (float) MathUtils.Rotation(victim.PositionX - monster.PositionX, victim.PositionY - monster.PositionY);
 
-            await monster.Attack(victim, monster.Proto.BattleType);
+            monster.Attack(victim, monster.Proto.BattleType);
 
             // Send attack packet
             var packet = new CharacterMoveOut {
@@ -165,13 +165,13 @@ namespace QuantumCore.Game.World.AI
                 PositionY = monster.PositionY,
                 Time = (uint) GameServer.Instance.ServerTime
             };
-            await monster.ForEachNearbyEntity(async entity =>
+            foreach (var entity in monster.NearbyEntities)
             {
                 if (entity is PlayerEntity player)
                 {
-                    await player.Connection.Send(packet);
+                    player.Connection.Send(packet);
                 }
-            });
+            }
         }
 
         private IEntity NextTarget()

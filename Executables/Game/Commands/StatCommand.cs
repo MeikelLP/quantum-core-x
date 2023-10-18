@@ -14,10 +14,10 @@ public class StatCommand : ICommandHandler<StatCommandOptions>
         {
             return;
         }
-        
-        await context.Player.AddPoint(context.Arguments.Point, 1);
-        await context.Player.AddPoint(EPoints.StatusPoints, -1);
-        await context.Player.SendPoints();
+
+        context.Player.AddPoint(context.Arguments.Point, 1);
+        context.Player.AddPoint(EPoints.StatusPoints, -1);
+        context.Player.SendPoints();
     }
 }
 

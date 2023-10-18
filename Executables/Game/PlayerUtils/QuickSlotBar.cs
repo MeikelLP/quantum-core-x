@@ -15,7 +15,7 @@ public class QuickSlotBar : IQuickSlotBar
     private readonly ILogger _logger;
     public IPlayerEntity Player { get; }
     public QuickSlotData[] Slots { get; } = new QuickSlotData[8];
-    
+
     public QuickSlotBar(ICacheManager cacheManager, ILogger logger, PlayerEntity player)
     {
         _cacheManager = cacheManager;
@@ -26,7 +26,7 @@ public class QuickSlotBar : IQuickSlotBar
     public async Task Load()
     {
         var key = $"quickbar:{Player.Player.Id}";
-        
+
         if (await _cacheManager.Exists(key) > 0)
         {
             var slots = await _cacheManager.Get<QuickSlotData[]>(key);
@@ -43,7 +43,7 @@ public class QuickSlotBar : IQuickSlotBar
                 }
             }
         }
-        
+
         // todo load from database
     }
 
@@ -63,8 +63,8 @@ public class QuickSlotBar : IQuickSlotBar
             {
                 continue;
             }
-            
-            await Player.Connection.Send(new QuickBarAddOut {
+
+            Player.Connection.Send(new QuickBarAddOut {
                 Position = (byte) i,
                 Slot = new QuickSlot{Position = slot.Position, Type = slot.Type}
             });
@@ -79,9 +79,9 @@ public class QuickSlotBar : IQuickSlotBar
         }
 
         // todo verify type, and position?
-        
+
         Slots[position] = slot;
-        await Player.Connection.Send(new QuickBarAddOut {
+        Player.Connection.Send(new QuickBarAddOut {
             Position = position,
             Slot = new QuickSlot{Position = slot.Position, Type = slot.Type}
         });
@@ -98,7 +98,7 @@ public class QuickSlotBar : IQuickSlotBar
         var slot2 = Slots[position2];
         Slots[position1] = slot2;
         Slots[position2] = slot1;
-        await Player.Connection.Send(new QuickBarSwapOut {
+        Player.Connection.Send(new QuickBarSwapOut {
             Position1 = position1,
             Position2 = position2
         });
@@ -112,7 +112,7 @@ public class QuickSlotBar : IQuickSlotBar
         }
 
         Slots[position] = null;
-        await Player.Connection.Send(new QuickBarRemoveOut {
+        Player.Connection.Send(new QuickBarRemoveOut {
             Position = position
         });
     }

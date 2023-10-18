@@ -8,7 +8,7 @@ namespace QuantumCore.API.Game.World
     {
         static IWorld Instance { get; set; }
         Task Load();
-        Task Update(double elapsedTime);
+        void Update(double elapsedTime);
         IMap GetMapAt(uint x, uint y);
         IMap GetMapByName(string name);
         List<IMap> FindMapsByName(string needle);
@@ -17,8 +17,8 @@ namespace QuantumCore.API.Game.World
         SpawnGroup? GetGroup(uint id);
         SpawnGroupCollection? GetGroupCollection(uint id);
         #nullable restore
-        ValueTask<bool> SpawnEntity(IEntity e);
-        Task DespawnEntity(IEntity entity);
+        bool SpawnEntity(IEntity e);
+        void DespawnEntity(IEntity entity);
         uint GenerateVid();
         void RemovePlayer(IPlayerEntity e);
         IPlayerEntity GetPlayer(string playerName);

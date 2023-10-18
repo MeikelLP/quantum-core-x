@@ -18,7 +18,7 @@ namespace QuantumCore.API.Game.World
         Npc = 1,
         Player = 6
     }
-    
+
     public interface IEntity
     {
         public uint Vid { get; }
@@ -34,7 +34,7 @@ namespace QuantumCore.API.Game.World
         public byte HealthPercentage { get; }
         public List<IPlayerEntity> TargetedBy { get; }
         public bool Dead { get; }
-        
+
         // QuadTree cache
         public int LastPositionX { get; set; }
         public int LastPositionY { get; set; }
@@ -48,29 +48,30 @@ namespace QuantumCore.API.Game.World
         public int StartPositionY { get; }
         public uint MovementDuration { get; }
 
-        public Task Update(double elapsedTime);
-        
+        public void Update(double elapsedTime);
+
         public ValueTask OnDespawn();
-        public ValueTask AddNearbyEntity(IEntity entity);
-        public ValueTask RemoveNearbyEntity(IEntity entity);
-        public Task ForEachNearbyEntity(Func<IEntity, Task> action);
-        public Task ShowEntity(IConnection connection);
-        public Task HideEntity(IConnection connection);
+        public void AddNearbyEntity(IEntity entity);
+        public void RemoveNearbyEntity(IEntity entity);
+        public void ForEachNearbyEntity(Action<IEntity> action);
+        public void ShowEntity(IConnection connection);
+        public void HideEntity(IConnection connection);
+        IReadOnlyCollection<IEntity> NearbyEntities { get; }
 
         public uint GetPoint(EPoints point);
         public int GetMinDamage();
         public int GetMaxDamage();
         public int GetBonusDamage();
 
-        public Task Goto(int x, int y);
+        public void Goto(int x, int y);
         public void Wait(int x, int y);
 
         public byte GetBattleType();
-        public Task Attack(IEntity victim, byte type);
-        public Task<int> Damage(IEntity attacker, EDamageType damageType, int damage);
+        public void Attack(IEntity victim, byte type);
+        public int Damage(IEntity attacker, EDamageType damageType, int damage);
 
-        public Task Move(int x, int y);
+        public void Move(int x, int y);
         public void Stop();
-        public ValueTask Die();
+        public void Die();
     }
 }

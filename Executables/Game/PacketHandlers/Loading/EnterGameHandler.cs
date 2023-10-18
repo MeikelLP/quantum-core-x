@@ -18,7 +18,7 @@ namespace QuantumCore.Game.PacketHandlers.Loading
             _logger = logger;
             _world = world;
         }
-        
+
         public async Task ExecuteAsync(GamePacketContext<EnterGame> ctx, CancellationToken token = default)
         {
             var player = ctx.Connection.Player;
@@ -28,24 +28,24 @@ namespace QuantumCore.Game.PacketHandlers.Loading
                 ctx.Connection.Close();
                 return;
             }
-            
+
             // Enable game phase
-            await ctx.Connection.SetPhaseAsync(EPhases.Game);
-            
-            await ctx.Connection.Send(new GameTime { Time = (uint) ctx.Connection.Server.ServerTime });
-            await ctx.Connection.Send(new Channel { ChannelNo = 1 }); // todo
-            
+            ctx.Connection.SetPhaseAsync(EPhases.Game);
+
+            ctx.Connection.Send(new GameTime { Time = (uint) ctx.Connection.Server.ServerTime });
+            ctx.Connection.Send(new Channel { ChannelNo = 1 }); // todo
+
             // Show the player
-            await player.Show(ctx.Connection);
-            
+            player.Show(ctx.Connection);
+
             // Spawn the player
-            if (!await _world.SpawnEntity(player))
+            if (!_world.SpawnEntity(player))
             {
                 _logger.LogWarning("Failed to spawn player entity");
                 ctx.Connection.Close();
             }
-            
-            await player.SendInventory();
+
+            player.SendInventory();
         }
     }
 }

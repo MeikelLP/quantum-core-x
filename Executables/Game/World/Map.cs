@@ -79,19 +79,19 @@ namespace QuantumCore.Game.World
             }
         }
 
-        public async ValueTask Update(double elapsedTime)
+        public void Update(double elapsedTime)
         {
             // HookManager.Instance.CallHook<IHookMapUpdate>(this, elapsedTime);
 
             foreach (var entity in _pendingRemovals)
             {
-                _entities.Remove(entity as Entity);
+                _entities.Remove(entity);
             }
             _pendingRemovals.Clear();
 
             foreach (var entity in _entities.ToArray())
             {
-                await entity.Update(elapsedTime);
+                entity.Update(elapsedTime);
 
                 if (entity.PositionChanged)
                 {
@@ -115,7 +115,7 @@ namespace QuantumCore.Game.World
                             filter);
 
                         // Check nearby entities and mark all entities which are too far away now
-                        await entity.ForEachNearbyEntity(e =>
+                        foreach (var e in entity.NearbyEntities)
                         {
                             // Remove this entity from our temporary list as they are already in it
                             if (!_nearby.Remove(e))
@@ -123,15 +123,13 @@ namespace QuantumCore.Game.World
                                 // If it wasn't in our temporary list it is no longer in view
                                 _remove.Add(e);
                             }
-
-                            return Task.CompletedTask;
-                        });
+                        }
 
                         // Remove previously marked entities on both sides
                         foreach (var e in _remove)
                         {
-                            await e.RemoveNearbyEntity(entity);
-                            await entity.RemoveNearbyEntity(e);
+                            e.RemoveNearbyEntity(entity);
+                            entity.RemoveNearbyEntity(e);
                         }
 
                         // Add new nearby entities on both sides
@@ -142,8 +140,8 @@ namespace QuantumCore.Game.World
                                 continue; // do not add ourself!
                             }
 
-                            await e.AddNearbyEntity(entity);
-                            await entity.AddNearbyEntity(e);
+                            e.AddNearbyEntity(entity);
+                            entity.AddNearbyEntity(e);
                         }
 
                         // Clear our temporary lists
@@ -194,7 +192,7 @@ namespace QuantumCore.Game.World
                     spawnPoint.CurrentGroup = groupInstance;
 
                     var monster = new MonsterEntity(_monsterManager, _animationManager, _world, _logger, spawnPoint.Monster, x, y, (spawnPoint.Direction - 1) * 45);
-                    await _world.SpawnEntity(monster);
+                    _world.SpawnEntity(monster);
 
                     groupInstance.Monsters.Add(monster);
                     monster.Group = groupInstance;
@@ -220,7 +218,7 @@ namespace QuantumCore.Game.World
                     (int) (PositionX + (baseX + RandomNumberGenerator.GetInt32(-5, 5)) * 100),
                     (int) (PositionY + (baseY + RandomNumberGenerator.GetInt32(-5, 5)) * 100),
                     RandomNumberGenerator.GetInt32(0, 360));
-                await _world.SpawnEntity(monster);
+                _world.SpawnEntity(monster);
 
                 groupInstance.Monsters.Add(monster);
                 monster.Group = groupInstance;
@@ -299,7 +297,10 @@ namespace QuantumCore.Game.World
             await entity.OnDespawn();
 
             // Remove this entity from all nearby entities
-            await entity.ForEachNearbyEntity(async e => await e.RemoveNearbyEntity(entity));
+            foreach (var e in entity.NearbyEntities)
+            {
+                e.RemoveNearbyEntity(entity);
+            }
 
             // Remove map from the entity
             entity.Map = null;

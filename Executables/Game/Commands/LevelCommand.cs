@@ -23,12 +23,12 @@ public class LevelCommand : ICommandHandler<LevelCommandOptions>
 
         if (target is null)
         {
-            await context.Player.SendChatMessage("Target not found");
+            context.Player.SendChatMessage("Target not found");
         }
         else
         {
-            await target.SetPoint(EPoints.Level, context.Arguments.Level);
-            await target.SendPoints();
+            target.SetPoint(EPoints.Level, context.Arguments.Level);
+            target.SendPoints();
         }
     }
 }

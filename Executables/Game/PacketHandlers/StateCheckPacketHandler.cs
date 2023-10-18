@@ -10,7 +10,7 @@ public class StateCheckPacketHandler : IGamePacketHandler<StateCheckPacket>
 {
     public async Task ExecuteAsync(GamePacketContext<StateCheckPacket> ctx, CancellationToken token = default)
     {
-        await ctx.Connection.Send(new ServerStatusPacket {
+        ctx.Connection.Send(new ServerStatusPacket {
             Statuses = new [] {
                 new ServerStatus {
                     Port = 13001,

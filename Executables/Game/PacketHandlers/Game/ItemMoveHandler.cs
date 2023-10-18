@@ -13,7 +13,7 @@ public class ItemMoveHandler : IGamePacketHandler<ItemMove>
     {
         _logger = logger;
     }
-        
+
     public async Task ExecuteAsync(GamePacketContext<ItemMove> ctx, CancellationToken token = default)
     {
         var player = ctx.Connection.Player;
@@ -22,7 +22,7 @@ public class ItemMoveHandler : IGamePacketHandler<ItemMove>
             ctx.Connection.Close();
             return;
         }
-            
+
         _logger.LogDebug("Move item from {FromWindow},{FromPosition} to {ToWindow},{ToPosition}", ctx.Packet.FromWindow, ctx.Packet.FromPosition, ctx.Packet.ToWindow, ctx.Packet.ToPosition);
 
         // Get moved item
@@ -37,14 +37,14 @@ public class ItemMoveHandler : IGamePacketHandler<ItemMove>
         if (player.IsSpaceAvailable(item, ctx.Packet.ToWindow, ctx.Packet.ToPosition))
         {
             // remove from old space
-            await player.RemoveItem(item);
-                
+            player.RemoveItem(item);
+
             // place item
-            await player.SetItem(item, ctx.Packet.ToWindow, ctx.Packet.ToPosition);
+            player.SetItem(item, ctx.Packet.ToWindow, ctx.Packet.ToPosition);
 
             // send item movement to client
-            await player.SendRemoveItem(ctx.Packet.FromWindow, ctx.Packet.FromPosition);
-            await player.SendItem(item);
+            player.SendRemoveItem(ctx.Packet.FromWindow, ctx.Packet.FromPosition);
+            player.SendItem(item);
         }
     }
 }

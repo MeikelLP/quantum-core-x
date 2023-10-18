@@ -26,12 +26,12 @@ public class HpCommand : ICommandHandler<HpOtherOptions>
 
         if (target is null)
         {
-            await context.Player.SendChatMessage("Target not found!");
+            context.Player.SendChatMessage("Target not found!");
         }
         else
         {
-            await target.AddPoint(EPoints.Hp, context.Arguments.Value);
-            await target.SendPoints();   
+            target.AddPoint(EPoints.Hp, context.Arguments.Value);
+            target.SendPoints();
         }
     }
 }
@@ -41,7 +41,7 @@ public class HpOtherOptions
     [Value(0)]
     public int Value { get; set; }
 
-    [Value(1)] 
-    [CanBeNull] 
+    [Value(1)]
+    [CanBeNull]
     public string Target { get; set; }
 }

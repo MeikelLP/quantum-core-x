@@ -8,6 +8,6 @@ public class RestartTownCommand : ICommandHandler
 {
     public async Task ExecuteAsync(CommandContext context)
     {
-        await context.Player.Respawn(true);
+        context.Player.Respawn(true);
     }
 }

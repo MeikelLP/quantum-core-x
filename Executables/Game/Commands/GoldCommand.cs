@@ -25,12 +25,12 @@ public class GoldCommand : ICommandHandler<GoldCommandOptions>
 
         if (target is null)
         {
-            await context.Player.SendChatMessage("Target not found");
+            context.Player.SendChatMessage("Target not found");
             return;
         }
-        
-        await target.AddPoint(EPoints.Gold, context.Arguments.Value);
-        await target.SendPoints();
+
+        target.AddPoint(EPoints.Gold, context.Arguments.Value);
+        target.SendPoints();
     }
 }
 
@@ -38,7 +38,7 @@ public class GoldCommandOptions
 {
     [Value(0)]
     public int Value { get; set; }
-    
+
     [Value(1)]
     public string Target { get; set; }
 }

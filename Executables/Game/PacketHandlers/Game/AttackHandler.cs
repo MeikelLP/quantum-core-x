@@ -13,7 +13,7 @@ public class AttackHandler : IGamePacketHandler<Attack>
     {
         _logger = logger;
     }
-        
+
     public async Task ExecuteAsync(GamePacketContext<Attack> ctx, CancellationToken token = default)
     {
         var attacker = ctx.Connection.Player;
@@ -23,15 +23,15 @@ public class AttackHandler : IGamePacketHandler<Attack>
             ctx.Connection.Close();
             return;
         }
-            
+
         var entity = attacker.Map.GetEntity(ctx.Packet.Vid);
         if (entity == null)
         {
             return;
         }
-            
+
         _logger.LogDebug("Attack from {Attacker} with type {AttackType} target {TargetId}", attacker.Name, ctx.Packet.AttackType, ctx.Packet.Vid);
 
-        await attacker.Attack(entity, 0);
+        attacker.Attack(entity, 0);
     }
 }

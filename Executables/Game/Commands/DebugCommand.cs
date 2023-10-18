@@ -12,8 +12,8 @@ namespace QuantumCore.Game.Commands
             var maxWeapon = context.Player.GetPoint(EPoints.MaxWeaponDamage);
             var minAttack = context.Player.GetPoint(EPoints.MinAttackDamage);
             var maxAttack = context.Player.GetPoint(EPoints.MaxAttackDamage);
-            await context.Player.SendChatMessage($"Weapon Damage: {minWeapon}-{maxWeapon}");
-            await context.Player.SendChatMessage($"Attack Damage: {minAttack}-{maxAttack}");
+            context.Player.SendChatMessage($"Weapon Damage: {minWeapon}-{maxWeapon}");
+            context.Player.SendChatMessage($"Attack Damage: {minAttack}-{maxAttack}");
         }
     }
 }

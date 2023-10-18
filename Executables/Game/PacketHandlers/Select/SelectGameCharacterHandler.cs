@@ -19,7 +19,7 @@ public class SelectGameCharacterHandler : IGamePacketHandler<SelectCharacter>
     private readonly IServiceProvider _provider;
     private readonly ICacheManager _cacheManager;
 
-    public SelectGameCharacterHandler(IDbConnection db, ILogger<SelectGameCharacterHandler> logger, IServiceProvider provider, 
+    public SelectGameCharacterHandler(IDbConnection db, ILogger<SelectGameCharacterHandler> logger, IServiceProvider provider,
         ICacheManager cacheManager)
     {
         _db = db;
@@ -27,7 +27,7 @@ public class SelectGameCharacterHandler : IGamePacketHandler<SelectCharacter>
         _provider = provider;
         _cacheManager = cacheManager;
     }
-    
+
     public async Task ExecuteAsync(GamePacketContext<SelectCharacter> ctx, CancellationToken token = default)
     {
         _logger.LogDebug("Selected character in slot {Slot}", ctx.Packet.Slot);
@@ -42,7 +42,7 @@ public class SelectGameCharacterHandler : IGamePacketHandler<SelectCharacter>
         var accountId = ctx.Connection.AccountId ?? default; // todo clean solution
 
         // Let the client load the game
-        await ctx.Connection.SetPhaseAsync(EPhases.Loading);
+        ctx.Connection.SetPhaseAsync(EPhases.Loading);
 
         // Load player
         var player = await Player.GetPlayer(_db, _cacheManager, accountId, ctx.Packet.Slot);
@@ -52,9 +52,9 @@ public class SelectGameCharacterHandler : IGamePacketHandler<SelectCharacter>
         ctx.Connection.Player = entity;
 
         // Send information about the player to the client
-        await entity.SendBasicData();
-        await entity.SendPoints();
-        await entity.SendCharacterUpdate();
+        entity.SendBasicData();
+        entity.SendPoints();
+        entity.SendCharacterUpdate();
         await entity.QuickSlotBar.Send();
     }
 }

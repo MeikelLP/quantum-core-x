@@ -1,11 +1,11 @@
-﻿using System.Data;
-using BenchmarkDotNet.Attributes;
+using System.Data;
+using FluentAssertions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Moq;
+using NSubstitute;
 using QuantumCore;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
@@ -21,22 +21,15 @@ using QuantumCore.Game.World;
 using QuantumCore.Game.World.Entities;
 using Weikio.PluginFramework.Catalogs;
 
-namespace Game.Benchmarks.Benchmarks;
+namespace Game.Tests;
 
-[MemoryDiagnoser]
-[MediumRunJob]
-public class WorldUpdateBenchmark
+public class WorldTests
 {
-    [Params(0, 100, 1000)]
-    public int MobAmount;
-
-    [Params(0, 1, 10)]
-    public int PlayerAmount;
 
     private World _world = null!;
+    private readonly PlayerEntity _playerEntity;
 
-    [GlobalSetup]
-    public void GlobalSetup()
+    public WorldTests()
     {
         var config = new ConfigurationBuilder()
             .AddInMemoryCollection(new Dictionary<string, string>())
@@ -48,33 +41,33 @@ public class WorldUpdateBenchmark
             .AddQuantumCoreCache()
             .AddQuantumCoreDatabase()
             .AddGameServices()
-            .Replace(new ServiceDescriptor(typeof(IDbConnection), _ => new Mock<IDbConnection>().Object, ServiceLifetime.Singleton))
+            .Replace(new ServiceDescriptor(typeof(IDbConnection), _ => Substitute.For<IDbConnection>(), ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(IAtlasProvider), provider =>
             {
-                var mock = new Mock<IAtlasProvider>();
-                mock.Setup(x => x.GetAsync(It.IsAny<IWorld>())).ReturnsAsync<IWorld, IAtlasProvider, IEnumerable<IMap>>(world => new []
+                var mock = Substitute.For<IAtlasProvider>();
+                mock.GetAsync(Arg.Any<IWorld>()).Returns(info => new []
                 {
                     new Map(provider.GetRequiredService<IMonsterManager>(),
                         provider.GetRequiredService<IAnimationManager>(),
-                        provider.GetRequiredService<ICacheManager>(), world,
+                        provider.GetRequiredService<ICacheManager>(), info.Arg<IWorld>(),
                         provider.GetRequiredService<IOptions<HostingOptions>>(),
                         provider.GetRequiredService<ILogger<Map>>(),
                         provider.GetRequiredService<ISpawnPointProvider>(), "test_map", 0, 0, 1024, 1024)
                 });
-                return mock.Object;
+                return mock;
             }, ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(ICacheManager), _ =>
             {
-                var mock = new Mock<ICacheManager>();
-                mock.Setup(x => x.Keys("maps:*")).ReturnsAsync(new []{"maps:test_map"});
-                mock.Setup(x => x.Subscribe()).Returns(new Mock<IRedisSubscriber>().Object);
-                return mock.Object;
+                var mock = Substitute.For<ICacheManager>();
+                mock.Keys("maps:*").Returns(new []{"maps:test_map"});
+                mock.Subscribe().Returns(Substitute.For<IRedisSubscriber>());
+                return mock;
             }, ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(ISpawnPointProvider), _ =>
             {
-                var mock = new Mock<ISpawnPointProvider>();
-                mock.Setup(x => x.GetSpawnPointsForMap("test_map")).ReturnsAsync(Enumerable
-                    .Range(0, MobAmount)
+                var mock = Substitute.For<ISpawnPointProvider>();
+                mock.GetSpawnPointsForMap("test_map").Returns(Enumerable
+                    .Range(0, 1)
                     .Select(_ =>
                         new SpawnPoint
                         {
@@ -89,51 +82,44 @@ public class WorldUpdateBenchmark
                     )
                     .ToArray()
                 );
-                return mock.Object;
+                return mock;
             }, ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(IJobManager), _ =>
             {
-                var mock = new Mock<IJobManager>();
-                mock.Setup(x => x.Get(1)).Returns(new Job());
-                return mock.Object;
+                var mock = Substitute.For<IJobManager>();
+                mock.Get(1).Returns(new Job());
+                return mock;
             }, ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(IMonsterManager), _ =>
             {
-                var mock = new Mock<IMonsterManager>();
-                mock.Setup(x => x.GetMonster(42)).Returns(new MonsterData
+                var mock = Substitute.For<IMonsterManager>();
+                mock.GetMonster(42).Returns(new MonsterData
                 {
                     Type = (byte)EEntityType.Monster
                 });
-                return mock.Object;
+                return mock;
             }, ServiceLifetime.Singleton))
             .BuildServiceProvider();
         _world = ActivatorUtilities.CreateInstance<World>(services);
         ActivatorUtilities.CreateInstance<GameServer>(services); // for setting the singleton GameServer.Instance
         _world.Load().Wait();
 
-        foreach (var i in Enumerable.Range(0, PlayerAmount))
+        var conn = Substitute.For<IGameConnection>();
+        var playerData = new Player
         {
-            var player = new Player
-            {
-                Name = i.ToString(),
-                PlayerClass = 1,
-                PositionX = 1,
-                PositionY = 1
-            };
-            var connMock = new Mock<IGameConnection>();
-            var conn = connMock.Object;
-            var entity = ActivatorUtilities.CreateInstance<PlayerEntity>(services, _world, player, conn);
-            _world.SpawnEntity(entity);
-        }
-        foreach (var e in _world.GetMapAt(0, 0).GetEntities())
-        {
-            e.Goto(0, 0);
-        }
+            Name = "TestPlayer",
+            PlayerClass = 1,
+            PositionX = 1,
+            PositionY = 1
+        };
+        _playerEntity = ActivatorUtilities.CreateInstance<PlayerEntity>(services, _world, playerData, conn);
+        _world.SpawnEntity(_playerEntity);
     }
 
-    [Benchmark]
-    public void World_Tick()
+    [Fact]
+    public void World_Update()
     {
         _world.Update(0.2);
+        Assert.True(true);
     }
 }

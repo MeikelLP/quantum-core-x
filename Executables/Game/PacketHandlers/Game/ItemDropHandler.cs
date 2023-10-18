@@ -18,7 +18,7 @@ public class ItemDropHandler : IGamePacketHandler<ItemDrop>
         if (ctx.Packet.Gold > 0)
         {
             // We're dropping gold...
-            await player.DropGold(ctx.Packet.Gold);
+            player.DropGold(ctx.Packet.Gold);
         }
         else
         {
@@ -29,7 +29,7 @@ public class ItemDropHandler : IGamePacketHandler<ItemDrop>
                 return; // Item slot is empty
             }
 
-            await player.DropItem(item, ctx.Packet.Count);
+            player.DropItem(item, ctx.Packet.Count);
         }
     }
 }

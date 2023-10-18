@@ -30,7 +30,7 @@ public abstract class Quest : IQuest
 
     protected async Task SendScript()
     {
-        await _player.Connection.Send(new QuestScript {
+        _player.Connection.Send(new QuestScript {
             Skin = (byte) _currentSkin,
             Source = _questScript
         });
@@ -43,7 +43,7 @@ public abstract class Quest : IQuest
     {
         _currentSkin = skin;
     }
-    
+
     public void Answer(byte answer)
     {
         if (answer == 254)
@@ -51,7 +51,7 @@ public abstract class Quest : IQuest
             _currentNextTask.SetResult();
             return;
         }
-        
+
         _currentChoiceTask.SetResult(answer);
     }
 
@@ -64,29 +64,29 @@ public abstract class Quest : IQuest
     {
         _currentNextTask?.TrySetCanceled();
         _currentNextTask = new TaskCompletionSource();
-        
+
         _questScript += "[NEXT]";
         await SendScript();
-        
+
         _player.CurrentQuest = this;
     }
 
     protected async Task<byte> Choice(bool done = false, params string[] options)
     {
         Debug.Assert(options.Length > 0);
-        
+
         _currentChoiceTask?.TrySetCanceled();
         _currentChoiceTask = new TaskCompletionSource<byte>();
 
         _questScript += "[QUESTION ";
-        
+
         for (var i = 0; i < options.Length; i++)
         {
             if (i != 0)
             {
                 _questScript += "|";
             }
-            
+
             Debug.Assert(!options[i].Contains(';'));
             Debug.Assert(!options[i].Contains('|'));
 
@@ -99,7 +99,7 @@ public abstract class Quest : IQuest
         {
             _questScript += "[DONE]";
         }
-        
+
         await SendScript();
 
         _player.CurrentQuest = this;
@@ -113,7 +113,7 @@ public abstract class Quest : IQuest
             _questScript += "[ENTER]";
         }
         _questScript += "[DONE]";
-        
+
         await SendScript();
     }
 }

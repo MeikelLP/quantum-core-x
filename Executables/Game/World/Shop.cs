@@ -68,7 +68,7 @@ public class Shop : IShop
 
         p.Shop = this;
         Visitors.Add(p);
-        
+
         var shopStart = new ShopOpen { Vid = Vid };
         foreach (var item in _items)
         {
@@ -80,7 +80,7 @@ public class Shop : IShop
                 Price = item.Price
             };
         }
-        await p.Connection.Send(shopStart);
+        p.Connection.Send(shopStart);
     }
 
     public async Task Buy(IPlayerEntity player, byte position, byte count)
@@ -89,7 +89,7 @@ public class Shop : IShop
         {
             return;
         }
-        
+
         // Look up item the player wants to buy
         var item = _items.Find(item => item.Position == position);
         if (item == null)
@@ -104,24 +104,24 @@ public class Shop : IShop
         var gold = p.GetPoint(EPoints.Gold);
         if (gold < item.Price)
         {
-            await p.Connection.Send(new ShopNotEnoughMoney());
+            p.Connection.Send(new ShopNotEnoughMoney());
             return;
         }
 
         // Create item instance
         var playerItem = _itemManager.CreateItem(proto, item.Count);
-        
+
         // todo set bonuses and sockets
-        
+
         // Try to place item into players inventory
         if (!await p.Inventory.PlaceItem(playerItem))
         {
-            await p.Connection.Send(new ShopNoSpaceLeft());
+            p.Connection.Send(new ShopNoSpaceLeft());
         }
-        await p.AddPoint(EPoints.Gold, -(int)item.Price);
+        p.AddPoint(EPoints.Gold, -(int)item.Price);
 
-        await p.SendPoints();
-        await p.SendItem(playerItem);
+        p.SendPoints();
+        p.SendItem(playerItem);
     }
 
     public async Task Sell(IPlayerEntity player, byte position)
@@ -143,10 +143,10 @@ public class Shop : IShop
             return;
         }
 
-        if (await p.DestroyItem(item))
+        if (p.DestroyItem(item))
         {
-            await p.AddPoint(EPoints.Gold, (int) proto.SellPrice);
-            await p.SendPoints();
+            p.AddPoint(EPoints.Gold, (int) proto.SellPrice);
+            p.SendPoints();
         }
     }
 
@@ -159,7 +159,7 @@ public class Shop : IShop
 
         p.Shop = null;
         Visitors.Remove(p);
-        
+
         // todo send close if flag specified
     }
 }

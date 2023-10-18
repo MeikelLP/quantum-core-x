@@ -162,13 +162,13 @@ namespace QuantumCore.Game.World
             _mapSubscriber.Listen();
         }
 
-        public async Task Update(double elapsedTime)
+        public void Update(double elapsedTime)
         {
             // HookManager.Instance.CallHook<IHookWorldUpdate>(elapsedTime);
 
             foreach (var map in _maps.Values)
             {
-                await map.Update(elapsedTime);
+                map.Update(elapsedTime);
             }
         }
 
@@ -240,7 +240,7 @@ namespace QuantumCore.Game.World
             return _groupCollections[id];
         }
 
-        public async ValueTask<bool> SpawnEntity(IEntity e)
+        public bool SpawnEntity(IEntity e)
         {
             var map = GetMapAt((uint) e.PositionX, (uint) e.PositionY);
             if (map == null) return false;
@@ -248,22 +248,22 @@ namespace QuantumCore.Game.World
             if (e.GetType() == typeof(PlayerEntity))
                 AddPlayer((PlayerEntity)e);
 
-            await _pluginExecutor.ExecutePlugins<IGameEntityLifetimeListener>(_logger, x => x.OnPreCreatedAsync());
+            // _pluginExecutor.ExecutePlugins<IGameEntityLifetimeListener>(_logger, x => x.OnPreCreatedAsync()); // TODO
             var result = map.SpawnEntity(e);
-            await _pluginExecutor.ExecutePlugins<IGameEntityLifetimeListener>(_logger, x => x.OnPostCreatedAsync());
+            // _pluginExecutor.ExecutePlugins<IGameEntityLifetimeListener>(_logger, x => x.OnPostCreatedAsync()); // TODO
             return result;
         }
 
-        public async Task DespawnEntity(IEntity entity)
+        public void DespawnEntity(IEntity entity)
         {
             if (entity is IPlayerEntity player)
             {
                 RemovePlayer(player);
             }
 
-            await _pluginExecutor.ExecutePlugins<IGameEntityLifetimeListener>(_logger, x => x.OnPreDeletedAsync());
+            // await _pluginExecutor.ExecutePlugins<IGameEntityLifetimeListener>(_logger, x => x.OnPreDeletedAsync()); // TODO
             entity.Map?.DespawnEntity(entity);
-            await _pluginExecutor.ExecutePlugins<IGameEntityLifetimeListener>(_logger, x => x.OnPostDeletedAsync());
+            // await _pluginExecutor.ExecutePlugins<IGameEntityLifetimeListener>(_logger, x => x.OnPostDeletedAsync()); // TODO
         }
 
         public uint GenerateVid()

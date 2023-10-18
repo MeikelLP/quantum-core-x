@@ -13,19 +13,19 @@ public class CommandTeleportHere : ICommandHandler<TeleportHereOptions>
     {
         _world = world;
     }
-    
+
     public async Task ExecuteAsync(CommandContext<TeleportHereOptions> ctx)
     {
         var target = _world.GetPlayer(ctx.Arguments.Target);
 
         if (target is null)
         {
-            await ctx.Player.SendChatInfo("Target not found");
+            ctx.Player.SendChatInfo("Target not found");
         }
         else
         {
-            await ctx.Player.SendChatInfo($"Teleporting {target.Name} to your position");
-            await target.Move(ctx.Player.PositionX, ctx.Player.PositionY);
+            ctx.Player.SendChatInfo($"Teleporting {target.Name} to your position");
+            target.Move(ctx.Player.PositionX, ctx.Player.PositionY);
         }
     }
 }

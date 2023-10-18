@@ -26,12 +26,12 @@ public class ExperienceCommand : ICommandHandler<ExperienceOtherOptions>
 
         if (target is null)
         {
-            await context.Player.SendChatMessage("Target not found!");
+            context.Player.SendChatMessage("Target not found!");
         }
         else
         {
-            await target.AddPoint(EPoints.Experience, context.Arguments.Value);
-            await target.SendPoints();   
+            target.AddPoint(EPoints.Experience, context.Arguments.Value);
+            target.SendPoints();
         }
     }
 }
@@ -41,7 +41,7 @@ public class ExperienceOtherOptions
     [Value(0)]
     public int Value { get; set; }
 
-    [Value(1)] 
-    [CanBeNull] 
+    [Value(1)]
+    [CanBeNull]
     public string Target { get; set; }
 }

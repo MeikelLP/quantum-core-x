@@ -4,7 +4,7 @@ using QuantumCore.API.Game.World;
 
 namespace QuantumCore.Game.Commands
 {
-    
+
     public class CommandFunction
     {
         public string Description { get; set; }
@@ -51,7 +51,7 @@ namespace QuantumCore.Game.Commands
             {
                 return true;
             }
-            
+
             if (input == typeof(int))
             {
                 if (expected == typeof(uint) || expected == typeof(byte) || expected == typeof(ushort))
@@ -63,15 +63,15 @@ namespace QuantumCore.Game.Commands
             return false;
         }
 
-        public async Task Run(object[] args)
+        public Task Run(object[] args)
         {
             MethodInfo method = null;
-            
+
             foreach (var function in Functions)
             {
                 var callArguments = new object[args.Length];
                 Array.Copy(args, callArguments, args.Length);
-                
+
                 var param = function.Method.GetParameters();
 
                 if (param.Length < args.Length)
@@ -79,7 +79,7 @@ namespace QuantumCore.Game.Commands
                     method = null;
                     continue;
                 }
-                
+
                 method = function.Method;
 
                 for (var i = 1; i < param.Length; i++) // Parameter 0 is always an IPlayer, no reason to check it
@@ -110,8 +110,8 @@ namespace QuantumCore.Game.Commands
                                 var player = _world.GetPlayer((string) callArguments[i]);
                                 if (player == null)
                                 {
-                                    await ((IPlayerEntity) callArguments[0]).SendChatInfo($"Cannot find player {(string)callArguments[i]}");
-                                    return;
+                                    ((IPlayerEntity) callArguments[0]).SendChatInfo($"Cannot find player {(string)callArguments[i]}");
+                                    return Task.CompletedTask;
                                 }
                                 callArguments[i] = player;
                             }
@@ -132,11 +132,12 @@ namespace QuantumCore.Game.Commands
                 if (method != null)
                 {
                     method.Invoke(null, callArguments);
-                    return;
+                    return Task.CompletedTask;
                 }
             }
 
-            await ((IPlayerEntity)args[0]).SendChatInfo("Invalid command parameters");
+            ((IPlayerEntity)args[0]).SendChatInfo("Invalid command parameters");
+            return Task.CompletedTask;
         }
     }
 }

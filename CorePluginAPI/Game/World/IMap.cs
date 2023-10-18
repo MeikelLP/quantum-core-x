@@ -18,11 +18,11 @@ namespace QuantumCore.API.Game.World
         public IEntity GetEntity(uint vid);
 
         public bool SpawnEntity(IEntity entity);
-        
+
         public Task DespawnEntity(IEntity entity);
 
         public bool IsPositionInside(int x, int y);
 
-        public ValueTask Update(double elapsedTime);
+        public void Update(double elapsedTime);
     }
 }

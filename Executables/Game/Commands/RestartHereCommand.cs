@@ -8,7 +8,7 @@ namespace QuantumCore.Game.Commands
     {
         public async Task ExecuteAsync(CommandContext context)
         {
-            await context.Player.Respawn(false);
+            context.Player.Respawn(false);
         }
     }
 }

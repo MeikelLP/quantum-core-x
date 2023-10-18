@@ -23,6 +23,6 @@ public class ItemPickupHandler : IGamePacketHandler<ItemPickup>
             return;
         }
 
-        await player.Pickup(groundItem);
+        player.Pickup(groundItem);
     }
 }
