@@ -59,7 +59,7 @@ public class ItemUseHandler : IGamePacketHandler<ItemUse>
         }
         else if (player.IsEquippable(item))
         {
-            var wearSlot = player.Inventory.EquipmentWindow.GetWearSlot(_itemManager, item);
+            var wearSlot = player.Inventory.EquipmentWindow.GetWearPosition(_itemManager, item);
 
             if (wearSlot <= ushort.MaxValue)
             {

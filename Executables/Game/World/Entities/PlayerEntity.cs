@@ -111,6 +111,8 @@ namespace QuantumCore.Game.World.Entities
             _cacheManager = cacheManager;
             _world = world;
             _logger = logger;
+            Inventory = new Inventory(itemManager, db, _cacheManager, _logger, player.Id, 1, 5, 9, 2);
+            Inventory.OnSlotChanged += Inventory_OnSlotChanged;
             Player = new PlayerData {
                 Id = player.Id,
                 AccountId = player.AccountId,
@@ -134,16 +136,38 @@ namespace QuantumCore.Game.World.Entities
                 HairPart = player.HairPart,
                 GivenStatusPoints = player.GivenStatusPoints,
                 AvailableStatusPoints = player.AvailableStatusPoints,
+                MaxHp = GetMaxHp(_jobManager, player.PlayerClass, player.Level, player.Ht),
+                MaxSp = GetMaxSp(_jobManager, player.PlayerClass, player.Level, player.Iq),
             };
             PositionX = player.PositionX;
             PositionY = player.PositionY;
-            Inventory = new Inventory(itemManager, db, _cacheManager, _logger, player.Id, 1, 5, 9, 2);
             QuickSlotBar = new QuickSlotBar(_cacheManager, _logger, this);
 
             MovementSpeed = 150;
             EntityClass = player.PlayerClass;
 
             Groups = new List<Guid>();
+        }
+
+        private static uint GetMaxSp(IJobManager jobManager, byte playerClass, byte level, uint point)
+        {
+            var info = jobManager.Get(playerClass);
+            if (info == null)
+            {
+                return 0;
+            }
+            return info.StartSp + info.SpPerIq * point + info.SpPerLevel * level;
+        }
+
+        private static uint GetMaxHp(IJobManager jobManager, byte playerClass, byte level, uint point)
+        {
+            var info = jobManager.Get(playerClass);
+            if (info == null)
+            {
+                return 0;
+            }
+
+            return info.StartHp + info.HpPerHt * point + info.HpPerLevel * level;
         }
 
         public async Task Load()
@@ -155,7 +179,6 @@ namespace QuantumCore.Game.World.Entities
             Health = (int) GetPoint(EPoints.MaxHp); // todo: cache hp of player
             Mana = (int) GetPoint(EPoints.MaxSp);
             await LoadPermGroups();
-
             _questManager.InitializePlayer(this);
 
             CalculateDefence();
@@ -582,6 +605,26 @@ namespace QuantumCore.Game.World.Entities
             }
         }
 
+        private void Inventory_OnSlotChanged(object? sender, SlotChangedEventArgs args)
+        {
+            switch (args.Slot)
+            {
+                case EquipmentSlots.Weapon:
+                    if (args.ItemInstance is not null)
+                    {
+                        var item = _itemManager.GetItem(args.ItemInstance.ItemId);
+                        Player.MinWeaponDamage = (uint)(item.GetMinWeaponDamage() + item.Values[5]);
+                        Player.MinWeaponDamage = (uint)(item.GetMaxWeaponDamage() + item.Values[5]);
+                    }
+                    else
+                    {
+                        Player.MinWeaponDamage = 0;
+                        Player.MaxWeaponDamage = 0;
+                    }
+                    break;
+            }
+        }
+
         public override uint GetPoint(EPoints point)
         {
             switch (point)
@@ -597,24 +640,9 @@ namespace QuantumCore.Game.World.Entities
                 case EPoints.Sp:
                     return (uint) Mana;
                 case EPoints.MaxHp:
-                    var info = _jobManager.Get(Player.PlayerClass);
-                    if (info == null)
-                    {
-                        _logger.LogWarning("Job not found: {Job}" , Player.PlayerClass);
-                        return 0;
-                    }
-
-                    return info.StartHp + info.HpPerHt * GetPoint(EPoints.Ht) +
-                           info.HpPerLevel * GetPoint(EPoints.Level);
+                    return Player.MaxHp;
                 case EPoints.MaxSp:
-                    info = _jobManager.Get(Player.PlayerClass);
-                    if (info == null)
-                    {
-                        _logger.LogWarning("Job not found: {Job}", Player.PlayerClass);
-                        return 0;
-                    }
-                    return info.StartSp + info.SpPerIq * GetPoint(EPoints.Iq) +
-                           info.SpPerLevel * GetPoint(EPoints.Level);
+                    return Player.MaxSp;
                 case EPoints.St:
                     return Player.St;
                 case EPoints.Ht:
@@ -626,41 +654,23 @@ namespace QuantumCore.Game.World.Entities
                 case EPoints.Gold:
                     return Player.Gold;
                 case EPoints.MinWeaponDamage:
-                {
-                    var weapon = Inventory.EquipmentWindow.Weapon;
-                    if (weapon == null)
-                    {
-                        return 0;
-                    }
-
-                    var item = _itemManager.GetItem(weapon.ItemId);
-                    return (uint) (item.Values[3] + item.Values[5]);
-                }
+                    return Player.MinWeaponDamage;
                 case EPoints.MaxWeaponDamage:
-                {
-                    var weapon = Inventory.EquipmentWindow.Weapon;
-                    if (weapon == null)
-                    {
-                        return 0;
-                    }
-
-                    var item = _itemManager.GetItem(weapon.ItemId);
-                    return (uint) (item.Values[4] + item.Values[5]);
-                }
+                    return Player.MaxWeaponDamage;
                 case EPoints.MinAttackDamage:
-                    return CalculateAttackDamage(GetPoint(EPoints.MinWeaponDamage));
+                    return Player.MinAttackDamage;
                 case EPoints.MaxAttackDamage:
-                    return CalculateAttackDamage(GetPoint(EPoints.MaxWeaponDamage));
+                    return Player.MaxAttackDamage;
                 case EPoints.Defence:
                 case EPoints.DefenceGrade:
                     return _defence;
                 case EPoints.StatusPoints:
                     return Player.AvailableStatusPoints;
                 default:
-                    if (Enum.GetValues<EPoints>().Contains(point))
-                    {
-                        _logger.LogWarning("Point {Point} is not implemented on player", point);
-                    }
+                    // if (Enum.GetValues<EPoints>().Contains(point))
+                    // {
+                    //     _logger.LogWarning("Point {Point} is not implemented on player", point);
+                    // }
 
                     return 0;
             }

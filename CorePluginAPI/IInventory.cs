@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
+using JetBrains.Annotations;
 using QuantumCore.API.Core.Models;
 
 namespace QuantumCore.API;
@@ -12,6 +13,7 @@ public interface IInventory
     ReadOnlyCollection<ItemInstance> Items { get; }
     IEquipment EquipmentWindow { get; }
     long Size { get; }
+    event EventHandler<SlotChangedEventArgs> OnSlotChanged;
     Task Load();
     Task<bool> PlaceItem(ItemInstance instance);
     Task<bool> PlaceItem(ItemInstance item, ushort position);

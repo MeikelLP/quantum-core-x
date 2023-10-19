@@ -26,6 +26,7 @@ public static class ServiceExtensions
         services.AddSingleton<IItemManager, ItemManager>();
         services.AddSingleton<IMonsterManager, MonsterManager>();
         services.AddSingleton<IJobManager, JobManager>();
+        services.AddSingleton<IAtlasProvider, AtlasProvider>();
         services.AddSingleton<IAnimationManager, AnimationManager>();
         services.AddSingleton<IExperienceManager, ExperienceManager>();
         services.AddSingleton<ICommandManager, CommandManager>();
