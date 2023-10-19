@@ -50,7 +50,7 @@ namespace QuantumCore.API.Game.World
 
         public void Update(double elapsedTime);
 
-        public ValueTask OnDespawn();
+        public void OnDespawn();
         public void AddNearbyEntity(IEntity entity);
         public void RemoveNearbyEntity(IEntity entity);
         public void ForEachNearbyEntity(Action<IEntity> action);

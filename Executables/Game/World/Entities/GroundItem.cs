@@ -41,9 +41,8 @@ public class GroundItem : Entity, IGroundItem
     {
     }
 
-    public override ValueTask OnDespawn()
+    public override void OnDespawn()
     {
-        return ValueTask.CompletedTask;
     }
 
     public override void ShowEntity(IConnection connection)

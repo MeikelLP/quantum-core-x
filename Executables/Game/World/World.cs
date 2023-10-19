@@ -240,18 +240,17 @@ namespace QuantumCore.Game.World
             return _groupCollections[id];
         }
 
-        public bool SpawnEntity(IEntity e)
+        public void SpawnEntity(IEntity e)
         {
             var map = GetMapAt((uint) e.PositionX, (uint) e.PositionY);
-            if (map == null) return false;
+            if (map == null) return;
 
             if (e.GetType() == typeof(PlayerEntity))
                 AddPlayer((PlayerEntity)e);
 
             // _pluginExecutor.ExecutePlugins<IGameEntityLifetimeListener>(_logger, x => x.OnPreCreatedAsync()); // TODO
-            var result = map.SpawnEntity(e);
+            map.SpawnEntity(e);
             // _pluginExecutor.ExecutePlugins<IGameEntityLifetimeListener>(_logger, x => x.OnPostCreatedAsync()); // TODO
-            return result;
         }
 
         public void DespawnEntity(IEntity entity)

@@ -1,4 +1,5 @@
-﻿using System.Security.Cryptography;
+﻿using System.Collections.Concurrent;
+using System.Security.Cryptography;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -25,6 +26,7 @@ namespace QuantumCore.Game.World
         public uint UnitY => PositionY / MapUnit;
         public uint Width { get; private set; }
         public uint Height { get; private set; }
+        public IReadOnlyCollection<IEntity> Entities => _entities;
 
         private readonly List<IEntity> _entities = new();
         private readonly QuadTree _quadTree;
@@ -32,7 +34,8 @@ namespace QuantumCore.Game.World
 
         private readonly List<IEntity> _nearby = new();
         private readonly List<IEntity> _remove = new();
-        private readonly List<IEntity> _pendingRemovals = new();
+        private readonly ConcurrentQueue<IEntity> _pendingRemovals = new();
+        private readonly ConcurrentQueue<IEntity> _pendingSpawns = new();
         private readonly IMonsterManager _monsterManager;
         private readonly IAnimationManager _animationManager;
         private readonly ICacheManager _cacheManager;
@@ -83,13 +86,51 @@ namespace QuantumCore.Game.World
         {
             // HookManager.Instance.CallHook<IHookMapUpdate>(this, elapsedTime);
 
-            foreach (var entity in _pendingRemovals)
+            while (_pendingSpawns.TryDequeue(out var entity))
+            {
+                if (!_quadTree.Insert(entity)) continue;
+
+                // Add this entity to all entities nearby
+                var nearby = new List<IEntity>();
+                EEntityType? filter = null;
+                if (entity.Type != EEntityType.Player)
+                {
+                    // if we aren't a player only players are relevant for nearby
+                    filter = EEntityType.Player;
+                }
+
+                _quadTree.QueryAround(nearby, entity.PositionX, entity.PositionY, Entity.ViewDistance, filter);
+                foreach (var e in nearby.Where(e => e != entity))
+                {
+                    entity.AddNearbyEntity(e);
+                    e.AddNearbyEntity(entity);
+                }
+
+                _entities.Add(entity);
+                entity.Map = this;
+            }
+
+            while (_pendingRemovals.TryDequeue(out var entity))
             {
                 _entities.Remove(entity);
+
+                entity.OnDespawn();
+
+                // Remove this entity from all nearby entities
+                foreach (var e in entity.NearbyEntities)
+                {
+                    e.RemoveNearbyEntity(entity);
+                }
+
+                // Remove map from the entity
+                entity.Map = null;
+
+                // Remove entity from the quad tree
+                _quadTree.Remove(entity);
             }
             _pendingRemovals.Clear();
 
-            foreach (var entity in _entities.ToArray())
+            foreach (var entity in _entities)
             {
                 entity.Update(elapsedTime);
 
@@ -240,32 +281,9 @@ namespace QuantumCore.Game.World
             return x >= PositionX && x < PositionX + Width * MapUnit && y >= PositionY && y < PositionY + Height * MapUnit;
         }
 
-        public bool SpawnEntity(IEntity entity)
+        public void SpawnEntity(IEntity entity)
         {
-            lock (_entities)
-            {
-                if (!_quadTree.Insert(entity)) return false;
-
-                // Add this entity to all entities nearby
-                var nearby = new List<IEntity>();
-                EEntityType? filter = null;
-                if (entity.Type != EEntityType.Player)
-                {
-                    // if we aren't a player only players are relevant for nearby
-                    filter = EEntityType.Player;
-                }
-
-                _quadTree.QueryAround(nearby, entity.PositionX, entity.PositionY, Entity.ViewDistance, filter);
-                foreach (var e in nearby.Where(e => e != entity))
-                {
-                    entity.AddNearbyEntity(e);
-                    e.AddNearbyEntity(entity);
-                }
-
-                _entities.Add(entity);
-                entity.Map = this;
-                return true;
-            }
+            _pendingSpawns.Enqueue(entity);
         }
 
         /// <summary>
@@ -289,48 +307,17 @@ namespace QuantumCore.Game.World
         /// Should only be called by World
         /// </summary>
         /// <param name="entity"></param>
-        public async Task DespawnEntity(IEntity entity)
+        public void DespawnEntity(IEntity entity)
         {
             _logger.LogDebug("Despawn {Entity}", entity);
 
-            // Call despawn handlers
-            await entity.OnDespawn();
-
-            // Remove this entity from all nearby entities
-            foreach (var e in entity.NearbyEntities)
-            {
-                e.RemoveNearbyEntity(entity);
-            }
-
-            // Remove map from the entity
-            entity.Map = null;
-
-            lock (_entities)
-            {
-                _entities.Remove(entity);
-            }
-            // Remove entity from the quad tree
-            _quadTree.Remove(entity);
-
             // Remove entity from entities list in the next update
-            _pendingRemovals.Add(entity);
-        }
-
-        public List<IEntity> GetEntities()
-        {
-            // todo make sure if we have to lock here or not
-            lock (_entities)
-            {
-                return new List<IEntity>(_entities);
-            }
+            _pendingRemovals.Enqueue(entity);
         }
 
         public IEntity GetEntity(uint vid)
         {
-            lock (_entities)
-            {
-                return _entities.Find(e => e.Vid == vid);
-            }
+            return _entities.Find(e => e.Vid == vid);
         }
     }
 }

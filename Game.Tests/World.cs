@@ -122,4 +122,11 @@ public class WorldTests
         _world.Update(0.2);
         Assert.True(true);
     }
+
+    [Fact]
+    public void Player_Update()
+    {
+        _playerEntity.Update(1);
+        Assert.True(true);
+    }
 }

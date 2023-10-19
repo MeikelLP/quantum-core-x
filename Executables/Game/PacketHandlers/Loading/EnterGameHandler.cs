@@ -35,15 +35,8 @@ namespace QuantumCore.Game.PacketHandlers.Loading
             ctx.Connection.Send(new GameTime { Time = (uint) ctx.Connection.Server.ServerTime });
             ctx.Connection.Send(new Channel { ChannelNo = 1 }); // todo
 
-            // Show the player
             player.Show(ctx.Connection);
-
-            // Spawn the player
-            if (!_world.SpawnEntity(player))
-            {
-                _logger.LogWarning("Failed to spawn player entity");
-                ctx.Connection.Close();
-            }
+            _world.SpawnEntity(player);
 
             player.SendInventory();
         }

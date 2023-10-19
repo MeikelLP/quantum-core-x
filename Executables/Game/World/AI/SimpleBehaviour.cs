@@ -81,7 +81,7 @@ namespace QuantumCore.Game.World.AI
             _entity.Goto((int) targetPositionX, (int) targetPositionY);
         }
 
-        public async Task Update(double elapsedTime)
+        public void Update(double elapsedTime)
         {
             if (_entity == null)
             {
@@ -123,7 +123,7 @@ namespace QuantumCore.Game.World.AI
                             _attackCooldown -= elapsedTime;
                             if (_attackCooldown <= 0)
                             {
-                                await Attack(_targetEntity);
+                                Attack(_targetEntity).Wait(); // TODO
                                 _attackCooldown += 2000; // todo use attack speed
                             }
                         }

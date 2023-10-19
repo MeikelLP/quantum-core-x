@@ -85,7 +85,7 @@ namespace QuantumCore.Game.World.Entities
 
         protected abstract void OnNewNearbyEntity(IEntity entity);
         protected abstract void OnRemoveNearbyEntity(IEntity entity);
-        public abstract ValueTask OnDespawn();
+        public abstract void OnDespawn();
         public abstract void ShowEntity(IConnection connection);
         public abstract void HideEntity(IConnection connection);
 

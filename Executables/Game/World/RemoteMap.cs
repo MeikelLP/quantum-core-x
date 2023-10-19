@@ -12,6 +12,7 @@ public class RemoteMap : IMap
     public uint UnitY => PositionY / Map.MapUnit;
     public uint Width { get; }
     public uint Height { get; }
+    public IReadOnlyCollection<IEntity> Entities => throw new System.NotImplementedException();
 
     public IPAddress Host { get; set; }
     public ushort Port { get; set; }
@@ -35,12 +36,12 @@ public class RemoteMap : IMap
         throw new System.NotImplementedException();
     }
 
-    public bool SpawnEntity(IEntity entity)
+    public void SpawnEntity(IEntity entity)
     {
         throw new System.NotImplementedException();
     }
 
-    public Task DespawnEntity(IEntity entity)
+    public void DespawnEntity(IEntity entity)
     {
         throw new System.NotImplementedException();
     }

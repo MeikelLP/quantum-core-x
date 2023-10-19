@@ -13,13 +13,13 @@ namespace QuantumCore.API.Game.World
         public uint Width { get; }
         public uint Height { get; }
 
-        public List<IEntity> GetEntities();
+        public IReadOnlyCollection<IEntity> Entities { get; }
 
         public IEntity GetEntity(uint vid);
 
-        public bool SpawnEntity(IEntity entity);
+        public void SpawnEntity(IEntity entity);
 
-        public Task DespawnEntity(IEntity entity);
+        public void DespawnEntity(IEntity entity);
 
         public bool IsPositionInside(int x, int y);
 

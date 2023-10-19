@@ -246,12 +246,7 @@ namespace QuantumCore.Game.World.Entities
             // Reset movement info
             Stop();
 
-            // Spawn the player
-            if (!_world.SpawnEntity(this))
-            {
-                _logger.LogWarning("Failed to spawn player entity");
-                Connection.Close();
-            }
+            _world.SpawnEntity(this);
 
             Show(Connection);
 
@@ -760,9 +755,9 @@ namespace QuantumCore.Game.World.Entities
             (Map as Map)?.AddGroundItem(item, PositionX, PositionY, amount); // todo add method to IMap interface when we have an item interface...
         }
 
-        public async override ValueTask OnDespawn()
+        public override void OnDespawn()
         {
-            await Persist();
+            Persist().Wait(); // TODO
         }
 
         public ItemInstance GetItem(byte window, ushort position)

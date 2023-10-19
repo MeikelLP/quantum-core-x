@@ -209,7 +209,7 @@ namespace QuantumCore.Game.World.Entities
         {
         }
 
-        public override ValueTask OnDespawn()
+        public override void OnDespawn()
         {
             if (Group != null)
             {
@@ -219,8 +219,6 @@ namespace QuantumCore.Game.World.Entities
                     (Map as Map)?.EnqueueGroupRespawn(Group);
                 }
             }
-
-            return ValueTask.CompletedTask;
         }
 
         public override void ShowEntity(IConnection connection)

@@ -17,7 +17,7 @@ namespace QuantumCore.API.Game.World
         SpawnGroup? GetGroup(uint id);
         SpawnGroupCollection? GetGroupCollection(uint id);
         #nullable restore
-        bool SpawnEntity(IEntity e);
+        void SpawnEntity(IEntity e);
         void DespawnEntity(IEntity entity);
         uint GenerateVid();
         void RemovePlayer(IPlayerEntity e);
