@@ -128,11 +128,10 @@ namespace QuantumCore.Core.Networking
 
                         try
                         {
-                            await _pluginExecutor.ExecutePlugins<IPacketOperationListener>(_logger, x => x.OnPrePacketSentAsync(obj, CancellationToken.None));
-                            _logger.LogDebug("Sending bytes: {Bytes:X}", bytesToSend.ToArray());
-                            await _stream.WriteAsync(bytesToSend);
-                            await _stream.FlushAsync();
-                            await _pluginExecutor.ExecutePlugins<IPacketOperationListener>(_logger, x => x.OnPostPacketReceivedAsync(obj, bytes, CancellationToken.None));
+                            await _pluginExecutor.ExecutePlugins<IPacketOperationListener>(_logger, x => x.OnPrePacketSentAsync(obj, CancellationToken.None)).ConfigureAwait(false);
+                            await _stream.WriteAsync(bytesToSend).ConfigureAwait(false);
+                            await _stream.FlushAsync().ConfigureAwait(false);
+                            await _pluginExecutor.ExecutePlugins<IPacketOperationListener>(_logger, x => x.OnPostPacketReceivedAsync(obj, bytes, CancellationToken.None)).ConfigureAwait(false);
                         }
                         catch (Exception e)
                         {
@@ -144,7 +143,7 @@ namespace QuantumCore.Core.Networking
                     }
                     else
                     {
-                        await Task.Delay(1); // wait at least 1ms
+                        await Task.Delay(1).ConfigureAwait(false); // wait at least 1ms
                     }
                 }
                 catch (SocketException)
