@@ -50,7 +50,7 @@ namespace QuantumCore.Core.Networking
         {
             _client = client;
             _cts = new CancellationTokenSource();
-            SendPacketsWhenPossible().GetAwaiter(); // ignore warning
+            Task.Factory.StartNew(SendPacketsWhenPossible, TaskCreationOptions.LongRunning);
         }
 
         protected abstract void OnHandshakeFinished();
