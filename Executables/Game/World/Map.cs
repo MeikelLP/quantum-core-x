@@ -100,8 +100,9 @@ namespace QuantumCore.Game.World
                 }
 
                 _quadTree.QueryAround(nearby, entity.PositionX, entity.PositionY, Entity.ViewDistance, filter);
-                foreach (var e in nearby.Where(e => e != entity))
+                foreach (var e in nearby)
                 {
+                    if (e == entity) continue;
                     entity.AddNearbyEntity(e);
                     e.AddNearbyEntity(entity);
                 }
@@ -128,7 +129,6 @@ namespace QuantumCore.Game.World
                 // Remove entity from the quad tree
                 _quadTree.Remove(entity);
             }
-            _pendingRemovals.Clear();
 
             foreach (var entity in _entities)
             {
