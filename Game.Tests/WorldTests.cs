@@ -114,6 +114,7 @@ public class WorldTests
         };
         _playerEntity = ActivatorUtilities.CreateInstance<PlayerEntity>(services, _world, playerData, conn);
         _world.SpawnEntity(_playerEntity);
+        _world.Update(0.2); // spawn all entities
     }
 
     [Fact]
