@@ -467,11 +467,11 @@ public class CommandTests : IAsyncLifetime
         world.SpawnEntity(_player);
         _player.Move((int)(Map.MapUnit * 13), (int)(Map.MapUnit * 29)); // center of the map
         await File.WriteAllTextAsync("settings.toml", @"maps = [""map_a2"", ""map_b2""]");
-        _player.Map.GetEntities().Count.Should().Be(1);
+        _player.Map.Entities.Count.Should().Be(1);
 
         await _commandManager.Handle(_connection, "/spawn 101");
 
-        _player.Map.GetEntities().Count.Should().Be(2);
+        _player.Map.Entities.Count.Should().Be(2);
     }
 
     [Fact]
@@ -481,11 +481,11 @@ public class CommandTests : IAsyncLifetime
         world.SpawnEntity(_player);
         _player.Move((int)(Map.MapUnit * 13), (int)(Map.MapUnit * 29)); // center of the map
         await File.WriteAllTextAsync("settings.toml", @"maps = [""map_a2"", ""map_b2""]");
-        _player.Map.GetEntities().Count.Should().Be(1);
+        _player.Map.Entities.Count.Should().Be(1);
 
         await _commandManager.Handle(_connection, "/spawn 101 10");
 
-        _player.Map.GetEntities().Count.Should().Be(11);
+        _player.Map.Entities.Count.Should().Be(11);
     }
 
     [Fact]
