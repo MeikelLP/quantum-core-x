@@ -238,25 +238,11 @@ namespace QuantumCore.Game.World.Entities
                 return;
             }
 
-            _world.DespawnEntity(this);
-
             PositionX = x;
             PositionY = y;
 
             // Reset movement info
             Stop();
-
-            _world.SpawnEntity(this);
-
-            Show(Connection);
-
-            foreach (var entity in NearbyEntities)
-            {
-                if (entity is PlayerEntity p)
-                {
-                    p.Show(Connection);
-                }
-            }
         }
 
         private void CalculateDefence()
@@ -608,8 +594,8 @@ namespace QuantumCore.Game.World.Entities
                     if (args.ItemInstance is not null)
                     {
                         var item = _itemManager.GetItem(args.ItemInstance.ItemId);
-                        Player.MinWeaponDamage = (uint)(item.GetMinWeaponDamage() + item.Values[5]);
-                        Player.MinWeaponDamage = (uint)(item.GetMaxWeaponDamage() + item.Values[5]);
+                        Player.MinWeaponDamage = item.GetMinWeaponDamage();
+                        Player.MaxWeaponDamage = item.GetMaxWeaponDamage();
                     }
                     else
                     {
@@ -893,7 +879,7 @@ namespace QuantumCore.Game.World.Entities
                         // Equipment
                         if (Inventory.EquipmentWindow.GetItem(position) == null)
                         {
-                            Inventory.EquipmentWindow.SetItem(item, position);
+                            Inventory.SetEquipment(item, position);
                             item.Set(_cacheManager, Player.Id, window, position).Wait(); // TODO
                             CalculateDefence();
                             SendCharacterUpdate();
@@ -1091,6 +1077,7 @@ namespace QuantumCore.Game.World.Entities
 
         public void Disconnect()
         {
+            Inventory.OnSlotChanged -= Inventory_OnSlotChanged;
             Connection.Close();
         }
 

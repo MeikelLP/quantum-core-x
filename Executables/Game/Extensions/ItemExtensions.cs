@@ -13,13 +13,54 @@ namespace QuantumCore.Extensions;
 
 public static class ItemExtensions
 {
-    public static uint GetMinWeaponDamage(this ItemData item)
+    public static uint GetMinWeaponBaseDamage(this ItemData item)
     {
         return (uint) item.Values[3];
     }
-    public static uint GetMaxWeaponDamage(this ItemData item)
+
+    public static uint GetMaxWeaponBaseDamage(this ItemData item)
     {
         return (uint) item.Values[4];
+    }
+
+    public static uint GetMinMagicWeaponBaseDamage(this ItemData item)
+    {
+        return (uint) item.Values[1];
+    }
+
+    public static uint GetMaxMagicWeaponBaseDamage(this ItemData item)
+    {
+        return (uint) item.Values[2];
+    }
+
+    /// <summary>
+    /// Weapon damage added additionally to the base damage
+    /// </summary>
+    /// <param name="item"></param>
+    /// <returns></returns>
+    public static uint GetAdditionalWeaponDamage(this ItemData item)
+    {
+        return (uint) item.Values[5];
+    }
+
+    public static uint GetMinWeaponDamage(this ItemData item)
+    {
+        return item.GetMinWeaponBaseDamage() + item.GetAdditionalWeaponDamage();
+    }
+
+    public static uint GetMaxWeaponDamage(this ItemData item)
+    {
+        return item.GetMaxWeaponBaseDamage() + item.GetAdditionalWeaponDamage();
+    }
+
+    public static uint GetMinMagicWeaponDamage(this ItemData item)
+    {
+        return item.GetMinMagicWeaponBaseDamage() + item.GetAdditionalWeaponDamage();
+    }
+
+    public static uint GetMaxMagicWeaponDamage(this ItemData item)
+    {
+        return item.GetMaxMagicWeaponBaseDamage() + item.GetAdditionalWeaponDamage();
     }
 
     public static EquipmentSlots? GetWearSlot(this IItemManager itemManager, ItemInstance item)

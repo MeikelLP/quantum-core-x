@@ -337,5 +337,11 @@ namespace QuantumCore.Game.PlayerUtils
                 Log.Debug("Failed to place item");
             }
         }
+
+        public void SetEquipment(ItemInstance item, ushort position)
+        {
+            EquipmentWindow.SetItem(item, position);
+            OnSlotChanged?.Invoke(this, new SlotChangedEventArgs(item, _itemManager.GetWearSlot(item)!.Value));
+        }
     }
 }

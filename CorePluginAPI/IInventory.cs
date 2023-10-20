@@ -21,4 +21,5 @@ public interface IInventory
     ItemInstance GetItem(ushort position);
     bool IsSpaceAvailable(ItemInstance item, ushort position);
     void MoveItem(ItemInstance item, ushort fromPosition, ushort position);
+    void SetEquipment(ItemInstance item, ushort position);
 }
