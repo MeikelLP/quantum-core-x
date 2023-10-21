@@ -107,7 +107,7 @@ namespace QuantumCore.Game
             // Put all new connections into login phase
             RegisterNewConnectionListener(connection =>
             {
-                connection.SetPhaseAsync(EPhases.Login);
+                connection.SetPhase(EPhases.Login);
                 return true;
             });
 

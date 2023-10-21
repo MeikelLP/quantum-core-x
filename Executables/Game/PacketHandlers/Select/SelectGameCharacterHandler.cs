@@ -42,7 +42,7 @@ public class SelectGameCharacterHandler : IGamePacketHandler<SelectCharacter>
         var accountId = ctx.Connection.AccountId ?? default; // todo clean solution
 
         // Let the client load the game
-        ctx.Connection.SetPhaseAsync(EPhases.Loading);
+        ctx.Connection.SetPhase(EPhases.Loading);
 
         // Load player
         var player = await Player.GetPlayer(_db, _cacheManager, accountId, ctx.Packet.Slot);

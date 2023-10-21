@@ -165,7 +165,7 @@ namespace QuantumCore.Core.Networking
             // Generate random handshake and start the handshaking
             Handshake = CoreRandom.GenerateUInt32();
             Handshaking = true;
-            this.SetPhaseAsync(EPhases.Handshake);
+            this.SetPhase(EPhases.Handshake);
             SendHandshake();
         }
 

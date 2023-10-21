@@ -24,7 +24,7 @@ namespace QuantumCore.Game.Commands
 
             // Despawn player
             _world.DespawnEntity(context.Player);
-            context.Player.Connection.SetPhaseAsync(EPhases.Select);
+            context.Player.Connection.SetPhase(EPhases.Select);
         }
     }
 }

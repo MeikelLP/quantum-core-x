@@ -83,7 +83,7 @@ namespace QuantumCore.Game.PacketHandlers
                 "SELECT Empire FROM account.accounts WHERE Id = @AccountId", new {AccountId = token.AccountId});
 
             ctx.Connection.Send(new Empire { EmpireId = empire });
-            ctx.Connection.SetPhaseAsync(EPhases.Select);
+            ctx.Connection.SetPhase(EPhases.Select);
             ctx.Connection.Send(characters);
         }
     }

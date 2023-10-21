@@ -39,7 +39,7 @@ namespace QuantumCore.Auth
 
         private bool NewConnection(IConnection connection)
         {
-            connection.SetPhaseAsync(EPhases.Auth);
+            connection.SetPhase(EPhases.Auth);
             return true;
         }
     }

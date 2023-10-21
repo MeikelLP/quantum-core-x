@@ -30,7 +30,7 @@ namespace QuantumCore.Game.PacketHandlers.Loading
             }
 
             // Enable game phase
-            ctx.Connection.SetPhaseAsync(EPhases.Game);
+            ctx.Connection.SetPhase(EPhases.Game);
 
             ctx.Connection.Send(new GameTime { Time = (uint) ctx.Connection.Server.ServerTime });
             ctx.Connection.Send(new Channel { ChannelNo = 1 }); // todo

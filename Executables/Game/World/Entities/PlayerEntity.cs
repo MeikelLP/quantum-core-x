@@ -299,7 +299,7 @@ namespace QuantumCore.Game.World.Entities
             // todo spawn with invisible affect
 
             SendChatCommand("CloseRestartWindow");
-            Connection.SetPhaseAsync(EPhases.Game);
+            Connection.SetPhase(EPhases.Game);
 
             var remove = new RemoveCharacter { Vid = Vid };
 

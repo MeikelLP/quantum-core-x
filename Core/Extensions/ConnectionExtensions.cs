@@ -7,7 +7,7 @@ namespace QuantumCore.Extensions;
 
 public static class ConnectionExtensions
 {
-    public static void SetPhaseAsync(this IConnection connection, EPhases phase)
+    public static void SetPhase(this IConnection connection, EPhases phase)
     {
         connection.Phase = phase;
         connection.Send(new GCPhase
