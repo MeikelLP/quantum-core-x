@@ -24,6 +24,6 @@ namespace QuantumCore.API.Game.World
     {
         public uint Id { get; set; }
         public string Name { get; set; }
-        public List<SpawnGroupCollectionMember> Members { get; } = new List<SpawnGroupCollectionMember>();
+        public List<SpawnGroupCollectionMember> Groups { get; } = new List<SpawnGroupCollectionMember>();
     }
 }

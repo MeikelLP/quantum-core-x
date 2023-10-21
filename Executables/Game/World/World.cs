@@ -172,7 +172,7 @@ namespace QuantumCore.Game.World
             }
         }
 
-        public IMap GetMapAt(uint x, uint y)
+        public IMap? GetMapAt(uint x, uint y)
         {
             var gridX = x / Map.MapUnit;
             var gridY = y / Map.MapUnit;
@@ -180,9 +180,9 @@ namespace QuantumCore.Game.World
             return _world.Get(gridX, gridY);
         }
 
-        public IMap GetMapByName(string name)
+        public IMap? GetMapByName(string name)
         {
-            return _maps[name];
+            return _maps.TryGetValue(name, out var map) ? map : null;
         }
 
         public List<IMap> FindMapsByName(string needle)
@@ -243,10 +243,17 @@ namespace QuantumCore.Game.World
         public async ValueTask<bool> SpawnEntity(IEntity e)
         {
             var map = GetMapAt((uint) e.PositionX, (uint) e.PositionY);
-            if (map == null) return false;
+            if (map == null)
+            {
+                _logger.LogWarning("Could not spawn entity at ({X};{Y}) No Map found for this coordinate", e.PositionX, e.PositionY);
+                return false;
+            }
 
-            if (e.GetType() == typeof(PlayerEntity))
-                AddPlayer((PlayerEntity)e);
+            if (e is IPlayerEntity player)
+            {
+                AddPlayer(player);
+                _logger.LogInformation("Player {PlayerName} ({PlayerId}) joined the map {MapName}", player.Name, player.Vid, map.Name);
+            }
 
             await _pluginExecutor.ExecutePlugins<IGameEntityLifetimeListener>(_logger, x => x.OnPreCreatedAsync());
             var result = map.SpawnEntity(e);
@@ -271,7 +278,7 @@ namespace QuantumCore.Game.World
             return ++_vid;
         }
 
-        private void AddPlayer(PlayerEntity e)
+        private void AddPlayer(IPlayerEntity e)
         {
             if (_players.ContainsKey(e.Name))
                 _players[e.Name] = e;
