@@ -66,7 +66,7 @@ namespace QuantumCore.Core.Networking
             _logger.LogInformation("New connection from {RemoteEndPoint}", _client.Client.RemoteEndPoint?.ToString());
 
             _stream = _client.GetStream();
-            await StartHandshake();
+            StartHandshake();
 
             try
             {
@@ -154,7 +154,7 @@ namespace QuantumCore.Core.Networking
             }
         }
 
-        public async Task StartHandshake()
+        public void StartHandshake()
         {
             if (Handshaking)
             {
