@@ -9,7 +9,7 @@ using QuantumCore.Game.World;
 
 namespace QuantumCore.Game.Services;
 
-internal class AtlasProvider : IAtlasProvider
+internal partial class AtlasProvider : IAtlasProvider
 {
     private readonly IConfiguration _configuration;
     private readonly IMonsterManager _monsterManager;
@@ -18,6 +18,12 @@ internal class AtlasProvider : IAtlasProvider
     private readonly IOptions<HostingOptions> _options;
     private readonly ICacheManager _cacheManager;
     private readonly ILogger<AtlasProvider> _logger;
+
+    /// <summary>
+    /// Regex for parsing lines in the atlas info
+    /// </summary>
+    [GeneratedRegex(@"^([a-zA-Z0-9\/_]+)[\s]+([0-9]+)[\s]+([0-9]+)[\s]+([0-9]+)[\s]+([0-9]+)$", RegexOptions.Compiled, 100)]
+    private static partial Regex LineParser();
 
     public AtlasProvider(IConfiguration configuration, IMonsterManager monsterManager,
         IAnimationManager animationManager, ISpawnPointProvider spawnPointProvider, IOptions<HostingOptions> options,
@@ -34,9 +40,6 @@ internal class AtlasProvider : IAtlasProvider
 
     public async Task<IEnumerable<IMap>> GetAsync(IWorld world)
     {
-        // Regex for parsing lines in the atlas info
-        var regex = new Regex(@"^([a-zA-Z0-9\/_]+)[\s]+([0-9]+)[\s]+([0-9]+)[\s]+([0-9]+)[\s]+([0-9]+)$");
-
         var maxX = 0u;
         var maxY = 0u;
 
@@ -56,7 +59,7 @@ internal class AtlasProvider : IAtlasProvider
             lineNo++;
             if (string.IsNullOrWhiteSpace(line)) continue; // skip empty lines
 
-            var match = regex.Match(line);
+            var match = LineParser().Match(line);
             if (match.Success)
             {
                 try
