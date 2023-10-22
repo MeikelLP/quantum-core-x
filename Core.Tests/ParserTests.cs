@@ -10,6 +10,19 @@ namespace Core.Tests;
 
 public class ParserTests
 {
+    [Theory]
+    [InlineData("//r	751	311	10	10	0	0	5s	100	1	101")]
+    [InlineData("	//r	751	311	10	10	0	0	5s	100	1	101")]
+    [InlineData("	")]
+    [InlineData("")]
+    [InlineData("//")]
+    public void Spawn_Null(string input)
+    {
+        var result = ParserUtils.GetSpawnFromLine(input);
+
+        result.Should().BeNull();
+    }
+
     [Fact]
     public void Spawn_Regular()
     {
