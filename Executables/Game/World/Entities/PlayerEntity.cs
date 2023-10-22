@@ -648,10 +648,10 @@ namespace QuantumCore.Game.World.Entities
                 case EPoints.StatusPoints:
                     return Player.AvailableStatusPoints;
                 default:
-                    // if (Enum.GetValues<EPoints>().Contains(point))
-                    // {
-                    //     _logger.LogWarning("Point {Point} is not implemented on player", point);
-                    // }
+                    if (Enum.GetValues<EPoints>().Contains(point))
+                    {
+                        _logger.LogWarning("Point {Point} is not implemented on player", point);
+                    }
 
                     return 0;
             }
