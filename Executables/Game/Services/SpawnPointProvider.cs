@@ -10,6 +10,8 @@ internal class SpawnPointProvider : ISpawnPointProvider
 
         await AddSpawnPointsFromFile($"data/maps/{name}/regen.txt", list);
         await AddSpawnPointsFromFile($"data/maps/{name}/npc.txt", list);
+        await AddSpawnPointsFromFile($"data/maps/{name}/stone.txt", list);
+        await AddSpawnPointsFromFile($"data/maps/{name}/boss.txt", list);
 
         return list.ToArray();
     }
