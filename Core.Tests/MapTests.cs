@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.Extensions.Configuration;
@@ -140,8 +141,8 @@ public class MapTests
         };
         await _world.Load();
 
-        _map.GetEntities().Should().HaveCount(1);
-        var entity = _map.GetEntities()[0];
+        _map.Entities.Should().HaveCount(1);
+        var entity = _map.Entities.ElementAt(0);
         var mob = entity.Should().BeOfType<MonsterEntity>().Subject;
         mob.Proto.Id.Should().Be(101);
     }
@@ -161,8 +162,8 @@ public class MapTests
         };
         await _world.Load();
 
-        _map.GetEntities().Should().HaveCount(3);
-        var mobs = _map.GetEntities().Should().AllBeOfType<MonsterEntity>().Subject;
+        _map.Entities.Should().HaveCount(3);
+        var mobs = _map.Entities.Should().AllBeOfType<MonsterEntity>().Subject;
         mobs.Should().AllSatisfy(x => x.Proto.Id.Should().Be(101));
     }
 
@@ -181,8 +182,8 @@ public class MapTests
         };
         await _world.Load();
 
-        _map.GetEntities().Should().HaveCount(3);
-        var mobs = _map.GetEntities().Should().AllBeOfType<MonsterEntity>().Subject;
+        _map.Entities.Should().HaveCount(3);
+        var mobs = _map.Entities.Should().AllBeOfType<MonsterEntity>().Subject;
         mobs.Should().AllSatisfy(x => x.Proto.Id.Should().Be(101));
     }
 }

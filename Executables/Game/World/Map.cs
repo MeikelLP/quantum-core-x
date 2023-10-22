@@ -285,7 +285,7 @@ namespace QuantumCore.Game.World
             EventSystem.EnqueueEvent(() =>
             {
                 // TODO
-                SpawnGroup(group).Wait();
+                SpawnGroup(group);
                 return 0;
             }, group.SpawnPoint.RespawnTime * 1000);
         }
