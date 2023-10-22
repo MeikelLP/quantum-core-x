@@ -140,6 +140,7 @@ public class MapTests
             }
         };
         await _world.Load();
+        _world.Update(0); // spawn entities
 
         _map.Entities.Should().HaveCount(1);
         var entity = _map.Entities.ElementAt(0);
@@ -161,6 +162,7 @@ public class MapTests
             }
         };
         await _world.Load();
+        _world.Update(0); // spawn entities
 
         _map.Entities.Should().HaveCount(3);
         var mobs = _map.Entities.Should().AllBeOfType<MonsterEntity>().Subject;
@@ -181,6 +183,7 @@ public class MapTests
             }
         };
         await _world.Load();
+        _world.Update(0); // spawn entities
 
         _map.Entities.Should().HaveCount(3);
         var mobs = _map.Entities.Should().AllBeOfType<MonsterEntity>().Subject;
