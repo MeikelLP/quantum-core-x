@@ -89,9 +89,9 @@ internal static partial class ParserUtils
         item.Id = uint.Parse(line.Replace("Vnum", "").Trim());
         while ((line = (await sr.ReadLineAsync())!.Trim()) != "}")
         {
-            if (string.IsNullOrWhiteSpace(line)) break;
+            if (string.IsNullOrWhiteSpace(line)) continue;
             var splitted = SplitByWhitespaceRegex().Split(line);
-            item.Members.Add(new SpawnGroupCollectionMember
+            item.Groups.Add(new SpawnGroupCollectionMember
             {
                 Id = uint.Parse(splitted[^2].Trim()),
                 Amount = byte.Parse(splitted[^1].Trim())

@@ -133,7 +133,7 @@ public class ParserTests
         {
             Name = "a1_01",
             Id = 101,
-            Members =
+            Groups =
             {
                 new SpawnGroupCollectionMember { Id = 101, Amount = 1 },
                 new SpawnGroupCollectionMember { Id = 171, Amount = 1 }
@@ -165,7 +165,7 @@ public class ParserTests
         {
             Name = "a1_01",
             Id = 101,
-            Members =
+            Groups =
             {
                 new SpawnGroupCollectionMember { Id = 101, Amount = 1 },
                 new SpawnGroupCollectionMember { Id = 171, Amount = 1 }
@@ -192,10 +192,36 @@ public class ParserTests
         {
             Name = "a1_01",
             Id = 101,
-            Members =
+            Groups =
             {
                 new SpawnGroupCollectionMember { Id = 101, Amount = 1 },
                 new SpawnGroupCollectionMember { Id = 171, Amount = 1 }
+            }
+        });
+    }
+
+    [Fact]
+    public async Task GroupCollection_EmptyLinesInside()
+    {
+        var input = new StringReader("""
+                                       Group	a1_05		
+                                       {			
+                                       	Vnum	105	
+                                       			
+                                       	1	112	1
+                                       	2	113	1
+                                       }			
+                                       """);
+        var result = await ParserUtils.GetSpawnGroupCollectionFromBlock(input);
+
+        result.Should().BeEquivalentTo(new SpawnGroupCollection
+        {
+            Name = "a1_05",
+            Id = 105,
+            Groups =
+            {
+                new SpawnGroupCollectionMember { Id = 112, Amount = 1 },
+                new SpawnGroupCollectionMember { Id = 113, Amount = 1 }
             }
         });
     }
