@@ -106,7 +106,7 @@ namespace QuantumCore.Core.Networking
             _packetsToSend.Enqueue(packet);
         }
 
-        public async Task SendPacketsWhenAvailable()
+        private async Task SendPacketsWhenAvailable()
         {
             if (!_client.Connected)
             {
