@@ -180,7 +180,7 @@ namespace QuantumCore.Game.World.Entities
         public abstract void SetPoint(EPoints point, uint value);
         public abstract uint GetPoint(EPoints point);
 
-        public async void Attack(IEntity victim, byte type)
+        public void Attack(IEntity victim, byte type)
         {
             if (type == 0)
             {
@@ -193,7 +193,7 @@ namespace QuantumCore.Game.World.Entities
                     case 6:
                     case 7:
                         // melee sort attack
-                        await MeleeAttack(victim);
+                        MeleeAttack(victim);
                         break;
                     case 1:
                         // todo range attack
@@ -209,7 +209,7 @@ namespace QuantumCore.Game.World.Entities
             }
         }
 
-        private async Task MeleeAttack(IEntity victim)
+        private void MeleeAttack(IEntity victim)
         {
             // todo verify victim is in range
 
