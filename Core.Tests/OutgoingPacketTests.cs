@@ -6,6 +6,7 @@ using Bogus;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using QuantumCore.API.Game.Types;
 using QuantumCore.Extensions;
 using QuantumCore.Game.Packets;
 using QuantumCore.Game.Packets.General;
@@ -160,7 +161,7 @@ public class OutgoingPacketTests
                 .Append(obj.Slot)
                 .Concat(BitConverter.GetBytes(obj.Character.Id))
                 .Concat(Encoding.ASCII.GetBytes(obj.Character.Name))
-                .Append((byte)0) // null byte for end of string 
+                .Append((byte)0) // null byte for end of string
                 .Append(obj.Character.Level)
                 .Concat(BitConverter.GetBytes(obj.Character.Playtime))
                 .Append(obj.Character.St)
@@ -266,11 +267,7 @@ public class OutgoingPacketTests
                 faker.Random.UShort(),
                 faker.Random.UShort()
             })
-            .RuleFor(x => x.Affects, faker => new[]
-            {
-                faker.Random.UInt(),
-                faker.Random.UInt()
-            })
+            .RuleFor(x => x.Affects, faker => faker.PickRandom<EAffects>())
             .Generate();
         var bytes = _serializer.Serialize(obj);
 
@@ -284,7 +281,7 @@ public class OutgoingPacketTests
                 .Append(obj.MoveSpeed)
                 .Append(obj.AttackSpeed)
                 .Append(obj.State)
-                .Concat(obj.Affects.SelectMany(BitConverter.GetBytes))
+                .Concat(BitConverter.GetBytes((ulong)obj.Affects))
                 .Concat(BitConverter.GetBytes(obj.GuildId))
                 .Concat(BitConverter.GetBytes(obj.RankPoints))
                 .Append(obj.PkMode)

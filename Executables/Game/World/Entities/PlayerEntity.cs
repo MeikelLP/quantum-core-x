@@ -1,5 +1,6 @@
 using System.Data;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using Dapper;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
@@ -10,8 +11,6 @@ using QuantumCore.Core.Cache;
 using QuantumCore.Core.Utils;
 using QuantumCore.Database;
 using QuantumCore.Extensions;
-using QuantumCore.Game.Extensions;
-using QuantumCore.Game.Items;
 using QuantumCore.Game.Packets;
 using QuantumCore.Game.PlayerUtils;
 using Affect = QuantumCore.API.Core.Models.Affect;
@@ -33,7 +32,6 @@ namespace QuantumCore.Game.World.Entities
         public IQuickSlotBar QuickSlotBar { get; }
         public IQuest CurrentQuest { get; set; }
         public Dictionary<string, IQuest> Quests { get; } = new();
-        public IList<Affect> Affects { get; private set; }
 
         public override byte HealthPercentage {
             get {
@@ -82,7 +80,7 @@ namespace QuantumCore.Game.World.Entities
                 }
             }
         }
-        
+
         private byte _attackSpeed = 140;
         private byte _movementSpeed = 100;
         private uint _defence;
@@ -93,6 +91,8 @@ namespace QuantumCore.Game.World.Entities
         private const int ManaRegenInterval = 3 * 1000;
         private double _healthRegenTime = HealthRegenInterval;
         private double _manaRegenTime = ManaRegenInterval;
+        private readonly List<Affect> _affects = new();
+
         private readonly IItemManager _itemManager;
         private readonly IJobManager _jobManager;
         private readonly IAffectManager _affectController;
@@ -105,7 +105,7 @@ namespace QuantumCore.Game.World.Entities
 
         public PlayerEntity(Player player, IGameConnection connection, IItemManager itemManager, IJobManager jobManager,
             IExperienceManager experienceManager, IAnimationManager animationManager, IDbConnection db,
-            IQuestManager questManager, ICacheManager cacheManager, IWorld world, ILogger<PlayerEntity> logger, IAffectManager affectController) 
+            IQuestManager questManager, ICacheManager cacheManager, IWorld world, ILogger<PlayerEntity> logger, IAffectManager affectController)
             : base(animationManager, world.GenerateVid())
         {
             Connection = connection;
@@ -151,51 +151,70 @@ namespace QuantumCore.Game.World.Entities
             EntityClass = player.PlayerClass;
 
             Groups = new List<Guid>();
-            Affects = new List<Affect>();
         }
 
         public byte GetMovementSpeed()
         {
             var totalApplyValue = 0;
-            if (Affects != null && Affects.Count > 0)
+            if (_affects.Count > 0)
             {
-                // TODO: Fix the LINQ
-                totalApplyValue = Affects.Where(a => a.ApplyOn == (int)EPoints.MoveSpeed).Sum(a => a.ApplyValue);
-            }
-            return (byte)(_movementSpeed + totalApplyValue);
-        }
-
-        public Affect HasAffect(Affect affect)
-        {
-            for (var i = 0; i < Affects.Count; i++)
-            {
-                if (Affects[i].Type == affect.Type && Affects[i].ApplyOn == affect.ApplyOn)
+                foreach (var affect in _affects)
                 {
-                    return Affects[i];
+                    if (affect.ApplyOn == EAffectType.MovementSpeed)
+                    {
+                        totalApplyValue += affect.ApplyValue;
+                    }
                 }
             }
-            return null;
+            return (byte)(_movementSpeed + Math.Min(totalApplyValue, byte.MaxValue - _movementSpeed)); // min to not overflow byte
+        }
+
+        public bool TryGetAffect(Affect affect, [MaybeNullWhen(false)] out Affect result)
+        {
+            for (var i = 0; i < _affects.Count; i++)
+            {
+                if (_affects[i].Type == affect.Type && _affects[i].ApplyOn == affect.ApplyOn)
+                {
+                    result = _affects[i];
+                    return true;
+                }
+            }
+
+            result = null;
+            return false;
         }
 
         public async Task AddAffect(Affect affect)
         {
-            Affects.Add(affect);
+            _affects.Add(affect);
+            Player.Affects |= (EAffects)(1 << (byte)affect.Flag - 1); // -1 due to offset
             await SendCharacterUpdate();
             await SendPoints();
         }
 
         public async Task RemoveAffect(Affect affect)
         {
-            for (var i = 0; i < Affects.Count; i++)
+            for (var i = 0; i < _affects.Count; i++)
             {
-                if (Affects[i].Type == affect.Type && Affects[i].ApplyOn == affect.ApplyOn)
+                if (_affects[i].Type == affect.Type && _affects[i].ApplyOn == affect.ApplyOn)
                 {
-                    Affects.RemoveAt(i);
+                    _affects.RemoveAt(i);
                 }
             }
-            await _affectController.SendAffectRemovePacket(this, affect.Type, (byte) affect.ApplyOn);
+            await _affectController.SendAffectRemovePacket(this, affect.Type, affect.ApplyOn);
             await SendCharacterUpdate();
             await SendPoints();
+        }
+
+        public Task SendPoint(EPoints point)
+        {
+            return Connection.Send(new CharacterPointUpdate
+            {
+                Vid = Vid,
+                Type = (byte)point,
+                Value = GetPoint(point),
+                Amount = 0
+            });
         }
 
         public async Task Load()
@@ -204,13 +223,13 @@ namespace QuantumCore.Game.World.Entities
                 "SELECT Empire FROM account.accounts WHERE Id = @AccountId", new {AccountId = Player.AccountId});
             await Inventory.Load();
             await QuickSlotBar.Load();
-            Health = (int) GetPoint(EPoints.MaxHp); // todo: cache hp of player 
+            Health = (int) GetPoint(EPoints.MaxHp); // todo: cache hp of player
             Mana = (int) GetPoint(EPoints.MaxSp);
             await LoadPermGroups();
-            
+
             _questManager.InitializePlayer(this);
             await _affectController.LoadAffect(this);
-            
+
             CalculateDefence();
         }
 
@@ -241,10 +260,10 @@ namespace QuantumCore.Game.World.Entities
         private async Task Warp(int x, int y)
         {
             await _world.DespawnEntity(this);
-            
+
             PositionX = x;
             PositionY = y;
-            
+
             var host = _world.GetMapHost(PositionX, PositionY);
 
             await Persist();
@@ -261,7 +280,7 @@ namespace QuantumCore.Game.World.Entities
         public override async Task Move(int x, int y)
         {
             if (PositionX == x && PositionY == y) return;
-            
+
             if (!Map.IsPositionInside(x, y))
             {
                 await Warp(x, y);
@@ -297,7 +316,7 @@ namespace QuantumCore.Game.World.Entities
         private void CalculateDefence()
         {
             _defence = GetPoint(EPoints.Level) + (uint)Math.Floor(0.8 * GetPoint(EPoints.Ht));
-            
+
             foreach (var slot in Enum.GetValues<EquipmentSlots>())
             {
                 var item = Inventory.EquipmentWindow.GetItem(slot);
@@ -307,9 +326,9 @@ namespace QuantumCore.Game.World.Entities
 
                 _defence += (uint)proto.Values[1] + (uint)proto.Values[5] * 2;
             }
-            
+
             _logger.LogDebug("Calculate defence value for {Name}, result: {Defence}", Name, _defence);
-            
+
             // todo add defence bonus from quests
         }
 
@@ -319,7 +338,7 @@ namespace QuantumCore.Game.World.Entities
             {
                 return;
             }
-            
+
             await base.Die();
 
             var dead = new CharacterDead { Vid = Vid };
@@ -343,15 +362,15 @@ namespace QuantumCore.Game.World.Entities
             Shop?.Close(this);
 
             Dead = false;
-            
+
             // todo implement respawn in town
             // todo spawn with invisible affect
-            
+
             await SendChatCommand("CloseRestartWindow");
             await Connection.SetPhaseAsync(EPhases.Game);
 
             var remove = new RemoveCharacter { Vid = Vid };
-            
+
             await Connection.Send(remove);
             await Show(Connection);
 
@@ -361,7 +380,7 @@ namespace QuantumCore.Game.World.Entities
                 {
                     await ShowEntity(pe.Connection);
                 }
-                
+
                 await entity.ShowEntity(Connection);
             });
 
@@ -378,7 +397,7 @@ namespace QuantumCore.Game.World.Entities
             var shouldHavePoints = (uint) ((Player.Level - 1) * 3);
             var steps = (byte) Math.Floor(GetPoint(EPoints.Experience) / (double)GetPoint(EPoints.NeededExperience) * 4);
             shouldHavePoints += steps;
-            
+
             if (shouldHavePoints <= Player.GivenStatusPoints)
             {
                 // Remove available points if possible
@@ -393,7 +412,7 @@ namespace QuantumCore.Game.World.Entities
 
                 return;
             }
-            
+
             Player.AvailableStatusPoints += shouldHavePoints - Player.GivenStatusPoints;
             Player.GivenStatusPoints = shouldHavePoints;
         }
@@ -402,11 +421,11 @@ namespace QuantumCore.Game.World.Entities
         {
             var exp = GetPoint(EPoints.Experience);
             var needed = GetPoint(EPoints.NeededExperience);
-            
+
             if (exp >= needed)
             {
                 // todo level up animation
-                
+
                 await AddPoint(EPoints.Level, 1);
                 await SetPoint(EPoints.Experience, exp - needed);
 
@@ -417,7 +436,7 @@ namespace QuantumCore.Game.World.Entities
 
                 return true;
             }
-            
+
             GiveStatusPoints();
             return false;
         }
@@ -439,7 +458,7 @@ namespace QuantumCore.Game.World.Entities
             var b = (GetPoint(EPoints.Dx) * 4 + GetPoint(EPoints.Level) * 2) / 6;
             return 100 * ((b > 90 ? 90 : b) + 210) / 300;
         }
-        
+
         public async override Task Update(double elapsedTime)
         {
             if (Dead) return;
@@ -521,7 +540,7 @@ namespace QuantumCore.Game.World.Entities
             {
                 return;
             }
-            
+
             switch (point)
             {
                 case EPoints.Level:
@@ -554,7 +573,7 @@ namespace QuantumCore.Game.World.Entities
                     {
                         await CheckLevelUp();
                     }
-                    
+
                     break;
                 case EPoints.Gold:
                     var gold = Player.Gold + value;
@@ -729,10 +748,10 @@ namespace QuantumCore.Game.World.Entities
         private async Task Persist()
         {
             await QuickSlotBar.Persist();
-            
+
             Player.PositionX = PositionX;
             Player.PositionY = PositionY;
-            
+
             await _cacheManager.Set($"player:{Player.Id}", Player);
         }
 
@@ -763,7 +782,7 @@ namespace QuantumCore.Game.World.Entities
             {
                 item.Count -= count;
                 await item.Persist(_cacheManager);
-                
+
                 await SendItem(item);
 
                 item = _itemManager.CreateItem(_itemManager.GetItem(item.ItemId), count);
@@ -789,7 +808,7 @@ namespace QuantumCore.Game.World.Entities
                 await SendChatInfo("No inventory space left");
                 return;
             }
-            
+
             await SendItem(item);
             await Map.DespawnEntity(groundItem);
         }
@@ -797,12 +816,12 @@ namespace QuantumCore.Game.World.Entities
         public async Task DropGold(uint amount)
         {
             // todo prevent crashing the server with dropping gold too often ;)
-            
+
             if (amount > GetPoint(EPoints.Gold))
             {
                 return; // We can't drop more gold than we have ^^
             }
-            
+
             await AddPoint(EPoints.Gold, -(int)amount);
             await SendPoints();
 
@@ -848,7 +867,7 @@ namespace QuantumCore.Game.World.Entities
                         {
                             return Inventory.EquipmentWindow.GetItem(position) == null;
                         }
-                        
+
                         return false;
                     }
                     else
@@ -875,7 +894,7 @@ namespace QuantumCore.Game.World.Entities
                 // No wear flags -> not wearable
                 return false;
             }
-            
+
             // Check anti flags
             var antiFlags = (EAntiFlags) proto.AntiFlags;
             if (antiFlags.HasFlag(AntiFlagClass))
@@ -899,13 +918,13 @@ namespace QuantumCore.Game.World.Entities
                     }
                 }
             }
-            
+
             return true;
         }
 
         public async Task RespawnInvisible(IPlayerEntity player, int duration)
         {
-            await _affectController.AddAffect(player, (int) EAffectTypes.ReviveInvisible, 0, 0, (int) EAffectBits.MoveSpeedPotion, duration, 0);
+            await _affectController.AddAffect(player, EAffectType.ReviveInvisible, 0, 0, EAffects.MovSpeedPotion, duration, 0);
         }
 
         public async Task<bool> DestroyItem(ItemInstance item)
@@ -919,7 +938,7 @@ namespace QuantumCore.Game.World.Entities
             await SendRemoveItem(item.Window, (ushort) item.Position);
             return true;
         }
-        
+
         public async Task RemoveItem(ItemInstance item)
         {
             switch (item.Window)
@@ -964,7 +983,7 @@ namespace QuantumCore.Game.World.Entities
                     {
                         // Inventory
                         await Inventory.PlaceItem(item, position);
-                    } 
+                    }
                     break;
             }
         }
@@ -1020,7 +1039,7 @@ namespace QuantumCore.Game.World.Entities
         public async Task SendItem(ItemInstance item)
         {
             Debug.Assert(item.PlayerId == Player.Id);
-            
+
             var p = new SetItem {
                 Window = item.Window,
                 Position = (ushort)item.Position,
@@ -1064,9 +1083,9 @@ namespace QuantumCore.Game.World.Entities
                 Empire = Empire,
                 Level = Player.Level,
                 Parts = new ushort[] {
-                    (ushort)(Inventory.EquipmentWindow.Body?.ItemId ?? 0), 
-                    (ushort)(Inventory.EquipmentWindow.Weapon?.ItemId ?? 0), 
-                    0, 
+                    (ushort)(Inventory.EquipmentWindow.Body?.ItemId ?? 0),
+                    (ushort)(Inventory.EquipmentWindow.Weapon?.ItemId ?? 0),
+                    0,
                     (ushort)(Inventory.EquipmentWindow.Hair?.ItemId ?? 0)
                 }
             });
@@ -1082,11 +1101,12 @@ namespace QuantumCore.Game.World.Entities
                     (ushort)(Inventory.EquipmentWindow.Hair?.ItemId ?? 0)
                 },
                 MoveSpeed = GetMovementSpeed(),
-                AttackSpeed = _attackSpeed
+                AttackSpeed = _attackSpeed,
+                Affects = Player.Affects
             };
-            
+
             await Connection.Send(packet);
-            
+
             await ForEachNearbyEntity(async entity =>
             {
                 if (entity is PlayerEntity p)
@@ -1107,7 +1127,7 @@ namespace QuantumCore.Game.World.Entities
             };
             await Connection.Send(chat);
         }
-		
+
         public async Task SendChatCommand(string message)
         {
             var chat = new ChatOutcoming
@@ -1119,7 +1139,7 @@ namespace QuantumCore.Game.World.Entities
             };
             await Connection.Send(chat);
         }
-		
+
         public async Task SendChatInfo(string message)
         {
             var chat = new ChatOutcoming
@@ -1142,7 +1162,7 @@ namespace QuantumCore.Game.World.Entities
             }
             await Connection.Send(packet);
         }
-        
+
         public async Task Show(IConnection connection)
         {
             await SendCharacter(connection);

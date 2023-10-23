@@ -1,5 +1,6 @@
 using System;
 using Dapper.Contrib.Extensions;
+using QuantumCore.API.Game.Types;
 
 namespace QuantumCore.Database;
 
@@ -9,12 +10,12 @@ public class Affect
     [ExplicitKey]
     public Guid PlayerId { get; set; }
     [ExplicitKey]
-    public long Type { get; set; }
+    public EAffectType Type { get; set; }
     [ExplicitKey]
-    public byte ApplyOn { get; set; }
+    public EAffectType ApplyOn { get; set; }
     [ExplicitKey]
     public int ApplyValue { get; set; }
-    public int Flag { get; set; }
+    public EAffects Flag { get; set; }
     public DateTime Duration { get; set; }
     public int SpCost { get; set; }
 }

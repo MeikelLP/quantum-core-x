@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game.Types;
@@ -14,14 +15,12 @@ namespace QuantumCore.API.Game.World
         IInventory Inventory { get; }
         IEntity Target { get; set; }
         IList<Guid> Groups { get; }
-        IList<Affect> Affects { get; }
         IShop Shop { get; set; }
         IQuickSlotBar QuickSlotBar { get; }
         IQuest CurrentQuest { get; set; }
         Dictionary<string, IQuest> Quests { get; }
         EAntiFlags AntiFlagClass { get; }
         EAntiFlags AntiFlagGender { get; }
-        
         Task Load();
         T GetQuestInstance<T>() where T : IQuest;
         Task Respawn(bool town);
@@ -53,7 +52,9 @@ namespace QuantumCore.API.Game.World
         Task Show(IConnection connection);
         void Disconnect();
         string ToString();
-        Affect HasAffect(Affect affect);
+#nullable enable
+        bool TryGetAffect(Affect affect, [MaybeNullWhen(false)] out Affect result);
+#nullable restore
         Task AddAffect(Affect affect);
         Task RemoveAffect(Affect affect);
     }

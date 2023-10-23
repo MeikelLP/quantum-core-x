@@ -3,9 +3,10 @@ using Microsoft.Extensions.Logging;
 using QuantumCore.API.Game.World;
 using Dapper;
 using System.Data;
+using QuantumCore.API.Game.Types;
 using Affect = QuantumCore.Database.Affect;
 using AffectAPI = QuantumCore.API.Core.Models.Affect;
-using QuantumCore.Game.Packets.Affects;
+using AffectRemove = QuantumCore.Game.Packets.AffectRemove;
 
 namespace QuantumCore.Game;
 
@@ -19,25 +20,9 @@ public class AffectManager : IAffectManager
         _db = db;
     }
 
-    public void SendAffectAddPacket(IPlayerEntity playerEntity, Affect affect, int duration)
+    public async Task SendAffectRemovePacket(IPlayerEntity playerEntity, EAffectType type, EAffectType applyOn)
     {
-        var affectAdd = new AffectAdd();
-        var affectAddPacket = new AffectAddPacket
-        {
-            Type = (uint) affect.Type,
-            ApplyOn = affect.ApplyOn,
-            ApplyValue = (uint) affect.ApplyValue,
-            Duration = (uint) duration,
-            Flag = (uint) affect.Flag,
-            SpCost = (uint) affect.SpCost
-        };
-        affectAdd.Elem[0] = affectAddPacket;
-        playerEntity.Connection.Send(affectAdd);
-    }
-
-    public async Task SendAffectRemovePacket(IPlayerEntity playerEntity, long type, byte applyOn)
-    {
-        await _db.QueryAsync("DELETE FROM affects WHERE PlayerId=@PlayerId and Type=@Type and ApplyOn=@ApplyOn", 
+        await _db.QueryAsync("DELETE FROM affects WHERE PlayerId=@PlayerId and Type=@Type and ApplyOn=@ApplyOn",
             new { PlayerId = playerEntity.Player.Id, Type = type, ApplyOn = applyOn });
         var affectRemovePacket = new AffectRemove
         {
@@ -47,19 +32,19 @@ public class AffectManager : IAffectManager
         await playerEntity.Connection.Send(affectRemovePacket);
     }
 
-    public async Task AddAffect(IPlayerEntity playerEntity, int type, int applyOn, int applyValue, int flag, int duration, int spCost)
+    public async Task AddAffect(IPlayerEntity playerEntity, EAffectType type, EAffectType applyOn, int applyValue,
+        EAffects flags,
+        int duration, int spCost)
     {
-        _logger.LogDebug("Add affect starting!");
-        _logger.LogDebug("::AddAffect Type:{Type}, ApplyOn:{ApplyOn}, ApplyValue:{ApplyValue}, Flag:{Flag}, Duration:{Duration}, SpCost:{SpCost}", type, applyOn, applyValue, flag, duration, spCost);  
-        
+
         // Create player data
         var affect = new Affect
         {
             PlayerId = playerEntity.Player.Id,
             Type = type,
-            ApplyOn = (byte) applyOn,
+            ApplyOn = applyOn,
             ApplyValue = applyValue,
-            Flag = flag,
+            Flag = flags,
             Duration = DateTime.Now.AddSeconds(duration),
             SpCost = spCost
         };
@@ -67,15 +52,15 @@ public class AffectManager : IAffectManager
         {
             PlayerId = playerEntity.Player.Id,
             Type = type,
-            ApplyOn = (byte) applyOn,
+            ApplyOn = applyOn,
             ApplyValue = applyValue,
-            Flag = flag,
+            Flag = flags,
             Duration = DateTime.Now.AddSeconds(duration),
             SpCost = spCost
         };
+        _logger.LogDebug("Adding affect to player {PlayerName}: {@Affect}", playerEntity.Name, affect);
 
-        var affectApi = playerEntity.HasAffect(affectAPI);
-        if (affectApi != null)
+        if (playerEntity.TryGetAffect(affectAPI, out var affectApi))
         {
             if(affect.ApplyValue != affectAPI.ApplyValue)
             {
@@ -99,16 +84,10 @@ public class AffectManager : IAffectManager
 
         // Add affect to cache
         // await _cacheManager.Set("affect:" + player.Id, player);
-
-        SendAffectAddPacket(playerEntity, affect, duration);
-
     }
 
     public async Task LoadAffect(IPlayerEntity playerEntity)
     {
-        _logger.LogDebug("Load affect starting!");
-        _logger.LogDebug("::LoadAffect PlayerId:{PlayerId}", playerEntity.Player.Id);
-
         var playerAffects = await _db.QueryAsync<Affect>("SELECT * FROM affects WHERE PlayerId = @PlayerId", new { PlayerId = playerEntity.Player.Id });
         if (playerAffects != null && playerAffects.Any())
         {
@@ -123,9 +102,10 @@ public class AffectManager : IAffectManager
                     Flag = playerAffect.Flag,
                     Duration = playerAffect.Duration,
                     SpCost = playerAffect.SpCost
-                }; 
+                };
                 await playerEntity.AddAffect(affect);
             }
         }
+        _logger.LogDebug("Loaded affects for player: {PlayerName}", playerEntity.Name);
     }
 }

@@ -1,12 +1,8 @@
-﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using QuantumCore.API;
+using QuantumCore.API.Constants;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.PluginTypes;
-using QuantumCore.Core.Types;
-using QuantumCore.Game.Items;
 using QuantumCore.Game.Packets;
 using QuantumCore.Game.PlayerUtils;
 
@@ -24,7 +20,7 @@ public class ItemUseHandler : IGamePacketHandler<ItemUse>
         _logger = logger;
         _affectController = affectController;
     }
-        
+
     public async Task ExecuteAsync(GamePacketContext<ItemUse> ctx, CancellationToken token = default)
     {
         var player = ctx.Connection.Player;
@@ -106,7 +102,7 @@ public class ItemUseHandler : IGamePacketHandler<ItemUse>
             switch ((EItemType) itemProto.Type)
             {
                 case EItemType.Use:
-                    _logger.LogDebug("Use item");
+                    _logger.LogDebug("Use item {ItemName}", itemProto.TranslatedName);
                     switch ((EUseSubTypes) itemProto.Subtype)
                     {
                         case EUseSubTypes.AbilityUp:
@@ -115,30 +111,20 @@ public class ItemUseHandler : IGamePacketHandler<ItemUse>
                             var duration = itemProto.Values[1];
                             var value = itemProto.Values[2];
                             // TODO: Enums.NET improve allocations
-                            var applyInfo = Enum.GetName(typeof(EApplyTypes), type);
-                            var applyType = (EPoints) Enum.Parse(typeof(EPoints), applyInfo);
-                            switch ((EApplyTypes) type)
+                            var applyInfo = (EApplyType)type;
+                            var applyType = AffectConstants.ApplyTypeToApplyPointMapping[applyInfo];
+                            switch ((EApplyType) type)
                             {
-                                case EApplyTypes.MoveSpeed:
-                                    await _affectController.AddAffect(player, (int) EAffectTypes.AffectMoveSpeed, (int) applyType, value, (int) EAffectBits.MoveSpeedPotion, duration, 0);
+                                case EApplyType.MovementSpeed:
+                                    await _affectController.AddAffect(player, EAffectType.MovementSpeed, applyType, value, EAffects.MovSpeedPotion, duration, 0);
                                     break;
-                                case EApplyTypes.AttackSpeed:
-                                    await _affectController.AddAffect(player, (int) EAffectTypes.AffectAttackSpeed, (int) applyType, value, (int) EAffectBits.AttackSpeedPotion, duration, 0);
+                                case EApplyType.AttackSpeed:
+                                    await _affectController.AddAffect(player, EAffectType.AttackSpeed, applyType, value, EAffects.AttSpeedPotion, duration, 0);
                                     break;
                             }
                             break;
-                        case EUseSubTypes.UseSpecial:
-                            var specialItemType = EAffectTypes.None;
-                            var bonus = EPoints.None;
-                            var infDuration = 60 * 365 * 24 * 60 * 60;
-                            switch (itemProto.Id)
-                            {
-                                case 72728: // TODO: fix the harcoded IDs
-                                    specialItemType = EAffectTypes.AutoSPRecovery;
-                                    break;
-                            }
-                            _logger.LogDebug("Use special");
-                            await _affectController.AddAffect(player, (int) specialItemType, (int) bonus, 4, (int) itemProto.Id, infDuration, 0);
+                        default:
+                            _logger.LogWarning("Don't know how to handle item sub type {ItemSubType} for item {Id}", itemProto.Subtype, itemProto.Id);
                             break;
                     }
                     break;
