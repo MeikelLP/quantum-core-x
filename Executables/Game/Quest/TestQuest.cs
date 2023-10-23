@@ -45,6 +45,7 @@ public class TestQuest : Quest
         var proto = _itemManager.GetItem(item.ItemId);
 
         Text($"Thanks for giving me the item {proto.TranslatedName}.");
+        player.Inventory.PlaceItem(item);
         Done();
     }
 }
