@@ -16,9 +16,6 @@ Assuming you are using a valid TMP4 client
     CH3_NAME			= "CH3"
     CH4_NAME			= "CH4"
     PORT_1				= 13001
-    PORT_2				= 13010
-    PORT_3				= 13020
-    PORT_4				= 13030
     PORT_AUTH			= 11002
     PORT_MARK			= 13000
 
