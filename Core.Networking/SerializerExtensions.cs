@@ -46,8 +46,9 @@ public static class SerializerExtensions
     {
         await stream.ReadExactlyAsync(buffer.AsMemory(0, size));
         var str = System.Text.Encoding.ASCII.GetString(buffer.AsSpan(0, size));
-        // null bytes may be appended
-        return str.TrimEnd('\0');
+        // the string ends with the first null byte, after that garbage could be in the string
+        var length = str.IndexOf('\0');
+        return length == -1 ? str : str[..length];
     }
         
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
@@ -55,6 +56,18 @@ public static class SerializerExtensions
     {
         await stream.ReadExactlyAsync(buffer.AsMemory(0, size));
         return buffer[..size];
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static string ReadNullTerminatedString(this ReadOnlySpan<byte> span)
+    {
+        var length = span.IndexOf((byte) 0);
+        if (length == -1)
+        {
+            return Encoding.ASCII.GetString(span);
+        }
+
+        return Encoding.ASCII.GetString(span[..length]);
     }
         
     public static void WriteString(this byte[] bytes, string? str, in int index, in int length)

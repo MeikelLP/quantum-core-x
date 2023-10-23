@@ -674,7 +674,7 @@ namespace QuantumCore.Core.Packets {
         {
             var __Type = bytes[(offset + 0)];
             var __Size = System.BitConverter.ToUInt32(bytes[(offset + 1)..(offset + 1 + 4)]) - 6;
-            var __Message = System.Text.Encoding.ASCII.GetString(bytes[(offset + 5)..(System.Index)(offset + 5 + __Size)]);
+            var __Message = (bytes[(offset + 5)..(System.Index)(offset + 5 + __Size)]).ReadNullTerminatedString();
             var obj = new QuantumCore.Core.Packets.GCHandshake
             (
                 __Type,
@@ -1364,7 +1364,7 @@ namespace QuantumCore.Game.Packets {
         {
             var __Size = System.BitConverter.ToUInt16(bytes[(offset + 0)..(offset + 0 + 2)]) - 4;
             var __MessageType = bytes[(offset + 2)];
-            var __Message = System.Text.Encoding.ASCII.GetString(bytes[(offset + 3)..(System.Index)(offset + 3 + __Size)]);
+            var __Message = (bytes[(offset + 3)..(System.Index)(offset + 3 + __Size)]).ReadNullTerminatedString();
             var obj = new QuantumCore.Game.Packets.ChatIncoming
             {
                 MessageType = __MessageType,
@@ -1598,8 +1598,8 @@ namespace QuantumCore.Core.Packets {
         {
             var __Names = new []
             {
-                System.Text.Encoding.ASCII.GetString(bytes[(offset + 0)..(offset + 0 + 13)]),
-                System.Text.Encoding.ASCII.GetString(bytes[(offset + 13)..(offset + 13 + 13)])
+                (bytes[(offset + 0)..(offset + 0 + 13)]).ReadNullTerminatedString(),
+                (bytes[(offset + 13)..(offset + 13 + 13)]).ReadNullTerminatedString()
             };
             var obj = new QuantumCore.Core.Packets.GCHandshake
             {
@@ -1866,7 +1866,7 @@ namespace QuantumCore.Core.Packets {
         {
             var __Type = bytes[(offset + 0)];
             var __Size = System.BitConverter.ToUInt32(bytes[(offset + 1)..(offset + 1 + 4)]) - 7;
-            var __Message = System.Text.Encoding.ASCII.GetString(bytes[(offset + 5)..(System.Index)(offset + 5 + __Size)]);
+            var __Message = (bytes[(offset + 5)..(System.Index)(offset + 5 + __Size)]).ReadNullTerminatedString();
             var __Location = bytes[(System.Index)(offset + 5 + __Size)];
             var obj = new QuantumCore.Core.Packets.GCHandshake
             (
@@ -3057,7 +3057,7 @@ namespace QuantumCore.Core.Packets {
         public static CharacterInfo Deserialize(ReadOnlySpan<byte> bytes, in int offset = 0)
         {
             var __Vid = System.BitConverter.ToUInt32(bytes[(offset + 0)..(offset + 0 + 4)]);
-            var __Name = System.Text.Encoding.ASCII.GetString(bytes[(offset + 4)..(offset + 4 + 25)]);
+            var __Name = (bytes[(offset + 4)..(offset + 4 + 25)]).ReadNullTerminatedString();
             var __Parts = new []
             {
                 System.BitConverter.ToUInt16(bytes[(offset + 29)..(offset + 29 + 2)]),
@@ -3278,6 +3278,23 @@ namespace QuantumCore.Game.Packets {
     }
 }");
 
+    }
+
+    [Fact]
+    public void TruncateNullBytes()
+    {
+        const string file = @"
+using QuantumCore.Networking;
+
+namespace QuantumCore.Game.Packets;
+
+[Packet(0x20, EDirection.Incoming)]
+[PacketGenerator]
+public partial record struct StringTest ()
+{
+    [Field(0, Length = 25)]
+    public string Name { get; set; }
+};";
     }
 
     [Fact]
