@@ -14,7 +14,7 @@ internal static partial class ParserUtils
         if (string.IsNullOrWhiteSpace(splitted[0]) || splitted[0].StartsWith("//")) return null;
         return new SpawnPoint
         {
-            Type = Enums.Parse<ESpawnPointType>(splitted[0].AsSpan()[..1], true, EnumFormat.EnumMemberValue),
+            Type = Enums.Parse<ESpawnPointType>(splitted[0][0], true, EnumFormat.EnumMemberValue),
             IsAggressive = splitted[0].Length > 1 && splitted[0][1].Equals("a", StringComparison.InvariantCultureIgnoreCase),
             X = int.Parse(splitted[1]),
             Y = int.Parse(splitted[2]),
