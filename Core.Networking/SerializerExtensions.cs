@@ -50,10 +50,10 @@ public static class SerializerExtensions
         // the string ends with the first null byte, after that garbage could be in the string
         if (length == -1)
         {
-            return Encoding.ASCII.GetString(buffer.AsSpan(0, length));
+            return Encoding.ASCII.GetString(buffer.AsSpan(0, size));
         }
 
-        return Encoding.ASCII.GetString(buffer.AsSpan(0, size));
+        return Encoding.ASCII.GetString(buffer.AsSpan(0, length));
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
