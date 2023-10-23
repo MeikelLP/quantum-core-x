@@ -6,15 +6,16 @@ namespace QuantumCore.Game.PacketHandlers.Game;
 
 public class QuickBarSwapHandler : IGamePacketHandler<QuickBarSwap>
 {
-    public async Task ExecuteAsync(GamePacketContext<QuickBarSwap> ctx, CancellationToken token = default)
+    public Task ExecuteAsync(GamePacketContext<QuickBarSwap> ctx, CancellationToken token = default)
     {
         var player = ctx.Connection.Player;
         if (player == null)
         {
             ctx.Connection.Close();
-            return;
+            return Task.CompletedTask;
         }
 
-        await player.QuickSlotBar.Swap(ctx.Packet.Position1, ctx.Packet.Position2);
+        player.QuickSlotBar.Swap(ctx.Packet.Position1, ctx.Packet.Position2);
+        return Task.CompletedTask;
     }
 }

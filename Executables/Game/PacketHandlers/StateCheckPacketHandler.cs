@@ -8,7 +8,7 @@ namespace QuantumCore.Game.PacketHandlers;
 
 public class StateCheckPacketHandler : IGamePacketHandler<StateCheckPacket>
 {
-    public async Task ExecuteAsync(GamePacketContext<StateCheckPacket> ctx, CancellationToken token = default)
+    public Task ExecuteAsync(GamePacketContext<StateCheckPacket> ctx, CancellationToken token = default)
     {
         ctx.Connection.Send(new ServerStatusPacket {
             Statuses = new [] {
@@ -19,5 +19,6 @@ public class StateCheckPacketHandler : IGamePacketHandler<StateCheckPacket>
             },
             IsSuccess = 1
         });
+        return Task.CompletedTask;
     }
 }

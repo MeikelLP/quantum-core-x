@@ -55,6 +55,6 @@ public class SelectGameCharacterHandler : IGamePacketHandler<SelectCharacter>
         entity.SendBasicData();
         entity.SendPoints();
         entity.SendCharacterUpdate();
-        await entity.QuickSlotBar.Send();
+        entity.QuickSlotBar.Send();
     }
 }

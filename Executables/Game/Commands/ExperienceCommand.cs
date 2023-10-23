@@ -16,7 +16,7 @@ public class ExperienceCommand : ICommandHandler<ExperienceOtherOptions>
         _world = world;
     }
 
-    public async Task ExecuteAsync(CommandContext<ExperienceOtherOptions> context)
+    public Task ExecuteAsync(CommandContext<ExperienceOtherOptions> context)
     {
         var target = context.Player;
         if (!string.IsNullOrWhiteSpace(context.Arguments.Target))
@@ -33,6 +33,8 @@ public class ExperienceCommand : ICommandHandler<ExperienceOtherOptions>
             target.AddPoint(EPoints.Experience, context.Arguments.Value);
             target.SendPoints();
         }
+
+        return Task.CompletedTask;
     }
 }
 

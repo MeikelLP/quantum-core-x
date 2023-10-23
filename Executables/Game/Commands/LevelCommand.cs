@@ -15,7 +15,7 @@ public class LevelCommand : ICommandHandler<LevelCommandOptions>
         _world = world;
     }
 
-    public async Task ExecuteAsync(CommandContext<LevelCommandOptions> context)
+    public Task ExecuteAsync(CommandContext<LevelCommandOptions> context)
     {
         var target = !string.IsNullOrWhiteSpace(context.Arguments.Target)
             ? _world.GetPlayer(context.Arguments.Target)
@@ -30,6 +30,7 @@ public class LevelCommand : ICommandHandler<LevelCommandOptions>
             target.SetPoint(EPoints.Level, context.Arguments.Level);
             target.SendPoints();
         }
+        return Task.CompletedTask;
     }
 }
 

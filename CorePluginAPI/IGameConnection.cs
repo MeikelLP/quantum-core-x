@@ -11,5 +11,5 @@ public interface IGameConnection : IConnection
     Guid? AccountId { get; set; }
     string Username { get; set; }
     IPlayerEntity Player { get; set; }
-    Task<bool> HandleHandshake(GCHandshakeData handshake);
+    bool HandleHandshake(GCHandshakeData handshake);
 }

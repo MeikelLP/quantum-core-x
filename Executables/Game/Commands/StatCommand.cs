@@ -8,16 +8,17 @@ namespace QuantumCore.Game.Commands;
 [CommandNoPermission]
 public class StatCommand : ICommandHandler<StatCommandOptions>
 {
-    public async Task ExecuteAsync(CommandContext<StatCommandOptions> context)
+    public Task ExecuteAsync(CommandContext<StatCommandOptions> context)
     {
         if (context.Player.GetPoint(EPoints.StatusPoints) <= 0)
         {
-            return;
+            return Task.CompletedTask;
         }
 
         context.Player.AddPoint(context.Arguments.Point, 1);
         context.Player.AddPoint(EPoints.StatusPoints, -1);
         context.Player.SendPoints();
+        return Task.CompletedTask;
     }
 }
 

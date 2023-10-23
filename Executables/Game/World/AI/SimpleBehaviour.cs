@@ -123,7 +123,7 @@ namespace QuantumCore.Game.World.AI
                             _attackCooldown -= elapsedTime;
                             if (_attackCooldown <= 0)
                             {
-                                Attack(_targetEntity).Wait(); // TODO
+                                Attack(_targetEntity);
                                 _attackCooldown += 2000; // todo use attack speed
                             }
                         }
@@ -144,7 +144,7 @@ namespace QuantumCore.Game.World.AI
             }
         }
 
-        private async Task Attack(IEntity victim)
+        private void Attack(IEntity victim)
         {
             if (_entity is not MonsterEntity monster)
             {

@@ -54,7 +54,7 @@ public class QuickSlotBar : IQuickSlotBar
         await _cacheManager.Set(key, Slots);
     }
 
-    public async Task Send()
+    public void Send()
     {
         for (var i = 0; i < Slots.Length; i++)
         {
@@ -71,7 +71,7 @@ public class QuickSlotBar : IQuickSlotBar
         }
     }
 
-    public async Task Add(byte position, QuickSlotData slot)
+    public void Add(byte position, QuickSlotData slot)
     {
         if (position >= 8)
         {
@@ -87,7 +87,7 @@ public class QuickSlotBar : IQuickSlotBar
         });
     }
 
-    public async Task Swap(byte position1, byte position2)
+    public void Swap(byte position1, byte position2)
     {
         if (position1 >= 8 || position2 >= 8)
         {
@@ -104,7 +104,7 @@ public class QuickSlotBar : IQuickSlotBar
         });
     }
 
-    public async Task Remove(byte position)
+    public void Remove(byte position)
     {
         if (position >= 8)
         {

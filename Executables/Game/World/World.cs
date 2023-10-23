@@ -106,9 +106,10 @@ namespace QuantumCore.Game.World
 
                 if (shopDef.Npc.HasValue)
                 {
-                    GameEventManager.RegisterNpcClickEvent(shop.Name, shopDef.Npc.Value, async player =>
+                    GameEventManager.RegisterNpcClickEvent(shop.Name, shopDef.Npc.Value, player =>
                     {
-                        await shop.Open(player);
+                        shop.Open(player);
+                        return Task.CompletedTask;
                     });
                 }
             }
@@ -261,9 +262,9 @@ namespace QuantumCore.Game.World
                 _logger.LogInformation("Player {PlayerName} ({PlayerId}) joined the map {MapName}", player.Name, player.Vid, map.Name);
             }
 
-            // _pluginExecutor.ExecutePlugins<IGameEntityLifetimeListener>(_logger, x => x.OnPreCreatedAsync()); // TODO
+            _pluginExecutor.ExecutePlugins<IGameEntityLifetimeListener>(_logger, x => x.OnPreCreatedAsync()).Wait();
             map.SpawnEntity(e);
-            // _pluginExecutor.ExecutePlugins<IGameEntityLifetimeListener>(_logger, x => x.OnPostCreatedAsync()); // TODO
+            _pluginExecutor.ExecutePlugins<IGameEntityLifetimeListener>(_logger, x => x.OnPostCreatedAsync()).Wait();
         }
 
         public void DespawnEntity(IEntity entity)
@@ -273,9 +274,9 @@ namespace QuantumCore.Game.World
                 RemovePlayer(player);
             }
 
-            // await _pluginExecutor.ExecutePlugins<IGameEntityLifetimeListener>(_logger, x => x.OnPreDeletedAsync()); // TODO
+            _pluginExecutor.ExecutePlugins<IGameEntityLifetimeListener>(_logger, x => x.OnPreDeletedAsync()).Wait();
             entity.Map?.DespawnEntity(entity);
-            // await _pluginExecutor.ExecutePlugins<IGameEntityLifetimeListener>(_logger, x => x.OnPostDeletedAsync()); // TODO
+            _pluginExecutor.ExecutePlugins<IGameEntityLifetimeListener>(_logger, x => x.OnPostDeletedAsync()).Wait();
         }
 
         public uint GenerateVid()

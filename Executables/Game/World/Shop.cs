@@ -59,7 +59,7 @@ public class Shop : IShop
         _grid.SetBlock((uint) x, (uint) y, 1, proto.Size, item);
     }
 
-    public async Task Open(IPlayerEntity player)
+    public void Open(IPlayerEntity player)
     {
         if (player is not PlayerEntity p)
         {
@@ -124,7 +124,7 @@ public class Shop : IShop
         p.SendItem(playerItem);
     }
 
-    public async Task Sell(IPlayerEntity player, byte position)
+    public void Sell(IPlayerEntity player, byte position)
     {
         if (player is not PlayerEntity p)
         {

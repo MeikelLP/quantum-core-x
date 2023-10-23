@@ -16,7 +16,7 @@ public class SpCommand : ICommandHandler<SpOtherOptions>
         _world = world;
     }
 
-    public async Task ExecuteAsync(CommandContext<SpOtherOptions> context)
+    public Task ExecuteAsync(CommandContext<SpOtherOptions> context)
     {
         var target = context.Player;
         if (!string.IsNullOrWhiteSpace(context.Arguments.Target))
@@ -33,6 +33,7 @@ public class SpCommand : ICommandHandler<SpOtherOptions>
             target.AddPoint(EPoints.Sp, context.Arguments.Value);
             target.SendPoints();
         }
+        return Task.CompletedTask;
     }
 }
 

@@ -16,7 +16,7 @@ public class HpCommand : ICommandHandler<HpOtherOptions>
         _world = world;
     }
 
-    public async Task ExecuteAsync(CommandContext<HpOtherOptions> context)
+    public Task ExecuteAsync(CommandContext<HpOtherOptions> context)
     {
         var target = context.Player;
         if (!string.IsNullOrWhiteSpace(context.Arguments.Target))
@@ -33,6 +33,7 @@ public class HpCommand : ICommandHandler<HpOtherOptions>
             target.AddPoint(EPoints.Hp, context.Arguments.Value);
             target.SendPoints();
         }
+        return Task.CompletedTask;
     }
 }
 

@@ -74,9 +74,9 @@ internal class MockedGameConnection : IGameConnection
     public Guid? AccountId { get; set; }
     public string Username { get; set; }
     public IPlayerEntity Player { get; set; }
-    public Task<bool> HandleHandshake(GCHandshakeData handshake)
+    public bool HandleHandshake(GCHandshakeData handshake)
     {
-        return Task.FromResult<bool>(true);
+        return true;
     }
 }
 

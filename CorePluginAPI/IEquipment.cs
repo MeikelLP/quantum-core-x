@@ -22,7 +22,7 @@ public interface IEquipment
     ItemInstance GetItem(EquipmentSlots slot);
     ItemInstance GetItem(ushort position);
     bool RemoveItem(ItemInstance item);
-    Task Send(IPlayerEntity player);
+    void Send(IPlayerEntity player);
     bool IsSuitable(IItemManager itemManager, ItemInstance item, ushort position);
     long GetWearPosition(IItemManager itemManager, ItemInstance item);
 }

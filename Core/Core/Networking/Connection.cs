@@ -169,7 +169,7 @@ namespace QuantumCore.Core.Networking
             SendHandshake();
         }
 
-        public async Task<bool> HandleHandshake(GCHandshakeData handshake)
+        public bool HandleHandshake(GCHandshakeData handshake)
         {
             if (!Handshaking)
             {

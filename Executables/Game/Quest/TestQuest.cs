@@ -18,7 +18,11 @@ public class TestQuest : Quest
     {
         // todo invent api for register npc click event on player
         GameEventManager.RegisterNpcClickEvent("Test Quest", 20354, Test, player => player.Vid == Player.Vid);
-        GameEventManager.RegisterNpcGiveEvent("Test Quest", 20016, TestGive, (player, _) => player.Vid == Player.Vid);
+        GameEventManager.RegisterNpcGiveEvent("Test Quest", 20016, (player, item) =>
+        {
+            TestGive(player, item);
+            return Task.CompletedTask;
+        }, (player, _) => player.Vid == Player.Vid);
     }
 
     private async Task Test(IPlayerEntity player)
@@ -26,21 +30,21 @@ public class TestQuest : Quest
         Text("Hello World from QuantumCore!");
         Text("This is using the current work in progress");
         Text("Quest API.");
-        await Next();
-        
+        Next();
+
         Text("This is the second page showing how to easily");
         Text("using await to wait for user response");
         var choice = await Choice(false, "1st option", "2nd option");
-        
+
         Text($"You've chosen: {choice}");
-        await Done();
+        Done();
     }
 
-    private async Task TestGive(IPlayerEntity player, ItemInstance item)
+    private void TestGive(IPlayerEntity player, ItemInstance item)
     {
         var proto = _itemManager.GetItem(item.ItemId);
-        
+
         Text($"Thanks for giving me the item {proto.TranslatedName}.");
-        await Done();
+        Done();
     }
 }

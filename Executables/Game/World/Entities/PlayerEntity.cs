@@ -304,7 +304,7 @@ namespace QuantumCore.Game.World.Entities
             var remove = new RemoveCharacter { Vid = Vid };
 
             Connection.Send(remove);
-            Show(Connection);
+            ShowEntity(Connection);
 
             foreach (var entity in NearbyEntities)
             {
@@ -1067,12 +1067,6 @@ namespace QuantumCore.Game.World.Entities
                 packet.Percentage = Target.HealthPercentage;
             }
             Connection.Send(packet);
-        }
-
-        public void Show(IConnection connection)
-        {
-            SendCharacter(connection);
-            SendCharacterAdditional(connection);
         }
 
         public void Disconnect()

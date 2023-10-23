@@ -16,7 +16,7 @@ namespace QuantumCore.Game.Commands
             _world = world;
         }
 
-        public async Task ExecuteAsync(CommandContext context)
+        public Task ExecuteAsync(CommandContext context)
         {
             context.Player.SendChatInfo("Going back to character selection. Please wait.");
 
@@ -25,6 +25,7 @@ namespace QuantumCore.Game.Commands
             // Despawn player
             _world.DespawnEntity(context.Player);
             context.Player.Connection.SetPhase(EPhases.Select);
+            return Task.CompletedTask;
         }
     }
 }

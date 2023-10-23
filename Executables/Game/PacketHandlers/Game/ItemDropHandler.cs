@@ -6,13 +6,13 @@ namespace QuantumCore.Game.PacketHandlers.Game;
 
 public class ItemDropHandler : IGamePacketHandler<ItemDrop>
 {
-    public async Task ExecuteAsync(GamePacketContext<ItemDrop> ctx, CancellationToken token = default)
+    public Task ExecuteAsync(GamePacketContext<ItemDrop> ctx, CancellationToken token = default)
     {
         var player = ctx.Connection.Player;
         if (player == null)
         {
             ctx.Connection.Close();
-            return;
+            return Task.CompletedTask;
         }
 
         if (ctx.Packet.Gold > 0)
@@ -26,10 +26,11 @@ public class ItemDropHandler : IGamePacketHandler<ItemDrop>
             var item = player.GetItem(ctx.Packet.Window, ctx.Packet.Position);
             if (item == null)
             {
-                return; // Item slot is empty
+                return Task.CompletedTask; // Item slot is empty
             }
 
             player.DropItem(item, ctx.Packet.Count);
         }
+        return Task.CompletedTask;
     }
 }

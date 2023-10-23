@@ -14,13 +14,13 @@ public class ItemMoveHandler : IGamePacketHandler<ItemMove>
         _logger = logger;
     }
 
-    public async Task ExecuteAsync(GamePacketContext<ItemMove> ctx, CancellationToken token = default)
+    public Task ExecuteAsync(GamePacketContext<ItemMove> ctx, CancellationToken token = default)
     {
         var player = ctx.Connection.Player;
         if (player == null)
         {
             ctx.Connection.Close();
-            return;
+            return Task.CompletedTask;
         }
 
         _logger.LogDebug("Move item from {FromWindow},{FromPosition} to {ToWindow},{ToPosition}", ctx.Packet.FromWindow, ctx.Packet.FromPosition, ctx.Packet.ToWindow, ctx.Packet.ToPosition);
@@ -30,7 +30,7 @@ public class ItemMoveHandler : IGamePacketHandler<ItemMove>
         if (item == null)
         {
             _logger.LogDebug("Moved item not found!");
-            return;
+            return Task.CompletedTask;
         }
 
         // Check if target space is available
@@ -46,5 +46,6 @@ public class ItemMoveHandler : IGamePacketHandler<ItemMove>
             player.SendRemoveItem(ctx.Packet.FromWindow, ctx.Packet.FromPosition);
             player.SendItem(item);
         }
+        return Task.CompletedTask;
     }
 }

@@ -67,7 +67,7 @@ namespace QuantumCore.Game.World.Entities
         public byte MovementSpeed { get; protected set; }
 
         public IReadOnlyCollection<IEntity> NearbyEntities => _nearbyEntities;
-        private List<IEntity> _nearbyEntities = new();
+        private readonly List<IEntity> _nearbyEntities = new();
         public List<IPlayerEntity> TargetedBy { get; } = new();
         public const int ViewDistance = 10000;
 
@@ -75,7 +75,6 @@ namespace QuantumCore.Game.World.Entities
         private int _positionY;
         private float _rotation;
         private bool _positionChanged;
-        private IEntity _entityImplementation;
 
         public Entity(IAnimationManager animationManager, uint vid)
         {

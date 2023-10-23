@@ -31,13 +31,11 @@ public class ChatManager : IChatManager
         _id = Guid.NewGuid();
 
         _subscriber = _cacheManager.Subscribe();
-#pragma warning disable CS4014
-        _subscriber.Register<ChatMessage>("chat", msg => OnChatMessage(msg));
-#pragma warning restore CS4014
+        _subscriber.Register<ChatMessage>("chat", OnChatMessage);
         _subscriber.Listen();
     }
 
-    private async Task OnChatMessage(ChatMessage message)
+    private void OnChatMessage(ChatMessage message)
     {
         if (message.OwnerCore == _id)
         {
@@ -54,7 +52,7 @@ public class ChatManager : IChatManager
         };
 
         // Send message to all connections in the game phase
-        await GameServer.Instance.ForAllConnections(async connection =>
+        GameServer.Instance.ForAllConnections(connection =>
         {
             if (connection.Phase != EPhases.Game)
             {
@@ -65,7 +63,7 @@ public class ChatManager : IChatManager
         });
     }
 
-    public async ValueTask Talk(IEntity entity, string message)
+    public void Talk(IEntity entity, string message)
     {
         var packet = new ChatOutcoming
         {
@@ -100,7 +98,7 @@ public class ChatManager : IChatManager
         };
 
         // Send message to all connections in the game phase
-        await GameServer.Instance.ForAllConnections(async connection =>
+        GameServer.Instance.ForAllConnections(connection =>
         {
             if (connection.Phase != EPhases.Game)
             {

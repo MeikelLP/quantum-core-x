@@ -133,7 +133,7 @@ namespace QuantumCore.Game.PlayerUtils
             return false;
         }
 
-        public async Task Send(IPlayerEntity player)
+        public void Send(IPlayerEntity player)
         {
             if (Body != null)
             {

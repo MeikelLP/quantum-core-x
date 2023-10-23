@@ -14,7 +14,7 @@ namespace QuantumCore.Game.Commands
             _world = world;
         }
 
-        public async Task ExecuteAsync(CommandContext<TeleportToOptions> ctx)
+        public Task ExecuteAsync(CommandContext<TeleportToOptions> ctx)
         {
             var dest = _world.GetPlayer(ctx.Arguments.Destination);
 
@@ -27,6 +27,7 @@ namespace QuantumCore.Game.Commands
                 ctx.Player.SendChatInfo($"Teleporting to player {dest.Name}");
                 ctx.Player.Move(dest.PositionX, dest.PositionY);
             }
+            return Task.CompletedTask;
         }
     }
 

@@ -14,11 +14,12 @@ namespace QuantumCore.Game.Commands
             _world = world;
         }
 
-        public async Task ExecuteAsync(CommandContext context)
+        public Task ExecuteAsync(CommandContext context)
         {
             context.Player.SendChatInfo("Logging out. Please wait.");
             _world.DespawnEntity(context.Player);
             context.Player.Disconnect();
+            return Task.CompletedTask;
         }
     }
 }

@@ -16,7 +16,7 @@ namespace QuantumCore.Game.Commands
             _world = world;
         }
 
-        public async Task ExecuteAsync(CommandContext<GotoCommandOptions> context)
+        public Task ExecuteAsync(CommandContext<GotoCommandOptions> context)
         {
             if (!string.IsNullOrWhiteSpace(context.Arguments.Map))
             {
@@ -29,13 +29,13 @@ namespace QuantumCore.Game.Commands
                         context.Player.SendChatInfo($"- {map.Name}");
                     }
 
-                    return;
+                    return Task.CompletedTask;
                 }
 
                 if (maps.Count == 0)
                 {
                     context.Player.SendChatInfo("Unknown map");
-                    return;
+                    return Task.CompletedTask;
                 }
 
                 // todo read goto position from map instead of using center
@@ -56,6 +56,7 @@ namespace QuantumCore.Game.Commands
                     context.Player.Move(x, y);
                 }
             }
+            return Task.CompletedTask;
         }
     }
 

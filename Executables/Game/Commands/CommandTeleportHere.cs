@@ -14,7 +14,7 @@ public class CommandTeleportHere : ICommandHandler<TeleportHereOptions>
         _world = world;
     }
 
-    public async Task ExecuteAsync(CommandContext<TeleportHereOptions> ctx)
+    public Task ExecuteAsync(CommandContext<TeleportHereOptions> ctx)
     {
         var target = _world.GetPlayer(ctx.Arguments.Target);
 
@@ -27,6 +27,8 @@ public class CommandTeleportHere : ICommandHandler<TeleportHereOptions>
             ctx.Player.SendChatInfo($"Teleporting {target.Name} to your position");
             target.Move(ctx.Player.PositionX, ctx.Player.PositionY);
         }
+
+        return Task.CompletedTask;
     }
 }
 

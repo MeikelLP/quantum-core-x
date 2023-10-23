@@ -100,11 +100,11 @@ namespace QuantumCore.Core.Networking
             await connection.ExecuteTask.ConfigureAwait(false);
         }
 
-        public async Task ForAllConnections(Func<IConnection, Task> callback)
+        public void ForAllConnections(Action<IConnection> callback)
         {
             foreach (var connection in _connections.Values)
             {
-                await callback(connection);
+                callback(connection);
             }
         }
 

@@ -15,14 +15,14 @@ public class CharacterMoveHandler : IGamePacketHandler<CharacterMove>
         _logger = logger;
     }
 
-    public async Task ExecuteAsync(GamePacketContext<CharacterMove> ctx, CancellationToken token = default)
+    public Task ExecuteAsync(GamePacketContext<CharacterMove> ctx, CancellationToken token = default)
     {
         if (ctx.Packet.MovementType > (int) CharacterMove.CharacterMovementType.Max &&
             ctx.Packet.MovementType != (int) CharacterMove.CharacterMovementType.Skill)
         {
             _logger.LogError("Received unknown movement type ({MovementType})", ctx.Packet.MovementType);
             ctx.Connection.Close();
-            return;
+            return Task.CompletedTask;
         }
 
         _logger.LogDebug("Received movement packet with type {MovementType}", (CharacterMove.CharacterMovementType)ctx.Packet.MovementType);
@@ -57,6 +57,7 @@ public class CharacterMoveHandler : IGamePacketHandler<CharacterMove>
             {
                 player.Connection.Send(movement);
             }
-        };
+        }
+        return Task.CompletedTask;
     }
 }

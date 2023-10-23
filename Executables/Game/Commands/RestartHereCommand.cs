@@ -6,9 +6,10 @@ namespace QuantumCore.Game.Commands
     [CommandNoPermission]
     public class RestartHereCommand : ICommandHandler
     {
-        public async Task ExecuteAsync(CommandContext context)
+        public Task ExecuteAsync(CommandContext context)
         {
             context.Player.Respawn(false);
+            return Task.CompletedTask;
         }
     }
 }

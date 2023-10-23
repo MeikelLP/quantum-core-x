@@ -28,7 +28,7 @@ public abstract class Quest : IQuest
 
     public abstract void Init();
 
-    protected async Task SendScript()
+    protected void SendScript()
     {
         _player.Connection.Send(new QuestScript {
             Skin = (byte) _currentSkin,
@@ -60,13 +60,13 @@ public abstract class Quest : IQuest
         _questScript += str + "[ENTER]";
     }
 
-    protected async Task Next()
+    protected void Next()
     {
         _currentNextTask?.TrySetCanceled();
         _currentNextTask = new TaskCompletionSource();
 
         _questScript += "[NEXT]";
-        await SendScript();
+        SendScript();
 
         _player.CurrentQuest = this;
     }
@@ -100,13 +100,13 @@ public abstract class Quest : IQuest
             _questScript += "[DONE]";
         }
 
-        await SendScript();
+        SendScript();
 
         _player.CurrentQuest = this;
         return await _currentChoiceTask.Task;
     }
 
-    protected async Task Done(bool silent = false)
+    protected void Done(bool silent = false)
     {
         if (!silent)
         {
@@ -114,6 +114,6 @@ public abstract class Quest : IQuest
         }
         _questScript += "[DONE]";
 
-        await SendScript();
+        SendScript();
     }
 }

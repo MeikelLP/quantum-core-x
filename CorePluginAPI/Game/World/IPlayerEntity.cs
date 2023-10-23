@@ -49,7 +49,6 @@ namespace QuantumCore.API.Game.World
         void SendChatCommand(string message);
         void SendChatInfo(string message);
         void SendTarget();
-        void Show(IConnection connection);
         void Disconnect();
         string ToString();
     }
