@@ -6,15 +6,16 @@ namespace QuantumCore.Game.PacketHandlers.Game;
 
 public class QuickBarRemoveHandler : IGamePacketHandler<QuickBarRemove>
 {
-    public async Task ExecuteAsync(GamePacketContext<QuickBarRemove> ctx, CancellationToken token = default)
+    public Task ExecuteAsync(GamePacketContext<QuickBarRemove> ctx, CancellationToken token = default)
     {
         var player = ctx.Connection.Player;
         if (player == null)
         {
             ctx.Connection.Close();
-            return;
+            return Task.CompletedTask;
         }
 
-        await player.QuickSlotBar.Remove(ctx.Packet.Position);
+        player.QuickSlotBar.Remove(ctx.Packet.Position);
+        return Task.CompletedTask;
     }
 }

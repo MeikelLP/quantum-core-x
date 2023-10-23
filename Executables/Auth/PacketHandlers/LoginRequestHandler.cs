@@ -34,16 +34,16 @@ public class LoginRequestHandler : IAuthPacketHandler<LoginRequest>
         {
             // Hash the password to prevent timing attacks
             BCrypt.Net.BCrypt.HashPassword(ctx.Packet.Password);
-            
+
             _logger.LogDebug("Account {Username} not found", ctx.Packet.Username);
-            await ctx.Connection.Send(new LoginFailed
+            ctx.Connection.Send(new LoginFailed
             {
                 Status = "WRONGPWD"
             });
 
             return;
         }
-        
+
         var status = "";
 
         // Verify the password against the stored one
@@ -73,17 +73,17 @@ public class LoginRequestHandler : IAuthPacketHandler<LoginRequest>
         // If the status is not empty send a failed login response to the client
         if (status != "")
         {
-            await ctx.Connection.Send(new LoginFailed
+            ctx.Connection.Send(new LoginFailed
             {
                 Status = status
             });
 
             return;
         }
-        
+
         // Generate authentication token
         var authToken = CoreRandom.GenerateUInt32();
-        
+
         // Store auth token
         await _cacheManager.Set("token:" + authToken, new Token
         {
@@ -92,9 +92,9 @@ public class LoginRequestHandler : IAuthPacketHandler<LoginRequest>
         });
         // Set expiration on token
         await _cacheManager.Expire("token:" + authToken, 30);
-        
+
         // Send the auth token to the client and let it connect to our game server
-        await ctx.Connection.Send(new LoginSuccess
+        ctx.Connection.Send(new LoginSuccess
         {
             Key = authToken,
             Result = 1

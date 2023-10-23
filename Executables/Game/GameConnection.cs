@@ -15,8 +15,8 @@ namespace QuantumCore.Game
         public string Username { get; set; }
         public IPlayerEntity Player { get; set; }
 
-        public GameConnection(IServerBase server, TcpClient client, ILogger<GameConnection> logger, 
-            PluginExecutor pluginExecutor, IWorld world, IPacketReader packetReader) 
+        public GameConnection(IServerBase server, TcpClient client, ILogger<GameConnection> logger,
+            PluginExecutor pluginExecutor, IWorld world, IPacketReader packetReader)
             : base(logger, pluginExecutor, packetReader)
         {
             _world = world;
@@ -33,11 +33,11 @@ namespace QuantumCore.Game
         {
             if (Player != null)
             {
-                await _world.DespawnEntity(Player);
+                _world.DespawnEntity(Player);
             }
 
             await Server.RemoveConnection(this);
-            
+
             // todo enable expiry on auth token
         }
 

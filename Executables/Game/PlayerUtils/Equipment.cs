@@ -133,43 +133,43 @@ namespace QuantumCore.Game.PlayerUtils
             return false;
         }
 
-        public async Task Send(IPlayerEntity player)
+        public void Send(IPlayerEntity player)
         {
             if (Body != null)
             {
-                await player.SendItem(Body);
+                player.SendItem(Body);
             }
             if (Head != null)
             {
-                await player.SendItem(Head);
+                player.SendItem(Head);
             }
             if (Shoes != null)
             {
-                await player.SendItem(Shoes);
+                player.SendItem(Shoes);
             }
             if (Bracelet != null)
             {
-                await player.SendItem(Bracelet);
+                player.SendItem(Bracelet);
             }
             if (Weapon != null)
             {
-                await player.SendItem(Weapon);
+                player.SendItem(Weapon);
             }
             if (Necklace != null)
             {
-                await player.SendItem(Necklace);
+                player.SendItem(Necklace);
             }
             if (Earrings != null)
             {
-                await player.SendItem(Earrings);
+                player.SendItem(Earrings);
             }
             if (Costume != null)
             {
-                await player.SendItem(Costume);
+                player.SendItem(Costume);
             }
             if (Hair != null)
             {
-                await player.SendItem(Hair);
+                player.SendItem(Hair);
             }
         }
 
@@ -182,7 +182,7 @@ namespace QuantumCore.Game.PlayerUtils
             }
 
             var wearFlags = (EWearFlags) proto.WearFlags;
-            
+
             switch ((EquipmentSlots)(position - _offset))
             {
                 case EquipmentSlots.Body:
@@ -208,16 +208,16 @@ namespace QuantumCore.Game.PlayerUtils
             }
         }
 
-        public long GetWearSlot(IItemManager itemManager, ItemInstance item)
+        public long GetWearPosition(IItemManager itemManager, uint itemId)
         {
-            var proto = itemManager.GetItem(item.ItemId);
+            var proto = itemManager.GetItem(itemId);
             if (proto == null)
             {
                 return _offset + (ushort)EquipmentSlots.Body;
             }
 
             var wearFlags = (EWearFlags) proto.WearFlags;
-            
+
             if (wearFlags.HasFlag(EWearFlags.Head))
                 return _offset + (ushort)EquipmentSlots.Head;
             else if (wearFlags.HasFlag(EWearFlags.Shoes))

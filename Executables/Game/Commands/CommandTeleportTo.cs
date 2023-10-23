@@ -14,19 +14,20 @@ namespace QuantumCore.Game.Commands
             _world = world;
         }
 
-        public async Task ExecuteAsync(CommandContext<TeleportToOptions> ctx)
+        public Task ExecuteAsync(CommandContext<TeleportToOptions> ctx)
         {
             var dest = _world.GetPlayer(ctx.Arguments.Destination);
 
             if (dest is null)
             {
-                await ctx.Player.SendChatInfo("Destination not found");
+                ctx.Player.SendChatInfo("Destination not found");
             }
             else
             {
-                await ctx.Player.SendChatInfo($"Teleporting to player {dest.Name}");
-                await ctx.Player.Move(dest.PositionX, dest.PositionY);
+                ctx.Player.SendChatInfo($"Teleporting to player {dest.Name}");
+                ctx.Player.Move(dest.PositionX, dest.PositionY);
             }
+            return Task.CompletedTask;
         }
     }
 
