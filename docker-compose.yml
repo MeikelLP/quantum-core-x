@@ -11,6 +11,9 @@ services:
     restart: unless-stopped
     ports:
     - "11002:11002"
+    environment:
+      - "Database:Host=db"
+      - "Cache:Host=cache"
     volumes:
       - ./Executables/Auth/appsettings.json:/app/appsettings.json:ro
 
@@ -42,7 +45,7 @@ services:
     - MARIADB_ROOT_PASSWORD=supersecure.123
     volumes:
     - db_data:/var/lib/mysql
-  
+
 volumes:
   cache_data:
   db_data:
