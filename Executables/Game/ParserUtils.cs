@@ -15,7 +15,7 @@ internal static partial class ParserUtils
         return new SpawnPoint
         {
             Type = Enums.Parse<ESpawnPointType>(splitted[0].AsSpan()[..1], true, EnumFormat.EnumMemberValue),
-            IsAggressive = splitted[0].Length > 1 && splitted[0].AsSpan()[1..2].Equals("a", StringComparison.InvariantCultureIgnoreCase),
+            IsAggressive = splitted[0].Length > 1 && splitted[0][1].Equals("a", StringComparison.InvariantCultureIgnoreCase),
             X = int.Parse(splitted[1]),
             Y = int.Parse(splitted[2]),
             RangeX = int.Parse(splitted[3]),
