@@ -39,7 +39,7 @@
         # you should see a "Build succeeded"
         ```
 
-    5. Save the following as `atlasinfo.txt`
+    5. Save the following as `atlasinfo.txt` or copy the `atlasinfo.txt` from your client root.epk
 
         ```txt
         metin2_map_a1	409600	896000	4	5
