@@ -7,14 +7,15 @@ namespace QuantumCore.Game;
 
 internal static partial class ParserUtils
 {
-    public static SpawnPoint GetSpawnFromLine(string line)
+    public static SpawnPoint? GetSpawnFromLine(string line)
     {
-        // r	751	311	10	10	0	0	5s	100	1	101
-        var splitted = SplitByWhitespaceRegex().Split(line);
+        if (string.IsNullOrWhiteSpace(line)) return null;
+        var splitted = SplitByWhitespaceRegex().Split(line.Trim());
+        if (string.IsNullOrWhiteSpace(splitted[0]) || splitted[0].StartsWith("//")) return null;
         return new SpawnPoint
         {
-            Type = Enums.Parse<ESpawnPointType>(splitted[0][..1], true, EnumFormat.EnumMemberValue),
-            IsAggressive = splitted[0].Length > 1 && splitted[0][1..2].Equals("a", StringComparison.InvariantCultureIgnoreCase),
+            Type = Enums.Parse<ESpawnPointType>(splitted[0].AsSpan()[..1], true, EnumFormat.EnumMemberValue),
+            IsAggressive = splitted[0].Length > 1 && splitted[0].AsSpan()[1..2].Equals("a", StringComparison.InvariantCultureIgnoreCase),
             X = int.Parse(splitted[1]),
             Y = int.Parse(splitted[2]),
             RangeX = int.Parse(splitted[3]),
@@ -30,7 +31,7 @@ internal static partial class ParserUtils
 
     private static int ParseSecondsFromTimespanString(string str)
     {
-        var value = int.Parse(str[..^1]);
+        var value = int.Parse(str.AsSpan()[..^1]);
         if (str.EndsWith("s", StringComparison.InvariantCultureIgnoreCase))
         {
             return value;

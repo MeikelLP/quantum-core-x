@@ -249,6 +249,12 @@ namespace QuantumCore.Game.World
                 return;
             }
 
+            if (map is RemoteMap)
+            {
+                _logger.LogWarning("Cannot spawn entity on RemoteMap. This is not implemented yet");
+                return false;
+            }
+
             if (e is IPlayerEntity player)
             {
                 AddPlayer(player);

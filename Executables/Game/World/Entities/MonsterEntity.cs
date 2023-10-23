@@ -93,7 +93,6 @@ namespace QuantumCore.Game.World.Entities
             Rotation = (float) MathUtils.Rotation(x - PositionX, y - PositionY);
 
             base.Goto(x, y);
-
             // Send movement to nearby players
             var movement = new CharacterMoveOut {
                 Vid = Vid,
@@ -246,7 +245,7 @@ namespace QuantumCore.Game.World.Entities
                 connection.Send(new CharacterInfo {
                     Vid = Vid,
                     Empire = _proto.Empire,
-                    Level = _proto.Level,
+                    Level = 0,
                     Name = _proto.TranslatedName
                 });
             }

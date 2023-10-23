@@ -14,7 +14,10 @@ internal class SpawnGroupProvider : ISpawnGroupProvider
         do
         {
             var item = await Game.ParserUtils.GetSpawnGroupFromBlock(sr);
-            list.Add(item);
+            if (item != null)
+            {
+                list.Add(item);
+            }
         } while (!sr.EndOfStream);
 
         return list;
@@ -30,7 +33,10 @@ internal class SpawnGroupProvider : ISpawnGroupProvider
         do
         {
             var item = await Game.ParserUtils.GetSpawnGroupCollectionFromBlock(sr);
-            list.Add(item);
+            if (item != null)
+            {
+                list.Add(item);
+            }
         } while (!sr.EndOfStream);
 
         return list;
