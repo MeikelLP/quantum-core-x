@@ -9,11 +9,16 @@ namespace QuantumCore.API.Game.World
         static IWorld Instance { get; set; }
         Task Load();
         void Update(double elapsedTime);
-        IMap GetMapAt(uint x, uint y);
-        IMap GetMapByName(string name);
+        #nullable enable
+        IMap? GetMapAt(uint x, uint y);
+        IMap? GetMapByName(string name);
+        #nullable restore
         List<IMap> FindMapsByName(string needle);
         CoreHost GetMapHost(int x, int y);
-        SpawnGroup GetGroup(int id);
+        #nullable enable
+        SpawnGroup? GetGroup(uint id);
+        SpawnGroupCollection? GetGroupCollection(uint id);
+        #nullable restore
         ValueTask<bool> SpawnEntity(IEntity e);
         Task DespawnEntity(IEntity entity);
         uint GenerateVid();

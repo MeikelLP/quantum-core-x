@@ -4,6 +4,7 @@ using System.Text;
 using AutoBogus;
 using Bogus;
 using FluentAssertions;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API.Game.Types;
@@ -28,7 +29,7 @@ public class OutgoingPacketTests
     public OutgoingPacketTests(ITestOutputHelper testOutputHelper)
     {
         var services = new ServiceCollection()
-            .AddCoreServices(new EmptyPluginCatalog())
+            .AddCoreServices(new EmptyPluginCatalog(), new ConfigurationBuilder().Build())
             .AddSingleton<IPacketSerializer, DefaultPacketSerializer>()
             .AddLogging(x =>
             {

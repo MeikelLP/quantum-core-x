@@ -1,9 +1,10 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -12,6 +13,7 @@ using QuantumCore.API.PluginTypes;
 using QuantumCore.Core.Cache;
 using QuantumCore.Networking;
 using Serilog;
+using Serilog.Events;
 using Weikio.PluginFramework.Abstractions;
 using Weikio.PluginFramework.Microsoft.DependencyInjection;
 
@@ -45,12 +47,12 @@ public static class ServiceExtensions
         return services;
     }
 
-    public static IServiceCollection AddCoreServices(this IServiceCollection services, IPluginCatalog pluginCatalog)
+    public static IServiceCollection AddCoreServices(this IServiceCollection services, IPluginCatalog pluginCatalog, IConfiguration configuration)
     {
         services.AddOptions<HostingOptions>()
             .BindConfiguration("Hosting")
             .ValidateDataAnnotations();
-        services.AddCustomLogging();
+        services.AddCustomLogging(configuration);
         services.AddSingleton<IPacketManager>(provider =>
         {
             var packetTypes = AppDomain.CurrentDomain.GetAssemblies().SelectMany(x => x.ExportedTypes)
@@ -59,8 +61,8 @@ public static class ServiceExtensions
                 .OrderBy(x => x.FullName)
                 .ToArray();
             var handlerTypes = AppDomain.CurrentDomain.GetAssemblies().SelectMany(x => x.ExportedTypes)
-                .Where(x => 
-                    x.IsAssignableTo(typeof(IPacketHandler)) && 
+                .Where(x =>
+                    x.IsAssignableTo(typeof(IPacketHandler)) &&
                     x is { IsClass: true, IsAbstract: false, IsInterface: false })
                 .OrderBy(x => x.FullName)
                 .ToArray();
@@ -79,7 +81,7 @@ public static class ServiceExtensions
         return services;
     }
 
-    private static IServiceCollection AddCustomLogging(this IServiceCollection services)
+    private static IServiceCollection AddCustomLogging(this IServiceCollection services, IConfiguration configuration)
     {
         var config = new LoggerConfiguration();
 
@@ -115,11 +117,15 @@ public static class ServiceExtensions
         // sink to console
         config.WriteTo.Console(outputTemplate: MessageTemplate);
 
+        config.MinimumLevel.Override("QuantumCore.Core.Networking", LogEventLevel.Warning);
+
         // sink to rolling file
         config.WriteTo.RollingFile($"{Directory.GetCurrentDirectory()}/logs/api.log",
             fileSizeLimitBytes: 10 * 1024 * 1024,
             buffered: true,
             outputTemplate: MessageTemplate);
+
+        config.ReadFrom.Configuration(configuration);
 
         // finally, create the logger
         services.AddLogging(x =>
