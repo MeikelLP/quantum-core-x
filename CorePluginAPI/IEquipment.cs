@@ -24,5 +24,5 @@ public interface IEquipment
     bool RemoveItem(ItemInstance item);
     void Send(IPlayerEntity player);
     bool IsSuitable(IItemManager itemManager, ItemInstance item, ushort position);
-    long GetWearPosition(IItemManager itemManager, ItemInstance item);
+    long GetWearPosition(IItemManager itemManager, uint itemId);
 }

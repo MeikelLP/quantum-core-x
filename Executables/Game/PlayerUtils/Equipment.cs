@@ -208,9 +208,9 @@ namespace QuantumCore.Game.PlayerUtils
             }
         }
 
-        public long GetWearPosition(IItemManager itemManager, ItemInstance item)
+        public long GetWearPosition(IItemManager itemManager, uint itemId)
         {
-            var proto = itemManager.GetItem(item.ItemId);
+            var proto = itemManager.GetItem(itemId);
             if (proto == null)
             {
                 return _offset + (ushort)EquipmentSlots.Body;

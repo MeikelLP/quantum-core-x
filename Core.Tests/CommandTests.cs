@@ -226,7 +226,7 @@ public class CommandTests : IAsyncLifetime
     public async Task DebugCommand()
     {
         var item = new ItemInstance{ItemId = 1, Count = 1};
-        var wearSlot = _player.Inventory.EquipmentWindow.GetWearPosition(_itemManager, item);
+        var wearSlot = _player.Inventory.EquipmentWindow.GetWearPosition(_itemManager, item.ItemId);
 
         _player.SetItem(item, (byte) WindowType.Inventory, (ushort)wearSlot);
 

@@ -63,9 +63,9 @@ public static class ItemExtensions
         return item.GetMaxMagicWeaponBaseDamage() + item.GetAdditionalWeaponDamage();
     }
 
-    public static EquipmentSlots? GetWearSlot(this IItemManager itemManager, ItemInstance item)
+    public static EquipmentSlots? GetWearSlot(this IItemManager itemManager, uint itemId)
     {
-        var proto = itemManager.GetItem(item.ItemId);
+        var proto = itemManager.GetItem(itemId);
         if (proto == null)
         {
             return null;
