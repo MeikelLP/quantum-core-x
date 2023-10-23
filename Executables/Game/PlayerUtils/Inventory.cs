@@ -227,17 +227,31 @@ namespace QuantumCore.Game.PlayerUtils
             }
         }
 
-        public async Task<bool> PlaceItem(ItemInstance instance)
+        /// <summary>
+        /// Places an item in the inventory in the first possible slot. Equipment items will be placed in the inventory
+        /// too and not be equipped by default. If no space is available items may be equipped.
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns>True if placement was successful. False if no space is available</returns>
+        public async Task<bool> PlaceItem(ItemInstance item)
         {
             for(var i = 0; i < _pages.Length; i++)
             {
                 var page = _pages[i];
 
-                var pos = page.Place(instance);
-                if (pos != -1)
+                var position = page.Place(item);
+                if (position != -1)
                 {
-                    await instance.Set(_cacheManager, Owner, Window, (uint) (pos + i * _width * _height));
-                    _items.Add(instance);
+                    await item.Set(_cacheManager, Owner, Window, (uint) (position + i * _width * _height));
+                    _items.Add(item);
+
+
+                    var wearSlot = _itemManager.GetWearSlot(item.ItemId);
+                    if (wearSlot is not null && position == EquipmentWindow.GetWearPosition(_itemManager, item.ItemId))
+                    {
+                        // if item is now "equipped"
+                        OnSlotChanged?.Invoke(this, new SlotChangedEventArgs(item, wearSlot.Value));
+                    }
                     return true;
                 }
             }
@@ -246,6 +260,13 @@ namespace QuantumCore.Game.PlayerUtils
             return false;
         }
 
+        /// <summary>
+        /// Places an item in the inventory at the given position. The position must be inside a valid inventory window.
+        /// Equipment window is not valid.
+        /// </summary>
+        /// <param name="item">Instance to place in inventory</param>
+        /// <param name="position">Where to place it</param>
+        /// <returns>True if placement was successful. May be false if the slot is occupied</returns>
         public async Task<bool> PlaceItem(ItemInstance item, ushort position)
         {
             var pageSize = _width * _height;
@@ -259,13 +280,6 @@ namespace QuantumCore.Game.PlayerUtils
             {
                 _items.Add(item);
                 await item.Set(_cacheManager, Owner, Window, position);
-                var wearSlot = _itemManager.GetWearSlot(item);
-                if (wearSlot is not null && position == EquipmentWindow.GetWearPosition(_itemManager, item))
-                {
-                    // if item is now "equipped"
-                    // TODO write test
-                    OnSlotChanged?.Invoke(this, new SlotChangedEventArgs(item, wearSlot.Value));
-                }
                 return true;
             }
 
@@ -341,7 +355,7 @@ namespace QuantumCore.Game.PlayerUtils
         public void SetEquipment(ItemInstance item, ushort position)
         {
             EquipmentWindow.SetItem(item, position);
-            OnSlotChanged?.Invoke(this, new SlotChangedEventArgs(item, _itemManager.GetWearSlot(item)!.Value));
+            OnSlotChanged?.Invoke(this, new SlotChangedEventArgs(item, _itemManager.GetWearSlot(item.ItemId)!.Value));
         }
     }
 }
