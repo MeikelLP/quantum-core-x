@@ -3,6 +3,7 @@ using System.Linq;
 using System.Text;
 using AutoBogus;
 using FluentAssertions;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using QuantumCore.Core.Packets;
@@ -27,7 +28,7 @@ public class IncomingPacketTests
     public IncomingPacketTests(ITestOutputHelper testOutputHelper)
     {
         var services = new ServiceCollection()
-            .AddCoreServices(new EmptyPluginCatalog())
+            .AddCoreServices(new EmptyPluginCatalog(), new ConfigurationBuilder().Build())
             .AddSingleton<IPacketSerializer, DefaultPacketSerializer>()
             .AddLogging(x =>
             {

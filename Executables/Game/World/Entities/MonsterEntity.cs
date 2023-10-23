@@ -30,15 +30,15 @@ namespace QuantumCore.Game.World.Entities
         }
 
         public MonsterData Proto { get { return _proto; } }
-        
+
         public MonsterGroup Group { get; set; }
-        
+
         private readonly MonsterData _proto;
         private IBehaviour _behaviour;
         private bool _behaviourInitialized;
         private double _deadTime = 5000;
-        
-        public MonsterEntity(IMonsterManager monsterManager, IAnimationManager animationManager, IWorld world, ILogger logger, uint id, int x, int y, float rotation = 0) 
+
+        public MonsterEntity(IMonsterManager monsterManager, IAnimationManager animationManager, IWorld world, ILogger logger, uint id, int x, int y, float rotation = 0)
             : base(animationManager, world.GenerateVid())
         {
             _logger = logger;
@@ -48,7 +48,7 @@ namespace QuantumCore.Game.World.Entities
             Rotation = rotation;
 
             MovementSpeed = (byte) _proto.MoveSpeed;
-            
+
             Health = _proto.Hp;
             EntityClass = id;
 
@@ -73,7 +73,7 @@ namespace QuantumCore.Game.World.Entities
                     await Map.DespawnEntity(this);
                 }
             }
-            
+
             if (!_behaviourInitialized)
             {
                 _behaviour?.Init(this);
@@ -91,9 +91,9 @@ namespace QuantumCore.Game.World.Entities
         public override async Task Goto(int x, int y)
         {
             Rotation = (float) MathUtils.Rotation(x - PositionX, y - PositionY);
-            
+
             await base.Goto(x, y);
-            
+
             // Send movement to nearby players
             var movement = new CharacterMoveOut {
                 Vid = Vid,
@@ -188,7 +188,7 @@ namespace QuantumCore.Game.World.Entities
             {
                 return;
             }
-            
+
             await base.Die();
 
             var dead = new CharacterDead { Vid = Vid };
@@ -204,7 +204,7 @@ namespace QuantumCore.Game.World.Entities
         protected override ValueTask OnNewNearbyEntity(IEntity entity)
         {
             _behaviour?.OnNewNearbyEntity(entity);
-        
+
             return ValueTask.CompletedTask;
         }
 
@@ -223,7 +223,7 @@ namespace QuantumCore.Game.World.Entities
                     (Map as Map)?.EnqueueGroupRespawn(Group);
                 }
             }
-        
+
             return ValueTask.CompletedTask;
         }
 
@@ -233,7 +233,7 @@ namespace QuantumCore.Game.World.Entities
             {
                 return; // no need to send dead entities to new players
             }
-            
+
             await connection.Send(new SpawnCharacter
             {
                 Vid = Vid,
@@ -252,12 +252,12 @@ namespace QuantumCore.Game.World.Entities
                 await connection.Send(new CharacterInfo {
                     Vid = Vid,
                     Empire = _proto.Empire,
-                    Level = _proto.Level,
+                    Level = 0,
                     Name = _proto.TranslatedName
                 });
             }
         }
-        
+
         public async override Task HideEntity(IConnection connection)
         {
             await connection.Send(new RemoveCharacter
