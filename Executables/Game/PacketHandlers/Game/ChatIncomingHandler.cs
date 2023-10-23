@@ -15,7 +15,7 @@ public class ChatIncomingHandler : IGamePacketHandler<ChatIncoming>
         _commandManager = commandManager;
         _chatManager = chatManager;
     }
-        
+
     public async Task ExecuteAsync(GamePacketContext<ChatIncoming> ctx, CancellationToken token = default)
     {
         if (ctx.Packet.MessageType == ChatMessageTypes.Normal)
@@ -28,7 +28,7 @@ public class ChatIncomingHandler : IGamePacketHandler<ChatIncoming>
             {
                 var message = ctx.Connection.Player.Name + ": " + ctx.Packet.Message;
 
-                await _chatManager.Talk(ctx.Connection.Player, message);
+                _chatManager.Talk(ctx.Connection.Player, message);
             }
         }
 
@@ -36,7 +36,7 @@ public class ChatIncomingHandler : IGamePacketHandler<ChatIncoming>
         {
             // todo check 15 seconds cooldown
             var message = ctx.Connection.Player.Name + ": " + ctx.Packet.Message;
-                
+
             await _chatManager.Shout(message);
         }
     }

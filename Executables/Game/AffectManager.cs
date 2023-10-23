@@ -29,7 +29,7 @@ public class AffectManager : IAffectManager
             Type = (uint) type,
             ApplyOn = applyOn,
         };
-        await playerEntity.Connection.Send(affectRemovePacket);
+        playerEntity.Connection.Send(affectRemovePacket);
     }
 
     public async Task AddAffect(IPlayerEntity playerEntity, EAffectType type, EAffectType applyOn, int applyValue,
@@ -64,22 +64,22 @@ public class AffectManager : IAffectManager
         {
             if(affect.ApplyValue != affectAPI.ApplyValue)
             {
-                await playerEntity.SendChatInfo("This affect is already working!");
+                playerEntity.SendChatInfo("This affect is already working!");
             }
             else
             {
-                await playerEntity.RemoveAffect(affectApi);
+                playerEntity.RemoveAffect(affectApi);
                 affectApi.Duration = affectApi.Duration.AddSeconds(duration);
                 affect.Duration = affectApi.Duration;
                 await _db.InsertAsync(affect);
-                await playerEntity.AddAffect(affectAPI);
-                await playerEntity.SendChatInfo("This affect duration is extended!");
+                playerEntity.AddAffect(affectAPI);
+                playerEntity.SendChatInfo("This affect duration is extended!");
             }
         }
         else
         {
             await _db.InsertAsync(affect);
-            await playerEntity.AddAffect(affectAPI);
+            playerEntity.AddAffect(affectAPI);
         }
 
         // Add affect to cache
@@ -103,7 +103,7 @@ public class AffectManager : IAffectManager
                     Duration = playerAffect.Duration,
                     SpCost = playerAffect.SpCost
                 };
-                await playerEntity.AddAffect(affect);
+                playerEntity.AddAffect(affect);
             }
         }
         _logger.LogDebug("Loaded affects for player: {PlayerName}", playerEntity.Name);

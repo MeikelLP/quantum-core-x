@@ -21,7 +21,7 @@ public class CreateCharacterHandler : IGamePacketHandler<CreateCharacter>
     private readonly IWorld _world;
     private readonly IDbConnection _db;
 
-    public CreateCharacterHandler(ILogger<CreateCharacterHandler> logger, 
+    public CreateCharacterHandler(ILogger<CreateCharacterHandler> logger,
         IJobManager jobManager, ICacheManager cacheManager, IWorld world, IDbConnection db)
     {
         _logger = logger;
@@ -30,7 +30,7 @@ public class CreateCharacterHandler : IGamePacketHandler<CreateCharacter>
         _world = world;
         _db = db;
     }
-    
+
     public async Task ExecuteAsync(GamePacketContext<CreateCharacter> ctx, CancellationToken token = default)
     {
         _logger.LogDebug("Create character in slot {Slot}", ctx.Packet.Slot);
@@ -46,12 +46,12 @@ public class CreateCharacterHandler : IGamePacketHandler<CreateCharacter>
         var count = await _db.QuerySingleAsync<int>("SELECT COUNT(*) FROM players WHERE Name = @Name", new {Name = ctx.Packet.Name});
         if (count > 0)
         {
-            await ctx.Connection.Send(new CreateCharacterFailure());
+            ctx.Connection.Send(new CreateCharacterFailure());
             return;
         }
 
         var job = _jobManager.Get((byte)ctx.Packet.Class);
-        
+
         // Create player data
         var player = new Player
         {
@@ -62,32 +62,32 @@ public class CreateCharacterHandler : IGamePacketHandler<CreateCharacter>
             PositionX = 958870,
             PositionY = 272788,
             St = job.St,
-            Iq = job.Iq, 
-            Dx = job.Dx, 
+            Iq = job.Iq,
+            Dx = job.Dx,
             Ht = job.Ht,
-            Health =  job.StartHp, 
+            Health =  job.StartHp,
             Mana = job.StartSp
         };
 
 
         // Persist player
         await _db.InsertAsync(player);
-        
+
         // Add player to cache
         await _cacheManager.Set("player:" + player.Id, player);
-        
+
         // Add player to the list of characters
         var list = _cacheManager.CreateList<Guid>("players:" + accountId);
         var idx = await list.Push(player.Id);
-        
+
         // Query responsible host for the map
         var host = _world.GetMapHost(player.PositionX, player.PositionY);
-        
+
         // Send success response
         var character = Character.FromEntity(player);
         character.Ip = IpUtils.ConvertIpToUInt(host.Ip);
         character.Port = host.Port;
-        await ctx.Connection.Send(new CreateCharacterSuccess
+        ctx.Connection.Send(new CreateCharacterSuccess
         {
             Slot = (byte)(idx - 1),
             Character = character

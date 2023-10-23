@@ -30,7 +30,7 @@ namespace QuantumCore.Game
         private readonly IQuestManager _questManager;
         private readonly IChatManager _chatManager;
         public IWorld World { get; }
-        
+
         private readonly Stopwatch _gameTime = new Stopwatch();
         private long _previousTicks = 0;
         private TimeSpan _accumulatedElapsedTime;
@@ -39,12 +39,12 @@ namespace QuantumCore.Game
         private readonly Stopwatch _serverTimer = new();
 
         public static GameServer Instance { get; private set; }
-        
-        public GameServer(IOptions<HostingOptions> hostingOptions, IPacketManager packetManager, 
-            ILogger<GameServer> logger, PluginExecutor pluginExecutor, IServiceProvider serviceProvider, 
-            IItemManager itemManager, IMonsterManager monsterManager, IExperienceManager experienceManager, 
+
+        public GameServer(IOptions<HostingOptions> hostingOptions, IPacketManager packetManager,
+            ILogger<GameServer> logger, PluginExecutor pluginExecutor, IServiceProvider serviceProvider,
+            IItemManager itemManager, IMonsterManager monsterManager, IExperienceManager experienceManager,
             IAnimationManager animationManager, ICommandManager commandManager,
-            IEnumerable<IPacketHandler> packetHandlers, IQuestManager questManager, IChatManager chatManager, 
+            IEnumerable<IPacketHandler> packetHandlers, IQuestManager questManager, IChatManager chatManager,
             IWorld world)
             : base(packetManager, logger, pluginExecutor, serviceProvider, packetHandlers, "game", hostingOptions)
         {
@@ -65,7 +65,7 @@ namespace QuantumCore.Game
         private void Update(double elapsedTime)
         {
             EventSystem.Update(elapsedTime);
-            
+
             World.Update(elapsedTime);
         }
 
@@ -81,16 +81,16 @@ namespace QuantumCore.Game
                 // Query interfaces for our best ipv4 address
                 IpUtils.SearchPublicIp();
             }
-            
+
             // Load game data
             await Task.WhenAll(
-                _itemManager.LoadAsync(stoppingToken), 
-                _monsterManager.LoadAsync(stoppingToken), 
+                _itemManager.LoadAsync(stoppingToken),
+                _monsterManager.LoadAsync(stoppingToken),
                 _experienceManager.LoadAsync(stoppingToken),
                 _animationManager.LoadAsync(stoppingToken),
                 _commandManager.LoadAsync(stoppingToken)
             );
-            
+
             // Initialize core systems
             _chatManager.Init();
 
@@ -98,32 +98,32 @@ namespace QuantumCore.Game
             _questManager.Init();
 
             // Load game world
-            _logger.LogInformation("Initialize world"); 
+            _logger.LogInformation("Initialize world");
             await World.Load();
 
             // Register all default commands
             _commandManager.Register("QuantumCore.Game.Commands");
-            
+
             // Put all new connections into login phase
-            RegisterNewConnectionListener(async connection =>
+            RegisterNewConnectionListener(connection =>
             {
-                await connection.SetPhaseAsync(EPhases.Login);
+                connection.SetPhase(EPhases.Login);
                 return true;
             });
 
             RegisterListeners();
-            
+
             // Start server timer
             _serverTimer.Start();
 
             _logger.LogInformation("Start listening for connections...");
 
             StartListening();
-            
+
             _gameTime.Start();
 
             _logger.LogDebug("Start!");
-            
+
             while (!stoppingToken.IsCancellationRequested)
             {
                 try
@@ -163,11 +163,11 @@ namespace QuantumCore.Game
             {
                 _accumulatedElapsedTime -= _targetElapsedTime;
                 ++stepCount;
-                
+
                 //_logger.LogDebug($"Update... ({stepCount})");
                 Update(_targetElapsedTime.TotalMilliseconds);
             }
-            
+
             // todo detect lags
         }
 

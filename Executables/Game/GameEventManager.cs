@@ -43,16 +43,16 @@ public static class GameEventManager
             var selected = await internalQuest.SelectQuest(events.Select(e => e.Name));
             if (events[selected].Callback.Target is not Quest.Quest)
             {
-                await internalQuest.EndQuest();
+                internalQuest.EndQuest();
             }
             await events[selected].Callback(player);
-            
+
             return;
         }
 
         if (!events.Any())
         {
-            return; 
+            return;
         }
 
         await events[0].Callback(player);
@@ -75,29 +75,29 @@ public static class GameEventManager
             var selected = await internalQuest.SelectQuest(events.Select(e => e.Name));
             if (events[selected].Callback.Target is not Quest.Quest)
             {
-                await internalQuest.EndQuest();
+                internalQuest.EndQuest();
             }
             await events[selected].Callback(player, item);
-            
+
             return;
         }
-        
+
         if (!events.Any())
         {
-            return; 
+            return;
         }
 
         await events[0].Callback(player, item);
     }
-    
-    public static void RegisterNpcClickEvent(string name, uint npcId, Func<IPlayerEntity, Task> callback, 
+
+    public static void RegisterNpcClickEvent(string name, uint npcId, Func<IPlayerEntity, Task> callback,
         Func<IPlayerEntity, bool> condition = null)
     {
         if (!NpcClickEvents.ContainsKey(npcId))
         {
             NpcClickEvents[npcId] = new List<NpcClickEvent>();
         }
-        
+
         NpcClickEvents[npcId].Add(new NpcClickEvent {
             Name = name,
             NpcId = npcId,
@@ -113,7 +113,7 @@ public static class GameEventManager
         {
             NpcGiveEvents[npcId] = new List<NpcGiveEvent>();
         }
-        
+
         NpcGiveEvents[npcId].Add(new NpcGiveEvent {
             Name = name,
             NpcId = npcId,

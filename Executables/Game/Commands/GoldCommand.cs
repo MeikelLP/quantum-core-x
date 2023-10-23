@@ -15,7 +15,7 @@ public class GoldCommand : ICommandHandler<GoldCommandOptions>
         _world = world;
     }
 
-    public async Task ExecuteAsync(CommandContext<GoldCommandOptions> context)
+    public Task ExecuteAsync(CommandContext<GoldCommandOptions> context)
     {
         var target = context.Player;
         if (!string.IsNullOrWhiteSpace(context.Arguments.Target))
@@ -25,12 +25,14 @@ public class GoldCommand : ICommandHandler<GoldCommandOptions>
 
         if (target is null)
         {
-            await context.Player.SendChatMessage("Target not found");
-            return;
+            context.Player.SendChatMessage("Target not found");
+            return Task.CompletedTask;
         }
-        
-        await target.AddPoint(EPoints.Gold, context.Arguments.Value);
-        await target.SendPoints();
+
+        target.AddPoint(EPoints.Gold, context.Arguments.Value);
+        target.SendPoints();
+
+        return Task.CompletedTask;
     }
 }
 
@@ -38,7 +40,7 @@ public class GoldCommandOptions
 {
     [Value(0)]
     public int Value { get; set; }
-    
+
     [Value(1)]
     public string Target { get; set; }
 }

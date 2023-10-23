@@ -14,7 +14,7 @@ namespace QuantumCore.Game.PlayerUtils
     {
         Inventory = 1
     }
-    
+
     public class Inventory : IInventory
     {
         private class Page
@@ -30,7 +30,7 @@ namespace QuantumCore.Game.PlayerUtils
                 _itemManager = itemManager;
                 _width = width;
                 _height = height;
-                
+
                 _grid = new Grid<ItemInstance>(_width, _height);
             }
 
@@ -38,7 +38,7 @@ namespace QuantumCore.Game.PlayerUtils
             {
                 if (position < 0) return null;
                 if (position >= _width * _height) return null;
-                
+
                 var x = (uint)(position % _width);
                 var y = (uint)(position / _width);
 
@@ -49,13 +49,13 @@ namespace QuantumCore.Game.PlayerUtils
             {
                 if (position < 0) return false;
                 if (position >= _width * _height) return false;
-                
+
                 var x = (uint)(position % _width);
                 var y = (uint)(position / _width);
 
                 var item = _grid.Get(x, y);
                 if (item == null) return false;
-                
+
                 var proto = _itemManager.GetItem(item.ItemId);
                 if (proto == null) return false;
 
@@ -80,7 +80,7 @@ namespace QuantumCore.Game.PlayerUtils
                     for (uint x = 0; x < _width; x++)
                     {
                         if (Place(item, x, y)) return x + y * _width;
-                    }    
+                    }
                 }
 
                 return -1;
@@ -100,7 +100,7 @@ namespace QuantumCore.Game.PlayerUtils
                 {
                     _grid.Set(x, y + i, item);
                 }
-                
+
                 return true;
             }
 
@@ -119,7 +119,7 @@ namespace QuantumCore.Game.PlayerUtils
             {
                 if (position < 0) return false;
                 if (position >= _width * _height) return false;
-                
+
                 var x = (uint)(position % _width);
                 var y = (uint)(position / _width);
 
@@ -134,7 +134,7 @@ namespace QuantumCore.Game.PlayerUtils
                 for (byte i = 0; i < size; i++)
                 {
                     if (y + i >= _height) return false;
-                    
+
                     if (_grid.Get(x, y + i) != null)
                     {
                         return false;
@@ -144,15 +144,19 @@ namespace QuantumCore.Game.PlayerUtils
                 return true;
             }
         }
-        
+
+        public event EventHandler<SlotChangedEventArgs>? OnSlotChanged;
         public Guid Owner { get; private set; }
         public byte Window { get; private set; }
+
         public ReadOnlyCollection<ItemInstance> Items {
             get {
                 return _items.AsReadOnly();
             }
         }
+
         public IEquipment EquipmentWindow { get; private set; }
+
 
         public long Size {
             get {
@@ -169,7 +173,7 @@ namespace QuantumCore.Game.PlayerUtils
         private readonly ICacheManager _cacheManager;
         private readonly ILogger _logger;
 
-        public Inventory(IItemManager itemManager, IDbConnection db, ICacheManager cacheManager, ILogger logger, 
+        public Inventory(IItemManager itemManager, IDbConnection db, ICacheManager cacheManager, ILogger logger,
             Guid owner, byte window, ushort width, ushort height, ushort pages)
         {
             Owner = owner;
@@ -188,7 +192,7 @@ namespace QuantumCore.Game.PlayerUtils
             {
                 _pages[i] = new Page(_itemManager, width, height);
             }
-            
+
             // Initialize equipment
             EquipmentWindow = new Equipment(Owner, Size);
         }
@@ -196,7 +200,7 @@ namespace QuantumCore.Game.PlayerUtils
         public async Task Load()
         {
             _items.Clear();
-            
+
             var pageSize = _width * _height;
             await foreach(var item in _db.GetItems(_cacheManager, Owner, Window))
             {
@@ -223,17 +227,31 @@ namespace QuantumCore.Game.PlayerUtils
             }
         }
 
-        public async Task<bool> PlaceItem(ItemInstance instance)
+        /// <summary>
+        /// Places an item in the inventory in the first possible slot. Equipment items will be placed in the inventory
+        /// too and not be equipped by default. If no space is available items may be equipped.
+        /// </summary>
+        /// <param name="item"></param>
+        /// <returns>True if placement was successful. False if no space is available</returns>
+        public async Task<bool> PlaceItem(ItemInstance item)
         {
             for(var i = 0; i < _pages.Length; i++)
             {
                 var page = _pages[i];
-                
-                var pos = page.Place(instance);
-                if (pos != -1)
+
+                var position = page.Place(item);
+                if (position != -1)
                 {
-                    await instance.Set(_cacheManager, Owner, Window, (uint) (pos + i * _width * _height));
-                    _items.Add(instance);
+                    await item.Set(_cacheManager, Owner, Window, (uint) (position + i * _width * _height));
+                    _items.Add(item);
+
+
+                    var wearSlot = _itemManager.GetWearSlot(item.ItemId);
+                    if (wearSlot is not null && position == EquipmentWindow.GetWearPosition(_itemManager, item.ItemId))
+                    {
+                        // if item is now "equipped"
+                        OnSlotChanged?.Invoke(this, new SlotChangedEventArgs(item, wearSlot.Value));
+                    }
                     return true;
                 }
             }
@@ -242,6 +260,13 @@ namespace QuantumCore.Game.PlayerUtils
             return false;
         }
 
+        /// <summary>
+        /// Places an item in the inventory at the given position. The position must be inside a valid inventory window.
+        /// Equipment window is not valid.
+        /// </summary>
+        /// <param name="item">Instance to place in inventory</param>
+        /// <param name="position">Where to place it</param>
+        /// <returns>True if placement was successful. May be false if the slot is occupied</returns>
         public async Task<bool> PlaceItem(ItemInstance item, ushort position)
         {
             var pageSize = _width * _height;
@@ -325,6 +350,12 @@ namespace QuantumCore.Game.PlayerUtils
             {
                 Log.Debug("Failed to place item");
             }
+        }
+
+        public void SetEquipment(ItemInstance item, ushort position)
+        {
+            EquipmentWindow.SetItem(item, position);
+            OnSlotChanged?.Invoke(this, new SlotChangedEventArgs(item, _itemManager.GetWearSlot(item.ItemId)!.Value));
         }
     }
 }

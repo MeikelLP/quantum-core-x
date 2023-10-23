@@ -23,39 +23,38 @@ namespace QuantumCore.API.Game.World
         EAntiFlags AntiFlagGender { get; }
         Task Load();
         T GetQuestInstance<T>() where T : IQuest;
-        Task Respawn(bool town);
+        void Respawn(bool town);
         uint CalculateAttackDamage(uint baseDamage);
         uint GetHitRate();
-        ValueTask AddPoint(EPoints point, int value);
-        ValueTask SetPoint(EPoints point, uint value);
-        Task DropItem(ItemInstance item, byte count);
-        Task Pickup(IGroundItem groundItem);
-        Task DropGold(uint amount);
+        void AddPoint(EPoints point, int value);
+        void SetPoint(EPoints point, uint value);
+        void DropItem(ItemInstance item, byte count);
+        void Pickup(IGroundItem groundItem);
+        void DropGold(uint amount);
         ItemInstance GetItem(byte window, ushort position);
         bool IsSpaceAvailable(ItemInstance item, byte window, ushort position);
         bool IsEquippable(ItemInstance item);
-        Task<bool> DestroyItem(ItemInstance item);
-        Task RemoveItem(ItemInstance item);
-        Task SetItem(ItemInstance item, byte window, ushort position);
-        Task SendBasicData();
-        Task SendPoints();
-        Task SendInventory();
-        Task SendItem(ItemInstance item);
-        Task SendRemoveItem(byte window, ushort position);
-        Task SendCharacter(IConnection connection);
-        Task SendCharacterAdditional(IConnection connection);
-        Task SendCharacterUpdate();
-        Task SendChatMessage(string message);
-        Task SendChatCommand(string message);
-        Task SendChatInfo(string message);
-        Task SendTarget();
-        Task Show(IConnection connection);
+        bool DestroyItem(ItemInstance item);
+        void RemoveItem(ItemInstance item);
+        void SetItem(ItemInstance item, byte window, ushort position);
+        void SendBasicData();
+        void SendPoints();
+        void SendInventory();
+        void SendItem(ItemInstance item);
+        void SendRemoveItem(byte window, ushort position);
+        void SendCharacter(IConnection connection);
+        void SendCharacterAdditional(IConnection connection);
+        void SendCharacterUpdate();
+        void SendChatMessage(string message);
+        void SendChatCommand(string message);
+        void SendChatInfo(string message);
+        void SendTarget();
         void Disconnect();
         string ToString();
 #nullable enable
         bool TryGetAffect(Affect affect, [MaybeNullWhen(false)] out Affect result);
 #nullable restore
-        Task AddAffect(Affect affect);
-        Task RemoveAffect(Affect affect);
+        void AddAffect(Affect affect);
+        void RemoveAffect(Affect affect);
     }
 }

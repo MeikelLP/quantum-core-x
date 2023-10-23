@@ -7,18 +7,19 @@ namespace QuantumCore.Game.PacketHandlers.Game;
 
 public class QuickBarAddHandler : IGamePacketHandler<QuickBarAdd>
 {
-    public async Task ExecuteAsync(GamePacketContext<QuickBarAdd> ctx, CancellationToken token = default)
+    public Task ExecuteAsync(GamePacketContext<QuickBarAdd> ctx, CancellationToken token = default)
     {
         var player = ctx.Connection.Player;
         if (player == null)
         {
             ctx.Connection.Close();
-            return;
+            return Task.CompletedTask;
         }
 
-        await player.QuickSlotBar.Add(ctx.Packet.Position, new QuickSlotData {
+        player.QuickSlotBar.Add(ctx.Packet.Position, new QuickSlotData {
             Position = ctx.Packet.Slot.Position,
             Type = ctx.Packet.Slot.Position
         });
+        return Task.CompletedTask;
     }
 }

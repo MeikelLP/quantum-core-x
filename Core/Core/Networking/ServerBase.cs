@@ -19,12 +19,12 @@ using QuantumCore.Networking;
 
 namespace QuantumCore.Core.Networking
 {
-    public abstract class ServerBase<T> : BackgroundService, IServerBase 
+    public abstract class ServerBase<T> : BackgroundService, IServerBase
         where T : IConnection
     {
         private readonly ILogger _logger;
         protected IPacketManager PacketManager { get; }
-        private readonly List<Func<IConnection, Task<bool>>> _connectionListeners = new();
+        private readonly List<Func<IConnection, bool>> _connectionListeners = new();
         private readonly ConcurrentDictionary<Guid, IConnection> _connections = new();
         private readonly Dictionary<ushort, IPacketHandler> _listeners = new();
         private readonly Stopwatch _serverTimer = new();
@@ -49,10 +49,10 @@ namespace QuantumCore.Core.Networking
             _serverMode = mode;
             PacketManager = packetManager;
             Port = hostingOptions.Value.Port;
-            
+
             // Start server timer
             _serverTimer.Start();
-            
+
             var localAddr = IPAddress.Parse(hostingOptions.Value.IpAddress);
             Listener = new TcpListener(localAddr, Port);
 
@@ -64,7 +64,7 @@ namespace QuantumCore.Core.Networking
         public async Task RemoveConnection(IConnection connection)
         {
             _connections.Remove(connection.Id, out _);
-            
+
             await _pluginExecutor.ExecutePlugins<IConnectionLifetimeListener>(_logger, x => x.OnDisconnectedAsync(_stoppingToken.Token));
         }
 
@@ -83,32 +83,32 @@ namespace QuantumCore.Core.Networking
         {
             var listener = (TcpListener) ar.AsyncState;
             var client = listener!.EndAcceptTcpClient(ar);
-            
-            // will dispose once connection finished executing (canceled or disconnect) 
+
+            // will dispose once connection finished executing (canceled or disconnect)
             await using var scope = _serviceProvider.CreateAsyncScope();
 
             // cannot inject tcp client here
             var connection = ActivatorUtilities.CreateInstance<T>(scope.ServiceProvider, client, (IServerBase) this);
             _connections.TryAdd(connection.Id, connection);
-            
+
             await _pluginExecutor.ExecutePlugins<IConnectionLifetimeListener>(_logger, x => x.OnConnectedAsync(_stoppingToken.Token));
 
             // accept new connections on another thread
             Listener.BeginAcceptTcpClient(OnClientAccepted, Listener);
-            
+
             await connection.StartAsync(_stoppingToken.Token);
             await connection.ExecuteTask.ConfigureAwait(false);
         }
 
-        public async Task ForAllConnections(Func<IConnection, Task> callback)
+        public void ForAllConnections(Action<IConnection> callback)
         {
             foreach (var connection in _connections.Values)
             {
-                await callback(connection);
+                callback(connection);
             }
         }
 
-        public void RegisterNewConnectionListener(Func<IConnection, Task<bool>> listener)
+        public void RegisterNewConnectionListener(Func<IConnection, bool> listener)
         {
             _connectionListeners.Add(listener);
         }
@@ -120,7 +120,7 @@ namespace QuantumCore.Core.Networking
                 _logger.LogWarning("Could not find a handler for packet {PacketType}", packet.GetType());
                 return;
             }
-            
+
             object context;
             if (_serverMode == "game")
             {
@@ -208,14 +208,14 @@ namespace QuantumCore.Core.Networking
                     _logger.LogWarning("Base interface did not match {BaseInterface} this should not happen", nameof(IPacketHandler));
                     continue;
                 }
-                
+
                 var packetDescription = packetType.GetCustomAttribute<PacketAttribute>();
                 if (packetDescription is null)
                 {
                     _logger.LogWarning("Packet type {Type} is missing a {AttributeTypeName}", packetType.Name, nameof(PacketAttribute));
                     continue;
                 }
-                
+
                 var subPacketDescription = packetType.GetCustomAttribute<SubPacketAttribute>();
                 if (subPacketDescription is not null)
                 {

@@ -12,7 +12,7 @@ public class InternalQuest : Quest
 
     public override void Init()
     {
-        
+
     }
 
     public async Task<byte> SelectQuest(IEnumerable<string> events)
@@ -20,9 +20,9 @@ public class InternalQuest : Quest
         return await Choice(false, events.ToArray());
     }
 
-    public async Task EndQuest()
+    public void EndQuest()
     {
         SetSkin(QuestSkin.NoWindow);
-        await Done();
+        Done();
     }
 }
