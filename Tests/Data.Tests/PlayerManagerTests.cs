@@ -96,7 +96,7 @@ public class PlayerManagerTests : IClassFixture<RedisFixture>, IClassFixture<Dat
     [Fact]
     public async Task CreateCharacter()
     {
-        var account = await _accountManager.CreateAsync("testificate", "testificate", "some@gmail.com", "1234567"); 
+        var account = await _accountManager.CreateAsync("testificate", "testificate", "some@gmail.com", "1234567");
         var player = await _playerManager.CreateAsync(account.Id, "Testificate", 0, 1);
 
         player.Should().BeEquivalentTo(new PlayerData
@@ -122,7 +122,7 @@ public class PlayerManagerTests : IClassFixture<RedisFixture>, IClassFixture<Dat
     [Fact]
     public async Task IsNameInUseOtherAccount()
     {
-        var account = await _accountManager.CreateAsync("testificate", "testificate", "some@gmail.com", "1234567"); 
+        var account = await _accountManager.CreateAsync("testificate", "testificate", "some@gmail.com", "1234567");
         await _playerManager.CreateAsync(account.Id, "Testificate", 0, 1);
 
         var resultCaseSensitive = await _playerManager.IsNameInUseAsync("Testificate");
@@ -155,12 +155,15 @@ public class PlayerManagerTests : IClassFixture<RedisFixture>, IClassFixture<Dat
         await _dbPlayerRepository.CreateAsync(new PlayerData
         {
             Id = playerId,
-            Name = "1234"
+            Name = "1234",
+            AccountId = new Guid("AB79A4E3-21E3-4A7A-AB84-C9A94C3DC041")
         });
-        await _playerManager.GetPlayer(playerId);
+        var player = await _playerManager.GetPlayer(playerId);
 
         var keys = await _cacheManager.Keys("*");
-        keys.Should().HaveCount(1).And.Contain($"player:{playerId}");
+        keys.Should().HaveCount(2);
+        keys.Should().Contain($"player:{playerId}");
+        keys.Should().Contain($"players:{player!.AccountId}:0");
     }
 
     [Fact]
@@ -235,7 +238,7 @@ public class PlayerManagerTests : IClassFixture<RedisFixture>, IClassFixture<Dat
     [Fact]
     public async Task DeleteCharacter()
     {
-        var account = await _accountManager.CreateAsync("testificate", "testificate", "some@gmail.com", "1234567"); 
+        var account = await _accountManager.CreateAsync("testificate", "testificate", "some@gmail.com", "1234567");
         var player = await _playerManager.CreateAsync(account.Id, "Testificate", 0, 1);
         await _playerManager.DeletePlayerAsync(player);
 
