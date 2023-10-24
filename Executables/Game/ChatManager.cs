@@ -25,26 +25,24 @@ public class ChatManager : IChatManager
     {
         _cacheManager = cacheManager;
     }
-    
+
     public void Init()
     {
         _id = Guid.NewGuid();
 
         _subscriber = _cacheManager.Subscribe();
-#pragma warning disable CS4014
-        _subscriber.Register<ChatMessage>("chat", msg => OnChatMessage(msg));
-#pragma warning restore CS4014
+        _subscriber.Register<ChatMessage>("chat", OnChatMessage);
         _subscriber.Listen();
     }
 
-    private async Task OnChatMessage(ChatMessage message)
+    private void OnChatMessage(ChatMessage message)
     {
         if (message.OwnerCore == _id)
         {
             // It's our own message, we don't have to handle it here
             return;
         }
-        
+
         var chat = new ChatOutcoming
         {
             MessageType = message.Type,
@@ -52,20 +50,20 @@ public class ChatManager : IChatManager
             Empire = 1, // todo
             Message = message.Message
         };
-        
+
         // Send message to all connections in the game phase
-        await GameServer.Instance.ForAllConnections(async connection =>
+        GameServer.Instance.ForAllConnections(connection =>
         {
             if (connection.Phase != EPhases.Game)
             {
                 return;
             }
-            
-            await connection.Send(chat);
+
+            connection.Send(chat);
         });
     }
-    
-    public async ValueTask Talk(IEntity entity, string message)
+
+    public void Talk(IEntity entity, string message)
     {
         var packet = new ChatOutcoming
         {
@@ -77,16 +75,16 @@ public class ChatManager : IChatManager
 
         if (entity is IPlayerEntity player)
         {
-            await player.Connection.Send(packet);
+            player.Connection.Send(packet);
         }
-        
-        await entity.ForEachNearbyEntity(async nearby =>
+
+        foreach (var nearby in entity.NearbyEntities)
         {
-            if (nearby is PlayerEntity player)
+            if (nearby is PlayerEntity p)
             {
-                await player.Connection.Send(packet);
+                p.Connection.Send(packet);
             }
-        });
+        }
     }
 
     public async Task Shout(string message)
@@ -98,19 +96,19 @@ public class ChatManager : IChatManager
             Empire = 1, // todo
             Message = message
         };
-        
+
         // Send message to all connections in the game phase
-        await GameServer.Instance.ForAllConnections(async connection =>
+        GameServer.Instance.ForAllConnections(connection =>
         {
             if (connection.Phase != EPhases.Game)
             {
                 return;
             }
-            
-            await connection.Send(chat);
+
+            connection.Send(chat);
         });
-        
-        // Broadcast message to all cores 
+
+        // Broadcast message to all cores
         await _cacheManager.Publish("chat",
             new ChatMessage {Type = ChatMessageTypes.Shout, Message = message, OwnerCore = _id});
     }

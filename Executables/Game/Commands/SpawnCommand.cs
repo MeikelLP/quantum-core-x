@@ -23,14 +23,14 @@ namespace QuantumCore.Game.Commands
             _world = world;
             _logger = logger;
         }
-        
-        public async Task ExecuteAsync(CommandContext<SpawnCommandOptions> context)
+
+        public Task ExecuteAsync(CommandContext<SpawnCommandOptions> context)
         {
             var proto = _monsterManager.GetMonster(context.Arguments.MonsterId);
             if (proto == null)
             {
-                await context.Player.SendChatInfo("No monster found with the specified id");
-                return;
+                context.Player.SendChatInfo("No monster found with the specified id");
+                return Task.CompletedTask;
             }
 
             for (var i = 0; i < context.Arguments.Count; i++)
@@ -41,8 +41,10 @@ namespace QuantumCore.Game.Commands
 
                 // Create entity instance
                 var monster = new MonsterEntity(_monsterManager, _animationManager, _world, _logger, context.Arguments.MonsterId, x, y);
-                await _world.SpawnEntity(monster);
+                _world.SpawnEntity(monster);
             }
+
+            return Task.CompletedTask;
         }
     }
 

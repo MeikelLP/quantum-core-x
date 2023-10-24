@@ -49,14 +49,14 @@ namespace QuantumCore.Game.World.Entities
         public long Mana { get; set; }
         public abstract byte HealthPercentage { get; }
         public bool Dead { get; protected set; }
-        
+
         public IMap Map { get; set; }
-        
+
         // QuadTree cache
         public int LastPositionX { get; set; }
         public int LastPositionY { get; set; }
         public IQuadTree LastQuadTree { get; set; }
-        
+
         // Movement related
         public long MovementStart { get; private set; }
         public int TargetPositionX { get; private set; }
@@ -66,7 +66,8 @@ namespace QuantumCore.Game.World.Entities
         public uint MovementDuration { get; private set; }
         public byte MovementSpeed { get; protected set; }
 
-        private List<IEntity> NearbyEntities { get; } = new();
+        public IReadOnlyCollection<IEntity> NearbyEntities => _nearbyEntities;
+        private readonly List<IEntity> _nearbyEntities = new();
         public List<IPlayerEntity> TargetedBy { get; } = new();
         public const int ViewDistance = 10000;
 
@@ -74,7 +75,6 @@ namespace QuantumCore.Game.World.Entities
         private int _positionY;
         private float _rotation;
         private bool _positionChanged;
-        private IEntity _entityImplementation;
 
         public Entity(IAnimationManager animationManager, uint vid)
         {
@@ -82,13 +82,13 @@ namespace QuantumCore.Game.World.Entities
             Vid = vid;
         }
 
-        protected abstract ValueTask OnNewNearbyEntity(IEntity entity);
-        protected abstract ValueTask OnRemoveNearbyEntity(IEntity entity);
-        public abstract ValueTask OnDespawn();
-        public abstract Task ShowEntity(IConnection connection);
-        public abstract Task HideEntity(IConnection connection);
-        
-        public virtual Task Update(double elapsedTime)
+        protected abstract void OnNewNearbyEntity(IEntity entity);
+        protected abstract void OnRemoveNearbyEntity(IEntity entity);
+        public abstract void OnDespawn();
+        public abstract void ShowEntity(IConnection connection);
+        public abstract void HideEntity(IConnection connection);
+
+        public virtual void Update(double elapsedTime)
         {
             if (State == EEntityState.Moving)
             {
@@ -107,24 +107,21 @@ namespace QuantumCore.Game.World.Entities
                     State = EEntityState.Idle;
                 }
             }
-
-            return Task.CompletedTask;
         }
 
-        public virtual Task Move(int x, int y)
+        public virtual void Move(int x, int y)
         {
-            if (PositionX == x && PositionY == y) return Task.CompletedTask;
-            
+            if (PositionX == x && PositionY == y) return;
+
             PositionX = x;
             PositionY = y;
             PositionChanged = true;
-            return Task.CompletedTask;
         }
 
-        public virtual Task Goto(int x, int y)
+        public virtual void Goto(int x, int y)
         {
-            if (PositionX == x && PositionY == y) return Task.CompletedTask;
-            if (TargetPositionX == x && TargetPositionY == y) return Task.CompletedTask;
+            if (PositionX == x && PositionY == y) return;
+            if (TargetPositionX == x && TargetPositionY == y) return;
 
             var animation =
                 _animationManager.GetAnimation(EntityClass, AnimationType.Run, AnimationSubType.General);
@@ -160,8 +157,6 @@ namespace QuantumCore.Game.World.Entities
                 var duration = (int) ((distance / animationSpeed) * 1000) * i / 100;
                 MovementDuration = (uint) duration;
             }
-            
-            return Task.CompletedTask;
         }
 
         public virtual void Wait(int x, int y)
@@ -181,11 +176,11 @@ namespace QuantumCore.Game.World.Entities
         public abstract int GetMinDamage();
         public abstract int GetMaxDamage();
         public abstract int GetBonusDamage();
-        public abstract ValueTask AddPoint(EPoints point, int value);
-        public abstract ValueTask SetPoint(EPoints point, uint value);
+        public abstract void AddPoint(EPoints point, int value);
+        public abstract void SetPoint(EPoints point, uint value);
         public abstract uint GetPoint(EPoints point);
 
-        public async Task Attack(IEntity victim, byte type)
+        public void Attack(IEntity victim, byte type)
         {
             if (type == 0)
             {
@@ -198,7 +193,7 @@ namespace QuantumCore.Game.World.Entities
                     case 6:
                     case 7:
                         // melee sort attack
-                        await MeleeAttack(victim);
+                        MeleeAttack(victim);
                         break;
                     case 1:
                         // todo range attack
@@ -214,10 +209,10 @@ namespace QuantumCore.Game.World.Entities
             }
         }
 
-        private async Task MeleeAttack(IEntity victim)
+        private void MeleeAttack(IEntity victim)
         {
             // todo verify victim is in range
-            
+
             var attackerRating = Math.Min(90, (GetPoint(EPoints.Dx) * 4 + GetPoint(EPoints.Level) * 2) / 6);
             var victimRating = Math.Min(90, (victim.GetPoint(EPoints.Dx) * 4 + victim.GetPoint(EPoints.Level) * 2) / 6);
             var attackRating = (attackerRating + 210.0) / 300.0 - (victimRating * 2 + 5) / (victimRating + 95) * 3.0 / 10.0;
@@ -226,31 +221,31 @@ namespace QuantumCore.Game.World.Entities
             var maxDamage = GetMaxDamage();
 
             var damage = CoreRandom.GenerateInt32(minDamage, maxDamage + 1) * 2;
-            await SendDebugDamage(victim, $"{this}->{victim} Base Attack value: {damage}");
+            SendDebugDamage(victim, $"{this}->{victim} Base Attack value: {damage}");
             var attack = (int)(GetPoint(EPoints.AttackGrade) + damage - GetPoint(EPoints.Level) * 2);
             attack = (int) Math.Floor(attack * attackRating);
             attack += (int)GetPoint(EPoints.Level) * 2 + GetBonusDamage() * 2;
             attack *= (int)((100 + GetPoint(EPoints.AttackBonus) + GetPoint(EPoints.MagicAttackBonus)) / 100);
             attack = CalculateAttackBonus(victim, attack);
-            await SendDebugDamage(victim, $"{this}->{victim} With bonus and level {attack}");
+            SendDebugDamage(victim, $"{this}->{victim} With bonus and level {attack}");
 
             var defence = (int)(victim.GetPoint(EPoints.DefenceGrade) * (100 + victim.GetPoint(EPoints.DefenceBonus)) / 100);
-            await SendDebugDamage(victim, $"{this}->{victim} Base defence: {defence}");
+            SendDebugDamage(victim, $"{this}->{victim} Base defence: {defence}");
             if (this is MonsterEntity thisMonster)
             {
                 attack = (int) Math.Floor(attack * thisMonster.Proto.DamageMultiply);
             }
 
             damage = Math.Max(0, attack - defence);
-            await SendDebugDamage(victim, $"{this}->{victim} Melee damage: {damage}");
+            SendDebugDamage(victim, $"{this}->{victim} Melee damage: {damage}");
             if (damage < 3)
             {
                 damage = CoreRandom.GenerateInt32(1, 6);
             }
-            
+
             // todo reduce damage by weapon type resist
-            
-            await victim.Damage(this, EDamageType.Normal, damage);
+
+            victim.Damage(this, EDamageType.Normal, damage);
         }
 
         /// <summary>
@@ -265,7 +260,7 @@ namespace QuantumCore.Game.World.Entities
             // todo implement bonus attack against warriors etc...
             // todo implement resist again warriors etc...
             // todo implement resist against fire etc...
-            
+
             return attack;
         }
 
@@ -279,19 +274,19 @@ namespace QuantumCore.Game.World.Entities
             return (int)(baseExp * percentage);
         }
 
-        private async Task SendDebugDamage(IEntity other, string text)
+        private void SendDebugDamage(IEntity other, string text)
         {
             if (this is PlayerEntity thisPlayer)
             {
-                await thisPlayer.SendChatInfo(text);
+                thisPlayer.SendChatInfo(text);
             }
             if (other is PlayerEntity otherPlayer)
             {
-                await otherPlayer.SendChatInfo(text);
+                otherPlayer.SendChatInfo(text);
             }
         }
 
-        public async virtual Task<int> Damage(IEntity attacker, EDamageType damageType, int damage)
+        public virtual int Damage(IEntity attacker, EDamageType damageType, int damage)
         {
             if (damageType != EDamageType.Normal)
             {
@@ -301,8 +296,8 @@ namespace QuantumCore.Game.World.Entities
             // todo block
             // todo handle berserk, fear, blessing skill
             // todo handle reflect melee
-            
-            await SendDebugDamage(attacker, $"{attacker}->{this} Base Damage: {damage}");
+
+            SendDebugDamage(attacker, $"{attacker}->{this} Base Damage: {damage}");
 
             var isCritical = false;
             var isPenetrate = false;
@@ -317,7 +312,7 @@ namespace QuantumCore.Game.World.Entities
                     isCritical = true;
                     damage *= 2;
                     // todo send effect to clients
-                    await SendDebugDamage(attacker, $"{attacker}->{this} Critical hit -> {damage} (percentage was {criticalPercentage})");
+                    SendDebugDamage(attacker, $"{attacker}->{this} Critical hit -> {damage} (percentage was {criticalPercentage})");
                 }
             }
 
@@ -331,10 +326,10 @@ namespace QuantumCore.Game.World.Entities
                 {
                     isPenetrate = true;
                     damage += (int) (GetPoint(EPoints.DefenceGrade) * (100 + GetPoint(EPoints.DefenceBonus)) / 100);
-                    await SendDebugDamage(attacker, $"{attacker}->{this} Penetrate hit -> {damage} (percentage was {penetratePercentage})");
+                    SendDebugDamage(attacker, $"{attacker}->{this} Penetrate hit -> {damage} (percentage was {penetratePercentage})");
                 }
-            } 
-            
+            }
+
             // todo calculate hp steal, sp steal, hp recovery, sp recovery and mana burn
 
             byte damageFlags = 1; // 1 = normal
@@ -358,65 +353,64 @@ namespace QuantumCore.Game.World.Entities
 
                 if (victimPlayer != null)
                 {
-                    await victimPlayer.Connection.Send(damageInfo);
+                    victimPlayer.Connection.Send(damageInfo);
                 }
 
                 if (attackerPlayer != null)
                 {
-                    await attackerPlayer.Connection.Send(damageInfo);
+                    attackerPlayer.Connection.Send(damageInfo);
                 }
             }
 
             this.Health -= damage;
             if (victimPlayer != null)
             {
-                await victimPlayer.SendPoints();
+                victimPlayer.SendPoints();
             }
 
             foreach (var playerEntity in TargetedBy)
             {
-                await playerEntity.SendTarget();
+                playerEntity.SendTarget();
             }
 
             if (Health <= 0)
             {
-                await Die();
+                Die();
                 if (Type != EEntityType.Player && attackerPlayer is not null)
                 {
                     var exp = CalculateExperience(attackerPlayer.GetPoint(EPoints.Level));
-                    await attackerPlayer.AddPoint(EPoints.Experience, exp);
-                    await attackerPlayer.SendPoints();
+                    attackerPlayer.AddPoint(EPoints.Experience, exp);
+                    attackerPlayer.SendPoints();
                 }
             }
 
             return damage;
         }
 
-        public virtual ValueTask Die()
+        public virtual void Die()
         {
             Dead = true;
-            return ValueTask.CompletedTask;
         }
 
-        public async ValueTask AddNearbyEntity(IEntity entity)
+        public void AddNearbyEntity(IEntity entity)
         {
-            NearbyEntities.Add(entity);
-            await OnNewNearbyEntity(entity);
+            _nearbyEntities.Add(entity);
+            OnNewNearbyEntity(entity);
         }
 
-        public async ValueTask RemoveNearbyEntity(IEntity entity)
+        public void RemoveNearbyEntity(IEntity entity)
         {
-            if (NearbyEntities.Remove(entity))
+            if (_nearbyEntities.Remove(entity))
             {
-                await OnRemoveNearbyEntity(entity);
+                OnRemoveNearbyEntity(entity);
             }
         }
 
-        public async Task ForEachNearbyEntity(Func<IEntity, Task> action)
+        public void ForEachNearbyEntity(Action<IEntity> action)
         {
-            foreach (var entity in NearbyEntities)
+            foreach (var entity in _nearbyEntities)
             {
-                await action(entity);
+                action(entity);
             }
         }
     }

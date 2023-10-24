@@ -9,6 +9,4 @@ public interface IGroundItem : IEntity
 {
     ItemInstance Item { get; }
     uint Amount { get; }
-    ValueTask AddPoint(EPoints point, int value);
-    ValueTask SetPoint(EPoints point, uint value);
 }

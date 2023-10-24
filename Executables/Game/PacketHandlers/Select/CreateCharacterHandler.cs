@@ -20,7 +20,7 @@ public class CreateCharacterHandler : IGamePacketHandler<CreateCharacter>
         _world = world;
         _playerManager = playerManager;
     }
-    
+
     public async Task ExecuteAsync(GamePacketContext<CreateCharacter> ctx, CancellationToken token = default)
     {
         _logger.LogDebug("Create character in slot {Slot}", ctx.Packet.Slot);
@@ -36,21 +36,20 @@ public class CreateCharacterHandler : IGamePacketHandler<CreateCharacter>
         var isNameInUse = await _playerManager.IsNameInUseAsync(ctx.Packet.Name);
         if (isNameInUse)
         {
-            await ctx.Connection.Send(new CreateCharacterFailure());
+            ctx.Connection.Send(new CreateCharacterFailure());
             return;
         }
 
 
         var player = await _playerManager.CreateAsync(accountId.Value, ctx.Packet.Name, (byte)ctx.Packet.Class, ctx.Packet.Appearance);
-        
         // Query responsible host for the map
         var host = _world.GetMapHost(player.PositionX, player.PositionY);
-        
+
         // Send success response
         var character = player.ToCharacter();
         character.Ip = IpUtils.ConvertIpToUInt(host.Ip);
         character.Port = host.Port;
-        await ctx.Connection.Send(new CreateCharacterSuccess
+        ctx.Connection.Send(new CreateCharacterSuccess
         {
             Slot = player.Slot,
             Character = character

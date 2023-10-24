@@ -30,7 +30,7 @@ namespace QuantumCore.Game.PacketHandlers
             _world = world;
             _playerManager = playerManager;
         }
-        
+
         public async Task ExecuteAsync(GamePacketContext<TokenLogin> ctx, CancellationToken cancellationToken = default)
         {
             var key = "token:" + ctx.Packet.Key;
@@ -41,7 +41,7 @@ namespace QuantumCore.Game.PacketHandlers
                 ctx.Connection.Close();
                 return;
             }
-            
+
             // Verify that the given token is for the given user
             var token = await _cacheManager.Get<Token>(key);
             if (!string.Equals(token.Username, ctx.Packet.Username, StringComparison.OrdinalIgnoreCase))
@@ -50,20 +50,20 @@ namespace QuantumCore.Game.PacketHandlers
                 ctx.Connection.Close();
                 return;
             }
-            
+
             // todo verify ip address
-            
+
             _logger.LogDebug("Received valid auth token");
-            
+
             // Remove TTL from token so we can use it for another game core transition
             await _cacheManager.Persist(key);
 
             // Store the username and id for later reference
             ctx.Connection.Username = token.Username;
             ctx.Connection.AccountId = token.AccountId;
-            
+
             _logger.LogDebug("Logged in user {UserName} ({AccountId})", token.Username, token.AccountId);
-            
+
             // Load players of account
             var characters = new Characters();
             var i = 0;
@@ -71,7 +71,7 @@ namespace QuantumCore.Game.PacketHandlers
             foreach (var player in charactersFromCacheOrDb)
             {
                 var host = _world.GetMapHost(player.PositionX, player.PositionY);
-                
+
                 // todo character slot position
                 characters.CharacterList[i] = player.ToCharacter();
                 characters.CharacterList[i].Ip = IpUtils.ConvertIpToUInt(host.Ip);
@@ -84,9 +84,9 @@ namespace QuantumCore.Game.PacketHandlers
             var empire = await _db.QueryFirstOrDefaultAsync<byte>(
                 "SELECT Empire FROM account.accounts WHERE Id = @AccountId", new {AccountId = token.AccountId});
 
-            await ctx.Connection.Send(new Empire { EmpireId = empire });
-            await ctx.Connection.SetPhaseAsync(EPhases.Select);
-            await ctx.Connection.Send(characters);
+            ctx.Connection.Send(new Empire { EmpireId = empire });
+            ctx.Connection.SetPhase(EPhases.Select);
+            ctx.Connection.Send(characters);
         }
     }
 }

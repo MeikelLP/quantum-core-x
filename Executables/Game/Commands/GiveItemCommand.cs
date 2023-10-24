@@ -30,14 +30,14 @@ namespace QuantumCore.Game.Commands
 
             if (target is null)
             {
-                await context.Player.SendChatMessage("Target not found");
+                context.Player.SendChatMessage("Target not found");
             }
             else
             {
                 var item = _itemManager.GetItem(context.Arguments.ItemId);
                 if (item == null)
                 {
-                    await context.Player.SendChatInfo("Item not found");
+                    context.Player.SendChatInfo("Item not found");
                     return;
                 }
 
@@ -46,14 +46,14 @@ namespace QuantumCore.Game.Commands
                 if (!await target.Inventory.PlaceItem(instance))
                 {
                     // No space left in inventory, drop item with player name
-                    await context.Player.SendChatInfo("No place in inventory");
+                    context.Player.SendChatInfo("No place in inventory");
                     return;
                 }
                 // Store item in cache
                 await instance.Persist(_cacheManager);
 
                 // Send item to client
-                await target.SendItem(instance);
+                target.SendItem(instance);
             }
         }
     }

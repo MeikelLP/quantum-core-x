@@ -49,19 +49,16 @@ public class PlayerManager : IPlayerManager
         var cachedPlayer = await _cachePlayerRepository.GetPlayerAsync(playerId);
         if (cachedPlayer is null)
         {
-            var players = await _dbPlayerRepository.GetPlayersAsync(playerId);
-            for (var i = 0; i < players.Length; i++)
+            var player = await _dbPlayerRepository.GetPlayerAsync(playerId);
+            if (player == null)
             {
-                var player = players[i];
-                player.Slot = (byte)i;
-
-                if (player.Id == playerId)
-                {
-                    await _cachePlayerRepository.SetPlayerAsync(player, (byte)i);
-                    return player;
-                }
+                _logger.LogWarning("Could not find player with ID {PlayerId}", playerId);
             }
-            _logger.LogWarning("Could not find player with ID {PlayerId}", playerId);
+            else
+            {
+                await _cachePlayerRepository.SetPlayerAsync(player, player.Slot);
+                return player;
+            }
         }
         return cachedPlayer;
     }
@@ -86,7 +83,7 @@ public class PlayerManager : IPlayerManager
     public async Task<PlayerData> CreateAsync(Guid accountId, string playerName, byte @class, byte appearance)
     {
         var job = _jobManager.Get(@class);
-        
+
         // Create player data
         var player = new PlayerData
         {
@@ -97,20 +94,20 @@ public class PlayerManager : IPlayerManager
             PositionX = 958870,
             PositionY = 272788,
             St = job.St,
-            Iq = job.Iq, 
-            Dx = job.Dx, 
+            Iq = job.Iq,
+            Dx = job.Dx,
             Ht = job.Ht,
-            Health = job.StartHp, 
+            Health = job.StartHp,
             Mana = job.StartSp
         };
-        
+
         var existingPlayers = await _dbPlayerRepository.GetPlayersAsync(player.AccountId);
 
         if (existingPlayers.Length >= PlayerConstants.MAX_PLAYERS_PER_ACCOUNT)
         {
             throw new InvalidOperationException("Already have max allowed players for this account");
         }
-        
+
         await _dbPlayerRepository.CreateAsync(player);
         await _cachePlayerRepository.CreateAsync(player);
 

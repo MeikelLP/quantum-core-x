@@ -41,12 +41,12 @@ namespace QuantumCore.Game.Commands
             _world = world;
             _serviceProvider = serviceProvider;
         }
-        
+
         public void Register(string ns, Assembly assembly = null)
         {
             _logger.LogDebug("Registring commands from namespace {Namespace}", ns);
             if (assembly == null) assembly = Assembly.GetAssembly(typeof(CommandManager))!;
-            
+
             var types = assembly.GetTypes().Where(t => string.Equals(t.Namespace, ns, StringComparison.Ordinal))
                 .Where(t => (t.GetInterfaces().Any(x => x.IsGenericType && x.GetGenericTypeDefinition() == typeof(ICommandHandler<>))
                              || typeof(ICommandHandler).IsAssignableFrom(t)) && t.IsClass && !t.IsAbstract)
@@ -189,8 +189,8 @@ namespace QuantumCore.Game.Commands
                 }
 
                 var msg = sb.ToString();
-                
-                await connection.Player.SendChatMessage(msg);
+
+                connection.Player.SendChatMessage(msg);
             }
             else
             {
@@ -198,7 +198,7 @@ namespace QuantumCore.Game.Commands
                 {
                     if (!CanUseCommand(connection.Player, command))
                     {
-                        await connection.Send(new ChatOutcoming()
+                        connection.Send(new ChatOutcoming()
                         {
                             MessageType = ChatMessageTypes.Info,
                             Vid = 0,
@@ -214,7 +214,7 @@ namespace QuantumCore.Game.Commands
                             .GetMethods()
                             .Single(x => x.Name == nameof(Parser.ParseArguments) && x.GetParameters().Length == 1)
                             .MakeGenericMethod(commandCache.OptionsType);
-                        
+
                         // basically makes a ICommandHandler<TCommandOptions> for the given command
                         // creates a context with the given CommandContext<TCommandContext>
                         // invokes the command
@@ -233,10 +233,10 @@ namespace QuantumCore.Game.Commands
                             return param1.IsGenericType &&
                                    param1.GetGenericTypeDefinition() == typeof(ParserResult<>) &&
                                    param1.GenericTypeArguments[0].IsGenericParameter &&
-                                   
+
                                    param2.IsGenericType &&
                                    param2.GetGenericTypeDefinition() == typeof(Func<,>) &&
-                                   
+
                                    param3.IsGenericType &&
                                    param3.GetGenericTypeDefinition() == typeof(Func<,>) &&
                                    param3.GenericTypeArguments[0] == typeof(IEnumerable<Error>);
@@ -266,7 +266,7 @@ namespace QuantumCore.Game.Commands
                         catch (Exception e)
                         {
                             _logger.LogError(e, "Failed to execute command {Type}!", commandCache.Type.Name);
-                            await connection.Send(new ChatOutcoming()
+                            connection.Send(new ChatOutcoming()
                             {
                                 MessageType = ChatMessageTypes.Info,
                                 Vid = 0,
@@ -283,7 +283,7 @@ namespace QuantumCore.Game.Commands
                 }
                 else
                 {
-                    await connection.Send(new ChatOutcoming()
+                    connection.Send(new ChatOutcoming()
                     {
                         MessageType = ChatMessageTypes.Info,
                         Vid = 0,

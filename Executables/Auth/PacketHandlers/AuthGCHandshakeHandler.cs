@@ -7,12 +7,12 @@ namespace QuantumCore.Auth.PacketHandlers;
 
 public class AuthGCHandshakeHandler : IAuthPacketHandler<GCHandshake>
 {
-    public async Task ExecuteAsync(AuthPacketContext<GCHandshake> ctx, CancellationToken token = default)
+    public Task ExecuteAsync(AuthPacketContext<GCHandshake> ctx, CancellationToken token = default)
     {
-        await ctx.Connection.HandleHandshake(new GCHandshakeData {
-            Delta = ctx.Packet.Delta,
+        ctx.Connection.HandleHandshake(new GCHandshakeData { Delta = ctx.Packet.Delta,
             Handshake = ctx.Packet.Handshake,
             Time = ctx.Packet.Time
         });
+        return Task.CompletedTask;
     }
 }

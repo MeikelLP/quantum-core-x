@@ -15,7 +15,7 @@ public class QuickSlotBar : IQuickSlotBar
     private readonly ILogger _logger;
     public IPlayerEntity Player { get; }
     public QuickSlotData[] Slots { get; } = new QuickSlotData[8];
-    
+
     public QuickSlotBar(ICacheManager cacheManager, ILogger logger, PlayerEntity player)
     {
         _cacheManager = cacheManager;
@@ -26,7 +26,7 @@ public class QuickSlotBar : IQuickSlotBar
     public async Task Load()
     {
         var key = $"quickbar:{Player.Player.Id}";
-        
+
         if (await _cacheManager.Exists(key) > 0)
         {
             var slots = await _cacheManager.Get<QuickSlotData[]>(key);
@@ -43,7 +43,7 @@ public class QuickSlotBar : IQuickSlotBar
                 }
             }
         }
-        
+
         // todo load from database
     }
 
@@ -54,7 +54,7 @@ public class QuickSlotBar : IQuickSlotBar
         await _cacheManager.Set(key, Slots);
     }
 
-    public async Task Send()
+    public void Send()
     {
         for (var i = 0; i < Slots.Length; i++)
         {
@@ -63,15 +63,15 @@ public class QuickSlotBar : IQuickSlotBar
             {
                 continue;
             }
-            
-            await Player.Connection.Send(new QuickBarAddOut {
+
+            Player.Connection.Send(new QuickBarAddOut {
                 Position = (byte) i,
                 Slot = new QuickSlot{Position = slot.Position, Type = slot.Type}
             });
         }
     }
 
-    public async Task Add(byte position, QuickSlotData slot)
+    public void Add(byte position, QuickSlotData slot)
     {
         if (position >= 8)
         {
@@ -79,15 +79,15 @@ public class QuickSlotBar : IQuickSlotBar
         }
 
         // todo verify type, and position?
-        
+
         Slots[position] = slot;
-        await Player.Connection.Send(new QuickBarAddOut {
+        Player.Connection.Send(new QuickBarAddOut {
             Position = position,
             Slot = new QuickSlot{Position = slot.Position, Type = slot.Type}
         });
     }
 
-    public async Task Swap(byte position1, byte position2)
+    public void Swap(byte position1, byte position2)
     {
         if (position1 >= 8 || position2 >= 8)
         {
@@ -98,13 +98,13 @@ public class QuickSlotBar : IQuickSlotBar
         var slot2 = Slots[position2];
         Slots[position1] = slot2;
         Slots[position2] = slot1;
-        await Player.Connection.Send(new QuickBarSwapOut {
+        Player.Connection.Send(new QuickBarSwapOut {
             Position1 = position1,
             Position2 = position2
         });
     }
 
-    public async Task Remove(byte position)
+    public void Remove(byte position)
     {
         if (position >= 8)
         {
@@ -112,7 +112,7 @@ public class QuickSlotBar : IQuickSlotBar
         }
 
         Slots[position] = null;
-        await Player.Connection.Send(new QuickBarRemoveOut {
+        Player.Connection.Send(new QuickBarRemoveOut {
             Position = position
         });
     }

@@ -8,21 +8,21 @@ namespace ExamplePlugin
     public static class TestCommand
     {
         [CommandMethod("Plain command without any parameter")]
-        public static async Task Run(IPlayerEntity player)
+        public static void Run(IPlayerEntity player)
         {
-            await player.SendChatInfo("Test command works!");
+            player.SendChatInfo("Test command works!");
         }
 
         [CommandMethod("This command tests the handler with more than one argument")]
-        public static async Task Run(IPlayerEntity player, int required1, string optional1 = "")
+        public static void Run(IPlayerEntity player, int required1, string optional1 = "")
         {
-            await player.SendChatInfo($"Test command sent with parameters {required1} and {optional1}");
+            player.SendChatInfo($"Test command sent with parameters {required1} and {optional1}");
         }
 
         [CommandMethod("This command tests the float type")]
-        public static async Task Run(IPlayerEntity player, float required1, string optional1 = "")
+        public static void Run(IPlayerEntity player, float required1, string optional1 = "")
         {
-            await player.SendChatInfo($"Test command sent with parameters {required1} and {optional1}");
+            player.SendChatInfo($"Test command sent with parameters {required1} and {optional1}");
         }
     }
 }

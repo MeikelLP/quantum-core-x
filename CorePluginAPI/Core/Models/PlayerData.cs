@@ -26,5 +26,11 @@ public class PlayerData
     public uint HairPart { get; set; }
     public uint GivenStatusPoints { get; set; }
     public uint AvailableStatusPoints { get; set; }
+    public uint MinWeaponDamage { get; set; }
+    public uint MaxWeaponDamage { get; set; }
+    public uint MinAttackDamage { get; set; }
+    public uint MaxAttackDamage { get; set; }
+    public uint MaxHp { get; set; }
+    public uint MaxSp { get; set; }
     public byte Slot { get; set; }
 }

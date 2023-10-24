@@ -15,14 +15,14 @@ public class SelectGameCharacterHandler : IGamePacketHandler<SelectCharacter>
     private readonly IServiceProvider _provider;
     private readonly IPlayerManager _playerManager;
 
-    public SelectGameCharacterHandler(ILogger<SelectGameCharacterHandler> logger, IServiceProvider provider, 
+    public SelectGameCharacterHandler(ILogger<SelectGameCharacterHandler> logger, IServiceProvider provider,
         IPlayerManager playerManager)
     {
         _logger = logger;
         _provider = provider;
         _playerManager = playerManager;
     }
-    
+
     public async Task ExecuteAsync(GamePacketContext<SelectCharacter> ctx, CancellationToken token = default)
     {
         _logger.LogDebug("Selected character in slot {Slot}", ctx.Packet.Slot);
@@ -37,7 +37,7 @@ public class SelectGameCharacterHandler : IGamePacketHandler<SelectCharacter>
         var accountId = ctx.Connection.AccountId ?? default; // todo clean solution
 
         // Let the client load the game
-        await ctx.Connection.SetPhaseAsync(EPhases.Loading);
+        ctx.Connection.SetPhase(EPhases.Loading);
 
         // Load player
         var player = await _playerManager.GetPlayer(accountId, ctx.Packet.Slot);
@@ -46,16 +46,16 @@ public class SelectGameCharacterHandler : IGamePacketHandler<SelectCharacter>
         {
             throw new InvalidOperationException("Player was not found. This should never happen at this point");
         }
-        
+
         var entity = ActivatorUtilities.CreateInstance<PlayerEntity>(_provider, ctx.Connection, player);
         await entity.Load();
 
         ctx.Connection.Player = entity;
 
         // Send information about the player to the client
-        await entity.SendBasicData();
-        await entity.SendPoints();
-        await entity.SendCharacterUpdate();
-        await entity.QuickSlotBar.Send();
+        entity.SendBasicData();
+        entity.SendPoints();
+        entity.SendCharacterUpdate();
+        entity.QuickSlotBar.Send();
     }
 }

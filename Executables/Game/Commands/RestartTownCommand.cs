@@ -6,8 +6,9 @@ namespace QuantumCore.Game.Commands;
 [CommandNoPermission]
 public class RestartTownCommand : ICommandHandler
 {
-    public async Task ExecuteAsync(CommandContext context)
+    public Task ExecuteAsync(CommandContext context)
     {
-        await context.Player.Respawn(true);
+        context.Player.Respawn(true);
+        return Task.CompletedTask;
     }
 }

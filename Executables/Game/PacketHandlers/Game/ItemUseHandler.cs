@@ -16,7 +16,7 @@ public class ItemUseHandler : IGamePacketHandler<ItemUse>
         _itemManager = itemManager;
         _logger = logger;
     }
-        
+
     public async Task ExecuteAsync(GamePacketContext<ItemUse> ctx, CancellationToken token = default)
     {
         var player = ctx.Connection.Player;
@@ -44,22 +44,22 @@ public class ItemUseHandler : IGamePacketHandler<ItemUse>
 
         if (ctx.Packet.Window == (byte) WindowType.Inventory && ctx.Packet.Position >= player.Inventory.Size)
         {
-            await player.RemoveItem(item);
+            player.RemoveItem(item);
             if (await player.Inventory.PlaceItem(item))
             {
-                await player.SendRemoveItem(ctx.Packet.Window, ctx.Packet.Position);
-                await player.SendItem(item);
-                await player.SendCharacterUpdate();
+                player.SendRemoveItem(ctx.Packet.Window, ctx.Packet.Position);
+                player.SendItem(item);
+                player.SendCharacterUpdate();
             }
             else
             {
-                await player.SetItem(item, ctx.Packet.Window, ctx.Packet.Position);
-                await player.SendChatInfo("Cannot unequip item if the inventory is full");
+                player.SetItem(item, ctx.Packet.Window, ctx.Packet.Position);
+                player.SendChatInfo("Cannot unequip item if the inventory is full");
             }
         }
         else if (player.IsEquippable(item))
         {
-            var wearSlot = player.Inventory.EquipmentWindow.GetWearSlot(_itemManager, item);
+            var wearSlot = player.Inventory.EquipmentWindow.GetWearPosition(_itemManager, item.ItemId);
 
             if (wearSlot <= ushort.MaxValue)
             {
@@ -67,30 +67,30 @@ public class ItemUseHandler : IGamePacketHandler<ItemUse>
 
                 if (item2 != null)
                 {
-                    await player.RemoveItem(item);
-                    await player.RemoveItem(item2);
+                    player.RemoveItem(item);
+                    player.RemoveItem(item2);
                     if (await player.Inventory.PlaceItem(item2))
                     {
-                        await player.SendRemoveItem(ctx.Packet.Window, (ushort)wearSlot);
-                        await player.SendRemoveItem(ctx.Packet.Window, ctx.Packet.Position);
-                        await player.SetItem(item, ctx.Packet.Window, (ushort)wearSlot);
-                        await player.SetItem(item2, ctx.Packet.Window, ctx.Packet.Position);
-                        await player.SendItem(item);
-                        await player.SendItem(item2);
+                        player.SendRemoveItem(ctx.Packet.Window, (ushort)wearSlot);
+                        player.SendRemoveItem(ctx.Packet.Window, ctx.Packet.Position);
+                        player.SetItem(item, ctx.Packet.Window, (ushort)wearSlot);
+                        player.SetItem(item2, ctx.Packet.Window, ctx.Packet.Position);
+                        player.SendItem(item);
+                        player.SendItem(item2);
                     }
                     else
                     {
-                        await player.SetItem(item, ctx.Packet.Window, ctx.Packet.Position);
-                        await player.SetItem(item2, ctx.Packet.Window, (ushort)wearSlot);
-                        await player.SendChatInfo("Cannot swap item if the inventory is full");
+                        player.SetItem(item, ctx.Packet.Window, ctx.Packet.Position);
+                        player.SetItem(item2, ctx.Packet.Window, (ushort)wearSlot);
+                        player.SendChatInfo("Cannot swap item if the inventory is full");
                     }
                 }
                 else
                 {
-                    await player.RemoveItem(item);
-                    await player.SetItem(item, (byte) WindowType.Inventory, (ushort)wearSlot);
-                    await player.SendRemoveItem(ctx.Packet.Window, ctx.Packet.Position);
-                    await player.SendItem(item);
+                    player.RemoveItem(item);
+                    player.SetItem(item, (byte) WindowType.Inventory, (ushort)wearSlot);
+                    player.SendRemoveItem(ctx.Packet.Window, ctx.Packet.Position);
+                    player.SendItem(item);
                 }
             }
         }

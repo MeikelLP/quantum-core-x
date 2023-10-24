@@ -81,7 +81,7 @@ namespace QuantumCore.Game.World.AI
             _entity.Goto((int) targetPositionX, (int) targetPositionY);
         }
 
-        public async Task Update(double elapsedTime)
+        public void Update(double elapsedTime)
         {
             if (_entity == null)
             {
@@ -123,7 +123,7 @@ namespace QuantumCore.Game.World.AI
                             _attackCooldown -= elapsedTime;
                             if (_attackCooldown <= 0)
                             {
-                                await Attack(_targetEntity);
+                                Attack(_targetEntity);
                                 _attackCooldown += 2000; // todo use attack speed
                             }
                         }
@@ -144,7 +144,7 @@ namespace QuantumCore.Game.World.AI
             }
         }
 
-        private async Task Attack(IEntity victim)
+        private void Attack(IEntity victim)
         {
             if (_entity is not MonsterEntity monster)
             {
@@ -154,7 +154,7 @@ namespace QuantumCore.Game.World.AI
             monster.Rotation =
                 (float) MathUtils.Rotation(victim.PositionX - monster.PositionX, victim.PositionY - monster.PositionY);
 
-            await monster.Attack(victim, monster.Proto.BattleType);
+            monster.Attack(victim, monster.Proto.BattleType);
 
             // Send attack packet
             var packet = new CharacterMoveOut {
@@ -165,13 +165,13 @@ namespace QuantumCore.Game.World.AI
                 PositionY = monster.PositionY,
                 Time = (uint) GameServer.Instance.ServerTime
             };
-            await monster.ForEachNearbyEntity(async entity =>
+            foreach (var entity in monster.NearbyEntities)
             {
                 if (entity is PlayerEntity player)
                 {
-                    await player.Connection.Send(packet);
+                    player.Connection.Send(packet);
                 }
-            });
+            }
         }
 
         private IEntity NextTarget()

@@ -8,6 +8,8 @@ using QuantumCore.Game.Commands;
 using QuantumCore.Game.Persistence.Extensions;
 using QuantumCore.Game.PlayerUtils;
 using QuantumCore.Game.Quest;
+using QuantumCore.Game.Services;
+using QuantumCore.Game.World;
 
 namespace QuantumCore.Game.Extensions;
 
@@ -26,9 +28,12 @@ public static class ServiceExtensions
         services.AddGameDatabase();
         services.AddGameCaching();
         services.AddSingleton<IPlayerManager, PlayerManager>();
+        services.AddSingleton<ISpawnGroupProvider, SpawnGroupProvider>();
+        services.AddSingleton<ISpawnPointProvider, SpawnPointProvider>();
         services.AddSingleton<IItemManager, ItemManager>();
         services.AddSingleton<IMonsterManager, MonsterManager>();
         services.AddSingleton<IJobManager, JobManager>();
+        services.AddSingleton<IAtlasProvider, AtlasProvider>();
         services.AddSingleton<IAnimationManager, AnimationManager>();
         services.AddSingleton<IExperienceManager, ExperienceManager>();
         services.AddSingleton<ICommandManager, CommandManager>();

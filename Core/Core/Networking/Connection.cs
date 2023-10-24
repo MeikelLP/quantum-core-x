@@ -1,5 +1,6 @@
 using System;
 using System.Buffers;
+using System.Collections.Concurrent;
 using System.IO;
 using System.Net.Sockets;
 using System.Text.Json;
@@ -23,12 +24,14 @@ namespace QuantumCore.Core.Networking
         private readonly ILogger _logger;
         private readonly PluginExecutor _pluginExecutor;
         private TcpClient _client;
+        private readonly ConcurrentQueue<object> _packetsToSend = new();
 
         private readonly IPacketReader _packetReader;
 
         private Stream _stream;
 
         private long _lastHandshakeTime;
+        private CancellationTokenSource _cts;
 
         public Guid Id { get; }
         public uint Handshake { get; private set; }
@@ -46,6 +49,8 @@ namespace QuantumCore.Core.Networking
         public void Init(TcpClient client)
         {
             _client = client;
+            _cts = new CancellationTokenSource();
+            Task.Factory.StartNew(SendPacketsWhenAvailable, TaskCreationOptions.LongRunning);
         }
 
         protected abstract void OnHandshakeFinished();
@@ -61,7 +66,7 @@ namespace QuantumCore.Core.Networking
             _logger.LogInformation("New connection from {RemoteEndPoint}", _client.Client.RemoteEndPoint?.ToString());
 
             _stream = _client.GetStream();
-            await StartHandshake();
+            StartHandshake();
 
             try
             {
@@ -91,43 +96,65 @@ namespace QuantumCore.Core.Networking
 
         public void Close()
         {
+            _cts.Cancel();
             _client.Close();
             OnClose();
         }
 
-        public async Task Send<T>(T packet) 
-            where T : IPacketSerializable
+        public void Send<T>(T packet) where T : IPacketSerializable
+        {
+            _packetsToSend.Enqueue(packet);
+        }
+
+        private async Task SendPacketsWhenAvailable()
         {
             if (!_client.Connected)
             {
                 _logger.LogWarning("Tried to send data to a closed connection");
                 return;
             }
-
-            var size = packet.GetSize();
-            var bytes = ArrayPool<byte>.Shared.Rent(size);
-            Array.Clear(bytes, 0, size);
-            packet.Serialize(bytes);
-            var bytesToSend = bytes.AsMemory(0, size);
-
-            try
+            while (!_cts.IsCancellationRequested)
             {
-                await _pluginExecutor.ExecutePlugins<IPacketOperationListener>(_logger, x => x.OnPrePacketSentAsync(packet, CancellationToken.None));
-                _logger.LogDebug("Sending bytes: {Bytes:X}", bytesToSend.ToArray());
-                await _stream.WriteAsync(bytesToSend);
-                await _stream.FlushAsync();
-                await _pluginExecutor.ExecutePlugins<IPacketOperationListener>(_logger, x => x.OnPostPacketReceivedAsync(packet, bytes, CancellationToken.None));
+                try
+                {
+                    if (_packetsToSend.TryDequeue(out var obj))
+                    {
+                        var packet = (IPacketSerializable) obj;
+                        var size = packet.GetSize();
+                        var bytes = ArrayPool<byte>.Shared.Rent(size);
+                        Array.Clear(bytes, 0, size);
+                        packet.Serialize(bytes);
+                        var bytesToSend = bytes.AsMemory(0, size);
+
+                        try
+                        {
+                            await _pluginExecutor.ExecutePlugins<IPacketOperationListener>(_logger, x => x.OnPrePacketSentAsync(obj, CancellationToken.None)).ConfigureAwait(false);
+                            await _stream.WriteAsync(bytesToSend).ConfigureAwait(false);
+                            await _stream.FlushAsync().ConfigureAwait(false);
+                            await _pluginExecutor.ExecutePlugins<IPacketOperationListener>(_logger, x => x.OnPostPacketReceivedAsync(obj, bytes, CancellationToken.None)).ConfigureAwait(false);
+                        }
+                        catch (Exception e)
+                        {
+                            _logger.LogError(e, "Failed to send packet");
+                        }
+
+                        ArrayPool<byte>.Shared.Return(bytes);
+                        _logger.LogInformation("OUT: {Type} => {Packet}", packet.GetType(), JsonSerializer.Serialize(obj));
+                    }
+                    else
+                    {
+                        await Task.Delay(1).ConfigureAwait(false); // wait at least 1ms
+                    }
+                }
+                catch (SocketException)
+                {
+                    // connection closed. Ignore
+                    break;
+                }
             }
-            catch (Exception e)
-            {
-                _logger.LogError(e, "Failed to send packet");
-            }
-            
-            ArrayPool<byte>.Shared.Return(bytes);
-            _logger.LogInformation("OUT: {Type} => {Packet}", packet.GetType(), JsonSerializer.Serialize(packet));
         }
 
-        public async Task StartHandshake()
+        public void StartHandshake()
         {
             if (Handshaking)
             {
@@ -138,11 +165,11 @@ namespace QuantumCore.Core.Networking
             // Generate random handshake and start the handshaking
             Handshake = CoreRandom.GenerateUInt32();
             Handshaking = true;
-            await this.SetPhaseAsync(EPhases.Handshake);
-            await SendHandshake();
+            this.SetPhase(EPhases.Handshake);
+            SendHandshake();
         }
 
-        public async Task<bool> HandleHandshake(GCHandshakeData handshake)
+        public bool HandleHandshake(GCHandshakeData handshake)
         {
             if (!Handshaking)
             {
@@ -172,7 +199,7 @@ namespace QuantumCore.Core.Networking
             }
             else
             {
-                // calculate new delta 
+                // calculate new delta
                 var delta = (time - handshake.Time) / 2;
                 if (delta < 0)
                 {
@@ -180,23 +207,23 @@ namespace QuantumCore.Core.Networking
                     _logger.LogDebug($"Delta is too low, retry with last send time");
                 }
 
-                await SendHandshake((uint) time, (uint) delta);
+                SendHandshake((uint) time, (uint) delta);
             }
 
             return true;
         }
 
-        private async Task SendHandshake()
+        private void SendHandshake()
         {
             var time = GetServerTime();
             _lastHandshakeTime = time;
-            await Send(new GCHandshake(Handshake, (uint)time, 0));
+            Send(new GCHandshake(Handshake, (uint)time, 0));
         }
 
-        private async Task SendHandshake(uint time, uint delta)
+        private void SendHandshake(uint time, uint delta)
         {
             _lastHandshakeTime = time;
-            await Send(new GCHandshake(Handshake, time, delta));
+            Send(new GCHandshake(Handshake, time, delta));
         }
     }
 }

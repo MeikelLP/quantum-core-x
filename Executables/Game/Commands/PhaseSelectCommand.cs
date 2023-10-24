@@ -16,15 +16,16 @@ namespace QuantumCore.Game.Commands
             _world = world;
         }
 
-        public async Task ExecuteAsync(CommandContext context)
+        public Task ExecuteAsync(CommandContext context)
         {
-            await context.Player.SendChatInfo("Going back to character selection. Please wait.");
+            context.Player.SendChatInfo("Going back to character selection. Please wait.");
 
             // todo implement wait
 
             // Despawn player
-            await _world.DespawnEntity(context.Player);
-            await context.Player.Connection.SetPhaseAsync(EPhases.Select);
+            _world.DespawnEntity(context.Player);
+            context.Player.Connection.SetPhase(EPhases.Select);
+            return Task.CompletedTask;
         }
     }
 }
