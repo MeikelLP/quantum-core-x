@@ -2,6 +2,7 @@
 using JetBrains.Annotations;
 using QuantumCore.API.Game;
 using QuantumCore.API.Game.World;
+using QuantumCore.Game.Packets;
 using QuantumCore.Game.World;
 
 namespace QuantumCore.Game.Commands
@@ -51,11 +52,22 @@ namespace QuantumCore.Game.Commands
                     context.Player.SendChatInfo("The X and Y position must be positive");
                 else
                 {
-                    var x = (int) context.Player.Map.PositionX + (context.Arguments.X*100);
-                    var y = (int) context.Player.Map.PositionY + (context.Arguments.Y*100);
+                    var x = (int) context.Player.Map.PositionX + (context.Arguments.X * 100);
+                    var y = (int) context.Player.Map.PositionY + (context.Arguments.Y * 100);
                     context.Player.Move(x, y);
                 }
             }
+            context.Player.Connection.Send(new CharacterMoveOut
+            {
+                Vid = context.Player.Vid,
+                Rotation = (byte) (context.Player.Rotation / 5),
+                Argument = (byte) CharacterMove.CharacterMovementType.Wait,
+                PositionX = context.Player.PositionX,
+                PositionY = context.Player.PositionY,
+                Time = (uint) GameServer.Instance.ServerTime,
+                Duration = context.Player.MovementDuration
+            });
+            context.Player.ShowEntity(context.Player.Connection);
             return Task.CompletedTask;
         }
     }
