@@ -52,8 +52,8 @@ namespace QuantumCore.Game.Commands
                     context.Player.SendChatInfo("The X and Y position must be positive");
                 else
                 {
-                    var x = (int) context.Player.Map.PositionX + (context.Arguments.X * 100);
-                    var y = (int) context.Player.Map.PositionY + (context.Arguments.Y * 100);
+                    var x = (int) context.Player.Map.PositionX + (context.Arguments.X*100);
+                    var y = (int) context.Player.Map.PositionY + (context.Arguments.Y*100);
                     context.Player.Move(x, y);
                 }
             }
