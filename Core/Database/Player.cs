@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Threading.Tasks;
-using Dapper;
-using Dapper.Contrib.Extensions;
 using QuantumCore.Core.Cache;
+using QuantumCore.Database.Repositories;
 
 namespace QuantumCore.Database
 {
@@ -33,15 +31,15 @@ namespace QuantumCore.Database
         public uint GivenStatusPoints { get; set; }
         public uint AvailableStatusPoints { get; set; }
 
-        public static async Task<Player> GetPlayer(IDbConnection db, ICacheManager cacheManager, Guid account, byte slot)
+        public static async Task<Player> GetPlayer(IPlayerRepository repository, ICacheManager cacheManager, Guid account, byte slot)
         {
             var key = "players:" + account;
-            
+
             var list = cacheManager.CreateList<Guid>(key);
             if (await cacheManager.Exists(key) <= 0)
             {
                 var i = 0;
-                await foreach (var player in GetPlayers(db, cacheManager, account))
+                await foreach (var player in GetPlayers(repository, cacheManager, account))
                 {
                     if (i == slot) return player;
                     i++;
@@ -51,10 +49,10 @@ namespace QuantumCore.Database
             }
 
             var playerId = await list.Index(slot);
-            return await GetPlayer(db, cacheManager, playerId);
+            return await GetPlayer(repository, cacheManager, playerId);
         }
 
-        public static async Task<Player> GetPlayer(IDbConnection db, ICacheManager cacheManager, Guid playerId)
+        public static async Task<Player> GetPlayer(IPlayerRepository repository, ICacheManager cacheManager, Guid playerId)
         {
             var playerKey = "player:" + playerId;
             if (await cacheManager.Exists(playerKey) > 0)
@@ -63,19 +61,19 @@ namespace QuantumCore.Database
             }
             else
             {
-                var player = db.Get<Player>(playerId);
+                var player = await repository.GetPlayerAsync(playerId);
                 //var player = await SqlMapperExtensions.Get<Player>(db, playerId);
                 await cacheManager.Set(playerKey, player);
                 return player;
             }
         }
-        
-        public static async IAsyncEnumerable<Player> GetPlayers(IDbConnection db, ICacheManager cacheManager, Guid account)
+
+        public static async IAsyncEnumerable<Player> GetPlayers(IPlayerRepository repository, ICacheManager cacheManager, Guid account)
         {
             var key = "players:" + account;
 
             var list = cacheManager.CreateList<Guid>(key);
-            
+
             // Check if we have players cached
             if (await cacheManager.Exists(key) > 0)
             {
@@ -84,22 +82,20 @@ namespace QuantumCore.Database
 
                 foreach (var id in cachedIds)
                 {
-                    yield return await cacheManager.Get<Player>("player:" + id);    
+                    yield return await cacheManager.Get<Player>("player:" + id);
                 }
             }
             else
             {
-                var ids = await db.QueryAsync("SELECT Id FROM players WHERE AccountId = @AccountId",
-                    new {AccountId = account});
+                var ids = await repository.GetPlayerIdsForAccountAsync(account);
 
-                // todo: is it ever possible that we have a player cached but not the players list? 
+                // todo: is it ever possible that we have a player cached but not the players list?
                 //  if this is not the case we can make this part short and faster
-                foreach (var row in ids)
+                foreach (var playerId in ids)
                 {
-                    Guid playerId = row.Id;
                     await list.Push(playerId);
 
-                    yield return await GetPlayer(db, cacheManager, playerId);
+                    yield return await GetPlayer(repository, cacheManager, playerId);
                 }
             }
         }
