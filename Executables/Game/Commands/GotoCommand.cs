@@ -2,7 +2,6 @@
 using JetBrains.Annotations;
 using QuantumCore.API.Game;
 using QuantumCore.API.Game.World;
-using QuantumCore.Game.Packets;
 using QuantumCore.Game.World;
 
 namespace QuantumCore.Game.Commands
