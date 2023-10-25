@@ -57,16 +57,6 @@ namespace QuantumCore.Game.Commands
                     context.Player.Move(x, y);
                 }
             }
-            context.Player.Connection.Send(new CharacterMoveOut
-            {
-                Vid = context.Player.Vid,
-                Rotation = (byte) (context.Player.Rotation / 5),
-                Argument = (byte) CharacterMove.CharacterMovementType.Wait,
-                PositionX = context.Player.PositionX,
-                PositionY = context.Player.PositionY,
-                Time = (uint) GameServer.Instance.ServerTime,
-                Duration = context.Player.MovementDuration
-            });
             context.Player.ShowEntity(context.Player.Connection);
             return Task.CompletedTask;
         }
