@@ -10,7 +10,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Core.Persistence\Core.Persistence.csproj" />
-      <ProjectReference Include="..\CorePluginAPI\CorePluginAPI.csproj" />
+      <ProjectReference Include="..\..\CorePluginAPI\CorePluginAPI.csproj" />
     </ItemGroup>
 
     <ItemGroup>

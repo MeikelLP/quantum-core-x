@@ -26,17 +26,17 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core.Networking", "Core.Net
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core.Networking.Generators.Tests", "Core.Networking.Generators.Tests\Core.Networking.Generators.Tests.csproj", "{5B18DAF2-E35C-48A9-AB72-65A481DB5590}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core.Caching", "Core.Caching\Core.Caching.csproj", "{5330599B-ECAA-47A3-8DF1-539CF7885AFC}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core.Caching", "Data\Core.Caching\Core.Caching.csproj", "{5330599B-ECAA-47A3-8DF1-539CF7885AFC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Auth.Persistence", "Auth.Persistence\Auth.Persistence.csproj", "{69F84025-1299-498A-B358-963272578C92}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Auth.Persistence", "Data\Auth.Persistence\Auth.Persistence.csproj", "{69F84025-1299-498A-B358-963272578C92}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Game.Persistence", "Game.Persistence\Game.Persistence.csproj", "{0845E057-896F-4A8B-AAA5-233091B7EB1D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Game.Persistence", "Data\Game.Persistence\Game.Persistence.csproj", "{0845E057-896F-4A8B-AAA5-233091B7EB1D}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Data", "Data", "{5D1259AE-E0B7-43FA-AACC-87F587A0282C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core.Persistence", "Core.Persistence\Core.Persistence.csproj", "{005CE889-4674-4EAB-8A21-867E7D9A2BCD}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core.Persistence", "Data\Core.Persistence\Core.Persistence.csproj", "{005CE889-4674-4EAB-8A21-867E7D9A2BCD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Game.Caching", "Game.Caching\Game.Caching.csproj", "{31E30DA3-9D5E-4963-BB40-CCFE30E3D20F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Game.Caching", "Data\Game.Caching\Game.Caching.csproj", "{31E30DA3-9D5E-4963-BB40-CCFE30E3D20F}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{5BBCB9D9-C272-4400-ABCE-B47C073AF753}"
 EndProject
