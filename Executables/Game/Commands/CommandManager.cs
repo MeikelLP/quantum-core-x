@@ -3,7 +3,6 @@ using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
 using CommandLine;
-using Dapper;
 using Microsoft.CodeAnalysis;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -12,20 +11,20 @@ using QuantumCore.API.Game;
 using QuantumCore.API.Game.World;
 using QuantumCore.Caching;
 using QuantumCore.Game.Packets;
+using QuantumCore.Game.Persistence;
 
 namespace QuantumCore.Game.Commands
 {
     public class CommandManager : ICommandManager
     {
         private readonly ILogger<CommandManager> _logger;
-        private readonly IDbConnection _db;
         private readonly ICacheManager _cacheManager;
-        private readonly IWorld _world;
         private readonly Dictionary<string, CommandDescriptor> _commandHandlers = new();
         public Dictionary<Guid, PermissionGroup> Groups { get; } = new ();
 
         public static readonly Guid Operator_Group = Guid.Parse("45bff707-1836-42b7-956d-00b9b69e0ee0");
         private readonly IServiceProvider _serviceProvider;
+        private readonly ICommandPermissionRepository _repository;
 
         private static readonly Parser ParserInstance = new Parser(settings =>
             {
@@ -33,13 +32,13 @@ namespace QuantumCore.Game.Commands
             }
         );
 
-        public CommandManager(ILogger<CommandManager> logger, IDbConnection db, ICacheManager cacheManager, IWorld world, IServiceProvider serviceProvider)
+        public CommandManager(ILogger<CommandManager> logger, ICacheManager cacheManager, IWorld world,
+            IServiceProvider serviceProvider, ICommandPermissionRepository repository)
         {
             _logger = logger;
-            _db = db;
             _cacheManager = cacheManager;
-            _world = world;
             _serviceProvider = serviceProvider;
+            _repository = repository;
         }
 
         public void Register(string ns, Assembly assembly = null)
@@ -86,21 +85,21 @@ namespace QuantumCore.Game.Commands
 
             if (id != Operator_Group)
             {
-                var authq = await _db.QueryAsync("SELECT Command FROM perm_auth WHERE `Group` = @Group", new { Group = id });
+                var authq = await _repository.GetPermissionsForGroupAsync(id);
 
-                foreach (var auth in authq)
+                foreach (var command in authq)
                 {
-                    p.Permissions.Add(auth.Command);
+                    p.Permissions.Add(command);
                 }
             }
 
-            var pq = await _db.QueryAsync("SELECT Player FROM perm_users WHERE `Group` = @Group", new { Group = id });
+            var pq = await _repository.GetPlayerIdsInGroupAsync(id);
 
-            foreach (var user in pq)
+            foreach (var userId in pq)
             {
-                p.Users.Add(Guid.Parse(user.Player));
+                p.Users.Add(userId);
 
-                var key = "perm:" + user.Player;
+                var key = "perm:" + userId;
                 var redisList = _cacheManager.CreateList<Guid>(key);
 
                 await redisList.Push(id);
@@ -119,11 +118,11 @@ namespace QuantumCore.Game.Commands
                 await _cacheManager.Del(p);
             }
 
-            var groups = await _db.QueryAsync("SELECT * FROM perm_groups");
+            var groups = await _repository.GetGroupsAsync();
 
             foreach (var group in groups)
             {
-                await ParseGroup(Guid.Parse(group.Id), group.Name);
+                await ParseGroup(group.Id, group.Name);
             }
 
             await ParseGroup(Operator_Group, "Operator");

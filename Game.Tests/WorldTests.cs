@@ -12,6 +12,7 @@ using QuantumCore;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game.World;
+using QuantumCore.Auth.Persistence;
 using QuantumCore.Caching;
 using QuantumCore.Caching.Extensions;
 using QuantumCore.Extensions;
@@ -45,6 +46,7 @@ public class WorldTests
             .AddQuantumCoreDatabase()
             .AddGameServices()
             .Replace(new ServiceDescriptor(typeof(IDbConnection), _ => Substitute.For<IDbConnection>(), ServiceLifetime.Singleton))
+            .Replace(new ServiceDescriptor(typeof(IAccountRepository), _ => Substitute.For<IAccountRepository>(), ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(IAtlasProvider), provider =>
             {
                 var mock = Substitute.For<IAtlasProvider>();

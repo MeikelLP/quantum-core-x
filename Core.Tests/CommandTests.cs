@@ -1,20 +1,17 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using AutoBogus;
 using Bogus;
-using Dapper;
 using FluentAssertions;
 using FluentAssertions.Equivalency;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
-using Moq;
-using Moq.Dapper;
+using NSubstitute;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game.Types;
@@ -25,6 +22,7 @@ using QuantumCore.Extensions;
 using QuantumCore.Game.Commands;
 using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Packets;
+using QuantumCore.Game.Persistence;
 using QuantumCore.Game.PlayerUtils;
 using QuantumCore.Game.World;
 using QuantumCore.Game.World.Entities;
@@ -99,28 +97,27 @@ public class CommandTests : IAsyncLifetime
             .RuleFor(x => x.Experience, _ => (uint)0)
             .RuleFor(x => x.PositionX, _ => (int)(10 * Map.MapUnit))
             .RuleFor(x => x.PositionY, _ => (int)(26 * Map.MapUnit));
-        var monsterManagerMock = new Mock<IMonsterManager>();
-        monsterManagerMock.Setup(x => x.GetMonster(It.IsAny<uint>())).Returns<uint>(id => new AutoFaker<MonsterData>().RuleFor(x => x.Id, _ => id).Generate());
-        var experienceManagerMock = new Mock<IExperienceManager>();
-        experienceManagerMock.Setup(x => x.GetNeededExperience(It.IsAny<byte>())).Returns(1000);
-        var jobManagerMock = new Mock<IJobManager>();
-        jobManagerMock.Setup(x => x.Get(It.IsAny<byte>())).Returns(new Job());
-        var itemManagerMock = new Mock<IItemManager>();
-        itemManagerMock.Setup(x => x.GetItem(It.IsAny<uint>())).Returns<uint>(id => new AutoFaker<ItemData>()
-            .RuleFor(x => x.Id, _ => id)
+        var monsterManagerMock = Substitute.For<IMonsterManager>();
+        monsterManagerMock.GetMonster(Arg.Any<uint>()).Returns(callerInfo => new AutoFaker<MonsterData>().RuleFor(x => x.Id, _ => callerInfo.Arg<uint>()).Generate());
+        var experienceManagerMock = Substitute.For<IExperienceManager>();
+        experienceManagerMock.GetNeededExperience(Arg.Any<byte>()).Returns(1000u);
+        var jobManagerMock = Substitute.For<IJobManager>();
+        jobManagerMock.Get(Arg.Any<byte>()).Returns(new Job());
+        var itemManagerMock = Substitute.For<IItemManager>();
+        itemManagerMock.GetItem(Arg.Any<uint>()).Returns(call => new AutoFaker<ItemData>()
+            .RuleFor(x => x.Id, _ => call.Arg<uint>())
             .RuleFor(x => x.Size, _ => (byte)1)
             .RuleFor(x => x.WearFlags, _ => (byte)EWearFlags.Weapon)
             .RuleFor(x => x.Values, _ => new List<int>{0, 0, 0, 10, 16, 0})
             .Generate());
-        var cacheManagerMock = new Mock<ICacheManager>();
-        var redisListWrapperMock = new Mock<IRedisListWrapper<Guid>>();
-        var redisSubscriberWrapperMock = new Mock<IRedisSubscriber>();
-        redisListWrapperMock.Setup(x => x.Range(It.IsAny<int>(), It.IsAny<int>()))
-            .ReturnsAsync(new[] { CommandManager.Operator_Group });
-        cacheManagerMock.Setup(x => x.CreateList<Guid>(It.IsAny<string>())).Returns(redisListWrapperMock.Object);
-        cacheManagerMock.Setup(x => x.Subscribe()).Returns(redisSubscriberWrapperMock.Object);
-        var dbMock = new Mock<IDbConnection>();
-        dbMock.SetupDapperAsync(c => c.QueryAsync<Guid>(It.IsAny<string>(), null, null, null, null));
+        var cacheManagerMock = Substitute.For<ICacheManager>();
+        var redisListWrapperMock = Substitute.For<IRedisListWrapper<Guid>>();
+        var redisSubscriberWrapperMock = Substitute.For<IRedisSubscriber>();
+        redisListWrapperMock.Range(Arg.Any<int>(), Arg.Any<int>())
+            .Returns(new[] { CommandManager.Operator_Group });
+        cacheManagerMock.Keys(Arg.Any<string>()).Returns(Array.Empty<string>());
+        cacheManagerMock.CreateList<Guid>(Arg.Any<string>()).Returns(redisListWrapperMock);
+        cacheManagerMock.Subscribe().Returns(redisSubscriberWrapperMock);
         _services = new ServiceCollection()
             .AddCoreServices(new EmptyPluginCatalog(), new ConfigurationBuilder().Build())
             .AddGameServices()
@@ -131,12 +128,15 @@ public class CommandTests : IAsyncLifetime
                     .WriteTo.TestOutput(testOutputHelper)
                     .CreateLogger());
             })
-            .Replace(new ServiceDescriptor(typeof(IMonsterManager), _ => monsterManagerMock.Object, ServiceLifetime.Singleton))
-            .Replace(new ServiceDescriptor(typeof(IItemManager), _ => itemManagerMock.Object, ServiceLifetime.Singleton))
-            .Replace(new ServiceDescriptor(typeof(ICacheManager), _ => cacheManagerMock.Object, ServiceLifetime.Singleton))
-            .Replace(new ServiceDescriptor(typeof(IDbConnection), _ => dbMock.Object, ServiceLifetime.Singleton))
-            .Replace(new ServiceDescriptor(typeof(IJobManager), _ => jobManagerMock.Object, ServiceLifetime.Singleton))
-            .Replace(new ServiceDescriptor(typeof(IExperienceManager), _ => experienceManagerMock.Object, ServiceLifetime.Singleton))
+            .Replace(new ServiceDescriptor(typeof(IItemRepository), _ => Substitute.For<IItemRepository>(), ServiceLifetime.Singleton))
+            .Replace(new ServiceDescriptor(typeof(IEmpireRepository), _ => Substitute.For<IEmpireRepository>(), ServiceLifetime.Singleton))
+            .Replace(new ServiceDescriptor(typeof(ICommandPermissionRepository), _ => Substitute.For<ICommandPermissionRepository>(), ServiceLifetime.Singleton))
+            .Replace(new ServiceDescriptor(typeof(IPlayerRepository), _ => Substitute.For<IPlayerRepository>(), ServiceLifetime.Singleton))
+            .Replace(new ServiceDescriptor(typeof(IMonsterManager), _ => monsterManagerMock, ServiceLifetime.Singleton))
+            .Replace(new ServiceDescriptor(typeof(IItemManager), _ => itemManagerMock, ServiceLifetime.Singleton))
+            .Replace(new ServiceDescriptor(typeof(ICacheManager), _ => cacheManagerMock, ServiceLifetime.Singleton))
+            .Replace(new ServiceDescriptor(typeof(IJobManager), _ => jobManagerMock, ServiceLifetime.Singleton))
+            .Replace(new ServiceDescriptor(typeof(IExperienceManager), _ => experienceManagerMock, ServiceLifetime.Singleton))
             .AddSingleton<IConfiguration>(_ => new ConfigurationBuilder()
                 .AddInMemoryCollection(new Dictionary<string, string?>
                 {

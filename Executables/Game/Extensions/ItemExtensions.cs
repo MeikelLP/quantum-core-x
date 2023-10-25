@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Threading.Tasks;
-using Dapper;
-using Dapper.Contrib.Extensions;
-using QuantumCore.API;
+﻿using QuantumCore.API;
 using QuantumCore.API.Core.Models;
 using QuantumCore.Caching;
+using QuantumCore.Game.Persistence;
 using QuantumCore.Game.PlayerUtils;
 
 namespace QuantumCore.Extensions;
@@ -105,7 +100,7 @@ public static class ItemExtensions
         return null;
     }
 
-    public static async Task<ItemInstance> GetItem(this IDbConnection db, ICacheManager cacheManager, Guid id)
+    public static async Task<ItemInstance?> GetItem(this IItemRepository repository, ICacheManager cacheManager, Guid id)
     {
         var key = "item:" + id;
 
@@ -114,13 +109,13 @@ public static class ItemExtensions
             return await cacheManager.Get<ItemInstance>(key);
         }
 
-        var item = db.Get<ItemInstance>(id);
+        var item = await repository.GetItemAsync(id);
         await cacheManager.Set(key, item);
         return item;
     }
 
-    public static async IAsyncEnumerable<ItemInstance> GetItems(this IDbConnection db, ICacheManager cacheManager, Guid player,
-        byte window)
+    public static async IAsyncEnumerable<ItemInstance> GetItems(this IItemRepository repository,
+        ICacheManager cacheManager, Guid player, byte window)
     {
         var key = "items:" + player + ":" + window;
 
@@ -133,20 +128,26 @@ public static class ItemExtensions
 
             foreach (var id in itemIds)
             {
-                yield return await GetItem(db, cacheManager, id);
+                var item = await GetItem(repository, cacheManager, id);
+                if (item is not null)
+                {
+                    yield return item;
+                }
             }
         }
         else
         {
-            var ids = await db.QueryAsync<Guid>(
-                "SELECT Id FROM items WHERE PlayerId = @PlayerId AND `Window` = @Window",
-                new { PlayerId = player, Window = window });
+            var ids = await repository.GetItemIdsForPlayerAsync(player, window);
 
             foreach (var id in ids)
             {
                 await list.Push(id);
 
-                yield return await GetItem(db, cacheManager, id);
+                var item = await GetItem(repository, cacheManager, id);
+                if (item is not null)
+                {
+                    yield return item;
+                }
             }
         }
     }

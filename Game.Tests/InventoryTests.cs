@@ -1,10 +1,10 @@
-﻿using System.Data;
-using FluentAssertions;
+﻿using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
 using QuantumCore.Caching;
+using QuantumCore.Game.Persistence;
 using QuantumCore.Game.PlayerUtils;
 
 namespace Game.Tests;
@@ -22,8 +22,8 @@ public class InventoryTests
                 WearFlags = (uint)EWearFlags.Body,
                 Size = 1
             });
-        var inv = new Inventory(itemManager, Substitute.For<IDbConnection>(),
-            Substitute.For<ICacheManager>(), Substitute.For<ILogger>(), Guid.Empty, 1, 1, 1, 1);
+        var inv = new Inventory(itemManager,
+            Substitute.For<ICacheManager>(), Substitute.For<ILogger>(), Substitute.For<IItemRepository>(), Guid.Empty, 1, 1, 1, 1);
         var changed = 0;
         inv.OnSlotChanged += (_, _) => changed++;
 
