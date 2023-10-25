@@ -56,6 +56,7 @@ namespace QuantumCore.Game.Commands
                     context.Player.Move(x, y);
                 }
             }
+            context.Player.ShowEntity(context.Player.Connection);
             return Task.CompletedTask;
         }
     }
