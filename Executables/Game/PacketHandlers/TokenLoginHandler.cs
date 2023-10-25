@@ -1,5 +1,3 @@
-using System.Data;
-using Dapper;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.Game.Types;
@@ -11,24 +9,25 @@ using QuantumCore.Core.Utils;
 using QuantumCore.Extensions;
 using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Packets;
+using QuantumCore.Game.Persistence;
 
 namespace QuantumCore.Game.PacketHandlers
 {
     public class TokenLoginHandler : IGamePacketHandler<TokenLogin>
     {
-        private readonly IDbConnection _db;
+        private readonly IEmpireRepository _empireRepository;
         private readonly ILogger<TokenLoginHandler> _logger;
         private readonly ICacheManager _cacheManager;
         private readonly IWorld _world;
         private readonly IPlayerManager _playerManager;
 
-        public TokenLoginHandler(IDbConnection db, ILogger<TokenLoginHandler> logger, ICacheManager cacheManager, IWorld world, IPlayerManager playerManager)
+        public TokenLoginHandler(ILogger<TokenLoginHandler> logger, ICacheManager cacheManager, IWorld world, IPlayerManager playerManager, IEmpireRepository empireRepository)
         {
-            _db = db;
             _logger = logger;
             _cacheManager = cacheManager;
             _world = world;
             _playerManager = playerManager;
+            _empireRepository = empireRepository;
         }
 
         public async Task ExecuteAsync(GamePacketContext<TokenLogin> ctx, CancellationToken cancellationToken = default)
@@ -81,8 +80,7 @@ namespace QuantumCore.Game.PacketHandlers
             }
 
             // Send empire to the client and characters
-            var empire = await _db.QueryFirstOrDefaultAsync<byte>(
-                "SELECT Empire FROM account.accounts WHERE Id = @AccountId", new {AccountId = token.AccountId});
+            var empire = await _empireRepository.GetEmpireForAccountAsync(token.AccountId) ?? 0;
 
             ctx.Connection.Send(new Empire { EmpireId = empire });
             ctx.Connection.SetPhase(EPhases.Select);
