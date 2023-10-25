@@ -10,7 +10,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Plugins", "Plugins", "{6D10
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PrometheusPlugin", "Plugins\PrometheusPlugin\PrometheusPlugin.csproj", "{631F3027-FFC5-4F91-8ED5-8B0A8DF97ABE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core.Tests", "Core.Tests\Core.Tests.csproj", "{D02F020D-2464-48F3-B89E-EF4BABCB7713}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core.Tests", "Tests\Core.Tests\Core.Tests.csproj", "{D02F020D-2464-48F3-B89E-EF4BABCB7713}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Executables", "Executables", "{2D49C796-8A20-414E-818A-A92E7161D1B3}"
 EndProject
@@ -24,7 +24,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core.Networking.Generators"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core.Networking", "Core.Networking\Core.Networking.csproj", "{9D257823-D1F1-4831-B4BA-613FFD6C4529}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core.Networking.Generators.Tests", "Core.Networking.Generators.Tests\Core.Networking.Generators.Tests.csproj", "{5B18DAF2-E35C-48A9-AB72-65A481DB5590}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core.Networking.Generators.Tests", "Tests\Core.Networking.Generators.Tests\Core.Networking.Generators.Tests.csproj", "{5B18DAF2-E35C-48A9-AB72-65A481DB5590}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core.Caching", "Data\Core.Caching\Core.Caching.csproj", "{5330599B-ECAA-47A3-8DF1-539CF7885AFC}"
 EndProject
@@ -46,7 +46,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Weikio.PluginFramework.Micr
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Game.Benchmarks", "Game.Benchmarks\Game.Benchmarks.csproj", "{08C823FA-CE25-4A3A-950E-1318EF8FD820}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Game.Tests", "Game.Tests\Game.Tests.csproj", "{0051033D-1CCB-460C-9E3D-7027141B437A}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Game.Tests", "Tests\Game.Tests\Game.Tests.csproj", "{0051033D-1CCB-460C-9E3D-7027141B437A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
