@@ -2,28 +2,29 @@
 
 namespace QuantumCore.Core.Utils
 {
-    public class Grid<T> where T : class
+    public class Grid<T> where T : class?
     {
         public uint Width { get; private set; }
         public uint Height { get; private set; }
-        
+
         private T[,] _grid;
-        
+
         public Grid(uint width, uint height)
         {
             Resize(width, height);
             Width = width;
             Height = height;
+            _grid = new T[0,0];
         }
 
         public void Resize(uint width, uint height)
-        {    
+        {
             Width = width;
             Height = height;
             _grid = new T[Width,Height];
         }
 
-        public T Get(uint x, uint y)
+        public T? Get(uint x, uint y)
         {
             if (x >= Width || y >= Height)
                 return null;
@@ -54,7 +55,7 @@ namespace QuantumCore.Core.Utils
         {
             Debug.Assert(width > 0);
             Debug.Assert(height > 0);
-            
+
             for (uint y = 0; y < Height - height + 1; y++)
             {
                 for (uint x = 0; x < Width - width + 1; x++)
@@ -75,7 +76,7 @@ namespace QuantumCore.Core.Utils
                                 break;
                             }
                         }
-                        
+
                         if (!isFree)
                         {
                             break;

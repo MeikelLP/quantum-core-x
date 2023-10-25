@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Threading.Tasks;
+﻿using System.Data;
 using Dapper;
 using Dapper.Contrib.Extensions;
 using QuantumCore.Core.Cache;
@@ -12,7 +9,7 @@ namespace QuantumCore.Database
     public class Player : BaseModel, ICache
     {
         public Guid AccountId { get; set; }
-        public string Name { get; set; }
+        public string Name { get; set; } = "";
         public byte PlayerClass { get; set; }
         public byte SkillGroup { get; set; }
         public uint PlayTime { get; set; }
@@ -33,10 +30,10 @@ namespace QuantumCore.Database
         public uint GivenStatusPoints { get; set; }
         public uint AvailableStatusPoints { get; set; }
 
-        public static async Task<Player> GetPlayer(IDbConnection db, ICacheManager cacheManager, Guid account, byte slot)
+        public static async Task<Player?> GetPlayer(IDbConnection db, ICacheManager cacheManager, Guid account, byte slot)
         {
             var key = "players:" + account;
-            
+
             var list = cacheManager.CreateList<Guid>(key);
             if (await cacheManager.Exists(key) <= 0)
             {
@@ -69,13 +66,13 @@ namespace QuantumCore.Database
                 return player;
             }
         }
-        
+
         public static async IAsyncEnumerable<Player> GetPlayers(IDbConnection db, ICacheManager cacheManager, Guid account)
         {
             var key = "players:" + account;
 
             var list = cacheManager.CreateList<Guid>(key);
-            
+
             // Check if we have players cached
             if (await cacheManager.Exists(key) > 0)
             {
@@ -84,7 +81,7 @@ namespace QuantumCore.Database
 
                 foreach (var id in cachedIds)
                 {
-                    yield return await cacheManager.Get<Player>("player:" + id);    
+                    yield return await cacheManager.Get<Player>("player:" + id);
                 }
             }
             else
@@ -92,7 +89,7 @@ namespace QuantumCore.Database
                 var ids = await db.QueryAsync("SELECT Id FROM players WHERE AccountId = @AccountId",
                     new {AccountId = account});
 
-                // todo: is it ever possible that we have a player cached but not the players list? 
+                // todo: is it ever possible that we have a player cached but not the players list?
                 //  if this is not the case we can make this part short and faster
                 foreach (var row in ids)
                 {

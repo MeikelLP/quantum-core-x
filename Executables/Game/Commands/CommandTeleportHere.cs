@@ -34,6 +34,5 @@ public class CommandTeleportHere : ICommandHandler<TeleportHereOptions>
 
 public class TeleportHereOptions
 {
-    [Value(0)]
-    public string Target { get; set; }
+    [Value(0)] public string Target { get; set; } = "";
 }

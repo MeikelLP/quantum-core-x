@@ -25,6 +25,13 @@ public class CharacterMoveHandler : IGamePacketHandler<CharacterMove>
             return Task.CompletedTask;
         }
 
+        if (ctx.Connection.Player is null)
+        {
+            _logger.LogCritical("Cannot move player that does not exist. This is a programmatic failure");
+            ctx.Connection.Close();
+            return Task.CompletedTask;
+        }
+
         _logger.LogDebug("Received movement packet with type {MovementType}", (CharacterMove.CharacterMovementType)ctx.Packet.MovementType);
         if (ctx.Packet.MovementType == (int) CharacterMove.CharacterMovementType.Move)
         {

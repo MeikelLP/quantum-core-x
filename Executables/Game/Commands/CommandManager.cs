@@ -42,7 +42,7 @@ namespace QuantumCore.Game.Commands
             _serviceProvider = serviceProvider;
         }
 
-        public void Register(string ns, Assembly assembly = null)
+        public void Register(string ns, Assembly? assembly = null)
         {
             _logger.LogDebug("Registring commands from namespace {Namespace}", ns);
             if (assembly == null) assembly = Assembly.GetAssembly(typeof(CommandManager))!;
@@ -63,7 +63,7 @@ namespace QuantumCore.Game.Commands
                 var cmd = cmdAttr.Name;
                 var desc = cmdAttr.Description;
                 var bypass = type.GetCustomAttribute<CommandNoPermissionAttribute>() is not null;
-                Type optionsType = null;
+                Type? optionsType = null;
                 var intf = type.GetInterfaces().FirstOrDefault(x =>
                     x.IsGenericType && x.GetGenericTypeDefinition() == typeof(ICommandHandler<>));
                 if (intf is not null)
@@ -174,6 +174,11 @@ namespace QuantumCore.Game.Commands
 
         public async Task Handle(IGameConnection connection, string chatline)
         {
+            if (connection.Player is null)
+            {
+                _logger.LogCritical("Cannot handle command if connection's player is null. This should never happen");
+                return;
+            }
             var args = CommandLineParser.SplitCommandLineIntoArguments(chatline.TrimStart('/'), false).ToArray();
             var command = args[0];
             var argsWithoutCommand = args.Skip(1).ToArray();
@@ -220,7 +225,7 @@ namespace QuantumCore.Game.Commands
                         // invokes the command
                         // this may be improved in the future (caching)
 
-                        var parserResult = parserMethod.Invoke(ParserInstance, new object [] { argsWithoutCommand });
+                        var parserResult = parserMethod.Invoke(ParserInstance, new object [] { argsWithoutCommand })!;
                         var methodInfo = typeof(ParserResultExtensions).GetMethods().Single(x =>
                         {
                             var nameMatches = x.Name == nameof(ParserResultExtensions.MapResult);
@@ -248,13 +253,13 @@ namespace QuantumCore.Game.Commands
                         var errorConstant = Expression.Constant(Activator.CreateInstance(commandCache.OptionsType));
                         var errorExpression = Expression.Lambda(errorConstant, errorParam);
                         var options =
-                            genericMethod.Invoke(null, new object[] { parserResult, successExpression.Compile(), errorExpression.Compile() });
+                            genericMethod.Invoke(null, new object[] { parserResult, successExpression.Compile(), errorExpression.Compile() })!;
 
                         var ctx = Activator.CreateInstance(typeof(CommandContext<>).MakeGenericType(commandCache.OptionsType),
                             new object[] {
                                     connection.Player,
                                     options
-                            });
+                            })!;
                         var cmdExecuteMethodInfo = typeof(ICommandHandler<>).MakeGenericType(commandCache.OptionsType)
                             .GetMethod(nameof(ICommandHandler<object>.ExecuteAsync))!;
                         var cmd = ActivatorUtilities.CreateInstance(_serviceProvider, commandCache.Type);

@@ -7,15 +7,15 @@ namespace QuantumCore.Game.PlayerUtils
     public class Equipment : IEquipment
     {
         public Guid Owner { get; }
-        public ItemInstance Body { get; private set; }
-        public ItemInstance Head { get; private set; }
-        public ItemInstance Shoes { get; private set; }
-        public ItemInstance Bracelet { get; private set; }
-        public ItemInstance Weapon { get; private set; }
-        public ItemInstance Necklace { get; private set; }
-        public ItemInstance Earrings { get; private set; }
-        public ItemInstance Costume { get; private set; }
-        public ItemInstance Hair { get; private set; }
+        public ItemInstance? Body { get; private set; }
+        public ItemInstance? Head { get; private set; }
+        public ItemInstance? Shoes { get; private set; }
+        public ItemInstance? Bracelet { get; private set; }
+        public ItemInstance? Weapon { get; private set; }
+        public ItemInstance? Necklace { get; private set; }
+        public ItemInstance? Earrings { get; private set; }
+        public ItemInstance? Costume { get; private set; }
+        public ItemInstance? Hair { get; private set; }
 
         private long _offset;
 
@@ -65,7 +65,7 @@ namespace QuantumCore.Game.PlayerUtils
             return false;
         }
 
-        public ItemInstance GetItem(EquipmentSlots slot)
+        public ItemInstance? GetItem(EquipmentSlots slot)
         {
             switch (slot)
             {
@@ -92,7 +92,7 @@ namespace QuantumCore.Game.PlayerUtils
             return null;
         }
 
-        public ItemInstance GetItem(ushort position)
+        public ItemInstance? GetItem(ushort position)
         {
             return GetItem((EquipmentSlots) (position - _offset));
         }

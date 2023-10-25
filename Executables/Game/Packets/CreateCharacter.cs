@@ -9,7 +9,7 @@ namespace QuantumCore.Game.Packets
         [Field(0)]
         public byte Slot { get; set; }
         [Field(1, Length = 25)]
-        public string Name { get; set; }
+        public string Name { get; set; } = "";
         [Field(2)]
         public ushort Class { get; set; }
         [Field(3)]

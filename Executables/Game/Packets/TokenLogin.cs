@@ -7,7 +7,7 @@ namespace QuantumCore.Game.Packets
     public partial class TokenLogin
     {
         [Field(0, Length = 31)]
-        public string Username { get; set; }
+        public string Username { get; set; } = "";
         [Field(1)]
         public uint Key { get; set; }
 

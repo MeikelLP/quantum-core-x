@@ -30,7 +30,7 @@ public class InventoryTests
         var pos = (ushort)inv.EquipmentWindow.GetWearPosition(itemManager, 1);
         inv.SetEquipment(new ItemInstance { ItemId = 1 }, pos);
 
-        inv.EquipmentWindow.Body.ItemId.Should().Be(1);
+        inv.EquipmentWindow.Body!.ItemId.Should().Be(1);
         changed.Should().Be(1);
     }
 }

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
+﻿using System.Data;
 using AutoBogus;
 using Bogus;
 using Dapper;
@@ -48,7 +43,7 @@ internal class MockedGameConnection : IGameConnection
     public readonly List<GCPhase> SentPhases = new();
     public Guid Id { get; }
     public EPhases Phase { get; set; }
-    public Task ExecuteTask { get; }
+    public Task ExecuteTask { get; } = null!;
     public void Close()
     {
     }
@@ -70,10 +65,10 @@ internal class MockedGameConnection : IGameConnection
         return Task.CompletedTask;
     }
 
-    public IServerBase Server { get; }
+    public IServerBase Server { get; } = null!;
     public Guid? AccountId { get; set; }
-    public string Username { get; set; }
-    public IPlayerEntity Player { get; set; }
+    public string Username { get; set; } = "";
+    public IPlayerEntity? Player { get; set; }
     public bool HandleHandshake(GCHandshakeData handshake)
     {
         return true;

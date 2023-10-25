@@ -38,7 +38,7 @@ namespace QuantumCore.Game
         private TimeSpan _maxElapsedTime = TimeSpan.FromMilliseconds(500);
         private readonly Stopwatch _serverTimer = new();
 
-        public static GameServer Instance { get; private set; }
+        public static GameServer Instance { get; private set; } = null!; // singleton
 
         public GameServer(IOptions<HostingOptions> hostingOptions, IPacketManager packetManager,
             ILogger<GameServer> logger, PluginExecutor pluginExecutor, IServiceProvider serviceProvider,
@@ -173,7 +173,7 @@ namespace QuantumCore.Game
 
         public void RegisterCommandNamespace(Type t)
         {
-            _commandManager.Register(t.Namespace, t.Assembly);
+            _commandManager.Register(t.Namespace!, t.Assembly);
         }
     }
 }

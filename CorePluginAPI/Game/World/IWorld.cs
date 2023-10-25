@@ -1,12 +1,9 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using QuantumCore.API.Core.Models;
+﻿using QuantumCore.API.Core.Models;
 
 namespace QuantumCore.API.Game.World
 {
     public interface IWorld
     {
-        static IWorld Instance { get; set; }
         Task Load();
         void Update(double elapsedTime);
         #nullable enable
@@ -23,6 +20,6 @@ namespace QuantumCore.API.Game.World
         void DespawnEntity(IEntity entity);
         uint GenerateVid();
         void RemovePlayer(IPlayerEntity e);
-        IPlayerEntity GetPlayer(string playerName);
+        IPlayerEntity? GetPlayer(string playerName);
     }
 }

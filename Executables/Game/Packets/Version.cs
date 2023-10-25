@@ -6,9 +6,7 @@ namespace QuantumCore.Game.Packets
     [PacketGenerator]
     public partial class Version
     {
-        [Field(0, Length = 33)]
-        public string ExecutableName { get; set; }
-        [Field(1, Length = 33)]
-        public string Timestamp { get; set; }
+        [Field(0, Length = 33)] public string ExecutableName { get; set; } = "";
+        [Field(1, Length = 33)] public string Timestamp { get; set; } = "";
     }
 }

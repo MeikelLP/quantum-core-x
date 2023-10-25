@@ -15,7 +15,7 @@ namespace QuantumCore.Game.World.Entities
         private readonly ILogger _logger;
         public override EEntityType Type => EEntityType.Monster;
 
-        public IBehaviour Behaviour {
+        public IBehaviour? Behaviour {
             get { return _behaviour; }
             set {
                 _behaviour = value;
@@ -31,18 +31,26 @@ namespace QuantumCore.Game.World.Entities
 
         public MonsterData Proto { get { return _proto; } }
 
-        public MonsterGroup Group { get; set; }
+        public MonsterGroup? Group { get; set; }
 
         private readonly MonsterData _proto;
-        private IBehaviour _behaviour;
+        private IBehaviour? _behaviour;
         private bool _behaviourInitialized;
         private double _deadTime = 5000;
 
         public MonsterEntity(IMonsterManager monsterManager, IAnimationManager animationManager, IWorld world, ILogger logger, uint id, int x, int y, float rotation = 0)
             : base(animationManager, world.GenerateVid())
         {
+            var proto = monsterManager.GetMonster(id);
+
+            if (proto is null)
+            {
+                // todo handle better
+                throw new InvalidOperationException($"Could not find mob proto for ID {id}. Cannot create mob entity");
+            }
+
             _logger = logger;
-            _proto = monsterManager.GetMonster(id);
+            _proto = proto;
             PositionX = x;
             PositionY = y;
             Rotation = rotation;
@@ -65,6 +73,7 @@ namespace QuantumCore.Game.World.Entities
 
         public override void Update(double elapsedTime)
         {
+            if (Map is null) return;
             if (Dead)
             {
                 _deadTime -= elapsedTime;
