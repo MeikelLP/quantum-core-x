@@ -4,11 +4,27 @@ namespace QuantumCore.Game;
 
 public interface IPlayerManager
 {
-    Task<PlayerData?> GetPlayer(Guid account, byte slot);
+    /// <summary>
+    /// Tries to get a player by account ID + slot
+    /// First tries to load player from cache then from database.
+    /// If player is not found in cache but in database: The cache will be updated.
+    /// </summary>
+    Task<PlayerData?> GetPlayer(Guid accountId, byte slot);
+
+    /// <summary>
+    /// Tries to get a player by player ID
+    /// First tries to load player from cache then from database.
+    /// If player is not found in cache but in database: The cache will be updated.
+    /// </summary>
     Task<PlayerData?> GetPlayer(Guid playerId);
-    Task<PlayerData[]> GetPlayers(Guid account);
+
+    /// <summary>
+    /// Gets all players for account ID
+    /// </summary>
+    Task<PlayerData[]> GetPlayers(Guid accountId);
+
     Task<bool> IsNameInUseAsync(string name);
-    
+
     /// <summary>
     /// Creates a new player and persists it in the database and the cache
     /// </summary>

@@ -21,12 +21,12 @@ public class PlayerManager : IPlayerManager
         _jobManager = jobManager;
     }
 
-    public async Task<PlayerData?> GetPlayer(Guid account, byte slot)
+    public async Task<PlayerData?> GetPlayer(Guid accountId, byte slot)
     {
-        var cachedPlayer = await _cachePlayerRepository.GetPlayerAsync(account, slot);
+        var cachedPlayer = await _cachePlayerRepository.GetPlayerAsync(accountId, slot);
         if (cachedPlayer is null)
         {
-            var players = await _dbPlayerRepository.GetPlayersAsync(account);
+            var players = await _dbPlayerRepository.GetPlayersAsync(accountId);
             for (var i = 0; i < players.Length; i++)
             {
                 var player = players[i];
@@ -39,7 +39,7 @@ public class PlayerManager : IPlayerManager
                 }
             }
 
-            _logger.LogWarning("Could not find player for account {AccountId} at slot {Slot}", account, slot);
+            _logger.LogWarning("Could not find player for account {AccountId} at slot {Slot}", accountId, slot);
         }
         return cachedPlayer;
     }
@@ -63,11 +63,11 @@ public class PlayerManager : IPlayerManager
         return cachedPlayer;
     }
 
-    public async Task<PlayerData[]> GetPlayers(Guid account)
+    public async Task<PlayerData[]> GetPlayers(Guid accountId)
     {
         // get players always from db not from cache
 
-        var players = await _dbPlayerRepository.GetPlayersAsync(account);
+        var players = await _dbPlayerRepository.GetPlayersAsync(accountId);
 
         // update cache
         await Task.WhenAll(players.Select((x, i) => _cachePlayerRepository.SetPlayerAsync(x, (byte)i)));
