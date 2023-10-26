@@ -11,10 +11,9 @@ namespace QuantumCore.Core.Utils
 
         public Grid(uint width, uint height)
         {
-            Resize(width, height);
             Width = width;
             Height = height;
-            _grid = new T[0,0];
+            _grid = new T[Width,Height];
         }
 
         public void Resize(uint width, uint height)
