@@ -76,7 +76,7 @@ namespace QuantumCore.Game
             {
                 IpUtils.PublicIP = IPAddress.Parse(_hostingOptions.IpAddress);
             }
-            else
+            else if(IpUtils.PublicIP is null)
             {
                 // Query interfaces for our best ipv4 address
                 IpUtils.SearchPublicIp();
