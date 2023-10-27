@@ -1,6 +1,5 @@
 ﻿using System.Collections.Concurrent;
 using System.Security.Cryptography;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using QuantumCore.API;
@@ -73,8 +72,6 @@ namespace QuantumCore.Game.World
             await _cacheManager.Publish("maps", $"{Name} {IpUtils.PublicIP}:{_options.Port}");
 
             _spawnPoints.AddRange(await _spawnPointProvider.GetSpawnPointsForMap(Name));
-
-            _logger.LogDebug("Loaded {SpawnPointsCount} spawn points for map {MapName}", _spawnPoints.Count, Name);
 
             // Populate map
             foreach(var spawnPoint in _spawnPoints)

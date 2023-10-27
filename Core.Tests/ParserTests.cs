@@ -2,9 +2,10 @@
 using System.Threading.Tasks;
 using FluentAssertions;
 using QuantumCore.API.Game.World;
+using QuantumCore.Game;
+using QuantumCore.Game.Services;
 using QuantumCore.Game.World;
 using Xunit;
-using ParserUtils = QuantumCore.Game.ParserUtils;
 
 namespace Core.Tests;
 
@@ -248,5 +249,116 @@ public class ParserTests
         var result = await ParserUtils.GetSpawnGroupCollectionFromBlock(input);
 
         result.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task Drop_Mob_DropSingle()
+    {
+        var input = new StringReader("""
+                             Group	Abc
+                             {
+                             	Mob	101
+                             	Type	drop
+                             	1	10	1	0.09
+                             }
+                             """);
+
+        var result = await ParserUtils.GetDropsAsync(input);
+        result.Should().NotBeNull();
+        var drops = result!.Value;
+        drops.Key.Should().Be(101);
+        drops.Value.Should().HaveCount(1);
+        drops.Value[0].ItemProtoId.Should().Be(10);
+        drops.Value[0].Chance.Should().BeApproximately(0.0009f, 0.0005f);
+    }
+
+    [Fact]
+    public async Task Drop_Mob_DropMultiple()
+    {
+        var input = new StringReader("""
+                             Group	Abc
+                             {
+                             	Mob	101
+                             	Type	drop
+                             	1	10	1	0.1
+                             	2	11	2	1
+                             }
+                             """);
+
+        var result = await ParserUtils.GetDropsAsync(input);
+        result.Should().NotBeNull();
+        var drops = result!.Value;
+        drops.Key.Should().Be(101);
+        drops.Value.Should().HaveCount(2);
+        drops.Value[0].Should().BeEquivalentTo(new DropEntry(10, 0.001f));
+        drops.Value[1].Should().BeEquivalentTo(new DropEntry(11, 0.01f, Amount: 2));
+    }
+
+    [Fact]
+    public async Task Drop_MultipleMob()
+    {
+        var input = new StringReader("""
+                             Group	Abc
+                             {
+                             	Mob	101
+                             	Type	drop
+                             	1	10	1	0.1
+                             }
+                             Group	Abc2
+                             {
+                             	Mob	102
+                             	Type	drop
+                             	1	10	1	0.1
+                             }
+                             """);
+
+        var result = await ParserUtils.GetDropsAsync(input);
+        result.Should().NotBeNull();
+        var drops = result!.Value;
+        drops.Key.Should().Be(101);
+        drops.Value.Should().HaveCount(1);
+        drops.Value.Should().Contain(new DropEntry(10, 0.001f));
+    }
+
+    [Fact]
+    public async Task Drop_FloatForUint()
+    {
+        var input = new StringReader("""
+                             Group	Abc
+                             {
+                             	Kill_drop	4.0
+                             	Mob	101
+                             	Type	drop
+                             	1	10	1	100
+                             }
+                             """);
+
+        var result = await ParserUtils.GetDropsAsync(input);
+        result.Should().NotBeNull();
+        var drops = result!.Value;
+        drops.Key.Should().Be(101);
+        drops.Value.Should().HaveCount(1);
+        drops.Value.Should().Contain(new DropEntry(10, 1, MinKillCount: 4));
+    }
+
+    [Fact]
+    public async Task Drop_StringItemId_WillBeIgnored()
+    {
+        var input = new StringReader("""
+                             Group	Abc
+                             {
+                             	Mob	101
+                             	Type	drop
+                             	1	10	1	100
+                             	2	Blub	1	100
+                             }
+                             """);
+
+        var result = await ParserUtils.GetDropsAsync(input);
+        result.Should().NotBeNull();
+        var drops = result!.Value;
+        drops.Key.Should().Be(101);
+        drops.Value.Should().HaveCount(1);
+        drops.Value.Should().Contain(new DropEntry(10, 1));
     }
 }

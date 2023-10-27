@@ -13,6 +13,7 @@ using QuantumCore.Core.Utils;
 using QuantumCore.Extensions;
 using QuantumCore.Game.Commands;
 using QuantumCore.Game.PlayerUtils;
+using QuantumCore.Game.Services;
 using QuantumCore.Networking;
 
 namespace QuantumCore.Game
@@ -37,6 +38,7 @@ namespace QuantumCore.Game
         private TimeSpan _targetElapsedTime = TimeSpan.FromTicks(100000); // 100hz
         private TimeSpan _maxElapsedTime = TimeSpan.FromMilliseconds(500);
         private readonly Stopwatch _serverTimer = new();
+        private readonly IDropProvider _dropProvider;
 
         public static GameServer Instance { get; private set; }
 
@@ -45,7 +47,7 @@ namespace QuantumCore.Game
             IItemManager itemManager, IMonsterManager monsterManager, IExperienceManager experienceManager,
             IAnimationManager animationManager, ICommandManager commandManager,
             IEnumerable<IPacketHandler> packetHandlers, IQuestManager questManager, IChatManager chatManager,
-            IWorld world)
+            IWorld world, IDropProvider dropProvider)
             : base(packetManager, logger, pluginExecutor, serviceProvider, packetHandlers, "game", hostingOptions)
         {
             _hostingOptions = hostingOptions.Value;
@@ -59,6 +61,7 @@ namespace QuantumCore.Game
             _questManager = questManager;
             _chatManager = chatManager;
             World = world;
+            _dropProvider = dropProvider;
             Instance = this;
         }
 
@@ -88,7 +91,8 @@ namespace QuantumCore.Game
                 _monsterManager.LoadAsync(stoppingToken),
                 _experienceManager.LoadAsync(stoppingToken),
                 _animationManager.LoadAsync(stoppingToken),
-                _commandManager.LoadAsync(stoppingToken)
+                _commandManager.LoadAsync(stoppingToken),
+                _dropProvider.LoadAsync(stoppingToken)
             );
 
             // Initialize core systems
