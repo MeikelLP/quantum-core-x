@@ -49,6 +49,7 @@ public class MapTests
             })
             .AddSingleton<PluginExecutor>()
             .AddSingleton<IItemManager>(_ => new Mock<IItemManager>().Object)
+            .AddSingleton<IDropProvider>(_ => new Mock<IDropProvider>().Object)
             .AddSingleton<IAtlasProvider>(_ =>
             {
                 var mock = new Mock<IAtlasProvider>();
@@ -119,10 +120,12 @@ public class MapTests
         var animationManager = provider.GetRequiredService<IAnimationManager>();
         var cacheManager = provider.GetRequiredService<ICacheManager>();
         var spawnPointProvider = provider.GetRequiredService<ISpawnPointProvider>();
+        var dropProvider = provider.GetRequiredService<IDropProvider>();
+        var itemManager = provider.GetRequiredService<IItemManager>();
         var options = provider.GetRequiredService<IOptions<HostingOptions>>();
         var logger = provider.GetRequiredService<ILogger<MapTests>>();
         _world = provider.GetRequiredService<IWorld>();
-        _map = new Map(monsterManager, animationManager, cacheManager, _world, options, logger, spawnPointProvider,
+        _map = new Map(monsterManager, animationManager, cacheManager, _world, options, logger, spawnPointProvider, dropProvider, itemManager,
             "Test", 0, 0, 4096, 4096);
     }
 

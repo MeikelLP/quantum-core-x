@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
-using System.Threading.Tasks;
+using JetBrains.Annotations;
+using QuantumCore.API.Core.Models;
 
 namespace QuantumCore.API.Game.World
 {
@@ -12,6 +13,7 @@ namespace QuantumCore.API.Game.World
         public uint UnitY { get; }
         public uint Width { get; }
         public uint Height { get; }
+        public IWorld World { get; }
 
         public IReadOnlyCollection<IEntity> Entities { get; }
 
@@ -24,5 +26,15 @@ namespace QuantumCore.API.Game.World
         public bool IsPositionInside(int x, int y);
 
         public void Update(double elapsedTime);
+
+        /// <summary>
+        /// Add a ground item which will automatically get destroyed after configured time
+        /// </summary>
+        /// <param name="item">Item to add on the ground, should not have any owner!</param>
+        /// <param name="x">Position X</param>
+        /// <param name="y">Position Y</param>
+        /// <param name="amount">Only used for gold as we have a higher limit here</param>
+        /// <param name="ownerName"></param>
+        void AddGroundItem(ItemInstance item, int x, int y, uint amount = 0, [CanBeNull] string ownerName = null);
     }
 }

@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game.World;
 
 namespace QuantumCore.Game.World;
@@ -12,13 +13,15 @@ public class RemoteMap : IMap
     public uint UnitY => PositionY / Map.MapUnit;
     public uint Width { get; }
     public uint Height { get; }
+    public IWorld World { get; }
     public IReadOnlyCollection<IEntity> Entities => throw new System.NotImplementedException();
 
     public IPAddress Host { get; set; }
     public ushort Port { get; set; }
 
-    public RemoteMap(string name, uint x, uint y, uint width, uint height)
+    public RemoteMap(IWorld world, string name, uint x, uint y, uint width, uint height)
     {
+        World = world;
         Name = name;
         PositionX = x;
         PositionY = y;
@@ -53,5 +56,10 @@ public class RemoteMap : IMap
 
     public void Update(double elapsedTime)
     {
+    }
+
+    public void AddGroundItem(ItemInstance item, int x, int y, uint amount = 0, string? ownerName = null)
+    {
+        throw new NotImplementedException();
     }
 }
