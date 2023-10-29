@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 
 namespace QuantumCore.API.Core.Models;
 
+[DebuggerDisplay("{Name} ({Id})")]
 public class MonsterData
 {
     public uint Id { get; set; }

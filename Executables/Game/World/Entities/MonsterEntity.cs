@@ -214,8 +214,7 @@ namespace QuantumCore.Game.World.Entities
             var drops = _dropProvider.GetDropsForMob(_proto.Id);
             foreach (var drop in drops)
             {
-                var itemModifier = _dropProvider.GetDropMultiplierForItem(drop.ItemProtoId);
-                var chance = drop.Chance * Globals.DROP_MULTIPLIER * itemModifier;
+                var chance = drop.Chance * Globals.DROP_MULTIPLIER;
                 if (chance > Random.Shared.NextSingle())
                 {
                     var itemInstance = _itemManager.CreateItem(_itemManager.GetItem(drop.ItemProtoId));

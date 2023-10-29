@@ -7,20 +7,23 @@ namespace QuantumCore.Game.Services;
 
 public class DropProvider : IDropProvider
 {
-    private readonly Dictionary<uint, DropEntry[]> _drops = new();
-    private readonly Dictionary<uint, float> _itemDropMultipliers = new();
+    private readonly Dictionary<uint, DropEntry[]> _monsterDrops = new();
+    private readonly Dictionary<uint, float> _commonDrops = new();
+
     private readonly ILogger<DropProvider> _logger;
     private readonly IItemManager _itemManager;
+    private readonly IMonsterManager _monsterManager;
 
-    public DropProvider(ILogger<DropProvider> logger, IItemManager itemManager)
+    public DropProvider(ILogger<DropProvider> logger, IItemManager itemManager, IMonsterManager monsterManager)
     {
         _logger = logger;
         _itemManager = itemManager;
+        _monsterManager = monsterManager;
     }
 
     public IReadOnlyCollection<DropEntry> GetDropsForMob(uint monsterProtoId)
     {
-        if (_drops.TryGetValue(monsterProtoId, out var arr))
+        if (_monsterDrops.TryGetValue(monsterProtoId, out var arr))
         {
             return arr;
         }
@@ -28,23 +31,16 @@ public class DropProvider : IDropProvider
         return Array.Empty<DropEntry>();
     }
 
-    public float GetDropMultiplierForItem(uint itemId)
-    {
-        if (_itemDropMultipliers.TryGetValue(itemId, out var value))
-        {
-            return value;
-        }
-
-        return 1;
-    }
-
     public async Task LoadAsync(CancellationToken cancellationToken = default)
     {
-        await LoadDropsAsync(cancellationToken);
-        await LoadItemDropModifiersAsync(cancellationToken);
+        await LoadCommonDropsAsync(cancellationToken);
+        await LoadDropsForMonstersAsync(cancellationToken);
     }
 
-    private async Task LoadItemDropModifiersAsync(CancellationToken cancellationToken)
+    /// <summary>
+    /// Loads drops that are defined in mob_proto's drop_item column. The parsed file contains the default drop chance
+    /// </summary>
+    private async Task LoadCommonDropsAsync(CancellationToken cancellationToken)
     {
         const string file = "data/etc_drop_item.txt";
         if (!File.Exists(file)) return;
@@ -55,22 +51,22 @@ public class DropProvider : IDropProvider
 
         var lineIndex = 0;
         // loop while line is not null
-        while((await sr.ReadLineAsync(cancellationToken))! is { } line)
+        while ((await sr.ReadLineAsync(cancellationToken))! is { } line)
         {
-            var result = ParseModifierLine(line, lineIndex, file);
+            var result = ParseCommonLine(line, lineIndex, file);
 
             if (result is not null)
             {
-                _itemDropMultipliers.Add(result.Value.Key, result.Value.Value);
+                _commonDrops.Add(result.Value.Key, result.Value.Value);
             }
 
             lineIndex++;
         }
 
-        _logger.LogDebug("Found drop multipliers for {Count:D} items", _itemDropMultipliers.Count);
+        _logger.LogDebug("Found drop multipliers for {Count:D} items", _commonDrops.Count);
     }
 
-    private KeyValuePair<uint, float>? ParseModifierLine(ReadOnlySpan<char> line, int lineIndex, string file)
+    private KeyValuePair<uint, float>? ParseCommonLine(ReadOnlySpan<char> line, int lineIndex, string file)
     {
         var i = line.IndexOf('\t');
 
@@ -81,7 +77,7 @@ public class DropProvider : IDropProvider
         }
 
         var itemName = line[..i];
-        var multiplier = line[(i + 1)..];
+        var chance = line[(i + 1)..];
 
         var item = _itemManager.GetItemByName(itemName);
 
@@ -91,16 +87,18 @@ public class DropProvider : IDropProvider
             return null;
         }
 
-        if (!float.TryParse(multiplier, CultureInfo.InvariantCulture, out var multiplierValue))
+        if (!float.TryParse(chance, CultureInfo.InvariantCulture, out var multiplierValue))
         {
-            _logger.LogDebug("Cannot parse multiplier value {Value} of item {ItemName}", multiplier.ToString(), itemName.ToString());
+            _logger.LogDebug("Cannot parse multiplier value {Value} of item {ItemName}", chance.ToString(),
+                itemName.ToString());
             return null;
         }
 
-        return new KeyValuePair<uint, float>(item.Id, multiplierValue);
+        // divide by 100 to make a human percentage to math percentage
+        return new KeyValuePair<uint, float>(item.Id, multiplierValue / 100);
     }
 
-    private async Task LoadDropsAsync(CancellationToken cancellationToken)
+    private async Task LoadDropsForMonstersAsync(CancellationToken cancellationToken)
     {
         const string file = "data/mob_drop_item.txt";
         if (!File.Exists(file)) return;
@@ -110,11 +108,11 @@ public class DropProvider : IDropProvider
         using var sr = new StreamReader(file);
         do
         {
-            var item = await ParserUtils.GetDropsAsync(sr, cancellationToken);
+            var item = await ParserUtils.GetDropsForBlockAsync(sr, cancellationToken);
             if (item != null)
             {
                 var newArr = item.Value.Value;
-                if (_drops.TryGetValue(item.Value.Key, out var existingArr))
+                if (_monsterDrops.TryGetValue(item.Value.Key, out var existingArr))
                 {
                     var previousSize = existingArr.Length;
                     Array.Resize(ref existingArr, previousSize + newArr.Length);
@@ -122,11 +120,33 @@ public class DropProvider : IDropProvider
                 }
                 else
                 {
-                    _drops.Add(item.Value.Key, newArr);
+                    _monsterDrops.Add(item.Value.Key, newArr);
                 }
             }
         } while (!sr.EndOfStream);
 
-        _logger.LogDebug("Found drops for {Count:D} mobs", _drops.Count);
+        foreach (var monster in _monsterManager.GetMonsters())
+        {
+            if (monster.DropItemId == 0) continue;
+
+            if (_commonDrops.TryGetValue(monster.DropItemId, out var chance))
+            {
+                if (_monsterDrops.TryGetValue(monster.Id, out var existingArr))
+                {
+                    Array.Resize(ref existingArr, existingArr.Length + 1);
+                    existingArr[^1] = new DropEntry(monster.DropItemId, chance);
+                }
+                else
+                {
+                    _monsterDrops.Add(monster.Id, new []
+                    {
+                        new DropEntry(monster.DropItemId, chance)
+                    });
+                }
+            }
+
+        }
+
+        _logger.LogDebug("Found drops for {Count:D} mobs", _monsterDrops.Count);
     }
 }

@@ -11,8 +11,5 @@ public interface IDropProvider
     /// <returns>The amount of drops that have written to the array</returns>
     IReadOnlyCollection<DropEntry> GetDropsForMob(uint monsterProtoId);
 
-    /// <returns>1 (100%) if not configured</returns>
-    float GetDropMultiplierForItem(uint itemId);
-
     Task LoadAsync(CancellationToken cancellationToken = default);
 }

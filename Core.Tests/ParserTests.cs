@@ -263,7 +263,7 @@ public class ParserTests
                              }
                              """);
 
-        var result = await ParserUtils.GetDropsAsync(input);
+        var result = await ParserUtils.GetDropsForBlockAsync(input);
         result.Should().NotBeNull();
         var drops = result!.Value;
         drops.Key.Should().Be(101);
@@ -285,7 +285,7 @@ public class ParserTests
                              }
                              """);
 
-        var result = await ParserUtils.GetDropsAsync(input);
+        var result = await ParserUtils.GetDropsForBlockAsync(input);
         result.Should().NotBeNull();
         var drops = result!.Value;
         drops.Key.Should().Be(101);
@@ -312,7 +312,7 @@ public class ParserTests
                              }
                              """);
 
-        var result = await ParserUtils.GetDropsAsync(input);
+        var result = await ParserUtils.GetDropsForBlockAsync(input);
         result.Should().NotBeNull();
         var drops = result!.Value;
         drops.Key.Should().Be(101);
@@ -333,7 +333,7 @@ public class ParserTests
                              }
                              """);
 
-        var result = await ParserUtils.GetDropsAsync(input);
+        var result = await ParserUtils.GetDropsForBlockAsync(input);
         result.Should().NotBeNull();
         var drops = result!.Value;
         drops.Key.Should().Be(101);
@@ -354,7 +354,7 @@ public class ParserTests
                              }
                              """);
 
-        var result = await ParserUtils.GetDropsAsync(input);
+        var result = await ParserUtils.GetDropsForBlockAsync(input);
         result.Should().NotBeNull();
         var drops = result!.Value;
         drops.Key.Should().Be(101);

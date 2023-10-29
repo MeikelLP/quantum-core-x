@@ -86,7 +86,7 @@ internal static partial class ParserUtils
     }
 
     /// <returns>null if end of stream</returns>
-    public static async Task<KeyValuePair<uint, DropEntry[]>?> GetDropsAsync(TextReader sr,
+    public static async Task<KeyValuePair<uint, DropEntry[]>?> GetDropsForBlockAsync(TextReader sr,
         CancellationToken cancellationToken = default)
     {
         string? line;
