@@ -195,15 +195,7 @@ namespace QuantumCore.Game.World.Entities
                 return;
             }
 
-            var drops = _dropProvider.GetDropsForMob(_proto.Id);
-            foreach (var drop in drops)
-            {
-                if (drop.Chance * Globals.DROP_MULTIPLIER > Random.Shared.NextSingle())
-                {
-                    var itemInstance = _itemManager.CreateItem(_itemManager.GetItem(drop.ItemProtoId));
-                    _map.AddGroundItem(itemInstance, PositionX, PositionY, drop.Amount, LastAttacker?.Name);
-                }
-            }
+            DoDrops();
 
             base.Die();
 
@@ -213,6 +205,21 @@ namespace QuantumCore.Game.World.Entities
                 if (entity is PlayerEntity player)
                 {
                     player.Connection.Send(dead);
+                }
+            }
+        }
+
+        private void DoDrops()
+        {
+            var drops = _dropProvider.GetDropsForMob(_proto.Id);
+            foreach (var drop in drops)
+            {
+                var itemModifier = _dropProvider.GetDropMultiplierForItem(drop.ItemProtoId);
+                var chance = drop.Chance * Globals.DROP_MULTIPLIER * itemModifier;
+                if (chance > Random.Shared.NextSingle())
+                {
+                    var itemInstance = _itemManager.CreateItem(_itemManager.GetItem(drop.ItemProtoId));
+                    _map.AddGroundItem(itemInstance, PositionX, PositionY, drop.Amount, LastAttacker?.Name);
                 }
             }
         }
