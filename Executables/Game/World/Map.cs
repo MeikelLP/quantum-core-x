@@ -8,6 +8,7 @@ using QuantumCore.API.Game.World;
 using QuantumCore.Core.Cache;
 using QuantumCore.Core.Event;
 using QuantumCore.Core.Utils;
+using QuantumCore.Game.Services;
 using QuantumCore.Game.World.Entities;
 
 // using QuantumCore.Core.API;
@@ -17,6 +18,8 @@ namespace QuantumCore.Game.World
     public class Map : IMap
     {
         public const uint MapUnit = 25600;
+        private const int SPAWN_BASE_OFFSET = 5;
+        private const int SPAWN_POSITION_MULTIPLIER = 100;
         public string Name { get; private set; }
         public uint PositionX { get; private set; }
         public uint UnitX => PositionX / MapUnit;
@@ -37,10 +40,11 @@ namespace QuantumCore.Game.World
         private readonly ICacheManager _cacheManager;
         private readonly IWorld _world;
         private readonly ILogger _logger;
+        private readonly ISpawnPointProvider _spawnPointProvider;
         private readonly HostingOptions _options;
 
-        public Map(IMonsterManager monsterManager, IAnimationManager animationManager, ICacheManager cacheManager, 
-            IWorld world, IOptions<HostingOptions> options, ILogger logger,
+        public Map(IMonsterManager monsterManager, IAnimationManager animationManager, ICacheManager cacheManager,
+            IWorld world, IOptions<HostingOptions> options, ILogger logger, ISpawnPointProvider spawnPointProvider,
             string name, uint x, uint y, uint width, uint height)
         {
             _monsterManager = monsterManager;
@@ -48,6 +52,7 @@ namespace QuantumCore.Game.World
             _cacheManager = cacheManager;
             _world = world;
             _logger = logger;
+            _spawnPointProvider = spawnPointProvider;
             _options = options.Value;
             Name = name;
             PositionX = x;
@@ -64,17 +69,12 @@ namespace QuantumCore.Game.World
             await _cacheManager.Set($"maps:{Name}", $"{IpUtils.PublicIP}:{_options.Port}");
             await _cacheManager.Publish("maps", $"{Name} {IpUtils.PublicIP}:{_options.Port}");
 
-            var cfg = new ConfigurationBuilder()
-                .AddTomlFile(Path.Join("data", "maps", Name, "spawn.toml"), true)
-                .Build();
+            _spawnPoints.AddRange(await _spawnPointProvider.GetSpawnPointsForMap(Name));
 
-            _spawnPoints.AddRange(cfg.GetSection("spawn").Get<SpawnPoint[]>() ?? Array.Empty<SpawnPoint>());
-            
-            _logger.LogDebug("Loaded {SpawnPointsCount} spawn points", _spawnPoints.Count);
-            
-            
+            _logger.LogDebug("Loaded {SpawnPointsCount} spawn points for map {MapName}", _spawnPoints.Count, Name);
+
             // Populate map
-            foreach(var spawnPoint in _spawnPoints) 
+            foreach(var spawnPoint in _spawnPoints)
             {
                 var monsterGroup = new MonsterGroup { SpawnPoint = spawnPoint };
                 await SpawnGroup(monsterGroup);
@@ -90,15 +90,15 @@ namespace QuantumCore.Game.World
                 _entities.Remove(entity as Entity);
             }
             _pendingRemovals.Clear();
-            
-            foreach (var entity in _entities)
+
+            foreach (var entity in _entities.ToArray())
             {
                 await entity.Update(elapsedTime);
 
                 if (entity.PositionChanged)
                 {
                     entity.PositionChanged = false;
-                    
+
                     // Update position in our quad tree (used for faster nearby look up)
                     _quadTree.UpdatePosition(entity);
 
@@ -161,51 +161,37 @@ namespace QuantumCore.Game.World
             var spawnPoint = groupInstance.SpawnPoint;
             switch (spawnPoint.Type)
             {
+                case ESpawnPointType.GroupCollection:
+                    var groupCollection = _world.GetGroupCollection(spawnPoint.Monster);
+                    if (groupCollection != null)
+                    {
+                        var index = Random.Shared.Next(0, groupCollection.Groups.Count);
+                        var collectionGroup = groupCollection.Groups[index];
+                        var group = _world.GetGroup(collectionGroup.Id);
+                        if (group != null)
+                        {
+                            for (var i = 0; i < collectionGroup.Amount; i++)
+                            {
+                                await SpawnGroup(groupInstance, spawnPoint, group);
+                            }
+                        }
+                    }
+                    break;
                 case ESpawnPointType.Group:
                 {
-                    var group = _world.GetGroup(CoreRandom.GetRandom(spawnPoint.Groups));
+                    var group = _world.GetGroup(spawnPoint.Monster);
                     if (group != null)
                     {
-                        var baseX = spawnPoint.X + RandomNumberGenerator.GetInt32(-spawnPoint.Range, spawnPoint.Range);
-                        var baseY = spawnPoint.Y + RandomNumberGenerator.GetInt32(-spawnPoint.Range, spawnPoint.Range);
-
-                        spawnPoint.CurrentGroup = groupInstance;
-
-                        foreach (var member in group.Members)
-                        {
-                            var monster = new MonsterEntity(_monsterManager, _animationManager, _world, _logger, member.Id,
-                                (int) (PositionX + (baseX + RandomNumberGenerator.GetInt32(-5, 5)) * 100),
-                                (int) (PositionY + (baseY + RandomNumberGenerator.GetInt32(-5, 5)) * 100),
-                                RandomNumberGenerator.GetInt32(0, 360));
-                            await _world.SpawnEntity(monster);
-
-                            groupInstance.Monsters.Add(monster);
-                            monster.Group = groupInstance;
-                        }
+                        await SpawnGroup(groupInstance, spawnPoint, group);
                     }
 
                     break;
                 }
                 case ESpawnPointType.Monster:
                 {
-                    int x, y;
-                    if (spawnPoint.RandomPosition)
-                    {
-                        // todo make sure monster doesn't spawn in non walkable area
-                        x = CoreRandom.GenerateInt32((int) (PositionX), (int) (PositionX + Width * MapUnit) + 1);
-                        y = CoreRandom.GenerateInt32((int) (PositionY), (int) (PositionY + Height * MapUnit) + 1);
-                    }
-                    else
-                    {
-                        x = (int)PositionX + (spawnPoint.X + CoreRandom.GenerateInt32(-spawnPoint.Range, spawnPoint.Range + 1)) * 100;
-                        y = (int)PositionY + (spawnPoint.Y + CoreRandom.GenerateInt32(-spawnPoint.Range, spawnPoint.Range + 1)) * 100;
-                    }
+                    var monster = await SpawnMonster(spawnPoint.Monster, spawnPoint);
 
                     spawnPoint.CurrentGroup = groupInstance;
-
-                    var monster = new MonsterEntity(_monsterManager, _animationManager, _world, _logger, spawnPoint.Monster, x, y, (spawnPoint.Direction - 1) * 45);
-                    await _world.SpawnEntity(monster);
-                    
                     groupInstance.Monsters.Add(monster);
                     monster.Group = groupInstance;
 
@@ -215,6 +201,44 @@ namespace QuantumCore.Game.World
                     _logger.LogWarning("Unknown spawn point type: {SpawnPointType}", spawnPoint.Type);
                     break;
             }
+        }
+
+        private async Task SpawnGroup(MonsterGroup groupInstance, SpawnPoint spawnPoint, SpawnGroup group)
+        {
+            spawnPoint.CurrentGroup = groupInstance;
+
+            var leader = await SpawnMonster(group.Leader, spawnPoint);
+            groupInstance.Monsters.Add(leader);
+            leader.Group = groupInstance;
+
+            foreach (var member in group.Members)
+            {
+                var monster = await SpawnMonster(member.Id, spawnPoint);
+
+                groupInstance.Monsters.Add(monster);
+                monster.Group = groupInstance;
+            }
+        }
+
+        private async Task<MonsterEntity> SpawnMonster(uint id, SpawnPoint spawnPoint)
+        {
+            var baseX = spawnPoint.X;
+            var baseY = spawnPoint.Y;
+            if (spawnPoint.RangeX != 0)
+            {
+                baseX += RandomNumberGenerator.GetInt32(-spawnPoint.RangeX, spawnPoint.RangeY);
+            }
+            if (spawnPoint.RangeY != 0)
+            {
+                baseY += RandomNumberGenerator.GetInt32(-spawnPoint.RangeX, spawnPoint.RangeY);
+            }
+
+            var monster = new MonsterEntity(_monsterManager, _animationManager, _world, _logger, id,
+                (int)(PositionX + (baseX + RandomNumberGenerator.GetInt32(-SPAWN_BASE_OFFSET, SPAWN_BASE_OFFSET)) * SPAWN_POSITION_MULTIPLIER),
+                (int)(PositionY + (baseY + RandomNumberGenerator.GetInt32(-SPAWN_BASE_OFFSET, SPAWN_BASE_OFFSET)) * SPAWN_POSITION_MULTIPLIER),
+                RandomNumberGenerator.GetInt32(0, 360));
+            await _world.SpawnEntity(monster);
+            return monster;
         }
 
         public void EnqueueGroupRespawn(MonsterGroup group)
@@ -246,7 +270,7 @@ namespace QuantumCore.Game.World
                     // if we aren't a player only players are relevant for nearby
                     filter = EEntityType.Player;
                 }
-                
+
                 _quadTree.QueryAround(nearby, entity.PositionX, entity.PositionY, Entity.ViewDistance, filter);
                 foreach (var e in nearby.Where(e => e != entity))
                 {
@@ -270,7 +294,7 @@ namespace QuantumCore.Game.World
         public void AddGroundItem(ItemInstance item, int x, int y, uint amount = 0)
         {
             var groundItem = new GroundItem(_animationManager, _world.GenerateVid(), item, amount) {
-                PositionX = x, 
+                PositionX = x,
                 PositionY = y
             };
 
