@@ -5,6 +5,7 @@ using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.World;
 using QuantumCore.API.Game.World.AI;
 using QuantumCore.Core.Utils;
+using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Packets;
 using QuantumCore.Game.Services;
 using QuantumCore.Game.World.AI;
@@ -211,14 +212,19 @@ namespace QuantumCore.Game.World.Entities
 
         private void DoDrops()
         {
-            var drops = _dropProvider.GetDropsForMob(_proto.Id);
-            foreach (var drop in drops)
+            // no drops if no killer
+            if (LastAttacker is null) return;
+
+            var mobDrops = _dropProvider.GetDropsForMob(_proto.Id);
+            foreach (var drop in mobDrops)
             {
+                if (!drop.CanDropFor(LastAttacker)) continue;
+
                 var chance = drop.Chance * Globals.DROP_MULTIPLIER;
                 if (chance > Random.Shared.NextSingle())
                 {
                     var itemInstance = _itemManager.CreateItem(_itemManager.GetItem(drop.ItemProtoId));
-                    _map.AddGroundItem(itemInstance, PositionX, PositionY, drop.Amount, LastAttacker?.Name);
+                    _map.AddGroundItem(itemInstance, PositionX, PositionY, drop.Amount, LastAttacker.Name);
                 }
             }
         }

@@ -1,6 +1,10 @@
-﻿namespace QuantumCore.Game.Services;
+﻿using System.Collections.Immutable;
+using QuantumCore.API.Game.Types;
 
-public record struct DropEntry(uint ItemProtoId, float Chance, uint MinLevel = 0, uint MinKillCount = 0, byte Amount = 1);
+namespace QuantumCore.Game.Services;
+
+public record struct MonsterDropEntry(uint ItemProtoId, float Chance, uint MinLevel = 0, uint MinKillCount = 0, byte Amount = 1);
+public record struct CommonDropEntry(EMonsterLevel MonsterLevel, byte MinLevel, byte MaxLevel, uint ItemProtoId, float Chance);
 
 public interface IDropProvider
 {
@@ -9,7 +13,9 @@ public interface IDropProvider
     /// </summary>
     /// <param name="monsterProtoId">For what monster shall we lookup drops</param>
     /// <returns>The amount of drops that have written to the array</returns>
-    IReadOnlyCollection<DropEntry> GetDropsForMob(uint monsterProtoId);
+    ImmutableArray<MonsterDropEntry> GetDropsForMob(uint monsterProtoId);
+
+    ImmutableArray<CommonDropEntry> CommonDrops { get; }
 
     Task LoadAsync(CancellationToken cancellationToken = default);
 }

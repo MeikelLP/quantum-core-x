@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using System.Collections.Immutable;
+using System.Globalization;
 using System.Text;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
@@ -7,8 +8,8 @@ namespace QuantumCore.Game.Services;
 
 public class DropProvider : IDropProvider
 {
-    private readonly Dictionary<uint, DropEntry[]> _monsterDrops = new();
-    private readonly Dictionary<uint, float> _commonDrops = new();
+    private readonly Dictionary<uint, ImmutableArray<MonsterDropEntry>> _monsterDrops = new();
+    private readonly Dictionary<uint, float> _simpleMobDrops = new();
 
     private readonly ILogger<DropProvider> _logger;
     private readonly IItemManager _itemManager;
@@ -21,26 +22,29 @@ public class DropProvider : IDropProvider
         _monsterManager = monsterManager;
     }
 
-    public IReadOnlyCollection<DropEntry> GetDropsForMob(uint monsterProtoId)
+    public ImmutableArray<MonsterDropEntry> GetDropsForMob(uint monsterProtoId)
     {
         if (_monsterDrops.TryGetValue(monsterProtoId, out var arr))
         {
             return arr;
         }
 
-        return Array.Empty<DropEntry>();
+        return new ImmutableArray<MonsterDropEntry>();
     }
+
+    public ImmutableArray<CommonDropEntry> CommonDrops { get; private set; }
 
     public async Task LoadAsync(CancellationToken cancellationToken = default)
     {
-        await LoadCommonDropsAsync(cancellationToken);
         await LoadDropsForMonstersAsync(cancellationToken);
+        await LoadSimpleMobDropsAsync(cancellationToken);
     }
 
     /// <summary>
-    /// Loads drops that are defined in mob_proto's drop_item column. The parsed file contains the default drop chance
+    /// The parsed file contains the default drop chances for items.
+    /// Drops defined in mob_proto's drop_item column get their chance from this file.
     /// </summary>
-    private async Task LoadCommonDropsAsync(CancellationToken cancellationToken)
+    private async Task LoadSimpleMobDropsAsync(CancellationToken cancellationToken)
     {
         const string file = "data/etc_drop_item.txt";
         if (!File.Exists(file)) return;
@@ -51,19 +55,35 @@ public class DropProvider : IDropProvider
 
         var lineIndex = 0;
         // loop while line is not null
+        var simpleMobDrops = new Dictionary<uint, float>();
         while ((await sr.ReadLineAsync(cancellationToken))! is { } line)
         {
             var result = ParseCommonLine(line, lineIndex, file);
 
             if (result is not null)
             {
-                _commonDrops.Add(result.Value.Key, result.Value.Value);
+                simpleMobDrops.Add(result.Value.Key, result.Value.Value);
             }
 
             lineIndex++;
         }
 
-        _logger.LogDebug("Found drop multipliers for {Count:D} items", _commonDrops.Count);
+        foreach (var mobId in _monsterDrops.Keys.ToArray()) // copy
+        {
+            var mob = _monsterManager.GetMonster(mobId);
+            if (mob is null)
+            {
+                _logger.LogWarning("Cannot load simple drop for mob {Id} because that mob does not exist", mobId);
+                continue;
+            }
+            if (mob.DropItemId != 0 &&
+                simpleMobDrops.TryGetValue(mob.DropItemId, out var chance))
+            {
+                _monsterDrops[mobId] = _monsterDrops[mobId].Add(new MonsterDropEntry(mob.DropItemId, chance));
+            }
+        }
+
+        _logger.LogDebug("Found drop multipliers for {Count:D} items", _simpleMobDrops.Count);
     }
 
     private KeyValuePair<uint, float>? ParseCommonLine(ReadOnlySpan<char> line, int lineIndex, string file)
@@ -111,16 +131,13 @@ public class DropProvider : IDropProvider
             var item = await ParserUtils.GetDropsForBlockAsync(sr, cancellationToken);
             if (item != null)
             {
-                var newArr = item.Value.Value;
-                if (_monsterDrops.TryGetValue(item.Value.Key, out var existingArr))
+                if (_monsterDrops.TryGetValue(item.Value.Key, out var list))
                 {
-                    var previousSize = existingArr.Length;
-                    Array.Resize(ref existingArr, previousSize + newArr.Length);
-                    newArr.CopyTo(existingArr, previousSize);
+                    _monsterDrops[item.Value.Key] = list.AddRange(item.Value.Value);
                 }
                 else
                 {
-                    _monsterDrops.Add(item.Value.Key, newArr);
+                    _monsterDrops.Add(item.Value.Key, item.Value.Value.ToImmutableArray());
                 }
             }
         } while (!sr.EndOfStream);
@@ -129,19 +146,19 @@ public class DropProvider : IDropProvider
         {
             if (monster.DropItemId == 0) continue;
 
-            if (_commonDrops.TryGetValue(monster.DropItemId, out var chance))
+            if (_simpleMobDrops.TryGetValue(monster.DropItemId, out var chance))
             {
-                if (_monsterDrops.TryGetValue(monster.Id, out var existingArr))
+                if (_monsterDrops.TryGetValue(monster.Id, out var list))
                 {
-                    Array.Resize(ref existingArr, existingArr.Length + 1);
-                    existingArr[^1] = new DropEntry(monster.DropItemId, chance);
+                    _monsterDrops[monster.Id] = list.Add(new MonsterDropEntry(monster.DropItemId, chance));
                 }
                 else
                 {
-                    _monsterDrops.Add(monster.Id, new []
+                    var arr = new []
                     {
-                        new DropEntry(monster.DropItemId, chance)
-                    });
+                        new MonsterDropEntry(monster.DropItemId, chance)
+                    }.ToImmutableArray();
+                    _monsterDrops.Add(monster.Id, arr);
                 }
             }
 
