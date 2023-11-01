@@ -12,9 +12,6 @@ Assuming you are using a valid TMP4 client
     SERVER_IP			= "127.0.0.1"
     SERVER_IP_TEST		= "127.0.0.1"
     CH1_NAME			= "CH1"
-    CH2_NAME			= "CH2"
-    CH3_NAME			= "CH3"
-    CH4_NAME			= "CH4"
     PORT_1				= 13001
     PORT_AUTH			= 11002
     PORT_MARK			= 13000
