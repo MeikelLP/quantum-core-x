@@ -17,13 +17,6 @@ services:
     volumes:
       - ./Executables/Auth/appsettings.json:/app/appsettings.json:ro
 
-  # migrate service - required once
-  migrate:
-    image: ghcr.io/meikellp/quantum-core-x/migrator
-    restart: no
-    network_mode: host
-    command: '--host localhost --port 3306 --user root --password supersecure.123'
-
   # redis holds live data of the game world
   # used as distributed memory between server nodes
   cache:
