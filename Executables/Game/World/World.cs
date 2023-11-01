@@ -114,7 +114,7 @@ namespace QuantumCore.Game.World
             using var reader = new StreamReader("data/atlasinfo.txt");
             string line;
             var lineNo = 0;
-            while ((line = reader.ReadLine()) != null)
+            while ((line = reader.ReadLine()?.Trim()) != null)
             {
                 lineNo++;
                 if(string.IsNullOrWhiteSpace(line)) continue; // skip empty lines
