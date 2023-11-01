@@ -18,8 +18,8 @@ namespace QuantumCore.Core.Cache
             _db = db;
             _logger = logger;
             _redis = new RedisDB { DataFormater = new JsonFormater() };
-            _logger.LogInformation("Initialize Cache Manager");
             _redis.Host.AddWriteHost(options.Value.Host, options.Value.Port);
+            _logger.LogInformation("Initialize Redis Cache Manager on socket {Host}:{Port}", options.Value.Host, options.Value.Port);
         }
 
         public async ValueTask<T> GetOrCreate<T>(object id) where T : class
@@ -37,7 +37,7 @@ namespace QuantumCore.Core.Cache
             // We have to query the object from the database, cache it and return it
             var obj = await _db.GetAsync<T>(id);
             await _redis.Set(keyName, obj);
-            
+
             return obj;
         }
 
