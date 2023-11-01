@@ -2,7 +2,10 @@
     "$schema": "http://json.schemastore.org/launchsettings.json",
     "profiles": {
         "Game": {
-            "commandName": "Project"
+            "commandName": "Project",
+            "environmentVariables": {
+//                "DOTNET_ENVIRONMENT": "Development"
+            }
         }
     }
 }
