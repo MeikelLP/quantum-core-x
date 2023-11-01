@@ -36,19 +36,14 @@
 
         ```sh
         dotnet build
-        # you should see a "Build succeeded"
+        # you should see "0 Error(s)"
         ```
 
-    5. Save the following as `atlasinfo.txt` or copy the `atlasinfo.txt` from your client root.epk
-
-        ```txt
-        metin2_map_a1	409600	896000	4	5
-        metin2_map_b1	0	102400	4	5
-        metin2_map_c1	921600	204800	4	5
-        ```
-
-    6. Save the following as `jobs.json`
-
+    5. Create the folder `data` in `./Executables/Game/bin/Debug/net7.0/`
+    6. Copy the following files into that folder:
+        * In your clients `Eternexus` folder there should be an `atlasinfo.txt`
+        * `item_proto` & `mob_proto` from step 3
+        * `jobs.json`
         ```json
        {
             "job": [
@@ -168,16 +163,6 @@
         }
         ```
 
-    7. Copy required data to the execution path
-
-        ```sh
-        mkdir Executables/Game/bin/Debug/net7.0/data
-        cp atlasinfo.txt Executables/Game/bin/Debug/net7.0/data/
-        cp jobs.json Executables/Game/bin/Debug/net7.0/data/
-        cp item_proto Executables/Game/bin/Debug/net7.0/data/
-        cp mob_proto Executables/Game/bin/Debug/net7.0/data/
-        ```
-
 2. Setting up required services
 
     1. Use the `docker-compose.yml` in the project's root to boot up all services.
@@ -194,7 +179,7 @@
     2. Run the db migrator
 
         ```sh
-        docker run --rm --command --network=host ghcr.io/meikellp/quantum-core-x/migrator --host localhost --user root --password supersecure.123
+         dotnet run --project Executables/Migrator --launch-profile Migrator
         ```
 
 3. Setup client
@@ -204,8 +189,15 @@
 4. Create an account `admin` with the password `admin`
 
     ```sh
+    # /bin/sh
     # replace __CONTAINER_ID__ with your mysql container ID
-    docker exec __CONTAINER_ID__ /bin/mysql -u root -psupersecure.123 --execute="INSERT INTO account.accounts (Id, Username, Password, Email, Status, LastLogin, CreatedAt, UpdatedAt, DeleteCode) VALUES ('584C4BC9-559F-47DD-9A7E-49EEB65DD831', 'admin', '$2y$10$dTh8zmAfA742vKZ35Oarzugv3QXJPTOYRhKpk807o9h9SWBsFcys6', 'some@mail.com', DEFAULT, null, DEFAULT, DEFAULT, DEFAULT);"
+    docker exec __CONTAINER_ID__ /bin/mysql -u root -psupersecure.123 --execute="INSERT INTO account.accounts (Id, Username, Password, Email, Status, LastLogin, CreatedAt, UpdatedAt, DeleteCode) VALUES ('584C4BC9-559F-47DD-9A7E-49EEB65DD831', 'admin', '\$2y\$10\$dTh8zmAfA742vKZ35Oarzugv3QXJPTOYRhKpk807o9h9SWBsFcys6', 'some@mail.com', DEFAULT, null, DEFAULT, DEFAULT, DEFAULT);"
+    ```
+   
+    ```ps1
+    # for powershell / windows
+    # replace __CONTAINER_ID__ with your mysql container ID
+    docker exec __CONTAINER_ID__ /bin/mysql -u root '-psupersecure.123' --execute="INSERT INTO account.accounts (Id, Username, Password, Email, Status, LastLogin, CreatedAt, UpdatedAt, DeleteCode) VALUES ('584C4BC9-559F-47DD-9A7E-49EEB65DD831', 'admin', '`$2y`$10`$dTh8zmAfA742vKZ35Oarzugv3QXJPTOYRhKpk807o9h9SWBsFcys6', 'some@mail.com', DEFAULT, null, DEFAULT, DEFAULT, DEFAULT);"
     ```
 
     for more infos about account creation look at [Account Creation](../tutorials/account-creation.md)
@@ -215,7 +207,7 @@
     Start the application from source
 
     ```sh
-    dotnet run --launch-profile Game --project Core
+    dotnet run --project Executables/Game
     ```
 
 6. Start the client
