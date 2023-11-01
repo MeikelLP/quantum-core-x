@@ -1,6 +1,7 @@
 ﻿using CommandLine;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using QuantumCore;
 using QuantumCore.Migrator;
@@ -17,5 +18,16 @@ static async Task RunAsync(MigrateOptions obj, string[] args)
         services.AddHostedService<Migrate>();
     });
 
-    await hostBuilder.Build().StartAsync();
+    var host = hostBuilder.Build();
+    var logger = host.Services.GetRequiredService<ILogger<Program>>();
+    try
+    {
+        await host.StartAsync();
+        logger.LogInformation("Successfully migrated the database");
+    }
+    catch (Exception e)
+    {
+        logger.LogCritical(e, "Failed to start program");
+        throw;
+    }
 }
