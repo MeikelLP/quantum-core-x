@@ -218,3 +218,7 @@
 ## Closure
 
 There are more things that can be setup (for levels) but that's not required to start the server. From here on you can start coding.
+
+## Further Reading
+
+* [Developer VM](../tutorials/dev-vm.md)
