@@ -205,7 +205,7 @@ internal class DeserializeGenerator
         var endOffsetStr = GetOffsetString(offset, dynamicOffset, fieldData.ElementSize > 0
             ? $"{tempDynamicOffset} + {fieldData.ElementSize}"
             : tempDynamicOffset);
-        return $"System.Text.Encoding.ASCII.GetString(bytes[{offsetStr}..{endOffsetStr}])";
+        return $"(bytes[{offsetStr}..{endOffsetStr}]).ReadNullTerminatedString()";
     }
 
     private static string GetOffsetString(in int offset, StringBuilder dynamicOffset, string tempDynamicOffset,
