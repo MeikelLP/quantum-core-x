@@ -1,5 +1,4 @@
 using System.Data;
-using FluentAssertions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -32,7 +31,10 @@ public class WorldTests
     public WorldTests()
     {
         var config = new ConfigurationBuilder()
-            .AddInMemoryCollection(new Dictionary<string, string>())
+            .AddInMemoryCollection(new Dictionary<string, string>
+            {
+                {"Hosting:IpAddress", "0.0.0.0"}
+            })
             .Build();
         var services = new ServiceCollection()
             .AddLogging()
