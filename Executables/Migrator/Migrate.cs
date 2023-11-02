@@ -15,7 +15,7 @@ public class Migrate : IHostedService
 {
     private readonly ILogger<Migrate> _logger;
     private readonly MigrateOptions _options;
-        
+
     public Migrate(IOptions<MigrateOptions> options, ILogger<Migrate> logger)
     {
         _logger = logger;
@@ -37,8 +37,9 @@ public class Migrate : IHostedService
         {
             // create initial schemas if not exists - first time only probably
             await conn.ExecuteAsync("CREATE SCHEMA IF NOT EXISTS account;CREATE SCHEMA IF NOT EXISTS game;");
+            _logger.LogDebug("Created account schema (if not exists)");
         }
-        
+
         var accountString = new MySqlConnectionStringBuilder
         {
             Database = "account",
@@ -55,6 +56,7 @@ public class Migrate : IHostedService
             try
             {
                 runner.MigrateUp();
+                _logger.LogDebug("Migrated database");
             }
             catch (MissingMigrationsException)
             {

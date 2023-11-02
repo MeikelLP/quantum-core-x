@@ -11,3 +11,5 @@ examples/
 ItemProto.cs
 MobProto.cs
 packages.lock.json
+
+appsettings.*.json
