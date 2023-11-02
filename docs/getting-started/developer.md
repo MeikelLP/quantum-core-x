@@ -17,7 +17,7 @@
         git clone https://github.com/MeikelLP/quantum-core-x.git
         ```
 
-    2. Run the Kaitai struct compiler (use the `.bat` when on windows)
+    2. Run the Kaitai struct compiler (use the `.ps1` when on windows)
 
         ```sh
         # in the repo directory
