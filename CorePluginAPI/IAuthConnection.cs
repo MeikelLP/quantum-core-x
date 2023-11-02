@@ -5,5 +5,5 @@ namespace QuantumCore.API;
 
 public interface IAuthConnection : IConnection
 {
-    Task<bool> HandleHandshake(GCHandshakeData handshake);
+    bool HandleHandshake(GCHandshakeData handshake);
 }

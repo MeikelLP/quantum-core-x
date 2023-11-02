@@ -10,8 +10,8 @@ public interface IQuickSlotBar
     QuickSlotData[] Slots { get; }
     Task Load();
     Task Persist();
-    Task Send();
-    Task Add(byte position, QuickSlotData slot);
-    Task Swap(byte position1, byte position2);
-    Task Remove(byte position);
+    void Send();
+    void Add(byte position, QuickSlotData slot);
+    void Swap(byte position1, byte position2);
+    void Remove(byte position);
 }

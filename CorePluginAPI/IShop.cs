@@ -12,8 +12,8 @@ public interface IShop
     IReadOnlyList<ShopItem> Items { get; }
     List<IPlayerEntity> Visitors { get; }
     void AddItem(uint itemId, byte count, uint price);
-    Task Open(IPlayerEntity player);
+    void Open(IPlayerEntity player);
     Task Buy(IPlayerEntity player, byte position, byte count);
-    Task Sell(IPlayerEntity player, byte position);
+    void Sell(IPlayerEntity player, byte position);
     void Close(IPlayerEntity player, bool sendClose = false);
 }

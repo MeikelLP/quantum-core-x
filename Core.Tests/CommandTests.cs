@@ -8,6 +8,7 @@ using AutoBogus;
 using Bogus;
 using Dapper;
 using FluentAssertions;
+using FluentAssertions.Equivalency;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -52,7 +53,7 @@ internal class MockedGameConnection : IGameConnection
     {
     }
 
-    public Task Send<T>(T packet) where T : IPacketSerializable
+    public void Send<T>(T packet) where T : IPacketSerializable
     {
         // ReSharper disable once SuspiciousTypeConversion.Global
         if (packet is ChatOutcoming chat)
@@ -62,8 +63,6 @@ internal class MockedGameConnection : IGameConnection
         {
             SentPhases.Add(phase);
         }
-
-        return Task.CompletedTask;
     }
 
     public Task StartAsync(CancellationToken token = default)
@@ -75,9 +74,9 @@ internal class MockedGameConnection : IGameConnection
     public Guid? AccountId { get; set; }
     public string Username { get; set; }
     public IPlayerEntity Player { get; set; }
-    public Task<bool> HandleHandshake(GCHandshakeData handshake)
+    public bool HandleHandshake(GCHandshakeData handshake)
     {
-        return Task.FromResult<bool>(true);
+        return true;
     }
 }
 
@@ -87,6 +86,7 @@ public class CommandTests : IAsyncLifetime
     private readonly IGameConnection _connection;
     private readonly ServiceProvider _services;
     private readonly IPlayerEntity _player;
+    private readonly IItemManager _itemManager;
     private readonly Faker<Player> _playerDataFaker;
 
     public CommandTests(ITestOutputHelper testOutputHelper)
@@ -110,6 +110,8 @@ public class CommandTests : IAsyncLifetime
         itemManagerMock.Setup(x => x.GetItem(It.IsAny<uint>())).Returns<uint>(id => new AutoFaker<ItemData>()
             .RuleFor(x => x.Id, _ => id)
             .RuleFor(x => x.Size, _ => (byte)1)
+            .RuleFor(x => x.WearFlags, _ => (byte)EWearFlags.Weapon)
+            .RuleFor(x => x.Values, _ => new List<int>{0, 0, 0, 10, 16, 0})
             .Generate());
         var cacheManagerMock = new Mock<ICacheManager>();
         var redisListWrapperMock = new Mock<IRedisListWrapper<Guid>>();
@@ -147,6 +149,7 @@ public class CommandTests : IAsyncLifetime
             .AddSingleton<IPlayerEntity, PlayerEntity>()
             .AddSingleton(_ => _playerDataFaker.Generate())
             .BuildServiceProvider();
+        _itemManager = _services.GetRequiredService<IItemManager>();
         _commandManager = _services.GetRequiredService<ICommandManager>();
         _commandManager.Register("QuantumCore.Game.Commands", typeof(SpawnCommand).Assembly);
         _connection = _services.GetRequiredService<IGameConnection>();
@@ -185,9 +188,10 @@ public class CommandTests : IAsyncLifetime
     {
         var world = await PrepareWorldAsync();
         var player2 = ActivatorUtilities.CreateInstance<PlayerEntity>(_services, _playerDataFaker.Generate());
-        await world.SpawnEntity(_player);
-        await world.SpawnEntity(player2);
-        await player2.Move((int)(11 * Map.MapUnit), (int)(27 * Map.MapUnit));
+        world.SpawnEntity(_player);
+        world.SpawnEntity(player2);
+        world.Update(0); // spawn entities
+        player2.Move((int)(11 * Map.MapUnit), (int)(27 * Map.MapUnit));
 
         Assert.Equal((int)(10 * Map.MapUnit), _player.PositionX);
         Assert.Equal((int)(26 * Map.MapUnit), _player.PositionY);
@@ -203,9 +207,10 @@ public class CommandTests : IAsyncLifetime
     {
         var world = await PrepareWorldAsync();
         var player2 = ActivatorUtilities.CreateInstance<PlayerEntity>(_services, _playerDataFaker.Generate());
-        await world.SpawnEntity(_player);
-        await world.SpawnEntity(player2);
-        await player2.Move((int)(11 * Map.MapUnit), (int)(27 * Map.MapUnit));
+        world.SpawnEntity(_player);
+        world.SpawnEntity(player2);
+        world.Update(0); // spawn entities
+        player2.Move((int)(11 * Map.MapUnit), (int)(27 * Map.MapUnit));
 
 
         Assert.Equal((int)(11 * Map.MapUnit), player2.PositionX);
@@ -220,15 +225,21 @@ public class CommandTests : IAsyncLifetime
     [Fact]
     public async Task DebugCommand()
     {
-        await _commandManager.Handle(_connection, "debug_damage");
+        var item = new ItemInstance{ItemId = 1, Count = 1};
+        var wearSlot = _player.Inventory.EquipmentWindow.GetWearPosition(_itemManager, item.ItemId);
 
+        _player.SetItem(item, (byte) WindowType.Inventory, (ushort)wearSlot);
+
+        await _commandManager.Handle(_connection, "debug_damage");
         // simple calculation just for this test
-        var minAttack = _player.GetPoint(EPoints.Level) + _player.GetPoint(EPoints.St);
-        var maxAttack = _player.GetPoint(EPoints.Level) + _player.GetPoint(EPoints.St);
-        const int minWeapon = 0;
-        const int maxWeapon = 0;
-        (_connection as MockedGameConnection).SentMessages.Should().ContainEquivalentOf(new ChatOutcoming { Message = $"Weapon Damage: {minWeapon}-{maxWeapon}" }, cfg => cfg.Including(x => x.Message));
-        (_connection as MockedGameConnection).SentMessages.Should().ContainEquivalentOf(new ChatOutcoming { Message = $"Attack Damage: {minAttack}-{maxAttack}" }, cfg => cfg.Including(x => x.Message));
+        var minAttack = _player.GetPoint(EPoints.MinAttackDamage);
+        var maxAttack = _player.GetPoint(EPoints.MaxAttackDamage);
+        var sentMessages = (_connection as MockedGameConnection).SentMessages;
+
+        sentMessages.Should().ContainEquivalentOf(new ChatOutcoming { Message = $"Weapon Damage: 10-16" }, Config);
+        sentMessages.Should().ContainEquivalentOf(new ChatOutcoming { Message = $"Attack Damage: {minAttack}-{maxAttack}" }, Config);
+
+        EquivalencyAssertionOptions<ChatOutcoming> Config(EquivalencyAssertionOptions<ChatOutcoming> cfg) => cfg.Including(x => x.Message);
     }
 
     [Fact]
@@ -244,8 +255,8 @@ public class CommandTests : IAsyncLifetime
     {
         var world = await PrepareWorldAsync();
         var player2 = ActivatorUtilities.CreateInstance<PlayerEntity>(_services, _playerDataFaker.Generate());
-        await world.SpawnEntity(_player);
-        await world.SpawnEntity(player2);
+        world.SpawnEntity(_player);
+        world.SpawnEntity(player2);
 
         await _commandManager.Handle(_connection, $"/exp 500 \"{player2.Name}\"");
 
@@ -270,8 +281,8 @@ public class CommandTests : IAsyncLifetime
     {
         var world = await PrepareWorldAsync();
         var player2 = ActivatorUtilities.CreateInstance<PlayerEntity>(_services, _playerDataFaker.Generate());
-        await world.SpawnEntity(_player);
-        await world.SpawnEntity(player2);
+        world.SpawnEntity(_player);
+        world.SpawnEntity(player2);
 
         await _commandManager.Handle(_connection, $"/give \"{player2.Name}\" 1 10");
 
@@ -297,8 +308,8 @@ public class CommandTests : IAsyncLifetime
     {
         var world = await PrepareWorldAsync();
         var player2 = ActivatorUtilities.CreateInstance<PlayerEntity>(_services, _playerDataFaker.Generate());
-        await world.SpawnEntity(_player);
-        await world.SpawnEntity(player2);
+        world.SpawnEntity(_player);
+        world.SpawnEntity(player2);
 
         player2.GetPoint(EPoints.Gold).Should().Be(0);
         await _commandManager.Handle(_connection, $"/gold 10 \"{player2.Name}\"");
@@ -309,9 +320,10 @@ public class CommandTests : IAsyncLifetime
     public async Task GotoCommand_Coords()
     {
         var world = await PrepareWorldAsync();
-        await world.SpawnEntity(_player);
+        world.SpawnEntity(_player);
+        world.Update(0); // spawn entities
 
-        await _player.Move((int)(Map.MapUnit * 10), (int)(Map.MapUnit * 26));
+        _player.Move((int)(Map.MapUnit * 10), (int)(Map.MapUnit * 26));
 
         Assert.Equal((int)(10 * Map.MapUnit), _player.PositionX);
         Assert.Equal((int)(26 * Map.MapUnit), _player.PositionY);
@@ -326,7 +338,8 @@ public class CommandTests : IAsyncLifetime
     public async Task GotoCommand_Map()
     {
         var world = await PrepareWorldAsync();
-        await world.SpawnEntity(_player);
+        world.SpawnEntity(_player);
+        world.Update(0); // spawn entities
 
 
         Assert.Equal((int)(10 * Map.MapUnit), _player.PositionX);
@@ -358,8 +371,8 @@ public class CommandTests : IAsyncLifetime
     {
         var world = await PrepareWorldAsync();
         var player2 = ActivatorUtilities.CreateInstance<PlayerEntity>(_services, _playerDataFaker.Generate());
-        await world.SpawnEntity(_player);
-        await world.SpawnEntity(player2);
+        world.SpawnEntity(_player);
+        world.SpawnEntity(player2);
 
         await _commandManager.Handle(_connection, $"/kick \"{player2.Name}\"");
 
@@ -392,8 +405,8 @@ public class CommandTests : IAsyncLifetime
     {
         var world = await PrepareWorldAsync();
         var player2 = ActivatorUtilities.CreateInstance<PlayerEntity>(_services, _playerDataFaker.Generate());
-        await world.SpawnEntity(_player);
-        await world.SpawnEntity(player2);
+        world.SpawnEntity(_player);
+        world.SpawnEntity(player2);
 
         player2.GetPoint(EPoints.Level).Should().Be(1);
 
@@ -406,7 +419,7 @@ public class CommandTests : IAsyncLifetime
     public async Task LogoutCommand()
     {
         var world = await PrepareWorldAsync();
-        await world.SpawnEntity(_player);
+        world.SpawnEntity(_player);
 
         world.GetPlayer(_player.Name).Should().NotBeNull();
 
@@ -419,7 +432,7 @@ public class CommandTests : IAsyncLifetime
     public async Task PhaseSelectCommand()
     {
         var world = await PrepareWorldAsync();
-        await world.SpawnEntity(_player);
+        world.SpawnEntity(_player);
 
         world.GetPlayer(_player.Name).Should().NotBeNull();
         (_connection as MockedGameConnection).SentPhases.Should().NotContainEquivalentOf(new GCPhase
@@ -441,7 +454,7 @@ public class CommandTests : IAsyncLifetime
     public async Task QuitCommand()
     {
         var world = await PrepareWorldAsync();
-        await world.SpawnEntity(_player);
+        world.SpawnEntity(_player);
 
         world.GetPlayer(_player.Name).Should().NotBeNull();
 
@@ -466,34 +479,38 @@ public class CommandTests : IAsyncLifetime
     public async Task SpawnCommand_WithoutCount()
     {
         var world = await PrepareWorldAsync();
-        await world.SpawnEntity(_player);
-        await _player.Move((int)(Map.MapUnit * 13), (int)(Map.MapUnit * 29)); // center of the map
+        world.SpawnEntity(_player);
+        world.Update(0); // spawn entities
+        _player.Move((int)(Map.MapUnit * 13), (int)(Map.MapUnit * 29)); // center of the map
         await File.WriteAllTextAsync("settings.toml", @"maps = [""map_a2"", ""map_b2""]");
-        _player.Map.GetEntities().Count.Should().Be(1);
+        _player.Map.Entities.Count.Should().Be(1);
 
         await _commandManager.Handle(_connection, "/spawn 101");
+        world.Update(0); // spawn entities
 
-        _player.Map.GetEntities().Count.Should().Be(2);
+        _player.Map.Entities.Count.Should().Be(2);
     }
 
     [Fact]
     public async Task SpawnCommand_WithCount()
     {
         var world = await PrepareWorldAsync();
-        await world.SpawnEntity(_player);
-        await _player.Move((int)(Map.MapUnit * 13), (int)(Map.MapUnit * 29)); // center of the map
+        world.SpawnEntity(_player);
+        world.Update(0); // spawn entities
+        _player.Move((int)(Map.MapUnit * 13), (int)(Map.MapUnit * 29)); // center of the map
         await File.WriteAllTextAsync("settings.toml", @"maps = [""map_a2"", ""map_b2""]");
-        _player.Map.GetEntities().Count.Should().Be(1);
+        _player.Map.Entities.Count.Should().Be(1);
 
         await _commandManager.Handle(_connection, "/spawn 101 10");
+        world.Update(0); // spawn entities
 
-        _player.Map.GetEntities().Count.Should().Be(11);
+        _player.Map.Entities.Count.Should().Be(11);
     }
 
     [Fact]
     public async Task StatCommand()
     {
-        await _player.AddPoint(EPoints.StatusPoints, 1);
+        _player.AddPoint(EPoints.StatusPoints, 1);
         _player.GetPoint(EPoints.Ht).Should().Be(1);
 
         await _commandManager.Handle(_connection, "/stat ht");

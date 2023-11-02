@@ -24,7 +24,7 @@ public class DeleteCharacterHandler : IGamePacketHandler<DeleteCharacter>
         _db = db;
         _cacheManager = cacheManager;
     }
-    
+
     public async Task ExecuteAsync(GamePacketContext<DeleteCharacter> ctx, CancellationToken token = default)
     {
         _logger.LogDebug("Deleting character in slot {Slot}", ctx.Packet.Slot);
@@ -49,11 +49,11 @@ public class DeleteCharacterHandler : IGamePacketHandler<DeleteCharacter>
 
         if (deletecode != ctx.Packet.Code[..^1])
         {
-            await ctx.Connection.Send(new DeleteCharacterFail());
+            ctx.Connection.Send(new DeleteCharacterFail());
             return;
         }
 
-        await ctx.Connection.Send(new DeleteCharacterSuccess
+        ctx.Connection.Send(new DeleteCharacterSuccess
         {
             Slot = ctx.Packet.Slot
         });

@@ -32,25 +32,22 @@ public class GroundItem : Entity, IGroundItem
     public override EEntityType Type { get; }
 
     public override byte HealthPercentage { get; } = 0;
-    
-    protected override ValueTask OnNewNearbyEntity(IEntity entity)
+
+    protected override void OnNewNearbyEntity(IEntity entity)
     {
-       return ValueTask.CompletedTask;
     }
 
-    protected override ValueTask OnRemoveNearbyEntity(IEntity entity)
+    protected override void OnRemoveNearbyEntity(IEntity entity)
     {
-        return ValueTask.CompletedTask;
     }
 
-    public override ValueTask OnDespawn()
+    public override void OnDespawn()
     {
-        return ValueTask.CompletedTask;
     }
 
-    public async override Task ShowEntity(IConnection connection)
+    public override void ShowEntity(IConnection connection)
     {
-        await connection.Send(new GroundItemAdd {
+        connection.Send(new GroundItemAdd {
             PositionX = PositionX,
             PositionY = PositionY,
             Vid = Vid,
@@ -58,9 +55,9 @@ public class GroundItem : Entity, IGroundItem
         });
     }
 
-    public async override Task HideEntity(IConnection connection)
+    public override void HideEntity(IConnection connection)
     {
-        await connection.Send(new GroundItemRemove {
+        connection.Send(new GroundItemRemove {
             Vid = Vid
         });
     }
@@ -90,13 +87,11 @@ public class GroundItem : Entity, IGroundItem
         throw new System.NotImplementedException();
     }
 
-    public override ValueTask AddPoint(EPoints point, int value)
+    public override void AddPoint(EPoints point, int value)
     {
-        throw new System.NotImplementedException();
     }
 
-    public override ValueTask SetPoint(EPoints point, uint value)
+    public override void SetPoint(EPoints point, uint value)
     {
-        throw new System.NotImplementedException();
     }
 }

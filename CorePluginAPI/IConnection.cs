@@ -12,7 +12,7 @@ namespace QuantumCore.API
         EPhases Phase { get; set; }
         Task ExecuteTask { get; }
         void Close();
-        Task Send<T>(T packet) where T : IPacketSerializable;
+        void Send<T>(T packet) where T : IPacketSerializable;
         Task StartAsync(CancellationToken token = default);
     }
 }

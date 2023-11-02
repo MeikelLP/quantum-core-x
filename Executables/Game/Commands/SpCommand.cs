@@ -16,7 +16,7 @@ public class SpCommand : ICommandHandler<SpOtherOptions>
         _world = world;
     }
 
-    public async Task ExecuteAsync(CommandContext<SpOtherOptions> context)
+    public Task ExecuteAsync(CommandContext<SpOtherOptions> context)
     {
         var target = context.Player;
         if (!string.IsNullOrWhiteSpace(context.Arguments.Target))
@@ -26,13 +26,14 @@ public class SpCommand : ICommandHandler<SpOtherOptions>
 
         if (target is null)
         {
-            await context.Player.SendChatMessage("Target not found!");
+            context.Player.SendChatMessage("Target not found!");
         }
         else
         {
-            await target.AddPoint(EPoints.Sp, context.Arguments.Value);
-            await target.SendPoints();   
+            target.AddPoint(EPoints.Sp, context.Arguments.Value);
+            target.SendPoints();
         }
+        return Task.CompletedTask;
     }
 }
 
@@ -41,7 +42,7 @@ public class SpOtherOptions
     [Value(0)]
     public int Value { get; set; }
 
-    [Value(1)] 
-    [CanBeNull] 
+    [Value(1)]
+    [CanBeNull]
     public string Target { get; set; }
 }

@@ -14,7 +14,7 @@ namespace QuantumCore.Game.Commands
         {
             _cacheManager = cacheManager;
         }
-        
+
         public async Task ExecuteAsync(CommandContext ctx)
         {
             var items = ctx.Player.Inventory.Items
@@ -31,12 +31,12 @@ namespace QuantumCore.Game.Commands
                 .ToArray();
             foreach (var item in items)
             {
-                await ctx.Player.RemoveItem(item);
-                await ctx.Player.SendRemoveItem(item.Window, (ushort)item.Position);
+                ctx.Player.RemoveItem(item);
+                ctx.Player.SendRemoveItem(item.Window, (ushort)item.Position);
                 await item.Destroy(_cacheManager);
             }
 
-            await ctx.Player.SendInventory();
+            ctx.Player.SendInventory();
         }
     }
 
