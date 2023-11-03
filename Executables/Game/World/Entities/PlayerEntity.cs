@@ -1,6 +1,4 @@
-using System.Data;
 using System.Diagnostics;
-using Dapper;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
@@ -9,6 +7,7 @@ using QuantumCore.API.Game.World;
 using QuantumCore.Core.Cache;
 using QuantumCore.Core.Utils;
 using QuantumCore.Database;
+using QuantumCore.Database.Repositories;
 using QuantumCore.Extensions;
 using QuantumCore.Game.Packets;
 using QuantumCore.Game.PlayerUtils;
@@ -90,27 +89,29 @@ namespace QuantumCore.Game.World.Entities
         private readonly IItemManager _itemManager;
         private readonly IJobManager _jobManager;
         private readonly IExperienceManager _experienceManager;
-        private readonly IDbConnection _db;
         private readonly IQuestManager _questManager;
         private readonly ICacheManager _cacheManager;
         private readonly IWorld _world;
         private readonly ILogger<PlayerEntity> _logger;
+        private readonly IEmpireRepository _empireRepository;
 
         public PlayerEntity(Player player, IGameConnection connection, IItemManager itemManager, IJobManager jobManager,
-            IExperienceManager experienceManager, IAnimationManager animationManager, IDbConnection db,
-            IQuestManager questManager, ICacheManager cacheManager, IWorld world, ILogger<PlayerEntity> logger)
+            IExperienceManager experienceManager, IAnimationManager animationManager,
+            IQuestManager questManager, ICacheManager cacheManager, IWorld world, ILogger<PlayerEntity> logger,
+            IEmpireRepository empireRepository, IItemRepository itemRepository)
             : base(animationManager, world.GenerateVid())
         {
             Connection = connection;
             _itemManager = itemManager;
             _jobManager = jobManager;
             _experienceManager = experienceManager;
-            _db = db;
             _questManager = questManager;
             _cacheManager = cacheManager;
             _world = world;
             _logger = logger;
-            Inventory = new Inventory(itemManager, db, _cacheManager, _logger, player.Id, 1, 5, 9, 2);
+            _empireRepository = empireRepository;
+            Inventory = new Inventory(itemManager, _cacheManager, _logger, itemRepository, player.Id,
+                (byte)WindowType.Inventory, InventoryConstants.DEFAULT_INVENTORY_WIDTH, InventoryConstants.DEFAULT_INVENTORY_HEIGHT, InventoryConstants.DEFAULT_INVENTORY_PAGES);
             Inventory.OnSlotChanged += Inventory_OnSlotChanged;
             Player = new PlayerData {
                 Id = player.Id,
@@ -171,8 +172,7 @@ namespace QuantumCore.Game.World.Entities
 
         public async Task Load()
         {
-            Empire = await _db.QueryFirstOrDefaultAsync<byte>(
-                "SELECT Empire FROM account.accounts WHERE Id = @AccountId", new {AccountId = Player.AccountId});
+            Empire = await _empireRepository.GetEmpireForAccountAsync(Player.Id) ?? 0;
             await Inventory.Load();
             await QuickSlotBar.Load();
             Health = (int) GetPoint(EPoints.MaxHp); // todo: cache hp of player

@@ -1,11 +1,11 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="BenchmarkDotNet" Version="0.13.9" />
+      <PackageReference Include="BenchmarkDotNet" Version="0.13.10" />
       <PackageReference Include="Moq" Version="4.18.2" />
     </ItemGroup>
 

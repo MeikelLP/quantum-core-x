@@ -674,7 +674,7 @@ namespace QuantumCore.Core.Packets {
         {
             var __Type = bytes[(offset + 0)];
             var __Size = System.BitConverter.ToUInt32(bytes[(offset + 1)..(offset + 1 + 4)]) - 6;
-            var __Message = System.Text.Encoding.ASCII.GetString(bytes[(offset + 5)..(System.Index)(offset + 5 + __Size)]);
+            var __Message = (bytes[(offset + 5)..(System.Index)(offset + 5 + __Size)]).ReadNullTerminatedString();
             var obj = new QuantumCore.Core.Packets.GCHandshake
             (
                 __Type,
@@ -829,7 +829,7 @@ namespace QuantumCore.Core.Packets {
     }
 }");
     }
-    
+
     [Fact]
     public void Record_WithFixedByteArray()
     {
@@ -940,7 +940,7 @@ namespace QuantumCore.Core.Packets {
     }
 }");
     }
-    
+
     [Fact]
     public void Record_WithFixedUshortArray()
     {
@@ -1364,7 +1364,7 @@ namespace QuantumCore.Game.Packets {
         {
             var __Size = System.BitConverter.ToUInt16(bytes[(offset + 0)..(offset + 0 + 2)]) - 4;
             var __MessageType = bytes[(offset + 2)];
-            var __Message = System.Text.Encoding.ASCII.GetString(bytes[(offset + 3)..(System.Index)(offset + 3 + __Size)]);
+            var __Message = (bytes[(offset + 3)..(System.Index)(offset + 3 + __Size)]).ReadNullTerminatedString();
             var obj = new QuantumCore.Game.Packets.ChatIncoming
             {
                 MessageType = __MessageType,
@@ -1530,7 +1530,7 @@ public partial class ShopBuy
         diagnostics[0].GetMessage().Should().Contain("Field configuration for type ShopBuy is invalid");
         diagnostics[0].Id.Should().BeEquivalentTo("QCX-G000005");
     }
-    
+
     [Fact]
     public void Record_WithFixedStringArray()
     {
@@ -1598,8 +1598,8 @@ namespace QuantumCore.Core.Packets {
         {
             var __Names = new []
             {
-                System.Text.Encoding.ASCII.GetString(bytes[(offset + 0)..(offset + 0 + 13)]),
-                System.Text.Encoding.ASCII.GetString(bytes[(offset + 13)..(offset + 13 + 13)])
+                (bytes[(offset + 0)..(offset + 0 + 13)]).ReadNullTerminatedString(),
+                (bytes[(offset + 13)..(offset + 13 + 13)]).ReadNullTerminatedString()
             };
             var obj = new QuantumCore.Core.Packets.GCHandshake
             {
@@ -1642,7 +1642,7 @@ namespace QuantumCore.Core.Packets {
     }
 }");
     }
-    
+
     [Fact]
     public void Record_WithDynamicUshortArray()
     {
@@ -1768,7 +1768,7 @@ namespace QuantumCore.Core.Packets {
     }
 }");
     }
-    
+
     [Fact]
     public void SizeAfterArray_Error()
     {
@@ -1866,7 +1866,7 @@ namespace QuantumCore.Core.Packets {
         {
             var __Type = bytes[(offset + 0)];
             var __Size = System.BitConverter.ToUInt32(bytes[(offset + 1)..(offset + 1 + 4)]) - 7;
-            var __Message = System.Text.Encoding.ASCII.GetString(bytes[(offset + 5)..(System.Index)(offset + 5 + __Size)]);
+            var __Message = (bytes[(offset + 5)..(System.Index)(offset + 5 + __Size)]).ReadNullTerminatedString();
             var __Location = bytes[(System.Index)(offset + 5 + __Size)];
             var obj = new QuantumCore.Core.Packets.GCHandshake
             (
@@ -3057,7 +3057,7 @@ namespace QuantumCore.Core.Packets {
         public static CharacterInfo Deserialize(ReadOnlySpan<byte> bytes, in int offset = 0)
         {
             var __Vid = System.BitConverter.ToUInt32(bytes[(offset + 0)..(offset + 0 + 4)]);
-            var __Name = System.Text.Encoding.ASCII.GetString(bytes[(offset + 4)..(offset + 4 + 25)]);
+            var __Name = (bytes[(offset + 4)..(offset + 4 + 25)]).ReadNullTerminatedString();
             var __Parts = new []
             {
                 System.BitConverter.ToUInt16(bytes[(offset + 29)..(offset + 29 + 2)]),
@@ -3169,7 +3169,7 @@ public record Character(uint Id);";
 
         driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation,
             out var diagnostics);
-        
+
         var runResult = driver.GetRunResult();
         diagnostics.Should().BeEmpty();
         outputCompilation.GetDiagnostics().Should().BeEmpty();
@@ -3278,6 +3278,108 @@ namespace QuantumCore.Game.Packets {
     }
 }");
 
+    }
+
+    [Fact]
+    public void TruncateNullBytes()
+    {
+        var inputCompilation = CreateCompilation(@"
+using QuantumCore.Networking;
+
+namespace QuantumCore.Game.Packets;
+
+[Packet(0x20, EDirection.Incoming)]
+[PacketGenerator]
+public partial record struct StringTest ()
+{
+    [Field(0, Length = 25)]
+    public string Name { get; set; }
+};");
+
+        GeneratorDriver driver = CSharpGeneratorDriver.Create(new PacketSerializerGenerator());
+
+        driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation,
+            out var diagnostics);
+
+        var runResult = driver.GetRunResult();
+        diagnostics.Should().BeEmpty();
+        outputCompilation.GetDiagnostics().Should().BeEmpty();
+
+        runResult.GeneratedTrees.Should().HaveCount(1);
+        runResult.Diagnostics.Should().BeEmpty();
+
+        runResult.Results[0].GeneratedSources.Should().HaveCount(1);
+        runResult.Results[0].Diagnostics.Should().BeEmpty();
+        runResult.Results[0].Exception.Should().BeNull();
+        runResult.Results[0].GeneratedSources[0].SourceText.ToString().Should().BeEquivalentTo(@"/// <auto-generated/>
+using System;
+using System.Buffers;
+using System.IO;
+using System.Threading.Tasks;
+using QuantumCore.Networking;
+
+// no async warning if no properties
+#pragma warning disable CS1998 
+
+namespace QuantumCore.Game.Packets {
+
+    public partial record struct StringTest : IPacketSerializable
+    {
+        public static byte Header => 0x20;
+        public static byte? SubHeader => null;
+        public static bool HasStaticSize => true;
+        public static bool HasSequence => false;
+
+        public void Serialize(byte[] bytes, in int offset = 0)
+        {
+            bytes[offset + 0] = 0x20;
+            bytes.WriteString(this.Name, offset + 1, (int)25);
+        }
+
+        public ushort GetSize()
+        {
+            return 26;
+        }
+
+        public static StringTest Deserialize(ReadOnlySpan<byte> bytes, in int offset = 0)
+        {
+            var __Name = (bytes[(offset + 0)..(offset + 0 + 25)]).ReadNullTerminatedString();
+            var obj = new QuantumCore.Game.Packets.StringTest
+            {
+                Name = __Name
+            };
+            return obj;
+        }
+
+        public static T Deserialize<T>(ReadOnlySpan<byte> bytes, in int offset = 0)
+            where T : IPacketSerializable
+        {
+            return (T)(object)Deserialize(bytes, offset);
+        }
+
+        public static async ValueTask<object> DeserializeFromStreamAsync(Stream stream)
+        {
+            var buffer = ArrayPool<byte>.Shared.Rent(NetworkingConstants.BufferSize);
+            try
+            {
+                var __Name = await stream.ReadStringFromStreamAsync(buffer, (int)25);
+                var obj = new QuantumCore.Game.Packets.StringTest
+                {
+                    Name = __Name
+                };
+                return obj;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            finally
+            {
+                ArrayPool<byte>.Shared.Return(buffer);
+            }
+        }
+    }
+}");
     }
 
     [Fact]
