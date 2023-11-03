@@ -1,5 +1,3 @@
-using System.Data;
-using Dapper;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.Game.Types;
@@ -9,6 +7,7 @@ using QuantumCore.Auth.Cache;
 using QuantumCore.Core.Cache;
 using QuantumCore.Core.Utils;
 using QuantumCore.Database;
+using QuantumCore.Database.Repositories;
 using QuantumCore.Extensions;
 using QuantumCore.Game.Packets;
 
@@ -16,17 +15,20 @@ namespace QuantumCore.Game.PacketHandlers
 {
     public class TokenLoginHandler : IGamePacketHandler<TokenLogin>
     {
-        private readonly IDbConnection _db;
         private readonly ILogger<TokenLoginHandler> _logger;
         private readonly ICacheManager _cacheManager;
         private readonly IWorld _world;
+        private readonly IEmpireRepository _empireRepository;
+        private readonly IPlayerRepository _playerRepository;
 
-        public TokenLoginHandler(IDbConnection db, ILogger<TokenLoginHandler> logger, ICacheManager cacheManager, IWorld world)
+        public TokenLoginHandler(ILogger<TokenLoginHandler> logger, ICacheManager cacheManager, IWorld world,
+            IEmpireRepository empireRepository, IPlayerRepository playerRepository)
         {
-            _db = db;
             _logger = logger;
             _cacheManager = cacheManager;
             _world = world;
+            _empireRepository = empireRepository;
+            _playerRepository = playerRepository;
         }
 
         public async Task ExecuteAsync(GamePacketContext<TokenLogin> ctx, CancellationToken cancellationToken = default)
@@ -65,7 +67,7 @@ namespace QuantumCore.Game.PacketHandlers
             // Load players of account
             var characters = new Characters();
             var i = 0;
-            var charactersFromCacheOrDb = await Player.GetPlayers(_db, _cacheManager, token.AccountId).ToArrayAsync(cancellationToken);
+            var charactersFromCacheOrDb = await Player.GetPlayers(_playerRepository, _cacheManager, token.AccountId).ToArrayAsync(cancellationToken);
             foreach (var player in charactersFromCacheOrDb)
             {
                 var host = _world.GetMapHost(player.PositionX, player.PositionY);
@@ -79,8 +81,7 @@ namespace QuantumCore.Game.PacketHandlers
             }
 
             // Send empire to the client and characters
-            var empire = await _db.QueryFirstOrDefaultAsync<byte>(
-                "SELECT Empire FROM account.accounts WHERE Id = @AccountId", new {AccountId = token.AccountId});
+            var empire = await _empireRepository.GetEmpireForAccountAsync(ctx.Connection.AccountId.Value) ?? 0;
 
             ctx.Connection.Send(new Empire { EmpireId = empire });
             ctx.Connection.SetPhase(EPhases.Select);

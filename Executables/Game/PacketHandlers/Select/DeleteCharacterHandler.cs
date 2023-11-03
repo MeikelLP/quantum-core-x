@@ -1,11 +1,10 @@
 using System.Data;
-using Dapper;
-using Dapper.Contrib.Extensions;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.PluginTypes;
 using QuantumCore.Core.Cache;
 using QuantumCore.Database;
+using QuantumCore.Database.Repositories;
 using QuantumCore.Extensions;
 using QuantumCore.Game.Packets;
 using QuantumCore.Game.PlayerUtils;
@@ -15,14 +14,19 @@ namespace QuantumCore.Game.PacketHandlers.Select;
 public class DeleteCharacterHandler : IGamePacketHandler<DeleteCharacter>
 {
     private readonly ILogger<DeleteCharacterHandler> _logger;
-    private readonly IDbConnection _db;
     private readonly ICacheManager _cacheManager;
+    private readonly IItemRepository _itemRepository;
+    private readonly IPlayerRepository _playerRepository;
+    private readonly IAccountRepository _accountRepository;
 
-    public DeleteCharacterHandler(ILogger<DeleteCharacterHandler> logger, IDbConnection db, ICacheManager cacheManager)
+    public DeleteCharacterHandler(ILogger<DeleteCharacterHandler> logger, IDbConnection db, ICacheManager cacheManager,
+        IItemRepository itemRepository, IPlayerRepository playerRepository, IAccountRepository accountRepository)
     {
         _logger = logger;
-        _db = db;
         _cacheManager = cacheManager;
+        _itemRepository = itemRepository;
+        _playerRepository = playerRepository;
+        _accountRepository = accountRepository;
     }
 
     public async Task ExecuteAsync(GamePacketContext<DeleteCharacter> ctx, CancellationToken token = default)
@@ -38,7 +42,7 @@ public class DeleteCharacterHandler : IGamePacketHandler<DeleteCharacter>
 
         var accountId = ctx.Connection.AccountId ?? default;
 
-        var deletecode = await _db.QueryFirstOrDefaultAsync<string>("SELECT DeleteCode FROM accounts WHERE Id = @Id", new { Id = ctx.Connection.AccountId });
+        var deletecode = await _accountRepository.GetDeleteCodeAsync(accountId);
 
         if (deletecode == default)
         {
@@ -58,7 +62,7 @@ public class DeleteCharacterHandler : IGamePacketHandler<DeleteCharacter>
             Slot = ctx.Packet.Slot
         });
 
-        var player = await Player.GetPlayer(_db, _cacheManager, accountId, ctx.Packet.Slot);
+        var player = await Player.GetPlayer(_playerRepository, _cacheManager, accountId, ctx.Packet.Slot);
         if (player == null)
         {
             ctx.Connection.Close();
@@ -66,10 +70,7 @@ public class DeleteCharacterHandler : IGamePacketHandler<DeleteCharacter>
             return;
         }
 
-        var delPlayer = new PlayerDeleted(player);
-        await _db.InsertAsync(delPlayer); // add the player to the players_deleted table
-
-        await _db.DeleteAsync(player); // delete the player from the players table
+        await _playerRepository.DeleteAsync(player);
 
         // Delete player redis data
         var key = "player:" + player.Id;
@@ -83,7 +84,7 @@ public class DeleteCharacterHandler : IGamePacketHandler<DeleteCharacter>
 
         //for (byte i = (byte)WindowType.Inventory; i < (byte) WindowType.Inventory; i++)
         {
-            var items = _db.GetItems(_cacheManager, player.Id, (byte) WindowType.Inventory);
+            var items = _itemRepository.GetItems(_cacheManager, player.Id, (byte) WindowType.Inventory);
 
             await foreach (var item in items)
             {
@@ -96,6 +97,6 @@ public class DeleteCharacterHandler : IGamePacketHandler<DeleteCharacter>
         }
 
         // Delete all items in db
-        await _db.QueryAsync("DELETE FROM items WHERE PlayerId=@PlayerId", new { PlayerId = player.Id });
+        await _itemRepository.DeletePlayerItemsAsync(player.Id);
     }
 }

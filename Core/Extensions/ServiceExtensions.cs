@@ -11,6 +11,8 @@ using Microsoft.Extensions.Options;
 using MySqlConnector;
 using QuantumCore.API.PluginTypes;
 using QuantumCore.Core.Cache;
+using QuantumCore.Database;
+using QuantumCore.Database.Repositories;
 using QuantumCore.Networking;
 using Serilog;
 using Serilog.Events;
@@ -29,6 +31,10 @@ public static class ServiceExtensions
         services.AddOptions<DatabaseOptions>()
             .BindConfiguration("Database")
             .ValidateDataAnnotations();
+        services.AddScoped<IEmpireRepository, EmpireRepository>();
+        services.AddScoped<IItemRepository, ItemRepository>();
+        services.AddScoped<IPlayerRepository, PlayerRepository>();
+        services.AddScoped<ICommandPermissionRepository, CommandPermissionRepository>();
         services.AddScoped<IDbConnection>(provider =>
         {
             var options = provider.GetRequiredService<IOptions<DatabaseOptions>>().Value;
