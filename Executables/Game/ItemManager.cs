@@ -1,4 +1,3 @@
-using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
@@ -12,7 +11,7 @@ namespace QuantumCore.Game
     public class ItemManager : IItemManager
     {
         private readonly ILogger<ItemManager> _logger;
-        private ItemProto _proto;
+        private ItemProto? _proto;
 
         public ItemManager(ILogger<ItemManager> logger)
         {
@@ -24,10 +23,9 @@ namespace QuantumCore.Game
         /// </summary>
         /// <param name="id">Item ID</param>
         /// <returns>The item definition or null if the item is not known</returns>
-        [CanBeNull]
-        public ItemData GetItem(uint id)
+        public ItemData? GetItem(uint id)
         {
-            var proto = _proto.Content.Data.Items.FirstOrDefault(item => item.Id == id);
+            var proto = _proto?.Content.Data.Items.FirstOrDefault(item => item.Id == id);
 
             if (proto is not null)
             {

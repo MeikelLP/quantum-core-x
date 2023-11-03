@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using System.Drawing;
 using QuantumCore.API.Core.Utils;
 using QuantumCore.API.Game.World;
@@ -17,10 +15,10 @@ namespace QuantumCore.Core.Utils
         public bool Subdivided { get; private set; }
         public List<IEntity> Objects { get; } = new List<IEntity>();
 
-        private QuadTree _nw;
-        private QuadTree _ne;
-        private QuadTree _sw;
-        private QuadTree _se;
+        private QuadTree _nw = null!;
+        private QuadTree _ne = null!;
+        private QuadTree _sw = null!;
+        private QuadTree _se = null!;
 
         public QuadTree(int x, int y, int width, int height, uint capacity)
         {
@@ -31,7 +29,7 @@ namespace QuantumCore.Core.Utils
             Capacity = capacity;
             Bounds = new Rectangle(X, Y, Width, Height);
         }
-        
+
         public bool Insert(IEntity obj)
         {
             if (!Bounds.Contains(obj.PositionX, obj.PositionY)) return false;
@@ -42,7 +40,7 @@ namespace QuantumCore.Core.Utils
                 obj.LastPositionX = obj.PositionX;
                 obj.LastPositionY = obj.PositionY;
                 obj.LastQuadTree = this;
-                
+
                 Objects.Add(obj);
                 return true;
             }
@@ -95,7 +93,7 @@ namespace QuantumCore.Core.Utils
                     {
                         continue;
                     }
-                    
+
                     if (Math.Pow(obj.PositionX - x, 2) + Math.Pow(obj.PositionY - y, 2) <= Math.Pow(radius, 2))
                     {
                         objects.Add(obj);
@@ -131,17 +129,19 @@ namespace QuantumCore.Core.Utils
         {
             var halfWidth = Width / 2;
             var halfHeight = Height / 2;
-            
+
             _nw = new QuadTree(X, Y, halfWidth, halfHeight, Capacity);
             _ne = new QuadTree(X, Y + halfHeight, halfWidth, halfHeight, Capacity);
             _sw = new QuadTree(X + halfWidth, Y, halfWidth, halfHeight, Capacity);
             _se = new QuadTree(X + halfWidth, Y + halfHeight, halfWidth, halfHeight, Capacity);
             Subdivided = true;
-            
+
             // Move our own objects to our children
             foreach (var entity in Objects)
             {
-                if (_nw.Insert(entity) || _ne.Insert(entity) || _sw.Insert(entity) || _se.Insert(entity)) ;
+                if (_nw.Insert(entity) || _ne.Insert(entity) || _sw.Insert(entity) || _se.Insert(entity))
+                {
+                }
             }
             Objects.Clear();
         }

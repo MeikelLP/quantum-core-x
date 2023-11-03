@@ -12,8 +12,8 @@ namespace QuantumCore.Game
         private readonly IWorld _world;
         public IServerBase Server { get; }
         public Guid? AccountId { get; set; }
-        public string Username { get; set; }
-        public IPlayerEntity Player { get; set; }
+        public string Username { get; set; } = "";
+        public IPlayerEntity? Player { get; set; }
 
         public GameConnection(IServerBase server, TcpClient client, ILogger<GameConnection> logger,
             PluginExecutor pluginExecutor, IWorld world, IPacketReader packetReader)

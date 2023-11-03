@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.ObjectModel;
-using System.Threading.Tasks;
-using JetBrains.Annotations;
+﻿using System.Collections.ObjectModel;
 using QuantumCore.API.Core.Models;
 
 namespace QuantumCore.API;
@@ -18,7 +15,7 @@ public interface IInventory
     Task<bool> PlaceItem(ItemInstance item);
     Task<bool> PlaceItem(ItemInstance item, ushort position);
     void RemoveItem(ItemInstance item);
-    ItemInstance GetItem(ushort position);
+    ItemInstance? GetItem(ushort position);
     bool IsSpaceAvailable(ItemInstance item, ushort position);
     void MoveItem(ItemInstance item, ushort fromPosition, ushort position);
     void SetEquipment(ItemInstance item, ushort position);

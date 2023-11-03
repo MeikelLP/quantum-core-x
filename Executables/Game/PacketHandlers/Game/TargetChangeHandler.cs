@@ -24,7 +24,7 @@ public class TargetChangeHandler : IGamePacketHandler<TargetChange>
             return Task.CompletedTask;
         }
 
-        var entity = player.Map.GetEntity(ctx.Packet.TargetVid);
+        var entity = player.Map?.GetEntity(ctx.Packet.TargetVid);
         if (entity == null)
         {
             return Task.CompletedTask;

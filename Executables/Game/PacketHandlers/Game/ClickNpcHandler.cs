@@ -7,7 +7,7 @@ namespace QuantumCore.Game.PacketHandlers.Game;
 public class ClickNpcHandler : IGamePacketHandler<ClickNpc>
 {
     public async Task ExecuteAsync(GamePacketContext<ClickNpc> ctx, CancellationToken token = default)
-    { 
+    {
         var player = ctx.Connection.Player;
         if (player == null)
         {
@@ -15,13 +15,13 @@ public class ClickNpcHandler : IGamePacketHandler<ClickNpc>
             return;
         }
 
-        var entity = player.Map.GetEntity(ctx.Packet.Vid);
+        var entity = player.Map?.GetEntity(ctx.Packet.Vid);
         if (entity == null)
         {
             ctx.Connection.Close();
             return;
         }
-            
+
         await GameEventManager.OnNpcClick(entity.EntityClass, player);
     }
 }

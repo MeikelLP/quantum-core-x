@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
+﻿using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 
 namespace QuantumCore.Core.Utils
@@ -30,20 +28,20 @@ namespace QuantumCore.Core.Utils
             {
                 throw new ArgumentException("fromInclusive must be smaller than toExclusive", nameof(fromInclusive));
             }
-            
+
             var range = toExclusive - fromInclusive - 1;
             if (range == 0)
             {
                 return fromInclusive;
             }
-            
+
             var mask = range;
             mask |= mask >> 1;
             mask |= mask >> 2;
             mask |= mask >> 4;
             mask |= mask >> 8;
             mask |= mask >> 16;
-            
+
             Span<uint> random = stackalloc uint[1];
             uint result;
             do
@@ -53,13 +51,6 @@ namespace QuantumCore.Core.Utils
             } while (result > range);
 
             return result + fromInclusive;
-        }
-
-        public static T GetRandom<T>(List<T> list)
-        {
-            if (list.Count == 0) return default;
-
-            return list[RandomNumberGenerator.GetInt32(list.Count)];
         }
     }
 }

@@ -7,7 +7,7 @@ namespace QuantumCore.Game.Commands;
 
 public interface ICommandManager
 {
-    void Register(string ns, Assembly assembly = null);
+    void Register(string ns, Assembly? assembly = null);
     Task LoadAsync(CancellationToken token = default);
     bool HavePerm(Guid group, string cmd);
     bool CanUseCommand(IPlayerEntity player, string cmd);

@@ -1,13 +1,11 @@
-﻿using System.Collections.Generic;
-
-namespace QuantumCore.API.Core.Models;
+﻿namespace QuantumCore.API.Core.Models;
 
 public class ItemData
 {
     public uint Id { get; set; }
     public uint Unknown { get; set; }
-    public string Name { get; set; }
-    public string TranslatedName { get; set; }
+    public string Name { get; set; } = "";
+    public string TranslatedName { get; set; } = "";
     public byte Type { get; set; }
     public byte Subtype { get; set; }
     public byte Unknown2 { get; set; }
@@ -18,10 +16,10 @@ public class ItemData
     public uint ImmuneFlags { get; set; }
     public uint BuyPrice { get; set; }
     public uint SellPrice { get; set; }
-    public List<ItemLimitData> Limits { get; set; }
-    public List<ItemApplyData> Applies { get; set; }
-    public List<int> Values { get; set; }
-    public List<int> Sockets { get; set; }
+    public List<ItemLimitData> Limits { get; set; } = new();
+    public List<ItemApplyData> Applies { get; set; } = new();
+    public List<int> Values { get; set; } = new();
+    public List<int> Sockets { get; set; } = new();
     public uint UpgradeId { get; set; }
     public ushort UpgradeSet { get; set; }
     public byte MagicItemPercentage { get; set; }

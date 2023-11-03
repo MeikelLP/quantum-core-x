@@ -39,13 +39,19 @@ public class SelectGameCharacterHandler : IGamePacketHandler<SelectCharacter>
             return;
         }
 
-        var accountId = ctx.Connection.AccountId ?? default; // todo clean solution
+        var accountId = ctx.Connection.AccountId.Value;
 
         // Let the client load the game
         ctx.Connection.SetPhase(EPhases.Loading);
 
         // Load player
         var player = await Player.GetPlayer(_playerRepository, _cacheManager, accountId, ctx.Packet.Slot);
+        if (player is null)
+        {
+            _logger.LogCritical("Failed to load player on slot {Slot} for account {AccountId}", ctx.Packet.Slot, accountId);
+            ctx.Connection.Close();
+            return;
+        }
         var entity = ActivatorUtilities.CreateInstance<PlayerEntity>(_provider, ctx.Connection, player);
         await entity.Load();
 

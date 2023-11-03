@@ -1,7 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-
-namespace QuantumCore.API.Game.World
+﻿namespace QuantumCore.API.Game.World
 {
     public interface IMap
     {
@@ -15,7 +12,7 @@ namespace QuantumCore.API.Game.World
 
         public IReadOnlyCollection<IEntity> Entities { get; }
 
-        public IEntity GetEntity(uint vid);
+        public IEntity? GetEntity(uint vid);
 
         public void SpawnEntity(IEntity entity);
 

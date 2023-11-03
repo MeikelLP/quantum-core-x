@@ -1,7 +1,6 @@
 using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game.World;
 using QuantumCore.Game.Quest;
-using QuantumCore.Game.World.Entities;
 
 namespace QuantumCore.Game;
 
@@ -12,7 +11,7 @@ public static class GameEventManager
         public string Name { get; set; }
         public uint NpcId { get; set; }
         public Func<IPlayerEntity, Task> Callback { get; set; }
-        public Func<IPlayerEntity, bool> Condition { get; set; }
+        public Func<IPlayerEntity, bool>? Condition { get; set; }
     }
 
     private struct NpcGiveEvent
@@ -20,7 +19,7 @@ public static class GameEventManager
         public string Name { get; set; }
         public uint NpcId { get; set; }
         public Func<IPlayerEntity, ItemInstance, Task> Callback { get; set; }
-        public Func<IPlayerEntity, ItemInstance, bool> Condition { get; set; }
+        public Func<IPlayerEntity, ItemInstance, bool>? Condition { get; set; }
     }
 
     private static readonly Dictionary<uint, List<NpcClickEvent>> NpcClickEvents = new();
@@ -37,8 +36,12 @@ public static class GameEventManager
         if (events.Count > 1)
         {
             // todo make sure interface IPlayerEntity is enough
-            var p = player as PlayerEntity;
-            var internalQuest = p.GetQuestInstance<InternalQuest>();
+            var internalQuest = player.GetQuestInstance<InternalQuest>();
+
+            if (internalQuest is null)
+            {
+                return;
+            }
 
             var selected = await internalQuest.SelectQuest(events.Select(e => e.Name));
             if (events[selected].Callback.Target is not Quest.Quest)
@@ -69,8 +72,9 @@ public static class GameEventManager
         if (events.Count > 1)
         {
             // todo make sure interface IPlayerEntity is enough
-            var p = player as PlayerEntity;
-            var internalQuest = p.GetQuestInstance<InternalQuest>();
+            var internalQuest = player.GetQuestInstance<InternalQuest>();
+
+            if (internalQuest == null) return;
 
             var selected = await internalQuest.SelectQuest(events.Select(e => e.Name));
             if (events[selected].Callback.Target is not Quest.Quest)
@@ -91,7 +95,7 @@ public static class GameEventManager
     }
 
     public static void RegisterNpcClickEvent(string name, uint npcId, Func<IPlayerEntity, Task> callback,
-        Func<IPlayerEntity, bool> condition = null)
+        Func<IPlayerEntity, bool>? condition = null)
     {
         if (!NpcClickEvents.ContainsKey(npcId))
         {
@@ -107,7 +111,7 @@ public static class GameEventManager
     }
 
     public static void RegisterNpcGiveEvent(string name, uint npcId, Func<IPlayerEntity, ItemInstance, Task> callback,
-        Func<IPlayerEntity, ItemInstance, bool> condition = null)
+        Func<IPlayerEntity, ItemInstance, bool>? condition = null)
     {
         if (!NpcGiveEvents.ContainsKey(npcId))
         {

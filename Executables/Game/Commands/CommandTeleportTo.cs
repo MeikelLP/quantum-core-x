@@ -33,7 +33,6 @@ namespace QuantumCore.Game.Commands
 
     public class TeleportToOptions
     {
-        [Value(1)]
-        public string Destination { get; set; }
+        [Value(1)] public string Destination { get; set; } = "";
     }
 }
