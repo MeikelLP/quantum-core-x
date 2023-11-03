@@ -1,4 +1,7 @@
-﻿using System;
+﻿using System.Data;
+using Dapper;
+using Dapper.Contrib.Extensions;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using QuantumCore.Core.Cache;
@@ -10,7 +13,7 @@ namespace QuantumCore.Database
     public class Player : BaseModel, ICache
     {
         public Guid AccountId { get; set; }
-        public string Name { get; set; }
+        public string Name { get; set; } = "";
         public byte PlayerClass { get; set; }
         public byte SkillGroup { get; set; }
         public uint PlayTime { get; set; }
@@ -31,7 +34,7 @@ namespace QuantumCore.Database
         public uint GivenStatusPoints { get; set; }
         public uint AvailableStatusPoints { get; set; }
 
-        public static async Task<Player> GetPlayer(IPlayerRepository repository, ICacheManager cacheManager, Guid account, byte slot)
+        public static async Task<Player?> GetPlayer(IPlayerRepository repository, ICacheManager cacheManager, Guid account, byte slot)
         {
             var key = "players:" + account;
 

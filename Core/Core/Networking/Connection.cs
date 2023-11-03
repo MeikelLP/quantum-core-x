@@ -1,11 +1,7 @@
-using System;
 using System.Buffers;
 using System.Collections.Concurrent;
-using System.IO;
 using System.Net.Sockets;
 using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
@@ -23,15 +19,13 @@ namespace QuantumCore.Core.Networking
     {
         private readonly ILogger _logger;
         private readonly PluginExecutor _pluginExecutor;
-        private TcpClient _client;
         private readonly ConcurrentQueue<object> _packetsToSend = new();
-
         private readonly IPacketReader _packetReader;
 
-        private Stream _stream;
-
+        private TcpClient? _client;
+        private Stream? _stream;
         private long _lastHandshakeTime;
-        private CancellationTokenSource _cts;
+        private CancellationTokenSource? _cts;
 
         public Guid Id { get; }
         public uint Handshake { get; private set; }
@@ -63,6 +57,12 @@ namespace QuantumCore.Core.Networking
 
         protected async override Task ExecuteAsync(CancellationToken stoppingToken)
         {
+            if (_client is null)
+            {
+                _logger.LogCritical("Cannot execute when client is null");
+                return;
+            }
+
             _logger.LogInformation("New connection from {RemoteEndPoint}", _client.Client.RemoteEndPoint?.ToString());
 
             _stream = _client.GetStream();
@@ -96,8 +96,8 @@ namespace QuantumCore.Core.Networking
 
         public void Close()
         {
-            _cts.Cancel();
-            _client.Close();
+            _cts?.Cancel();
+            _client?.Close();
             OnClose();
         }
 
@@ -108,12 +108,12 @@ namespace QuantumCore.Core.Networking
 
         private async Task SendPacketsWhenAvailable()
         {
-            if (!_client.Connected)
+            if (_client?.Connected != true)
             {
                 _logger.LogWarning("Tried to send data to a closed connection");
                 return;
             }
-            while (!_cts.IsCancellationRequested)
+            while (_cts?.IsCancellationRequested != true)
             {
                 try
                 {
@@ -128,6 +128,12 @@ namespace QuantumCore.Core.Networking
 
                         try
                         {
+                            if (_stream is null)
+                            {
+                                _cts?.Cancel();
+                                _logger.LogCritical("Stream unexpectedly became null. This shouldn't happen");
+                                break;
+                            }
                             await _pluginExecutor.ExecutePlugins<IPacketOperationListener>(_logger, x => x.OnPrePacketSentAsync(obj, CancellationToken.None)).ConfigureAwait(false);
                             await _stream.WriteAsync(bytesToSend).ConfigureAwait(false);
                             await _stream.FlushAsync().ConfigureAwait(false);
@@ -175,7 +181,7 @@ namespace QuantumCore.Core.Networking
             {
                 // We wasn't handshaking!
                 _logger.LogInformation("Received handshake while not handshaking!");
-                _client.Close();
+                _client?.Close();
                 return false;
             }
 
@@ -183,7 +189,7 @@ namespace QuantumCore.Core.Networking
             {
                 // We received a wrong handshake
                 _logger.LogInformation("Received wrong handshake ({Handshake} != {HandshakeHandshake})", Handshake, handshake.Handshake);
-                _client.Close();
+                _client?.Close();
                 return false;
             }
 

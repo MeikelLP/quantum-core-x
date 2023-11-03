@@ -1,10 +1,6 @@
-﻿using System;
-using JetBrains.Annotations;
-
-namespace QuantumCore.API.Game
+﻿namespace QuantumCore.API.Game
 {
     [AttributeUsage(AttributeTargets.Class)]
-    [MeansImplicitUse]
     public class CommandAttribute : Attribute
     {
         public CommandAttribute(string name, string description)
@@ -18,7 +14,6 @@ namespace QuantumCore.API.Game
     }
 
     [AttributeUsage(AttributeTargets.Method)]
-    [MeansImplicitUse]
     public class CommandMethodAttribute : Attribute
     {
         public CommandMethodAttribute(string description = "")

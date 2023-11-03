@@ -16,8 +16,8 @@ public abstract class Quest : IQuest
     private string _questScript = "";
     private QuestSkin _currentSkin = QuestSkin.Normal;
 
-    private TaskCompletionSource _currentNextTask;
-    private TaskCompletionSource<byte> _currentChoiceTask;
+    private TaskCompletionSource? _currentNextTask;
+    private TaskCompletionSource<byte>? _currentChoiceTask;
 
     public Quest(QuestState state, IPlayerEntity player)
     {
@@ -48,11 +48,11 @@ public abstract class Quest : IQuest
     {
         if (answer == 254)
         {
-            _currentNextTask.SetResult();
+            _currentNextTask?.SetResult();
             return;
         }
 
-        _currentChoiceTask.SetResult(answer);
+        _currentChoiceTask?.SetResult(answer);
     }
 
     protected void Text(string str)

@@ -13,8 +13,8 @@ namespace QuantumCore.Game.World.AI
     public class SimpleBehaviour : IBehaviour
     {
         private readonly IMonsterManager _monsterManager;
-        private MonsterData _proto;
-        private IEntity _entity;
+        private MonsterData? _proto;
+        private IEntity? _entity;
         private long _nextMovementIn;
 
         private int _spawnX;
@@ -24,7 +24,7 @@ namespace QuantumCore.Game.World.AI
         private int _lastAttackX;
         private int _lastAttackY;
 
-        private IEntity _targetEntity;
+        private IEntity? _targetEntity;
         private readonly Dictionary<uint, uint> _damageMap = new();
 
         private const int MoveRadius = 1000;
@@ -53,6 +53,8 @@ namespace QuantumCore.Game.World.AI
 
         private void MoveToRandomLocation()
         {
+            if (_entity is null) return;
+
             var offsetX = RandomNumberGenerator.GetInt32(-MoveRadius, MoveRadius);
             var offsetY = RandomNumberGenerator.GetInt32(-MoveRadius, MoveRadius);
 
@@ -68,6 +70,8 @@ namespace QuantumCore.Game.World.AI
         /// <param name="target"></param>
         private void MoveTo(IEntity target)
         {
+            if (_entity is null || _proto is null) return;
+
             // We're moving to a distance of half of our attack range so we do not have to directly move again
             double directionX = target.PositionX - _entity.PositionX;
             double directionY = target.PositionY - _entity.PositionY;
@@ -83,7 +87,7 @@ namespace QuantumCore.Game.World.AI
 
         public void Update(double elapsedTime)
         {
-            if (_entity == null)
+            if (_entity is null || _proto is null)
             {
                 return;
             }
@@ -174,15 +178,17 @@ namespace QuantumCore.Game.World.AI
             }
         }
 
-        private IEntity NextTarget()
+        private IEntity? NextTarget()
         {
-            IEntity target = null;
+            if (_entity is null) return null;
+
+            IEntity? target = null;
             uint maxDamage = 0;
             foreach (var (vid, damage) in _damageMap)
             {
                 if (damage > maxDamage)
                 {
-                    var attacker = _entity.Map.GetEntity(vid);
+                    var attacker = _entity.Map?.GetEntity(vid);
                     if (attacker != null)
                     {
                         target = attacker;
@@ -196,6 +202,7 @@ namespace QuantumCore.Game.World.AI
 
         public void TookDamage(IEntity attacker, uint damage)
         {
+            if (_entity is null) return;
             if (!_damageMap.ContainsKey(attacker.Vid))
             {
                 _damageMap[attacker.Vid] = damage;
@@ -212,6 +219,7 @@ namespace QuantumCore.Game.World.AI
                 return;
             }
 
+            if (_targetEntity is null) return;
             if (_targetEntity.Vid == attacker.Vid)
             {
                 return;

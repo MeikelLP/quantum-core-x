@@ -41,7 +41,7 @@ public class CreateCharacterHandler : IGamePacketHandler<CreateCharacter>
             return;
         }
 
-        var accountId = ctx.Connection.AccountId ?? default;
+        var accountId = ctx.Connection.AccountId.Value;
 
         var count = await _db.QuerySingleAsync<int>("SELECT COUNT(*) FROM players WHERE Name = @Name", new {Name = ctx.Packet.Name});
         if (count > 0)
@@ -51,6 +51,13 @@ public class CreateCharacterHandler : IGamePacketHandler<CreateCharacter>
         }
 
         var job = _jobManager.Get((byte)ctx.Packet.Class);
+
+        if (job is null)
+        {
+            _logger.LogCritical("Failed to find job for class {Class}", ctx.Packet.Class);
+            ctx.Connection.Close();
+            return;
+        }
 
         // Create player data
         var player = new Player
