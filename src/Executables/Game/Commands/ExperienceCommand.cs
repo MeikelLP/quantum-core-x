@@ -1,5 +1,4 @@
 ﻿using CommandLine;
-using JetBrains.Annotations;
 using QuantumCore.API.Game;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.World;
@@ -44,6 +43,5 @@ public class ExperienceOtherOptions
     public int Value { get; set; }
 
     [Value(1)]
-    [CanBeNull]
-    public string Target { get; set; }
+    public string? Target { get; set; }
 }

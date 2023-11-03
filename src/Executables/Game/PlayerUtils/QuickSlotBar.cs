@@ -14,7 +14,7 @@ public class QuickSlotBar : IQuickSlotBar
     private readonly ICacheManager _cacheManager;
     private readonly ILogger _logger;
     public IPlayerEntity Player { get; }
-    public QuickSlotData[] Slots { get; } = new QuickSlotData[8];
+    public QuickSlotData?[] Slots { get; } = new QuickSlotData[8];
 
     public QuickSlotBar(ICacheManager cacheManager, ILogger logger, PlayerEntity player)
     {

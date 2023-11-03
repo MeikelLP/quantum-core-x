@@ -1,8 +1,5 @@
-﻿using JetBrains.Annotations;
+﻿namespace QuantumCore.Networking;
 
-namespace QuantumCore.Networking;
-
-[MeansImplicitUse]
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, Inherited = false)]
 public class PacketAttribute : Attribute
 {

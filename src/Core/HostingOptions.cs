@@ -6,5 +6,5 @@ public class HostingOptions
 {
     [Required]
     public int Port { get; set; }
-    public string IpAddress { get; set; } = "127.0.0.1";
+    public string? IpAddress { get; set; }
 }

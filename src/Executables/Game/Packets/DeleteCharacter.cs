@@ -10,6 +10,6 @@ namespace QuantumCore.Game.Packets
         public byte Slot { get; set; }
 
         [Field(1, Length = 8)]
-        public string Code { get; set; }
+        public string Code { get; set; } = "";
     }
 }

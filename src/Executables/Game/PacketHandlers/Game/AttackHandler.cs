@@ -24,7 +24,7 @@ public class AttackHandler : IGamePacketHandler<Attack>
             return Task.CompletedTask;
         }
 
-        var entity = attacker.Map.GetEntity(ctx.Packet.Vid);
+        var entity = attacker.Map?.GetEntity(ctx.Packet.Vid);
         if (entity == null)
         {
             return Task.CompletedTask;

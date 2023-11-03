@@ -11,7 +11,7 @@ public static class SerializerExtensions
         await stream.ReadExactlyAsync(buffer.AsMemory(0, 1));
         return (T) (object)buffer[0];
     }
-        
+
     [MethodImpl(MethodImplOptions.AggressiveOptimization)]
     public static async ValueTask<T> ReadValueFromStreamAsync<T>(this Stream stream, byte[] buffer)
         where T : ISpanParsable<T> // should match all relevant types
@@ -40,23 +40,41 @@ public static class SerializerExtensions
             _ => throw new ArgumentOutOfRangeException(nameof(T), $"Type {typeof(T)} cannot be handled")
         };
     }
-        
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static async ValueTask<string> ReadStringFromStreamAsync(this Stream stream, byte[] buffer, int size)
     {
         await stream.ReadExactlyAsync(buffer.AsMemory(0, size));
-        var str = System.Text.Encoding.ASCII.GetString(buffer.AsSpan(0, size));
-        // null bytes may be appended
-        return str.TrimEnd('\0');
+        var length = buffer.AsSpan().IndexOf((byte) 0);
+
+        // the string ends with the first null byte, after that garbage could be in the string
+        if (length == -1)
+        {
+            return Encoding.ASCII.GetString(buffer.AsSpan(0, size));
+        }
+
+        return Encoding.ASCII.GetString(buffer.AsSpan(0, length));
     }
-        
+
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static async ValueTask<byte[]> ReadByteArrayFromStreamAsync(this Stream stream, byte[] buffer, int size)
     {
         await stream.ReadExactlyAsync(buffer.AsMemory(0, size));
         return buffer[..size];
     }
-        
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining)]
+    public static string ReadNullTerminatedString(this ReadOnlySpan<byte> span)
+    {
+        var length = span.IndexOf((byte) 0);
+        if (length == -1)
+        {
+            return Encoding.ASCII.GetString(span);
+        }
+
+        return Encoding.ASCII.GetString(span[..length]);
+    }
+
     public static void WriteString(this byte[] bytes, string? str, in int index, in int length)
     {
         if (!string.IsNullOrWhiteSpace(str))

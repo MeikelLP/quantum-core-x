@@ -11,7 +11,7 @@ namespace QuantumCore.Game.Packets
         [Field(1)]
         public ushort Class { get; set; }
         [Field(2, Length = 25)]
-        public string Name { get; set; }
+        public string Name { get; set; } = "";
         [Field(3)]
         public int PositionX { get; set; }
         [Field(4)]

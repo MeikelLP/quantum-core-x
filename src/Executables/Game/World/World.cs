@@ -9,7 +9,6 @@ using QuantumCore.API.PluginTypes;
 using QuantumCore.Caching;
 using QuantumCore.Core.Utils;
 using QuantumCore.Game.Services;
-using QuantumCore.Game.World.Entities;
 
 namespace QuantumCore.Game.World
 {
@@ -26,7 +25,7 @@ namespace QuantumCore.Game.World
 
         private readonly Dictionary<int, Shop> _staticShops = new();
 
-        private IRedisSubscriber _mapSubscriber;
+        private IRedisSubscriber? _mapSubscriber;
         private readonly IItemManager _itemManager;
         private readonly ICacheManager _cacheManager;
         private readonly IConfiguration _configuration;
@@ -217,10 +216,24 @@ namespace QuantumCore.Game.World
 
             if (map is RemoteMap remoteMap)
             {
-                return new CoreHost {Ip = remoteMap.Host, Port = remoteMap.Port};
+                if (remoteMap.Host is null)
+                {
+                    _logger.LogCritical("Remote maps IP is null. This should never happen. Name: {MapName}", remoteMap.Name);
+                    throw new InvalidOperationException("Cannot handle this situation. See logs.");
+                }
+
+                return new CoreHost
+                {
+                    Ip = remoteMap.Host,
+                    Port = remoteMap.Port
+                };
             }
 
-            return new CoreHost {Ip = IpUtils.PublicIP, Port = (ushort) GameServer.Instance.Port};
+            return new CoreHost
+            {
+                Ip = IpUtils.PublicIP!, // should be set by now
+                Port = (ushort) GameServer.Instance.Port
+            };
         }
 
         public SpawnGroup? GetGroup(uint id)
@@ -297,7 +310,7 @@ namespace QuantumCore.Game.World
             _players.Remove(e.Name);
         }
 
-        public IPlayerEntity GetPlayer(string playerName)
+        public IPlayerEntity? GetPlayer(string playerName)
         {
             return _players.ContainsKey(playerName) ? _players[playerName] : null;
         }

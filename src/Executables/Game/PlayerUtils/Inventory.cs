@@ -10,6 +10,13 @@ using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace QuantumCore.Game.PlayerUtils
 {
+    public static class InventoryConstants
+    {
+        public const ushort DEFAULT_INVENTORY_WIDTH = 5;
+        public const ushort DEFAULT_INVENTORY_HEIGHT = 9;
+        public const ushort DEFAULT_INVENTORY_PAGES = 2;
+    }
+
     public class Inventory : IInventory
     {
         private class Page
@@ -18,7 +25,7 @@ namespace QuantumCore.Game.PlayerUtils
             private ushort _width;
             private ushort _height;
 
-            private readonly Grid<ItemInstance> _grid;
+            private readonly Grid<ItemInstance?> _grid;
 
             public Page(IItemManager itemManager, ushort width, ushort height)
             {
@@ -26,10 +33,10 @@ namespace QuantumCore.Game.PlayerUtils
                 _width = width;
                 _height = height;
 
-                _grid = new Grid<ItemInstance>(_width, _height);
+                _grid = new Grid<ItemInstance?>(_width, _height);
             }
 
-            public ItemInstance GetItem(long position)
+            public ItemInstance? GetItem(long position)
             {
                 if (position < 0) return null;
                 if (position >= _width * _height) return null;
@@ -294,7 +301,7 @@ namespace QuantumCore.Game.PlayerUtils
             _pages[page].RemoveItem(item.Position - page * pageSize);
         }
 
-        public ItemInstance GetItem(ushort position)
+        public ItemInstance? GetItem(ushort position)
         {
             var pageSize = _width * _height;
             var page = position / pageSize;

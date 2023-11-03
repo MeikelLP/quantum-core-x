@@ -18,7 +18,7 @@ public class ChatManager : IChatManager
         public string Message { get; set; }
     }
 
-    private IRedisSubscriber _subscriber;
+    private IRedisSubscriber? _subscriber;
     private Guid _id;
 
     public ChatManager(ICacheManager cacheManager)

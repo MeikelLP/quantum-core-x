@@ -16,7 +16,7 @@ public class ItemPickupHandler : IGamePacketHandler<ItemPickup>
             return Task.CompletedTask;
         }
 
-        var entity = player.Map.GetEntity(ctx.Packet.Vid);
+        var entity = player.Map?.GetEntity(ctx.Packet.Vid);
         if (entity is not GroundItem groundItem)
         {
             // we can only pick up ground items

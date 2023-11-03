@@ -16,6 +16,12 @@ namespace QuantumCore.Game.Commands
 
         public Task ExecuteAsync(CommandContext<KickCommandOptions> context)
         {
+            if (context.Arguments.Target == null)
+            {
+                context.Player.SendChatMessage("No target given");
+                return Task.CompletedTask;
+            }
+
             var target = _world.GetPlayer(context.Arguments.Target);
             if (target is not null)
             {
@@ -26,7 +32,7 @@ namespace QuantumCore.Game.Commands
             {
                 context.Player.SendChatMessage("Target not found");
             }
-            
+
             return Task.CompletedTask;
         }
     }
@@ -34,6 +40,6 @@ namespace QuantumCore.Game.Commands
     public class KickCommandOptions
     {
         [Value(0, Required = true)]
-        public string Target { get; set; }
+        public string? Target { get; set; }
     }
 }

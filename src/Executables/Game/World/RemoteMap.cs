@@ -14,7 +14,7 @@ public class RemoteMap : IMap
     public uint Height { get; }
     public IReadOnlyCollection<IEntity> Entities => throw new System.NotImplementedException();
 
-    public IPAddress Host { get; set; }
+    public IPAddress? Host { get; set; }
     public ushort Port { get; set; }
 
     public RemoteMap(string name, uint x, uint y, uint width, uint height)

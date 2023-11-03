@@ -1,3 +1,4 @@
+using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game;
 using QuantumCore.API.Game.World;
 using QuantumCore.Caching;
@@ -28,6 +29,7 @@ namespace QuantumCore.Game.Commands
                 .Append(ctx.Player.Inventory.EquipmentWindow.Shoes)
                 .Append(ctx.Player.Inventory.EquipmentWindow.Weapon)
                 .Where(x => x is not null)
+                .Cast<ItemInstance>()
                 .ToArray();
             foreach (var item in items)
             {

@@ -13,7 +13,7 @@ namespace QuantumCore.Game.World.Entities
     {
         private readonly IAnimationManager _animationManager;
         public uint Vid { get; }
-        public byte Empire { get; private set; }
+        public byte Empire { get; private protected set; }
         public abstract EEntityType Type { get; }
         public uint EntityClass { get; protected set; }
         public EEntityState State { get; protected set; }
@@ -50,12 +50,12 @@ namespace QuantumCore.Game.World.Entities
         public abstract byte HealthPercentage { get; }
         public bool Dead { get; protected set; }
 
-        public IMap Map { get; set; }
+        public IMap? Map { get; set; }
 
         // QuadTree cache
         public int LastPositionX { get; set; }
         public int LastPositionY { get; set; }
-        public IQuadTree LastQuadTree { get; set; }
+        public IQuadTree? LastQuadTree { get; set; }
 
         // Movement related
         public long MovementStart { get; private set; }

@@ -1,5 +1,4 @@
 ﻿using System.Globalization;
-using JetBrains.Annotations;
 
 namespace QuantumCore.Core.Types
 {
@@ -15,9 +14,9 @@ namespace QuantumCore.Core.Types
         public async Task ReadAsync(string path)
         {
             if (!File.Exists(path)) throw new FileNotFoundException("Structured file not found", path);
-            
+
             using var reader = new StreamReader(path);
-            string line;
+            string? line;
             while ((line = await reader.ReadLineAsync()) != null)
             {
                 line = line.Trim();
@@ -25,7 +24,7 @@ namespace QuantumCore.Core.Types
 
                 var i = line.IndexOfAny(new[] {' ', '\t'});
                 if(i < 0) continue;
-                
+
                 var keyword = line.Substring(0, i);
                 var startIndex = line.IndexOf(' ');
                 if (startIndex == -1)
@@ -48,8 +47,7 @@ namespace QuantumCore.Core.Types
         /// </summary>
         /// <param name="key">The key to look for</param>
         /// <returns>The normalized value or null if the key wasn't found</returns>
-        [CanBeNull]
-        public string GetValue(string key)
+        public string? GetValue(string key)
         {
             return !_values.ContainsKey(key) ? null : _values[key];
         }
@@ -78,12 +76,12 @@ namespace QuantumCore.Core.Types
         {
             var value = GetValue(key);
             if (value == null) return null;
-            
+
             var values = value.Split(' ');
             if (position >= values.Length) return null;
 
             if (!float.TryParse(values[position], NumberStyles.Float, NumberFormatInfo.InvariantInfo, out var f)) return null;
-            
+
             return f;
         }
     }
