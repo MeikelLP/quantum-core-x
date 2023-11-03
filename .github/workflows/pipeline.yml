@@ -48,10 +48,11 @@ jobs:
           dotnet tool update dotnet-sonarscanner --tool-path .sonar/scanner
 
       # setup .NET
-      - name: Setup .NET Core SDK 7
+      - name: Setup .NET Core SDK 8
         uses: actions/setup-dotnet@v3
         with:
-          dotnet-version: 7.0.x
+          dotnet-version: 8.0.x
+          dotnet-quality: 'preview'
 
       # setup project dependencies
       - name: Download katai struct compiler
@@ -65,7 +66,7 @@ jobs:
           ./generate_kaitai.sh
       - name: Install dependencies
         run: dotnet restore
-        
+
       # actual build
       - name: Build and analyze
         env:
@@ -79,9 +80,9 @@ jobs:
       # finally tests
       - name: Test
         run: dotnet test --no-restore --verbosity normal
-  
+
   deploy:
-    needs: 
+    needs:
       - test
     runs-on: ubuntu-latest
     # only deploy if on master or tag
