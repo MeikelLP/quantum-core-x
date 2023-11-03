@@ -109,7 +109,7 @@ jobs:
       - name: Build and push game image
         uses: docker/build-push-action@v4.1.1
         with:
-          context: .
+          context: src/
           file: src/Executables/Game/Dockerfile
           push: true
           tags: ${{ steps.meta-game.outputs.tags }}
@@ -129,7 +129,7 @@ jobs:
       - name: Build and push auth image
         uses: docker/build-push-action@v4.1.1
         with:
-          context: .
+          context: src/
           images: ghcr.io/meikellp/quantum-core-x/auth
           file: src/Executables/Auth/Dockerfile
           push: true
@@ -150,7 +150,7 @@ jobs:
       - name: Build and push migrator image
         uses: docker/build-push-action@v4.1.1
         with:
-          context: .
+          context: src/
           images: ghcr.io/meikellp/quantum-core-x/migrator
           file: src/Executables/Migrator/Dockerfile
           push: true
