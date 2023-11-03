@@ -111,7 +111,8 @@ namespace QuantumCore.Game.World.Entities
             _world = world;
             _logger = logger;
             _empireRepository = empireRepository;
-            Inventory = new Inventory(itemManager, _cacheManager, _logger, itemRepository, player.Id, 1, 5, 9, 2);
+            Inventory = new Inventory(itemManager, _cacheManager, _logger, itemRepository, player.Id,
+                (byte)WindowType.Inventory, InventoryConstants.DEFAULT_INVENTORY_WIDTH, InventoryConstants.DEFAULT_INVENTORY_HEIGHT, InventoryConstants.DEFAULT_INVENTORY_PAGES);
             Inventory.OnSlotChanged += Inventory_OnSlotChanged;
             Player = new PlayerData {
                 Id = player.Id,
