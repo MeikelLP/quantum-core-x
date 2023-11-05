@@ -46,9 +46,9 @@ namespace QuantumCore.Game
             ILogger<GameServer> logger, PluginExecutor pluginExecutor, IServiceProvider serviceProvider,
             IItemManager itemManager, IMonsterManager monsterManager, IExperienceManager experienceManager,
             IAnimationManager animationManager, ICommandManager commandManager,
-            IEnumerable<IPacketHandler> packetHandlers, IQuestManager questManager, IChatManager chatManager,
+            IQuestManager questManager, IChatManager chatManager,
             IWorld world, IDropProvider dropProvider)
-            : base(packetManager, logger, pluginExecutor, serviceProvider, packetHandlers, "game", hostingOptions)
+            : base(packetManager, logger, pluginExecutor, serviceProvider, "game", hostingOptions)
         {
             _hostingOptions = hostingOptions.Value;
             _logger = logger;
@@ -72,7 +72,7 @@ namespace QuantumCore.Game
             World.Update(elapsedTime);
         }
 
-        protected async override Task ExecuteAsync(CancellationToken stoppingToken)
+        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             // Set public ip address
             if (_hostingOptions.IpAddress != null)
@@ -114,8 +114,6 @@ namespace QuantumCore.Game
                 connection.SetPhase(EPhases.Login);
                 return true;
             });
-
-            RegisterListeners();
 
             // Start server timer
             _serverTimer.Start();

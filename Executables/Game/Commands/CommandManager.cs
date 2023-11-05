@@ -31,7 +31,7 @@ namespace QuantumCore.Game.Commands
             }
         );
 
-        public CommandManager(ILogger<CommandManager> logger, ICacheManager cacheManager, IWorld world,
+        public CommandManager(ILogger<CommandManager> logger, ICacheManager cacheManager,
             IServiceProvider serviceProvider, ICommandPermissionRepository repository)
         {
             _logger = logger;

@@ -2,7 +2,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using QuantumCore.API;
 using QuantumCore.API.Game.Types;
-using QuantumCore.API.PluginTypes;
 using QuantumCore.Core.Cache;
 using QuantumCore.Core.Networking;
 using QuantumCore.Extensions;
@@ -16,19 +15,18 @@ namespace QuantumCore.Auth
         private readonly ICacheManager _cacheManager;
 
         public AuthServer(IOptions<HostingOptions> hostingOptions, IPacketManager packetManager, ILogger<AuthServer> logger,
-            PluginExecutor pluginExecutor, IServiceProvider serviceProvider,
-            IEnumerable<IPacketHandler> packetHandlers, ICacheManager cacheManager)
-            : base(packetManager, logger, pluginExecutor, serviceProvider, packetHandlers, "auth", hostingOptions)
+            PluginExecutor pluginExecutor, IServiceProvider serviceProvider, ICacheManager cacheManager)
+            : base(packetManager, logger, pluginExecutor, serviceProvider, "auth", hostingOptions)
         {
             _logger = logger;
             _cacheManager = cacheManager;
         }
 
-        protected async override Task ExecuteAsync(CancellationToken token)
+        protected override async Task ExecuteAsync(CancellationToken token)
         {
             // Register auth server features
             RegisterNewConnectionListener(NewConnection);
-            RegisterListeners();
+            StartListening();
 
             var pong = await _cacheManager.Ping();
             if (!pong)

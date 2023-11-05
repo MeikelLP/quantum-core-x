@@ -7,7 +7,6 @@ using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.World;
 using QuantumCore.Core.Cache;
 using QuantumCore.Core.Utils;
-using QuantumCore.Database;
 using QuantumCore.Extensions;
 using QuantumCore.Game.Packets;
 using QuantumCore.Game.PlayerUtils;
@@ -95,7 +94,7 @@ namespace QuantumCore.Game.World.Entities
         private readonly ILogger<PlayerEntity> _logger;
         private readonly IEmpireRepository _empireRepository;
 
-        public PlayerEntity(Player player, IGameConnection connection, IItemManager itemManager, IJobManager jobManager,
+        public PlayerEntity(PlayerData player, IGameConnection connection, IItemManager itemManager, IJobManager jobManager,
             IExperienceManager experienceManager, IAnimationManager animationManager,
             IQuestManager questManager, ICacheManager cacheManager, IWorld world, ILogger<PlayerEntity> logger,
             IEmpireRepository empireRepository, IItemRepository itemRepository)

@@ -15,7 +15,7 @@ public static class ServiceExtensions
             scan.FromAssemblyOf<AuthServer>()
                 .AddClasses(classes => classes.AssignableTo<IPacketHandler>())
                 .AsImplementedInterfaces()
-                .WithSingletonLifetime();
+                .WithScopedLifetime();
         });
 
         return services;

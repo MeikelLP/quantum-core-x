@@ -26,7 +26,7 @@ namespace QuantumCore.Game
 
         protected override void OnHandshakeFinished()
         {
-            GameServer.Instance.CallConnectionListener(this);
+            Server.CallConnectionListener(this);
         }
 
         protected async override Task OnClose()

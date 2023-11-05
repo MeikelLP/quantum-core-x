@@ -18,7 +18,7 @@ public static class ServiceExtensions
             scan.FromAssemblyOf<GameServer>()
                 .AddClasses(classes => classes.AssignableTo<IPacketHandler>())
                 .AsImplementedInterfaces()
-                .WithSingletonLifetime();
+                .WithScopedLifetime();
         });
         services.AddSingleton<ISpawnGroupProvider, SpawnGroupProvider>();
         services.AddSingleton<ISpawnPointProvider, SpawnPointProvider>();

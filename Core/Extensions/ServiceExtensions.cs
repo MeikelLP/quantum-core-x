@@ -11,7 +11,6 @@ using QuantumCore.Core.Cache;
 using QuantumCore.Database.Repositories;
 using QuantumCore.Networking;
 using Serilog;
-using Serilog.Events;
 using Weikio.PluginFramework.Abstractions;
 using Weikio.PluginFramework.Microsoft.DependencyInjection;
 
@@ -27,14 +26,14 @@ public static class ServiceExtensions
         services.AddOptions<DatabaseOptions>()
             .BindConfiguration("Database")
             .ValidateDataAnnotations();
-        services.AddScoped<IEmpireRepository, EmpireRepository>();
-        services.AddScoped<IItemRepository, ItemRepository>();
-        services.AddScoped<IPlayerRepository, PlayerRepository>();
-        services.AddScoped<IAccountRepository, AccountRepository>();
-        services.AddScoped<IAccountManager, AccountManager>();
-        services.AddScoped<IPlayerManager, PlayerManager>();
-        services.AddScoped<ICommandPermissionRepository, CommandPermissionRepository>();
-        services.AddScoped<IDbConnection>(provider =>
+        services.AddSingleton<IEmpireRepository, EmpireRepository>();
+        services.AddSingleton<IItemRepository, ItemRepository>();
+        services.AddSingleton<IPlayerRepository, PlayerRepository>();
+        services.AddSingleton<IAccountRepository, AccountRepository>();
+        services.AddSingleton<IAccountManager, AccountManager>();
+        services.AddSingleton<IPlayerManager, PlayerManager>();
+        services.AddSingleton<ICommandPermissionRepository, CommandPermissionRepository>();
+        services.AddTransient<IDbConnection>(provider =>
         {
             var options = provider.GetRequiredService<IOptions<DatabaseOptions>>().Value;
             return new MySqlConnection(options.ConnectionString);
@@ -121,8 +120,6 @@ public static class ServiceExtensions
 
         // sink to console
         config.WriteTo.Console(outputTemplate: MessageTemplate);
-
-        config.MinimumLevel.Override("QuantumCore.Core.Networking", LogEventLevel.Warning);
 
         // sink to rolling file
         config.WriteTo.RollingFile($"{Directory.GetCurrentDirectory()}/logs/api.log",
