@@ -9,6 +9,6 @@ namespace QuantumCore.Game.Packets
         [Field(0)]
         public byte Slot { get; set; }
         [Field(1)]
-        public Character Character { get; set; }
+        public Character Character { get; set; } = new Character();
     }
 }

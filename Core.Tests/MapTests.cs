@@ -1,12 +1,9 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
-using FluentAssertions;
+﻿using FluentAssertions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using Moq;
+using NSubstitute;
 using QuantumCore;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
@@ -32,35 +29,36 @@ public class MapTests
         var provider = new ServiceCollection()
             .AddSingleton<IMonsterManager>(_ =>
             {
-                var mock = new Mock<IMonsterManager>();
-                mock.Setup(x => x.GetMonster(It.IsAny<uint>())).Returns<uint>((id) => new MonsterData
+                var mock = Substitute.For<IMonsterManager>();
+                mock.GetMonster(Arg.Any<uint>()).Returns(call => new MonsterData
                 {
-                    Id = id,
+                    Id = call.Arg<uint>(),
                     TranslatedName = "TestMonster"
                 });
-                return mock.Object;
+                return mock;
             })
-            .AddSingleton<IAnimationManager>(_ => new Mock<IAnimationManager>().Object)
+            .AddSingleton<IAnimationManager>(_ => Substitute.For<IAnimationManager>())
             .AddSingleton<ICacheManager>(_ =>
             {
-                var mock = new Mock<ICacheManager>();
-                mock.Setup(x => x.Subscribe()).Returns(new Mock<IRedisSubscriber>().Object);
-                return mock.Object;
+                var mock = Substitute.For<ICacheManager>();
+                mock.Subscribe().Returns(Substitute.For<IRedisSubscriber>());
+                mock.Keys(Arg.Any<string>()).Returns(_ => Array.Empty<string>());
+                return mock;
             })
             .AddSingleton<PluginExecutor>()
-            .AddSingleton<IItemManager>(_ => new Mock<IItemManager>().Object)
-            .AddSingleton<IDropProvider>(_ => new Mock<IDropProvider>().Object)
+            .AddSingleton<IItemManager>(_ => Substitute.For<IItemManager>())
+            .AddSingleton<IDropProvider>(_ => Substitute.For<IDropProvider>())
             .AddSingleton<IAtlasProvider>(_ =>
             {
-                var mock = new Mock<IAtlasProvider>();
-                mock.Setup(x => x.GetAsync(It.IsAny<IWorld>())).ReturnsAsync((IWorld _) => new[] { _map }!);
-                return mock.Object;
+                var mock = Substitute.For<IAtlasProvider>();
+                mock.GetAsync(Arg.Any<IWorld>()).Returns(_ => new[] { _map }!);
+                return mock;
             })
             .AddSingleton<IConfiguration>(_ => new ConfigurationBuilder().Build())
             .AddSingleton<ISpawnGroupProvider>(_ =>
             {
-                var mock = new Mock<ISpawnGroupProvider>();
-                mock.Setup(x => x.GetSpawnGroupsAsync()).ReturnsAsync(() => new[]
+                var mock = Substitute.For<ISpawnGroupProvider>();
+                mock.GetSpawnGroupsAsync().Returns(_ => new[]
                 {
                     new SpawnGroup
                     {
@@ -74,7 +72,7 @@ public class MapTests
                         }
                     }
                 });
-                mock.Setup(x => x.GetSpawnGroupCollectionsAsync()).ReturnsAsync(() => new []
+                mock.GetSpawnGroupCollectionsAsync().Returns(_ => new []
                 {
                     // equal items but only one will be spawned
                     new SpawnGroupCollection
@@ -100,14 +98,14 @@ public class MapTests
                         }
                     }
                 });
-                return mock.Object;
+                return mock;
             })
             .AddSingleton<IWorld, World>()
             .AddSingleton<ISpawnPointProvider>(_ =>
             {
-                var mock = new Mock<ISpawnPointProvider>();
-                mock.Setup(x => x.GetSpawnPointsForMap(It.IsAny<string>())).Returns(() => Task.FromResult(_spawnPoints));
-                return mock.Object;
+                var mock = Substitute.For<ISpawnPointProvider>();
+                mock.GetSpawnPointsForMap(Arg.Any<string>()).Returns(_ => Task.FromResult(_spawnPoints));
+                return mock;
             })
             .AddOptions<HostingOptions>().Services
             .AddLogging(x =>

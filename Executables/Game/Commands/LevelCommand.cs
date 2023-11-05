@@ -40,5 +40,5 @@ public class LevelCommandOptions
     public byte Level { get; set; }
 
     [Value(1)]
-    public string Target { get; set; }
+    public string? Target { get; set; }
 }

@@ -1,6 +1,4 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
-using QuantumCore.API.Core.Models;
+﻿using QuantumCore.API.Core.Models;
 
 namespace QuantumCore.API;
 
@@ -19,5 +17,5 @@ public interface IAnimationManager
     /// <param name="type">The main animation type</param>
     /// <param name="subType">The sub animation type</param>
     /// <returns>The animation or null if the animation doesn't exists</returns>
-    Animation GetAnimation(uint id, AnimationType type, AnimationSubType subType);
+    Animation? GetAnimation(uint id, AnimationType type, AnimationSubType subType);
 }

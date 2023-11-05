@@ -1,4 +1,3 @@
-using JetBrains.Annotations;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
@@ -12,7 +11,7 @@ namespace QuantumCore.Game
     public class MonsterManager : IMonsterManager
     {
         private readonly ILogger<MonsterManager> _logger;
-        private MobProto _proto;
+        private MobProto? _proto;
 
         public MonsterManager(ILogger<MonsterManager> logger)
         {
@@ -31,10 +30,9 @@ namespace QuantumCore.Game
             return Task.CompletedTask;
         }
 
-        [CanBeNull]
-        public MonsterData GetMonster(uint id)
+        public MonsterData? GetMonster(uint id)
         {
-            var proto = _proto.Content.Data.Monsters.FirstOrDefault(monster => monster.Id == id);
+            var proto = _proto?.Content.Data.Monsters.FirstOrDefault(monster => monster.Id == id);
 
             if (proto is not null)
             {
@@ -46,7 +44,7 @@ namespace QuantumCore.Game
 
         public List<MonsterData> GetMonsters()
         {
-            return _proto.Content.Data.Monsters.Select(ToMonsterData).ToList();
+            return _proto?.Content.Data.Monsters.Select(ToMonsterData).ToList() ?? new List<MonsterData>();
         }
 
         private static MonsterData ToMonsterData(MobProto.Monster proto)

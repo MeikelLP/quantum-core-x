@@ -1,5 +1,3 @@
-﻿using System.Collections.Generic;
-using JetBrains.Annotations;
 using QuantumCore.API.Core.Models;
 
 namespace QuantumCore.API.Game.World
@@ -17,7 +15,7 @@ namespace QuantumCore.API.Game.World
 
         public IReadOnlyCollection<IEntity> Entities { get; }
 
-        public IEntity GetEntity(uint vid);
+        public IEntity? GetEntity(uint vid);
 
         public void SpawnEntity(IEntity entity);
 
@@ -35,6 +33,6 @@ namespace QuantumCore.API.Game.World
         /// <param name="y">Position Y</param>
         /// <param name="amount">Only used for gold as we have a higher limit here</param>
         /// <param name="ownerName"></param>
-        void AddGroundItem(ItemInstance item, int x, int y, uint amount = 0, [CanBeNull] string ownerName = null);
+        void AddGroundItem(ItemInstance item, int x, int y, uint amount = 0, string? ownerName = null);
     }
 }

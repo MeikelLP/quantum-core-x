@@ -201,6 +201,9 @@ namespace QuantumCore.Game.World
         private void SpawnGroup(MonsterGroup groupInstance)
         {
             var spawnPoint = groupInstance.SpawnPoint;
+
+            if (spawnPoint is null) return;
+
             switch (spawnPoint.Type)
             {
                 case ESpawnPointType.GroupCollection:
@@ -285,6 +288,8 @@ namespace QuantumCore.Game.World
 
         public void EnqueueGroupRespawn(MonsterGroup group)
         {
+            if (group.SpawnPoint == null) return;
+
             EventSystem.EnqueueEvent(() =>
             {
                 // TODO
@@ -333,9 +338,9 @@ namespace QuantumCore.Game.World
             _pendingRemovals.Enqueue(entity);
         }
 
-        public IEntity GetEntity(uint vid)
+        public IEntity? GetEntity(uint vid)
         {
-            return _entities.Find(e => e.Vid == vid);
+            return _entities?.Find(e => e.Vid == vid);
         }
     }
 }

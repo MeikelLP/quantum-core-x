@@ -1,19 +1,15 @@
-using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Reflection;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using QuantumCore.API;
 using QuantumCore.API.PluginTypes;
+using QuantumCore.Core.Utils;
 using QuantumCore.Extensions;
 using QuantumCore.Networking;
 
@@ -53,7 +49,8 @@ namespace QuantumCore.Core.Networking
             // Start server timer
             _serverTimer.Start();
 
-            var localAddr = IPAddress.Parse(hostingOptions.Value.IpAddress);
+            var localAddr = IPAddress.Parse(hostingOptions.Value.IpAddress ?? "127.0.0.1");
+            IpUtils.PublicIP = localAddr;
             Listener = new TcpListener(localAddr, Port);
 
             _logger.LogInformation("Initialize tcp server listening on {IP}:{Port}", localAddr, Port);
@@ -81,8 +78,8 @@ namespace QuantumCore.Core.Networking
 
         private async void OnClientAccepted(IAsyncResult ar)
         {
-            var listener = (TcpListener) ar.AsyncState;
-            var client = listener!.EndAcceptTcpClient(ar);
+            var listener = (TcpListener) ar.AsyncState!;
+            var client = listener.EndAcceptTcpClient(ar);
 
             // will dispose once connection finished executing (canceled or disconnect)
             await using var scope = _serviceProvider.CreateAsyncScope();
@@ -158,7 +155,7 @@ namespace QuantumCore.Core.Networking
             var contextConnectionProperty = typeof(GamePacketContext<>).MakeGenericType(packetType)
                 .GetProperty(nameof(GamePacketContext<object>.Connection))!;
 
-            var context = Activator.CreateInstance(typeof(GamePacketContext<>).MakeGenericType(packetType));
+            var context = Activator.CreateInstance(typeof(GamePacketContext<>).MakeGenericType(packetType))!;
             contextPacketProperty.SetValue(context, packet);
             contextConnectionProperty.SetValue(context, connection);
             return context;
@@ -172,7 +169,7 @@ namespace QuantumCore.Core.Networking
             var contextConnectionProperty = typeof(AuthPacketContext<>).MakeGenericType(packetType)
                 .GetProperty(nameof(AuthPacketContext<object>.Connection))!;
 
-            var context = Activator.CreateInstance(typeof(AuthPacketContext<>).MakeGenericType(packetType));
+            var context = Activator.CreateInstance(typeof(AuthPacketContext<>).MakeGenericType(packetType))!;
             contextPacketProperty.SetValue(context, packet);
             contextConnectionProperty.SetValue(context, connection);
             return context;

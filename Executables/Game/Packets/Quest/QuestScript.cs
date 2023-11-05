@@ -10,7 +10,7 @@ public partial class QuestScript
     [Field(1)]
     public byte Skin { get; set; }
 
-    [Field(2)] 
+    [Field(2)]
     public ushort SourceSize { get; set; }
-    public string Source { get; set; }
+    public string Source { get; set; } = "";
 }

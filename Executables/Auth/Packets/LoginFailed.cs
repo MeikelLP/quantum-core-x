@@ -10,6 +10,6 @@ namespace QuantumCore.Auth.Packets
         public byte Unknown { get; set; }
 
         [Field(1, Length = 9)]
-        public string Status { get; set; }
+        public string Status { get; set; } = "";
     }
 }

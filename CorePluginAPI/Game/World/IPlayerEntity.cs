@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using QuantumCore.API.Core.Models;
+﻿using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game.Types;
 
 namespace QuantumCore.API.Game.World
@@ -12,17 +9,17 @@ namespace QuantumCore.API.Game.World
         IGameConnection Connection { get; }
         PlayerData Player { get; }
         IInventory Inventory { get; }
-        IEntity Target { get; set; }
+        IEntity? Target { get; set; }
         IList<Guid> Groups { get; }
-        IShop Shop { get; set; }
+        IShop? Shop { get; set; }
         IQuickSlotBar QuickSlotBar { get; }
-        IQuest CurrentQuest { get; set; }
+        IQuest? CurrentQuest { get; set; }
         Dictionary<string, IQuest> Quests { get; }
         EAntiFlags AntiFlagClass { get; }
         EAntiFlags AntiFlagGender { get; }
 
         Task Load();
-        T GetQuestInstance<T>() where T : IQuest;
+        T? GetQuestInstance<T>() where T : class, IQuest;
         void Respawn(bool town);
         uint CalculateAttackDamage(uint baseDamage);
         uint GetHitRate();
@@ -31,7 +28,7 @@ namespace QuantumCore.API.Game.World
         void DropItem(ItemInstance item, byte count);
         void Pickup(IGroundItem groundItem);
         void DropGold(uint amount);
-        ItemInstance GetItem(byte window, ushort position);
+        ItemInstance? GetItem(byte window, ushort position);
         bool IsSpaceAvailable(ItemInstance item, byte window, ushort position);
         bool IsEquippable(ItemInstance item);
         bool DestroyItem(ItemInstance item);

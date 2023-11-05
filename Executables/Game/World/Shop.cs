@@ -22,7 +22,7 @@ public class Shop : IShop
     //       to prevent an item from getting sold multiple times
 
     public uint Vid { get; set; }
-    public string Name { get; set; }
+    public string Name { get; set; } = "";
     public IReadOnlyList<ShopItem> Items { get { return _items; } }
     public List<IPlayerEntity> Visitors { get; } = new();
 
@@ -100,6 +100,12 @@ public class Shop : IShop
         }
 
         var proto = _itemManager.GetItem(item.ItemId);
+
+        if (proto is null)
+        {
+            _logger.LogError("Couldn't find item proto for ID {ProtoId}. This shouldn't happen", item.ItemId);
+            return;
+        }
 
         var gold = p.GetPoint(EPoints.Gold);
         if (gold < item.Price)

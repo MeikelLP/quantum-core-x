@@ -28,7 +28,7 @@ namespace QuantumCore.Game.World
         public int RespawnTime { get; set; }
         public List<int> Groups { get; } = new List<int>();
         public uint Monster { get; set; }
-        public MonsterGroup CurrentGroup { get; set; }
+        public MonsterGroup? CurrentGroup { get; set; }
         public short Chance { get; set; }
         public short MaxAmount { get; set; }
     }

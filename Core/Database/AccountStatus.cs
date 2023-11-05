@@ -8,8 +8,9 @@ namespace QuantumCore.Database
     {
         [Key]
         public int Id { get; set; }
-        public string ClientStatus { get; set; }
+
+        public string ClientStatus { get; set; } = "";
         public bool AllowLogin { get; set; }
-        public string Description { get; set; }
+        public string Description { get; set; } = "";
     }
 }

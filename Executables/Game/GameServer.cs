@@ -40,7 +40,7 @@ namespace QuantumCore.Game
         private readonly Stopwatch _serverTimer = new();
         private readonly IDropProvider _dropProvider;
 
-        public static GameServer Instance { get; private set; }
+        public static GameServer Instance { get; private set; } = null!; // singleton
 
         public GameServer(IOptions<HostingOptions> hostingOptions, IPacketManager packetManager,
             ILogger<GameServer> logger, PluginExecutor pluginExecutor, IServiceProvider serviceProvider,
@@ -79,7 +79,7 @@ namespace QuantumCore.Game
             {
                 IpUtils.PublicIP = IPAddress.Parse(_hostingOptions.IpAddress);
             }
-            else
+            else if(IpUtils.PublicIP is null)
             {
                 // Query interfaces for our best ipv4 address
                 IpUtils.SearchPublicIp();
@@ -177,7 +177,7 @@ namespace QuantumCore.Game
 
         public void RegisterCommandNamespace(Type t)
         {
-            _commandManager.Register(t.Namespace, t.Assembly);
+            _commandManager.Register(t.Namespace!, t.Assembly);
         }
     }
 }

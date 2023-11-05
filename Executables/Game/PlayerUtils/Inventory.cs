@@ -1,15 +1,22 @@
 using System.Collections.ObjectModel;
-using System.Data;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
 using QuantumCore.Core.Cache;
 using QuantumCore.Core.Utils;
+using QuantumCore.Database.Repositories;
 using QuantumCore.Extensions;
 using Serilog;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace QuantumCore.Game.PlayerUtils
 {
+    public static class InventoryConstants
+    {
+        public const ushort DEFAULT_INVENTORY_WIDTH = 5;
+        public const ushort DEFAULT_INVENTORY_HEIGHT = 9;
+        public const ushort DEFAULT_INVENTORY_PAGES = 2;
+    }
+
     public enum WindowType
     {
         Inventory = 1
@@ -23,7 +30,7 @@ namespace QuantumCore.Game.PlayerUtils
             private ushort _width;
             private ushort _height;
 
-            private readonly Grid<ItemInstance> _grid;
+            private readonly Grid<ItemInstance?> _grid;
 
             public Page(IItemManager itemManager, ushort width, ushort height)
             {
@@ -31,10 +38,10 @@ namespace QuantumCore.Game.PlayerUtils
                 _width = width;
                 _height = height;
 
-                _grid = new Grid<ItemInstance>(_width, _height);
+                _grid = new Grid<ItemInstance?>(_width, _height);
             }
 
-            public ItemInstance GetItem(long position)
+            public ItemInstance? GetItem(long position)
             {
                 if (position < 0) return null;
                 if (position >= _width * _height) return null;
@@ -166,23 +173,23 @@ namespace QuantumCore.Game.PlayerUtils
 
         private readonly Page[] _pages;
         private readonly IItemManager _itemManager;
-        private readonly IDbConnection _db;
         private ushort _width;
         private ushort _height;
         private readonly List<ItemInstance> _items = new List<ItemInstance>();
         private readonly ICacheManager _cacheManager;
         private readonly ILogger _logger;
+        private readonly IItemRepository _itemRepository;
 
-        public Inventory(IItemManager itemManager, IDbConnection db, ICacheManager cacheManager, ILogger logger,
-            Guid owner, byte window, ushort width, ushort height, ushort pages)
+        public Inventory(IItemManager itemManager, ICacheManager cacheManager, ILogger logger,
+            IItemRepository itemRepository, Guid owner, byte window, ushort width, ushort height, ushort pages)
         {
             Owner = owner;
             Window = window;
 
             _itemManager = itemManager;
-            _db = db;
             _cacheManager = cacheManager;
             _logger = logger;
+            _itemRepository = itemRepository;
             _width = width;
             _height = height;
 
@@ -202,7 +209,7 @@ namespace QuantumCore.Game.PlayerUtils
             _items.Clear();
 
             var pageSize = _width * _height;
-            await foreach(var item in _db.GetItems(_cacheManager, Owner, Window))
+            await foreach(var item in _itemRepository.GetItems(_cacheManager, Owner, Window))
             {
                 // Calculate page
                 var page = item.Position / pageSize;
@@ -299,7 +306,7 @@ namespace QuantumCore.Game.PlayerUtils
             _pages[page].RemoveItem(item.Position - page * pageSize);
         }
 
-        public ItemInstance GetItem(ushort position)
+        public ItemInstance? GetItem(ushort position)
         {
             var pageSize = _width * _height;
             var page = position / pageSize;

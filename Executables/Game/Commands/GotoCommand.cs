@@ -1,5 +1,5 @@
 ﻿using CommandLine;
-using JetBrains.Annotations;
+using Microsoft.Extensions.Logging;
 using QuantumCore.API.Game;
 using QuantumCore.API.Game.World;
 using QuantumCore.Game.World;
@@ -10,10 +10,12 @@ namespace QuantumCore.Game.Commands
     public class GotoCommand : ICommandHandler<GotoCommandOptions>
     {
         private readonly IWorld _world;
+        private readonly ILogger<GotoCommand> _logger;
 
-        public GotoCommand(IWorld world)
+        public GotoCommand(IWorld world, ILogger<GotoCommand> logger)
         {
             _world = world;
+            _logger = logger;
         }
 
         public Task ExecuteAsync(CommandContext<GotoCommandOptions> context)
@@ -47,6 +49,13 @@ namespace QuantumCore.Game.Commands
             }
             else
             {
+                if (context.Player.Map is null)
+                {
+                    _logger.LogCritical("Player's map is null, this should never happen");
+                    context.Player.Connection.Close();
+                    return Task.CompletedTask;
+                }
+
                 if (context.Arguments.X < 0 || context.Arguments.Y < 0)
                     context.Player.SendChatInfo("The X and Y position must be positive");
                 else
@@ -64,7 +73,7 @@ namespace QuantumCore.Game.Commands
     public class GotoCommandOptions
     {
         [Option('m', "map")]
-        [CanBeNull] public string Map { get; set; }
+        public string? Map { get; set; }
 
         [Value(0)]
         public int X { get; set; }
