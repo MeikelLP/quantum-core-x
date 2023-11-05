@@ -1,17 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Threading.Tasks;
+﻿using System.Data;
 using Dapper;
+using QuantumCore.API.Data;
 
 namespace QuantumCore.Database.Repositories;
-
-public interface ICommandPermissionRepository
-{
-    Task<IEnumerable<string>> GetPermissionsForGroupAsync(Guid groupId);
-    Task<IEnumerable<Guid>> GetPlayerIdsInGroupAsync(Guid groupId);
-    Task<IEnumerable<(Guid Id, string Name)>> GetGroupsAsync();
-}
 
 public class CommandPermissionRepository : ICommandPermissionRepository
 {

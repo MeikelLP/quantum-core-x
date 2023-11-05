@@ -3,8 +3,8 @@ using Microsoft.Extensions.Logging;
 using NSubstitute;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
+using QuantumCore.API.Data;
 using QuantumCore.Core.Cache;
-using QuantumCore.Database.Repositories;
 using QuantumCore.Game.PlayerUtils;
 
 namespace Game.Tests;

@@ -1,4 +1,3 @@
-using System.Data;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
@@ -7,10 +6,10 @@ using Microsoft.CodeAnalysis;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
+using QuantumCore.API.Data;
 using QuantumCore.API.Game;
 using QuantumCore.API.Game.World;
 using QuantumCore.Core.Cache;
-using QuantumCore.Database.Repositories;
 using QuantumCore.Game.Packets;
 
 namespace QuantumCore.Game.Commands

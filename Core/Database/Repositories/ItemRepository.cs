@@ -1,21 +1,12 @@
 ﻿#nullable enable
 
-using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Threading.Tasks;
 using Dapper;
 using Dapper.Contrib.Extensions;
 using QuantumCore.API.Core.Models;
+using QuantumCore.API.Data;
 
 namespace QuantumCore.Database.Repositories;
-
-public interface IItemRepository
-{
-    Task<IEnumerable<Guid>> GetItemIdsForPlayerAsync(Guid player, byte window);
-    Task<ItemInstance?> GetItemAsync(Guid id);
-    Task DeletePlayerItemsAsync(Guid playerId);
-}
 
 public class ItemRepository : IItemRepository
 {

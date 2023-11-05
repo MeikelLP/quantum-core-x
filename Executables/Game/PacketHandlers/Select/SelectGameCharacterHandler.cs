@@ -1,11 +1,9 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
+using QuantumCore.API.Data;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.PluginTypes;
-using QuantumCore.Core.Cache;
-using QuantumCore.Database;
-using QuantumCore.Database.Repositories;
 using QuantumCore.Extensions;
 using QuantumCore.Game.Packets;
 using QuantumCore.Game.World.Entities;
@@ -16,16 +14,14 @@ public class SelectGameCharacterHandler : IGamePacketHandler<SelectCharacter>
 {
     private readonly ILogger<SelectGameCharacterHandler> _logger;
     private readonly IServiceProvider _provider;
-    private readonly ICacheManager _cacheManager;
-    private readonly IPlayerRepository _playerRepository;
+    private readonly IPlayerManager _playerManager;
 
     public SelectGameCharacterHandler(ILogger<SelectGameCharacterHandler> logger, IServiceProvider provider,
-        ICacheManager cacheManager, IPlayerRepository playerRepository)
+        IPlayerManager playerManager)
     {
         _logger = logger;
         _provider = provider;
-        _cacheManager = cacheManager;
-        _playerRepository = playerRepository;
+        _playerManager = playerManager;
     }
 
     public async Task ExecuteAsync(GamePacketContext<SelectCharacter> ctx, CancellationToken token = default)
@@ -45,7 +41,7 @@ public class SelectGameCharacterHandler : IGamePacketHandler<SelectCharacter>
         ctx.Connection.SetPhase(EPhases.Loading);
 
         // Load player
-        var player = await Player.GetPlayer(_playerRepository, _cacheManager, accountId, ctx.Packet.Slot);
+        var player = await _playerManager.GetPlayer(accountId, ctx.Packet.Slot);
         if (player is null)
         {
             _logger.LogCritical("Failed to load player on slot {Slot} for account {AccountId}", ctx.Packet.Slot, accountId);

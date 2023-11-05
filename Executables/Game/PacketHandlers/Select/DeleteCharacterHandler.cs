@@ -1,10 +1,8 @@
-using System.Data;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
+using QuantumCore.API.Data;
 using QuantumCore.API.PluginTypes;
 using QuantumCore.Core.Cache;
-using QuantumCore.Database;
-using QuantumCore.Database.Repositories;
 using QuantumCore.Extensions;
 using QuantumCore.Game.Packets;
 using QuantumCore.Game.PlayerUtils;
@@ -16,17 +14,17 @@ public class DeleteCharacterHandler : IGamePacketHandler<DeleteCharacter>
     private readonly ILogger<DeleteCharacterHandler> _logger;
     private readonly ICacheManager _cacheManager;
     private readonly IItemRepository _itemRepository;
-    private readonly IPlayerRepository _playerRepository;
-    private readonly IAccountRepository _accountRepository;
+    private readonly IPlayerManager _playerManager;
+    private readonly IAccountManager _accountManager;
 
-    public DeleteCharacterHandler(ILogger<DeleteCharacterHandler> logger, IDbConnection db, ICacheManager cacheManager,
-        IItemRepository itemRepository, IPlayerRepository playerRepository, IAccountRepository accountRepository)
+    public DeleteCharacterHandler(ILogger<DeleteCharacterHandler> logger, ICacheManager cacheManager,
+        IItemRepository itemRepository, IPlayerManager playerManager, IAccountManager accountManager)
     {
         _logger = logger;
         _cacheManager = cacheManager;
         _itemRepository = itemRepository;
-        _playerRepository = playerRepository;
-        _accountRepository = accountRepository;
+        _playerManager = playerManager;
+        _accountManager = accountManager;
     }
 
     public async Task ExecuteAsync(GamePacketContext<DeleteCharacter> ctx, CancellationToken token = default)
@@ -42,7 +40,7 @@ public class DeleteCharacterHandler : IGamePacketHandler<DeleteCharacter>
 
         var accountId = ctx.Connection.AccountId ?? default;
 
-        var deletecode = await _accountRepository.GetDeleteCodeAsync(accountId);
+        var deletecode = await _accountManager.GetDeleteCodeAsync(accountId);
 
         if (deletecode == default)
         {
@@ -62,7 +60,7 @@ public class DeleteCharacterHandler : IGamePacketHandler<DeleteCharacter>
             Slot = ctx.Packet.Slot
         });
 
-        var player = await Player.GetPlayer(_playerRepository, _cacheManager, accountId, ctx.Packet.Slot);
+        var player = await _playerManager.GetPlayer(accountId, ctx.Packet.Slot);
         if (player == null)
         {
             ctx.Connection.Close();
@@ -70,7 +68,7 @@ public class DeleteCharacterHandler : IGamePacketHandler<DeleteCharacter>
             return;
         }
 
-        await _playerRepository.DeleteAsync(player);
+        await _playerManager.DeleteAsync(player);
 
         // Delete player redis data
         var key = "player:" + player.Id;

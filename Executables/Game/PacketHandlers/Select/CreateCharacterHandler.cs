@@ -3,11 +3,11 @@ using Dapper;
 using Dapper.Contrib.Extensions;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
+using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game.World;
 using QuantumCore.API.PluginTypes;
 using QuantumCore.Core.Cache;
 using QuantumCore.Core.Utils;
-using QuantumCore.Database;
 using QuantumCore.Game.Packets;
 using QuantumCore.Game.PlayerUtils;
 
@@ -60,7 +60,7 @@ public class CreateCharacterHandler : IGamePacketHandler<CreateCharacter>
         }
 
         // Create player data
-        var player = new Player
+        var player = new PlayerData
         {
             Id = Guid.NewGuid(),
             AccountId = accountId,

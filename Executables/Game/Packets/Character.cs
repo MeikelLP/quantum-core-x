@@ -1,6 +1,6 @@
 ﻿#nullable enable
 
-using QuantumCore.Database;
+using QuantumCore.API.Core.Models;
 using QuantumCore.Networking;
 
 namespace QuantumCore.Game.Packets
@@ -44,7 +44,7 @@ namespace QuantumCore.Game.Packets
         [Field(17)]
         public byte SkillGroup { get; set; }
 
-        public static Character FromEntity(Player player)
+        public static Character FromEntity(PlayerData player)
         {
             return new Character
             {

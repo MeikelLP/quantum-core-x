@@ -1,14 +1,8 @@
-﻿using System;
-using System.Data;
-using System.Threading.Tasks;
+﻿using System.Data;
 using Dapper;
+using QuantumCore.API.Data;
 
-namespace QuantumCore.Database;
-
-public interface IEmpireRepository
-{
-    Task<byte?> GetEmpireForAccountAsync(Guid accountId);
-}
+namespace QuantumCore.Database.Repositories;
 
 public class EmpireRepository : IEmpireRepository
 {

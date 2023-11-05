@@ -1,17 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.IO;
-using System.Linq;
+﻿using System.Data;
 using System.Reflection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MySqlConnector;
+using QuantumCore.API.Data;
 using QuantumCore.API.PluginTypes;
 using QuantumCore.Core.Cache;
-using QuantumCore.Database;
 using QuantumCore.Database.Repositories;
 using QuantumCore.Networking;
 using Serilog;
@@ -34,6 +30,9 @@ public static class ServiceExtensions
         services.AddScoped<IEmpireRepository, EmpireRepository>();
         services.AddScoped<IItemRepository, ItemRepository>();
         services.AddScoped<IPlayerRepository, PlayerRepository>();
+        services.AddScoped<IAccountRepository, AccountRepository>();
+        services.AddScoped<IAccountManager, AccountManager>();
+        services.AddScoped<IPlayerManager, PlayerManager>();
         services.AddScoped<ICommandPermissionRepository, CommandPermissionRepository>();
         services.AddScoped<IDbConnection>(provider =>
         {

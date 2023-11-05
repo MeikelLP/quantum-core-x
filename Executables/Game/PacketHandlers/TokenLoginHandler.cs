@@ -1,13 +1,12 @@
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
+using QuantumCore.API.Data;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.World;
 using QuantumCore.API.PluginTypes;
 using QuantumCore.Auth.Cache;
 using QuantumCore.Core.Cache;
 using QuantumCore.Core.Utils;
-using QuantumCore.Database;
-using QuantumCore.Database.Repositories;
 using QuantumCore.Extensions;
 using QuantumCore.Game.Packets;
 
@@ -19,16 +18,16 @@ namespace QuantumCore.Game.PacketHandlers
         private readonly ICacheManager _cacheManager;
         private readonly IWorld _world;
         private readonly IEmpireRepository _empireRepository;
-        private readonly IPlayerRepository _playerRepository;
+        private readonly IPlayerManager _playerManager;
 
         public TokenLoginHandler(ILogger<TokenLoginHandler> logger, ICacheManager cacheManager, IWorld world,
-            IEmpireRepository empireRepository, IPlayerRepository playerRepository)
+            IEmpireRepository empireRepository, IPlayerManager playerManager)
         {
             _logger = logger;
             _cacheManager = cacheManager;
             _world = world;
             _empireRepository = empireRepository;
-            _playerRepository = playerRepository;
+            _playerManager = playerManager;
         }
 
         public async Task ExecuteAsync(GamePacketContext<TokenLogin> ctx, CancellationToken cancellationToken = default)
@@ -67,7 +66,7 @@ namespace QuantumCore.Game.PacketHandlers
             // Load players of account
             var characters = new Characters();
             var i = 0;
-            var charactersFromCacheOrDb = await Player.GetPlayers(_playerRepository, _cacheManager, token.AccountId).ToArrayAsync(cancellationToken);
+            var charactersFromCacheOrDb = await _playerManager.GetPlayers(token.AccountId).ToArrayAsync(cancellationToken);
             foreach (var player in charactersFromCacheOrDb)
             {
                 var host = _world.GetMapHost(player.PositionX, player.PositionY);

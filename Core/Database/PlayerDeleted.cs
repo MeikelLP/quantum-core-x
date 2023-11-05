@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using QuantumCore.API.Core.Models;
 
 namespace QuantumCore.Database
 {
@@ -31,7 +27,7 @@ namespace QuantumCore.Database
 
         public DateTime DeletedAt { get; set; } = DateTime.Now;
 
-        public PlayerDeleted(Player p)
+        public PlayerDeleted(PlayerData p)
         {
             AccountId = p.AccountId;
             Name = p.Name;
@@ -53,8 +49,6 @@ namespace QuantumCore.Database
             BodyPart = p.BodyPart;
             HairPart = p.HairPart;
             Id = p.Id;
-            CreatedAt = p.CreatedAt;
-            UpdatedAt = p.UpdatedAt;
         }
     }
 }
