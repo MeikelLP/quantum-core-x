@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Threading.Tasks;
+﻿using System.Data;
 using Dapper;
 
 namespace QuantumCore.Database.Repositories;
@@ -29,11 +26,13 @@ public class CommandPermissionRepository : ICommandPermissionRepository
 
     public async Task<IEnumerable<Guid>> GetPlayerIdsInGroupAsync(Guid groupId)
     {
-        return await _db.QueryAsync<Guid>("SELECT Player FROM perm_users WHERE `Group` = @Group", new { Group = groupId });
+        var results = await _db.QueryAsync<string>("SELECT Player FROM perm_users WHERE `Group` = @Group", new { Group = groupId });
+        return results.Select(Guid.Parse);
     }
 
     public async Task<IEnumerable<(Guid Id, string Name)>> GetGroupsAsync()
     {
-        return await _db.QueryAsync<(Guid Id, string Name)>("SELECT Id, Name FROM perm_groups");
+        var results = await _db.QueryAsync<(string Id, string Name)>("SELECT Id, Name FROM perm_groups");
+        return results.Select(x => (Guid.Parse(x.Id), x.Name));
     }
 }

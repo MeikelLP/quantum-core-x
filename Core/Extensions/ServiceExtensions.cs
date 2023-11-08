@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.IO;
-using System.Linq;
+﻿using System.Data;
 using System.Reflection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -34,6 +30,7 @@ public static class ServiceExtensions
         services.AddScoped<IEmpireRepository, EmpireRepository>();
         services.AddScoped<IItemRepository, ItemRepository>();
         services.AddScoped<IPlayerRepository, PlayerRepository>();
+        services.AddScoped<IAccountRepository, AccountRepository>();
         services.AddScoped<ICommandPermissionRepository, CommandPermissionRepository>();
         services.AddScoped<IDbConnection>(provider =>
         {

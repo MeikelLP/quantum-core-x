@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Threading.Tasks;
+﻿using System.Data;
 using Dapper;
 using Dapper.Contrib.Extensions;
 
@@ -37,8 +34,9 @@ public class PlayerRepository : IPlayerRepository
 
     public async Task<IEnumerable<Guid>> GetPlayerIdsForAccountAsync(Guid account)
     {
-        return await _db.QueryAsync<Guid>("SELECT Id FROM players WHERE AccountId = @AccountId",
+        var results = await _db.QueryAsync<string>("SELECT Id FROM players WHERE AccountId = @AccountId",
             new { AccountId = account });
+        return results.Select(Guid.Parse);
     }
 }
 
