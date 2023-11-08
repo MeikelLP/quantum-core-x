@@ -22,7 +22,7 @@ public class EmpireRepository : IEmpireRepository
     public async Task<byte?> GetEmpireForAccountAsync(Guid accountId)
     {
         return await _db.QueryFirstOrDefaultAsync<byte>(
-            "SELECT Empire FROM account.accounts WHERE Id = @AccountId", new { AccountId = accountId });
+            "SELECT Empire FROM game.empires WHERE AccountId = @AccountId", new { AccountId = accountId });
     }
 }
 
