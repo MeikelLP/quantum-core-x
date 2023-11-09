@@ -4,12 +4,11 @@ using QuantumCore.API;
 using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.World;
-using QuantumCore.Core.Cache;
+using QuantumCore.Caching;
 using QuantumCore.Core.Utils;
-using QuantumCore.Database;
-using QuantumCore.Database.Repositories;
 using QuantumCore.Extensions;
 using QuantumCore.Game.Packets;
+using QuantumCore.Game.Persistence;
 using QuantumCore.Game.PlayerUtils;
 
 namespace QuantumCore.Game.World.Entities
@@ -95,7 +94,7 @@ namespace QuantumCore.Game.World.Entities
         private readonly ILogger<PlayerEntity> _logger;
         private readonly IEmpireRepository _empireRepository;
 
-        public PlayerEntity(Player player, IGameConnection connection, IItemManager itemManager, IJobManager jobManager,
+        public PlayerEntity(PlayerData player, IGameConnection connection, IItemManager itemManager, IJobManager jobManager,
             IExperienceManager experienceManager, IAnimationManager animationManager,
             IQuestManager questManager, ICacheManager cacheManager, IWorld world, ILogger<PlayerEntity> logger,
             IEmpireRepository empireRepository, IItemRepository itemRepository)
@@ -113,32 +112,7 @@ namespace QuantumCore.Game.World.Entities
             Inventory = new Inventory(itemManager, _cacheManager, _logger, itemRepository, player.Id,
                 (byte)WindowType.Inventory, InventoryConstants.DEFAULT_INVENTORY_WIDTH, InventoryConstants.DEFAULT_INVENTORY_HEIGHT, InventoryConstants.DEFAULT_INVENTORY_PAGES);
             Inventory.OnSlotChanged += Inventory_OnSlotChanged;
-            Player = new PlayerData {
-                Id = player.Id,
-                AccountId = player.AccountId,
-                Name = player.Name,
-                PlayerClass = player.PlayerClass,
-                SkillGroup = player.SkillGroup,
-                PlayTime = player.PlayTime,
-                Level = player.Level,
-                Experience = player.Experience,
-                Gold = player.Gold,
-                St = player.St,
-                Ht = player.Ht,
-                Dx = player.Dx,
-                Iq = player.Iq,
-                PositionX = player.PositionX,
-                PositionY = player.PositionY,
-                Health = player.Health,
-                Mana = player.Mana,
-                Stamina = player.Stamina,
-                BodyPart = player.BodyPart,
-                HairPart = player.HairPart,
-                GivenStatusPoints = player.GivenStatusPoints,
-                AvailableStatusPoints = player.AvailableStatusPoints,
-                MaxHp = GetMaxHp(_jobManager, player.PlayerClass, player.Level, player.Ht),
-                MaxSp = GetMaxSp(_jobManager, player.PlayerClass, player.Level, player.Iq),
-            };
+            Player = player;
             PositionX = player.PositionX;
             PositionY = player.PositionY;
             QuickSlotBar = new QuickSlotBar(_cacheManager, _logger, this);

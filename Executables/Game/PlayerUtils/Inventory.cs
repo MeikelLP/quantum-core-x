@@ -1,10 +1,10 @@
 using System.Collections.ObjectModel;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
-using QuantumCore.Core.Cache;
+using QuantumCore.Caching;
 using QuantumCore.Core.Utils;
-using QuantumCore.Database.Repositories;
 using QuantumCore.Extensions;
+using QuantumCore.Game.Persistence;
 using Serilog;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
 
@@ -15,11 +15,6 @@ namespace QuantumCore.Game.PlayerUtils
         public const ushort DEFAULT_INVENTORY_WIDTH = 5;
         public const ushort DEFAULT_INVENTORY_HEIGHT = 9;
         public const ushort DEFAULT_INVENTORY_PAGES = 2;
-    }
-
-    public enum WindowType
-    {
-        Inventory = 1
     }
 
     public class Inventory : IInventory

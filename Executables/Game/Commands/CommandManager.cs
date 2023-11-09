@@ -9,9 +9,9 @@ using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.Game;
 using QuantumCore.API.Game.World;
-using QuantumCore.Core.Cache;
-using QuantumCore.Database.Repositories;
+using QuantumCore.Caching;
 using QuantumCore.Game.Packets;
+using QuantumCore.Game.Persistence;
 
 namespace QuantumCore.Game.Commands
 {

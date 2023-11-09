@@ -1,36 +1,32 @@
-using System.Data;
-using Dapper;
-using Dapper.Contrib.Extensions;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.PluginTypes;
 using QuantumCore.Auth.Cache;
 using QuantumCore.Auth.Packets;
-using QuantumCore.Core.Cache;
+using QuantumCore.Auth.Persistence;
+using QuantumCore.Caching;
 using QuantumCore.Core.Utils;
-using QuantumCore.Database;
 
 namespace QuantumCore.Auth.PacketHandlers;
 
 public class LoginRequestHandler : IAuthPacketHandler<LoginRequest>
 {
-    private readonly IDbConnection _db;
+    private readonly IAccountRepository _accountRepository;
     private readonly ILogger<LoginRequestHandler> _logger;
     private readonly ICacheManager _cacheManager;
 
-    public LoginRequestHandler(IDbConnection db, ILogger<LoginRequestHandler> logger, ICacheManager cacheManager)
+    public LoginRequestHandler(IAccountRepository accountRepository, ILogger<LoginRequestHandler> logger, ICacheManager cacheManager)
     {
-        _db = db;
+        _accountRepository = accountRepository;
         _logger = logger;
         _cacheManager = cacheManager;
     }
 
     public async Task ExecuteAsync(AuthPacketContext<LoginRequest> ctx, CancellationToken token = default)
     {
-        var account = await _db.QueryFirstOrDefaultAsync<Account>(
-            "SELECT * FROM account.accounts WHERE Username = @Username", new {Username = ctx.Packet.Username});
+        var account = await _accountRepository.FindByNameAsync(ctx.Packet.Username);
         // Check if account was found
-        if (account == default(Account))
+        if (account == default)
         {
             // Hash the password to prevent timing attacks
             BCrypt.Net.BCrypt.HashPassword(ctx.Packet.Password);
@@ -57,10 +53,9 @@ public class LoginRequestHandler : IAuthPacketHandler<LoginRequest>
             else
             {
                 // Check account status stored in the database
-                var dbStatus = await _db.GetAsync<AccountStatus>(account.Status);
-                if (!dbStatus.AllowLogin)
+                if (!account.AccountStatus.AllowLogin)
                 {
-                    status = dbStatus.ClientStatus;
+                    status = account.AccountStatus.ClientStatus;
                 }
             }
         }

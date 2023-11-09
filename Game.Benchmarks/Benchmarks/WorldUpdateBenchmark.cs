@@ -1,5 +1,7 @@
 ﻿using System.Data;
 using BenchmarkDotNet.Attributes;
+using Core.Persistence.Extensions;
+using Game.Caching.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -10,8 +12,8 @@ using QuantumCore;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game.World;
-using QuantumCore.Core.Cache;
-using QuantumCore.Database;
+using QuantumCore.Caching;
+using QuantumCore.Caching.Extensions;
 using QuantumCore.Extensions;
 using QuantumCore.Game;
 using QuantumCore.Game.Extensions;
@@ -45,7 +47,8 @@ public class WorldUpdateBenchmark
             .AddLogging()
             .AddSingleton<IConfiguration>(_ => config)
             .AddCoreServices(new EmptyPluginCatalog(), config)
-            .AddQuantumCoreCache()
+            .AddQuantumCoreCaching()
+            .AddGameCaching()
             .AddQuantumCoreDatabase()
             .AddGameServices()
             .Replace(new ServiceDescriptor(typeof(IDbConnection), _ => new Mock<IDbConnection>().Object, ServiceLifetime.Singleton))
@@ -113,7 +116,7 @@ public class WorldUpdateBenchmark
 
         foreach (var i in Enumerable.Range(0, PlayerAmount))
         {
-            var player = new Player
+            var player = new PlayerData
             {
                 Name = i.ToString(),
                 PlayerClass = 1,

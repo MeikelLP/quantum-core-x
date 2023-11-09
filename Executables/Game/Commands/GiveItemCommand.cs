@@ -3,7 +3,7 @@ using QuantumCore.API;
 using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game;
 using QuantumCore.API.Game.World;
-using QuantumCore.Core.Cache;
+using QuantumCore.Caching;
 using QuantumCore.Extensions;
 
 namespace QuantumCore.Game.Commands
