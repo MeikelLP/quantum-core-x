@@ -17,11 +17,6 @@ namespace QuantumCore.Game.PlayerUtils
         public const ushort DEFAULT_INVENTORY_PAGES = 2;
     }
 
-    public enum WindowType
-    {
-        Inventory = 1
-    }
-
     public class Inventory : IInventory
     {
         private class Page
