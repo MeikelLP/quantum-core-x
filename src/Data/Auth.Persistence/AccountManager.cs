@@ -12,7 +12,7 @@ public class AccountManager : IAccountManager
         _repository = repository;
         _passwordHasher = passwordHasher;
     }
-    
+
     public Task<AccountData?> FindByIdAsync(Guid id)
     {
         return _repository.FindByIdAsync(id);
@@ -43,7 +43,7 @@ public class AccountManager : IAccountManager
             AccountStatus = new AccountStatusData
             {
                 Id = 1,
-                Description = null,
+                Description = "",
                 AllowLogin = true,
                 ClientStatus = "OK"
             }

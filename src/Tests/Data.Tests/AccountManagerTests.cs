@@ -80,7 +80,7 @@ public class AccountManagerTests : IClassFixture<RedisFixture>, IClassFixture<Da
         {
             AccountStatus = new AccountStatusData
             {
-                Description = null,
+                Description = "",
                 Id = 1,
                 AllowLogin = true,
                 ClientStatus = "OK"
