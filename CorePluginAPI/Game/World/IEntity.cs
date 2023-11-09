@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using QuantumCore.API.Core.Utils;
+﻿using QuantumCore.API.Core.Utils;
 using QuantumCore.API.Game.Types;
 
 namespace QuantumCore.API.Game.World
@@ -30,7 +27,7 @@ namespace QuantumCore.API.Game.World
         public int PositionX { get; }
         public int PositionY { get; }
         public float Rotation { get; set; }
-        public IMap Map { get; set; }
+        public IMap? Map { get; set; }
         public byte HealthPercentage { get; }
         public List<IPlayerEntity> TargetedBy { get; }
         public bool Dead { get; }
@@ -38,7 +35,7 @@ namespace QuantumCore.API.Game.World
         // QuadTree cache
         public int LastPositionX { get; set; }
         public int LastPositionY { get; set; }
-        public IQuadTree LastQuadTree { get; set; }
+        public IQuadTree? LastQuadTree { get; set; }
 
         // Movement related
         public long MovementStart { get; }

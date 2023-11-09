@@ -10,5 +10,5 @@ public partial class QuickBarAddOut
     [Field(0)]
     public byte Position { get; set; }
     [Field(1)]
-    public QuickSlot Slot { get; set; }
+    public QuickSlot Slot { get; set; } = new QuickSlot();
 }

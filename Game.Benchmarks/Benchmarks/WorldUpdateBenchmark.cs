@@ -128,7 +128,7 @@ public class WorldUpdateBenchmark
             var entity = ActivatorUtilities.CreateInstance<PlayerEntity>(services, _world, player, conn);
             _world.SpawnEntity(entity);
         }
-        foreach (var e in _world.GetMapAt(0, 0).Entities)
+        foreach (var e in _world.GetMapAt(0, 0)!.Entities)
         {
             e?.Goto(0, 0);
         }

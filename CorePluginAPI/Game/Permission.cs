@@ -1,16 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace QuantumCore.API.Game
+﻿namespace QuantumCore.API.Game
 {
     public record PermissionGroup
     {
-        public Guid Id;
-        public string Name;
-        public IList<Guid> Users;
-        public IList<string> Permissions;
+        public Guid Id { get; init; }
+        public string Name { get; init; } = "";
+        public IList<Guid> Users { get; init; } = new List<Guid>();
+        public IList<string> Permissions { get; init; } = new List<string>();
     }
 }

@@ -1,4 +1,5 @@
-﻿using QuantumCore.API;
+﻿using Microsoft.Extensions.Logging;
+using QuantumCore.API;
 using QuantumCore.API.PluginTypes;
 using QuantumCore.Game.Commands;
 using QuantumCore.Game.Packets;
@@ -9,15 +10,24 @@ public class ChatIncomingHandler : IGamePacketHandler<ChatIncoming>
 {
     private readonly ICommandManager _commandManager;
     private readonly IChatManager _chatManager;
+    private readonly ILogger<ChatIncomingHandler> _logger;
 
-    public ChatIncomingHandler(ICommandManager commandManager, IChatManager chatManager)
+    public ChatIncomingHandler(ICommandManager commandManager, IChatManager chatManager,
+        ILogger<ChatIncomingHandler> logger)
     {
         _commandManager = commandManager;
         _chatManager = chatManager;
+        _logger = logger;
     }
 
     public async Task ExecuteAsync(GamePacketContext<ChatIncoming> ctx, CancellationToken token = default)
     {
+        if (ctx.Connection.Player is null)
+        {
+            _logger.LogCritical("Player is not set on connection. This must never happen");
+            ctx.Connection.Close();
+            return;
+        }
         if (ctx.Packet.MessageType == ChatMessageTypes.Normal)
         {
             if (ctx.Packet.Message.StartsWith('/'))

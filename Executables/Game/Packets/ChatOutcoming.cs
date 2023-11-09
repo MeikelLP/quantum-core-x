@@ -17,7 +17,7 @@ public partial class ChatOutcoming
     [Field(3)]
     public byte Empire { get; set; }
 
-    public string Message { get; set; }
+    public string Message { get; set; } = "";
 
     public override string ToString()
     {

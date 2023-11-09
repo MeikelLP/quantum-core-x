@@ -9,7 +9,7 @@ namespace QuantumCore.Game.Packets
         [Field(0)]
         public uint Vid { get; set; }
         [Field(1, Length = 25)]
-        public string Name { get; set; }
+        public string Name { get; set; } = "";
         [Field(2, ArrayLength = 4)]
         public ushort[] Parts { get; set; } = new ushort[4];
         [Field(3)]

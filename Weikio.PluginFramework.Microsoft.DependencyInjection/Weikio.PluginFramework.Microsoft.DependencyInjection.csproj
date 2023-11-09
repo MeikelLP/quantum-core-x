@@ -2,8 +2,7 @@
 
     <PropertyGroup>
         <TargetFramework>net7.0</TargetFramework>
-        <ImplicitUsings>enable</ImplicitUsings>
-        <Nullable>enable</Nullable>
+        <Nullable>disable</Nullable> <!-- Because we don't want warnings from this project -->
     </PropertyGroup>
 
     <ItemGroup>

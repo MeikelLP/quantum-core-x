@@ -46,17 +46,17 @@ namespace QuantumCore.Game
                 await LoadAnimation(i + 4, AnimationType.Walk, AnimationSubType.General, Path.Join(pc2, "general", "walk.msa"));
                 await LoadAnimation(i + 4, AnimationType.Run, AnimationSubType.General, Path.Join(pc2, "general", "run.msa"));
             }
-            
+
             // Load monster animations
             foreach (var monster in _monsterManager.GetMonsters())
             {
                 // The animation could be in monster or monster2
                 var folder = monster.Folder.Trim('\0');
                 if(folder.Length == 0) continue;
-                
+
                 var monster1 = Path.Join("data", "monster", folder);
                 var monster2 = Path.Join("data", "monster2", folder);
-                
+
                 if (Directory.Exists(monster1))
                 {
                     await LoadMonsterAnimation(monster, monster1);
@@ -105,7 +105,7 @@ namespace QuantumCore.Game
         /// <param name="type">The main animation type</param>
         /// <param name="subType">The sub animation type</param>
         /// <returns>The animation or null if the animation doesn't exists</returns>
-        public Animation GetAnimation(uint id, AnimationType type, AnimationSubType subType)
+        public Animation? GetAnimation(uint id, AnimationType type, AnimationSubType subType)
         {
             if (!_animations.ContainsKey(id)) return null;
             if (!_animations[id].ContainsKey(type)) return null;
@@ -125,9 +125,9 @@ namespace QuantumCore.Game
         private async Task<bool> LoadAnimation(uint id, AnimationType type, AnimationSubType subType, string path)
         {
             if (!File.Exists(path)) return false;
-            
+
             _logger.LogDebug("Loading animation file {Path} ({Id} {Type} {SubType})", path, id, type, subType);
-            
+
             var msa = new StructuredFile();
             await msa.ReadAsync(path);
 
@@ -153,10 +153,10 @@ namespace QuantumCore.Game
                 _logger.LogWarning("Invalid Accumulation found in msa file {Path}", path);
                 return false;
             }
-            
-            var animation = new Animation(duration??0, accuX??0, accuY??0, accuZ??0);
+
+            var animation = new Animation(duration.Value, accuX.Value, accuY.Value, accuZ.Value);
             PutAnimation(id, type, subType, animation);
-            
+
             return true;
         }
 

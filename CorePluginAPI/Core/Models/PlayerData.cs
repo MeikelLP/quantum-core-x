@@ -1,12 +1,10 @@
-﻿using System;
-
-namespace QuantumCore.API.Core.Models;
+﻿namespace QuantumCore.API.Core.Models;
 
 public class PlayerData
 {
     public Guid Id { get; set; }
     public Guid AccountId { get; set; }
-    public string Name { get; set; }
+    public string Name { get; set; } = "";
     public byte PlayerClass { get; set; }
     public byte SkillGroup { get; set; }
     public uint PlayTime { get; set; }

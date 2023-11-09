@@ -34,7 +34,7 @@ public class SelectGameCharacterHandler : IGamePacketHandler<SelectCharacter>
             return;
         }
 
-        var accountId = ctx.Connection.AccountId ?? default; // todo clean solution
+        var accountId = ctx.Connection.AccountId.Value;
 
         // Let the client load the game
         ctx.Connection.SetPhase(EPhases.Loading);

@@ -6,7 +6,7 @@ namespace QuantumCore.Game.World
     public class MonsterGroup
     {
         public List<MonsterEntity> Monsters { get; } = new();
-        public SpawnPoint SpawnPoint { get; set; }
+        public SpawnPoint? SpawnPoint { get; set; }
 
         public void TriggerAll(IEntity attacker, MonsterEntity except)
         {

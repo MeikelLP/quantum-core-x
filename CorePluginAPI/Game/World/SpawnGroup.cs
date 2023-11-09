@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-
 namespace QuantumCore.API.Game.World
 {
     public class SpawnMember
@@ -15,7 +13,7 @@ namespace QuantumCore.API.Game.World
     public class SpawnGroup
     {
         public uint Id { get; set; }
-        public string Name { get; set; }
+        public string Name { get; set; } = "";
         public uint Leader { get; set; }
         public List<SpawnMember> Members { get; } = new List<SpawnMember>();
     }
@@ -23,7 +21,7 @@ namespace QuantumCore.API.Game.World
     public class SpawnGroupCollection
     {
         public uint Id { get; set; }
-        public string Name { get; set; }
+        public string Name { get; set; } = "";
         public List<SpawnGroupCollectionMember> Groups { get; } = new List<SpawnGroupCollectionMember>();
     }
 }

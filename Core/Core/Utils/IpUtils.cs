@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using System.Net;
+﻿using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 
@@ -7,8 +6,8 @@ namespace QuantumCore.Core.Utils
 {
     public static class IpUtils
     {
-        public static IPAddress PublicIP { get; set; } 
-        
+        public static IPAddress? PublicIP { get; set; }
+
         public static int ConvertIpToUInt(string ip)
         {
             return ConvertIpToUInt(IPAddress.Parse(ip));

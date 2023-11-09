@@ -13,7 +13,7 @@ public class ItemGiveHandler : IGamePacketHandler<ItemGive>
     {
         _logger = logger;
     }
-        
+
     public async Task ExecuteAsync(GamePacketContext<ItemGive> ctx, CancellationToken token = default)
     {
         var player = ctx.Connection.Player;
@@ -23,7 +23,7 @@ public class ItemGiveHandler : IGamePacketHandler<ItemGive>
             return;
         }
 
-        var entity = player.Map.GetEntity(ctx.Packet.TargetVid);
+        var entity = player.Map?.GetEntity(ctx.Packet.TargetVid);
         if (entity == null)
         {
             _logger.LogDebug("Ignore item give to non existing entity");
@@ -35,7 +35,7 @@ public class ItemGiveHandler : IGamePacketHandler<ItemGive>
         {
             return;
         }
-            
+
         _logger.LogInformation("Item give to {Entity}", entity);
         await GameEventManager.OnNpcGive(entity.EntityClass, player, item);
     }

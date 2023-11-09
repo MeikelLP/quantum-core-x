@@ -20,13 +20,12 @@ namespace QuantumCore.Game.World.Entities
         public string Name => Player.Name;
         public IGameConnection Connection { get; }
         public PlayerData Player { get; private set; }
-        public byte Empire { get; private set; }
         public IInventory Inventory { get; private set; }
-        public IEntity Target { get; set; }
+        public IEntity? Target { get; set; }
         public IList<Guid> Groups { get; private set; }
-        public IShop Shop { get; set; }
+        public IShop? Shop { get; set; }
         public IQuickSlotBar QuickSlotBar { get; }
-        public IQuest CurrentQuest { get; set; }
+        public IQuest? CurrentQuest { get; set; }
         public Dictionary<string, IQuest> Quests { get; } = new();
 
         public override byte HealthPercentage {
@@ -110,7 +109,8 @@ namespace QuantumCore.Game.World.Entities
             _world = world;
             _logger = logger;
             _empireRepository = empireRepository;
-            Inventory = new Inventory(itemManager, _cacheManager, _logger, itemRepository, player.Id, 1, 5, 9, 2);
+            Inventory = new Inventory(itemManager, _cacheManager, _logger, itemRepository, player.Id,
+                (byte)WindowType.Inventory, InventoryConstants.DEFAULT_INVENTORY_WIDTH, InventoryConstants.DEFAULT_INVENTORY_HEIGHT, InventoryConstants.DEFAULT_INVENTORY_PAGES);
             Inventory.OnSlotChanged += Inventory_OnSlotChanged;
             Player = player;
             PositionX = player.PositionX;
@@ -170,7 +170,7 @@ namespace QuantumCore.Game.World.Entities
             }
         }
 
-        public T GetQuestInstance<T>() where T : IQuest
+        public T? GetQuestInstance<T>() where T : class, IQuest
         {
             var id = typeof(T).FullName;
             if (id == null)
@@ -203,6 +203,7 @@ namespace QuantumCore.Game.World.Entities
 
         public override void Move(int x, int y)
         {
+            if (Map is null) return;
             if (PositionX == x && PositionY == y) return;
 
             if (!Map.IsPositionInside(x, y))
@@ -227,7 +228,7 @@ namespace QuantumCore.Game.World.Entities
                 var item = Inventory.EquipmentWindow.GetItem(slot);
                 if (item == null) continue;
                 var proto = _itemManager.GetItem(item.ItemId);
-                if (proto.Type != (byte) EItemType.Armor) continue;
+                if (proto?.Type != (byte) EItemType.Armor) continue;
 
                 _defence += (uint)proto.Values[1] + (uint)proto.Values[5] * 2;
             }
@@ -345,10 +346,14 @@ namespace QuantumCore.Game.World.Entities
 
         public uint CalculateAttackDamage(uint baseDamage)
         {
+            var attackStatus = _jobManager.Get(Player.PlayerClass)?.AttackStatus;
+
+            if (attackStatus is null) return 0;
+
             var levelBonus = GetPoint(EPoints.Level) * 2;
             var statusBonus = (
                 4 * GetPoint(EPoints.St) +
-                2 * GetPoint(_jobManager.Get(Player.PlayerClass).AttackStatus)
+                2 * GetPoint(attackStatus.Value)
             ) / 3;
             var weaponDamage = baseDamage * 2;
 
@@ -567,8 +572,8 @@ namespace QuantumCore.Game.World.Entities
                     if (args.ItemInstance is not null)
                     {
                         var item = _itemManager.GetItem(args.ItemInstance.ItemId);
-                        Player.MinWeaponDamage = item.GetMinWeaponDamage();
-                        Player.MaxWeaponDamage = item.GetMaxWeaponDamage();
+                        Player.MinWeaponDamage = item?.GetMinWeaponDamage() ?? 0;
+                        Player.MaxWeaponDamage = item?.GetMaxWeaponDamage() ?? 0;
                     }
                     else
                     {
@@ -670,7 +675,14 @@ namespace QuantumCore.Game.World.Entities
 
                 SendItem(item);
 
-                item = _itemManager.CreateItem(_itemManager.GetItem(item.ItemId), count);
+                var proto = _itemManager.GetItem(item.ItemId);
+                if (proto is null)
+                {
+                    _logger.LogCritical("Failed to find proto {ProtoId} for instanced item {ItemId}",
+                        item.ItemId, item.Id);
+                    return;
+                }
+                item = _itemManager.CreateItem(proto, count);
             }
 
             (Map as Map)?.AddGroundItem(item, PositionX, PositionY);
@@ -678,6 +690,8 @@ namespace QuantumCore.Game.World.Entities
 
         public void Pickup(IGroundItem groundItem)
         {
+            if (Map is null) return;
+
             var item = groundItem.Item;
             if (item.ItemId == 1)
             {
@@ -700,6 +714,14 @@ namespace QuantumCore.Game.World.Entities
 
         public void DropGold(uint amount)
         {
+            var proto = _itemManager.GetItem(1);
+
+            if (proto is null)
+            {
+                _logger.LogCritical("Cannot find proto for gold. This must never happen");
+                return;
+            }
+
             // todo prevent crashing the server with dropping gold too often ;)
 
             if (amount > GetPoint(EPoints.Gold))
@@ -710,7 +732,7 @@ namespace QuantumCore.Game.World.Entities
             AddPoint(EPoints.Gold, -(int)amount);
             SendPoints();
 
-            var item = _itemManager.CreateItem(_itemManager.GetItem(1), 1); // count will be overwritten as it's gold
+            var item = _itemManager.CreateItem(proto, 1); // count will be overwritten as it's gold
             (Map as Map)?.AddGroundItem(item, PositionX, PositionY, amount); // todo add method to IMap interface when we have an item interface...
         }
 
@@ -719,7 +741,7 @@ namespace QuantumCore.Game.World.Entities
             Persist().Wait(); // TODO
         }
 
-        public ItemInstance GetItem(byte window, ushort position)
+        public ItemInstance? GetItem(byte window, ushort position)
         {
             switch (window)
             {
