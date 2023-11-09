@@ -43,10 +43,9 @@ public class SelectGameCharacterHandler : IGamePacketHandler<SelectCharacter>
         var player = await _playerManager.GetPlayer(accountId, ctx.Packet.Slot);
         if (player is null)
         {
-            _logger.LogCritical("Failed to load player on slot {Slot} for account {AccountId}", ctx.Packet.Slot, accountId);
-            ctx.Connection.Close();
-            return;
+            throw new InvalidOperationException("Player was not found. This should never happen at this point");
         }
+
         var entity = ActivatorUtilities.CreateInstance<PlayerEntity>(_provider, ctx.Connection, player);
         await entity.Load();
 
