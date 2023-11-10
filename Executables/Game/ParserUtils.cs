@@ -86,7 +86,7 @@ internal static partial class ParserUtils
     }
 
     /// <returns>null if end of stream</returns>
-    public static async Task<KeyValuePair<uint, DropEntry[]>?> GetDropsForBlockAsync(TextReader sr,
+    public static async Task<KeyValuePair<uint, MonsterDropEntry[]>?> GetDropsForBlockAsync(TextReader sr,
         CancellationToken cancellationToken = default)
     {
         string? line;
@@ -97,7 +97,7 @@ internal static partial class ParserUtils
             if (line is null) return null; // EOS
         } while (!line.StartsWith("Group"));
 
-        var drops = new List<DropEntry>();
+        var drops = new List<MonsterDropEntry>();
         uint mob = 0;
         uint minLevel = 0;
         uint minKillCount = 0;
@@ -126,7 +126,7 @@ internal static partial class ParserUtils
                 {
                     var amount = byte.Parse(splitted[2], InvNum);
                     var chance = float.Parse(splitted[3], InvNum) / 100; // to make it 0-1 not 0-100
-                    drops.Add(new DropEntry(itemId, chance, minLevel, minKillCount, amount));
+                    drops.Add(new MonsterDropEntry(itemId, chance, minLevel, minKillCount, amount));
                 }
                 else
                 {
@@ -137,7 +137,7 @@ internal static partial class ParserUtils
 
         if (mob == 0) return null; // invalid
 
-        return new KeyValuePair<uint, DropEntry[]>(mob, drops.ToArray());
+        return new KeyValuePair<uint, MonsterDropEntry[]>(mob, drops.ToArray());
     }
 
     public static async Task<SpawnGroupCollection?> GetSpawnGroupCollectionFromBlock(TextReader sr)

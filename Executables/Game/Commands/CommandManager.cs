@@ -9,7 +9,7 @@ using QuantumCore.API;
 using QuantumCore.API.Data;
 using QuantumCore.API.Game;
 using QuantumCore.API.Game.World;
-using QuantumCore.Core.Cache;
+using QuantumCore.Caching;
 using QuantumCore.Game.Packets;
 
 namespace QuantumCore.Game.Commands

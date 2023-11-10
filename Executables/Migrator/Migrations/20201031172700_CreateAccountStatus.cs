@@ -1,5 +1,6 @@
 ﻿using FluentMigrator;
-using QuantumCore.Database;
+using QuantumCore.Auth.Persistence;
+using QuantumCore.Auth.Persistence.Entities;
 
 namespace QuantumCore.Migrations
 {

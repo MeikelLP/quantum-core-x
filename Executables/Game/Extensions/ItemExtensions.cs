@@ -1,7 +1,7 @@
 ﻿using QuantumCore.API;
 using QuantumCore.API.Core.Models;
 using QuantumCore.API.Data;
-using QuantumCore.Core.Cache;
+using QuantumCore.Caching;
 using QuantumCore.Game.PlayerUtils;
 
 namespace QuantumCore.Extensions;

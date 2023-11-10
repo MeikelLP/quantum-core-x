@@ -7,8 +7,7 @@ using Microsoft.Extensions.Options;
 using MySqlConnector;
 using QuantumCore.API.Data;
 using QuantumCore.API.PluginTypes;
-using QuantumCore.Core.Cache;
-using QuantumCore.Database.Repositories;
+using QuantumCore.Caching;
 using QuantumCore.Networking;
 using Serilog;
 using Weikio.PluginFramework.Abstractions;
@@ -21,18 +20,18 @@ public static class ServiceExtensions
     private const string MessageTemplate = "[{Timestamp:HH:mm:ss.fff}][{Level:u3}]{Message:lj} " +
                                            "{NewLine:1}{Exception:1}";
 
+    /// <summary>
+    /// Services required by Auth & Game
+    /// </summary>
+    /// <param name="services"></param>
+    /// <param name="pluginCatalog"></param>
+    /// <returns></returns>
     public static IServiceCollection AddQuantumCoreDatabase(this IServiceCollection services)
     {
         services.AddOptions<DatabaseOptions>()
             .BindConfiguration("Database")
             .ValidateDataAnnotations();
-        services.AddSingleton<IEmpireRepository, EmpireRepository>();
-        services.AddSingleton<IItemRepository, ItemRepository>();
-        services.AddSingleton<IPlayerRepository, PlayerRepository>();
-        services.AddSingleton<IAccountRepository, AccountRepository>();
-        services.AddSingleton<IAccountManager, AccountManager>();
         services.AddSingleton<IPlayerManager, PlayerManager>();
-        services.AddSingleton<ICommandPermissionRepository, CommandPermissionRepository>();
         services.AddTransient<IDbConnection>(provider =>
         {
             var options = provider.GetRequiredService<IOptions<DatabaseOptions>>().Value;

@@ -2,5 +2,8 @@
 
 public interface IAccountRepository
 {
-    Task<string> GetDeleteCodeAsync(Guid accountId);
+    Task<AccountData?> FindByNameAsync(string name);
+    Task<AccountData?> FindByIdAsync(Guid id);
+    Task CreateAsync(AccountData account);
+    Task<string?> GetDeleteCodeAsync(Guid accountId);
 }

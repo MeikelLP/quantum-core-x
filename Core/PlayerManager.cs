@@ -1,6 +1,6 @@
 ﻿using QuantumCore.API.Core.Models;
 using QuantumCore.API.Data;
-using QuantumCore.Core.Cache;
+using QuantumCore.Caching;
 
 namespace QuantumCore;
 

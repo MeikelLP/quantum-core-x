@@ -1,11 +1,12 @@
-﻿using System.Text;
+using System.Text;
+using Game.Caching.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using QuantumCore;
-using QuantumCore.Extensions;
 using QuantumCore.Game;
 using QuantumCore.Game.Extensions;
+using QuantumCore.Game.Persistence.Extensions;
 
 var hostBuilder = await QuantumCoreHostBuilder.CreateHostAsync(args);
 Encoding.RegisterProvider(CodePagesEncodingProvider.Instance); // register korean locale
@@ -18,8 +19,8 @@ hostBuilder.ConfigureAppConfiguration(cfg =>
 hostBuilder.ConfigureServices(services =>
 {
     services.AddGameServices();
-    services.AddQuantumCoreDatabase();
-    services.AddQuantumCoreCache();
+    services.AddGameDatabase();
+    services.AddGameCaching();
     services.AddHostedService<GameServer>();
 });
 

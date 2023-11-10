@@ -7,8 +7,10 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\Data\Auth.Persistence\Auth.Persistence.csproj" />
       <ProjectReference Include="..\..\Core\Core.csproj" />
       <ProjectReference Include="..\..\Core.Networking.Generators\Core.Networking.Generators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+      <ProjectReference Include="..\..\Data\Core.Caching\Core.Caching.csproj" />
     </ItemGroup>
 
     <ItemGroup>

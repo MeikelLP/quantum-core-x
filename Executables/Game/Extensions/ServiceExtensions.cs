@@ -1,8 +1,11 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Game.Caching.Extensions;
+using Microsoft.Extensions.DependencyInjection;
 using QuantumCore.API;
 using QuantumCore.API.Game.World;
 using QuantumCore.API.PluginTypes;
+using QuantumCore.Auth.Persistence.Extensions;
 using QuantumCore.Game.Commands;
+using QuantumCore.Game.Persistence.Extensions;
 using QuantumCore.Game.PlayerUtils;
 using QuantumCore.Game.Quest;
 using QuantumCore.Game.Services;
@@ -20,6 +23,10 @@ public static class ServiceExtensions
                 .AsImplementedInterfaces()
                 .WithScopedLifetime();
         });
+        services.AddAuthDatabase();
+        services.AddGameDatabase();
+        services.AddGameCaching();
+        services.AddSingleton<IPlayerManager, PlayerManager>();
         services.AddSingleton<ISpawnGroupProvider, SpawnGroupProvider>();
         services.AddSingleton<ISpawnPointProvider, SpawnPointProvider>();
         services.AddSingleton<IDropProvider, DropProvider>();

@@ -12,11 +12,16 @@ namespace QuantumCore.Game.PlayerUtils
         public JobManager(ILogger<JobManager> logger, IConfiguration configuration)
         {
             _logger = logger;
-            
-            // Converts each Job from json into a Job class
-            foreach (var job in configuration.GetSection("job").Get<Job[]>())
+
+            var jobs = configuration.GetSection("job").Get<Job[]>();
+
+            if (jobs is not null)
             {
-                _jobs.Add(job);
+                _jobs.AddRange(jobs);
+            }
+            else
+            {
+                _logger.LogWarning("No jobs found. This may cause issues later on");
             }
         }
 
@@ -61,13 +66,14 @@ namespace QuantumCore.Game.PlayerUtils
         
         public Job Get(byte playerClass)
         {
-            var id = GetJobFromClass(playerClass) + 1;
-            if (_jobs.Count < id)
+            var index = GetJobFromClass(playerClass);
+            if (index > _jobs.Count)
             {
-                return _jobs[0];
+                throw new ArgumentOutOfRangeException(nameof(playerClass),
+                    $"Player class with identifier {playerClass} (index) was not found");
             }
 
-            return _jobs[id];
+            return _jobs[index];
         }
     }
 }
