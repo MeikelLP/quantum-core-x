@@ -18,6 +18,8 @@ internal partial class AtlasProvider : IAtlasProvider
     private readonly IOptions<HostingOptions> _options;
     private readonly ICacheManager _cacheManager;
     private readonly ILogger<AtlasProvider> _logger;
+    private readonly IDropProvider _dropProvider;
+    private readonly IItemManager _itemManager;
 
     /// <summary>
     /// Regex for parsing lines in the atlas info
@@ -27,7 +29,7 @@ internal partial class AtlasProvider : IAtlasProvider
 
     public AtlasProvider(IConfiguration configuration, IMonsterManager monsterManager,
         IAnimationManager animationManager, ISpawnPointProvider spawnPointProvider, IOptions<HostingOptions> options,
-        ICacheManager cacheManager, ILogger<AtlasProvider> logger)
+        ICacheManager cacheManager, ILogger<AtlasProvider> logger, IDropProvider dropProvider, IItemManager itemManager)
     {
         _configuration = configuration;
         _monsterManager = monsterManager;
@@ -36,6 +38,8 @@ internal partial class AtlasProvider : IAtlasProvider
         _options = options;
         _cacheManager = cacheManager;
         _logger = logger;
+        _dropProvider = dropProvider;
+        _itemManager = itemManager;
     }
 
     public async Task<IEnumerable<IMap>> GetAsync(IWorld world)
@@ -73,12 +77,12 @@ internal partial class AtlasProvider : IAtlasProvider
                     IMap map;
                     if (!maps.Contains(mapName))
                     {
-                        map = new RemoteMap(mapName, positionX, positionY, width, height);
+                        map = new RemoteMap(world, mapName, positionX, positionY, width, height);
                     }
                     else
                     {
                         map = new Map(_monsterManager, _animationManager, _cacheManager, world, _options, _logger,
-                            _spawnPointProvider, mapName, positionX, positionY, width, height);
+                            _spawnPointProvider, _dropProvider, _itemManager, mapName, positionX, positionY, width, height);
                     }
 
 

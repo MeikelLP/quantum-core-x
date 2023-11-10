@@ -1,12 +1,8 @@
 ﻿using System.Data;
 using Dapper;
+using QuantumCore.API.Data;
 
 namespace QuantumCore.Game.Persistence;
-
-public interface IEmpireRepository
-{
-    Task<byte?> GetEmpireForAccountAsync(Guid accountId);
-}
 
 public class EmpireRepository : IEmpireRepository
 {

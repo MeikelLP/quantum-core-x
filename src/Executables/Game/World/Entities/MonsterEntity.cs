@@ -5,13 +5,16 @@ using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.World;
 using QuantumCore.API.Game.World.AI;
 using QuantumCore.Core.Utils;
+using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Packets;
+using QuantumCore.Game.Services;
 using QuantumCore.Game.World.AI;
 
 namespace QuantumCore.Game.World.Entities
 {
     public class MonsterEntity : Entity
     {
+        private readonly IDropProvider _dropProvider;
         private readonly ILogger _logger;
         public override EEntityType Type => EEntityType.Monster;
 
@@ -37,9 +40,12 @@ namespace QuantumCore.Game.World.Entities
         private IBehaviour? _behaviour;
         private bool _behaviourInitialized;
         private double _deadTime = 5000;
+        private readonly IMap _map;
+        private readonly IItemManager _itemManager;
 
-        public MonsterEntity(IMonsterManager monsterManager, IAnimationManager animationManager, IWorld world, ILogger logger, uint id, int x, int y, float rotation = 0)
-            : base(animationManager, world.GenerateVid())
+        public MonsterEntity(IMonsterManager monsterManager, IDropProvider dropProvider, IAnimationManager animationManager,
+            IMap map, ILogger logger, IItemManager itemManager, uint id, int x, int y, float rotation = 0)
+            : base(animationManager, map.World.GenerateVid())
         {
             var proto = monsterManager.GetMonster(id);
 
@@ -49,7 +55,10 @@ namespace QuantumCore.Game.World.Entities
                 throw new InvalidOperationException($"Could not find mob proto for ID {id}. Cannot create mob entity");
             }
 
+            _map = map;
+            _dropProvider = dropProvider;
             _logger = logger;
+            _itemManager = itemManager;
             _proto = proto;
             PositionX = x;
             PositionY = y;
@@ -196,6 +205,8 @@ namespace QuantumCore.Game.World.Entities
                 return;
             }
 
+            DoDrops();
+
             base.Die();
 
             var dead = new CharacterDead { Vid = Vid };
@@ -204,6 +215,25 @@ namespace QuantumCore.Game.World.Entities
                 if (entity is PlayerEntity player)
                 {
                     player.Connection.Send(dead);
+                }
+            }
+        }
+
+        private void DoDrops()
+        {
+            // no drops if no killer
+            if (LastAttacker is null) return;
+
+            var mobDrops = _dropProvider.GetDropsForMob(_proto.Id);
+            foreach (var drop in mobDrops)
+            {
+                if (!drop.CanDropFor(LastAttacker)) continue;
+
+                var chance = drop.Chance * Globals.DROP_MULTIPLIER;
+                if (chance > Random.Shared.NextSingle())
+                {
+                    var itemInstance = _itemManager.CreateItem(_itemManager.GetItem(drop.ItemProtoId));
+                    _map.AddGroundItem(itemInstance, PositionX, PositionY, drop.Amount, LastAttacker.Name);
                 }
             }
         }

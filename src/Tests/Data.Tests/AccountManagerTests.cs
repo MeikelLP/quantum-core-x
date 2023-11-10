@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using QuantumCore;
 using QuantumCore.API;
+using QuantumCore.API.Data;
 using QuantumCore.Auth.Persistence;
 using QuantumCore.Caching;
 using QuantumCore.Game.Extensions;

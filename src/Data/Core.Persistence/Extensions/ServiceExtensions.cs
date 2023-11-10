@@ -14,7 +14,7 @@ public static class ServiceExtensions
         services.AddOptions<DatabaseOptions>()
             .BindConfiguration("Database")
             .ValidateDataAnnotations();
-        services.TryAddScoped<IDbConnection>(provider =>
+        services.TryAddTransient<IDbConnection>(provider =>
         {
             var options = provider.GetRequiredService<IOptions<DatabaseOptions>>().Value;
             return new MySqlConnection(options.ConnectionString);

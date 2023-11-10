@@ -1,4 +1,3 @@
-using System.Data;
 using System.Linq.Expressions;
 using System.Reflection;
 using System.Text;
@@ -7,11 +6,11 @@ using Microsoft.CodeAnalysis;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
+using QuantumCore.API.Data;
 using QuantumCore.API.Game;
 using QuantumCore.API.Game.World;
 using QuantumCore.Caching;
 using QuantumCore.Game.Packets;
-using QuantumCore.Game.Persistence;
 
 namespace QuantumCore.Game.Commands
 {
@@ -32,7 +31,7 @@ namespace QuantumCore.Game.Commands
             }
         );
 
-        public CommandManager(ILogger<CommandManager> logger, ICacheManager cacheManager, IWorld world,
+        public CommandManager(ILogger<CommandManager> logger, ICacheManager cacheManager,
             IServiceProvider serviceProvider, ICommandPermissionRepository repository)
         {
             _logger = logger;

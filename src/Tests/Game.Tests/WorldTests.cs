@@ -1,6 +1,4 @@
 using System.Data;
-using Core.Persistence.Extensions;
-using FluentAssertions;
 using Game.Caching.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,8 +9,8 @@ using NSubstitute;
 using QuantumCore;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
+using QuantumCore.API.Data;
 using QuantumCore.API.Game.World;
-using QuantumCore.Auth.Persistence;
 using QuantumCore.Caching;
 using QuantumCore.Caching.Extensions;
 using QuantumCore.Extensions;
@@ -57,7 +55,10 @@ public class WorldTests
                         provider.GetRequiredService<ICacheManager>(), info.Arg<IWorld>(),
                         provider.GetRequiredService<IOptions<HostingOptions>>(),
                         provider.GetRequiredService<ILogger<Map>>(),
-                        provider.GetRequiredService<ISpawnPointProvider>(), "test_map", 0, 0, 1024, 1024)
+                        provider.GetRequiredService<ISpawnPointProvider>(),
+                        provider.GetRequiredService<IDropProvider>(),
+                        provider.GetRequiredService<IItemManager>(),
+                        "test_map", 0, 0, 1024, 1024)
                 });
                 return mock;
             }, ServiceLifetime.Singleton))

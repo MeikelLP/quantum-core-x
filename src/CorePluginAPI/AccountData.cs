@@ -1,6 +1,4 @@
 ﻿
-using System;
-
 namespace QuantumCore.API;
 
 public class AccountData

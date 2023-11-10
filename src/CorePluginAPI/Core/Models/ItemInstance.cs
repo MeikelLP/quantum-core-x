@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace QuantumCore.API.Core.Models;
+﻿namespace QuantumCore.API.Core.Models;
 
 public class ItemInstance
 {

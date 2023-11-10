@@ -1,4 +1,5 @@
 ﻿using QuantumCore.API;
+using QuantumCore.API.Data;
 
 namespace QuantumCore.Auth.Persistence;
 
@@ -13,6 +14,10 @@ public class AccountManager : IAccountManager
         _passwordHasher = passwordHasher;
     }
 
+    public Task<string?> GetDeleteCodeAsync(Guid accountId)
+    {
+        return _repository.GetDeleteCodeAsync(accountId);
+    }
     public Task<AccountData?> FindByIdAsync(Guid id)
     {
         return _repository.FindByIdAsync(id);

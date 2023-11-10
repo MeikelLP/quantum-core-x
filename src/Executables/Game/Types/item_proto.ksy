@@ -47,11 +47,11 @@ types:
         type: u4
       - id: name
         type: strz
-        encoding: ascii
+        encoding: EUC-KR
         size: 25
       - id: translated_name
         type: strz
-        encoding: ascii
+        encoding: EUC-KR
         size: 25
       - id: type
         type: u1

@@ -10,23 +10,17 @@ public class GroundItem : Entity, IGroundItem
 {
     private readonly ItemInstance _item;
     private readonly uint _amount;
+    private readonly string? _ownerName;
 
-    public ItemInstance Item {
-        get {
-            return _item;
-        }
-    }
+    public ItemInstance Item => _item;
+    public uint Amount => _amount;
+    public string? OwnerName => _ownerName;
 
-    public uint Amount {
-        get {
-            return _amount;
-        }
-    }
-
-    public GroundItem(IAnimationManager animationManager, uint vid, ItemInstance item, uint amount) : base(animationManager, vid)
+    public GroundItem(IAnimationManager animationManager, uint vid, ItemInstance item, uint amount, string? ownerName = null) : base(animationManager, vid)
     {
         _item = item;
         _amount = amount;
+        _ownerName = ownerName;
     }
 
     public override EEntityType Type { get; }
@@ -52,6 +46,10 @@ public class GroundItem : Entity, IGroundItem
             PositionY = PositionY,
             Vid = Vid,
             ItemId = _item.ItemId
+        });
+        connection.Send(new ItemOwnership {
+            Vid = Vid,
+            Player = OwnerName ?? ""
         });
     }
 

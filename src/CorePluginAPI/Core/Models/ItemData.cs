@@ -1,5 +1,8 @@
-﻿namespace QuantumCore.API.Core.Models;
+using System.Diagnostics;
 
+namespace QuantumCore.API.Core.Models;
+
+[DebuggerDisplay("{Name} ({Id})")]
 public class ItemData
 {
     public uint Id { get; set; }

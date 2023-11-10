@@ -9,7 +9,6 @@ using QuantumCore.Game.Persistence.Extensions;
 using QuantumCore.Game.PlayerUtils;
 using QuantumCore.Game.Quest;
 using QuantumCore.Game.Services;
-using QuantumCore.Game.World;
 
 namespace QuantumCore.Game.Extensions;
 
@@ -22,7 +21,7 @@ public static class ServiceExtensions
             scan.FromAssemblyOf<GameServer>()
                 .AddClasses(classes => classes.AssignableTo<IPacketHandler>())
                 .AsImplementedInterfaces()
-                .WithSingletonLifetime();
+                .WithScopedLifetime();
         });
         services.AddAuthDatabase();
         services.AddGameDatabase();
@@ -30,6 +29,7 @@ public static class ServiceExtensions
         services.AddSingleton<IPlayerManager, PlayerManager>();
         services.AddSingleton<ISpawnGroupProvider, SpawnGroupProvider>();
         services.AddSingleton<ISpawnPointProvider, SpawnPointProvider>();
+        services.AddSingleton<IDropProvider, DropProvider>();
         services.AddSingleton<IItemManager, ItemManager>();
         services.AddSingleton<IMonsterManager, MonsterManager>();
         services.AddSingleton<IJobManager, JobManager>();

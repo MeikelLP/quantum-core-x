@@ -1,6 +1,4 @@
-﻿using System.Threading;
-using System.Threading.Tasks;
-using QuantumCore.API;
+﻿using QuantumCore.API;
 using QuantumCore.API.PluginTypes;
 using QuantumCore.Game.Packets;
 

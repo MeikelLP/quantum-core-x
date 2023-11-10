@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace QuantumCore.Core.Utils
+﻿namespace QuantumCore.Core.Utils
 {
     public static class MathUtils
     {

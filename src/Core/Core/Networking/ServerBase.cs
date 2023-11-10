@@ -2,7 +2,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
-using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -10,7 +9,6 @@ using Microsoft.Extensions.Options;
 using QuantumCore.API;
 using QuantumCore.API.PluginTypes;
 using QuantumCore.Core.Utils;
-using QuantumCore.Extensions;
 using QuantumCore.Networking;
 
 namespace QuantumCore.Core.Networking
@@ -22,26 +20,23 @@ namespace QuantumCore.Core.Networking
         protected IPacketManager PacketManager { get; }
         private readonly List<Func<IConnection, bool>> _connectionListeners = new();
         private readonly ConcurrentDictionary<Guid, IConnection> _connections = new();
-        private readonly Dictionary<ushort, IPacketHandler> _listeners = new();
         private readonly Stopwatch _serverTimer = new();
         private readonly CancellationTokenSource _stoppingToken = new();
         protected TcpListener Listener { get; }
 
         private readonly PluginExecutor _pluginExecutor;
         private readonly IServiceProvider _serviceProvider;
-        private readonly IEnumerable<IPacketHandler> _packetHandlers;
         private readonly string _serverMode;
 
         public int Port { get; }
 
         public ServerBase(IPacketManager packetManager, ILogger logger, PluginExecutor pluginExecutor,
-            IServiceProvider serviceProvider, IEnumerable<IPacketHandler> packetHandlers, string mode,
+            IServiceProvider serviceProvider, string mode,
             IOptions<HostingOptions> hostingOptions)
         {
             _logger = logger;
             _pluginExecutor = pluginExecutor;
             _serviceProvider = serviceProvider;
-            _packetHandlers = packetHandlers;
             _serverMode = mode;
             PacketManager = packetManager;
             Port = hostingOptions.Value.Port;
@@ -52,8 +47,6 @@ namespace QuantumCore.Core.Networking
             var localAddr = IPAddress.Parse(hostingOptions.Value.IpAddress ?? "127.0.0.1");
             IpUtils.PublicIP = localAddr;
             Listener = new TcpListener(localAddr, Port);
-
-            _logger.LogInformation("Initialize tcp server listening on {IP}:{Port}", localAddr, Port);
         }
 
         public long ServerTime => _serverTimer.ElapsedMilliseconds;
@@ -63,17 +56,6 @@ namespace QuantumCore.Core.Networking
             _connections.Remove(connection.Id, out _);
 
             await _pluginExecutor.ExecutePlugins<IConnectionLifetimeListener>(_logger, x => x.OnDisconnectedAsync(_stoppingToken.Token));
-        }
-
-        public override Task StartAsync(CancellationToken token)
-        {
-            base.StartAsync(token);
-            _logger.LogInformation("Start listening for connections...");
-
-            Listener.Start();
-            Listener.BeginAcceptTcpClient(OnClientAccepted, Listener);
-
-            return Task.CompletedTask;
         }
 
         private async void OnClientAccepted(IAsyncResult ar)
@@ -184,45 +166,8 @@ namespace QuantumCore.Core.Networking
         {
             Listener.Start();
             Listener.BeginAcceptTcpClient(OnClientAccepted, Listener);
-        }
 
-        public void RegisterListeners()
-        {
-            var handlers = _packetHandlers.Where(x => x
-                    .GetType()
-                    .GetInterfaces()
-                    .Where(i => i.IsGenericType)
-                    .Any(i => _serverMode == "auth"
-                ? i.GetGenericTypeDefinition() == typeof(IAuthPacketHandler<>)
-                : i.GetGenericTypeDefinition() == typeof(IGamePacketHandler<>)))
-                .ToArray();
-            foreach (var packetHandler in handlers)
-            {
-                var packetType = packetHandler.GetType().GetPacketType();
-
-                if (packetType is null)
-                {
-                    _logger.LogWarning("Base interface did not match {BaseInterface} this should not happen", nameof(IPacketHandler));
-                    continue;
-                }
-
-                var packetDescription = packetType.GetCustomAttribute<PacketAttribute>();
-                if (packetDescription is null)
-                {
-                    _logger.LogWarning("Packet type {Type} is missing a {AttributeTypeName}", packetType.Name, nameof(PacketAttribute));
-                    continue;
-                }
-
-                var subPacketDescription = packetType.GetCustomAttribute<SubPacketAttribute>();
-                if (subPacketDescription is not null)
-                {
-                    _listeners.Add((ushort)(packetDescription.Header << 8 | subPacketDescription.SubHeader), packetHandler);
-                }
-                else
-                {
-                    _listeners.Add(packetDescription.Header, packetHandler);
-                }
-            }
+            _logger.LogInformation("Listening for new connections on {Socket}", Listener.Server.LocalEndPoint!.ToString());
         }
 
         public async override Task StopAsync(CancellationToken cancellationToken)

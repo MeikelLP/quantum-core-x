@@ -1,6 +1,7 @@
 ﻿using Core.Persistence.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using QuantumCore.API;
+using QuantumCore.API.Data;
 
 namespace QuantumCore.Auth.Persistence.Extensions;
 

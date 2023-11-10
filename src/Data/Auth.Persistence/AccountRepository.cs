@@ -1,6 +1,7 @@
 ﻿using System.Data;
 using Dapper;
 using QuantumCore.API;
+using QuantumCore.API.Data;
 
 namespace QuantumCore.Auth.Persistence;
 
@@ -12,7 +13,7 @@ public class AccountRepository : IAccountRepository
     {
         _db = db;
     }
-    
+
     public async Task<AccountData?> FindByNameAsync(string userName)
     {
         var results = await _db.QueryAsync<AccountData, AccountStatusData, AccountData>(
@@ -47,5 +48,14 @@ public class AccountRepository : IAccountRepository
             throw new InvalidOperationException(
                 "Creating an account did not result in 1 row changed. This should never happen");
         }
+    }
+
+    public async Task<string?> GetDeleteCodeAsync(Guid accountId)
+    {
+        return await _db.QueryFirstOrDefaultAsync<string>(
+            "SELECT DeleteCode FROM account.accounts WHERE Id = @accountId", new
+            {
+                accountId
+            });
     }
 }

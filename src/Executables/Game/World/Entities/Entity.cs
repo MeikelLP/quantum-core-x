@@ -75,6 +75,7 @@ namespace QuantumCore.Game.World.Entities
         private int _positionY;
         private float _rotation;
         private bool _positionChanged;
+        protected PlayerEntity? LastAttacker { get; private set; }
 
         public Entity(IAnimationManager animationManager, uint vid)
         {
@@ -359,6 +360,7 @@ namespace QuantumCore.Game.World.Entities
                 if (attackerPlayer != null)
                 {
                     attackerPlayer.Connection.Send(damageInfo);
+                    LastAttacker = attackerPlayer;
                 }
             }
 

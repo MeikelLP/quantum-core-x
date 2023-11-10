@@ -1,16 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Data;
-using System.IO;
-using System.Linq;
+﻿using System.Data;
 using System.Reflection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using MySqlConnector;
 using QuantumCore.API.PluginTypes;
 using QuantumCore.Networking;
 using Serilog;
-using Serilog.Events;
 using Weikio.PluginFramework.Abstractions;
 using Weikio.PluginFramework.Microsoft.DependencyInjection;
 
@@ -27,6 +24,20 @@ public static class ServiceExtensions
     /// <param name="services"></param>
     /// <param name="pluginCatalog"></param>
     /// <returns></returns>
+    public static IServiceCollection AddQuantumCoreDatabase(this IServiceCollection services)
+    {
+        services.AddOptions<DatabaseOptions>()
+            .BindConfiguration("Database")
+            .ValidateDataAnnotations();
+        services.AddTransient<IDbConnection>(provider =>
+        {
+            var options = provider.GetRequiredService<IOptions<DatabaseOptions>>().Value;
+            return new MySqlConnection(options.ConnectionString);
+        });
+
+        return services;
+    }
+
     public static IServiceCollection AddCoreServices(this IServiceCollection services, IPluginCatalog pluginCatalog, IConfiguration configuration)
     {
         services.AddOptions<HostingOptions>()
@@ -96,8 +107,6 @@ public static class ServiceExtensions
 
         // sink to console
         config.WriteTo.Console(outputTemplate: MessageTemplate);
-
-        config.MinimumLevel.Override("QuantumCore.Core.Networking", LogEventLevel.Warning);
 
         // sink to rolling file
         config.WriteTo.RollingFile($"{Directory.GetCurrentDirectory()}/logs/api.log",

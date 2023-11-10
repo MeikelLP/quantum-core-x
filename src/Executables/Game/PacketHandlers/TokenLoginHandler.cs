@@ -1,5 +1,6 @@
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
+using QuantumCore.API.Data;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.World;
 using QuantumCore.API.PluginTypes;
@@ -9,25 +10,25 @@ using QuantumCore.Core.Utils;
 using QuantumCore.Extensions;
 using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Packets;
-using QuantumCore.Game.Persistence;
 
 namespace QuantumCore.Game.PacketHandlers
 {
     public class TokenLoginHandler : IGamePacketHandler<TokenLogin>
     {
-        private readonly IEmpireRepository _empireRepository;
         private readonly ILogger<TokenLoginHandler> _logger;
         private readonly ICacheManager _cacheManager;
         private readonly IWorld _world;
+        private readonly IEmpireRepository _empireRepository;
         private readonly IPlayerManager _playerManager;
 
-        public TokenLoginHandler(ILogger<TokenLoginHandler> logger, ICacheManager cacheManager, IWorld world, IPlayerManager playerManager, IEmpireRepository empireRepository)
+        public TokenLoginHandler(ILogger<TokenLoginHandler> logger, ICacheManager cacheManager, IWorld world,
+            IEmpireRepository empireRepository, IPlayerManager playerManager)
         {
             _logger = logger;
             _cacheManager = cacheManager;
             _world = world;
-            _playerManager = playerManager;
             _empireRepository = empireRepository;
+            _playerManager = playerManager;
         }
 
         public async Task ExecuteAsync(GamePacketContext<TokenLogin> ctx, CancellationToken cancellationToken = default)

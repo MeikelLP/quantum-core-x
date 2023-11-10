@@ -27,13 +27,13 @@ public class PacketManager : IPacketManager
             _infos.Add((header, subHeader), new PacketInfo(packetType, packetHandlerType));
             if (subHeader.HasValue)
             {
-                logger.LogDebug("Registered header 0x{Header:X2} with handler {HandlerType}", header,
-                    packetHandlerType);
+                logger.LogDebug("Registered header 0x{Header:X2}|0x{SubHeader:X2} with handler {HandlerType}", header,
+                    subHeader, packetHandlerType);
             }
             else
             {
-                logger.LogDebug("Registered header 0x{Header:X2}|0x{SubHeader:X2} with handler {HandlerType}", header,
-                    subHeader, packetHandlerType);
+                logger.LogDebug("Registered header 0x{Header:X2} with handler {HandlerType}", header,
+                    packetHandlerType);
             }
         }
     }
