@@ -67,6 +67,7 @@ namespace QuantumCore.Game.PacketHandlers
             // Load players of account
             var characters = new Characters();
             var i = 0;
+
             var charactersFromCacheOrDb = await Player.GetPlayers(_playerRepository, _cacheManager, token.AccountId).ToArrayAsync(cancellationToken);
             foreach (var player in charactersFromCacheOrDb)
             {
@@ -80,12 +81,14 @@ namespace QuantumCore.Game.PacketHandlers
                 i++;
             }
 
-            // Send empire to the client and characters
-            var empire = await _empireRepository.GetEmpireForAccountAsync(ctx.Connection.AccountId.Value) ?? 0;
+            // Get empire 
+            var empire = await _empireRepository.GetEmpireForAccountAsync(token.AccountId) ?? 0;
 
+            // TODO:: set player id to character?
             ctx.Connection.Send(new Empire { EmpireId = empire });
             ctx.Connection.SetPhase(EPhases.Select);
             ctx.Connection.Send(characters);
+
         }
     }
 }

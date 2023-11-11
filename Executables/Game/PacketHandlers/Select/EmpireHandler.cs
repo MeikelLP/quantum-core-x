@@ -4,6 +4,7 @@ using Dapper.Contrib.Extensions;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.PluginTypes;
+using QuantumCore.Core.Cache;
 using QuantumCore.Database;
 using QuantumCore.Game.Packets;
 
@@ -12,28 +13,20 @@ namespace QuantumCore.Game.PacketHandlers.Select;
 public class EmpireHandler : IGamePacketHandler<Empire>
 {
     private readonly ILogger<EmpireHandler> _logger;
-    private readonly IDbConnection _db;
+    private readonly ICacheManager _cacheManager;
 
-    public EmpireHandler(ILogger<EmpireHandler> logger, IDbConnection db)
+    public EmpireHandler(ILogger<EmpireHandler> logger, ICacheManager cacheManager)
     {
         _logger = logger;
-        _db = db;
+        _cacheManager = cacheManager;
     }
 
     public async Task ExecuteAsync(GamePacketContext<Empire> ctx, CancellationToken token = default)
     {
         if (ctx.Packet.EmpireId is > 0 and < 4)
         {
-            var empire = new Empires {
-                Id = Guid.NewGuid(),
-                AccountId = (Guid)ctx.Connection.AccountId,
-                Empire = ctx.Packet.EmpireId 
-            };  
-            var result = await _db.InsertAsync(empire);
-            if (result is not 1)
-            {
-                _logger.LogWarning("Unexpected result count {Result} when setting empire for account", result);
-            }
+            // Add player to cache
+            await _cacheManager.Set("empire:" + ctx.Connection.AccountId, ctx.Packet.EmpireId);
         }
         else
         {

@@ -43,27 +43,26 @@ namespace QuantumCore.Game.Packets
         public ushort Port { get; set; }
         [Field(17)]
         public byte SkillGroup { get; set; }
+        public byte Empire { get; set; }
 
-        public static Character FromEntity(Player player)
+        public static Character FromEntity(Player player) => new Character
         {
-            return new Character
-            {
-                Id = 1,
-                Name = player.Name,
-                Class = player.PlayerClass,
-                Level = player.Level,
-                Playtime = player.PlayTime,
-                St = player.St,
-                Ht = player.Ht,
-                Dx = player.Dx,
-                Iq = player.Iq,
-                BodyPart = (ushort) player.BodyPart,
-                NameChange = 0,
-                HairPort = (ushort) player.HairPart,
-                PositionX = player.PositionX,
-                PositionY = player.PositionY,
-                SkillGroup = player.SkillGroup
-            };
-        }
+            Id = 1,
+            Name = player.Name,
+            Class = player.PlayerClass,
+            Level = player.Level,
+            Playtime = player.PlayTime,
+            St = player.St,
+            Ht = player.Ht,
+            Dx = player.Dx,
+            Iq = player.Iq,
+            BodyPart = (ushort) player.BodyPart,
+            NameChange = 0,
+            HairPort = (ushort) player.HairPart,
+            PositionX = player.PositionX,
+            PositionY = player.PositionY,
+            SkillGroup = player.SkillGroup,
+            Empire = player.Empire
+        };
     }
 }

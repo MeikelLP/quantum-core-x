@@ -11,6 +11,7 @@ namespace QuantumCore.Migrations
             Create.Table("players")
                 .WithColumn("Id").AsAnsiString(36).PrimaryKey()
                 .WithColumn("AccountId").AsAnsiString(36).PrimaryKey()
+                .WithColumn("Empire").AsByte().WithDefaultValue(0)
                 .WithColumn("PlayerClass").AsByte().NotNullable()
                 .WithColumn("SkillGroup").AsByte().NotNullable()
                 .WithColumn("PlayTime").AsInt32().NotNullable().WithDefaultValue(0)

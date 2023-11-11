@@ -33,6 +33,7 @@ namespace QuantumCore.Database
         public uint HairPart { get; set; }
         public uint GivenStatusPoints { get; set; }
         public uint AvailableStatusPoints { get; set; }
+        public byte Empire { get; set; }
 
         public static async Task<Player?> GetPlayer(IPlayerRepository repository, ICacheManager cacheManager, Guid account, byte slot)
         {

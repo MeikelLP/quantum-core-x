@@ -1,13 +1,16 @@
 using System.Data;
+using System.Threading;
 using Dapper;
 using Dapper.Contrib.Extensions;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
+using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.World;
 using QuantumCore.API.PluginTypes;
 using QuantumCore.Core.Cache;
 using QuantumCore.Core.Utils;
 using QuantumCore.Database;
+using QuantumCore.Database.Repositories;
 using QuantumCore.Game.Packets;
 using QuantumCore.Game.PlayerUtils;
 
@@ -20,15 +23,17 @@ public class CreateCharacterHandler : IGamePacketHandler<CreateCharacter>
     private readonly ICacheManager _cacheManager;
     private readonly IWorld _world;
     private readonly IDbConnection _db;
+    private readonly IEmpireRepository _empireRepository;
 
     public CreateCharacterHandler(ILogger<CreateCharacterHandler> logger,
-        IJobManager jobManager, ICacheManager cacheManager, IWorld world, IDbConnection db)
+        IJobManager jobManager, ICacheManager cacheManager, IWorld world, IDbConnection db, IEmpireRepository empireRepository)
     {
         _logger = logger;
         _jobManager = jobManager;
         _cacheManager = cacheManager;
         _world = world;
         _db = db;
+        _empireRepository = empireRepository;
     }
 
     public async Task ExecuteAsync(GamePacketContext<CreateCharacter> ctx, CancellationToken token = default)
@@ -59,21 +64,25 @@ public class CreateCharacterHandler : IGamePacketHandler<CreateCharacter>
             return;
         }
 
+        // Get empire
+        var empire = await _empireRepository.GetEmpireForAccountAsync(accountId) ?? 0;
+
         // Create player data
         var player = new Player
         {
             Id = Guid.NewGuid(),
             AccountId = accountId,
             Name = ctx.Packet.Name,
-            PlayerClass = (byte) ctx.Packet.Class,
+            PlayerClass = (byte)ctx.Packet.Class,
             PositionX = 958870,
             PositionY = 272788,
             St = job.St,
             Iq = job.Iq,
             Dx = job.Dx,
             Ht = job.Ht,
-            Health =  job.StartHp,
-            Mana = job.StartSp
+            Health = job.StartHp,
+            Mana = job.StartSp,
+            Empire = empire,
         };
 
 
