@@ -82,7 +82,7 @@ namespace QuantumCore.Game.PacketHandlers
             }
 
             // Get empire 
-            var empire = await _empireRepository.GetEmpireForAccountAsync(token.AccountId) ?? 0;
+            var empire = await _empireRepository.GetEmpireForPlayerAsync(token.AccountId) ?? 0;
 
             // TODO:: set player id to character?
             ctx.Connection.Send(new Empire { EmpireId = empire });

@@ -8,7 +8,7 @@ namespace QuantumCore.Database;
 
 public interface IEmpireRepository
 {
-    Task<byte?> GetEmpireForAccountAsync(Guid accountId);
+    Task<byte?> GetEmpireForPlayerAsync(Guid accountId);
 }
 
 public class EmpireRepository : IEmpireRepository
@@ -22,7 +22,7 @@ public class EmpireRepository : IEmpireRepository
         _cacheManager = cacheManager;
     }
 
-    public async Task<byte?> GetEmpireForAccountAsync(Guid accountId)
+    public async Task<byte?> GetEmpireForPlayerAsync(Guid accountId)
     {
         var empireRedisKey = $"empire:{accountId}";
         var cachedEmpire = await _cacheManager.Get<byte?>(empireRedisKey);
