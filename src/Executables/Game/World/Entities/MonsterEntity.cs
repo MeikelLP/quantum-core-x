@@ -224,16 +224,25 @@ namespace QuantumCore.Game.World.Entities
             // no drops if no killer
             if (LastAttacker is null) return;
 
-            var mobDrops = _dropProvider.GetDropsForMob(_proto.Id);
+            var mobDrops = _dropProvider.GetPossibleMobDropsForPlayer(LastAttacker, _proto.Id);
             foreach (var drop in mobDrops)
             {
-                if (!drop.CanDropFor(LastAttacker)) continue;
-
                 var chance = drop.Chance * Globals.DROP_MULTIPLIER;
                 if (chance > Random.Shared.NextSingle())
                 {
                     var itemInstance = _itemManager.CreateItem(_itemManager.GetItem(drop.ItemProtoId));
                     _map.AddGroundItem(itemInstance, PositionX, PositionY, drop.Amount, LastAttacker.Name);
+                }
+            }
+
+            var commonDrops = _dropProvider.GetPossibleCommonDropsForPlayer(LastAttacker);
+            foreach (var drop in commonDrops)
+            {
+                var chance = drop.Chance * Globals.DROP_MULTIPLIER;
+                if (chance > Random.Shared.NextSingle())
+                {
+                    var itemInstance = _itemManager.CreateItem(_itemManager.GetItem(drop.ItemProtoId));
+                    _map.AddGroundItem(itemInstance, PositionX, PositionY, 1, LastAttacker.Name);
                 }
             }
         }
@@ -288,6 +297,17 @@ namespace QuantumCore.Game.World.Entities
                     Name = _proto.TranslatedName
                 });
             }
+            // foreach (var drop in _dropProvider.CommonDrops)
+            // {
+            //     if (!drop.CanDropFor(LastAttacker)) continue;
+            //
+            //     var chance = drop.Chance * Globals.DROP_MULTIPLIER * Globals.DROP_MULTIPLIER;
+            //     if (chance > Random.Shared.NextSingle())
+            //     {
+            //         var itemInstance = _itemManager.CreateItem(_itemManager.GetItem(drop.ItemProtoId));
+            //         _map.AddGroundItem(itemInstance, PositionX, PositionY, Globals.DROP_COMMON_AMOUNT, LastAttacker.Name);
+            //     }
+            // }
         }
 
         public override void HideEntity(IConnection connection)

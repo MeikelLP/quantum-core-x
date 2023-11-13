@@ -14,6 +14,7 @@ public class DropProvider : IDropProvider
     private readonly ILogger<DropProvider> _logger;
     private readonly IItemManager _itemManager;
     private readonly IMonsterManager _monsterManager;
+    private static readonly Encoding FileEncoding = Encoding.GetEncoding("EUC-KR");
 
     public DropProvider(ILogger<DropProvider> logger, IItemManager itemManager, IMonsterManager monsterManager)
     {
@@ -32,12 +33,29 @@ public class DropProvider : IDropProvider
         return new ImmutableArray<MonsterDropEntry>();
     }
 
-    public ImmutableArray<CommonDropEntry> CommonDrops { get; private set; }
+    public ImmutableArray<CommonDropEntry> CommonDrops { get; private set; } = ImmutableArray<CommonDropEntry>.Empty;
 
     public async Task LoadAsync(CancellationToken cancellationToken = default)
     {
-        await LoadDropsForMonstersAsync(cancellationToken);
-        await LoadSimpleMobDropsAsync(cancellationToken);
+        await Task.WhenAll(
+            LoadDropsForMonstersAsync(cancellationToken),
+            LoadSimpleMobDropsAsync(cancellationToken),
+            LoadCommonMobDropsAsync(cancellationToken)
+        );
+    }
+
+    private async Task LoadCommonMobDropsAsync(CancellationToken cancellationToken)
+    {
+        const string file = "data/common_drop_item.txt";
+        if (!File.Exists(file)) return;
+
+        _logger.LogDebug("Loading common drops from {FilePath}", file);
+
+        using var sr = new StreamReader(file, FileEncoding);
+
+        CommonDrops = await ParserUtils.GetCommonDropsAsync(sr, cancellationToken);
+
+        _logger.LogDebug("Found {Count:D} common drops", CommonDrops.Length);
     }
 
     /// <summary>
@@ -51,7 +69,7 @@ public class DropProvider : IDropProvider
 
         _logger.LogDebug("Loading item drop modifiers from {FilePath}", file);
 
-        using var sr = new StreamReader(file, Encoding.GetEncoding("EUC-KR"));
+        using var sr = new StreamReader(file, FileEncoding);
 
         var lineIndex = 0;
         // loop while line is not null
@@ -83,7 +101,7 @@ public class DropProvider : IDropProvider
             }
         }
 
-        _logger.LogDebug("Found drop multipliers for {Count:D} items", _simpleMobDrops.Count);
+        _logger.LogDebug("Found simple drops for {Count:D} items", _simpleMobDrops.Count);
     }
 
     private KeyValuePair<uint, float>? ParseCommonLine(ReadOnlySpan<char> line, int lineIndex, string file)

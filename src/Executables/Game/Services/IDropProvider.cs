@@ -1,10 +1,9 @@
 ﻿using System.Collections.Immutable;
-using QuantumCore.API.Game.Types;
 
 namespace QuantumCore.Game.Services;
 
 public record struct MonsterDropEntry(uint ItemProtoId, float Chance, uint MinLevel = 0, uint MinKillCount = 0, byte Amount = 1);
-public record struct CommonDropEntry(EMonsterLevel MonsterLevel, byte MinLevel, byte MaxLevel, uint ItemProtoId, float Chance);
+public record struct CommonDropEntry(byte MinLevel, byte MaxLevel, uint ItemProtoId, float Chance);
 
 public interface IDropProvider
 {

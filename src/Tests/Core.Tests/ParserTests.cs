@@ -9,6 +9,8 @@ namespace Core.Tests;
 
 public class ParserTests
 {
+    private const float CHANCE_ALLOWED_APPROXIMATION = 0.00005f;
+
     [Theory]
     [InlineData("//r	751	311	10	10	0	0	5s	100	1	101")]
     [InlineData("	//r	751	311	10	10	0	0	5s	100	1	101")]
@@ -358,5 +360,111 @@ public class ParserTests
         drops.Key.Should().Be(101);
         drops.Value.Should().HaveCount(1);
         drops.Value.Should().Contain(new MonsterDropEntry(10, 1));
+    }
+
+    [Fact]
+    public async Task CommonDrop_SingleLine_SingleDrop()
+    {
+        var input = new StringReader("""
+                                     ABC	1	15	0.08	11	5000
+                                     """);
+
+        var result = await ParserUtils.GetCommonDropsAsync(input);
+
+        result.Should().HaveCount(1);
+        result[0].MinLevel.Should().Be(1);
+        result[0].MaxLevel.Should().Be(15);
+        result[0].ItemProtoId.Should().Be(11);
+        result[0].Chance.Should().BeApproximately(0.08f / 5000, CHANCE_ALLOWED_APPROXIMATION);
+    }
+
+    [Fact]
+    public async Task CommonDrop_SingleLineNoLabel_SingleDrop()
+    {
+        var input = new StringReader("""
+                                     	1	15	0.08	11	5000
+                                     """);
+
+        var result = await ParserUtils.GetCommonDropsAsync(input);
+
+        result.Should().HaveCount(1);
+        result[0].MinLevel.Should().Be(1);
+        result[0].MaxLevel.Should().Be(15);
+        result[0].ItemProtoId.Should().Be(11);
+        result[0].Chance.Should().BeApproximately(0.08f / 5000, CHANCE_ALLOWED_APPROXIMATION);
+    }
+
+    [Fact]
+    public async Task CommonDrop_SingleLineInvalid_SingleDrop()
+    {
+        var input = new StringReader("""
+                                     					
+                                     """);
+
+        var result = await ParserUtils.GetCommonDropsAsync(input);
+
+        result.Should().HaveCount(0);
+    }
+
+    [Fact]
+    public async Task CommonDrop_SingleLine_MultipleDrop_WithLabels()
+    {
+        var input = new StringReader("""
+                                     ABC	1	15	0.08	11	5000	DEF	1	15	0.104	11	3846	GHI	1	15	0.12	11	3333	JKL	1	15	0.32	11	1250
+                                     """);
+
+        var result = await ParserUtils.GetCommonDropsAsync(input);
+
+        result.Should().HaveCount(4);
+        result[0].MinLevel.Should().Be(1);
+        result[0].MaxLevel.Should().Be(15);
+        result[0].ItemProtoId.Should().Be(11);
+        result[0].Chance.Should().BeApproximately(0.08f / 5000, CHANCE_ALLOWED_APPROXIMATION);
+
+        result[1].MinLevel.Should().Be(1);
+        result[1].MaxLevel.Should().Be(15);
+        result[1].ItemProtoId.Should().Be(11);
+        result[1].Chance.Should().BeApproximately(0.104f / 3846, CHANCE_ALLOWED_APPROXIMATION);
+
+        result[2].MinLevel.Should().Be(1);
+        result[2].MaxLevel.Should().Be(15);
+        result[2].ItemProtoId.Should().Be(11);
+        result[2].Chance.Should().BeApproximately(0.12f / 3333, CHANCE_ALLOWED_APPROXIMATION);
+
+        result[3].MinLevel.Should().Be(1);
+        result[3].MaxLevel.Should().Be(15);
+        result[3].ItemProtoId.Should().Be(11);
+        result[3].Chance.Should().BeApproximately(0.32f / 1250, CHANCE_ALLOWED_APPROXIMATION);
+    }
+
+    [Fact]
+    public async Task CommonDrop_SingleLine_MultipleDrop()
+    {
+        var input = new StringReader("""
+                                     1	15	0.04	12	10000		1	15	0.052	12	7692		1	15	0.06	12	6666		1	15	0.16	12	2500
+                                     """);
+
+        var result = await ParserUtils.GetCommonDropsAsync(input);
+
+        result.Should().HaveCount(4);
+        result[0].MinLevel.Should().Be(1);
+        result[0].MaxLevel.Should().Be(15);
+        result[0].ItemProtoId.Should().Be(12);
+        result[0].Chance.Should().BeApproximately(0.04f / 10000, CHANCE_ALLOWED_APPROXIMATION);
+
+        result[1].MinLevel.Should().Be(1);
+        result[1].MaxLevel.Should().Be(15);
+        result[1].ItemProtoId.Should().Be(12);
+        result[1].Chance.Should().BeApproximately(0.052f / 7692, CHANCE_ALLOWED_APPROXIMATION);
+
+        result[2].MinLevel.Should().Be(1);
+        result[2].MaxLevel.Should().Be(15);
+        result[2].ItemProtoId.Should().Be(12);
+        result[2].Chance.Should().BeApproximately(0.06f / 6666, CHANCE_ALLOWED_APPROXIMATION);
+
+        result[3].MinLevel.Should().Be(1);
+        result[3].MaxLevel.Should().Be(15);
+        result[3].ItemProtoId.Should().Be(12);
+        result[3].Chance.Should().BeApproximately(0.16f / 2500, CHANCE_ALLOWED_APPROXIMATION);
     }
 }
