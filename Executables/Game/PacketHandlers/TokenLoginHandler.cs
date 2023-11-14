@@ -80,9 +80,13 @@ namespace QuantumCore.Game.PacketHandlers
 
                 i++;
             }
-
             // Get empire 
-            var empire = await _empireRepository.GetEmpireForPlayerAsync(token.AccountId) ?? 0;
+            // If there are no characters belonging to the account, it will be retrieved from the cache.
+            var empire = await _empireRepository.GetTempEmpireForAccountAsync(token.AccountId) ?? 0;
+            if (charactersFromCacheOrDb.Length > 0)
+            {
+                empire = charactersFromCacheOrDb[0].Empire;
+            }
 
             // TODO:: set player id to character?
             ctx.Connection.Send(new Empire { EmpireId = empire });

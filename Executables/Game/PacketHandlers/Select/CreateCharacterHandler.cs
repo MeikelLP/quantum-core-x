@@ -65,7 +65,7 @@ public class CreateCharacterHandler : IGamePacketHandler<CreateCharacter>
         }
 
         // Get empire
-        var empire = await _empireRepository.GetEmpireForPlayerAsync(accountId) ?? 0;
+        var empire = await _empireRepository.GetTempEmpireForAccountAsync(accountId) ?? 0;
 
         // Create player data
         var player = new Player

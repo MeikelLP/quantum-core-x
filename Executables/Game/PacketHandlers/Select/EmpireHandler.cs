@@ -25,8 +25,8 @@ public class EmpireHandler : IGamePacketHandler<Empire>
     {
         if (ctx.Packet.EmpireId is > 0 and < 4)
         {
-            // Add player to cache
-            await _cacheManager.Set("empire:" + ctx.Connection.AccountId, ctx.Packet.EmpireId);
+            // Cache the empire value on account
+            await _cacheManager.Set("empire-aid:" + ctx.Connection.AccountId, ctx.Packet.EmpireId);
         }
         else
         {

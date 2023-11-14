@@ -9,6 +9,7 @@ namespace QuantumCore.Database;
 public interface IEmpireRepository
 {
     Task<byte?> GetEmpireForPlayerAsync(Guid accountId);
+    Task<byte?> GetTempEmpireForAccountAsync(Guid accountId);
 }
 
 public class EmpireRepository : IEmpireRepository
@@ -22,19 +23,19 @@ public class EmpireRepository : IEmpireRepository
         _cacheManager = cacheManager;
     }
 
-    public async Task<byte?> GetEmpireForPlayerAsync(Guid accountId)
+    public async Task<byte?> GetEmpireForPlayerAsync(Guid playerId)
     {
-        var empireRedisKey = $"empire:{accountId}";
+        var empireRedisKey = $"empire-pid:{playerId}";
         var cachedEmpire = await _cacheManager.Get<byte?>(empireRedisKey);
 
         if(cachedEmpire.HasValue)
         {
-            // If found in Redis, return the cached empire value
+            // If found in Redis on Player, return the cached empire value
             return cachedEmpire;
         }
 
         var databaseEmpire = await _db.QueryFirstOrDefaultAsync<byte>(
-            "SELECT Empire FROM game.players WHERE AccountId = @AccountId", new { AccountId = accountId });
+            "SELECT Empire FROM game.players WHERE Id = @PlayerId", new { PlayerId = playerId });
 
         if (databaseEmpire > 0)
         {
@@ -42,6 +43,26 @@ public class EmpireRepository : IEmpireRepository
         }
 
         return databaseEmpire;
+    }
+
+    /// <summary>
+    /// If no character has been created for the account, the player's selection is kept in the cache. 
+    /// Therefore, the value kept in the cache is fetched with this method.
+    /// </summary>
+    /// <param name="accountId"></param>
+    /// <returns></returns>
+    public async Task<byte?> GetTempEmpireForAccountAsync(Guid accountId)
+    {
+        var empireRedisKey = $"empire-aid:{accountId}";
+        var cachedEmpire = await _cacheManager.Get<byte?>(empireRedisKey);
+
+        if (cachedEmpire.HasValue)
+        {
+            // If found in Redis on Account, return the cached empire value
+            return cachedEmpire;
+        }
+
+        return 0;
     }
 }
 
