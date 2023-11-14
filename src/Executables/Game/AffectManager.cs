@@ -18,7 +18,7 @@ public class AffectManager : IAffectManager
         _repository = repository;
     }
 
-    public async Task SendAffectRemovePacket(IPlayerEntity playerEntity, EAffectType type, EApplyType applyOn)
+    public async Task RemoveAffectFromPlayerAsync(IPlayerEntity playerEntity, EAffectType type, EApplyType applyOn)
     {
         await _repository.RemoveAffectFromPlayerAsync(playerEntity.Player.Id, type, applyOn);
         var affectRemovePacket = new AffectRemove
@@ -29,12 +29,10 @@ public class AffectManager : IAffectManager
         playerEntity.Connection.Send(affectRemovePacket);
     }
 
-    public async Task AddAffect(IPlayerEntity playerEntity, EAffectType type, EApplyType applyOn, int applyValue,
-        EAffects flags,
-        int duration, int spCost)
+    public async Task AddAffectToPlayerAsync(IPlayerEntity playerEntity, EAffectType type, EApplyType applyOn, int applyValue,
+        EAffects flags, int duration, int spCost)
     {
-
-        var affectApi = new Affect
+        var affect = new Affect
         {
             PlayerId = playerEntity.Player.Id,
             Type = type,
@@ -44,11 +42,11 @@ public class AffectManager : IAffectManager
             Duration = DateTime.Now.AddSeconds(duration),
             SpCost = spCost
         };
-        _logger.LogDebug("Adding affect to player {PlayerName}: {@Affect}", playerEntity.Name, affectApi);
+        _logger.LogDebug("Adding affect to player {PlayerName}: {@Affect}", playerEntity.Name, affect);
 
-        if (playerEntity.TryGetAffect(affectApi, out var existingAffect))
+        if (playerEntity.TryGetAffect(affect, out var existingAffect))
         {
-            if(existingAffect.ApplyValue != affectApi.ApplyValue)
+            if(existingAffect.ApplyValue != affect.ApplyValue)
             {
                 playerEntity.SendChatInfo("This affect is already working!");
             }
@@ -56,22 +54,22 @@ public class AffectManager : IAffectManager
             {
                 playerEntity.RemoveAffect(existingAffect);
                 existingAffect.Duration = existingAffect.Duration.AddSeconds(duration);
-                await _repository.AddAffectAsync(affectApi);
-                playerEntity.AddAffect(affectApi);
+                await _repository.AddAffectAsync(affect);
+                playerEntity.AddAffect(affect);
                 playerEntity.SendChatInfo("This affect duration is extended!");
             }
         }
         else
         {
-            await _repository.AddAffectAsync(affectApi);
-            playerEntity.AddAffect(affectApi);
+            await _repository.AddAffectAsync(affect);
+            playerEntity.AddAffect(affect);
         }
 
-        // Add affect to cache
+        // TODO: Add affect to cache
         // await _cacheManager.Set("affect:" + player.Id, player);
     }
 
-    public async Task LoadAffect(IPlayerEntity playerEntity)
+    public async Task LoadAffectAffectsForPlayer(IPlayerEntity playerEntity)
     {
         var playerAffects = await _repository.GetAffectsForPlayerAsync(playerEntity.Player.Id);
         foreach(var playerAffect in playerAffects)

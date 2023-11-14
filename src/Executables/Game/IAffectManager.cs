@@ -5,9 +5,8 @@ namespace QuantumCore.Game;
 
 public interface IAffectManager
 {
-    Task SendAffectRemovePacket(IPlayerEntity playerEntity, EAffectType type, EApplyType applyOn);
-    Task AddAffect(IPlayerEntity playerEntity, EAffectType type, EApplyType applyOn, int applyValue, EAffects flags,
-        int duration,
-        int spCost);
-    Task LoadAffect(IPlayerEntity playerEntity);
+    Task RemoveAffectFromPlayerAsync(IPlayerEntity playerEntity, EAffectType type, EApplyType applyOn);
+    Task AddAffectToPlayerAsync(IPlayerEntity playerEntity, EAffectType type, EApplyType applyOn, int applyValue, EAffects flags,
+        int duration, int spCost);
+    Task LoadAffectAffectsForPlayer(IPlayerEntity playerEntity);
 }

@@ -198,7 +198,7 @@ namespace QuantumCore.Game.World.Entities
                     _affects.RemoveAt(i);
                 }
             }
-            _affectController.SendAffectRemovePacket(this, affect.Type, affect.ApplyOn).Wait(); // TODO
+            _affectController.RemoveAffectFromPlayerAsync(this, affect.Type, affect.ApplyOn).Wait(); // TODO
             SendCharacterUpdate();
             SendPoints();
         }
@@ -223,7 +223,7 @@ namespace QuantumCore.Game.World.Entities
             Mana = (int) GetPoint(EPoints.MaxSp);
             await LoadPermGroups();
             _questManager.InitializePlayer(this);
-            await _affectController.LoadAffect(this);
+            await _affectController.LoadAffectAffectsForPlayer(this);
             CalculateDefence();
         }
 
@@ -907,7 +907,7 @@ namespace QuantumCore.Game.World.Entities
 
         public async Task RespawnInvisible(IPlayerEntity player, int duration)
         {
-            await _affectController.AddAffect(player, EAffectType.ReviveInvisible, 0, 0, EAffects.MovSpeedPotion, duration, 0);
+            await _affectController.AddAffectToPlayerAsync(player, EAffectType.ReviveInvisible, 0, 0, EAffects.MovSpeedPotion, duration, 0);
         }
 
         public bool DestroyItem(ItemInstance item)

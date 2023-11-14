@@ -113,7 +113,7 @@ public class ItemUseHandler : IGamePacketHandler<ItemUse>
                             var value = itemProto.GetItemUseValue();
                             var affectType = AffectConstants.ApplyTypeToApplyPointMapping[applyType];
                             var affectFlags = AffectConstants.ApplyTypeToFlags[applyType];
-                            await _affectController.AddAffect(player, affectType, applyType, value, affectFlags, duration, 0);
+                            await _affectController.AddAffectToPlayerAsync(player, affectType, applyType, value, affectFlags, duration, 0);
                             break;
                         default:
                             _logger.LogWarning("Don't know how to handle item sub type {ItemSubType} for item {Id}", itemProto.Subtype, itemProto.Id);
