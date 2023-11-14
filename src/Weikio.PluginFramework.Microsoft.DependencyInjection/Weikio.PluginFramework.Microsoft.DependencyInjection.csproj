@@ -1,7 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net7.0</TargetFramework>
         <Nullable>disable</Nullable> <!-- Because we don't want warnings from this project -->
     </PropertyGroup>
 
