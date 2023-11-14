@@ -61,12 +61,11 @@ jobs:
           unzip kaitai-struct-compiler-0.9.zip
           PATH="${PWD}/kaitai-struct-compiler-0.9/bin/:${PATH}"
           sudo apt-get update && sudo apt-get install -y openjdk-8-jre
-          cd Executables/Game
+          cd src/Executables/Game
           sudo chmod +x generate_kaitai.sh
           ./generate_kaitai.sh
       - name: Install dependencies
-        run: dotnet restore
-
+        run: dotnet restore src/QuantumCore.sln
       # actual build
       - name: Build and analyze
         env:
@@ -74,13 +73,12 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: |
           ./.sonar/scanner/dotnet-sonarscanner begin /k:"MeikelLP_quantum-core-x" /o:"meikel" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io"
-          dotnet build --configuration Release --no-restore
+          dotnet build --configuration Release --no-restore src/QuantumCore.sln
           ./.sonar/scanner/dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
 
       # finally tests
       - name: Test
-        run: dotnet test --no-restore --verbosity normal
-
+        run: dotnet test --no-restore --verbosity normal src/QuantumCore.sln
   deploy:
     needs:
       - test
@@ -110,8 +108,8 @@ jobs:
       - name: Build and push game image
         uses: docker/build-push-action@v4.1.1
         with:
-          context: .
-          file: Executables/Game/Dockerfile
+          context: src/
+          file: src/Executables/Game/Dockerfile
           push: true
           tags: ${{ steps.meta-game.outputs.tags }}
           labels: ${{ steps.meta-game.outputs.labels }}
@@ -130,9 +128,9 @@ jobs:
       - name: Build and push auth image
         uses: docker/build-push-action@v4.1.1
         with:
-          context: .
+          context: src/
           images: ghcr.io/meikellp/quantum-core-x/auth
-          file: Executables/Auth/Dockerfile
+          file: src/Executables/Auth/Dockerfile
           push: true
           tags: ${{ steps.meta-auth.outputs.tags }}
           labels: ${{ steps.meta-auth.outputs.labels }}
@@ -151,9 +149,9 @@ jobs:
       - name: Build and push migrator image
         uses: docker/build-push-action@v4.1.1
         with:
-          context: .
+          context: src/
           images: ghcr.io/meikellp/quantum-core-x/migrator
-          file: Executables/Migrator/Dockerfile
+          file: src/Executables/Migrator/Dockerfile
           push: true
           tags: ${{ steps.meta-migrator.outputs.tags }}
           labels: ${{ steps.meta-migrator.outputs.labels }}
