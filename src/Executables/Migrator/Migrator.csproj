@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <AssemblyName>QuantumCore.Migrator</AssemblyName>
+        <RootNamespace>QuantumCore.Migrator</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="CommandLineParser" Version="2.9.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\Data\Auth.Persistence\Auth.Persistence.csproj" />
+      <ProjectReference Include="..\..\Core\Core.csproj" />
+      <ProjectReference Include="..\..\Data\Game.Persistence\Game.Persistence.csproj" />
+    </ItemGroup>
+
+</Project>
