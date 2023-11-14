@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using AutoBogus;
 using Bogus;
 using FluentAssertions;
@@ -113,6 +114,9 @@ public class CommandTests : IAsyncLifetime
         cacheManagerMock.Keys(Arg.Any<string>()).Returns(Array.Empty<string>());
         cacheManagerMock.CreateList<Guid>(Arg.Any<string>()).Returns(redisListWrapperMock);
         cacheManagerMock.Subscribe().Returns(redisSubscriberWrapperMock);
+        var affectRepositoryMock = Substitute.For<IAffectRepository>();
+        affectRepositoryMock.GetAffectsForPlayerAsync(Arg.Any<Guid>())
+            .Returns(Array.Empty<Affect>().ToImmutableArray());
         _services = new ServiceCollection()
             .AddCoreServices(new EmptyPluginCatalog(), new ConfigurationBuilder().Build())
             .AddGameServices()
@@ -127,6 +131,7 @@ public class CommandTests : IAsyncLifetime
             .Replace(new ServiceDescriptor(typeof(IEmpireRepository), _ => Substitute.For<IEmpireRepository>(), ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(ICommandPermissionRepository), _ => Substitute.For<ICommandPermissionRepository>(), ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(IPlayerRepository), _ => Substitute.For<IPlayerRepository>(), ServiceLifetime.Singleton))
+            .Replace(new ServiceDescriptor(typeof(IAffectRepository), _ => affectRepositoryMock, ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(IMonsterManager), _ => monsterManagerMock, ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(IItemManager), _ => itemManagerMock, ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(ICacheManager), _ => cacheManagerMock, ServiceLifetime.Singleton))
