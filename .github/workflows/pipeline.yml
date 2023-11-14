@@ -52,7 +52,6 @@ jobs:
         uses: actions/setup-dotnet@v3
         with:
           dotnet-version: 8.0.x
-          dotnet-quality: 'preview'
 
       # setup project dependencies
       - name: Download katai struct compiler
