@@ -3,6 +3,7 @@ using QuantumCore.API;
 using QuantumCore.API.Constants;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.PluginTypes;
+using QuantumCore.Extensions;
 using QuantumCore.Game.Packets;
 using QuantumCore.Game.PlayerUtils;
 
@@ -107,9 +108,9 @@ public class ItemUseHandler : IGamePacketHandler<ItemUse>
                     {
                         case EUseSubTypes.AbilityUp:
                             _logger.LogDebug("Use ability up");
-                            var applyType = (EApplyType)itemProto.Values[0];
-                            var duration = itemProto.Values[1];
-                            var value = itemProto.Values[2];
+                            var applyType = itemProto.GetItemUseApplyType();
+                            var duration = itemProto.GetItemUseDuration();
+                            var value = itemProto.GetItemUseValue();
                             var affectType = AffectConstants.ApplyTypeToApplyPointMapping[applyType];
                             var affectFlags = AffectConstants.ApplyTypeToFlags[applyType];
                             await _affectController.AddAffect(player, affectType, applyType, value, affectFlags, duration, 0);

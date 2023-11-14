@@ -1,5 +1,6 @@
 ﻿using QuantumCore.API;
 using QuantumCore.API.Core.Models;
+using QuantumCore.API.Game.Types;
 using QuantumCore.Caching;
 using QuantumCore.Game.Persistence;
 using QuantumCore.Game.PlayerUtils;
@@ -36,6 +37,21 @@ public static class ItemExtensions
     public static uint GetAdditionalWeaponDamage(this ItemData item)
     {
         return (uint) item.Values[5];
+    }
+
+    public static EApplyType GetItemUseApplyType(this ItemData item)
+    {
+        return (EApplyType) item.Values[0];
+    }
+
+    public static int GetItemUseDuration(this ItemData item)
+    {
+        return item.Values[1];
+    }
+
+    public static int GetItemUseValue(this ItemData item)
+    {
+        return item.Values[2];
     }
 
     public static uint GetMinWeaponDamage(this ItemData item)
