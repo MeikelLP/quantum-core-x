@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net7.0</TargetFramework>
+        <Nullable>disable</Nullable> <!-- Because we don't want warnings from this project -->
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="6.0.0" />
+      <PackageReference Include="Weikio.PluginFramework" Version="1.5.1" />
+      <PackageReference Include="Weikio.PluginFramework.Configuration" Version="1.5.1" />
+    </ItemGroup>
+
+</Project>
