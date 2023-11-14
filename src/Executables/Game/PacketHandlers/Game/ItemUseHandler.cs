@@ -107,21 +107,12 @@ public class ItemUseHandler : IGamePacketHandler<ItemUse>
                     {
                         case EUseSubTypes.AbilityUp:
                             _logger.LogDebug("Use ability up");
-                            var type = itemProto.Values[0];
+                            var applyType = (EApplyType)itemProto.Values[0];
                             var duration = itemProto.Values[1];
                             var value = itemProto.Values[2];
-                            // TODO: Enums.NET improve allocations
-                            var applyInfo = (EApplyType)type;
-                            var applyType = AffectConstants.ApplyTypeToApplyPointMapping[applyInfo];
-                            switch ((EApplyType) type)
-                            {
-                                case EApplyType.MovementSpeed:
-                                    await _affectController.AddAffect(player, EAffectType.MovementSpeed, applyType, value, EAffects.MovSpeedPotion, duration, 0);
-                                    break;
-                                case EApplyType.AttackSpeed:
-                                    await _affectController.AddAffect(player, EAffectType.AttackSpeed, applyType, value, EAffects.AttSpeedPotion, duration, 0);
-                                    break;
-                            }
+                            var affectType = AffectConstants.ApplyTypeToApplyPointMapping[applyType];
+                            var affectFlags = AffectConstants.ApplyTypeToFlags[applyType];
+                            await _affectController.AddAffect(player, affectType, applyType, value, affectFlags, duration, 0);
                             break;
                         default:
                             _logger.LogWarning("Don't know how to handle item sub type {ItemSubType} for item {Id}", itemProto.Subtype, itemProto.Id);

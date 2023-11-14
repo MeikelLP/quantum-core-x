@@ -1,6 +1,5 @@
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using Dapper;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
@@ -12,7 +11,6 @@ using QuantumCore.Extensions;
 using QuantumCore.Game.Packets;
 using QuantumCore.Game.Persistence;
 using QuantumCore.Game.PlayerUtils;
-using Affect = QuantumCore.API.Core.Models.Affect;
 
 namespace QuantumCore.Game.World.Entities
 {
@@ -159,7 +157,7 @@ namespace QuantumCore.Game.World.Entities
             {
                 foreach (var affect in _affects)
                 {
-                    if (affect.ApplyOn == EAffectType.MovementSpeed)
+                    if (affect.ApplyOn == EApplyType.MovementSpeed)
                     {
                         totalApplyValue += affect.ApplyValue;
                     }
@@ -186,7 +184,7 @@ namespace QuantumCore.Game.World.Entities
         public void AddAffect(Affect affect)
         {
             _affects.Add(affect);
-            Player.Affects |= (EAffects)(1 << (byte)affect.Flag - 1); // -1 due to offset
+            Player.Affects |= affect.Flag; // -1 due to offset
             SendCharacterUpdate();
             SendPoints();
         }

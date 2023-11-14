@@ -1,5 +1,4 @@
 ﻿using FluentMigrator;
-using QuantumCore.Database;
 
 namespace QuantumCore.Migrations
 {

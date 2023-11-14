@@ -1,9 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Data;
 using AutoBogus;
 using Bogus;
 using FluentAssertions;
@@ -142,7 +136,9 @@ public class CommandTests : IAsyncLifetime
                 .AddInMemoryCollection(new Dictionary<string, string?>
                 {
                     { "maps:0", "map_a2"},
-                    { "maps:1", "map_b2"}
+                    { "maps:1", "map_b2"},
+                    { "Database:Password", "abc"},
+                    { "Database:Database", "abc"}
                 })
                 .Build())
             .AddSingleton<IGameConnection>(_ => new MockedGameConnection())

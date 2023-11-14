@@ -8,5 +8,5 @@ namespace QuantumCore.Game.Packets;
 public partial class AffectRemove
 {
     public uint Type { get; set; }
-    public EAffectType ApplyOn { get; set; }
+    public EApplyType ApplyOn { get; set; }
 }
