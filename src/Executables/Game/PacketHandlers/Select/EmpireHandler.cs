@@ -1,11 +1,7 @@
-﻿using System.Data;
-using Dapper;
-using Dapper.Contrib.Extensions;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.PluginTypes;
-using QuantumCore.Core.Cache;
-using QuantumCore.Database;
+using QuantumCore.Caching;
 using QuantumCore.Game.Packets;
 
 namespace QuantumCore.Game.PacketHandlers.Select;

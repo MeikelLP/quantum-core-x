@@ -12,13 +12,14 @@ public class PlayerManager : IPlayerManager
     private readonly ICachePlayerRepository _cachePlayerRepository;
     private readonly ILogger<PlayerManager> _logger;
     private readonly IJobManager _jobManager;
-
-    public PlayerManager(IDbPlayerRepository dbPlayerRepository, ICachePlayerRepository cachePlayerRepository, ILogger<PlayerManager> logger, IJobManager jobManager)
+    private readonly IEmpireRepository _empireRepository;
+    public PlayerManager(IDbPlayerRepository dbPlayerRepository, ICachePlayerRepository cachePlayerRepository, ILogger<PlayerManager> logger, IJobManager jobManager, IEmpireRepository empireRepository)
     {
         _dbPlayerRepository = dbPlayerRepository;
         _cachePlayerRepository = cachePlayerRepository;
         _logger = logger;
         _jobManager = jobManager;
+        _empireRepository = empireRepository;
     }
 
     public async Task<PlayerData?> GetPlayer(Guid accountId, byte slot)

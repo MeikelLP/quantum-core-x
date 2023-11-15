@@ -1,6 +1,6 @@
 ﻿using System.Data;
 using Dapper;
-using QuantumCore.Core.Cache;
+using QuantumCore.Caching;
 
 namespace QuantumCore.Game.Persistence;
 
