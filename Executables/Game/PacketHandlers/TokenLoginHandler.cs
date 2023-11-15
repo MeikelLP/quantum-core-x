@@ -80,8 +80,8 @@ namespace QuantumCore.Game.PacketHandlers
 
                 i++;
             }
-            // Get empire 
-            // If there are no characters belonging to the account, it will be retrieved from the cache.
+
+            // When there are no characters belonging to the account, the empire status is stored in the cache.
             var empire = await _empireRepository.GetTempEmpireForAccountAsync(token.AccountId) ?? 0;
             if (charactersFromCacheOrDb.Length > 0)
             {

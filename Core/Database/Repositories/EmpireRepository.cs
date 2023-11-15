@@ -9,6 +9,13 @@ namespace QuantumCore.Database;
 public interface IEmpireRepository
 {
     Task<byte?> GetEmpireForPlayerAsync(Guid accountId);
+
+    /// <summary>
+    /// If no character has been created for the account, the player's selection is kept in the cache. 
+    /// Therefore, the value kept in the cache is fetched with this method.
+    /// </summary>
+    /// <param name="accountId"></param>
+    /// <returns></returns>
     Task<byte?> GetTempEmpireForAccountAsync(Guid accountId);
 }
 
@@ -30,7 +37,6 @@ public class EmpireRepository : IEmpireRepository
 
         if(cachedEmpire.HasValue)
         {
-            // If found in Redis on Player, return the cached empire value
             return cachedEmpire;
         }
 
@@ -44,13 +50,6 @@ public class EmpireRepository : IEmpireRepository
 
         return databaseEmpire;
     }
-
-    /// <summary>
-    /// If no character has been created for the account, the player's selection is kept in the cache. 
-    /// Therefore, the value kept in the cache is fetched with this method.
-    /// </summary>
-    /// <param name="accountId"></param>
-    /// <returns></returns>
     public async Task<byte?> GetTempEmpireForAccountAsync(Guid accountId)
     {
         var empireRedisKey = $"empire-aid:{accountId}";
@@ -58,10 +57,10 @@ public class EmpireRepository : IEmpireRepository
 
         if (cachedEmpire.HasValue)
         {
-            // If found in Redis on Account, return the cached empire value
             return cachedEmpire;
         }
 
+        // 0 means Empire not selected
         return 0;
     }
 }
