@@ -79,12 +79,18 @@ namespace QuantumCore.Game.PacketHandlers
                 i++;
             }
 
-            // Send empire to the client and characters
-            var empire = await _empireRepository.GetEmpireForAccountAsync(token.AccountId) ?? 0;
+            // When there are no characters belonging to the account, the empire status is stored in the cache.
+            var empire = await _empireRepository.GetTempEmpireForAccountAsync(token.AccountId) ?? 0;
+            if (charactersFromCacheOrDb.Length > 0)
+            {
+                empire = charactersFromCacheOrDb[0].Empire;
+            }
 
+            // TODO:: set player id to character?
             ctx.Connection.Send(new Empire { EmpireId = empire });
             ctx.Connection.SetPhase(EPhases.Select);
             ctx.Connection.Send(characters);
+
         }
     }
 }

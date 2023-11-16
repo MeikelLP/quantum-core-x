@@ -146,7 +146,7 @@ namespace QuantumCore.Game.World.Entities
 
         public async Task Load()
         {
-            Empire = await _empireRepository.GetEmpireForAccountAsync(Player.Id) ?? 0;
+            Empire = await _empireRepository.GetEmpireForPlayerAsync(Player.Id) ?? 0;
             await Inventory.Load();
             await QuickSlotBar.Load();
             Health = (int) GetPoint(EPoints.MaxHp); // todo: cache hp of player
@@ -982,7 +982,7 @@ namespace QuantumCore.Game.World.Entities
             {
                 Vid = Vid,
                 Name = Player.Name,
-                Empire = Empire,
+                Empire = Player.Empire,
                 Level = Player.Level,
                 Parts = new ushort[] {
                     (ushort)(Inventory.EquipmentWindow.Body?.ItemId ?? 0),
