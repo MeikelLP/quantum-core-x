@@ -6,7 +6,7 @@ namespace QuantumCore.Game.Persistence;
 
 public interface IEmpireRepository
 {
-    Task<byte?> GetEmpireForPlayerAsync(Guid accountId);
+    Task<byte?> GetEmpireForPlayerAsync(Guid playerId);
 
     /// <summary>
     /// If no character has been created for the account, the player's selection is kept in the cache. 
