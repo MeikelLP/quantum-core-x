@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <AssemblyName>QuantumCore.Auth.Persistence</AssemblyName>
+        <RootNamespace>QuantumCore.Auth.Persistence</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Core.Persistence\Core.Persistence.csproj" />
+      <ProjectReference Include="..\..\CorePluginAPI\CorePluginAPI.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageReference Include="BCrypt.Net-Next" Version="4.0.0" />
+      <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.0" />
+      <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0" />
+    </ItemGroup>
+    <ItemGroup>
+        <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleToAttribute">
+            <_Parameter1>Core.Tests</_Parameter1>
+        </AssemblyAttribute>
+    </ItemGroup>
+
+    <ItemGroup>
+      <Compile Remove="AccountStore.cs" />
+    </ItemGroup>
+
+</Project>

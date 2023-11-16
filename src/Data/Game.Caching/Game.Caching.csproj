@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Core.Caching\Core.Caching.csproj" />
+      <ProjectReference Include="..\..\CorePluginAPI\CorePluginAPI.csproj" />
+    </ItemGroup>
+
+</Project>
