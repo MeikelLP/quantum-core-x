@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+        <AssemblyName>QuantumCore.Single</AssemblyName>
+        <RootNamespace>QuantumCore.Single</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <None Update="appsettings.json">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="appsettings.json">
+          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
+    
+    <ItemGroup>
+      <ProjectReference Include="..\..\Core\Core.csproj" />
+      <ProjectReference Include="..\..\Data\Game.Caching\Game.Caching.csproj" />
+      <ProjectReference Include="..\Auth\Auth.csproj" />
+      <ProjectReference Include="..\Game\Game.csproj" />
+    </ItemGroup>
+
+</Project>
