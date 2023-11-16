@@ -1,4 +1,5 @@
 ﻿using System.Net.Sockets;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.Game.World;
@@ -16,7 +17,7 @@ namespace QuantumCore.Game
         public IPlayerEntity? Player { get; set; }
 
         public GameConnection(IServerBase server, TcpClient client, ILogger<GameConnection> logger,
-            PluginExecutor pluginExecutor, IWorld world, IPacketReader packetReader)
+            PluginExecutor pluginExecutor, IWorld world, [FromKeyedServices("game")]IPacketReader packetReader)
             : base(logger, pluginExecutor, packetReader)
         {
             _world = world;

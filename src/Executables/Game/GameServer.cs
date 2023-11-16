@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Net;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using QuantumCore.API;
@@ -40,9 +41,9 @@ namespace QuantumCore.Game
 
         public static GameServer Instance { get; private set; } = null!; // singleton
 
-        public GameServer(IOptions<HostingOptions> hostingOptions, IPacketManager packetManager,
-            ILogger<GameServer> logger, PluginExecutor pluginExecutor, IServiceProvider serviceProvider,
-        public GameServer(IOptionsSnapshot<HostingOptions> hostingOptions, IPacketManager packetManager,
+        public GameServer(IOptionsSnapshot<HostingOptions> hostingOptions,
+            [FromKeyedServices("game")] IPacketManager packetManager, ILogger<GameServer> logger,
+            PluginExecutor pluginExecutor, IServiceProvider serviceProvider,
             IItemManager itemManager, IMonsterManager monsterManager, IExperienceManager experienceManager,
             IAnimationManager animationManager, ICommandManager commandManager,
             IEnumerable<IPacketHandler> packetHandlers, IQuestManager questManager, IChatManager chatManager,

@@ -1,6 +1,7 @@
 ﻿using System.Buffers;
 using System.Runtime.CompilerServices;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace QuantumCore.Networking;
@@ -11,14 +12,15 @@ public class PacketReader : IPacketReader
     private readonly IPacketManager _packetManager;
     private readonly int _bufferSize;
 
-    public PacketReader(ILogger<PacketReader> logger, IPacketManager packetManager, IConfiguration configuration)
+    public PacketReader([ServiceKey] string serviceKey, ILogger<PacketReader> logger, IConfiguration configuration,
+        IServiceProvider serviceProvider)
     {
         _logger = logger;
-        _packetManager = packetManager;
+        _packetManager = serviceProvider.GetRequiredKeyedService<IPacketManager>(serviceKey);
         _bufferSize = configuration.GetValue<int?>("BufferSize") ?? 4096;
         _logger.LogDebug("Using buffer size {BufferSize}", _bufferSize);
     }
-    
+
     public async IAsyncEnumerable<object> EnumerateAsync(Stream stream, [EnumeratorCancellation] CancellationToken token = default)
     {
         var buffer = ArrayPool<byte>.Shared.Rent(_bufferSize);

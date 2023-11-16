@@ -4,12 +4,12 @@ using QuantumCore.API;
 using QuantumCore.API.Game.World;
 using QuantumCore.API.PluginTypes;
 using QuantumCore.Auth.Persistence.Extensions;
+using QuantumCore.Extensions;
 using QuantumCore.Game.Commands;
 using QuantumCore.Game.Persistence.Extensions;
 using QuantumCore.Game.PlayerUtils;
 using QuantumCore.Game.Quest;
 using QuantumCore.Game.Services;
-using QuantumCore.Game.World;
 
 namespace QuantumCore.Game.Extensions;
 
@@ -17,6 +17,7 @@ public static class ServiceExtensions
 {
     public static IServiceCollection AddGameServices(this IServiceCollection services)
     {
+        services.AddPacketProvider<GamePacketLocationProvider>("game");
         services.Scan(scan =>
         {
             scan.FromAssemblyOf<GameServer>()
