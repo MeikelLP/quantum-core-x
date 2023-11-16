@@ -42,6 +42,7 @@ namespace QuantumCore.Game
 
         public GameServer(IOptions<HostingOptions> hostingOptions, IPacketManager packetManager,
             ILogger<GameServer> logger, PluginExecutor pluginExecutor, IServiceProvider serviceProvider,
+        public GameServer(IOptionsSnapshot<HostingOptions> hostingOptions, IPacketManager packetManager,
             IItemManager itemManager, IMonsterManager monsterManager, IExperienceManager experienceManager,
             IAnimationManager animationManager, ICommandManager commandManager,
             IEnumerable<IPacketHandler> packetHandlers, IQuestManager questManager, IChatManager chatManager,

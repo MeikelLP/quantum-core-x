@@ -9,6 +9,9 @@ public static class ServiceExtensions
     public static IServiceCollection AddAuthServices(this IServiceCollection services)
     {
         services.AddAuthDatabase();
+        services.AddOptions<HostingOptions>("auth")
+            .BindConfiguration("Auth:Hosting")
+            .ValidateDataAnnotations();
         services.Scan(scan =>
         {
             scan.FromAssemblyOf<AuthServer>()

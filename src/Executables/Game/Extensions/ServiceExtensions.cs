@@ -24,6 +24,9 @@ public static class ServiceExtensions
                 .AsImplementedInterfaces()
                 .WithSingletonLifetime();
         });
+        services.AddOptions<HostingOptions>("game")
+            .BindConfiguration("Game:Hosting")
+            .ValidateDataAnnotations();
         services.AddAuthDatabase();
         services.AddGameDatabase();
         services.AddGameCaching();

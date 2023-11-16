@@ -29,9 +29,6 @@ public static class ServiceExtensions
     /// <returns></returns>
     public static IServiceCollection AddCoreServices(this IServiceCollection services, IPluginCatalog pluginCatalog, IConfiguration configuration)
     {
-        services.AddOptions<HostingOptions>()
-            .BindConfiguration("Hosting")
-            .ValidateDataAnnotations();
         services.AddCustomLogging(configuration);
         services.AddSingleton<IPacketManager>(provider =>
         {

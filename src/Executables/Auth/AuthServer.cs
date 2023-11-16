@@ -16,6 +16,7 @@ namespace QuantumCore.Auth
         private readonly ICacheManager _cacheManager;
 
         public AuthServer(IOptions<HostingOptions> hostingOptions, IPacketManager packetManager, ILogger<AuthServer> logger,
+        public AuthServer(IOptionsSnapshot<HostingOptions> hostingOptions, IPacketManager packetManager, ILogger<AuthServer> logger,
             PluginExecutor pluginExecutor, IServiceProvider serviceProvider,
             IEnumerable<IPacketHandler> packetHandlers, ICacheManager cacheManager)
             : base(packetManager, logger, pluginExecutor, serviceProvider, packetHandlers, "auth", hostingOptions)

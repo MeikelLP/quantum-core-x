@@ -36,7 +36,7 @@ namespace QuantumCore.Core.Networking
 
         public ServerBase(IPacketManager packetManager, ILogger logger, PluginExecutor pluginExecutor,
             IServiceProvider serviceProvider, IEnumerable<IPacketHandler> packetHandlers, string mode,
-            IOptions<HostingOptions> hostingOptions)
+            IOptionsSnapshot<HostingOptions> hostingOptions)
         {
             _logger = logger;
             _pluginExecutor = pluginExecutor;
@@ -44,12 +44,12 @@ namespace QuantumCore.Core.Networking
             _packetHandlers = packetHandlers;
             _serverMode = mode;
             PacketManager = packetManager;
-            Port = hostingOptions.Value.Port;
+            Port = hostingOptions.Get(mode).Port;
 
             // Start server timer
             _serverTimer.Start();
 
-            var localAddr = IPAddress.Parse(hostingOptions.Value.IpAddress ?? "127.0.0.1");
+            var localAddr = IPAddress.Parse(hostingOptions.Get(mode).IpAddress ?? "127.0.0.1");
             IpUtils.PublicIP = localAddr;
             Listener = new TcpListener(localAddr, Port);
 
