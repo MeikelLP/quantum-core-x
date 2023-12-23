@@ -1,4 +1,6 @@
-﻿namespace QuantumCore.API.Core.Models;
+using QuantumCore.API.Game.Types;
+
+namespace QuantumCore.API.Core.Models;
 
 public class PlayerData
 {
@@ -31,4 +33,5 @@ public class PlayerData
     public uint MaxHp { get; set; }
     public uint MaxSp { get; set; }
     public byte Slot { get; set; }
+    public EAffects Affects { get; set; }
 }

@@ -39,6 +39,7 @@ namespace QuantumCore.Game.PacketHandlers.Loading
             _world.SpawnEntity(player);
 
             player.SendInventory();
+            player.SendCharacterUpdate();
             return Task.CompletedTask;
         }
     }
