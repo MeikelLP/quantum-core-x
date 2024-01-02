@@ -29,12 +29,20 @@ public class Shop : IShop
     private Grid<ShopItem> _grid = new(4, 5);
     private readonly List<ShopItem> _items = new();
     private readonly IItemManager _itemManager;
+    private readonly IShopsManager _shopsManager;
     private readonly ILogger _logger;
 
-    public Shop(IItemManager itemManager, ILogger logger)
+    public Shop(IItemManager itemManager, IShopsManager shopsManager, ILogger logger)
     {
         _itemManager = itemManager;
+        _shopsManager = shopsManager;
         _logger = logger;
+
+        var shopItems = _shopsManager.GetShopItems(Vid);
+        foreach (var item in shopItems.Result)
+        {
+            AddItem(item.ItemId, item.Count, item.Price);
+        }
     }
 
     public void AddItem(uint itemId, byte count, uint price)
