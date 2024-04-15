@@ -165,7 +165,7 @@
 
 2. Setting up required services
 
-    1. Use the `docker-compose.yml` in the project's root to boot up all services.
+    1. Use the `docker-compose.yml` in `src/` to boot up all services.
 
         ```sh
         docker-compose up -d
