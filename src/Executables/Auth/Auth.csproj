@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <AssemblyName>QuantumCore.Auth</AssemblyName>
+        <RootNamespace>QuantumCore.Auth</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\..\Data\Auth.Persistence\Auth.Persistence.csproj" />
+      <ProjectReference Include="..\..\Core\Core.csproj" />
+      <ProjectReference Include="..\..\Core.Networking.Generators\Core.Networking.Generators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+      <ProjectReference Include="..\..\Data\Core.Caching\Core.Caching.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Update="appsettings.json">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="appsettings.Development.json" Condition="Exists('appsettings.Development.json')">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="appsettings.Production.json" Condition="Exists('appsettings.Production.json')">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+    </ItemGroup>
+
+</Project>

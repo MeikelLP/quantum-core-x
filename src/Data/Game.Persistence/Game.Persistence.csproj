@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <AssemblyName>QuantumCore.Game.Persistence</AssemblyName>
+        <RootNamespace>QuantumCore.Game.Persistence</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Core.Persistence\Core.Persistence.csproj" />
+      <ProjectReference Include="..\..\CorePluginAPI\CorePluginAPI.csproj" />
+    </ItemGroup>
+
+</Project>
