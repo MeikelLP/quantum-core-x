@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using FluentMigrator;
-using QuantumCore.Database;
 
 namespace QuantumCore.Migrations
 {
