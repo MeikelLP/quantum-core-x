@@ -16,9 +16,10 @@ public class DefaultPacketSerializer : IPacketSerializer
         obj.Serialize(arr, offset);
     }
 
-    public T Deserialize<T>(byte[] bytes, int offset = 0)
-        where T : IPacketSerializable
+    public T Deserialize<T>(byte[] bytes, int offset = 0) where T : IPacketSerializable, new()
     {
-        return T.Deserialize<T>(bytes, offset);
+        var obj = new T();
+        obj.Deserialize(bytes, offset);
+        return obj;
     }
 }

@@ -26,8 +26,8 @@ internal class SerializeGenerator
         var staticByteIndex = subHeader is not null ? 2 : 1;
         foreach (var field in fields.ToArray())
         {
-            var fieldExpression = fields.Any(x => x.SizeFieldName == field.Name) 
-                ? "this.GetSize()" 
+            var fieldExpression = fields.Any(x => x.SizeFieldName == field.Name)
+                ? "this.GetSize()"
                 : $"this.{field.Name}";
 
             var line = GenerateMethodLine(field, fieldExpression, ref staticByteIndex, dynamicByteIndex, "", "            ");
@@ -69,23 +69,23 @@ internal class SerializeGenerator
         return finalLine;
     }
 
-    private static string GetLineForString(FieldData fieldData, string fieldExpression, ref int offset, StringBuilder dynamicOffset,
+    internal static string GetLineForString(FieldData fieldData, string fieldExpression, ref int offset, StringBuilder dynamicOffset,
         string tempDynamicOffset, string indentPrefix)
     {
         var offsetStr = $"offset + {offset}{dynamicOffset}{tempDynamicOffset}";
-        if (fieldData.ElementSize <= 0)
+        if (fieldData.HasDynamicLength)
         {
             // only append to dynamic offset if type has non static length
             dynamicOffset.Append($" + {fieldExpression}.Length");
         }
 
-        var lengthString = fieldData.SizeFieldName is not null
-            ? $"this.{fieldData.SizeFieldName} + 1"
+        var lengthString = fieldData.HasDynamicLength
+            ? $"(int)this.{fieldData.SizeFieldName} + 1"
             : fieldData.ElementSize.ToString();
-        return $"{indentPrefix}bytes.WriteString({fieldExpression}, {offsetStr}, (int){lengthString});";
+        return $"{indentPrefix}bytes.WriteString({fieldExpression}, {offsetStr}, {lengthString});";
     }
 
-    private static string GetLineForFixedByteArray(FieldData field, string fieldExpression,
+    internal static string GetLineForFixedByteArray(FieldData field, string fieldExpression,
         ref int offset,
         StringBuilder dynamicOffset, string tempDynamicOffset, string indentPrefix)
     {
@@ -94,7 +94,7 @@ internal class SerializeGenerator
         return $"{indentPrefix}{fieldExpression}.CopyTo(bytes, {offsetStr});";
     }
 
-    private static string GetLineForDynamicByteArray(string fieldExpression,
+    internal static string GetLineForDynamicByteArray(string fieldExpression,
         ref int offset,
         StringBuilder dynamicOffset, string tempDynamicOffset, string indentPrefix)
     {
@@ -103,33 +103,32 @@ internal class SerializeGenerator
         return $"{indentPrefix}{fieldExpression}.CopyTo(bytes, {offsetStr});";
     }
 
-    private string GetLineForSingleValue(FieldData fieldData, INamedTypeSymbol namedTypeSymbol, string fieldExpression,
+    internal static string GetLineForSingleValue(FieldData fieldData, INamedTypeSymbol namedTypeSymbol, string fieldExpression,
         ref int offset,
         StringBuilder dynamicOffset, string tempDynamicOffset, string indentPrefix)
     {
         var offsetStr = $"offset + {offset}{dynamicOffset}{tempDynamicOffset}";
-        var type = namedTypeSymbol.TypeKind is TypeKind.Enum
+        var type = fieldData.IsEnum
             ? namedTypeSymbol.EnumUnderlyingType!.Name
             : namedTypeSymbol.Name;
-        var cast = namedTypeSymbol.TypeKind is TypeKind.Enum
-            ? $"({namedTypeSymbol.EnumUnderlyingType.GetFullName()})"
-            : GeneratorConstants.CastableToByteTypes.Contains(namedTypeSymbol.Name)
-                ? $"({namedTypeSymbol.GetFullName()})"
-                : "";
+        var cast = fieldData.IsEnum
+            ? $"({namedTypeSymbol.EnumUnderlyingType!.GetFullName()})"
+            : "";
 
-        if (GeneratorConstants.SupportedTypesByBitConverter.Contains(type))
+        if (GeneratorConstants.SupportedTypesByBitConverter.Contains(type) || GeneratorConstants.ConvertTypes.Contains(type))
         {
-            if (type is "Int32" or "UInt32" or 
-                        "Int16" or "UInt16" or 
+            if (type is "Int32" or "UInt32" or
+                        "Int16" or "UInt16" or
                         "Int64" or "UInt64")
             {
                 var sb = new StringBuilder();
-                for (int i = 0; i < fieldData.ElementSize; i++)
+                var elementSize = GeneratorConstants.GetSizeOfPrimitiveType(type);
+                for (int i = 0; i < elementSize; i++)
                 {
                     var offsetStrLocal = $"offset + {offset + i}{dynamicOffset}{tempDynamicOffset}";
-                    var line = $"{indentPrefix}bytes[{offsetStrLocal}] = (byte)({cast}{fieldExpression} >> {8 * i});";
+                    var line = $"{indentPrefix}bytes[{offsetStrLocal}] = (System.Byte)({cast}{fieldExpression} >> {8 * i});";
 
-                    if (i < fieldData.ElementSize - 1)
+                    if (i < elementSize - 1)
                     {
                         sb.AppendLine(line);
                     }
@@ -146,21 +145,22 @@ internal class SerializeGenerator
                 return $"{indentPrefix}System.BitConverter.GetBytes({cast}{fieldExpression}).CopyTo(bytes, {offsetStr});";
             }
         }
-        if (GeneratorConstants.CastableToByteTypes.Contains(type))
+        if (GeneratorConstants.ConvertTypes.Contains(type))
         {
             return $"{indentPrefix}bytes[{offsetStr}] = {cast}{fieldExpression};";
         }
 
         if (GeneratorConstants.NoCastTypes.Contains(type))
         {
-            return $"{indentPrefix}bytes[{offsetStr}] = {cast}{fieldExpression};";
+            return fieldData.IsEnum
+                ? $"{indentPrefix}bytes[{offsetStr}] = {cast}{fieldExpression};"
+                : $"{indentPrefix}bytes[{offsetStr}] = {fieldExpression};";
         }
 
-        if (namedTypeSymbol.GetFullName() == "System.String")
+        if (type == "String")
         {
             return GetLineForString(fieldData, fieldExpression, ref offset, dynamicOffset, tempDynamicOffset, indentPrefix);
         }
-        
 
         throw new InvalidOperationException($"Don't know how to handle type {namedTypeSymbol.Name}");
     }
@@ -255,7 +255,7 @@ internal class SerializeGenerator
             {
                 var elementType = (INamedTypeSymbol)((IArrayTypeSymbol)field.SemanticType).ElementType;
                 var subFieldExpression = $"{fieldExpression}[i]";
-                var line = GetLineForSingleValue(field, elementType, subFieldExpression, ref offset, dynamicOffset, 
+                var line = GetLineForSingleValue(field, elementType, subFieldExpression, ref offset, dynamicOffset,
                     $" + i * {field.ElementSize}", $"{indentPrefix}    ");
                 dynamicOffset.Append($" + {fieldExpression}.Length * {field.ElementSize}");
                 lines.AppendLine(line);
@@ -271,7 +271,7 @@ internal class SerializeGenerator
     {
         var subTypeFullName = arr.ElementType.GetFullName()!;
         var lines = new StringBuilder();
-        
+
         if (subTypeFullName == "System.Byte")
         {
             return GetLineForFixedByteArray(field, fieldExpression, ref offset, dynamicOffset, tempDynamicOffset, indentPrefix);
@@ -348,7 +348,7 @@ internal class SerializeGenerator
         sb.AppendLine("        }");
     }
 
-    private static string GenerateWriteHeader(string header, string? subHeader)
+    internal static string GenerateWriteHeader(string header, string? subHeader)
     {
         var sb = new StringBuilder();
         sb.Append($"            bytes[offset + 0] = {header};");

@@ -1,5 +1,3 @@
-using System;
-using System.Linq;
 using System.Text;
 using AutoBogus;
 using Bogus;
@@ -80,7 +78,7 @@ public class OutgoingPacketTests
                 .Concat(BitConverter.GetBytes(obj.Class))
                 .Append(obj.MoveSpeed)
                 .Append(obj.AttackSpeed)
-                .Append(obj.State)
+                .Append((byte)obj.State)
                 .Concat(obj.Affects.SelectMany(BitConverter.GetBytes))
         );
     }
@@ -111,7 +109,7 @@ public class OutgoingPacketTests
                 {
                     0x03
                 }
-                .Append(obj.MovementType)
+                .Append((byte)obj.MovementType)
                 .Append(obj.Argument)
                 .Append(obj.Rotation)
                 .Concat(BitConverter.GetBytes(obj.Vid))

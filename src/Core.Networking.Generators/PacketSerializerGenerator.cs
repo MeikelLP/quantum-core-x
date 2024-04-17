@@ -12,64 +12,6 @@ public class PacketSerializerGenerator : IIncrementalGenerator
     private DeserializeGenerator _deserializeGenerator = null!;
     private GeneratorContext _generatorContext = null!;
 
-    private (string Name, string Source) GenerateFile(TypeDeclarationSyntax type, SyntaxTree tree)
-    {
-        var name = type.Identifier.Text;
-        var ns = tree.GetRoot().DescendantNodes().OfType<BaseNamespaceDeclarationSyntax>().First()?.Name.ToString()!;
-        var typeKeyWords = GeneratorContext.GetTypeKeyWords(type);
-        var packetAttr = type.AttributeLists
-            .SelectMany(x => x.Attributes)
-            .First(x => ((IdentifierNameSyntax)x.Name).Identifier.Text == "Packet");
-        var header = ((LiteralExpressionSyntax)packetAttr.ArgumentList!.Arguments[0].Expression).Token.Text;
-        var subPacketAttr = type.AttributeLists
-            .SelectMany(x => x.Attributes)
-            .FirstOrDefault(x => ((IdentifierNameSyntax)x.Name).Identifier.Text == "SubPacket");
-        var subHeader = (subPacketAttr?.ArgumentList?.Arguments.FirstOrDefault()?.Expression as LiteralExpressionSyntax)?.Token.Text ?? "null";
-        var hasStaticSize = _generatorContext.GetFieldsOfType(type).All(x => !x.HasDynamicLength);
-        var hasSequence = packetAttr.ArgumentList.Arguments.Any(x => x.NameEquals?.Name.Identifier.Text == "Sequence" && ((LiteralExpressionSyntax)x.Expression).Token.Text == "true");//packetAttr.ArgumentList
-        var source = new StringBuilder();
-        ApplyHeader(source, typeKeyWords, ns, name, header, subHeader, hasStaticSize, hasSequence);
-        
-        var dynamicByteIndex = new StringBuilder();
-        source.Append(_serializeGenerator.Generate(type, dynamicByteIndex));
-        
-        source.AppendLine();
-        
-        dynamicByteIndex = new StringBuilder();
-        source.Append(_deserializeGenerator.Generate(type, dynamicByteIndex.ToString()));
-
-        ApplyFooter(source);
-        return (name, source.ToString());
-    }
-
-    private static void ApplyFooter(StringBuilder source)
-    {
-        source.AppendLine("    }");
-        source.Append("}");
-    }
-
-    // TODO deserialize
-    
-    private static bool CouldBeEnumerationAsync(
-        SyntaxNode syntaxNode,
-        CancellationToken cancellationToken)
-    {
-        return syntaxNode is StructDeclarationSyntax or ClassDeclarationSyntax or RecordDeclarationSyntax &&
-               IsPartial((TypeDeclarationSyntax)syntaxNode);
-    }
-
-    private static bool IsPartial(TypeDeclarationSyntax declaration)
-    {
-        return declaration.Modifiers.Any(x => x.Text == "partial");
-    }
-    
-    private static SerializerTypeInfo GetTypeInfo(
-        GeneratorAttributeSyntaxContext context,
-        CancellationToken cancellationToken)
-    {
-        return new SerializerTypeInfo((INamedTypeSymbol)context.TargetSymbol, context.TargetNode, context.SemanticModel);
-    }
-
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         var assemblyName = context.CompilationProvider.Select(static (c, _) => c.AssemblyName);
@@ -77,7 +19,7 @@ public class PacketSerializerGenerator : IIncrementalGenerator
             .ForAttributeWithMetadataName(GeneratorConstants.PACKETGENEREATOR_ATTRIBUTE_FULLNAME, CouldBeEnumerationAsync, GetTypeInfo)
             .Collect()
             .SelectMany((info, _) => info.Distinct());
-        
+
         var combined = sourceFiles.Combine(assemblyName);
 
         context.RegisterSourceOutput(combined, (spc, compilationPair) =>
@@ -109,11 +51,70 @@ public class PacketSerializerGenerator : IIncrementalGenerator
                         true), typeDeclarationSyntax.GetLocation(), typeDeclarationSyntax.Identifier.Text,
                     e.GetType(), e.Message));
             }
-            
+
         });
     }
 
-    private static void ApplyHeader(StringBuilder sb, string typeKeywords, string ns, string name, string header, 
+    private (string Name, string Source) GenerateFile(TypeDeclarationSyntax type, SyntaxTree tree)
+    {
+        var name = type.Identifier.Text;
+        var ns = tree.GetRoot().DescendantNodes().OfType<BaseNamespaceDeclarationSyntax>().First()?.Name.ToString()!;
+        var typeKeyWords = GeneratorContext.GetTypeKeyWords(type);
+        var packetAttr = type.AttributeLists
+            .SelectMany(x => x.Attributes)
+            .First(x => ((IdentifierNameSyntax)x.Name).Identifier.Text == "Packet");
+        var header = ((LiteralExpressionSyntax)packetAttr.ArgumentList!.Arguments[0].Expression).Token.Text;
+        var subPacketAttr = type.AttributeLists
+            .SelectMany(x => x.Attributes)
+            .FirstOrDefault(x => ((IdentifierNameSyntax)x.Name).Identifier.Text == "SubPacket");
+        var subHeader = (subPacketAttr?.ArgumentList?.Arguments.FirstOrDefault()?.Expression as LiteralExpressionSyntax)?.Token.Text ?? "null";
+        var hasStaticSize = _generatorContext.GetFieldsOfType(type).All(x => !x.HasDynamicLength);
+        var hasSequence = packetAttr.ArgumentList.Arguments.Any(x => x.NameEquals?.Name.Identifier.Text == "Sequence" && ((LiteralExpressionSyntax)x.Expression).Token.Text == "true");//packetAttr.ArgumentList
+        var source = new StringBuilder();
+        ApplyHeader(source, typeKeyWords, ns, name, header, subHeader, hasStaticSize, hasSequence);
+
+        var dynamicByteIndex = new StringBuilder();
+        source.Append(_serializeGenerator.Generate(type, dynamicByteIndex));
+
+        source.AppendLine();
+
+        dynamicByteIndex = new StringBuilder();
+        source.Append(_deserializeGenerator.Generate(type, dynamicByteIndex.ToString()));
+
+        ApplyFooter(source);
+        return (name, source.ToString());
+    }
+
+    private static void ApplyFooter(StringBuilder source)
+    {
+        source.AppendLine("    }");
+        source.Append("}");
+    }
+
+    // TODO deserialize
+
+
+    private static bool CouldBeEnumerationAsync(
+        SyntaxNode syntaxNode,
+        CancellationToken cancellationToken)
+    {
+        return syntaxNode is StructDeclarationSyntax or ClassDeclarationSyntax &&
+               IsPartial((TypeDeclarationSyntax)syntaxNode);
+    }
+
+    private static bool IsPartial(TypeDeclarationSyntax declaration)
+    {
+        return declaration.Modifiers.Any(x => x.Text == "partial");
+    }
+
+    private static SerializerTypeInfo GetTypeInfo(
+        GeneratorAttributeSyntaxContext context,
+        CancellationToken cancellationToken)
+    {
+        return new SerializerTypeInfo((INamedTypeSymbol)context.TargetSymbol, context.TargetNode, context.SemanticModel);
+    }
+
+    private static void ApplyHeader(StringBuilder sb, string typeKeywords, string ns, string name, string header,
         string subHeader, bool hasStaticSize, bool hasSequence)
     {
         sb.AppendLine($@"/// <auto-generated/>
@@ -130,24 +131,10 @@ namespace {ns} {{
 
     public partial {typeKeywords} {name} : IPacketSerializable
     {{
-        public static byte Header => {header};
-        public static byte? SubHeader => {subHeader};
-        public static bool HasStaticSize => {hasStaticSize.ToString().ToLower()};
-        public static bool HasSequence => {hasSequence.ToString().ToLower()};
+        public byte Header => {header};
+        public byte? SubHeader => {subHeader};
+        public bool HasStaticSize => {hasStaticSize.ToString().ToLower()};
+        public bool HasSequence => {hasSequence.ToString().ToLower()};
 ");
-    }
-}
-
-internal class SerializerTypeInfo
-{
-    public INamedTypeSymbol Symbol { get; }
-    public SyntaxNode Node { get; }
-    public SemanticModel SemanticModel { get; }
-
-    public SerializerTypeInfo(INamedTypeSymbol symbol, SyntaxNode node, SemanticModel semanticModel)
-    {
-        Symbol = symbol;
-        Node = node;
-        SemanticModel = semanticModel;
     }
 }

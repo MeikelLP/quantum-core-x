@@ -1,6 +1,4 @@
-﻿using System;
-using System.Linq;
-using System.Text;
+﻿using System.Text;
 using AutoBogus;
 using FluentAssertions;
 using Microsoft.Extensions.Configuration;
@@ -83,8 +81,7 @@ public class IncomingPacketTests
         var result = _serializer.Deserialize<ChatIncoming>(bytes);
 
         result.Should().BeEquivalentTo(expected);
-
-        QuantumCore.Game.Packets.ChatIncoming.HasSequence.Should().BeTrue();
+        result.HasSequence.Should().BeTrue();
     }
 
     [Fact]
@@ -144,7 +141,7 @@ public class IncomingPacketTests
     {
         var expected = new AutoFaker<CharacterMove>().Generate();
         var bytes = Array.Empty<byte>()
-            .Append(expected.MovementType)
+            .Append((byte)expected.MovementType)
             .Append(expected.Argument)
             .Append(expected.Rotation)
             .Concat(BitConverter.GetBytes(expected.PositionX))
@@ -162,12 +159,9 @@ public class IncomingPacketTests
         // var expected = new AutoFaker<EnterGame>().Generate();
         var bytes = Array.Empty<byte>()
             .ToArray();
-        var result =  _serializer.Deserialize<EnterGame>(bytes);
+        var result = _serializer.Deserialize<EnterGame>(bytes);
 
-        var ex = Assert.Throws<InvalidOperationException>(() => result.Should().BeEquivalentTo(new EnterGame()));
-        ex.Message.Should()
-            .BeEquivalentTo(
-                "No members were found for comparison. Please specify some members to include in the comparison or choose a more meaningful assertion.");
+        result.Should().BeEquivalentTo(new EnterGame());
     }
 
     [Fact]
@@ -298,10 +292,7 @@ public class IncomingPacketTests
             .ToArray();
         var result = _serializer.Deserialize<ShopClose>(bytes);
 
-        var ex = Assert.Throws<InvalidOperationException>(() => result.Should().BeEquivalentTo(new ShopClose()));
-        ex.Message.Should()
-            .BeEquivalentTo(
-                "No members were found for comparison. Please specify some members to include in the comparison or choose a more meaningful assertion.");
+        result.Should().BeEquivalentTo(new ShopClose());
     }
 
     [Fact]

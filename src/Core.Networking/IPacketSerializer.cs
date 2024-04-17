@@ -26,5 +26,5 @@ public interface IPacketSerializer
     /// <param name="offset"></param>
     /// <typeparam name="T"></typeparam>
     /// <returns></returns>
-    T Deserialize<T>(byte[] bytes, int offset = 0) where T : IPacketSerializable;
+    T Deserialize<T>(byte[] bytes, int offset = 0) where T : IPacketSerializable, new();
 }

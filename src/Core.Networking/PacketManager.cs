@@ -10,13 +10,16 @@ public class PacketManager : IPacketManager
 
     public PacketManager(ILogger<PacketManager> logger, IEnumerable<Type> packetTypes, Type[]? packetHandlerTypes = null)
     {
-        const BindingFlags flags = BindingFlags.Static | BindingFlags.Public;
+        const BindingFlags flags = BindingFlags.Instance | BindingFlags.Public;
         foreach (var packetType in packetTypes)
         {
-            var header = (byte)packetType.GetProperty(nameof(IPacketSerializable.Header), flags)!.GetValue(null)!;
-            var subHeader = (byte?)packetType.GetProperty(nameof(IPacketSerializable.SubHeader), flags)!.GetValue(null);
+            var packetInstance = Activator.CreateInstance(packetType);
+            var header = (byte)packetType.GetProperty(nameof(IPacketSerializable.Header), flags)!.GetValue(packetInstance)!;
+            var subHeader = (byte?)packetType.GetProperty(nameof(IPacketSerializable.SubHeader), flags)!.GetValue(packetInstance);
+            var hasStaticSize = (bool)packetType.GetProperty(nameof(IPacketSerializable.HasStaticSize), flags)!.GetValue(packetInstance)!;
+            var hasSequence = (bool)packetType.GetProperty(nameof(IPacketSerializable.HasSequence), flags)!.GetValue(packetInstance)!;
 
-            // last or default so it can be overriden via plugins - last one is chosen
+            // last or default, so it can be overriden via plugins - last one is chosen
             var packetHandlerType = packetHandlerTypes?
                 .LastOrDefault(x =>
                     x is { IsAbstract: false, IsInterface: false } &&
@@ -24,7 +27,7 @@ public class PacketManager : IPacketManager
                         .GetInterfaces()
                         .Any(i => i.IsGenericType && i.GenericTypeArguments.First() == packetType)
                 );
-            _infos.Add((header, subHeader), new PacketInfo(packetType, packetHandlerType));
+            _infos.Add((header, subHeader), new PacketInfo(packetType, packetHandlerType, hasStaticSize, hasSequence));
             if (subHeader.HasValue)
             {
                 logger.LogDebug("Registered header 0x{Header:X2} with handler {HandlerType}", header,
@@ -47,12 +50,8 @@ public class PacketManager : IPacketManager
     {
         if(!_typeCache.TryGetValue(packet.GetType(), out var pair))
         {
-            pair.Header = (byte)packet.GetType()
-                .GetProperty(nameof(IPacketSerializable.Header), BindingFlags.Public | BindingFlags.Static)!
-                .GetValue(null)!;
-            pair.SubHeader = (byte?)packet.GetType()
-                .GetProperty(nameof(IPacketSerializable.SubHeader), BindingFlags.Public | BindingFlags.Static)!
-                .GetValue(null);
+            pair.Header = packet.Header;
+            pair.SubHeader = packet.SubHeader;
             _typeCache.Add(packet.GetType(), (pair.Header, pair.SubHeader));
         }
         return _infos.TryGetValue((pair.Header, pair.SubHeader), out packetInfo);
