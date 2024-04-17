@@ -223,13 +223,13 @@ namespace QuantumCore.Core.Networking
         {
             var time = GetServerTime();
             _lastHandshakeTime = time;
-            Send(new GCHandshake(Handshake, (uint)time, 0));
+            Send(new GCHandshake {Handshake = Handshake, Time = (uint) time});
         }
 
         private void SendHandshake(uint time, uint delta)
         {
             _lastHandshakeTime = time;
-            Send(new GCHandshake(Handshake, time, delta));
+            Send(new GCHandshake {Handshake = Handshake, Time = time, Delta = delta});
         }
     }
 }
