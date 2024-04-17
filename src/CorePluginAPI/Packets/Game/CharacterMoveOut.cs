@@ -7,7 +7,7 @@ namespace QuantumCore.Game.Packets
     public partial class CharacterMoveOut
     {
         [Field(0)]
-        public byte MovementType { get; set; }
+        public CharacterMovementType MovementType { get; set; }
         [Field(1)]
         public byte Argument { get; set; }
         [Field(2)]

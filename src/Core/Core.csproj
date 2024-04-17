@@ -36,7 +36,6 @@
     <ProjectReference Include="..\Data\Core.Caching\Core.Caching.csproj" />
     <ProjectReference Include="..\CorePluginAPI\CorePluginAPI.csproj" />
     <ProjectReference Include="..\Core.Networking\Core.Networking.csproj" />
-    <ProjectReference Include="..\Core.Networking.Generators\Core.Networking.Generators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
     <ProjectReference Include="..\Weikio.PluginFramework.Microsoft.DependencyInjection\Weikio.PluginFramework.Microsoft.DependencyInjection.csproj" />
   </ItemGroup>
 
