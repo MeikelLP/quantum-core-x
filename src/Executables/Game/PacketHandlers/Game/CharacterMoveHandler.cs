@@ -17,8 +17,8 @@ public class CharacterMoveHandler : IGamePacketHandler<CharacterMove>
 
     public Task ExecuteAsync(GamePacketContext<CharacterMove> ctx, CancellationToken token = default)
     {
-        if (ctx.Packet.MovementType > (int) CharacterMove.CharacterMovementType.Max &&
-            ctx.Packet.MovementType != (int) CharacterMove.CharacterMovementType.Skill)
+        if (ctx.Packet.MovementType > CharacterMovementType.Max &&
+            ctx.Packet.MovementType != CharacterMovementType.Skill)
         {
             _logger.LogError("Received unknown movement type ({MovementType})", ctx.Packet.MovementType);
             ctx.Connection.Close();
@@ -32,14 +32,14 @@ public class CharacterMoveHandler : IGamePacketHandler<CharacterMove>
             return Task.CompletedTask;
         }
 
-        _logger.LogDebug("Received movement packet with type {MovementType}", (CharacterMove.CharacterMovementType)ctx.Packet.MovementType);
-        if (ctx.Packet.MovementType == (int) CharacterMove.CharacterMovementType.Move)
+        _logger.LogDebug("Received movement packet with type {MovementType}", ctx.Packet.MovementType);
+        if (ctx.Packet.MovementType == CharacterMovementType.Move)
         {
             ctx.Connection.Player.Rotation = ctx.Packet.Rotation * 5;
             ctx.Connection.Player.Goto(ctx.Packet.PositionX, ctx.Packet.PositionY);
         }
 
-        if (ctx.Packet.MovementType == (int) CharacterMove.CharacterMovementType.Wait)
+        if (ctx.Packet.MovementType == CharacterMovementType.Wait)
         {
             ctx.Connection.Player.Wait(ctx.Packet.PositionX, ctx.Packet.PositionY);
         }
@@ -53,7 +53,7 @@ public class CharacterMoveHandler : IGamePacketHandler<CharacterMove>
             PositionX = ctx.Packet.PositionX,
             PositionY = ctx.Packet.PositionY,
             Time = ctx.Packet.Time,
-            Duration = ctx.Packet.MovementType == (int) CharacterMove.CharacterMovementType.Move
+            Duration = ctx.Packet.MovementType == CharacterMovementType.Move
                 ? ctx.Connection.Player.MovementDuration
                 : 0
         };

@@ -106,7 +106,7 @@ namespace QuantumCore.Game.World.Entities
             var movement = new CharacterMoveOut {
                 Vid = Vid,
                 Rotation = (byte) (Rotation / 5),
-                Argument = (byte) CharacterMove.CharacterMovementType.Wait,
+                MovementType = (byte) CharacterMovementType.Wait,
                 PositionX = TargetPositionX,
                 PositionY = TargetPositionY,
                 Time = (uint) GameServer.Instance.ServerTime,

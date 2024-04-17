@@ -162,7 +162,7 @@ namespace QuantumCore.Game.World.AI
 
             // Send attack packet
             var packet = new CharacterMoveOut {
-                MovementType = (byte) CharacterMove.CharacterMovementType.Attack,
+                MovementType = CharacterMovementType.Attack,
                 Rotation = (byte) (monster.Rotation / 5),
                 Vid = monster.Vid,
                 PositionX = monster.PositionX,
