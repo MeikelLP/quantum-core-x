@@ -39,6 +39,7 @@ public static class ServiceExtensions
         services.AddSingleton<ICommandManager, CommandManager>();
         services.AddSingleton<IChatManager, ChatManager>();
         services.AddSingleton<IQuestManager, QuestManager>();
+        services.AddSingleton<IShopsManager, ShopsManager>();
         services.AddSingleton<IWorld, World.World>();
 
         return services;

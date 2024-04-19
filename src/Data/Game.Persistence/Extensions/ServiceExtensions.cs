@@ -12,7 +12,7 @@ public static class ServiceExtensions
         services.AddSingleton<ICommandPermissionRepository, CommandPermissionRepository>();
         services.AddSingleton<IEmpireRepository, EmpireRepository>();
         services.AddSingleton<IItemRepository, ItemRepository>();
-        services.AddSingleton<IShopsRepository, IShopsRepository>();
+        services.AddSingleton<IShopsRepository, ShopsRepository>();
 
         return services;
     }

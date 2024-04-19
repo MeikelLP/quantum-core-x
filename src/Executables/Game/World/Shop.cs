@@ -32,12 +32,16 @@ public class Shop : IShop
     private readonly IShopsManager _shopsManager;
     private readonly ILogger _logger;
 
-    public Shop(IItemManager itemManager, IShopsManager shopsManager, ILogger logger)
+    public Shop(ShopDefinition shopDefinition, IItemManager itemManager, IShopsManager shopsManager, ILogger logger)
     {
         _itemManager = itemManager;
         _shopsManager = shopsManager;
         _logger = logger;
 
+        if (shopDefinition.Npc.HasValue)
+        {
+            Vid = shopDefinition.Npc.Value;
+        }
         var shopItems = _shopsManager.GetShopItems(Vid);
         foreach (var item in shopItems.Result)
         {
@@ -87,6 +91,11 @@ public class Shop : IShop
                 Count = item.Count,
                 Price = item.Price
             };
+        }
+        /* When the remaining item slots are null, it causes an error on the client side. */
+        for (int i = 1 - 1; i <= 39; i++)
+        {
+            shopStart.Items[i] = new Packets.Shop.ShopItem();
         }
         p.Connection.Send(shopStart);
     }
