@@ -10,9 +10,9 @@
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
     <PackageReference Include="Dapper" Version="2.1.24" />
     <PackageReference Include="Dapper.Contrib" Version="2.0.78" />
-    <PackageReference Include="FluentMigrator" Version="3.2.17" />
-    <PackageReference Include="FluentMigrator.Runner" Version="3.2.17" />
-    <PackageReference Include="FluentMigrator.Runner.MySql" Version="3.3.2" />
+    <PackageReference Include="FluentMigrator" Version="5.2.0" />
+    <PackageReference Include="FluentMigrator.Runner" Version="5.2.0" />
+    <PackageReference Include="FluentMigrator.Runner.MySql" Version="5.2.0" />
     <PackageReference Include="KaitaiStruct.Runtime.CSharp" Version="0.10.0" />
     <PackageReference Include="lzo.net" Version="0.0.6" />
     <PackageReference Include="McMaster.NETCore.Plugins" Version="1.4.0" />
