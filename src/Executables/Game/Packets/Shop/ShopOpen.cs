@@ -2,7 +2,7 @@
 
 namespace QuantumCore.Game.Packets.Shop
 {
-    [Packet(0x32, EDirection.Outgoing)]
+    [Packet(0x26, EDirection.Outgoing)]
     [SubPacket(0x00, 1)]
     [PacketGenerator]
     public partial class ShopOpen
