@@ -92,11 +92,6 @@ public class Shop : IShop
                 Price = item.Price
             };
         }
-        /* When the remaining item slots are null, it causes an error on the client side. */
-        for (int i = 1 - 1; i <= 39; i++)
-        {
-            shopStart.Items[i] = new Packets.Shop.ShopItem();
-        }
         p.Connection.Send(shopStart);
     }
 
