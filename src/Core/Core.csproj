@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Alexinea.Extensions.Configuration.Toml" Version="6.0.0" />
+    <PackageReference Include="Alexinea.Extensions.Configuration.Toml" Version="7.0.0" />
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
     <PackageReference Include="Dapper" Version="2.1.24" />
     <PackageReference Include="Dapper.Contrib" Version="2.0.78" />
