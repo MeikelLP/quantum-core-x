@@ -11,3 +11,7 @@ examples/
 ItemProto.cs
 MobProto.cs
 packages.lock.json
+
+#Jekyll
+_site
+.jekyll-cache
