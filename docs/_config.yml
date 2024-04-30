@@ -17,7 +17,7 @@ title: Quantum Core
 email: jb@krypton.dev
 description: >- # this means to ignore newlines until "baseurl:"
   An open source server emulator for the MMORPG Metin2.
-baseurl: "" # the subpath of your site, e.g. /blog
+baseurl: "quantum-core-x" # the subpath of your site, e.g. /blog
 url: "https://quantum-core.io" # the base hostname & protocol for your site, e.g. http://example.com
 
 # Build settings
