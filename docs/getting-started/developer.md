@@ -21,8 +21,8 @@
 
         ```sh
         # in the repo directory
-        kaitai-struct-compiler Core/Core/Types/item_proto.ksy -t csharp --outdir Core/Core/Types/ --dotnet-namespace QuantumCore.Core.Types
-        kaitai-struct-compiler Core/Core/Types/mob_proto.ksy -t csharp --outdir Core/Core/Types/ --dotnet-namespace QuantumCore.Core.Types
+        kaitai-struct-compiler src/Executables/Game/Types/item_proto.ksy -t csharp --outdir src/Executables/Game/Types/Types/ --dotnet-namespace QuantumCore.Core.Types
+        kaitai-struct-compiler src/Executables/Game/Types/mob_proto.ksy -t csharp --outdir src/Executables/Game/Types/Types/ --dotnet-namespace QuantumCore.Core.Types
         # you can ignore any warning
         ```
 
