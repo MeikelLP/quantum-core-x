@@ -22,5 +22,4 @@ hostBuilder.ConfigureServices(services =>
     services.AddHostedService<GameServer>();
 });
 
-var build = hostBuilder.Build();
-await QuantumCoreHostBuilder.RunAsync<Program>(build);
+await QuantumCoreHostBuilder.RunAsync<Program>(hostBuilder.Build());

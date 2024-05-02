@@ -4,7 +4,7 @@
         "Game": {
             "commandName": "Project",
             "environmentVariables": {
-//                "DOTNET_ENVIRONMENT": "Development"
+                "DOTNET_ENVIRONMENT": "Development"
             }
         }
     }
