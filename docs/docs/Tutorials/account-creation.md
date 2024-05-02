@@ -9,5 +9,6 @@ Passwords are encrypted with BCrypt. Use an online tool like [BCrypt Online](htt
 * Replace `YOUR_ENCRYPTED_PASSWORD` with the bcrypt string of your password
 
 ```sql
-INSERT INTO account.accounts (Id, Username, Password, Email, Status, LastLogin, CreatedAt, UpdatedAt, DeleteCode) VALUES ('SOME_GUID', 'ACCOUNT_NAME', 'YOUR_ENCRYPTED_PASSWORD', 'some@mail.com', DEFAULT, null, DEFAULT, DEFAULT, DEFAULT);
+INSERT INTO account.accounts (Id, Username, Password, Email, Status, LastLogin, CreatedAt, UpdatedAt, DeleteCode) 
+VALUES ('SOME_GUID', 'ACCOUNT_NAME', 'YOUR_ENCRYPTED_PASSWORD', 'some@mail.com', DEFAULT, null, DEFAULT, DEFAULT, DEFAULT);
 ```

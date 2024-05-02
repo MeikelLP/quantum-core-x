@@ -34,7 +34,10 @@ const config = {
     defaultLocale: 'en',
     locales: ['en'],
   },
-
+  markdown: {
+    mermaid: true
+  },
+  themes: ['@docusaurus/theme-mermaid'],
   presets: [
     [
       'classic',
@@ -46,14 +49,14 @@ const config = {
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl:
-            'https://github.com/MeikelLP/quantum-core-x/tree/master/',
+            'https://github.com/MeikelLP/quantum-core-x/tree/master/docs',
         },
         blog: {
           showReadingTime: true,
           // Please change this to your repo.
           // Remove this to remove the "edit this page" links.
           editUrl:
-            'https://github.com/MeikelLP/quantum-core-x/tree/master/',
+            'https://github.com/MeikelLP/quantum-core-x/tree/master/docs',
         }
       }),
     ],
