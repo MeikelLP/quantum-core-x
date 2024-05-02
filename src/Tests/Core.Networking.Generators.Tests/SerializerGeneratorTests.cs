@@ -1528,7 +1528,7 @@ public partial class ShopBuy
         driver.GetRunResult();
         diagnostics.Should().HaveCount(1);
         diagnostics[0].GetMessage().Should().Contain("Field configuration for type ShopBuy is invalid");
-        diagnostics[0].Id.Should().BeEquivalentTo("QCX-G000005");
+        diagnostics[0].Id.Should().BeEquivalentTo("QCX000005");
     }
 
     [Fact]

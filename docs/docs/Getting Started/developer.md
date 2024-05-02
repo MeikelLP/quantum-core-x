@@ -21,7 +21,8 @@
 
         ```sh
         # in the repo directory
-        ./Executables/Game/generate_kaitai.sh
+        kaitai-struct-compiler src/Executables/Game/Types/item_proto.ksy -t csharp --outdir src/Executables/Game/Types/Types/ --dotnet-namespace QuantumCore.Core.Types
+        kaitai-struct-compiler src/Executables/Game/Types/mob_proto.ksy -t csharp --outdir src/Executables/Game/Types/Types/ --dotnet-namespace QuantumCore.Core.Types
         # you can ignore any warning
         ```
 
@@ -200,7 +201,7 @@
     docker exec __CONTAINER_ID__ /bin/mysql -u root '-psupersecure.123' --execute="INSERT INTO account.accounts (Id, Username, Password, Email, Status, LastLogin, CreatedAt, UpdatedAt, DeleteCode) VALUES ('584C4BC9-559F-47DD-9A7E-49EEB65DD831', 'admin', '`$2y`$10`$dTh8zmAfA742vKZ35Oarzugv3QXJPTOYRhKpk807o9h9SWBsFcys6', 'some@mail.com', DEFAULT, null, DEFAULT, DEFAULT, DEFAULT);"
     ```
 
-    for more infos about account creation look at [Account Creation](../tutorials/account-creation.md)
+    for more infos about account creation look at [Account Creation](../Tutorials/account-creation.md)
 
 5. Start the server
 
