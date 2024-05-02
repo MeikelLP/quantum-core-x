@@ -4,12 +4,8 @@ on:
   push:
     branches:
       - master
-    paths:
-      - 'src/**'
   pull_request:
     types: [opened, synchronize, reopened]
-    paths:
-      - 'src/**'
 
 env:
   REGISTRY: ghcr.io
