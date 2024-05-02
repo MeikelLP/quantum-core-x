@@ -1,4 +1,4 @@
-﻿name: Pipeline
+﻿name: .NET Pipeline
 
 on:
   push:

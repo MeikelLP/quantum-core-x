@@ -11,14 +11,14 @@ namespace QuantumCore.Migrations
     [Migration(20231101165500)]
     public class AlterAccountAddEmpire : Migration
     {
-        public override void Up()
-        {
-            Alter.Table("accounts").AddColumn("Empire").AsByte().WithDefaultValue(0);
-        }
-
         public override void Down()
         {
             Delete.Column("Empire").FromTable("accounts");
+        }
+
+        public override void Up()
+        {
+            Alter.Table("accounts").AddColumn("Empire").AsByte().WithDefaultValue(0);
         }
     }
 }
