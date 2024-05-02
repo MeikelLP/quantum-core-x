@@ -37,7 +37,7 @@ const config = {
   markdown: {
     mermaid: true
   },
-  themes: ['@docusaurus/theme-mermaid'],
+  themes: ['@docusaurus/theme-mermaid', 'docusaurus-plugin-goatcounter'],
   presets: [
     [
       'classic',
@@ -61,10 +61,12 @@ const config = {
       }),
     ],
   ],
-
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
+      goatcounter: {
+        code: 'quantum-core-x',
+      },
       // Replace with your project's social card
       image: 'img/qc_logo_short.png',
       navbar: {
