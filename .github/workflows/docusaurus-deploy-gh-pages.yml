@@ -6,6 +6,9 @@ on:
       - master
     # Review gh actions docs if you want to further define triggers, paths, etc
     # https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#on
+    paths:
+      - 'docs/**'
+
 
 defaults:
   run:
@@ -22,7 +25,7 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 18
-          cache: npm**
+          cache: npm
           cache-dependency-path: docs
       - name: Install dependencies
         run: npm ci
