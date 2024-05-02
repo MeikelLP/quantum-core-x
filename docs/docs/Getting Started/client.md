@@ -34,18 +34,18 @@ Assuming you are using a valid TMP4 client
     }
 
     REGION_NAME_DICT = {
-        0 : "",		
+        0 : "",
     }
 
     REGION_AUTH_SERVER_DICT = {
         0 : {
             1 : { "ip":SERVER_IP, "port":PORT_AUTH, },
-        }		
+        }
     }
 
     REGION_DICT = {
         0 : {
-            1 : { "name" :SERVER_NAME, "channel" : SERVER01_CHANNEL_DICT, },						
+            1 : { "name" :SERVER_NAME, "channel" : SERVER01_CHANNEL_DICT, },
         },
     }
 

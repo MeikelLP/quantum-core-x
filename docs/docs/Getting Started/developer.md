@@ -4,7 +4,7 @@
 
 * Windows with admin rights (for the client - the server can be developed on any platform)
 * [Docker Desktop](https://www.docker.com/products/docker-desktop/) or equivalent
-* [.NET SDK 7](https://dotnet.microsoft.com/en-us/download)
+* [.NET SDK 8](https://dotnet.microsoft.com/en-us/download)
 * [Visual Studio](https://visualstudio.com), [Jetbrains Rider](https://www.jetbrains.com/rider/), or any IDE you are comfortable with
 * [Katai struct compiler](https://kaitai.io/#download)
 * A TMP4 compatible client (just google for "TMP4 Client")
@@ -45,6 +45,7 @@
         * In your clients `Eternexus` folder there should be an `atlasinfo.txt`
         * `item_proto` & `mob_proto` from step 3
         * `jobs.json`
+
         ```json
        {
             "job": [
@@ -171,7 +172,7 @@
         ```sh
         docker-compose up -d
         ```
-       
+
         This starts:
        * `auth` server for account authentication
        * `db` for persistant storage
@@ -194,7 +195,7 @@
     # replace __CONTAINER_ID__ with your mysql container ID
     docker exec __CONTAINER_ID__ /bin/mysql -u root -psupersecure.123 --execute="INSERT INTO account.accounts (Id, Username, Password, Email, Status, LastLogin, CreatedAt, UpdatedAt, DeleteCode) VALUES ('584C4BC9-559F-47DD-9A7E-49EEB65DD831', 'admin', '\$2y\$10\$dTh8zmAfA742vKZ35Oarzugv3QXJPTOYRhKpk807o9h9SWBsFcys6', 'some@mail.com', DEFAULT, null, DEFAULT, DEFAULT, DEFAULT);"
     ```
-   
+
     ```ps1
     # for powershell / windows
     # replace __CONTAINER_ID__ with your mysql container ID

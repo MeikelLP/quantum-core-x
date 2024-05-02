@@ -24,10 +24,9 @@ docker exec __CONTAINER_ID__ -it /bin/mysql -u root -psupersecure.123
 
 This command will open a mysql terminal session in which you can execute SQL. You can leave with `exit`
 
-
 Next, execute the following
 
-```mysql
+```sql
 SET @PlayerId = 'YOUR_PLAYER_ID_HERE';
 SET @GroupId = uuid();
 INSERT INTO game.perm_groups (Id, Name) VALUES (@GroupId, 'admins');
