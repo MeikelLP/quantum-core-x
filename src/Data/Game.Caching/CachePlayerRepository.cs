@@ -66,4 +66,15 @@ public class CachePlayerRepository : ICachePlayerRepository
         key = $"items:{player.Id}:{(byte)WindowType.Inventory}";
         await _cacheManager.Del(key);
     }
+
+    public async Task<byte?> GetTempEmpireAsync(Guid accountId)
+    {
+        var empireRedisKey = $"temp:empire-selection:{accountId}";
+        return await _cacheManager.Get<byte?>(empireRedisKey);
+    }
+
+    public async Task SetTempEmpireAsync(Guid accountId, byte empire)
+    {
+        await _cacheManager.Set($"temp:empire-selection:{accountId}", empire);
+    }
 }

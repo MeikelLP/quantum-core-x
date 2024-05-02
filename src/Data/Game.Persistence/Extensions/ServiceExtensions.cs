@@ -10,7 +10,6 @@ public static class ServiceExtensions
         services.AddQuantumCoreDatabase();
         services.AddSingleton<IDbPlayerRepository, DbPlayerRepository>();
         services.AddSingleton<ICommandPermissionRepository, CommandPermissionRepository>();
-        services.AddSingleton<IEmpireRepository, EmpireRepository>();
         services.AddSingleton<IItemRepository, ItemRepository>();
 
         return services;

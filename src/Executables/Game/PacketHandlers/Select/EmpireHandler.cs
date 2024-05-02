@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Game.Caching;
+using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.PluginTypes;
 using QuantumCore.Caching;
@@ -9,23 +10,34 @@ namespace QuantumCore.Game.PacketHandlers.Select;
 public class EmpireHandler : IGamePacketHandler<Empire>
 {
     private readonly ILogger<EmpireHandler> _logger;
+    private readonly IPlayerManager _playerManager;
     private readonly ICacheManager _cacheManager;
+    private readonly ICachePlayerRepository _playerCache;
 
-    public EmpireHandler(ILogger<EmpireHandler> logger, ICacheManager cacheManager)
+    public EmpireHandler(ILogger<EmpireHandler> logger, IPlayerManager playerManager, ICacheManager cacheManager, ICachePlayerRepository playerCache)
     {
         _logger = logger;
+        _playerManager = playerManager;
         _cacheManager = cacheManager;
+        _playerCache = playerCache;
     }
 
     public async Task ExecuteAsync(GamePacketContext<Empire> ctx, CancellationToken token = default)
     {
         if (ctx.Packet.EmpireId is > 0 and < 4)
         {
-            var result = await _db.ExecuteAsync("UPDATE account.accounts set Empire = @Empire WHERE Id = @AccountId"
-                , new { AccountId = ctx.Connection.AccountId, Empire = ctx.Packet.EmpireId });
-            if (result is not 1)
+            _logger.LogInformation("Empire selected: {Empire}", ctx.Packet.EmpireId);
+            var cacheKey = $"account:{ctx.Connection.AccountId}:game:select:selected-player";
+            var player = await _cacheManager.Get<Guid?>(cacheKey);
+            if (player is not null)
             {
-                _logger.LogWarning("Unexpected result count {Result} when setting empire for account", result);
+                await _playerManager.SetPlayerEmpireAsync(ctx.Connection.AccountId!.Value, player.Value, ctx.Packet.EmpireId);
+                await _cacheManager.Del(cacheKey);
+            }
+            else
+            {
+                // No player created yet. This is the first time an empire is selected before creating an account
+                await _playerCache.SetTempEmpireAsync(ctx.Connection.AccountId!.Value, ctx.Packet.EmpireId);
             }
         }
         else
