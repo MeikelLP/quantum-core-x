@@ -1,9 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Data;
 using AutoBogus;
 using Bogus;
 using FluentAssertions;
@@ -130,7 +124,6 @@ public class CommandTests : IAsyncLifetime
                     .CreateLogger());
             })
             .Replace(new ServiceDescriptor(typeof(IItemRepository), _ => Substitute.For<IItemRepository>(), ServiceLifetime.Singleton))
-            .Replace(new ServiceDescriptor(typeof(IEmpireRepository), _ => Substitute.For<IEmpireRepository>(), ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(ICommandPermissionRepository), _ => Substitute.For<ICommandPermissionRepository>(), ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(IPlayerRepository), _ => Substitute.For<IPlayerRepository>(), ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(IMonsterManager), _ => monsterManagerMock, ServiceLifetime.Singleton))
