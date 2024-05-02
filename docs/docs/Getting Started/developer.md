@@ -222,4 +222,4 @@ There are more things that can be setup (for levels) but that's not required to 
 
 ## Further Reading
 
-* [Developer VM](../tutorials/dev-vm.md)
+* [Developer VM](../Tutorials/dev-vm.md)

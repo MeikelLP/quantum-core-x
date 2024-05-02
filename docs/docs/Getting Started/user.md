@@ -266,7 +266,7 @@ To get the container ID of your mysql container use `docker ps`
 docker exec __CONTAINER_ID__ /bin/mysql -u root -psupersecure.123 --execute="INSERT INTO account.accounts (Id, Username, Password, Email, Status, LastLogin, CreatedAt, UpdatedAt, DeleteCode) VALUES ('584C4BC9-559F-47DD-9A7E-49EEB65DD831', 'admin', '$2y$10$dTh8zmAfA742vKZ35Oarzugv3QXJPTOYRhKpk807o9h9SWBsFcys6', 'some@mail.com', DEFAULT, null, DEFAULT, DEFAULT, DEFAULT);"
 ```
 
-for more infos about account creation look at [Account Creation](../tutorials/account-creation.md)
+for more infos about account creation look at [Account Creation](../Tutorials/account-creation.md)
 
 ### Setup client
 
@@ -294,4 +294,4 @@ docker-compose up
 
 ## Next steps
 
-* [Add player +permissions](../tutorials/player-permission.md)
+* [Add player +permissions](../Tutorials/player-permission.md)
