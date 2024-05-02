@@ -1,4 +1,3 @@
-﻿using System.Data;
 using System.Reflection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -6,7 +5,6 @@ using Microsoft.Extensions.Logging;
 using QuantumCore.API.PluginTypes;
 using QuantumCore.Networking;
 using Serilog;
-using Serilog.Events;
 using Weikio.PluginFramework.Abstractions;
 using Weikio.PluginFramework.Microsoft.DependencyInjection;
 
@@ -92,8 +90,6 @@ public static class ServiceExtensions
 
         // sink to console
         config.WriteTo.Console(outputTemplate: MessageTemplate);
-
-        config.MinimumLevel.Override("QuantumCore.Core.Networking", LogEventLevel.Warning);
 
         // sink to rolling file
         config.WriteTo.RollingFile($"{Directory.GetCurrentDirectory()}/logs/api.log",

@@ -101,7 +101,7 @@ public class PacketSerializerGenerator : IIncrementalGenerator
             {
                 spc.ReportDiagnostic(Diagnostic.Create(
                     new DiagnosticDescriptor(
-                        "QCX-G000001",
+                        "QCX000001",
                         "Failed to generate packet serializer",
                         "Type {0} is setup incorrectly. Exception: {1} => {2}",
                         "generators",

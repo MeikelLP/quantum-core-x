@@ -21,7 +21,12 @@ public class EmpireHandler : IGamePacketHandler<Empire>
     {
         if (ctx.Packet.EmpireId is > 0 and < 4)
         {
-            await _cacheManager.Set($"empire-aid:{ctx.Connection.AccountId}", ctx.Packet.EmpireId);
+            var result = await _db.ExecuteAsync("UPDATE account.accounts set Empire = @Empire WHERE Id = @AccountId"
+                , new { AccountId = ctx.Connection.AccountId, Empire = ctx.Packet.EmpireId });
+            if (result is not 1)
+            {
+                _logger.LogWarning("Unexpected result count {Result} when setting empire for account", result);
+            }
         }
         else
         {
