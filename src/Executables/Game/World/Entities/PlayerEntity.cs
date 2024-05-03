@@ -92,12 +92,11 @@ namespace QuantumCore.Game.World.Entities
         private readonly ICacheManager _cacheManager;
         private readonly IWorld _world;
         private readonly ILogger<PlayerEntity> _logger;
-        private readonly IEmpireRepository _empireRepository;
 
         public PlayerEntity(PlayerData player, IGameConnection connection, IItemManager itemManager, IJobManager jobManager,
             IExperienceManager experienceManager, IAnimationManager animationManager,
             IQuestManager questManager, ICacheManager cacheManager, IWorld world, ILogger<PlayerEntity> logger,
-            IEmpireRepository empireRepository, IItemRepository itemRepository)
+            IItemRepository itemRepository)
             : base(animationManager, world.GenerateVid())
         {
             Connection = connection;
@@ -108,11 +107,11 @@ namespace QuantumCore.Game.World.Entities
             _cacheManager = cacheManager;
             _world = world;
             _logger = logger;
-            _empireRepository = empireRepository;
             Inventory = new Inventory(itemManager, _cacheManager, _logger, itemRepository, player.Id,
                 (byte)WindowType.Inventory, InventoryConstants.DEFAULT_INVENTORY_WIDTH, InventoryConstants.DEFAULT_INVENTORY_HEIGHT, InventoryConstants.DEFAULT_INVENTORY_PAGES);
             Inventory.OnSlotChanged += Inventory_OnSlotChanged;
             Player = player;
+            Empire = player.Empire;
             PositionX = player.PositionX;
             PositionY = player.PositionY;
             QuickSlotBar = new QuickSlotBar(_cacheManager, _logger, this);
@@ -146,7 +145,6 @@ namespace QuantumCore.Game.World.Entities
 
         public async Task Load()
         {
-            Empire = await _empireRepository.GetEmpireForAccountAsync(Player.Id) ?? 0;
             await Inventory.Load();
             await QuickSlotBar.Load();
             Health = (int) GetPoint(EPoints.MaxHp); // todo: cache hp of player
@@ -982,7 +980,7 @@ namespace QuantumCore.Game.World.Entities
             {
                 Vid = Vid,
                 Name = Player.Name,
-                Empire = Empire,
+                Empire = Player.Empire,
                 Level = Player.Level,
                 Parts = new ushort[] {
                     (ushort)(Inventory.EquipmentWindow.Body?.ItemId ?? 0),

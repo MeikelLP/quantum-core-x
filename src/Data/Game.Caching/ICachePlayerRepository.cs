@@ -9,4 +9,14 @@ public interface ICachePlayerRepository : IPlayerRepository
     Task SetPlayerAsync(PlayerData player, byte slot);
     Task CreateAsync(PlayerData player);
     Task DeletePlayerAsync(PlayerData player);
+
+    /// <summary>
+    /// Gets the selected empire by the user for creating and persisting the player character.
+    /// </summary>
+    Task<byte?> GetTempEmpireAsync(Guid accountId);
+
+    /// <summary>
+    /// Cache the users selected empire for usage when creating and persisting the player character.
+    /// </summary>
+    Task SetTempEmpireAsync(Guid accountId, byte empire);
 }

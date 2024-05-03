@@ -12,7 +12,7 @@ public class DbPlayerRepository : IDbPlayerRepository
     {
         _db = db;
     }
-    
+
     public async Task<PlayerData[]> GetPlayersAsync(Guid accountId)
     {
        var players = await _db.QueryAsync<PlayerData>("SELECT * FROM game.players WHERE AccountId = @AccountId ORDER BY CreatedAt",
@@ -30,8 +30,8 @@ public class DbPlayerRepository : IDbPlayerRepository
     public async Task CreateAsync(PlayerData player)
     {
         var result = await _db.ExecuteAsync(@"
-INSERT INTO game.players (Id, AccountId, PlayerClass, SkillGroup, PlayTime, Level, Experience, Gold, St, Ht, Dx, Iq, PositionX, PositionY, Health, Mana, Stamina, BodyPart, HairPart, Name, GivenStatusPoints, AvailableStatusPoints)
-VALUES (@Id, @AccountId, @PlayerClass, @SkillGroup, @PlayTime, @Level, @Experience, @Gold, @St, @Ht, @Dx, @Iq, @PositionX, @PositionY, @Health, @Mana, @Stamina, @BodyPart, @HairPart, @Name, @GivenStatusPoints, @AvailableStatusPoints)", player);
+INSERT INTO game.players (Id, AccountId, Empire, PlayerClass, SkillGroup, PlayTime, Level, Experience, Gold, St, Ht, Dx, Iq, PositionX, PositionY, Health, Mana, Stamina, BodyPart, HairPart, Name, GivenStatusPoints, AvailableStatusPoints)
+VALUES (@Id, @AccountId, @Empire, @PlayerClass, @SkillGroup, @PlayTime, @Level, @Experience, @Gold, @St, @Ht, @Dx, @Iq, @PositionX, @PositionY, @Health, @Mana, @Stamina, @BodyPart, @HairPart, @Name, @GivenStatusPoints, @AvailableStatusPoints)", player);
         if (result != 1)
         {
             throw new Exception("Failed to create player");
@@ -50,9 +50,22 @@ VALUES (@Id, @AccountId, @PlayerClass, @SkillGroup, @PlayTime, @Level, @Experien
             """, player);
     }
 
+    public async Task UpdateEmpireAsync(Guid accountId, Guid playerId, byte empire)
+    {
+        await _db.ExecuteAsync("""
+            UPDATE game.players SET Empire = @Empire
+            WHERE AccountId = @AccountId AND Id = @PlayerId
+            """, new
+        {
+            accountId,
+            playerId,
+            empire
+        });
+    }
+
     public async Task<PlayerData?> GetPlayerAsync(Guid playerId)
     {
-        return await _db.QueryFirstOrDefaultAsync<PlayerData>("SELECT * FROM game.players WHERE Id = @PlayerId", 
+        return await _db.QueryFirstOrDefaultAsync<PlayerData>("SELECT * FROM game.players WHERE Id = @PlayerId",
             new {PlayerId = playerId});
     }
 }

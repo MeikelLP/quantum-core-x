@@ -2,6 +2,7 @@
 using Dapper;
 using Data.Tests.Fixtures;
 using FluentAssertions;
+using Game.Caching;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -31,6 +32,7 @@ public class PlayerManagerTests : IClassFixture<RedisFixture>, IClassFixture<Dat
 
     private readonly List<AccountData> _accountRepositoryList = new();
     private readonly IDbConnection _db;
+    private readonly ICachePlayerRepository _cachePlayer;
 
     public PlayerManagerTests(ITestOutputHelper outputHelper, RedisFixture redisFixture, DatabaseFixture databaseFixture)
     {
@@ -71,6 +73,7 @@ public class PlayerManagerTests : IClassFixture<RedisFixture>, IClassFixture<Dat
         _accountManager = services.GetRequiredService<IAccountManager>();
         _dbPlayerRepository = services.GetRequiredService<IDbPlayerRepository>();
         _cacheManager = services.GetRequiredService<ICacheManager>();
+        _cachePlayer = services.GetRequiredService<ICachePlayerRepository>();
         _db = services.GetRequiredService<IDbConnection>();
     }
 
@@ -97,6 +100,7 @@ public class PlayerManagerTests : IClassFixture<RedisFixture>, IClassFixture<Dat
     public async Task CreateCharacter()
     {
         var account = await _accountManager.CreateAsync("testificate", "testificate", "some@gmail.com", "1234567");
+        await _cachePlayer.SetTempEmpireAsync(account.Id, 2);
         var player = await _playerManager.CreateAsync(account.Id, "Testificate", 0, 1);
 
         player.Should().BeEquivalentTo(new PlayerData
@@ -104,6 +108,7 @@ public class PlayerManagerTests : IClassFixture<RedisFixture>, IClassFixture<Dat
             AccountId = account.Id,
             Name = "Testificate",
             PlayerClass = 0,
+            Empire = 2,
             Ht = 4,
             PositionX = 958870,
             PositionY = 272788
@@ -115,7 +120,10 @@ public class PlayerManagerTests : IClassFixture<RedisFixture>, IClassFixture<Dat
 
         var playerKey = $"player:{player.Id.ToString()}";
         var accountKey = $"players:{account.Id.ToString()}:0";
-        (await _cacheManager.Keys("*")).Should().HaveCount(2).And.Contain(playerKey).And.Contain(accountKey);
+        (await _cacheManager.Keys("*")).Should().HaveCount(3)
+            .And.Contain(playerKey)
+            .And.Contain(accountKey)
+            .And.Contain($"temp:empire-selection:{account.Id}");
         (await _cacheManager.Get<PlayerData>(playerKey)).Should().BeEquivalentTo(player);
     }
 
@@ -123,6 +131,7 @@ public class PlayerManagerTests : IClassFixture<RedisFixture>, IClassFixture<Dat
     public async Task IsNameInUseOtherAccount()
     {
         var account = await _accountManager.CreateAsync("testificate", "testificate", "some@gmail.com", "1234567");
+        await _cachePlayer.SetTempEmpireAsync(account.Id, 2);
         await _playerManager.CreateAsync(account.Id, "Testificate", 0, 1);
 
         var resultCaseSensitive = await _playerManager.IsNameInUseAsync("Testificate");
@@ -176,7 +185,8 @@ public class PlayerManagerTests : IClassFixture<RedisFixture>, IClassFixture<Dat
             AccountId = accountId,
             PositionX = 958870,
             PositionY = 272788,
-            Ht = 4
+            Ht = 4,
+            Empire = 2
         };
         var input2 = new PlayerData
         {
@@ -184,8 +194,11 @@ public class PlayerManagerTests : IClassFixture<RedisFixture>, IClassFixture<Dat
             AccountId = accountId,
             PositionX = 958870,
             PositionY = 272788,
-            Ht = 4
+            Ht = 4,
+            Empire = 2,
+            Slot = 1
         };
+        await _cachePlayer.SetTempEmpireAsync(accountId, 2);
         await _playerManager.CreateAsync(accountId, input1.Name, 0, 0);
         await _playerManager.CreateAsync(accountId, input2.Name, 0, 0);
         var output1 = await _playerManager.GetPlayer(accountId, 0);
@@ -239,10 +252,11 @@ public class PlayerManagerTests : IClassFixture<RedisFixture>, IClassFixture<Dat
     public async Task DeleteCharacter()
     {
         var account = await _accountManager.CreateAsync("testificate", "testificate", "some@gmail.com", "1234567");
+        await _cachePlayer.SetTempEmpireAsync(account.Id, 2);
         var player = await _playerManager.CreateAsync(account.Id, "Testificate", 0, 1);
         await _playerManager.DeletePlayerAsync(player);
 
-        (await _cacheManager.Keys("*")).Should().BeEmpty();
+        (await _cacheManager.Keys("*")).Should().BeEquivalentTo([$"temp:empire-selection:{account.Id}"]);
         (await _dbPlayerRepository.GetPlayersAsync(account.Id)).Should().BeEmpty();
     }
 }

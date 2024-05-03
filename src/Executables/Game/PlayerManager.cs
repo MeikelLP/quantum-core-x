@@ -12,7 +12,6 @@ public class PlayerManager : IPlayerManager
     private readonly ICachePlayerRepository _cachePlayerRepository;
     private readonly ILogger<PlayerManager> _logger;
     private readonly IJobManager _jobManager;
-
     public PlayerManager(IDbPlayerRepository dbPlayerRepository, ICachePlayerRepository cachePlayerRepository, ILogger<PlayerManager> logger, IJobManager jobManager)
     {
         _dbPlayerRepository = dbPlayerRepository;
@@ -84,6 +83,30 @@ public class PlayerManager : IPlayerManager
     {
         var job = _jobManager.Get(@class);
 
+        var existingPlayers = await _dbPlayerRepository.GetPlayersAsync(accountId);
+
+        if (existingPlayers.Length >= PlayerConstants.MAX_PLAYERS_PER_ACCOUNT)
+        {
+            throw new InvalidOperationException("Already have max allowed players for this account");
+        }
+
+        byte empire;
+        if (existingPlayers.Length > 0)
+        {
+            // reuse empire from first character
+            empire = existingPlayers[0].Empire;
+        }
+        else
+        {
+            var empireFromCache = await _cachePlayerRepository.GetTempEmpireAsync(accountId);
+            if (empireFromCache is null)
+            {
+                _logger.LogError("No empire has been selected before. This should not happen.");
+                throw new InvalidOperationException("No empire has been selected before. This should not happen.");
+            }
+            empire = empireFromCache.Value;
+        }
+
         // Create player data
         var player = new PlayerData
         {
@@ -98,21 +121,14 @@ public class PlayerManager : IPlayerManager
             Dx = job.Dx,
             Ht = job.Ht,
             Health = job.StartHp,
-            Mana = job.StartSp
+            Mana = job.StartSp,
+            Empire = empire,
+            Slot = (byte)existingPlayers.Length
         };
 
-        var existingPlayers = await _dbPlayerRepository.GetPlayersAsync(player.AccountId);
-
-        if (existingPlayers.Length >= PlayerConstants.MAX_PLAYERS_PER_ACCOUNT)
-        {
-            throw new InvalidOperationException("Already have max allowed players for this account");
-        }
 
         await _dbPlayerRepository.CreateAsync(player);
         await _cachePlayerRepository.CreateAsync(player);
-
-        // new index is equivalent to the previous length
-        player.Slot = (byte)existingPlayers.Length;
 
         return player;
     }
@@ -121,5 +137,10 @@ public class PlayerManager : IPlayerManager
     {
         await _dbPlayerRepository.DeletePlayerAsync(player);
         await _cachePlayerRepository.DeletePlayerAsync(player);
+    }
+
+    public async Task SetPlayerEmpireAsync(Guid accountId, Guid playerId, byte empire)
+    {
+        await _dbPlayerRepository.UpdateEmpireAsync(accountId, playerId, empire);
     }
 }

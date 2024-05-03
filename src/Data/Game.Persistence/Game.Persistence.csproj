@@ -6,6 +6,7 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\Core.Caching\Core.Caching.csproj" />
       <ProjectReference Include="..\Core.Persistence\Core.Persistence.csproj" />
       <ProjectReference Include="..\..\CorePluginAPI\CorePluginAPI.csproj" />
     </ItemGroup>

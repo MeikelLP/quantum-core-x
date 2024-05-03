@@ -30,5 +30,6 @@ public class PlayerData
     public uint MaxAttackDamage { get; set; }
     public uint MaxHp { get; set; }
     public uint MaxSp { get; set; }
+    public byte Empire { get; set; }
     public byte Slot { get; set; }
 }
