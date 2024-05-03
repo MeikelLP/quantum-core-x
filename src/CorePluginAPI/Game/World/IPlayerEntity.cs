@@ -1,4 +1,7 @@
-﻿using QuantumCore.API.Core.Models;
+using QuantumCore.API.Core.Models;
+using System;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using QuantumCore.API.Game.Types;
 
 namespace QuantumCore.API.Game.World
@@ -17,7 +20,6 @@ namespace QuantumCore.API.Game.World
         Dictionary<string, IQuest> Quests { get; }
         EAntiFlags AntiFlagClass { get; }
         EAntiFlags AntiFlagGender { get; }
-
         Task Load();
         T? GetQuestInstance<T>() where T : class, IQuest;
         void Respawn(bool town);
@@ -48,5 +50,10 @@ namespace QuantumCore.API.Game.World
         void SendTarget();
         void Disconnect();
         string ToString();
+#nullable enable
+        bool TryGetAffect(Affect affect, [MaybeNullWhen(false)] out Affect result);
+#nullable restore
+        void AddAffect(Affect affect);
+        void RemoveAffect(Affect affect);
     }
 }

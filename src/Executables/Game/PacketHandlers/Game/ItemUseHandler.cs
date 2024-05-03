@@ -1,6 +1,9 @@
 ﻿using Microsoft.Extensions.Logging;
 using QuantumCore.API;
+using QuantumCore.API.Constants;
+using QuantumCore.API.Game.Types;
 using QuantumCore.API.PluginTypes;
+using QuantumCore.Extensions;
 using QuantumCore.Game.Packets;
 using QuantumCore.Game.PlayerUtils;
 
@@ -9,12 +12,14 @@ namespace QuantumCore.Game.PacketHandlers.Game;
 public class ItemUseHandler : IGamePacketHandler<ItemUse>
 {
     private readonly IItemManager _itemManager;
+    private readonly IAffectManager _affectController;
     private readonly ILogger<ItemUseHandler> _logger;
 
-    public ItemUseHandler(IItemManager itemManager, ILogger<ItemUseHandler> logger)
+    public ItemUseHandler(IItemManager itemManager, IAffectManager affectController, ILogger<ItemUseHandler> logger)
     {
         _itemManager = itemManager;
         _logger = logger;
+        _affectController = affectController;
     }
 
     public async Task ExecuteAsync(GamePacketContext<ItemUse> ctx, CancellationToken token = default)
@@ -92,6 +97,29 @@ public class ItemUseHandler : IGamePacketHandler<ItemUse>
                     player.SendRemoveItem(ctx.Packet.Window, ctx.Packet.Position);
                     player.SendItem(item);
                 }
+            }
+        }else
+        {
+            switch ((EItemType) itemProto.Type)
+            {
+                case EItemType.Use:
+                    _logger.LogDebug("Use item {ItemName}", itemProto.TranslatedName);
+                    switch ((EUseSubTypes) itemProto.Subtype)
+                    {
+                        case EUseSubTypes.AbilityUp:
+                            _logger.LogDebug("Use ability up");
+                            var applyType = itemProto.GetItemUseApplyType();
+                            var duration = itemProto.GetItemUseDuration();
+                            var value = itemProto.GetItemUseValue();
+                            var affectType = AffectConstants.ApplyTypeToApplyPointMapping[applyType];
+                            var affectFlags = AffectConstants.ApplyTypeToFlags[applyType];
+                            await _affectController.AddAffectToPlayerAsync(player, affectType, applyType, value, affectFlags, duration, 0);
+                            break;
+                        default:
+                            _logger.LogWarning("Don't know how to handle item sub type {ItemSubType} for item {Id}", itemProto.Subtype, itemProto.Id);
+                            break;
+                    }
+                    break;
             }
         }
     }
