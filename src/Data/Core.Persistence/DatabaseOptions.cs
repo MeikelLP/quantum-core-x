@@ -1,26 +1,14 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using MySqlConnector;
 
 namespace QuantumCore;
 
 public class DatabaseOptions
 {
-    public string Host { get; set; } = "localhost";
+    [Required] public DatabaseProvider Provider { get; set; }
 
-    public uint Port { get; set; } = 3306;
-
-    public string User { get; set; } = "root";
-
+    /// <summary>
+    /// See https://www.connectionstrings.com/
+    /// </summary>
     [Required]
-    public string Password { get; set; } = "";
-
-    [Required] public string Database { get; set; } = "";
-
-    public string ConnectionString => new MySqlConnectionStringBuilder {
-        Port = Port,
-        Database = Database,
-        Server = Host,
-        Password = Password,
-        UserID = User
-    }.ToString();
+    public string ConnectionString { get; set; } = "";
 }

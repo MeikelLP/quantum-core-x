@@ -27,18 +27,32 @@ services:
     ports:
     - "6379:6379"
 
-  # persistent storage for game data
-  db:
-    image: mariadb:latest
+  # persistent storage for auth data
+  db-mysql:
+    image: mariadb:11.3
     ports:
     - "3306:3306"
     environment:
     - MARIADB_USER=metin2
     - MARIADB_PASSWORD=metin2
+    - MARIADB_DATABASE=auth
     - MARIADB_ROOT_PASSWORD=supersecure.123
     volumes:
-    - db_data:/var/lib/mysql
+    - db_data_mysql:/var/lib/mysql
+
+  # persistent storage for game data
+  db-postgres:
+    image: postgres:16.2-alpine
+    ports:
+    - "5432:5432"
+    environment:
+    - POSTGRES_USER=metin2
+    - POSTGRES_PASSWORD=metin2
+    - POSTGRES_DB=game
+    volumes:
+    - db_data_pg:/var/lib/postgresql/data
 
 volumes:
   cache_data:
-  db_data:
+  db_data_mysql:
+  db_data_pg:

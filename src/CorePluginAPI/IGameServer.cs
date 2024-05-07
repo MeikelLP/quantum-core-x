@@ -1,4 +1,4 @@
-﻿using System.Threading.Tasks;
+﻿using System.Collections.Immutable;
 using QuantumCore.API.Game.World;
 using QuantumCore.Networking;
 
@@ -10,4 +10,5 @@ public interface IGameServer
     long ServerTime { get; }
     Task CallListener(IConnection connection, IPacketSerializable packet);
     Task RemoveConnection(IConnection connection);
+    ImmutableArray<IGameConnection> Connections { get; }
 }
