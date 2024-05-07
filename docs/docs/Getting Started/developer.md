@@ -202,7 +202,7 @@
     docker exec __CONTAINER_ID__ /bin/mysql -u root '-psupersecure.123' --execute="INSERT INTO account.accounts (Id, Username, Password, Email, Status, LastLogin, CreatedAt, UpdatedAt, DeleteCode) VALUES ('584C4BC9-559F-47DD-9A7E-49EEB65DD831', 'admin', '`$2y`$10`$dTh8zmAfA742vKZ35Oarzugv3QXJPTOYRhKpk807o9h9SWBsFcys6', 'some@mail.com', DEFAULT, null, DEFAULT, DEFAULT, DEFAULT);"
     ```
 
-    for more infos about account creation look at [Account Creation](../Tutorials/account-creation.md)
+    for more infos about account creation look at [Account Creation](../Guides/account-creation.md)
 
 5. Start the server
 
@@ -223,4 +223,4 @@ There are more things that can be setup (for levels) but that's not required to 
 
 ## Further Reading
 
-* [Developer VM](../Tutorials/dev-vm.md)
+* [Developer VM](../Guides/dev-vm.md)
