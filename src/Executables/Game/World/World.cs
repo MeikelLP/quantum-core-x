@@ -8,6 +8,7 @@ using QuantumCore.API.Game.World;
 using QuantumCore.API.PluginTypes;
 using QuantumCore.Caching;
 using QuantumCore.Core.Utils;
+using QuantumCore.Game.Persistence;
 using QuantumCore.Game.Services;
 
 namespace QuantumCore.Game.World
@@ -27,6 +28,7 @@ namespace QuantumCore.Game.World
 
         private IRedisSubscriber? _mapSubscriber;
         private readonly IItemManager _itemManager;
+        private readonly IShopsManager _shopsManager;
         private readonly ICacheManager _cacheManager;
         private readonly IConfiguration _configuration;
         private readonly ISpawnGroupProvider _spawnGroupProvider;
@@ -34,7 +36,7 @@ namespace QuantumCore.Game.World
 
         public World(ILogger<World> logger, PluginExecutor pluginExecutor, IItemManager itemManager,
             ICacheManager cacheManager, IConfiguration configuration, ISpawnGroupProvider spawnGroupProvider,
-            IAtlasProvider atlasProvider)
+            IAtlasProvider atlasProvider, IShopsManager shopsManager)
         {
             _logger = logger;
             _pluginExecutor = pluginExecutor;
@@ -43,6 +45,7 @@ namespace QuantumCore.Game.World
             _configuration = configuration;
             _spawnGroupProvider = spawnGroupProvider;
             _atlasProvider = atlasProvider;
+            _shopsManager = shopsManager;
             _vid = 0;
         }
 
@@ -99,12 +102,11 @@ namespace QuantumCore.Game.World
             if (shops is null) return;
             foreach (var shopDef in shops)
             {
-                var shop = new Shop (_itemManager, _logger);
-
-                _staticShops[shopDef.Id] = shop;
-
                 if (shopDef.Npc.HasValue)
                 {
+                    var shop = new Shop (shopDef, _itemManager, _shopsManager, _logger);
+
+                    _staticShops[shopDef.Id] = shop;
                     GameEventManager.RegisterNpcClickEvent(shop.Name, shopDef.Npc.Value, player =>
                     {
                         shop.Open(player);

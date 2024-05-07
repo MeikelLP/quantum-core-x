@@ -11,6 +11,7 @@ public static class ServiceExtensions
         services.AddSingleton<IDbPlayerRepository, DbPlayerRepository>();
         services.AddSingleton<ICommandPermissionRepository, CommandPermissionRepository>();
         services.AddSingleton<IItemRepository, ItemRepository>();
+        services.AddSingleton<IShopsRepository, ShopsRepository>();
 
         return services;
     }

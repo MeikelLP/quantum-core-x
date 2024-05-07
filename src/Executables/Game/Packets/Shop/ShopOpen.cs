@@ -11,6 +11,48 @@ namespace QuantumCore.Game.Packets.Shop
         public ushort Size => (ushort)Items.Length;
         public uint Vid { get; set; }
 
-        public ShopItem[] Items { get; set; } = new ShopItem[40];
+        public ShopItem[] Items { get; set; } = new ShopItem[40]
+        {
+            new ShopItem(),
+            new ShopItem(),
+            new ShopItem(),
+            new ShopItem(),
+            new ShopItem(),
+            new ShopItem(),
+            new ShopItem(),
+            new ShopItem(),
+            new ShopItem(),
+            new ShopItem(),
+            new ShopItem(),
+            new ShopItem(),
+            new ShopItem(),
+            new ShopItem(),
+            new ShopItem(),
+            new ShopItem(),
+            new ShopItem(),
+            new ShopItem(),
+            new ShopItem(),
+            new ShopItem(),
+            new ShopItem(),
+            new ShopItem(),
+            new ShopItem(),
+            new ShopItem(),
+            new ShopItem(),
+            new ShopItem(),
+            new ShopItem(),
+            new ShopItem(),
+            new ShopItem(),
+            new ShopItem(),
+            new ShopItem(),
+            new ShopItem(),
+            new ShopItem(),
+            new ShopItem(),
+            new ShopItem(),
+            new ShopItem(),
+            new ShopItem(),
+            new ShopItem(),
+            new ShopItem(),
+            new ShopItem(),
+        };
     }
 }
