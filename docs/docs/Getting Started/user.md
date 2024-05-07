@@ -25,10 +25,8 @@ Save the following files in a new directory
       "Port": 6379
     },
     "Database": {
-      "Host": "db",
-      "User": "root",
-      "Password": "supersecure.123",
-      "Database": "game"
+      "Provider": "mysql",
+      "ConnectionString": "Server=localhost;Database=game;Uid=root;Pwd=supersecure.123;"
     },
     "maps": [
       "metin2_map_a1",
@@ -50,10 +48,8 @@ Save the following files in a new directory
       "Port": 6379
     },
     "Database": {
-      "Host": "db",
-      "User": "root",
-      "Password": "supersecure.123",
-      "Database": "account"
+      "Provider": "mysql",
+      "ConnectionString": "Server=localhost;Database=auth;Uid=root;Pwd=supersecure.123;"
     }
   }
   ```
@@ -83,13 +79,6 @@ Save the following files in a new directory
         - ./game.appsettings.json:/app/Core/appsettings.json:ro
         - ./settings.toml:/app/Core/settings.toml:ro
         - ./data:/app/Core/data:ro
-  
-    # migrate service - required once
-    migrate:
-      image: ghcr.io/meikellp/quantum-core-x/migrator
-      restart: no
-      network_mode: host
-      command: '--host localhost --port 3306 --user root --password supersecure.123'
   
     # redis holds live data of the game world
     # used as distributed memory between server nodes
@@ -287,12 +276,6 @@ Start the db detached first
 
 ```sh
 docker-compose up db -d
-```
-
-Next migrate the db
-
-```sh
-docker-compose up migrate
 ```
 
 Finally boot up all services. Add `-d` to run them in the background
