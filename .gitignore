@@ -6,6 +6,7 @@ obj/
 examples/
 *.user
 .DS_Store
+**/logs/*
 
 # Generated
 ItemProto.cs
