@@ -286,6 +286,17 @@ public class CommandTests : IAsyncLifetime
             Count = 10
         }, cfg => cfg.Including(x => x.ItemId).Including(x => x.Count));
     }
+    
+    [Fact]
+    public async Task GiveItemCommand_InvalidPlayer()
+    {
+        await _commandManager.Handle(_connection, "/give missing 1 10");
+
+        (_connection as MockedGameConnection).SentMessages.Should().ContainEquivalentOf(new ChatOutcoming
+        {
+            Message = "Target not found"
+        }, cfg => cfg.Including(x => x.Message));
+    }
 
     [Fact]
     public async Task GoldCommand_Self()
