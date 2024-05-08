@@ -19,10 +19,14 @@ public class ReloadPermissionsCommand : ICommandHandler<ReloadPermissionsCommand
     
     public async Task ExecuteAsync(CommandContext<ReloadPermissionsCommandOptions> context)
     {
+        // Reload in-memory + cache permissions
+        await _commandManager.ReloadAsync();
+        
         var target = string.Equals(context.Arguments.Target, "$self", StringComparison.InvariantCultureIgnoreCase)
             ? context.Player
             : _world.GetPlayer(context.Arguments.Target);
-     
+        
+        // Reload permissions for target player or all players
         if (target is not null)
         {
             await target.ReloadPermissions();
@@ -32,8 +36,8 @@ public class ReloadPermissionsCommand : ICommandHandler<ReloadPermissionsCommand
             var players = _world.GetPlayers();
             await Task.WhenAll(players.Select(x => x.ReloadPermissions()));
         }
-
-        await _commandManager.ReloadAsync();
+        
+        context.Player.SendChatInfo("Permissions reloaded");
     }
 }
 
