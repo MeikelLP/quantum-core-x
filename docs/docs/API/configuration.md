@@ -10,7 +10,7 @@ tags: [user]
 
 :::
 
-QuantumCoreX uses [Microsoft.Extensions.Configuration](https://learn.microsoft.com/en-us/dotnet/core/extensions/configuration) which can have multiple data source (i.e. json files, command line args, environment variables). Feel free to read into their docs do get a better understanding about overriding and naming.
+QuantumCoreX uses [Microsoft.Extensions.Configuration](https://learn.microsoft.com/en-us/dotnet/core/extensions/configuration) which can have multiple data sources (i.e. json files, command line args, environment variables). Feel free to read into their docs do get a better understanding about overriding and naming.
 
 |Key|Type|Default|Required|Example|
 |---|---|---|---|---|
