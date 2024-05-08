@@ -35,12 +35,10 @@ jobs:
           cd src/Executables/Game
           sudo chmod +x generate_kaitai.sh
           ./generate_kaitai.sh
-      - name: Install dependencies
-        run: dotnet restore src/QuantumCore.sln
 
       # finally tests
       - name: Test
-        run: dotnet test --no-restore --verbosity normal src/QuantumCore.sln
+        run: dotnet test --verbosity normal src/QuantumCore.sln
   deploy:
     needs:
       - test
