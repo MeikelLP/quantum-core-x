@@ -292,7 +292,7 @@ public class CommandTests : IAsyncLifetime
     {
         await _commandManager.Handle(_connection, "/give missing 1 10");
 
-        (_connection as MockedGameConnection).SentMessages.Should().ContainEquivalentOf(new ChatOutcoming
+        ((MockedGameConnection)_connection).SentMessages.Should().ContainEquivalentOf(new ChatOutcoming
         {
             Message = "Target not found"
         }, cfg => cfg.Including(x => x.Message));
