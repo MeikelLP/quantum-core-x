@@ -547,12 +547,12 @@ public class CommandTests : IAsyncLifetime
             Name = groupName,
             Permissions = newPermissions
         });
+
+        await _commandManager.ReloadAsync();
         
-        _player.ReloadPermissions().Should().Be(Task.CompletedTask);
-            
-        _commandManager.ReloadAsync().Should().Be(Task.CompletedTask);
+        await _player.ReloadPermissions();
         
-        (_connection as MockedGameConnection).SentMessages.Should().ContainEquivalentOf(new ChatOutcoming
+        ((MockedGameConnection)_connection).SentMessages.Should().ContainEquivalentOf(new ChatOutcoming
         {
             Message = "Permissions reloaded"
         }, cfg => cfg.Including(x => x.Message));
