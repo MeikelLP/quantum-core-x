@@ -154,6 +154,11 @@ namespace QuantumCore.Game.Persistence.Migrations.Postgresql
                         onDelete: ReferentialAction.Cascade);
                 });
 
+            migrationBuilder.InsertData(
+                table: "perm_groups",
+                columns: new[] {"Id", "Name"},
+                values: new object[] {new Guid("45bff707-1836-42b7-956d-00b9b69e0ee0"), "Operator"});
+
             migrationBuilder.CreateIndex(
                 name: "IX_items_PlayerId",
                 table: "items",

@@ -17,5 +17,8 @@ public class AccountStatus
 
     public static void Configure(EntityTypeBuilder<AccountStatus> builder, DatabaseFacade database)
     {
+        builder.HasData([
+            new AccountStatus {Id = 1, Description = "Default Status", AllowLogin = true, ClientStatus = "OK"}
+        ]);
     }
 }

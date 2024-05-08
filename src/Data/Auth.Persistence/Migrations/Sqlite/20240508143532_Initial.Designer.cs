@@ -11,7 +11,7 @@ using QuantumCore.Auth.Persistence;
 namespace QuantumCore.Auth.Persistence.Migrations.Sqlite
 {
     [DbContext(typeof(SqliteAuthDbContext))]
-    [Migration("20240507194030_Initial")]
+    [Migration("20240508143532_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -64,10 +64,22 @@ namespace QuantumCore.Auth.Persistence.Migrations.Sqlite
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Status")
-                        .IsUnique();
+                    b.HasIndex("Status");
 
                     b.ToTable("accounts");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("e34fd5ab-fb3b-428e-935b-7db5bd08a3e5"),
+                            CreatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            DeleteCode = "1234567",
+                            Email = "admin@test.com",
+                            Password = "$2y$10$5e9nP50E64iy8vaSMwrRWO7vCfnA7.p5XpIDHC3hPdi6BCtTF7rBS",
+                            Status = (short)1,
+                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
+                            Username = "admin"
+                        });
                 });
 
             modelBuilder.Entity("QuantumCore.Auth.Persistence.Entities.AccountStatus", b =>
@@ -92,13 +104,22 @@ namespace QuantumCore.Auth.Persistence.Migrations.Sqlite
                     b.HasKey("Id");
 
                     b.ToTable("account_status");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = (short)1,
+                            AllowLogin = true,
+                            ClientStatus = "OK",
+                            Description = "Default Status"
+                        });
                 });
 
             modelBuilder.Entity("QuantumCore.Auth.Persistence.Entities.Account", b =>
                 {
                     b.HasOne("QuantumCore.Auth.Persistence.Entities.AccountStatus", "AccountStatus")
-                        .WithOne("Account")
-                        .HasForeignKey("QuantumCore.Auth.Persistence.Entities.Account", "Status")
+                        .WithMany("Accounts")
+                        .HasForeignKey("Status")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -107,8 +128,7 @@ namespace QuantumCore.Auth.Persistence.Migrations.Sqlite
 
             modelBuilder.Entity("QuantumCore.Auth.Persistence.Entities.AccountStatus", b =>
                 {
-                    b.Navigation("Account")
-                        .IsRequired();
+                    b.Navigation("Accounts");
                 });
 #pragma warning restore 612, 618
         }

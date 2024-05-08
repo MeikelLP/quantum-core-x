@@ -11,7 +11,7 @@ using QuantumCore.Game.Persistence;
 namespace QuantumCore.Game.Persistence.Migrations.Sqlite
 {
     [DbContext(typeof(SqliteGameDbContext))]
-    [Migration("20240507193857_Initial")]
+    [Migration("20240508143504_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -179,6 +179,13 @@ namespace QuantumCore.Game.Persistence.Migrations.Sqlite
                         .IsUnique();
 
                     b.ToTable("perm_groups");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("45bff707-1836-42b7-956d-00b9b69e0ee0"),
+                            Name = "Operator"
+                        });
                 });
 
             modelBuilder.Entity("QuantumCore.Game.Persistence.Entities.PermUser", b =>

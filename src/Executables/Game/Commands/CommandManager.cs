@@ -11,6 +11,7 @@ using QuantumCore.API.Game.World;
 using QuantumCore.Caching;
 using QuantumCore.Game.Packets;
 using QuantumCore.Game.Persistence;
+using QuantumCore.Game.Persistence.Entities;
 
 namespace QuantumCore.Game.Commands
 {
@@ -21,7 +22,6 @@ namespace QuantumCore.Game.Commands
         private readonly Dictionary<string, CommandDescriptor> _commandHandlers = new();
         public Dictionary<Guid, PermissionGroup> Groups { get; } = new();
 
-        public static readonly Guid Operator_Group = Guid.Parse("45bff707-1836-42b7-956d-00b9b69e0ee0");
         private readonly IServiceProvider _serviceProvider;
 
         private static readonly Parser ParserInstance = new Parser(settings =>
@@ -126,7 +126,7 @@ namespace QuantumCore.Game.Commands
 
             foreach (var group in player.Groups)
             {
-                if (group == Operator_Group)
+                if (group == PermGroup.OperatorGroup)
                 {
                     return true;
                 }

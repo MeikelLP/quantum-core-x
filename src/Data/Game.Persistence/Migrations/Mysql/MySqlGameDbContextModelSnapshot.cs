@@ -181,6 +181,13 @@ namespace QuantumCore.Game.Persistence.Migrations.Mysql
                         .IsUnique();
 
                     b.ToTable("perm_groups");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("45bff707-1836-42b7-956d-00b9b69e0ee0"),
+                            Name = "Operator"
+                        });
                 });
 
             modelBuilder.Entity("QuantumCore.Game.Persistence.Entities.PermUser", b =>

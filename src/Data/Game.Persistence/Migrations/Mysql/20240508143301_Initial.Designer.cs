@@ -12,7 +12,7 @@ using QuantumCore.Game.Persistence;
 namespace QuantumCore.Game.Persistence.Migrations.Mysql
 {
     [DbContext(typeof(MySqlGameDbContext))]
-    [Migration("20240507193837_Initial")]
+    [Migration("20240508143301_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -184,6 +184,13 @@ namespace QuantumCore.Game.Persistence.Migrations.Mysql
                         .IsUnique();
 
                     b.ToTable("perm_groups");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = new Guid("45bff707-1836-42b7-956d-00b9b69e0ee0"),
+                            Name = "Operator"
+                        });
                 });
 
             modelBuilder.Entity("QuantumCore.Game.Persistence.Entities.PermUser", b =>

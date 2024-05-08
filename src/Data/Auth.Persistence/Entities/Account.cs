@@ -39,5 +39,19 @@ public class Account
             builder.Property(x => x.CreatedAt).HasDefaultValueSql("(CAST(CURRENT_TIMESTAMP AS DATETIME(6)))");
             builder.Property(x => x.UpdatedAt).HasDefaultValueSql("(CAST(CURRENT_TIMESTAMP AS DATETIME(6)))");
         }
+
+        builder.HasData([
+            new Account
+            {
+                Id = Guid.Parse("E34FD5AB-FB3B-428E-935B-7DB5BD08A3E5"),
+                Username = "admin",
+                Password = "$2y$10$5e9nP50E64iy8vaSMwrRWO7vCfnA7.p5XpIDHC3hPdi6BCtTF7rBS", // admin
+                Email = "admin@test.com",
+                Status = 1,
+                CreatedAt = default,
+                UpdatedAt = default,
+                DeleteCode = "1234567"
+            }
+        ]);
     }
 }

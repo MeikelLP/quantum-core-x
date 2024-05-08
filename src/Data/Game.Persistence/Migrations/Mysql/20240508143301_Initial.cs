@@ -52,8 +52,7 @@ namespace QuantumCore.Game.Persistence.Migrations.Mysql
                     name: "perm_groups",
                     columns: table => new
                     {
-                        Id = table.Column<Guid>(type: "char(36)", nullable: false, defaultValueSql: "(uuid())",
-                            collation: "ascii_general_ci"),
+                        Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                         Name = table.Column<string>(type: "varchar(30)", maxLength: 30, nullable: false)
                             .Annotation("MySql:CharSet", "utf8mb4")
                     },
@@ -64,8 +63,7 @@ namespace QuantumCore.Game.Persistence.Migrations.Mysql
                     name: "players",
                     columns: table => new
                     {
-                        Id = table.Column<Guid>(type: "char(36)", nullable: false, defaultValueSql: "(uuid())",
-                            collation: "ascii_general_ci"),
+                        Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                         AccountId =
                             table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                         Empire = table.Column<byte>(type: "tinyint unsigned", nullable: false),
@@ -102,8 +100,7 @@ namespace QuantumCore.Game.Persistence.Migrations.Mysql
                     name: "perm_auth",
                     columns: table => new
                     {
-                        Id = table.Column<Guid>(type: "char(36)", nullable: false, defaultValueSql: "(uuid())",
-                            collation: "ascii_general_ci"),
+                        Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                         GroupId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                         Command = table.Column<string>(type: "varchar(255)", maxLength: 255, nullable: false)
                             .Annotation("MySql:CharSet", "utf8mb4")
@@ -124,8 +121,7 @@ namespace QuantumCore.Game.Persistence.Migrations.Mysql
                     name: "items",
                     columns: table => new
                     {
-                        Id = table.Column<Guid>(type: "char(36)", nullable: false, defaultValueSql: "(uuid())",
-                            collation: "ascii_general_ci"),
+                        Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                         PlayerId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                         ItemId = table.Column<uint>(type: "int unsigned", nullable: false),
                         Window = table.Column<byte>(type: "tinyint unsigned", nullable: false),
@@ -172,6 +168,11 @@ namespace QuantumCore.Game.Persistence.Migrations.Mysql
                             onDelete: ReferentialAction.Cascade);
                     })
                 .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.InsertData(
+                table: "perm_groups",
+                columns: new[] {"Id", "Name"},
+                values: new object[] {new Guid("45bff707-1836-42b7-956d-00b9b69e0ee0"), "Operator"});
 
             migrationBuilder.CreateIndex(
                 name: "IX_items_PlayerId",
