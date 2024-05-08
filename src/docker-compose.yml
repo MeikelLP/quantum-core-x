@@ -16,6 +16,9 @@ services:
       - "Cache:Host=cache"
     volumes:
       - ./Executables/Auth/appsettings.json:/app/appsettings.json:ro
+    depends_on:
+      - db-mysql
+      - cache
 
   # redis holds live data of the game world
   # used as distributed memory between server nodes
