@@ -304,7 +304,7 @@ public class CommandTests : IAsyncLifetime
     {
         await _commandManager.Handle(_connection, "/give missing 1 10");
 
-        ((MockedGameConnection)_connection).SentMessages.Should().ContainEquivalentOf(new ChatOutcoming
+        ((MockedGameConnection) _connection).SentMessages.Should().ContainEquivalentOf(new ChatOutcoming
         {
             Message = "Target not found"
         }, cfg => cfg.Including(x => x.Message));
@@ -551,12 +551,19 @@ public class CommandTests : IAsyncLifetime
         var updatedGroup = Guid.NewGuid();
         var groupName = "test";
 
-        var newPermissions = new[] { "reload_perms", "goto" };
-        _services.GetRequiredService<ICommandPermissionRepository>().GetPermissionsForGroupAsync(Arg.Any<Guid>()).Returns(newPermissions);
-        _services.GetRequiredService<ICommandPermissionRepository>().GetGroupsAsync().Returns(new[] { (updatedGroup, groupName) });
+        var newPermissions = new[] {"reload_perms", "goto"};
+        _services.GetRequiredService<ICommandPermissionRepository>().GetPermissionsForGroupAsync(Arg.Any<Guid>())
+            .Returns(newPermissions);
+        _services.GetRequiredService<ICommandPermissionRepository>().GetGroupsAsync().Returns([
+            new PermissionGroup
+            {
+                Id = updatedGroup,
+                Name = groupName
+            }
+        ]);
 
         _services.GetRequiredService<ICacheManager>().CreateList<Guid>(Arg.Any<string>())
-            .Range(0, 0).Returns(new[] { updatedGroup });
+            .Range(0, 0).Returns(new[] {updatedGroup});
 
         // Act
         await _commandManager.Handle(_connection, "/reload_perms");
@@ -574,7 +581,7 @@ public class CommandTests : IAsyncLifetime
 
         await _player.ReloadPermissions();
 
-        ((MockedGameConnection)_connection).SentMessages.Should().ContainEquivalentOf(new ChatOutcoming
+        ((MockedGameConnection) _connection).SentMessages.Should().ContainEquivalentOf(new ChatOutcoming
         {
             Message = "Permissions reloaded"
         }, cfg => cfg.Including(x => x.Message));
