@@ -16,6 +16,9 @@ services:
       - "Cache:Host=cache"
     volumes:
       - ./Executables/Auth/appsettings.json:/app/appsettings.json:ro
+    depends_on:
+      - db-mysql
+      - cache
 
   # redis holds live data of the game world
   # used as distributed memory between server nodes
@@ -27,9 +30,9 @@ services:
     ports:
     - "6379:6379"
 
-  # persistent storage for game data
-  db:
-    image: mariadb:latest
+  # persistent storage
+  db-mysql:
+    image: mariadb:11.3
     ports:
     - "3306:3306"
     environment:
@@ -37,8 +40,9 @@ services:
     - MARIADB_PASSWORD=metin2
     - MARIADB_ROOT_PASSWORD=supersecure.123
     volumes:
-    - db_data:/var/lib/mysql
+    - db_data_mysql:/var/lib/mysql
 
 volumes:
   cache_data:
-  db_data:
+  db_data_mysql:
+  db_data_pg:

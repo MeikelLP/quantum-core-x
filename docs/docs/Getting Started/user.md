@@ -1,4 +1,4 @@
-﻿# User guide
+﻿# User Guide
 
 In this guide a _User_ refers to someone who wants to host/administrate QCX.
 
@@ -25,10 +25,8 @@ Save the following files in a new directory
       "Port": 6379
     },
     "Database": {
-      "Host": "db",
-      "User": "root",
-      "Password": "supersecure.123",
-      "Database": "game"
+      "Provider": "mysql",
+      "ConnectionString": "Server=localhost;Database=game;Uid=root;Pwd=supersecure.123;"
     },
     "maps": [
       "metin2_map_a1",
@@ -50,10 +48,8 @@ Save the following files in a new directory
       "Port": 6379
     },
     "Database": {
-      "Host": "db",
-      "User": "root",
-      "Password": "supersecure.123",
-      "Database": "account"
+      "Provider": "mysql",
+      "ConnectionString": "Server=localhost;Database=auth;Uid=root;Pwd=supersecure.123;"
     }
   }
   ```
@@ -71,7 +67,7 @@ Save the following files in a new directory
       ports:
         - "11002:11002"
       volumes:
-        - ./auth.appsettings.json:/app/Core/appsettings.json:ro
+        - ./auth.appsettings.json:/app/Core/appsettings.Production.json:ro
   
     # game service
     game:
@@ -80,16 +76,9 @@ Save the following files in a new directory
       ports:
         - "13001:13001"
       volumes:
-        - ./game.appsettings.json:/app/Core/appsettings.json:ro
+        - ./game.appsettings.json:/app/Core/appsettings.Production.json:ro
         - ./settings.toml:/app/Core/settings.toml:ro
         - ./data:/app/Core/data:ro
-  
-    # migrate service - required once
-    migrate:
-      image: ghcr.io/meikellp/quantum-core-x/migrator
-      restart: no
-      network_mode: host
-      command: '--host localhost --port 3306 --user root --password supersecure.123'
   
     # redis holds live data of the game world
     # used as distributed memory between server nodes
@@ -126,127 +115,6 @@ Save the following files in a new directory
   metin2_map_b1	0	102400	4	5
   ```
 
-* `jobs.json`
-
-  ```json
-  {
-    "job": [
-      {
-        "id": 0,
-        "name": "warrior",
-        "st": 6,
-        "ht": 4,
-        "dx": 3,
-        "iq": 3,
-        "startHp": 600,
-        "startSp": 200,
-        "hpPerHt": 40,
-        "spPerIq": 20,
-        "hpPerLevel": 36,
-        "spPerLevel": 44
-      },
-      {
-        "id": 1,
-        "name": "assassin",
-        "st": 4,
-        "ht": 3,
-        "dx": 6,
-        "iq": 3,
-        "startHp": 650,
-        "startSp": 200,
-        "hpPerHt": 40,
-        "spPerIq": 20,
-        "hpPerLevel": 36,
-        "spPerLevel": 44
-      },
-      {
-        "id": 2,
-        "name": "sura",
-        "st": 5,
-        "ht": 3,
-        "dx": 3,
-        "iq": 5,
-        "startHp": 650,
-        "startSp": 200,
-        "hpPerHt": 40,
-        "spPerIq": 20,
-        "hpPerLevel": 36,
-        "spPerLevel": 44
-      },
-      {
-        "id": 3,
-        "name": "shamana",
-        "st": 3,
-        "ht": 4,
-        "dx": 3,
-        "iq": 6,
-        "startHp": 700,
-        "startSp": 200,
-        "hpPerHt": 40,
-        "spPerIq": 20,
-        "hpPerLevel": 36,
-        "spPerLevel": 44
-      },
-      {
-        "id": 4,
-        "name": "warrior",
-        "st": 6,
-        "ht": 4,
-        "dx": 3,
-        "iq": 3,
-        "startHp": 600,
-        "startSp": 200,
-        "hpPerHt": 40,
-        "spPerIq": 20,
-        "hpPerLevel": 36,
-        "spPerLevel": 44
-      },
-      {
-        "id": 5,
-        "name": "assassin",
-        "st": 4,
-        "ht": 3,
-        "dx": 6,
-        "iq": 3,
-        "startHp": 650,
-        "startSp": 200,
-        "hpPerHt": 40,
-        "spPerIq": 20,
-        "hpPerLevel": 36,
-        "spPerLevel": 44
-      },
-      {
-        "id": 6,
-        "name": "sura",
-        "st": 5,
-        "ht": 3,
-        "dx": 3,
-        "iq": 5,
-        "startHp": 650,
-        "startSp": 200,
-        "hpPerHt": 40,
-        "spPerIq": 20,
-        "hpPerLevel": 36,
-        "spPerLevel": 44
-      },
-      {
-        "id": 7,
-        "name": "shamana",
-        "st": 3,
-        "ht": 4,
-        "dx": 3,
-        "iq": 6,
-        "startHp": 700,
-        "startSp": 200,
-        "hpPerHt": 40,
-        "spPerIq": 20,
-        "hpPerLevel": 36,
-        "spPerLevel": 44
-      }
-    ]
-  }
-  ```
-
 * execute the `Eternexus\--dump_proto--\dump_proto.exe` in the client's directory. This should create two files:
   * `item_proto`
   * `mob_proto`
@@ -267,15 +135,15 @@ Save the following files in a new directory
 
 ### Create an admin account
 
-This command will create an `admin` account with `admin` as password.
-To get the container ID of your mysql container use `docker ps`
+A default user `admin` with password `admin` is created for you by default.
 
-```sh
-# replace __CONTAINER_ID__ with your mysql container ID
-docker exec __CONTAINER_ID__ /bin/mysql -u root -psupersecure.123 --execute="INSERT INTO account.accounts (Id, Username, Password, Email, Status, LastLogin, CreatedAt, UpdatedAt, DeleteCode) VALUES ('584C4BC9-559F-47DD-9A7E-49EEB65DD831', 'admin', '$2y$10$dTh8zmAfA742vKZ35Oarzugv3QXJPTOYRhKpk807o9h9SWBsFcys6', 'some@mail.com', DEFAULT, null, DEFAULT, DEFAULT, DEFAULT);"
-```
+:::warning
+If you plan on opening up the server to other people you should change that admins password.
+:::
 
-for more infos about account creation look at [Account Creation](../Tutorials/account-creation.md)
+:::tip
+For more infos about account creation look at [Account Creation](../Guides/account-creation.md)
+:::
 
 ### Setup client
 
@@ -283,16 +151,10 @@ for more infos about account creation look at [Account Creation](../Tutorials/ac
 
 ### Startup
 
-Start the db detached first
+Start the db detached first because it is not available instantly but we require a valid database as soon as possible.
 
 ```sh
 docker-compose up db -d
-```
-
-Next migrate the db
-
-```sh
-docker-compose up migrate
 ```
 
 Finally boot up all services. Add `-d` to run them in the background
@@ -303,4 +165,4 @@ docker-compose up
 
 ## Next steps
 
-* [Add player +permissions](../Tutorials/player-permission.md)
+* [Add player +permissions](../Guides/player-permission.md)
