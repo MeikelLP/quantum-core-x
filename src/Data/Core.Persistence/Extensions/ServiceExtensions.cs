@@ -1,8 +1,4 @@
-﻿using System.Data;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Options;
-using MySqlConnector;
+﻿using Microsoft.Extensions.DependencyInjection;
 using QuantumCore;
 
 namespace Core.Persistence.Extensions;
@@ -14,12 +10,6 @@ public static class ServiceExtensions
         services.AddOptions<DatabaseOptions>()
             .BindConfiguration("Database")
             .ValidateDataAnnotations();
-        // TODO make this scoped
-        services.TryAddTransient<IDbConnection>(provider =>
-        {
-            var options = provider.GetRequiredService<IOptions<DatabaseOptions>>().Value;
-            return new MySqlConnection(options.ConnectionString);
-        });
 
         return services;
     }

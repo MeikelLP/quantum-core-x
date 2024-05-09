@@ -17,11 +17,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       # setup .NET
       - name: Setup .NET Core SDK 8
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 8.0.x
 
@@ -94,24 +94,3 @@ jobs:
           push: true
           tags: ${{ steps.meta-auth.outputs.tags }}
           labels: ${{ steps.meta-auth.outputs.labels }}
-
-      # migrator
-      - name: Extract metadata (tags, labels) for Docker
-        id: meta-migrator
-        uses: docker/metadata-action@v4.6.0
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/migrator
-          tags: |
-            type=schedule
-            type=ref,event=branch
-            type=ref,event=tag
-            type=raw,latest,enable=${{ github.ref == format('refs/heads/{0}', 'master') }}
-      - name: Build and push migrator image
-        uses: docker/build-push-action@v4.1.1
-        with:
-          context: src/
-          images: ghcr.io/meikellp/quantum-core-x/migrator
-          file: src/Executables/Migrator/Dockerfile
-          push: true
-          tags: ${{ steps.meta-migrator.outputs.tags }}
-          labels: ${{ steps.meta-migrator.outputs.labels }}

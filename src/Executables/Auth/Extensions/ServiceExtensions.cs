@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using QuantumCore.API.PluginTypes;
+﻿using QuantumCore.API.PluginTypes;
 using QuantumCore.Auth.Persistence.Extensions;
 using QuantumCore.Caching.Extensions;
 
@@ -16,7 +15,7 @@ public static class ServiceExtensions
             scan.FromAssemblyOf<AuthServer>()
                 .AddClasses(classes => classes.AssignableTo<IPacketHandler>())
                 .AsImplementedInterfaces()
-                .WithSingletonLifetime();
+                .WithScopedLifetime();
         });
 
         return services;

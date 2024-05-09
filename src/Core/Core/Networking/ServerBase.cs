@@ -2,7 +2,6 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
-using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -10,7 +9,6 @@ using Microsoft.Extensions.Options;
 using QuantumCore.API;
 using QuantumCore.API.PluginTypes;
 using QuantumCore.Core.Utils;
-using QuantumCore.Extensions;
 using QuantumCore.Networking;
 
 namespace QuantumCore.Core.Networking
@@ -21,27 +19,24 @@ namespace QuantumCore.Core.Networking
         private readonly ILogger _logger;
         protected IPacketManager PacketManager { get; }
         private readonly List<Func<IConnection, bool>> _connectionListeners = new();
-        private readonly ConcurrentDictionary<Guid, IConnection> _connections = new();
-        private readonly Dictionary<ushort, IPacketHandler> _listeners = new();
+        protected readonly ConcurrentDictionary<Guid, IConnection> Connections = new();
         private readonly Stopwatch _serverTimer = new();
         private readonly CancellationTokenSource _stoppingToken = new();
         protected TcpListener Listener { get; }
 
         private readonly PluginExecutor _pluginExecutor;
         private readonly IServiceProvider _serviceProvider;
-        private readonly IEnumerable<IPacketHandler> _packetHandlers;
         private readonly string _serverMode;
 
         public int Port { get; }
 
         public ServerBase(IPacketManager packetManager, ILogger logger, PluginExecutor pluginExecutor,
-            IServiceProvider serviceProvider, IEnumerable<IPacketHandler> packetHandlers, string mode,
+            IServiceProvider serviceProvider, string mode,
             IOptions<HostingOptions> hostingOptions)
         {
             _logger = logger;
             _pluginExecutor = pluginExecutor;
             _serviceProvider = serviceProvider;
-            _packetHandlers = packetHandlers;
             _serverMode = mode;
             PacketManager = packetManager;
             Port = hostingOptions.Value.Port;
@@ -60,9 +55,10 @@ namespace QuantumCore.Core.Networking
 
         public async Task RemoveConnection(IConnection connection)
         {
-            _connections.Remove(connection.Id, out _);
+            Connections.Remove(connection.Id, out _);
 
-            await _pluginExecutor.ExecutePlugins<IConnectionLifetimeListener>(_logger, x => x.OnDisconnectedAsync(_stoppingToken.Token));
+            await _pluginExecutor.ExecutePlugins<IConnectionLifetimeListener>(_logger,
+                x => x.OnDisconnectedAsync(_stoppingToken.Token));
         }
 
         public override Task StartAsync(CancellationToken token)
@@ -86,9 +82,10 @@ namespace QuantumCore.Core.Networking
 
             // cannot inject tcp client here
             var connection = ActivatorUtilities.CreateInstance<T>(scope.ServiceProvider, client, (IServerBase) this);
-            _connections.TryAdd(connection.Id, connection);
+            Connections.TryAdd(connection.Id, connection);
 
-            await _pluginExecutor.ExecutePlugins<IConnectionLifetimeListener>(_logger, x => x.OnConnectedAsync(_stoppingToken.Token));
+            await _pluginExecutor.ExecutePlugins<IConnectionLifetimeListener>(_logger,
+                x => x.OnConnectedAsync(_stoppingToken.Token));
 
             // accept new connections on another thread
             Listener.BeginAcceptTcpClient(OnClientAccepted, Listener);
@@ -99,7 +96,7 @@ namespace QuantumCore.Core.Networking
 
         public void ForAllConnections(Action<IConnection> callback)
         {
-            foreach (var connection in _connections.Values)
+            foreach (var connection in Connections.Values)
             {
                 callback(connection);
             }
@@ -138,7 +135,7 @@ namespace QuantumCore.Core.Networking
 
                 var packetHandler = ActivatorUtilities.CreateInstance(scope.ServiceProvider, details.PacketHandlerType);
                 var handlerExecuteMethod = details.PacketHandlerType.GetMethod("ExecuteAsync")!;
-                await (Task) handlerExecuteMethod.Invoke(packetHandler, new[] { context, new CancellationToken() })!;
+                await (Task) handlerExecuteMethod.Invoke(packetHandler, new[] {context, new CancellationToken()})!;
             }
             catch (Exception e)
             {
@@ -186,49 +183,11 @@ namespace QuantumCore.Core.Networking
             Listener.BeginAcceptTcpClient(OnClientAccepted, Listener);
         }
 
-        public void RegisterListeners()
-        {
-            var handlers = _packetHandlers.Where(x => x
-                    .GetType()
-                    .GetInterfaces()
-                    .Where(i => i.IsGenericType)
-                    .Any(i => _serverMode == "auth"
-                ? i.GetGenericTypeDefinition() == typeof(IAuthPacketHandler<>)
-                : i.GetGenericTypeDefinition() == typeof(IGamePacketHandler<>)))
-                .ToArray();
-            foreach (var packetHandler in handlers)
-            {
-                var packetType = packetHandler.GetType().GetPacketType();
-
-                if (packetType is null)
-                {
-                    _logger.LogWarning("Base interface did not match {BaseInterface} this should not happen", nameof(IPacketHandler));
-                    continue;
-                }
-
-                var packetDescription = packetType.GetCustomAttribute<PacketAttribute>();
-                if (packetDescription is null)
-                {
-                    _logger.LogWarning("Packet type {Type} is missing a {AttributeTypeName}", packetType.Name, nameof(PacketAttribute));
-                    continue;
-                }
-
-                var subPacketDescription = packetType.GetCustomAttribute<SubPacketAttribute>();
-                if (subPacketDescription is not null)
-                {
-                    _listeners.Add((ushort)(packetDescription.Header << 8 | subPacketDescription.SubHeader), packetHandler);
-                }
-                else
-                {
-                    _listeners.Add(packetDescription.Header, packetHandler);
-                }
-            }
-        }
-
         public async override Task StopAsync(CancellationToken cancellationToken)
         {
-            _stoppingToken.Cancel();
+            await _stoppingToken.CancelAsync();
             await base.StopAsync(cancellationToken);
+            _stoppingToken.Dispose();
         }
     }
 }

@@ -46,17 +46,11 @@ const config = {
         docs: {
           routeBasePath: '/',
           sidebarPath: './sidebars.js',
-          // Please change this to your repo.
-          // Remove this to remove the "edit this page" links.
-          editUrl:
-            'https://github.com/MeikelLP/quantum-core-x/tree/master/docs',
+          editUrl: 'https://github.com/MeikelLP/quantum-core-x/tree/master/docs',
         },
         blog: {
           showReadingTime: true,
-          // Please change this to your repo.
-          // Remove this to remove the "edit this page" links.
-          editUrl:
-            'https://github.com/MeikelLP/quantum-core-x/tree/master/docs',
+          editUrl: 'https://github.com/MeikelLP/quantum-core-x/tree/master/docs',
         }
       }),
     ],
@@ -80,7 +74,7 @@ const config = {
             type: 'docSidebar',
             sidebarId: 'tutorialSidebar',
             position: 'left',
-            label: 'Guide',
+            label: 'Docs'
           },
           {to: '/blog', label: 'Blog', position: 'left'},
         ],
@@ -89,10 +83,10 @@ const config = {
         style: 'dark',
         links: [
           {
-            title: 'Docs',
+            title: 'Pages',
             items: [
               {
-                label: 'Guide',
+                label: 'Docs',
                 to: '/',
               },
             ],
