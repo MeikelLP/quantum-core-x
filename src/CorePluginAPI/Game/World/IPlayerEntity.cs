@@ -19,6 +19,7 @@ namespace QuantumCore.API.Game.World
         EAntiFlags AntiFlagGender { get; }
 
         Task Load();
+        Task ReloadPermissions();
         T? GetQuestInstance<T>() where T : class, IQuest;
         void Respawn(bool town);
         uint CalculateAttackDamage(uint baseDamage);

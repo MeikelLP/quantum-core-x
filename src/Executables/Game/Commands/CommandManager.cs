@@ -97,6 +97,12 @@ namespace QuantumCore.Game.Commands
             }
         }
 
+        public async Task ReloadAsync(CancellationToken token = default)
+        {
+            Groups.Clear();
+            await LoadAsync(token);
+        }
+
         public bool HavePerm(Guid group, string cmd)
         {
             if (!Groups.ContainsKey(group))
