@@ -1,6 +1,4 @@
-﻿using System.IO;
-using System.Threading.Tasks;
-using FluentAssertions;
+﻿using FluentAssertions;
 using QuantumCore.API.Game.World;
 using QuantumCore.Game.World;
 using Xunit;
@@ -71,14 +69,14 @@ public class ParserTests
     public async Task Group_Regular()
     {
         var input = new StringReader("""
-                                       Group	Test
-                                       {
-                                           Vnum	101
-                                           Leader	Test	101
-                                           1	Test	101
-                                           2	Test	101
-                                       }
-                                       """);
+                                     Group	Test
+                                     {
+                                         Vnum	101
+                                         Leader	Test	101
+                                         1	Test	101
+                                         2	Test	101
+                                     }
+                                     """);
         var result = await ParserUtils.GetSpawnGroupFromBlock(input);
 
         result.Should().BeEquivalentTo(new SpawnGroup
@@ -88,8 +86,8 @@ public class ParserTests
             Leader = 101,
             Members =
             {
-                new SpawnMember { Id = 101 },
-                new SpawnMember { Id = 101 }
+                new SpawnMember {Id = 101},
+                new SpawnMember {Id = 101}
             }
         });
     }
@@ -98,18 +96,18 @@ public class ParserTests
     public async Task Group_Whitespace()
     {
         var input = new StringReader("""
-                                       Group   GroupName
-                                       {
-                                       	Vnum    2430
-                                       		Leader  Leader    2493
-                                       		1   Mob1  2492
-                                       		2   Mob2  2414
-                                       		3   Mob2  2414
-                                       		4   Mob3  2411
-                                       		5   Mob3  2411
-                                       		6   Mob3  2411
-                                       }
-                                       """);
+                                     Group   GroupName
+                                     {
+                                     	Vnum    2430
+                                     		Leader  Leader    2493
+                                     		1   Mob1  2492
+                                     		2   Mob2  2414
+                                     		3   Mob2  2414
+                                     		4   Mob3  2411
+                                     		5   Mob3  2411
+                                     		6   Mob3  2411
+                                     }
+                                     """);
         var result = await ParserUtils.GetSpawnGroupFromBlock(input);
 
         result.Should().BeEquivalentTo(new SpawnGroup
@@ -119,12 +117,41 @@ public class ParserTests
             Leader = 2493,
             Members =
             {
-                new SpawnMember { Id = 2492 },
-                new SpawnMember { Id = 2414 },
-                new SpawnMember { Id = 2414 },
-                new SpawnMember { Id = 2411 },
-                new SpawnMember { Id = 2411 },
-                new SpawnMember { Id = 2411 }
+                new SpawnMember {Id = 2492},
+                new SpawnMember {Id = 2414},
+                new SpawnMember {Id = 2414},
+                new SpawnMember {Id = 2411},
+                new SpawnMember {Id = 2411},
+                new SpawnMember {Id = 2411}
+            }
+        });
+    }
+
+    [Fact]
+    public async Task Group_WhitespaceInsteadOfTab()
+    {
+        var input = new StringReader("""
+                                     Group	GroupName
+                                     {
+                                     	Vnum	2430
+                                     	Leader	Leader	2493
+                                     	1	Mob1	2447
+                                     	2	Mob2 2447
+                                     	3	Mob 3	2513
+                                     }
+                                     """);
+        var result = await ParserUtils.GetSpawnGroupFromBlock(input);
+
+        result.Should().BeEquivalentTo(new SpawnGroup
+        {
+            Name = "GroupName",
+            Id = 2430,
+            Leader = 2493,
+            Members =
+            {
+                new SpawnMember {Id = 2447},
+                new SpawnMember {Id = 2447},
+                new SpawnMember {Id = 2513}
             }
         });
     }
@@ -133,13 +160,13 @@ public class ParserTests
     public async Task GroupCollection_Regular()
     {
         var input = new StringReader("""
-                                       Group	a1_01		
-                                       {			
-                                       	Vnum	101	
-                                       	1	101	1
-                                       	2	171	1
-                                       }			
-                                       """);
+                                     Group	a1_01
+                                     {
+                                     	Vnum	101
+                                     	1	101	1
+                                     	2	171	1
+                                     }
+                                     """);
         var result = await ParserUtils.GetSpawnGroupCollectionFromBlock(input);
 
         result.Should().BeEquivalentTo(new SpawnGroupCollection
@@ -148,8 +175,8 @@ public class ParserTests
             Id = 101,
             Groups =
             {
-                new SpawnGroupCollectionMember { Id = 101, Amount = 1 },
-                new SpawnGroupCollectionMember { Id = 171, Amount = 1 }
+                new SpawnGroupCollectionMember {Id = 101, Amount = 1},
+                new SpawnGroupCollectionMember {Id = 171, Amount = 1}
             }
         });
     }
@@ -158,20 +185,20 @@ public class ParserTests
     public async Task GroupCollection_Multiple()
     {
         var input = new StringReader("""
-                                       Group	a1_01		
-                                       {			
-                                       	Vnum	101	
-                                       	1	101	1
-                                       	2	171	1
-                                       }			
-                                       			
-                                       Group	a1_02		
-                                       {			
-                                       	Vnum	102	
-                                       	1	102	1
-                                       	2	171	1
-                                       }			
-                                       """);
+                                     Group	a1_01
+                                     {
+                                     	Vnum	101
+                                     	1	101	1
+                                     	2	171	1
+                                     }
+                                     			
+                                     Group	a1_02
+                                     {
+                                     	Vnum	102
+                                     	1	102	1
+                                     	2	171	1
+                                     }
+                                     """);
         var result = await ParserUtils.GetSpawnGroupCollectionFromBlock(input);
 
         result.Should().BeEquivalentTo(new SpawnGroupCollection
@@ -180,8 +207,8 @@ public class ParserTests
             Id = 101,
             Groups =
             {
-                new SpawnGroupCollectionMember { Id = 101, Amount = 1 },
-                new SpawnGroupCollectionMember { Id = 171, Amount = 1 }
+                new SpawnGroupCollectionMember {Id = 101, Amount = 1},
+                new SpawnGroupCollectionMember {Id = 171, Amount = 1}
             }
         });
     }
@@ -190,15 +217,15 @@ public class ParserTests
     public async Task GroupCollection_EmptyLines()
     {
         var input = new StringReader("""
-                                       Group	a1_01		
-                                       {			
-                                       	Vnum	101	
-                                       	1	101	1
-                                       	2	171	1
-                                       }			
-                                       			
-                                       			
-                                       """);
+                                     Group	a1_01
+                                     {
+                                     	Vnum	101
+                                     	1	101	1
+                                     	2	171	1
+                                     }
+                                     			
+                                     			
+                                     """);
         var result = await ParserUtils.GetSpawnGroupCollectionFromBlock(input);
 
         result.Should().BeEquivalentTo(new SpawnGroupCollection
@@ -207,8 +234,8 @@ public class ParserTests
             Id = 101,
             Groups =
             {
-                new SpawnGroupCollectionMember { Id = 101, Amount = 1 },
-                new SpawnGroupCollectionMember { Id = 171, Amount = 1 }
+                new SpawnGroupCollectionMember {Id = 101, Amount = 1},
+                new SpawnGroupCollectionMember {Id = 171, Amount = 1}
             }
         });
     }
@@ -217,14 +244,14 @@ public class ParserTests
     public async Task GroupCollection_EmptyLinesInside()
     {
         var input = new StringReader("""
-                                       Group	a1_05		
-                                       {			
-                                       	Vnum	105	
-                                       			
-                                       	1	112	1
-                                       	2	113	1
-                                       }			
-                                       """);
+                                     Group	a1_05
+                                     {
+                                     	Vnum	105
+                                     			
+                                     	1	112	1
+                                     	2	113	1
+                                     }
+                                     """);
         var result = await ParserUtils.GetSpawnGroupCollectionFromBlock(input);
 
         result.Should().BeEquivalentTo(new SpawnGroupCollection
@@ -233,8 +260,31 @@ public class ParserTests
             Id = 105,
             Groups =
             {
-                new SpawnGroupCollectionMember { Id = 112, Amount = 1 },
-                new SpawnGroupCollectionMember { Id = 113, Amount = 1 }
+                new SpawnGroupCollectionMember {Id = 112, Amount = 1},
+                new SpawnGroupCollectionMember {Id = 113, Amount = 1}
+            }
+        });
+    }
+
+    [Fact]
+    public async Task GroupCollection_WithoutAmount()
+    {
+        var input = new StringReader("""
+                                     Group	a1_05
+                                     {
+                                     	Vnum	105
+                                     	1	112
+                                     }
+                                     """);
+        var result = await ParserUtils.GetSpawnGroupCollectionFromBlock(input);
+
+        result.Should().BeEquivalentTo(new SpawnGroupCollection
+        {
+            Name = "a1_05",
+            Id = 105,
+            Groups =
+            {
+                new SpawnGroupCollectionMember {Id = 112, Amount = 1}
             }
         });
     }
@@ -243,8 +293,8 @@ public class ParserTests
     public async Task GroupCollection_NoContent()
     {
         var input = new StringReader("""
-                                       			
-                                       """);
+                                     			
+                                     """);
         var result = await ParserUtils.GetSpawnGroupCollectionFromBlock(input);
 
         result.Should().BeNull();
