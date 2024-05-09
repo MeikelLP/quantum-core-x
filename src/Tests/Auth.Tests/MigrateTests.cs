@@ -51,7 +51,9 @@ public class MigrateTests
     [Fact]
     public async Task Sqlite()
     {
-        await ExecuteMigrate(DatabaseProvider.Sqlite, "Data Source=test.db;");
+        var fileName = $"{Guid.NewGuid()}.db";
+        await ExecuteMigrate(DatabaseProvider.Sqlite, $"Data Source={fileName};");
+        File.Delete(fileName);
         Assert.True(true);
     }
 

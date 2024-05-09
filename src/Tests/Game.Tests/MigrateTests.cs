@@ -50,12 +50,9 @@ public class MigrateTests
     [Fact]
     public async Task Sqlite()
     {
-        if (File.Exists("test.db"))
-        {
-            File.Delete("test.db");
-        }
-
-        await ExecuteMigrate(DatabaseProvider.Sqlite, "Data Source=test.db;");
+        var fileName = $"{Guid.NewGuid()}.db";
+        await ExecuteMigrate(DatabaseProvider.Sqlite, $"Data Source={fileName};");
+        File.Delete(fileName);
         Assert.True(true);
     }
 

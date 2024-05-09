@@ -9,7 +9,6 @@ using QuantumCore;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
 using QuantumCore.Auth.Persistence;
-using QuantumCore.Auth.Persistence.Entities;
 using QuantumCore.Auth.Persistence.Extensions;
 using QuantumCore.Caching;
 using QuantumCore.Caching.Extensions;
@@ -57,17 +56,9 @@ public class AccountManagerTests : IClassFixture<RedisFixture>, IClassFixture<Da
         _accountRepository = _scope.ServiceProvider.GetRequiredService<IAccountRepository>();
     }
 
-    public async Task InitializeAsync()
+    public Task InitializeAsync()
     {
-        var db = _scope.ServiceProvider.GetRequiredService<AuthDbContext>();
-        db.AccountStatus.Add(new AccountStatus
-        {
-            Description = "",
-            Id = 1,
-            AllowLogin = true,
-            ClientStatus = "OK"
-        });
-        await db.SaveChangesAsync();
+        return Task.CompletedTask;
     }
 
     public async Task DisposeAsync()
@@ -92,7 +83,7 @@ public class AccountManagerTests : IClassFixture<RedisFixture>, IClassFixture<Da
         {
             AccountStatus = new AccountStatusData
             {
-                Description = "",
+                Description = "Default Status",
                 Id = 1,
                 AllowLogin = true,
                 ClientStatus = "OK"
