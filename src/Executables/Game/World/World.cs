@@ -312,7 +312,16 @@ namespace QuantumCore.Game.World
 
         public IPlayerEntity? GetPlayer(string playerName)
         {
-            return _players.ContainsKey(playerName) ? _players[playerName] : null;
+            if (string.IsNullOrWhiteSpace(playerName))
+            {
+                return null;
+            }
+            return _players.TryGetValue(playerName, out var player) ? player : null;
+        }
+
+        public IList<IPlayerEntity> GetPlayers()
+        {
+            return _players.Values.ToList();
         }
     }
 }

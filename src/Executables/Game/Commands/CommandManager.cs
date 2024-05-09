@@ -128,6 +128,12 @@ namespace QuantumCore.Game.Commands
             await ParseGroup(Operator_Group, "Operator");
         }
 
+        public async Task ReloadAsync(CancellationToken token = default)
+        {
+            Groups.Clear();
+            await LoadAsync(token);
+        }
+
         public bool HavePerm(Guid group, string cmd)
         {
             if (!Groups.ContainsKey(group))

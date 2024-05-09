@@ -154,6 +154,12 @@ namespace QuantumCore.Game.World.Entities
 
             CalculateDefence();
         }
+        
+        public async Task ReloadPermissions()
+        {
+            Groups.Clear();
+            await LoadPermGroups();
+        }
 
         private async Task LoadPermGroups()
         {
