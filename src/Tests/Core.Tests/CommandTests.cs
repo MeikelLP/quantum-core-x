@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using NSubstitute;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
+using QuantumCore.API.Game;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.World;
 using QuantumCore.Caching;
@@ -286,6 +287,17 @@ public class CommandTests : IAsyncLifetime
             Count = 10
         }, cfg => cfg.Including(x => x.ItemId).Including(x => x.Count));
     }
+    
+    [Fact]
+    public async Task GiveItemCommand_InvalidPlayer()
+    {
+        await _commandManager.Handle(_connection, "/give missing 1 10");
+
+        ((MockedGameConnection)_connection).SentMessages.Should().ContainEquivalentOf(new ChatOutcoming
+        {
+            Message = "Target not found"
+        }, cfg => cfg.Including(x => x.Message));
+    }
 
     [Fact]
     public async Task GoldCommand_Self()
@@ -519,5 +531,41 @@ public class CommandTests : IAsyncLifetime
         var world = _services.GetRequiredService<IWorld>();
         await world.Load();
         return world;
+    }
+    
+    [Fact]
+    public async Task ReloadPermissionsCommand_WithoutTarget()
+    {
+        // Prepare
+        var updatedGroup = Guid.NewGuid();
+        var groupName = "test";
+        
+        var newPermissions = new[] { "reload_perms", "goto" };
+        _services.GetRequiredService<ICommandPermissionRepository>().GetPermissionsForGroupAsync(Arg.Any<Guid>()).Returns(newPermissions);
+        _services.GetRequiredService<ICommandPermissionRepository>().GetGroupsAsync().Returns(new[] { (updatedGroup, groupName) });
+        
+        _services.GetRequiredService<ICacheManager>().CreateList<Guid>(Arg.Any<string>())
+            .Range(0, 0).Returns(new[] { updatedGroup });
+        
+        // Act
+        await _commandManager.Handle(_connection, "/reload_perms");
+
+        // Assert
+        _commandManager.Groups.Keys.Should().Contain(updatedGroup);
+        _commandManager.Groups.Values.Should().ContainEquivalentOf(new PermissionGroup
+        {
+            Id = updatedGroup,
+            Name = groupName,
+            Permissions = newPermissions
+        });
+
+        await _commandManager.ReloadAsync();
+        
+        await _player.ReloadPermissions();
+        
+        ((MockedGameConnection)_connection).SentMessages.Should().ContainEquivalentOf(new ChatOutcoming
+        {
+            Message = "Permissions reloaded"
+        }, cfg => cfg.Including(x => x.Message));
     }
 }
