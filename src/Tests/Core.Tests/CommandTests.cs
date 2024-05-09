@@ -552,17 +552,19 @@ public class CommandTests : IAsyncLifetime
         var groupName = "test";
 
         var newPermissions = new[] {"reload_perms", "goto"};
-        _services.GetRequiredService<ICommandPermissionRepository>().GetPermissionsForGroupAsync(Arg.Any<Guid>())
-            .Returns(newPermissions);
-        _services.GetRequiredService<ICommandPermissionRepository>().GetGroupsAsync().Returns([
+        var cacheManager = _services.GetRequiredService<ICacheManager>();
+        var commandRepo = _services.GetRequiredService<ICommandPermissionRepository>();
+        commandRepo.GetPermissionsForGroupAsync(Arg.Any<Guid>()).Returns(newPermissions);
+        commandRepo.GetGroupsAsync().Returns([
             new PermissionGroup
             {
                 Id = updatedGroup,
-                Name = groupName
+                Name = groupName,
+                Permissions = newPermissions
             }
         ]);
 
-        _services.GetRequiredService<ICacheManager>().CreateList<Guid>(Arg.Any<string>())
+        cacheManager.CreateList<Guid>(Arg.Any<string>())
             .Range(0, 0).Returns(new[] {updatedGroup});
 
         // Act
