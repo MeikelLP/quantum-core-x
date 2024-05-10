@@ -54,6 +54,7 @@ namespace QuantumCore.Game.World
             {
                 _groups[g.Id] = g;
             }
+
             var spawnGroups = await _spawnGroupProvider.GetSpawnGroupCollectionsAsync();
             foreach (var g in spawnGroups)
             {
@@ -81,6 +82,7 @@ namespace QuantumCore.Game.World
                     }
                 }
             }
+
             await LoadRemoteMaps();
 
             // Initialize maps, spawn monsters etc
@@ -99,7 +101,7 @@ namespace QuantumCore.Game.World
             if (shops is null) return;
             foreach (var shopDef in shops)
             {
-                var shop = new Shop (_itemManager, _logger);
+                var shop = new Shop(_itemManager, _logger);
 
                 _staticShops[shopDef.Id] = shop;
 
@@ -134,7 +136,8 @@ namespace QuantumCore.Game.World
                 remoteMap.Host = IPAddress.Parse(parts[0]);
                 remoteMap.Port = ushort.Parse(parts[1]);
 
-                _logger.LogDebug("Map {Name} is available at {Host}:{Port}", remoteMap.Name, remoteMap.Host, remoteMap.Port);
+                _logger.LogDebug("Map {Name} is available at {Host}:{Port}", remoteMap.Name, remoteMap.Host,
+                    remoteMap.Port);
             }
 
             _mapSubscriber = _cacheManager.Subscribe();
@@ -156,7 +159,8 @@ namespace QuantumCore.Game.World
                 remoteMap.Host = IPAddress.Parse(parts[0]);
                 remoteMap.Port = ushort.Parse(parts[1]);
 
-                _logger.LogDebug("Map {Name} is now available at {Host}:{Port}", remoteMap.Name, remoteMap.Host, remoteMap.Port);
+                _logger.LogDebug("Map {Name} is now available at {Host}:{Port}", remoteMap.Name, remoteMap.Host,
+                    remoteMap.Port);
             });
 
             _mapSubscriber.Listen();
@@ -202,6 +206,7 @@ namespace QuantumCore.Game.World
                     list.Add(map);
                 }
             }
+
             return list;
         }
 
@@ -218,7 +223,8 @@ namespace QuantumCore.Game.World
             {
                 if (remoteMap.Host is null)
                 {
-                    _logger.LogCritical("Remote maps IP is null. This should never happen. Name: {MapName}", remoteMap.Name);
+                    _logger.LogCritical("Remote maps IP is null. This should never happen. Name: {MapName}",
+                        remoteMap.Name);
                     throw new InvalidOperationException("Cannot handle this situation. See logs.");
                 }
 
@@ -242,6 +248,7 @@ namespace QuantumCore.Game.World
             {
                 return null;
             }
+
             return _groups[id];
         }
 
@@ -251,6 +258,7 @@ namespace QuantumCore.Game.World
             {
                 return null;
             }
+
             return _groupCollections[id];
         }
 
@@ -259,7 +267,8 @@ namespace QuantumCore.Game.World
             var map = GetMapAt((uint) e.PositionX, (uint) e.PositionY);
             if (map == null)
             {
-                _logger.LogWarning("Could not spawn entity at ({X};{Y}) No Map found for this coordinate", e.PositionX, e.PositionY);
+                _logger.LogWarning("Could not spawn entity at ({X};{Y}) No Map found for this coordinate", e.PositionX,
+                    e.PositionY);
                 return;
             }
 
@@ -272,7 +281,8 @@ namespace QuantumCore.Game.World
             if (e is IPlayerEntity player)
             {
                 AddPlayer(player);
-                _logger.LogInformation("Player {PlayerName} ({PlayerId}) joined the map {MapName}", player.Name, player.Vid, map.Name);
+                _logger.LogInformation("Player {PlayerName} ({PlayerId}) joined the map {MapName}", player.Name,
+                    player.Vid, map.Name);
             }
 
             _pluginExecutor.ExecutePlugins<IGameEntityLifetimeListener>(_logger, x => x.OnPreCreatedAsync()).Wait();
@@ -289,6 +299,16 @@ namespace QuantumCore.Game.World
 
             _pluginExecutor.ExecutePlugins<IGameEntityLifetimeListener>(_logger, x => x.OnPreDeletedAsync()).Wait();
             entity.Map?.DespawnEntity(entity);
+            _pluginExecutor.ExecutePlugins<IGameEntityLifetimeListener>(_logger, x => x.OnPostDeletedAsync()).Wait();
+        }
+
+        public async Task DespawnPlayerAsync(IPlayerEntity player)
+        {
+            RemovePlayer(player);
+            await player.OnDespawnAsync();
+
+            _pluginExecutor.ExecutePlugins<IGameEntityLifetimeListener>(_logger, x => x.OnPreDeletedAsync()).Wait();
+            player.Map?.DespawnEntity(player);
             _pluginExecutor.ExecutePlugins<IGameEntityLifetimeListener>(_logger, x => x.OnPostDeletedAsync()).Wait();
         }
 
@@ -316,6 +336,7 @@ namespace QuantumCore.Game.World
             {
                 return null;
             }
+
             return _players.TryGetValue(playerName, out var player) ? player : null;
         }
 
