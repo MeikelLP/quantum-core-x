@@ -68,7 +68,7 @@ internal class MockedGameConnection : IGameConnection
         return Task.CompletedTask;
     }
 
-    public IServerBase Server { get; } = null!;
+    public IServerBase Server { get; } = Substitute.For<IServerBase>();
     public Guid? AccountId { get; set; } = Guid.NewGuid();
     public string Username { get; set; } = "";
     public IPlayerEntity? Player { get; set; }
@@ -446,9 +446,13 @@ public class CommandTests : IAsyncLifetime
         world.SpawnEntity(_player);
 
         world.GetPlayer(_player.Name).Should().NotBeNull();
+        
+        _player.Player.PlayTime = 10;
+        _connection.Server.ServerTime.Returns(60000);
 
         await _commandManager.Handle(_connection, "/logout");
 
+        _player.GetPoint(EPoints.PlayTime).Should().Be(11);
         world.GetPlayer(_player.Name).Should().BeNull();
     }
 
@@ -463,9 +467,13 @@ public class CommandTests : IAsyncLifetime
         {
             Phase = EPhases.Select
         });
+        
+        _player.Player.PlayTime = 0;
+        _connection.Server.ServerTime.Returns(60000);
 
         await _commandManager.Handle(_connection, "/phase_select");
 
+        _player.GetPoint(EPoints.PlayTime).Should().Be(1);
         _player.Connection.Phase.Should().Be(EPhases.Select);
         (_connection as MockedGameConnection).SentPhases.Should().ContainEquivalentOf(new GCPhase
         {
