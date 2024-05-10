@@ -13,6 +13,10 @@
     </ItemGroup>
 
     <ItemGroup>
+        <InternalsVisibleTo Include="Game.Tests"/>
+    </ItemGroup>
+
+    <ItemGroup>
       <ProjectReference Include="..\..\Core\Core.csproj" />
       <ProjectReference Include="..\..\Data\Game.Caching\Game.Caching.csproj" />
       <ProjectReference Include="..\..\Data\Game.Persistence\Game.Persistence.csproj" />

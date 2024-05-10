@@ -492,6 +492,7 @@ namespace QuantumCore.Game.World.Entities
                         return;
                     }
 
+                    var before = Player.Experience;
                     if (value < 0 && Player.Experience <= -value)
                     {
                         Player.Experience = 0;
@@ -503,6 +504,18 @@ namespace QuantumCore.Game.World.Entities
 
                     if (value > 0)
                     {
+                        var partialLevelUps = CalcPartialLevelUps(before, GetPoint(EPoints.Experience),
+                            GetPoint(EPoints.NeededExperience));
+                        if (partialLevelUps > 0)
+                        {
+                            Health = Player.MaxHp;
+                            Mana = Player.MaxSp;
+                            for (var i = 0; i < partialLevelUps; i++)
+                            {
+                                GiveStatusPoints();
+                            }
+                        }
+
                         CheckLevelUp();
                     }
 
@@ -564,6 +577,18 @@ namespace QuantumCore.Game.World.Entities
                     _logger.LogError("Failed to add point to {Point}, unsupported", point);
                     break;
             }
+        }
+
+        internal static int CalcPartialLevelUps(uint before, uint after, uint requiredForNextLevel)
+        {
+            if (after >= requiredForNextLevel) return 0;
+
+            const int CHUNK_AMOUNT = 4;
+            var chunk = requiredForNextLevel / CHUNK_AMOUNT;
+            var beforeChunk = (int) (before / (float) chunk);
+            var afterChunk = (int) (after / (float) chunk);
+
+            return afterChunk - beforeChunk;
         }
 
         public override void SetPoint(EPoints point, uint value)
