@@ -26,12 +26,14 @@ public static class ServiceExtensions
         services.AddGameDatabase();
         services.AddGameCaching();
         services.AddOptions<AuthOptions>().BindConfiguration("Auth");
+        services.AddOptions<GameOptions>().BindConfiguration("Game");
         services.AddHttpClient("", (provider, http) =>
         {
             var options = provider.GetRequiredService<IOptions<AuthOptions>>().Value;
             http.BaseAddress = new Uri(options.BaseUrl);
         });
         services.AddScoped<IPlayerManager, PlayerManager>();
+        services.AddSingleton<IPlayerFactory, PlayerFactory>();
         services.AddSingleton<ISpawnGroupProvider, SpawnGroupProvider>();
         services.AddSingleton<ISpawnPointProvider, SpawnPointProvider>();
         services.AddSingleton<IItemManager, ItemManager>();

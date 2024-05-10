@@ -1,26 +1,24 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.PluginTypes;
 using QuantumCore.Extensions;
 using QuantumCore.Game.Packets;
-using QuantumCore.Game.World.Entities;
 
 namespace QuantumCore.Game.PacketHandlers.Select;
 
 public class SelectGameCharacterHandler : IGamePacketHandler<SelectCharacter>
 {
     private readonly ILogger<SelectGameCharacterHandler> _logger;
-    private readonly IServiceProvider _provider;
     private readonly IPlayerManager _playerManager;
+    private readonly IPlayerFactory _playerFactory;
 
-    public SelectGameCharacterHandler(ILogger<SelectGameCharacterHandler> logger, IServiceProvider provider,
-        IPlayerManager playerManager)
+    public SelectGameCharacterHandler(ILogger<SelectGameCharacterHandler> logger,
+        IPlayerManager playerManager, IPlayerFactory playerFactory)
     {
         _logger = logger;
-        _provider = provider;
         _playerManager = playerManager;
+        _playerFactory = playerFactory;
     }
 
     public async Task ExecuteAsync(GamePacketContext<SelectCharacter> ctx, CancellationToken token = default)
@@ -46,8 +44,7 @@ public class SelectGameCharacterHandler : IGamePacketHandler<SelectCharacter>
             throw new InvalidOperationException("Player was not found. This should never happen at this point");
         }
 
-        var entity = ActivatorUtilities.CreateInstance<PlayerEntity>(_provider, ctx.Connection, player);
-        await entity.Load();
+        var entity = await _playerFactory.CreatePlayerAsync(ctx.Connection, player);
 
         ctx.Connection.Player = entity;
 

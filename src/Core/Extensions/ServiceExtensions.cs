@@ -21,7 +21,8 @@ public static class ServiceExtensions
     /// <param name="services"></param>
     /// <param name="pluginCatalog"></param>
     /// <returns></returns>
-    public static IServiceCollection AddCoreServices(this IServiceCollection services, IPluginCatalog pluginCatalog, IConfiguration configuration)
+    public static IServiceCollection AddCoreServices(this IServiceCollection services, IPluginCatalog pluginCatalog,
+        IConfiguration configuration)
     {
         services.AddOptions<HostingOptions>()
             .BindConfiguration("Hosting")
@@ -37,10 +38,10 @@ public static class ServiceExtensions
             var handlerTypes = AppDomain.CurrentDomain.GetAssemblies().SelectMany(x => x.ExportedTypes)
                 .Where(x =>
                     x.IsAssignableTo(typeof(IPacketHandler)) &&
-                    x is { IsClass: true, IsAbstract: false, IsInterface: false })
+                    x is {IsClass: true, IsAbstract: false, IsInterface: false})
                 .OrderBy(x => x.FullName)
                 .ToArray();
-            return ActivatorUtilities.CreateInstance<PacketManager>(provider, new object[] { (IEnumerable<Type>)packetTypes, handlerTypes });
+            return ActivatorUtilities.CreateInstance<PacketManager>(provider, [packetTypes, handlerTypes]);
         });
         services.AddSingleton<IPacketReader, PacketReader>();
         services.AddSingleton<PluginExecutor>();

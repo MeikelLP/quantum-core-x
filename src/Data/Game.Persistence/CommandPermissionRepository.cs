@@ -8,6 +8,7 @@ public interface ICommandPermissionRepository
     Task<IEnumerable<string>> GetPermissionsForGroupAsync(Guid groupId);
     Task<IEnumerable<Guid>> GetPlayerIdsInGroupAsync(Guid groupId);
     Task<IEnumerable<PermissionGroup>> GetGroupsAsync();
+    Task<IEnumerable<Guid>> GetGroupsForPlayer(Guid playerId);
 }
 
 public class CommandPermissionRepository : ICommandPermissionRepository
@@ -17,6 +18,14 @@ public class CommandPermissionRepository : ICommandPermissionRepository
     public CommandPermissionRepository(GameDbContext db)
     {
         _db = db;
+    }
+
+    public async Task<IEnumerable<Guid>> GetGroupsForPlayer(Guid playerId)
+    {
+        return await _db.PermissionUsers
+            .Where(x => x.PlayerId == playerId)
+            .Select(x => x.GroupId)
+            .ToArrayAsync();
     }
 
     public async Task<IEnumerable<string>> GetPermissionsForGroupAsync(Guid groupId)

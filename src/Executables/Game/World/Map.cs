@@ -66,7 +66,8 @@ namespace QuantumCore.Game.World
 
         public async Task Initialize()
         {
-            _logger.LogDebug("Load map {Name} at {PositionX}|{PositionY} (size {Width}x{Height})", Name, PositionX, PositionY, Width, Height);
+            _logger.LogDebug("Load map {Name} at {PositionX}|{PositionY} (size {Width}x{Height})", Name, PositionX,
+                PositionY, Width, Height);
 
             await _cacheManager.Set($"maps:{Name}", $"{IpUtils.PublicIP}:{_options.Port}");
             await _cacheManager.Publish("maps", $"{Name} {IpUtils.PublicIP}:{_options.Port}");
@@ -76,9 +77,9 @@ namespace QuantumCore.Game.World
             _logger.LogDebug("Loaded {SpawnPointsCount} spawn points for map {MapName}", _spawnPoints.Count, Name);
 
             // Populate map
-            foreach(var spawnPoint in _spawnPoints)
+            foreach (var spawnPoint in _spawnPoints)
             {
-                var monsterGroup = new MonsterGroup { SpawnPoint = spawnPoint };
+                var monsterGroup = new MonsterGroup {SpawnPoint = spawnPoint};
                 SpawnGroup(monsterGroup);
             }
         }
@@ -117,6 +118,10 @@ namespace QuantumCore.Game.World
                 _entities.Remove(entity);
 
                 entity.OnDespawn();
+                if (entity is IDisposable dis)
+                {
+                    dis.Dispose();
+                }
 
                 // Remove this entity from all nearby entities
                 foreach (var e in entity.NearbyEntities)
@@ -217,6 +222,7 @@ namespace QuantumCore.Game.World
                             }
                         }
                     }
+
                     break;
                 case ESpawnPointType.Group:
                 {
@@ -269,15 +275,18 @@ namespace QuantumCore.Game.World
             {
                 baseX += RandomNumberGenerator.GetInt32(-spawnPoint.RangeX, spawnPoint.RangeY);
             }
+
             if (spawnPoint.RangeY != 0)
             {
                 baseY += RandomNumberGenerator.GetInt32(-spawnPoint.RangeX, spawnPoint.RangeY);
             }
 
             var monster = new MonsterEntity(_monsterManager, _animationManager, _world, _logger, id,
-                (int)(PositionX + (baseX + RandomNumberGenerator.GetInt32(-SPAWN_BASE_OFFSET, SPAWN_BASE_OFFSET)) * SPAWN_POSITION_MULTIPLIER),
-                (int)(PositionY + (baseY + RandomNumberGenerator.GetInt32(-SPAWN_BASE_OFFSET, SPAWN_BASE_OFFSET)) * SPAWN_POSITION_MULTIPLIER),
-                    RandomNumberGenerator.GetInt32(0, 360));
+                (int) (PositionX + (baseX + RandomNumberGenerator.GetInt32(-SPAWN_BASE_OFFSET, SPAWN_BASE_OFFSET)) *
+                    SPAWN_POSITION_MULTIPLIER),
+                (int) (PositionY + (baseY + RandomNumberGenerator.GetInt32(-SPAWN_BASE_OFFSET, SPAWN_BASE_OFFSET)) *
+                    SPAWN_POSITION_MULTIPLIER),
+                RandomNumberGenerator.GetInt32(0, 360));
             _world.SpawnEntity(monster);
             return monster;
         }
@@ -296,7 +305,8 @@ namespace QuantumCore.Game.World
 
         public bool IsPositionInside(int x, int y)
         {
-            return x >= PositionX && x < PositionX + Width * MapUnit && y >= PositionY && y < PositionY + Height * MapUnit;
+            return x >= PositionX && x < PositionX + Width * MapUnit && y >= PositionY &&
+                   y < PositionY + Height * MapUnit;
         }
 
         public void SpawnEntity(IEntity entity)
@@ -313,7 +323,8 @@ namespace QuantumCore.Game.World
         /// <param name="amount">Only used for gold as we have a higher limit here</param>
         public void AddGroundItem(ItemInstance item, int x, int y, uint amount = 0)
         {
-            var groundItem = new GroundItem(_animationManager, _world.GenerateVid(), item, amount) {
+            var groundItem = new GroundItem(_animationManager, _world.GenerateVid(), item, amount)
+            {
                 PositionX = x,
                 PositionY = y
             };
