@@ -115,10 +115,10 @@ internal static partial class ParserUtils
     {
         if (line.Contains('\t'))
         {
-            return line.Split('\t');
+            return line.Split('\t', StringSplitOptions.RemoveEmptyEntries);
         }
 
-        return line.Split(' ');
+        return line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
     }
 
     [GeneratedRegex("(?: {2,}|\\t+)")]
