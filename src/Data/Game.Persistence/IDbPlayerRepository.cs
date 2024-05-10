@@ -10,4 +10,5 @@ public interface IDbPlayerRepository : IPlayerRepository
     Task CreateAsync(PlayerData player);
     Task DeletePlayerAsync(PlayerData player);
     Task UpdateEmpireAsync(Guid accountId, Guid playerId, byte empire);
+    Task SetPlayerAsync(PlayerData data);
 }

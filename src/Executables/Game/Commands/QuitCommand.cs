@@ -18,7 +18,7 @@ namespace QuantumCore.Game.Commands
         {
             context.Player.SendChatInfo("End the game. Please wait.");
             context.Player.SendChatCommand("quit");
-            _world.DespawnEntity(context.Player);
+            _world.DespawnPlayerAsync(context.Player);
             context.Player.Disconnect();
 
             return Task.CompletedTask;

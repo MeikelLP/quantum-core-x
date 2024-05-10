@@ -25,7 +25,7 @@ namespace QuantumCore.Game.Commands
             var target = _world.GetPlayer(context.Arguments.Target);
             if (target is not null)
             {
-                _world.DespawnEntity(target);
+                _world.DespawnPlayerAsync(target);
                 target.Disconnect();
             }
             else
@@ -39,7 +39,6 @@ namespace QuantumCore.Game.Commands
 
     public class KickCommandOptions
     {
-        [Value(0, Required = true)]
-        public string? Target { get; set; }
+        [Value(0, Required = true)] public string? Target { get; set; }
     }
 }

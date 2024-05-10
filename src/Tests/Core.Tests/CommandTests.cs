@@ -69,7 +69,7 @@ internal class MockedGameConnection : IGameConnection
     }
 
     public IServerBase Server { get; } = null!;
-    public Guid? AccountId { get; set; }
+    public Guid? AccountId { get; set; } = Guid.NewGuid();
     public string Username { get; set; } = "";
     public IPlayerEntity? Player { get; set; }
 
@@ -155,6 +155,7 @@ public class CommandTests : IAsyncLifetime
                     {"maps:1", "map_b2"}
                 })
                 .Build())
+            .AddSingleton(Substitute.For<IDbPlayerRepository>())
             .AddSingleton<IGameConnection>(_ => new MockedGameConnection())
             .AddSingleton<IPlayerEntity, PlayerEntity>()
             .AddSingleton(_ => _playerDataFaker.Generate())
