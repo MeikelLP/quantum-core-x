@@ -33,4 +33,5 @@ public interface IPlayerManager
 
     Task DeletePlayerAsync(PlayerData player);
     Task SetPlayerEmpireAsync(Guid accountId, Guid playerId, byte empire);
+    Task SetPlayerAsync(PlayerData data);
 }

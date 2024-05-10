@@ -86,7 +86,7 @@ namespace QuantumCore.Game.World.Entities
         private byte _attackSpeed = 140;
         private uint _defence;
 
-        private const int PersistInterval = 1000;
+        private const int PersistInterval = 30 * 1000; // 30s
         private int _persistTime = 0;
         private const int HealthRegenInterval = 3 * 1000;
         private const int ManaRegenInterval = 3 * 1000;
@@ -209,7 +209,6 @@ namespace QuantumCore.Game.World.Entities
 
             var host = _world.GetMapHost(PositionX, PositionY);
 
-            Persist().Wait(); // TODO
             _logger.LogInformation("Warp!");
             var packet = new Warp
             {
@@ -669,7 +668,8 @@ namespace QuantumCore.Game.World.Entities
             Player.PositionX = PositionX;
             Player.PositionY = PositionY;
 
-            await _cacheManager.Set($"player:{Player.Id}", Player);
+            var playerManager = _scope.ServiceProvider.GetRequiredService<IPlayerManager>();
+            await playerManager.SetPlayerAsync(Player);
         }
 
         protected override void OnNewNearbyEntity(IEntity entity)
@@ -765,9 +765,16 @@ namespace QuantumCore.Game.World.Entities
                 amount); // todo add method to IMap interface when we have an item interface...
         }
 
+        /// <summary>
+        /// Does nothing - if you want to persist the player use <see cref="OnDespawnAsync"/>
+        /// </summary>
         public override void OnDespawn()
         {
-            Persist().Wait(); // TODO
+        }
+
+        public async Task OnDespawnAsync()
+        {
+            await Persist();
         }
 
         public ItemInstance? GetItem(byte window, ushort position)
