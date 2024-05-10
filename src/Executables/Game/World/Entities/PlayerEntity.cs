@@ -147,6 +147,8 @@ namespace QuantumCore.Game.World.Entities
         {
             await Inventory.Load();
             await QuickSlotBar.Load();
+            Player.MaxHp = GetMaxHp(_jobManager, Player.PlayerClass, Player.Level, Player.Ht);
+            Player.MaxSp = GetMaxSp(_jobManager, Player.PlayerClass, Player.Level, Player.Iq);
             Health = (int) GetPoint(EPoints.MaxHp); // todo: cache hp of player
             Mana = (int) GetPoint(EPoints.MaxSp);
             await LoadPermGroups();
