@@ -28,6 +28,8 @@ namespace QuantumCore.Game.World.Entities
         public IQuickSlotBar QuickSlotBar { get; }
         public IQuest? CurrentQuest { get; set; }
         public Dictionary<string, IQuest> Quests { get; } = new();
+        
+        public long LoggedInTime { get; set; }
 
         public override byte HealthPercentage
         {
@@ -555,6 +557,9 @@ namespace QuantumCore.Game.World.Entities
                 case EPoints.StatusPoints:
                     Player.AvailableStatusPoints += (uint) value;
                     break;
+                case EPoints.PlayTime:
+                    Player.PlayTime += (uint) value;
+                    break;
                 default:
                     _logger.LogError("Failed to add point to {Point}, unsupported", point);
                     break;
@@ -583,6 +588,9 @@ namespace QuantumCore.Game.World.Entities
                     break;
                 case EPoints.Gold:
                     Player.Gold = value;
+                    break;
+                case EPoints.PlayTime:
+                    Player.PlayTime = value;
                     break;
                 default:
                     _logger.LogError("Failed to set point to {Point}, unsupported", point);
@@ -652,6 +660,8 @@ namespace QuantumCore.Game.World.Entities
                     return _defence;
                 case EPoints.StatusPoints:
                     return Player.AvailableStatusPoints;
+                case EPoints.PlayTime:
+                    return Player.PlayTime;
                 default:
                     if (Enum.GetValues<EPoints>().Contains(point))
                     {

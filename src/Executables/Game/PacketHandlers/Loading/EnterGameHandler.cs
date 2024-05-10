@@ -35,6 +35,7 @@ namespace QuantumCore.Game.PacketHandlers.Loading
             ctx.Connection.Send(new GameTime { Time = (uint) ctx.Connection.Server.ServerTime });
             ctx.Connection.Send(new Channel { ChannelNo = 1 }); // todo
 
+            player.LoggedInTime = ctx.Connection.Server.ServerTime;
             player.ShowEntity(ctx.Connection);
             _world.SpawnEntity(player);
 

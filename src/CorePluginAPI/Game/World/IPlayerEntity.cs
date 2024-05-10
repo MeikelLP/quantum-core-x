@@ -1,4 +1,4 @@
-﻿using QuantumCore.API.Core.Models;
+using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game.Types;
 
 namespace QuantumCore.API.Game.World
@@ -17,6 +17,7 @@ namespace QuantumCore.API.Game.World
         Dictionary<string, IQuest> Quests { get; }
         EAntiFlags AntiFlagClass { get; }
         EAntiFlags AntiFlagGender { get; }
+        long LoggedInTime { get; set; }
 
         Task Load();
         Task ReloadPermissions();

@@ -21,10 +21,19 @@ namespace QuantumCore.Game.Commands
             context.Player.SendChatInfo("Going back to character selection. Please wait.");
 
             // todo implement wait
+            
+            // Calculate session time
+            var sessionTimeMillis = context.Player.Connection.Server.ServerTime - context.Player.LoggedInTime;
+            var minutes = sessionTimeMillis / 60000; // milliseconds to minutes
+            
+            context.Player.AddPoint(EPoints.PlayTime, (int) minutes);
+            
+            // todo implement persist
 
             // Despawn player
             _world.DespawnEntity(context.Player);
             context.Player.Connection.SetPhase(EPhases.Select);
+            
             return Task.CompletedTask;
         }
     }
