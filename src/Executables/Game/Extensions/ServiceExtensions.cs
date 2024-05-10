@@ -26,6 +26,7 @@ public static class ServiceExtensions
         services.AddGameDatabase();
         services.AddGameCaching();
         services.AddOptions<AuthOptions>().BindConfiguration("Auth");
+        services.AddOptions<GameOptions>().BindConfiguration("Game");
         services.AddHttpClient("", (provider, http) =>
         {
             var options = provider.GetRequiredService<IOptions<AuthOptions>>().Value;

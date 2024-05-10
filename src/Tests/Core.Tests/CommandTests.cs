@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using NSubstitute;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
@@ -15,6 +16,7 @@ using QuantumCore.API.Game.World;
 using QuantumCore.Caching;
 using QuantumCore.Core.Packets;
 using QuantumCore.Extensions;
+using QuantumCore.Game;
 using QuantumCore.Game.Commands;
 using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Packets;
@@ -586,6 +588,23 @@ public class CommandTests : IAsyncLifetime
         ((MockedGameConnection) _connection).SentMessages.Should().ContainEquivalentOf(new ChatOutcoming
         {
             Message = "Permissions reloaded"
+        }, cfg => cfg.Including(x => x.Message));
+    }
+    
+    [Fact]
+    public async Task InGameShopCommand()
+    {
+        // Prepare
+        _services.GetRequiredService<IOptions<GameOptions>>().Value.InGameShop = "test";
+        
+        // Act
+        await _commandManager.Handle(_connection, "/in_game_mall");
+
+        // Assert
+        ((MockedGameConnection) _connection).SentMessages.Should().ContainEquivalentOf(new ChatOutcoming
+        {
+            Message = "mall test",
+            MessageType = ChatMessageTypes.Command
         }, cfg => cfg.Including(x => x.Message));
     }
 }
