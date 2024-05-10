@@ -17,7 +17,7 @@ namespace QuantumCore.Game.Commands
         public Task ExecuteAsync(CommandContext context)
         {
             context.Player.SendChatInfo("Logging out. Please wait.");
-            _world.DespawnEntity(context.Player);
+            _world.DespawnPlayerAsync(context.Player);
             context.Player.Disconnect();
             return Task.CompletedTask;
         }

@@ -73,6 +73,36 @@ public class DbPlayerRepository : IDbPlayerRepository
             .ExecuteUpdateAsync(setters => setters.SetProperty(x => x.Empire, empire));
     }
 
+    public async Task SetPlayerAsync(PlayerData data)
+    {
+        var entity = await _db.Players.FirstOrDefaultAsync(x => x.Id == data.Id);
+        if (entity is null) return;
+
+        entity.Empire = data.Empire;
+        entity.PlayerClass = data.PlayerClass;
+        entity.SkillGroup = data.SkillGroup;
+        entity.PlayTime = data.PlayTime;
+        entity.Level = data.Level;
+        entity.Experience = data.Experience;
+        entity.Gold = data.Gold;
+        entity.St = data.St;
+        entity.Ht = data.Ht;
+        entity.Dx = data.Dx;
+        entity.Iq = data.Iq;
+        entity.PositionX = data.PositionX;
+        entity.PositionY = data.PositionY;
+        entity.Health = data.Health;
+        entity.Mana = data.Mana;
+        entity.Stamina = data.Stamina;
+        entity.BodyPart = data.BodyPart;
+        entity.HairPart = data.HairPart;
+        entity.Name = data.Name;
+        entity.GivenStatusPoints = data.GivenStatusPoints;
+        entity.AvailableStatusPoints = data.AvailableStatusPoints;
+
+        await _db.SaveChangesAsync();
+    }
+
     public async Task<PlayerData?> GetPlayerAsync(Guid playerId)
     {
         return await _db.Players

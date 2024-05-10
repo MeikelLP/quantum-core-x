@@ -50,5 +50,6 @@ namespace QuantumCore.API.Game.World
         void SendTarget();
         void Disconnect();
         string ToString();
+        Task OnDespawnAsync();
     }
 }
