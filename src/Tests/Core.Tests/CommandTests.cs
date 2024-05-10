@@ -134,7 +134,12 @@ public class CommandTests : IAsyncLifetime
             .Replace(new ServiceDescriptor(typeof(IItemRepository), _ => Substitute.For<IItemRepository>(),
                 ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(ICommandPermissionRepository),
-                _ => Substitute.For<ICommandPermissionRepository>(), ServiceLifetime.Singleton))
+                _ =>
+                {
+                    var mock = Substitute.For<ICommandPermissionRepository>();
+                    mock.GetGroupsForPlayer(Arg.Any<Guid>()).Returns([PermGroup.OperatorGroup]);
+                    return mock;
+                }, ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(IPlayerRepository), _ => Substitute.For<IPlayerRepository>(),
                 ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(IMonsterManager), _ => monsterManagerMock, ServiceLifetime.Singleton))
@@ -590,13 +595,13 @@ public class CommandTests : IAsyncLifetime
             Message = "Permissions reloaded"
         }, cfg => cfg.Including(x => x.Message));
     }
-    
+
     [Fact]
     public async Task InGameShopCommand()
     {
         // Prepare
         _services.GetRequiredService<IOptions<GameOptions>>().Value.InGameShop = "test";
-        
+
         // Act
         await _commandManager.Handle(_connection, "/in_game_mall");
 
