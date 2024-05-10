@@ -33,6 +33,7 @@ public static class ServiceExtensions
             http.BaseAddress = new Uri(options.BaseUrl);
         });
         services.AddScoped<IPlayerManager, PlayerManager>();
+        services.AddSingleton<IPlayerFactory, PlayerFactory>();
         services.AddSingleton<ISpawnGroupProvider, SpawnGroupProvider>();
         services.AddSingleton<ISpawnPointProvider, SpawnPointProvider>();
         services.AddSingleton<IItemManager, ItemManager>();
