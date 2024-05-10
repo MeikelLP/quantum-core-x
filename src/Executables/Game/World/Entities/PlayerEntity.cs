@@ -812,6 +812,16 @@ namespace QuantumCore.Game.World.Entities
             await Persist();
         }
 
+        public async Task CalculatePlayedTimeAsync()
+        {
+            var key = $"player:{Player.Id}:loggedInTime";
+            var startSessionTime = await _cacheManager.Get<long>(key);
+            var sessionTimeMillis = Connection.Server.ServerTime - startSessionTime;
+            var minutes = sessionTimeMillis / 60000; // milliseconds to minutes
+            
+            AddPoint(EPoints.PlayTime, (int) minutes);
+        }
+
         public ItemInstance? GetItem(byte window, ushort position)
         {
             switch (window)

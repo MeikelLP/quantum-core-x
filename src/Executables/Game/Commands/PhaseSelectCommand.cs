@@ -7,7 +7,6 @@ using QuantumCore.Caching;
 using QuantumCore.Extensions;
 using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Packets;
-using QuantumCore.Game.Persistence;
 
 namespace QuantumCore.Game.Commands
 {
@@ -16,13 +15,13 @@ namespace QuantumCore.Game.Commands
     public class PhaseSelectCommand : ICommandHandler
     {
         private readonly IWorld _world;
-        private readonly IServiceProvider _provider;
+        private readonly IServiceProvider _serviceProvider;
         private readonly ICacheManager _cache;
 
-        public PhaseSelectCommand(IWorld world, IServiceProvider provider, ICacheManager cache)
+        public PhaseSelectCommand(IWorld world, IServiceProvider serviceProvider, ICacheManager cache)
         {
             _world = world;
-            _provider = provider;
+            _serviceProvider = serviceProvider;
             _cache = cache;
         }
 
@@ -34,18 +33,8 @@ namespace QuantumCore.Game.Commands
 
             // todo implement wait
             
-            // Calculate session time
-            var key = $"player:{context.Player.Player.Id}:loggedInTime";
-            var startSessionTime = await _cache.Get<long>(key);
+            await context.Player.CalculatePlayedTimeAsync();
             
-            var sessionTimeMillis = context.Player.Connection.Server.ServerTime - startSessionTime;
-            var minutes = sessionTimeMillis / 60000; // milliseconds to minutes
-            
-            context.Player.AddPoint(EPoints.PlayTime, (int) minutes);
-            
-            //var manager = ActivatorUtilities.CreateInstance<DbPlayerRepository>(_provider);
-            //await manager.SaveAsync(context.Player.Player);
-
             await _world.DespawnPlayerAsync(context.Player);
             context.Player.Connection.SetPhase(EPhases.Select);
 
