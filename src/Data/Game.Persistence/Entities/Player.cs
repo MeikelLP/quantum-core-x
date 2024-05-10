@@ -1,30 +1,57 @@
-﻿using Core.Persistence;
-using Dapper.Contrib.Extensions;
+﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace QuantumCore.Game.Persistence.Entities;
 
 [Table("players")]
-internal class Player : BaseModel
+public class Player
 {
-    public Guid AccountId { get; set; }
-    public string Name { get; set; } = "";
-    public byte PlayerClass { get; set; }
-    public byte SkillGroup { get; set; }
-    public uint PlayTime { get; set; }
-    public byte Level { get; set; } = 1;
-    public uint Experience { get; set; }
-    public uint Gold { get; set; }
-    public byte St { get; set; }
-    public byte Ht { get; set; }
-    public byte Dx { get; set; }
-    public byte Iq { get; set; }
-    public int PositionX { get; set; }
-    public int PositionY { get; set; }
-    public long Health { get; set; }
-    public long Mana { get; set; }
-    public long Stamina { get; set; }
-    public uint BodyPart { get; set; }
-    public uint HairPart { get; set; }
-    public uint GivenStatusPoints { get; set; }
-    public uint AvailableStatusPoints { get; set; }
+    public required Guid Id { get; init; }
+    public required Guid AccountId { get; init; }
+    public required byte Empire { get; init; }
+    public required byte PlayerClass { get; init; }
+    public required byte SkillGroup { get; init; }
+    [DefaultValue(0)] public required uint PlayTime { get; init; }
+    [DefaultValue(1)] public required byte Level { get; init; }
+    [DefaultValue(0)] public required uint Experience { get; init; }
+    [DefaultValue(0)] public required uint Gold { get; init; }
+    [DefaultValue(0)] public required byte St { get; init; }
+    [DefaultValue(0)] public required byte Ht { get; init; }
+    [DefaultValue(0)] public required byte Dx { get; init; }
+    [DefaultValue(0)] public required byte Iq { get; init; }
+    public required int PositionX { get; init; }
+    public required int PositionY { get; init; }
+    public required long Health { get; init; }
+    public required long Mana { get; init; }
+    public required long Stamina { get; init; }
+    [DefaultValue(0)] public required uint BodyPart { get; init; }
+    [DefaultValue(0)] public required uint HairPart { get; init; }
+    public required DateTime CreatedAt { get; init; }
+    public required DateTime UpdatedAt { get; init; }
+    [StringLength(24)] public required string Name { get; init; }
+    [DefaultValue(0)] public required uint GivenStatusPoints { get; init; }
+    [DefaultValue(0)] public required uint AvailableStatusPoints { get; init; }
+
+    public static void Configure(EntityTypeBuilder<Player> builder, DatabaseFacade database)
+    {
+        if (database.IsSqlite() || database.IsNpgsql())
+        {
+            builder.Property(x => x.CreatedAt).HasDefaultValueSql("current_timestamp");
+            builder.Property(x => x.UpdatedAt).HasDefaultValueSql("current_timestamp");
+        }
+        else if (database.IsMySql())
+        {
+            builder.Property(x => x.CreatedAt).HasDefaultValueSql("(CAST(CURRENT_TIMESTAMP AS DATETIME(6)))");
+            builder.Property(x => x.UpdatedAt).HasDefaultValueSql("(CAST(CURRENT_TIMESTAMP AS DATETIME(6)))");
+        }
+
+        if (database.IsNpgsql())
+        {
+            builder.Property(x => x.Id).ValueGeneratedOnAdd().HasDefaultValueSql("gen_random_uuid()");
+        }
+    }
 }

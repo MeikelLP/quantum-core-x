@@ -1,15 +1,14 @@
 ﻿using Game.Caching.Extensions;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 using QuantumCore.API;
 using QuantumCore.API.Game.World;
 using QuantumCore.API.PluginTypes;
-using QuantumCore.Auth.Persistence.Extensions;
 using QuantumCore.Game.Commands;
 using QuantumCore.Game.Persistence.Extensions;
 using QuantumCore.Game.PlayerUtils;
 using QuantumCore.Game.Quest;
 using QuantumCore.Game.Services;
-using QuantumCore.Game.World;
 
 namespace QuantumCore.Game.Extensions;
 
@@ -22,12 +21,17 @@ public static class ServiceExtensions
             scan.FromAssemblyOf<GameServer>()
                 .AddClasses(classes => classes.AssignableTo<IPacketHandler>())
                 .AsImplementedInterfaces()
-                .WithSingletonLifetime();
+                .WithScopedLifetime();
         });
-        services.AddAuthDatabase();
         services.AddGameDatabase();
         services.AddGameCaching();
-        services.AddSingleton<IPlayerManager, PlayerManager>();
+        services.AddOptions<AuthOptions>().BindConfiguration("Auth");
+        services.AddHttpClient("", (provider, http) =>
+        {
+            var options = provider.GetRequiredService<IOptions<AuthOptions>>().Value;
+            http.BaseAddress = new Uri(options.BaseUrl);
+        });
+        services.AddScoped<IPlayerManager, PlayerManager>();
         services.AddSingleton<ISpawnGroupProvider, SpawnGroupProvider>();
         services.AddSingleton<ISpawnPointProvider, SpawnPointProvider>();
         services.AddSingleton<IItemManager, ItemManager>();
