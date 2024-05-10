@@ -13,6 +13,17 @@ image:
 nameOverride: ""
 fullnameOverride: ""
 
+auth:
+  hosting:
+    port: 11002
+  cache:
+    host:
+    port: 6379
+  database:
+    provider: "mysql"
+    connectionString:
+
+
 serviceAccount:
   # Specifies whether a service account should be created
   create: true

@@ -20,6 +20,17 @@ spec:
         - name: {{ .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            - name: Hosting__Port
+              value: "{{ .Values.auth.hosting.port | default .Values.service.port }}"
+            - name: Cache__Host
+              value: "{{ .Values.auth.cache.host }}"
+            - name: Cache__Port
+              value: "{{ .Values.auth.cache.port }}"
+            - name: Database__Provider
+              value: "{{ .Values.auth.database.provider }}"
+            - name: Database__ConnectionString
+              value: "{{ .Values.auth.database.connectionString }}"
           ports:
             - name: http
               containerPort: {{ .Values.service.port }}
