@@ -32,8 +32,9 @@ public class ExperienceManager : IExperienceManager
         }
 
         var lines = await File.ReadAllLinesAsync(path, token);
-        foreach (var line in lines)
+        for (var i = 0; i < lines.Length; i++)
         {
+            var line = lines[i];
             if (string.IsNullOrWhiteSpace(line))
             {
                 break;
@@ -41,11 +42,12 @@ public class ExperienceManager : IExperienceManager
 
             if (!uint.TryParse(line, out var experience))
             {
-                _logger.LogError("Failed to parse experience table!");
+                _logger.LogError("Failed to parse experience table!. Invalid value on line {Line}: {Value}", i + 1,
+                    line);
                 _experienceTable.Clear();
                 return;
             }
-            
+
             _experienceTable.Add(experience);
         }
     }
