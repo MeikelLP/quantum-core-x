@@ -14,10 +14,6 @@ public class AccountManager : IAccountManager
         _passwordHasher = passwordHasher;
     }
 
-    public Task<string?> GetDeleteCodeAsync(Guid accountId)
-    {
-        return _repository.GetDeleteCodeAsync(accountId);
-    }
     public Task<AccountData?> FindByIdAsync(Guid id)
     {
         return _repository.FindByIdAsync(id);
