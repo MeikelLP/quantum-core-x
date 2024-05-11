@@ -86,7 +86,7 @@ namespace QuantumCore.Game.World.Entities
         private byte _attackSpeed = 140;
         private uint _defence;
 
-        private const int PersistInterval = 1000;
+        private const int PersistInterval = 30 * 1000; // 30s
         private int _persistTime = 0;
         private const int HealthRegenInterval = 3 * 1000;
         private const int ManaRegenInterval = 3 * 1000;
@@ -209,7 +209,6 @@ namespace QuantumCore.Game.World.Entities
 
             var host = _world.GetMapHost(PositionX, PositionY);
 
-            Persist().Wait(); // TODO
             _logger.LogInformation("Warp!");
             var packet = new Warp
             {
@@ -490,6 +489,7 @@ namespace QuantumCore.Game.World.Entities
                         return;
                     }
 
+                    var before = Player.Experience;
                     if (value < 0 && Player.Experience <= -value)
                     {
                         Player.Experience = 0;
@@ -501,6 +501,18 @@ namespace QuantumCore.Game.World.Entities
 
                     if (value > 0)
                     {
+                        var partialLevelUps = CalcPartialLevelUps(before, GetPoint(EPoints.Experience),
+                            GetPoint(EPoints.NeededExperience));
+                        if (partialLevelUps > 0)
+                        {
+                            Health = Player.MaxHp;
+                            Mana = Player.MaxSp;
+                            for (var i = 0; i < partialLevelUps; i++)
+                            {
+                                GiveStatusPoints();
+                            }
+                        }
+
                         CheckLevelUp();
                     }
 
@@ -559,6 +571,18 @@ namespace QuantumCore.Game.World.Entities
                     _logger.LogError("Failed to add point to {Point}, unsupported", point);
                     break;
             }
+        }
+
+        internal static int CalcPartialLevelUps(uint before, uint after, uint requiredForNextLevel)
+        {
+            if (after >= requiredForNextLevel) return 0;
+
+            const int CHUNK_AMOUNT = 4;
+            var chunk = requiredForNextLevel / CHUNK_AMOUNT;
+            var beforeChunk = (int) (before / (float) chunk);
+            var afterChunk = (int) (after / (float) chunk);
+
+            return afterChunk - beforeChunk;
         }
 
         public override void SetPoint(EPoints point, uint value)
@@ -669,7 +693,8 @@ namespace QuantumCore.Game.World.Entities
             Player.PositionX = PositionX;
             Player.PositionY = PositionY;
 
-            await _cacheManager.Set($"player:{Player.Id}", Player);
+            var playerManager = _scope.ServiceProvider.GetRequiredService<IPlayerManager>();
+            await playerManager.SetPlayerAsync(Player);
         }
 
         protected override void OnNewNearbyEntity(IEntity entity)
@@ -765,9 +790,16 @@ namespace QuantumCore.Game.World.Entities
                 amount); // todo add method to IMap interface when we have an item interface...
         }
 
+        /// <summary>
+        /// Does nothing - if you want to persist the player use <see cref="OnDespawnAsync"/>
+        /// </summary>
         public override void OnDespawn()
         {
-            Persist().Wait(); // TODO
+        }
+
+        public async Task OnDespawnAsync()
+        {
+            await Persist();
         }
 
         public ItemInstance? GetItem(byte window, ushort position)

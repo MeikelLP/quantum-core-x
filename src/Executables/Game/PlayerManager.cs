@@ -12,7 +12,9 @@ public class PlayerManager : IPlayerManager
     private readonly ICachePlayerRepository _cachePlayerRepository;
     private readonly ILogger<PlayerManager> _logger;
     private readonly IJobManager _jobManager;
-    public PlayerManager(IDbPlayerRepository dbPlayerRepository, ICachePlayerRepository cachePlayerRepository, ILogger<PlayerManager> logger, IJobManager jobManager)
+
+    public PlayerManager(IDbPlayerRepository dbPlayerRepository, ICachePlayerRepository cachePlayerRepository,
+        ILogger<PlayerManager> logger, IJobManager jobManager)
     {
         _dbPlayerRepository = dbPlayerRepository;
         _cachePlayerRepository = cachePlayerRepository;
@@ -29,17 +31,18 @@ public class PlayerManager : IPlayerManager
             for (var i = 0; i < players.Length; i++)
             {
                 var player = players[i];
-                player.Slot = (byte)i;
+                player.Slot = (byte) i;
 
                 if (i == slot)
                 {
-                    await _cachePlayerRepository.SetPlayerAsync(player, slot);
+                    await _cachePlayerRepository.SetPlayerAsync(player);
                     return player;
                 }
             }
 
             _logger.LogWarning("Could not find player for account {AccountId} at slot {Slot}", accountId, slot);
         }
+
         return cachedPlayer;
     }
 
@@ -55,11 +58,18 @@ public class PlayerManager : IPlayerManager
             }
             else
             {
-                await _cachePlayerRepository.SetPlayerAsync(player, player.Slot);
+                await _cachePlayerRepository.SetPlayerAsync(player);
                 return player;
             }
         }
+
         return cachedPlayer;
+    }
+
+    public async Task SetPlayerAsync(PlayerData data)
+    {
+        await _cachePlayerRepository.SetPlayerAsync(data);
+        await _dbPlayerRepository.SetPlayerAsync(data);
     }
 
     public async Task<PlayerData[]> GetPlayers(Guid accountId)
@@ -69,7 +79,7 @@ public class PlayerManager : IPlayerManager
         var players = await _dbPlayerRepository.GetPlayersAsync(accountId);
 
         // update cache
-        await Task.WhenAll(players.Select((x, i) => _cachePlayerRepository.SetPlayerAsync(x, (byte)i)));
+        await Task.WhenAll(players.Select((x, i) => _cachePlayerRepository.SetPlayerAsync(x)));
 
         return players;
     }
@@ -104,6 +114,7 @@ public class PlayerManager : IPlayerManager
                 _logger.LogError("No empire has been selected before. This should not happen.");
                 throw new InvalidOperationException("No empire has been selected before. This should not happen.");
             }
+
             empire = empireFromCache.Value;
         }
 
@@ -123,7 +134,7 @@ public class PlayerManager : IPlayerManager
             Health = job.StartHp,
             Mana = job.StartSp,
             Empire = empire,
-            Slot = (byte)existingPlayers.Length
+            Slot = (byte) existingPlayers.Length
         };
 
 
