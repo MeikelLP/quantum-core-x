@@ -28,8 +28,6 @@ namespace QuantumCore.Game.World.Entities
         public IQuickSlotBar QuickSlotBar { get; }
         public IQuest? CurrentQuest { get; set; }
         public Dictionary<string, IQuest> Quests { get; } = new();
-        
-        public long LoggedInTime { get; set; }
 
         public override byte HealthPercentage
         {

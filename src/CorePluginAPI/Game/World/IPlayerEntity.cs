@@ -17,7 +17,6 @@ namespace QuantumCore.API.Game.World
         Dictionary<string, IQuest> Quests { get; }
         EAntiFlags AntiFlagClass { get; }
         EAntiFlags AntiFlagGender { get; }
-        long LoggedInTime { get; set; }
 
         Task Load();
         Task ReloadPermissions();
