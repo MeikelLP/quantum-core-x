@@ -8,11 +8,11 @@ using Microsoft.Extensions.Logging;
 using QuantumCore;
 using QuantumCore.API.Core.Models;
 using QuantumCore.Caching;
+using QuantumCore.Game;
 using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Persistence;
 using Serilog;
 using Xunit.Abstractions;
-using IPlayerManager = QuantumCore.Game.IPlayerManager;
 
 namespace Game.Tests;
 

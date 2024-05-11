@@ -37,7 +37,7 @@ public class DeleteCharacterHandler : IGamePacketHandler<DeleteCharacter>
         if (account is null)
         {
             ctx.Connection.Close();
-            _logger.LogWarning("Invalid account id??");
+            _logger.LogWarning("Account was not found");
             return;
         }
 

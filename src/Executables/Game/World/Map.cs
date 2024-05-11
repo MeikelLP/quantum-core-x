@@ -80,6 +80,8 @@ namespace QuantumCore.Game.World
 
             _spawnPoints.AddRange(await _spawnPointProvider.GetSpawnPointsForMap(Name));
 
+            _logger.LogDebug("Loaded {SpawnPointsCount} spawn points for map {MapName}", _spawnPoints.Count, Name);
+            
             // Populate map
             foreach (var spawnPoint in _spawnPoints)
             {
@@ -286,7 +288,7 @@ namespace QuantumCore.Game.World
             }
 
             var monster = new MonsterEntity(_monsterManager, _dropProvider, _animationManager, this, _logger, _itemManager,
-                _world.GenerateVid(),
+                id,
                 (int) (PositionX + (baseX + RandomNumberGenerator.GetInt32(-SPAWN_BASE_OFFSET, SPAWN_BASE_OFFSET)) *
                     SPAWN_POSITION_MULTIPLIER),
                 (int) (PositionY + (baseY + RandomNumberGenerator.GetInt32(-SPAWN_BASE_OFFSET, SPAWN_BASE_OFFSET)) *

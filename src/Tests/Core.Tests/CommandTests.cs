@@ -30,7 +30,6 @@ using Serilog;
 using Weikio.PluginFramework.Catalogs;
 using Xunit;
 using Xunit.Abstractions;
-using ICommandPermissionRepository = QuantumCore.Game.Persistence.ICommandPermissionRepository;
 
 // cannot cast MockedGameConnection to IGameConnection ???
 #pragma warning disable CS8602
