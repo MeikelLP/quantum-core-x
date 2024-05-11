@@ -1,4 +1,5 @@
 using System.Collections.ObjectModel;
+using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
 using QuantumCore.Caching;
@@ -6,7 +7,6 @@ using QuantumCore.Core.Utils;
 using QuantumCore.Extensions;
 using QuantumCore.Game.Persistence;
 using Serilog;
-using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace QuantumCore.Game.PlayerUtils
 {
@@ -172,10 +172,10 @@ namespace QuantumCore.Game.PlayerUtils
         private ushort _height;
         private readonly List<ItemInstance> _items = new List<ItemInstance>();
         private readonly ICacheManager _cacheManager;
-        private readonly ILogger _logger;
+        private readonly ILogger<Inventory> _logger;
         private readonly IItemRepository _itemRepository;
 
-        public Inventory(IItemManager itemManager, ICacheManager cacheManager, ILogger logger,
+        public Inventory(IItemManager itemManager, ICacheManager cacheManager, ILogger<Inventory> logger,
             IItemRepository itemRepository, Guid owner, byte window, ushort width, ushort height, ushort pages)
         {
             Owner = owner;

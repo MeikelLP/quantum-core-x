@@ -23,6 +23,7 @@ namespace QuantumCore.Game.World.Entities
         public IGameConnection Connection { get; }
         public PlayerData Player { get; private set; }
         public IInventory Inventory { get; private set; }
+        public IMall Mall { get; }
         public IEntity? Target { get; set; }
         public IList<Guid> Groups { get; private set; }
         public IShop? Shop { get; set; }
@@ -118,11 +119,14 @@ namespace QuantumCore.Game.World.Entities
             _world = world;
             _logger = logger;
             _scope = serviceProvider.CreateScope();
+            var loggerFactory = _scope.ServiceProvider.GetRequiredService<ILoggerFactory>();
             var itemRepository = _scope.ServiceProvider.GetRequiredService<IItemRepository>();
-            Inventory = new Inventory(itemManager, _cacheManager, _logger, itemRepository, player.Id,
+            Inventory = new Inventory(itemManager, _cacheManager, loggerFactory.CreateLogger<Inventory>(), itemRepository, player.Id,
                 (byte) WindowType.Inventory, InventoryConstants.DEFAULT_INVENTORY_WIDTH,
                 InventoryConstants.DEFAULT_INVENTORY_HEIGHT, InventoryConstants.DEFAULT_INVENTORY_PAGES);
             Inventory.OnSlotChanged += Inventory_OnSlotChanged;
+            Mall = new Mall(loggerFactory.CreateLogger<Mall>(), connection, itemManager, cacheManager);
+            
             Player = player;
             Empire = player.Empire;
             PositionX = player.PositionX;
@@ -160,6 +164,7 @@ namespace QuantumCore.Game.World.Entities
         public async Task Load()
         {
             await Inventory.Load();
+            await Mall.Load();
             await QuickSlotBar.Load();
             Player.MaxHp = GetMaxHp(_jobManager, Player.PlayerClass, Player.Level, Player.Ht);
             Player.MaxSp = GetMaxSp(_jobManager, Player.PlayerClass, Player.Level, Player.Iq);
@@ -801,19 +806,6 @@ namespace QuantumCore.Game.World.Entities
         public async Task OnDespawnAsync()
         {
             await Persist();
-        }
-
-        public void OpenMall()
-        {
-            // todo check already other trade windows opened
-            // todo magic number (3tabs * 9slots = 27)
-            Connection.Send(new MallboxSize { Size = 27 }); 
-        }
-
-        public void CloseMall()
-        {
-            // todo save items to db
-            SendChatCommand("CloseMall");
         }
 
         public ItemInstance? GetItem(byte window, ushort position)

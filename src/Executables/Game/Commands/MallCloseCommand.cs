@@ -8,7 +8,7 @@ public class MallCloseCommand : ICommandHandler
 {
     public Task ExecuteAsync(CommandContext context)
     {
-        context.Player.CloseMall();
+        context.Player.Mall.Close();
         return Task.CompletedTask;
     }
 }

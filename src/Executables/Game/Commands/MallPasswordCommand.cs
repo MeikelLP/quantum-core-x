@@ -1,8 +1,6 @@
 ﻿using CommandLine;
 using QuantumCore.API;
 using QuantumCore.API.Game;
-using QuantumCore.Extensions;
-using QuantumCore.Game.Packets.General;
 using QuantumCore.Game.Packets.Mall;
 
 namespace QuantumCore.Game.Commands;
@@ -34,7 +32,17 @@ public class MallPasswordCommand : ICommandHandler<MallPasswordCommandOptions>
             return Task.CompletedTask;
         }
         
-        // todo grace period of 10 seconds if necessary
+        if (context.Player.Mall.LastInteraction.HasValue)
+        {
+            var time = DateTime.UtcNow - context.Player.Mall.LastInteraction.Value;
+            var secondsRemaining = (int) (10 - time.TotalSeconds);
+            if (secondsRemaining > 0)
+            {
+                context.Player.SendChatInfo($"Please wait {secondsRemaining} seconds before trying again.");
+                return Task.CompletedTask;
+            }
+        }
+        
         // todo query the password and possibly cache it
         if (!string.Equals(password,"123456", StringComparison.InvariantCultureIgnoreCase))
         {
@@ -42,40 +50,8 @@ public class MallPasswordCommand : ICommandHandler<MallPasswordCommandOptions>
             return Task.CompletedTask;
         }
         
-        // todo load items from the mall (cache/db)
-        // safebox.cpp:55
-
-        var proto = _itemManager.GetItem(11210)!;
-        
-        var bonusArray = new ItemBonus[7];
-        for (var i = 0; i < 7; i++)
-        {
-            bonusArray[i] = new ItemBonus
-            {
-                BonusId = 0,
-                Value = 0
-            };
-        }
-        
-        var test = new MallItem
-        {
-            Cell = new MallItemPosition
-            {
-                Type = 4,
-                Cell = 1
-            },
-            Vid = proto.Id, // this is wrong, but it's here for testing purposes only
-            Count = 1,
-            Flags = proto.Flags,
-            AntiFlags = proto.AntiFlags,
-            Highlight = 0,
-            Sockets = new uint[3],
-            Bonuses = bonusArray
-        };
-        
-        context.Player.OpenMall();
-        
-        context.Player.Connection.Send(test);
+        context.Player.Mall.Open();
+        context.Player.Mall.SendItems();
         
         return Task.CompletedTask;
     }

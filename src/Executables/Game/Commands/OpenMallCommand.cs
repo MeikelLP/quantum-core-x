@@ -8,7 +8,7 @@ public class OpenMallCommand : ICommandHandler
 {
     public Task ExecuteAsync(CommandContext context)
     {
-        context.Player.SendChatCommand("ShowMeMallPassword");
+        context.Player.Mall.PromptPassword();
         return Task.CompletedTask;
     }
 }

@@ -23,7 +23,7 @@ public class InventoryTests
                 Size = 1
             });
         var inv = new Inventory(itemManager,
-            Substitute.For<ICacheManager>(), Substitute.For<ILogger>(), Substitute.For<IItemRepository>(), Guid.Empty, 1, 1, 1, 1);
+            Substitute.For<ICacheManager>(), Substitute.For<ILogger<Inventory>>(), Substitute.For<IItemRepository>(), Guid.Empty, 1, 1, 1, 1);
         var changed = 0;
         inv.OnSlotChanged += (_, _) => changed++;
 
