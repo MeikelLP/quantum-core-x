@@ -1,10 +1,10 @@
 ﻿using QuantumCore.API;
 using QuantumCore.API.Core.Models;
-using QuantumCore.API.Data;
 using QuantumCore.Caching;
+using QuantumCore.Game.Persistence;
 using QuantumCore.Game.PlayerUtils;
 
-namespace QuantumCore.Extensions;
+namespace QuantumCore.Game.Extensions;
 
 public static class ItemExtensions
 {

@@ -7,6 +7,13 @@ using QuantumCore.Game.Persistence.Extensions;
 
 namespace QuantumCore.Game.Persistence;
 
+public interface IItemRepository
+{
+    Task<IEnumerable<Guid>> GetItemIdsForPlayerAsync(Guid player, byte window);
+    Task<ItemInstance?> GetItemAsync(Guid id);
+    Task DeletePlayerItemsAsync(Guid playerId);
+}
+
 public class ItemRepository : IItemRepository
 {
     private readonly GameDbContext _db;

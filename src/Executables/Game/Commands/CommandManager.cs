@@ -6,7 +6,6 @@ using Microsoft.CodeAnalysis;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
-using QuantumCore.API.Data;
 using QuantumCore.API.Game;
 using QuantumCore.API.Game.World;
 using QuantumCore.Caching;
