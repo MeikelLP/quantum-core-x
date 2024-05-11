@@ -9,13 +9,6 @@ namespace QuantumCore.Game.Commands;
 [CommandNoPermission]
 public class MallPasswordCommand : ICommandHandler<MallPasswordCommandOptions>
 {
-    private readonly IItemManager _itemManager;
-    
-    public MallPasswordCommand(IItemManager itemManager)
-    {
-        _itemManager = itemManager;
-    }
-    
     public Task ExecuteAsync(CommandContext<MallPasswordCommandOptions> context)
     {
         var password = context.Arguments.Password;
@@ -26,7 +19,7 @@ public class MallPasswordCommand : ICommandHandler<MallPasswordCommandOptions>
             return Task.CompletedTask;
         }
 
-        if (password.Length != 6)
+        if (password.Length != 6) // todo magic number
         {
             context.Player.SendChatInfo("Password is incorrect.");
             return Task.CompletedTask;
@@ -35,7 +28,7 @@ public class MallPasswordCommand : ICommandHandler<MallPasswordCommandOptions>
         if (context.Player.Mall.LastInteraction.HasValue)
         {
             var time = DateTime.UtcNow - context.Player.Mall.LastInteraction.Value;
-            var secondsRemaining = (int) (10 - time.TotalSeconds);
+            var secondsRemaining = (int) (10 - time.TotalSeconds); // todo magic number
             if (secondsRemaining > 0)
             {
                 context.Player.SendChatInfo($"Please wait {secondsRemaining} seconds before trying again.");
@@ -43,8 +36,8 @@ public class MallPasswordCommand : ICommandHandler<MallPasswordCommandOptions>
             }
         }
         
-        // todo query the password and possibly cache it
-        if (!string.Equals(password,"123456", StringComparison.InvariantCultureIgnoreCase))
+        // todo real implementation
+        if (!string.Equals(password,"000000", StringComparison.InvariantCultureIgnoreCase))
         {
             context.Player.Connection.Send(new MallWrongPassword());
             return Task.CompletedTask;

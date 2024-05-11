@@ -26,7 +26,7 @@ public class Mall : IMall
 
     public Task Load()
     {
-        // todo load items from the mall (cache/db)
+        // todo load items
         return Task.CompletedTask;
     }
 
@@ -45,6 +45,9 @@ public class Mall : IMall
 
     public void SendItems()
     {
+        // todo send items previously fetched in Load()
+        // the following code is just for testing purposes and should be removed when the real implementation is done
+        
         var proto = _itemManager.GetItem(11210)!;
         
         var bonusArray = new ItemBonus[7];
