@@ -58,6 +58,17 @@ namespace QuantumCore.Core.Networking
             await _pluginExecutor.ExecutePlugins<IConnectionLifetimeListener>(_logger,
                 x => x.OnDisconnectedAsync(_stoppingToken.Token));
         }
+        
+        public override Task StartAsync(CancellationToken token)
+        {
+            base.StartAsync(token);
+            _logger.LogInformation("Start listening for connections...");
+
+            Listener.Start();
+            Listener.BeginAcceptTcpClient(OnClientAccepted, Listener);
+
+            return Task.CompletedTask;
+        }
 
         private async void OnClientAccepted(IAsyncResult ar)
         {

@@ -1,6 +1,6 @@
 ﻿using QuantumCore.API.Core.Models;
 
-namespace QuantumCore.API.Data;
+namespace QuantumCore.API;
 
 public interface IItemRepository
 {
