@@ -9,6 +9,7 @@ using QuantumCore.Caching;
 using QuantumCore.Core.Utils;
 using QuantumCore.Extensions;
 using QuantumCore.Game.Packets;
+using QuantumCore.Game.Packets.Mall;
 using QuantumCore.Game.Persistence;
 using QuantumCore.Game.PlayerUtils;
 
@@ -800,6 +801,19 @@ namespace QuantumCore.Game.World.Entities
         public async Task OnDespawnAsync()
         {
             await Persist();
+        }
+
+        public void OpenMall()
+        {
+            // todo check already other trade windows opened
+            // todo magic number (3tabs * 9slots = 27)
+            Connection.Send(new MallboxSize { Size = 27 }); 
+        }
+
+        public void CloseMall()
+        {
+            // todo save items to db
+            SendChatCommand("CloseMall");
         }
 
         public ItemInstance? GetItem(byte window, ushort position)
