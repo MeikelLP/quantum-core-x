@@ -13,7 +13,6 @@ namespace QuantumCore.Game.PacketHandlers.Loading
     {
         private readonly ILogger<EnterGameHandler> _logger;
         private readonly IWorld _world;
-        private readonly IServiceProvider _provider;
         private readonly ICacheManager _cache;
 
         public EnterGameHandler(ILogger<EnterGameHandler> logger, IWorld world, ICacheManager cache)

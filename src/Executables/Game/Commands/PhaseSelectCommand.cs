@@ -16,13 +16,11 @@ namespace QuantumCore.Game.Commands
     {
         private readonly IWorld _world;
         private readonly IServiceProvider _serviceProvider;
-        private readonly ICacheManager _cache;
 
-        public PhaseSelectCommand(IWorld world, IServiceProvider serviceProvider, ICacheManager cache)
+        public PhaseSelectCommand(IWorld world, IServiceProvider serviceProvider)
         {
             _world = world;
             _serviceProvider = serviceProvider;
-            _cache = cache;
         }
 
         public async Task ExecuteAsync(CommandContext context)
