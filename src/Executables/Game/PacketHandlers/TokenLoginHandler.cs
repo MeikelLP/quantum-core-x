@@ -20,6 +20,7 @@ namespace QuantumCore.Game.PacketHandlers
         private readonly ICacheManager _cacheManager;
         private readonly IWorld _world;
         private readonly IPlayerManager _playerManager;
+        private readonly ICachePlayerRepository _playerCache;
 
         public TokenLoginHandler(ILogger<TokenLoginHandler> logger, ICacheManager cacheManager, IWorld world, IPlayerManager playerManager)
         {

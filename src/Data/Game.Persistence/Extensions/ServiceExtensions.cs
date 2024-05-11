@@ -1,7 +1,6 @@
 using Core.Persistence.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using QuantumCore.API.Data;
 
 namespace QuantumCore.Game.Persistence.Extensions;
 
