@@ -67,13 +67,4 @@ public class AccountRepository : IAccountRepository
             }
         };
     }
-
-    public async Task<string?> GetDeleteCodeAsync(Guid accountId)
-    {
-        return await _db.QueryFirstOrDefaultAsync<string>(
-            "SELECT DeleteCode FROM account.accounts WHERE Id = @accountId", new
-            {
-                accountId
-            });
-    }
 }
