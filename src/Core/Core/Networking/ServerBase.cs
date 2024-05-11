@@ -168,6 +168,7 @@ namespace QuantumCore.Core.Networking
         {
             Listener.Start();
             Listener.BeginAcceptTcpClient(OnClientAccepted, Listener);
+        }
 
         public async override Task StopAsync(CancellationToken cancellationToken)
         {

@@ -2,8 +2,6 @@ using System.Reflection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using MySqlConnector;
 using QuantumCore.API.PluginTypes;
 using QuantumCore.Networking;
 using Serilog;
@@ -22,6 +20,7 @@ public static class ServiceExtensions
     /// </summary>
     /// <param name="services"></param>
     /// <param name="pluginCatalog"></param>
+    /// <param name="configuration"></param>
     /// <returns></returns>
     public static IServiceCollection AddCoreServices(this IServiceCollection services, IPluginCatalog pluginCatalog,
         IConfiguration configuration)
