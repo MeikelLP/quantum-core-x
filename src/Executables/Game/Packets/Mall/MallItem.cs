@@ -26,7 +26,7 @@ public partial class MallItem
     public byte Highlight { get; set; }
     
     [Field(6, ArrayLength = 3)] 
-    public long[] Sockets { get; set; } = new long[3];
+    public uint[] Sockets { get; set; } = new uint[3];
     
     [Field(7, ArrayLength = 7)]
     public ItemBonus[] Bonuses { get; set; } = new ItemBonus[7];

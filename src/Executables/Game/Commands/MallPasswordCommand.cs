@@ -47,6 +47,16 @@ public class MallPasswordCommand : ICommandHandler<MallPasswordCommandOptions>
 
         var proto = _itemManager.GetItem(11210)!;
         
+        var bonusArray = new ItemBonus[7];
+        for (var i = 0; i < 7; i++)
+        {
+            bonusArray[i] = new ItemBonus
+            {
+                BonusId = 0,
+                Value = 0
+            };
+        }
+        
         var test = new MallItem
         {
             Cell = new MallItemPosition
@@ -54,18 +64,18 @@ public class MallPasswordCommand : ICommandHandler<MallPasswordCommandOptions>
                 Type = 4,
                 Cell = 1
             },
-            Vid = 100,
+            Vid = proto.Id, // this is wrong, but it's here for testing purposes only
             Count = 1,
             Flags = proto.Flags,
             AntiFlags = proto.AntiFlags,
             Highlight = 0,
-            Sockets = new long[3],
-            Bonuses = new ItemBonus[7]
+            Sockets = new uint[3],
+            Bonuses = bonusArray
         };
         
         context.Player.OpenMall();
         
-        // context.Player.Connection.Send(test);
+        context.Player.Connection.Send(test);
         
         return Task.CompletedTask;
     }

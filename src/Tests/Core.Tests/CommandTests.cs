@@ -20,6 +20,7 @@ using QuantumCore.Game;
 using QuantumCore.Game.Commands;
 using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Packets;
+using QuantumCore.Game.Packets.Mall;
 using QuantumCore.Game.Persistence;
 using QuantumCore.Game.Persistence.Entities;
 using QuantumCore.Game.PlayerUtils;
@@ -610,6 +611,48 @@ public class CommandTests : IAsyncLifetime
         ((MockedGameConnection) _connection).SentMessages.Should().ContainEquivalentOf(new ChatOutcoming
         {
             Message = "mall test",
+            MessageType = ChatMessageTypes.Command
+        }, cfg => cfg.Including(x => x.Message));
+    }
+    
+    [Fact]
+    public async Task MallPasswordCommand_EmptyPassword()
+    {
+        // Act
+        await _commandManager.Handle(_connection, "/mall_password");
+
+        // Assert
+        ((MockedGameConnection) _connection).SentMessages.Should().ContainEquivalentOf(new ChatOutcoming
+        {
+            Message = "Please enter a password.",
+            MessageType = ChatMessageTypes.Info
+        }, cfg => cfg.Including(x => x.Message));
+    }
+    
+    [Fact]
+    public async Task MallPasswordCommand_IncorrectLength()
+    {
+        // Act
+        await _commandManager.Handle(_connection, "/mall_password 123");
+
+        // Assert
+        ((MockedGameConnection) _connection).SentMessages.Should().ContainEquivalentOf(new ChatOutcoming
+        {
+            Message = "Password is incorrect.",
+            MessageType = ChatMessageTypes.Info
+        }, cfg => cfg.Including(x => x.Message));
+    }
+    
+    [Fact]
+    public async Task MallCloseCommand()
+    {
+        // Act
+        await _commandManager.Handle(_connection, "/mall_close");
+
+        // Assert
+        ((MockedGameConnection) _connection).SentMessages.Should().ContainEquivalentOf(new ChatOutcoming
+        {
+            Message = "CloseMall",
             MessageType = ChatMessageTypes.Command
         }, cfg => cfg.Including(x => x.Message));
     }
