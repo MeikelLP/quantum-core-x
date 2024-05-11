@@ -47,6 +47,8 @@ namespace QuantumCore.Core.Networking
             var localAddr = IPAddress.Parse(hostingOptions.Value.IpAddress ?? "127.0.0.1");
             IpUtils.PublicIP = localAddr;
             Listener = new TcpListener(localAddr, Port);
+            
+            _logger.LogInformation("Initialize tcp server listening on {IP}:{Port}", localAddr, Port);
         }
 
         public long ServerTime => _serverTimer.ElapsedMilliseconds;
