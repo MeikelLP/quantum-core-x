@@ -55,7 +55,7 @@ public class DeleteCharacterHandler : IGamePacketHandler<DeleteCharacter>
         }
 
         var sentDeleteCode = ctx.Packet.Code[..^1];
-        if (deleteCode != sentDeleteCode)
+        if (account.DeleteCode != sentDeleteCode)
         {
             _logger.LogInformation(
                 "Account {AccountId} tried to delete player {PlayerId} but provided an invalid delete code", accountId,
