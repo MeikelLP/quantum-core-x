@@ -19,18 +19,14 @@ namespace QuantumCore.Game.PacketHandlers
         private readonly ILogger<TokenLoginHandler> _logger;
         private readonly ICacheManager _cacheManager;
         private readonly IWorld _world;
-        private readonly IEmpireRepository _empireRepository;
         private readonly IPlayerManager _playerManager;
-        private readonly ICachePlayerRepository _playerCache;
 
-        public TokenLoginHandler(ILogger<TokenLoginHandler> logger, ICacheManager cacheManager, IWorld world, IPlayerManager playerManager, ICachePlayerRepository playerCache)
+        public TokenLoginHandler(ILogger<TokenLoginHandler> logger, ICacheManager cacheManager, IWorld world, IPlayerManager playerManager)
         {
             _logger = logger;
             _cacheManager = cacheManager;
             _world = world;
-            _empireRepository = empireRepository;
             _playerManager = playerManager;
-            _playerCache = playerCache;
         }
 
         public async Task ExecuteAsync(GamePacketContext<TokenLogin> ctx, CancellationToken cancellationToken = default)
