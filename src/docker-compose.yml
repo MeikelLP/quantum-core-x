@@ -1,0 +1,48 @@
+# Developer compose file for required services
+# May be used as reference for production use but this file does not contain any best practices
+# This file has no service for the game defined as it will be started from the source code
+
+version: '3'
+services:
+
+  # authentication service
+  auth:
+    image: ghcr.io/meikellp/quantum-core-x/auth
+    restart: unless-stopped
+    ports:
+    - "11002:11002"
+    environment:
+      - "Database:Host=db"
+      - "Cache:Host=cache"
+    volumes:
+      - ./Executables/Auth/appsettings.json:/app/appsettings.json:ro
+    depends_on:
+      - db-mysql
+      - cache
+
+  # redis holds live data of the game world
+  # used as distributed memory between server nodes
+  cache:
+    image: redis:latest
+    restart: unless-stopped
+    volumes:
+    - cache_data:/data
+    ports:
+    - "6379:6379"
+
+  # persistent storage
+  db-mysql:
+    image: mariadb:11.3
+    ports:
+    - "3306:3306"
+    environment:
+    - MARIADB_USER=metin2
+    - MARIADB_PASSWORD=metin2
+    - MARIADB_ROOT_PASSWORD=supersecure.123
+    volumes:
+    - db_data_mysql:/var/lib/mysql
+
+volumes:
+  cache_data:
+  db_data_mysql:
+  db_data_pg:

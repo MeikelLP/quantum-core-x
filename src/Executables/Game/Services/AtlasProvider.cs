@@ -58,7 +58,7 @@ internal partial class AtlasProvider : IAtlasProvider
         using var reader = new StreamReader("data/atlasinfo.txt");
         string line;
         var lineNo = 0;
-        while ((line = (await reader.ReadLineAsync())!) != null)
+        while ((line = (await reader.ReadLineAsync())?.Trim()!) != null)
         {
             lineNo++;
             if (string.IsNullOrWhiteSpace(line)) continue; // skip empty lines

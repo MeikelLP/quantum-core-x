@@ -1,9 +1,9 @@
-﻿namespace QuantumCore.API.Data;
+using QuantumCore.API.Core.Models;
 
 public interface IAccountRepository
 {
     Task<AccountData?> FindByNameAsync(string name);
     Task<AccountData?> FindByIdAsync(Guid id);
-    Task CreateAsync(AccountData account);
+    Task<AccountData> CreateAsync(AccountData account);
     Task<string?> GetDeleteCodeAsync(Guid accountId);
 }

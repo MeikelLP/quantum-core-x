@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Net;
 using Microsoft.Extensions.Logging;
@@ -40,13 +41,16 @@ namespace QuantumCore.Game
         private readonly Stopwatch _serverTimer = new();
         private readonly IDropProvider _dropProvider;
 
+        public new ImmutableArray<IGameConnection> Connections =>
+            [..base.Connections.Values.Cast<IGameConnection>()];
+
         public static GameServer Instance { get; private set; } = null!; // singleton
 
         public GameServer(IOptions<HostingOptions> hostingOptions, IPacketManager packetManager,
             ILogger<GameServer> logger, PluginExecutor pluginExecutor, IServiceProvider serviceProvider,
             IItemManager itemManager, IMonsterManager monsterManager, IExperienceManager experienceManager,
-            IAnimationManager animationManager, ICommandManager commandManager,
-            IQuestManager questManager, IChatManager chatManager,
+            IAnimationManager animationManager, ICommandManager commandManager, IQuestManager questManager,
+            IChatManager chatManager,
             IWorld world, IDropProvider dropProvider)
             : base(packetManager, logger, pluginExecutor, serviceProvider, "game", hostingOptions)
         {
@@ -79,7 +83,7 @@ namespace QuantumCore.Game
             {
                 IpUtils.PublicIP = IPAddress.Parse(_hostingOptions.IpAddress);
             }
-            else if(IpUtils.PublicIP is null)
+            else if (IpUtils.PublicIP is null)
             {
                 // Query interfaces for our best ipv4 address
                 IpUtils.SearchPublicIp();
@@ -130,9 +134,11 @@ namespace QuantumCore.Game
             {
                 try
                 {
-                    await _pluginExecutor.ExecutePlugins<IGameTickListener>(_logger, x => x.PreUpdateAsync(stoppingToken));
+                    await _pluginExecutor.ExecutePlugins<IGameTickListener>(_logger,
+                        x => x.PreUpdateAsync(stoppingToken));
                     await Tick();
-                    await _pluginExecutor.ExecutePlugins<IGameTickListener>(_logger, x => x.PostUpdateAsync(stoppingToken));
+                    await _pluginExecutor.ExecutePlugins<IGameTickListener>(_logger,
+                        x => x.PostUpdateAsync(stoppingToken));
                 }
                 catch (Exception e)
                 {

@@ -1,6 +1,6 @@
 # Quantum Core X
 
-[![Pipeline](https://github.com/MeikelLP/quantum-core-x/actions/workflows/pipeline.yml/badge.svg)](https://github.com/MeikelLP/quantum-core-x/actions/workflows/pipeline.yml)
+[![.NET Pipeline](https://github.com/MeikelLP/quantum-core-x/actions/workflows/dotnet-pipeline.yml/badge.svg)](https://github.com/MeikelLP/quantum-core-x/actions/workflows/dotnet-pipeline.yml)
 
 **QCX** (Quantum Core X) is an open source implementation of the Metin2 server.
 

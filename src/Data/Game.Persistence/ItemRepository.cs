@@ -1,36 +1,38 @@
-﻿#nullable enable
+#nullable enable
 
-using System.Data;
-using Dapper;
-using Dapper.Contrib.Extensions;
+using Microsoft.EntityFrameworkCore;
 using QuantumCore.API.Core.Models;
-using QuantumCore.API.Data;
+using QuantumCore.Game.Persistence.Extensions;
 
 namespace QuantumCore.Game.Persistence;
 
 public class ItemRepository : IItemRepository
 {
-    private readonly IDbConnection _db;
+    private readonly GameDbContext _db;
 
-    public ItemRepository(IDbConnection db)
+    public ItemRepository(GameDbContext db)
     {
         _db = db;
     }
 
     public async Task<IEnumerable<Guid>> GetItemIdsForPlayerAsync(Guid player, byte window)
     {
-        return await _db.QueryAsync<Guid>(
-            "SELECT Id FROM items WHERE PlayerId = @PlayerId AND `Window` = @Window",
-            new { PlayerId = player, Window = window });
+        return await _db.Items
+            .Where(x => x.PlayerId == player && x.Window == window)
+            .Select(x => x.Id)
+            .ToArrayAsync();
     }
 
     public async Task<ItemInstance?> GetItemAsync(Guid id)
     {
-        return await _db.GetAsync<ItemInstance>(id);
+        return await _db.Items
+            .Where(x => x.Id == id)
+            .SelectInstance()
+            .FirstOrDefaultAsync();
     }
 
     public async Task DeletePlayerItemsAsync(Guid playerId)
     {
-        await _db.ExecuteAsync("DELETE FROM items WHERE PlayerId=@PlayerId", new { PlayerId = playerId });
+        await _db.Items.Where(x => x.PlayerId == playerId).ExecuteDeleteAsync();
     }
 }

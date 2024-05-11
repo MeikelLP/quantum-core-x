@@ -1,5 +1,5 @@
-﻿using QuantumCore.API;
-using QuantumCore.API.Data;
+using QuantumCore.API;
+using QuantumCore.API.Core.Models;
 
 namespace QuantumCore.Auth.Persistence;
 
@@ -44,19 +44,13 @@ public class AccountManager : IAccountManager
             Email = email,
             DeleteCode = deleteCode,
             Status = 1,
-            LastLogin = null,
-            AccountStatus = new AccountStatusData
-            {
-                Id = 1,
-                Description = "",
-                AllowLogin = true,
-                ClientStatus = "OK"
-            }
+            Password = "",
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
         };
         var hashedPassword = _passwordHasher.HashPassword(account, password);
         account.Password = hashedPassword;
 
-        await _repository.CreateAsync(account);
-        return account;
+        return await _repository.CreateAsync(account);
     }
 }

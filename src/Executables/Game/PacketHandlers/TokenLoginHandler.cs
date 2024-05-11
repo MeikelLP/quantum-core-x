@@ -1,3 +1,4 @@
+using Game.Caching;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.Data;
@@ -20,15 +21,16 @@ namespace QuantumCore.Game.PacketHandlers
         private readonly IWorld _world;
         private readonly IEmpireRepository _empireRepository;
         private readonly IPlayerManager _playerManager;
+        private readonly ICachePlayerRepository _playerCache;
 
-        public TokenLoginHandler(ILogger<TokenLoginHandler> logger, ICacheManager cacheManager, IWorld world,
-            IEmpireRepository empireRepository, IPlayerManager playerManager)
+        public TokenLoginHandler(ILogger<TokenLoginHandler> logger, ICacheManager cacheManager, IWorld world, IPlayerManager playerManager, ICachePlayerRepository playerCache)
         {
             _logger = logger;
             _cacheManager = cacheManager;
             _world = world;
             _empireRepository = empireRepository;
             _playerManager = playerManager;
+            _playerCache = playerCache;
         }
 
         public async Task ExecuteAsync(GamePacketContext<TokenLogin> ctx, CancellationToken cancellationToken = default)
@@ -80,12 +82,19 @@ namespace QuantumCore.Game.PacketHandlers
                 i++;
             }
 
-            // Send empire to the client and characters
-            var empire = await _empireRepository.GetEmpireForAccountAsync(token.AccountId) ?? 0;
+            // When there are no characters belonging to the account, the empire status is stored in the cache.
+            byte empire = 0;
+            if (charactersFromCacheOrDb.Length > 0)
+            {
+                empire = charactersFromCacheOrDb[0].Empire;
+                await _cacheManager.Set($"account:{ctx.Connection.AccountId}:game:select:selected-player", charactersFromCacheOrDb[0].Id);
+            }
 
+            // TODO:: set player id to character?
             ctx.Connection.Send(new Empire { EmpireId = empire });
             ctx.Connection.SetPhase(EPhases.Select);
             ctx.Connection.Send(characters);
+
         }
     }
 }

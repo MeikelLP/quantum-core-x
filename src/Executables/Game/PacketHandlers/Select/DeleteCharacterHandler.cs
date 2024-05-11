@@ -1,5 +1,7 @@
+using System.Net.Http.Json;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
+using QuantumCore.API.Core.Models;
 using QuantumCore.API.PluginTypes;
 using QuantumCore.Game.Packets;
 
@@ -9,14 +11,13 @@ public class DeleteCharacterHandler : IGamePacketHandler<DeleteCharacter>
 {
     private readonly ILogger<DeleteCharacterHandler> _logger;
     private readonly IPlayerManager _playerManager;
-    private readonly IAccountManager _accountManager;
+    private readonly HttpClient _http;
 
-    public DeleteCharacterHandler(ILogger<DeleteCharacterHandler> logger, IPlayerManager playerManager,
-        IAccountManager accountManager)
+    public DeleteCharacterHandler(ILogger<DeleteCharacterHandler> logger, IPlayerManager playerManager, HttpClient http)
     {
         _logger = logger;
         _playerManager = playerManager;
-        _accountManager = accountManager;
+        _http = http;
     }
 
     public async Task ExecuteAsync(GamePacketContext<DeleteCharacter> ctx, CancellationToken token = default)
@@ -31,9 +32,9 @@ public class DeleteCharacterHandler : IGamePacketHandler<DeleteCharacter>
             return;
         }
 
-        var deleteCode = await _accountManager.GetDeleteCodeAsync(accountId.Value);
+        var account = await _http.GetFromJsonAsync<AccountData>($"/account/{accountId.Value}", token);
 
-        if (deleteCode is null)
+        if (account is null)
         {
             ctx.Connection.Close();
             _logger.LogWarning("Invalid account id??");
@@ -56,7 +57,9 @@ public class DeleteCharacterHandler : IGamePacketHandler<DeleteCharacter>
         var sentDeleteCode = ctx.Packet.Code[..^1];
         if (deleteCode != sentDeleteCode)
         {
-            _logger.LogInformation("Account {AccountId} tried to delete player {PlayerId} but provided an invalid delete code", accountId, player.Id);
+            _logger.LogInformation(
+                "Account {AccountId} tried to delete player {PlayerId} but provided an invalid delete code", accountId,
+                player.Id);
             ctx.Connection.Send(new DeleteCharacterFail());
             return;
         }
