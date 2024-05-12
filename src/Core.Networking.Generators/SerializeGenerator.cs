@@ -24,23 +24,32 @@ internal class SerializeGenerator
         source.AppendLine("        {");
         source.AppendLine(GenerateWriteHeader(header));
         var staticByteIndex = 1;
-        for (var index = 0; index < fields.Length; index++)
+        if (fields.Length == 0 && subHeader is not null)
         {
-            var field = fields[index];
-            var fieldExpression = fields.Any(x => x.SizeFieldName == field.Name)
-                ? "this.GetSize()"
-                : $"this.{field.Name}";
-
-            if (subHeader is not null && subHeader.Value.Position == index)
+            source.AppendLine(
+                $"            bytes[offset + 1] = 0x{Convert.ToString(subHeader.Value.Value, 16).PadLeft(2, '0')};");
+            staticByteIndex++;
+        }
+        else
+        {
+            for (var index = 0; index < fields.Length; index++)
             {
-                source.AppendLine(
-                    $"            bytes[offset + {staticByteIndex}] = 0x{Convert.ToString(subHeader.Value.Value, 16).PadLeft(2, '0')};");
-                staticByteIndex++;
-            }
+                var field = fields[index];
+                var fieldExpression = fields.Any(x => x.SizeFieldName == field.Name)
+                    ? "this.GetSize()"
+                    : $"this.{field.Name}";
 
-            var line = GenerateMethodLine(field, fieldExpression, ref staticByteIndex, dynamicByteIndex, "",
-                "            ");
-            source.AppendLine(line);
+                if (subHeader is not null && subHeader.Value.Position == index)
+                {
+                    source.AppendLine(
+                        $"            bytes[offset + {staticByteIndex}] = 0x{Convert.ToString(subHeader.Value.Value, 16).PadLeft(2, '0')};");
+                    staticByteIndex++;
+                }
+
+                var line = GenerateMethodLine(field, fieldExpression, ref staticByteIndex, dynamicByteIndex, "",
+                    "            ");
+                source.AppendLine(line);
+            }
         }
 
         if (hasSequence)
