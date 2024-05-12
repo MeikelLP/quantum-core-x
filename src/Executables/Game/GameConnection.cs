@@ -40,10 +40,14 @@ namespace QuantumCore.Game
                 }
                 else
                 {
+                    if (Phase is EPhases.Game or EPhases.Loading)
+                    {
+                        await Player.CalculatePlayedTimeAsync();
+                    }
+
                     // In case of unexpected disconnection, we need to save the player's state
                     if (Phase is EPhases.Game or EPhases.Loading or EPhases.Select)
                     {
-                        await Player.CalculatePlayedTimeAsync();
                         await _world.DespawnPlayerAsync(Player);
                     }
                 }
