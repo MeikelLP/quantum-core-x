@@ -46,7 +46,7 @@ internal class MockedGameConnection : IGameConnection
     public EPhases Phase { get; set; }
     public Task ExecuteTask { get; } = null!;
 
-    public void Close()
+    public void Close(bool expected = true)
     {
     }
 

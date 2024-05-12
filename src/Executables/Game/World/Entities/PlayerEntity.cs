@@ -816,6 +816,7 @@ namespace QuantumCore.Game.World.Entities
             var startSessionTime = await _cacheManager.Get<long>(key);
             var sessionTimeMillis = Connection.Server.ServerTime - startSessionTime;
             var minutes = sessionTimeMillis / 60000; // milliseconds to minutes
+            if (minutes <= 0) return;
             
             AddPoint(EPoints.PlayTime, (int) minutes);
         }

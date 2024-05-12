@@ -1,6 +1,7 @@
 ﻿using System.Net.Sockets;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
+using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.World;
 using QuantumCore.Core.Networking;
 using QuantumCore.Networking;
@@ -29,11 +30,24 @@ namespace QuantumCore.Game
             GameServer.Instance.CallConnectionListener(this);
         }
 
-        protected async override Task OnClose()
+        protected override async Task OnClose(bool expected = true)
         {
             if (Player != null)
             {
-                _world.DespawnEntity(Player);
+                if (expected)
+                {
+                    _world.DespawnEntity(Player);
+                }
+                else
+                {
+                    // In case of unexpected disconnection, we need to save the player's state
+                    if (Phase is EPhases.Game or EPhases.Loading or EPhases.Select)
+                    {
+                        await Player.CalculatePlayedTimeAsync();
+                        await _world.DespawnPlayerAsync(Player);
+                    }
+                }
+                
             }
 
             await Server.RemoveConnection(this);
@@ -41,7 +55,7 @@ namespace QuantumCore.Game
             // todo enable expiry on auth token
         }
 
-        protected async override Task OnReceive(IPacketSerializable packet)
+        protected override async Task OnReceive(IPacketSerializable packet)
         {
             await Server.CallListener(this, packet);
         }
