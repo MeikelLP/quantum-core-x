@@ -17,7 +17,7 @@ public class Player
     public required byte Empire { get; set; }
     public required byte PlayerClass { get; set; }
     public required byte SkillGroup { get; set; }
-    [DefaultValue(0)] public required uint PlayTime { get; set; }
+    [DefaultValue(0)] public required ulong PlayTime { get; set; }
     [DefaultValue(1)] public required byte Level { get; set; }
     [DefaultValue(0)] public required uint Experience { get; set; }
     [DefaultValue(0)] public required uint Gold { get; set; }

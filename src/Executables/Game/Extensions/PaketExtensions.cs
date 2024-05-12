@@ -13,7 +13,7 @@ public static class PaketExtensions
             Name = player.Name,
             Class = player.PlayerClass,
             Level = player.Level,
-            Playtime = player.PlayTime,
+            Playtime = player.PlayTime == 0 ? 0 : (uint) player.PlayTime / 60000, // Milliseconds to minutes
             St = player.St,
             Ht = player.Ht,
             Dx = player.Dx,

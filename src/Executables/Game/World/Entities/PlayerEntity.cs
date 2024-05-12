@@ -683,7 +683,7 @@ namespace QuantumCore.Game.World.Entities
                 case EPoints.StatusPoints:
                     return Player.AvailableStatusPoints;
                 case EPoints.PlayTime:
-                    return Player.PlayTime;
+                    return Player.PlayTime == 0 ? 0 : (uint) Player.PlayTime / 60000; // milliseconds to minutes
                 default:
                     if (Enum.GetValues<EPoints>().Contains(point))
                     {
@@ -814,11 +814,11 @@ namespace QuantumCore.Game.World.Entities
         {
             var key = $"player:{Player.Id}:loggedInTime";
             var startSessionTime = await _cacheManager.Get<long>(key);
-            var sessionTimeMillis = Connection.Server.ServerTime - startSessionTime;
-            var minutes = sessionTimeMillis / 60000; // milliseconds to minutes
-            if (minutes <= 0) return;
+            var totalSessionTime = Connection.Server.ServerTime - startSessionTime;
+            //var minutes = sessionTimeMillis / 60000; // milliseconds to minutes
+            if (totalSessionTime <= 0) return;
             
-            AddPoint(EPoints.PlayTime, (int) minutes);
+            AddPoint(EPoints.PlayTime, (int) totalSessionTime);
         }
 
         public ItemInstance? GetItem(byte window, ushort position)

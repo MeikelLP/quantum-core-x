@@ -258,7 +258,7 @@ namespace QuantumCore.Game.Persistence.Migrations.Sqlite
                         .HasMaxLength(24)
                         .HasColumnType("TEXT");
 
-                    b.Property<uint>("PlayTime")
+                    b.Property<ulong>("PlayTime")
                         .HasColumnType("INTEGER");
 
                     b.Property<byte>("PlayerClass")
