@@ -19,7 +19,7 @@ namespace QuantumCore.Core.Networking
         private readonly ILogger _logger;
         protected IPacketManager PacketManager { get; }
         private readonly List<Func<IConnection, bool>> _connectionListeners = new();
-        private readonly ConcurrentDictionary<Guid, IConnection> _connections = new();
+        protected readonly ConcurrentDictionary<Guid, IConnection> Connections = new();
         private readonly Stopwatch _serverTimer = new();
         private readonly CancellationTokenSource _stoppingToken = new();
         protected TcpListener Listener { get; }
@@ -47,15 +47,29 @@ namespace QuantumCore.Core.Networking
             var localAddr = IPAddress.Parse(hostingOptions.Value.IpAddress ?? "127.0.0.1");
             IpUtils.PublicIP = localAddr;
             Listener = new TcpListener(localAddr, Port);
+            
+            _logger.LogInformation("Initialize tcp server listening on {IP}:{Port}", localAddr, Port);
         }
 
         public long ServerTime => _serverTimer.ElapsedMilliseconds;
 
         public async Task RemoveConnection(IConnection connection)
         {
-            _connections.Remove(connection.Id, out _);
+            Connections.Remove(connection.Id, out _);
 
-            await _pluginExecutor.ExecutePlugins<IConnectionLifetimeListener>(_logger, x => x.OnDisconnectedAsync(_stoppingToken.Token));
+            await _pluginExecutor.ExecutePlugins<IConnectionLifetimeListener>(_logger,
+                x => x.OnDisconnectedAsync(_stoppingToken.Token));
+        }
+        
+        public override Task StartAsync(CancellationToken token)
+        {
+            base.StartAsync(token);
+            _logger.LogInformation("Start listening for connections...");
+
+            Listener.Start();
+            Listener.BeginAcceptTcpClient(OnClientAccepted, Listener);
+
+            return Task.CompletedTask;
         }
 
         private async void OnClientAccepted(IAsyncResult ar)
@@ -68,9 +82,10 @@ namespace QuantumCore.Core.Networking
 
             // cannot inject tcp client here
             var connection = ActivatorUtilities.CreateInstance<T>(scope.ServiceProvider, client, (IServerBase) this);
-            _connections.TryAdd(connection.Id, connection);
+            Connections.TryAdd(connection.Id, connection);
 
-            await _pluginExecutor.ExecutePlugins<IConnectionLifetimeListener>(_logger, x => x.OnConnectedAsync(_stoppingToken.Token));
+            await _pluginExecutor.ExecutePlugins<IConnectionLifetimeListener>(_logger,
+                x => x.OnConnectedAsync(_stoppingToken.Token));
 
             // accept new connections on another thread
             Listener.BeginAcceptTcpClient(OnClientAccepted, Listener);
@@ -81,7 +96,7 @@ namespace QuantumCore.Core.Networking
 
         public void ForAllConnections(Action<IConnection> callback)
         {
-            foreach (var connection in _connections.Values)
+            foreach (var connection in Connections.Values)
             {
                 callback(connection);
             }
@@ -120,7 +135,7 @@ namespace QuantumCore.Core.Networking
 
                 var packetHandler = ActivatorUtilities.CreateInstance(scope.ServiceProvider, details.PacketHandlerType);
                 var handlerExecuteMethod = details.PacketHandlerType.GetMethod("ExecuteAsync")!;
-                await (Task) handlerExecuteMethod.Invoke(packetHandler, new[] { context, new CancellationToken() })!;
+                await (Task) handlerExecuteMethod.Invoke(packetHandler, new[] {context, new CancellationToken()})!;
             }
             catch (Exception e)
             {
@@ -166,14 +181,13 @@ namespace QuantumCore.Core.Networking
         {
             Listener.Start();
             Listener.BeginAcceptTcpClient(OnClientAccepted, Listener);
-
-            _logger.LogInformation("Listening for new connections on {Socket}", Listener.Server.LocalEndPoint!.ToString());
         }
 
         public async override Task StopAsync(CancellationToken cancellationToken)
         {
-            _stoppingToken.Cancel();
+            await _stoppingToken.CancelAsync();
             await base.StopAsync(cancellationToken);
+            _stoppingToken.Dispose();
         }
     }
 }

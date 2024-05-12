@@ -6,20 +6,33 @@ namespace QuantumCore.API.Game.World
     {
         Task Load();
         void Update(double elapsedTime);
-        #nullable enable
+#nullable enable
         IMap? GetMapAt(uint x, uint y);
         IMap? GetMapByName(string name);
-        #nullable restore
+#nullable restore
         List<IMap> FindMapsByName(string needle);
         CoreHost GetMapHost(int x, int y);
-        #nullable enable
+#nullable enable
         SpawnGroup? GetGroup(uint id);
         SpawnGroupCollection? GetGroupCollection(uint id);
-        #nullable restore
+#nullable restore
         void SpawnEntity(IEntity e);
+
+        /// <summary>
+        /// This will immediately despawn an entity. However, it does not trigger persistence for players. Please use
+        /// <see cref="DespawnPlayerAsync"/> for this.
+        /// </summary>
+        /// <param name="entity"></param>
         void DespawnEntity(IEntity entity);
+
+        /// <summary>
+        /// Despawns a player and waits for persistence to be finished before returning
+        /// </summary>
+        Task DespawnPlayerAsync(IPlayerEntity player);
+
         uint GenerateVid();
         void RemovePlayer(IPlayerEntity e);
         IPlayerEntity? GetPlayer(string playerName);
+        IList<IPlayerEntity> GetPlayers();
     }
 }

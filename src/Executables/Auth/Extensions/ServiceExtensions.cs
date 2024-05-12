@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using QuantumCore.API.PluginTypes;
+﻿using QuantumCore.API.PluginTypes;
 using QuantumCore.Auth.Persistence.Extensions;
 using QuantumCore.Caching.Extensions;
 

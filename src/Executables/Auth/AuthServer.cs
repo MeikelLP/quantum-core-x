@@ -1,4 +1,3 @@
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using QuantumCore.API;
 using QuantumCore.API.Game.Types;
@@ -14,7 +13,8 @@ namespace QuantumCore.Auth
         private readonly ILogger<AuthServer> _logger;
         private readonly ICacheManager _cacheManager;
 
-        public AuthServer(IOptions<HostingOptions> hostingOptions, IPacketManager packetManager, ILogger<AuthServer> logger,
+        public AuthServer(IOptions<HostingOptions> hostingOptions, IPacketManager packetManager,
+            ILogger<AuthServer> logger,
             PluginExecutor pluginExecutor, IServiceProvider serviceProvider, ICacheManager cacheManager)
             : base(packetManager, logger, pluginExecutor, serviceProvider, "auth", hostingOptions)
         {
@@ -26,7 +26,6 @@ namespace QuantumCore.Auth
         {
             // Register auth server features
             RegisterNewConnectionListener(NewConnection);
-            StartListening();
 
             var pong = await _cacheManager.Ping();
             if (!pong)

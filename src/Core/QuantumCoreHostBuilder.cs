@@ -11,7 +11,7 @@ namespace QuantumCore;
 
 public static class QuantumCoreHostBuilder
 {
-    public static async Task<IHostBuilder> CreateHostAsync(string[] args)
+    public static async Task<HostApplicationBuilder> CreateHostAsync(string[] args)
     {
         // workaround for https://github.com/dotnet/project-system/issues/3619
         var assemblyPath = Assembly.GetEntryAssembly()?.Location;
@@ -39,33 +39,33 @@ public static class QuantumCoreHostBuilder
             await pluginCatalog.Initialize();
         }
 
-        return Host.CreateDefaultBuilder(args)
-            .UseConsoleLifetime(x => x.SuppressStatusMessages = true)
-            .ConfigureServices((ctx, services) =>
-            {
-                services.AddCoreServices(pluginCatalog, ctx.Configuration);
 
-                var serviceCollectionPluginTypes = pluginCatalog.GetPlugins()
-                    .FindAll(x => typeof(IServiceCollectionPlugin).IsAssignableFrom(x.Type))
-                    .Select(x => x.Type)
-                    .ToArray();
-                foreach (var serviceCollectionPluginType in serviceCollectionPluginTypes)
-                {
-                    try
-                    {
-                        var serviceCollectionPlugin =
-                            (IServiceCollectionPlugin) Activator.CreateInstance(serviceCollectionPluginType)!;
-                        serviceCollectionPlugin.ModifyServiceCollection(services);
-                    }
-                    catch (Exception e)
-                    {
-                        // The application will crash / not start if a service plugin throws an exception
-                        // this is by design. They shall only modify the services and not have side effects
-                        Console.WriteLine(e);
-                        throw;
-                    }
-                }
-            });
+        var host = new HostApplicationBuilder(args);
+        host.Services.Configure<ConsoleLifetimeOptions>(opts => opts.SuppressStatusMessages = true);
+        host.Services.AddCoreServices(pluginCatalog, host.Configuration);
+
+        var serviceCollectionPluginTypes = pluginCatalog.GetPlugins()
+            .FindAll(x => typeof(IServiceCollectionPlugin).IsAssignableFrom(x.Type))
+            .Select(x => x.Type)
+            .ToArray();
+        foreach (var serviceCollectionPluginType in serviceCollectionPluginTypes)
+        {
+            try
+            {
+                var serviceCollectionPlugin =
+                    (IServiceCollectionPlugin) Activator.CreateInstance(serviceCollectionPluginType)!;
+                serviceCollectionPlugin.ModifyServiceCollection(host.Services);
+            }
+            catch (Exception e)
+            {
+                // The application will crash / not start if a service plugin throws an exception
+                // this is by design. They shall only modify the services and not have side effects
+                Console.WriteLine(e);
+                throw;
+            }
+        }
+
+        return host;
     }
 
     public static async Task RunAsync<T>(IHost host)

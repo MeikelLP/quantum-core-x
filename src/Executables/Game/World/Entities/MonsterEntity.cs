@@ -18,21 +18,25 @@ namespace QuantumCore.Game.World.Entities
         private readonly ILogger _logger;
         public override EEntityType Type => EEntityType.Monster;
 
-        public IBehaviour? Behaviour {
+        public IBehaviour? Behaviour
+        {
             get { return _behaviour; }
-            set {
+            set
+            {
                 _behaviour = value;
                 _behaviourInitialized = false;
             }
         }
 
-        public override byte HealthPercentage {
-            get {
-                return (byte)(Math.Min(Math.Max(Health / (double)_proto.Hp, 0), 1) * 100);
-            }
+        public override byte HealthPercentage
+        {
+            get { return (byte) (Math.Min(Math.Max(Health / (double) _proto.Hp, 0), 1) * 100); }
         }
 
-        public MonsterData Proto { get { return _proto; } }
+        public MonsterData Proto
+        {
+            get { return _proto; }
+        }
 
         public MonsterGroup? Group { get; set; }
 
@@ -43,7 +47,8 @@ namespace QuantumCore.Game.World.Entities
         private readonly IMap _map;
         private readonly IItemManager _itemManager;
 
-        public MonsterEntity(IMonsterManager monsterManager, IDropProvider dropProvider, IAnimationManager animationManager,
+        public MonsterEntity(IMonsterManager monsterManager, IDropProvider dropProvider,
+            IAnimationManager animationManager,
             IMap map, ILogger logger, IItemManager itemManager, uint id, int x, int y, float rotation = 0)
             : base(animationManager, map.World.GenerateVid())
         {
@@ -74,7 +79,7 @@ namespace QuantumCore.Game.World.Entities
                 // it's a monster
                 _behaviour = new SimpleBehaviour(monsterManager);
             }
-            else if(_proto.Type == (byte) EEntityType.Npc)
+            else if (_proto.Type == (byte) EEntityType.Npc)
             {
                 // npc
             }
@@ -112,7 +117,8 @@ namespace QuantumCore.Game.World.Entities
 
             base.Goto(x, y);
             // Send movement to nearby players
-            var movement = new CharacterMoveOut {
+            var movement = new CharacterMoveOut
+            {
                 Vid = Vid,
                 Rotation = (byte) (Rotation / 5),
                 Argument = (byte) CharacterMove.CharacterMovementType.Wait,
@@ -138,12 +144,12 @@ namespace QuantumCore.Game.World.Entities
 
         public override int GetMinDamage()
         {
-            return (int)_proto.DamageRange[0];
+            return (int) _proto.DamageRange[0];
         }
 
         public override int GetMaxDamage()
         {
-            return (int)_proto.DamageRange[1];
+            return (int) _proto.DamageRange[1];
         }
 
         public override int GetBonusDamage()
@@ -188,12 +194,13 @@ namespace QuantumCore.Game.World.Entities
                 case EPoints.AttackGrade:
                     return (uint) (_proto.Level * 2 + _proto.St * 2);
                 case EPoints.DefenceGrade:
-                    return (uint)(_proto.Level + _proto.Ht + _proto.Defence);
+                    return (uint) (_proto.Level + _proto.Ht + _proto.Defence);
                 case EPoints.DefenceBonus:
                     return 0;
                 case EPoints.Experience:
                     return _proto.Experience;
             }
+
             _logger.LogWarning("Point {Point} is not implemented on monster", point);
             return 0;
         }
@@ -209,7 +216,7 @@ namespace QuantumCore.Game.World.Entities
 
             base.Die();
 
-            var dead = new CharacterDead { Vid = Vid };
+            var dead = new CharacterDead {Vid = Vid};
             foreach (var entity in NearbyEntities)
             {
                 if (entity is PlayerEntity player)
@@ -225,6 +232,14 @@ namespace QuantumCore.Game.World.Entities
             if (LastAttacker is null) return;
 
             var mobDrops = _dropProvider.GetPossibleMobDropsForPlayer(LastAttacker, _proto.Id);
+
+            if (mobDrops.Length == 0)
+            {
+                _logger.LogWarning("No drops configured for mob {Name} ({MobProtoId})", _proto.TranslatedName,
+                    _proto.Id);
+                return;
+            }
+
             foreach (var drop in mobDrops)
             {
                 var chance = drop.Chance * Globals.DROP_MULTIPLIER;
@@ -290,7 +305,8 @@ namespace QuantumCore.Game.World.Entities
             if (_proto.Type == (byte) EEntityType.Npc)
             {
                 // NPCs need additional information too to show up for some reason
-                connection.Send(new CharacterInfo {
+                connection.Send(new CharacterInfo
+                {
                     Vid = Vid,
                     Empire = _proto.Empire,
                     Level = 0,

@@ -1,61 +1,70 @@
-﻿using System.Data;
-using Dapper;
-using QuantumCore.API;
-using QuantumCore.API.Data;
+using Microsoft.EntityFrameworkCore;
+using QuantumCore.API.Core.Models;
+using QuantumCore.Auth.Persistence.Entities;
+using QuantumCore.Auth.Persistence.Extensions;
 
 namespace QuantumCore.Auth.Persistence;
 
 public class AccountRepository : IAccountRepository
 {
-    private readonly IDbConnection _db;
+    private readonly AuthDbContext _db;
 
-    public AccountRepository(IDbConnection db)
+    public AccountRepository(AuthDbContext db)
     {
         _db = db;
     }
 
     public async Task<AccountData?> FindByNameAsync(string userName)
     {
-        var results = await _db.QueryAsync<AccountData, AccountStatusData, AccountData>(
-            "SELECT * FROM account.accounts a JOIN account.account_status s on a.Status = s.Id WHERE a.Username = @Username", (account, status) =>
-            {
-                account.AccountStatus = status;
-                return account;
-            }, new { Username = userName });
-
-        return results.FirstOrDefault();
+        return await _db.Accounts
+            .AsNoTracking()
+            .Where(x => x.Username == userName)
+            .SelectAccountData()
+            .FirstOrDefaultAsync();
     }
 
     public async Task<AccountData?> FindByIdAsync(Guid id)
     {
-        var results = await _db.QueryAsync<AccountData, AccountStatusData, AccountData>(
-            "SELECT * FROM account.accounts a JOIN account.account_status s on a.Status = s.Id WHERE a.Id = @Id", (account, status) =>
-            {
-                account.AccountStatus = status;
-                return account;
-            }, new { Id = id });
-
-        return results.FirstOrDefault();
+        return await _db.Accounts
+            .AsNoTracking()
+            .Where(x => x.Id == id)
+            .SelectAccountData()
+            .FirstOrDefaultAsync();
     }
 
-    public async Task CreateAsync(AccountData account)
+    public async Task<AccountData> CreateAsync(AccountData account)
     {
-        var result = await _db.ExecuteAsync("INSERT INTO account.accounts (Id, Username, Password, Email, DeleteCode) " +
-                                            "VALUES (@Id, @Username, @Password, @Email, @DeleteCode)", account);
-
-        if (result != 1)
+        var entity = new Account
         {
-            throw new InvalidOperationException(
-                "Creating an account did not result in 1 row changed. This should never happen");
-        }
-    }
+            Email = account.Email,
+            Username = account.Username,
+            Password = account.Password,
+            Status = account.Status,
+            CreatedAt = account.CreatedAt,
+            UpdatedAt = account.UpdatedAt,
+            DeleteCode = account.DeleteCode,
+        };
+        _db.Accounts.Add(entity);
+        await _db.SaveChangesAsync();
+        await _db.Entry(entity).Reference(x => x.AccountStatus).LoadAsync();
 
-    public async Task<string?> GetDeleteCodeAsync(Guid accountId)
-    {
-        return await _db.QueryFirstOrDefaultAsync<string>(
-            "SELECT DeleteCode FROM account.accounts WHERE Id = @accountId", new
+        return new AccountData
+        {
+            Id = entity.Id,
+            Email = entity.Email,
+            Username = entity.Username,
+            Password = entity.Password,
+            Status = entity.Status,
+            CreatedAt = entity.CreatedAt,
+            UpdatedAt = entity.UpdatedAt,
+            DeleteCode = entity.DeleteCode,
+            AccountStatus = new AccountStatusData
             {
-                accountId
-            });
+                Id = entity.AccountStatus.Id,
+                Description = entity.AccountStatus.Description,
+                AllowLogin = entity.AccountStatus.AllowLogin,
+                ClientStatus = entity.AccountStatus.ClientStatus,
+            }
+        };
     }
 }
