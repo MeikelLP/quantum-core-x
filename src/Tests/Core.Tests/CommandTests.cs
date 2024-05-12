@@ -447,12 +447,12 @@ public class CommandTests : IAsyncLifetime
 
         world.GetPlayer(_player.Name).Should().NotBeNull();
         
-        _player.Player.PlayTime = 10;
-        _connection.Server.ServerTime.Returns(60000);
+        _player.Player.PlayTime = 0;
+        _connection.Server.ServerTime.Returns(60000); // 1 minute in ms
 
         await _commandManager.Handle(_connection, "/logout");
 
-        _player.GetPoint(EPoints.PlayTime).Should().Be(11);
+        _player.GetPoint(EPoints.PlayTime).Should().Be(1);
         world.GetPlayer(_player.Name).Should().BeNull();
     }
 
