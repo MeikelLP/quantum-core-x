@@ -12,7 +12,7 @@ using QuantumCore.Game.Persistence;
 namespace QuantumCore.Game.Persistence.Migrations.Postgresql
 {
     [DbContext(typeof(PostgresqlGameDbContext))]
-    [Migration("20240513160800_Initial")]
+    [Migration("20240513161439_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -209,6 +209,13 @@ namespace QuantumCore.Game.Persistence.Migrations.Postgresql
                     b.HasIndex("PlayerId");
 
                     b.ToTable("PermissionUsers");
+
+                    b.HasData(
+                        new
+                        {
+                            GroupId = new Guid("45bff707-1836-42b7-956d-00b9b69e0ee0"),
+                            PlayerId = 1L
+                        });
                 });
 
             modelBuilder.Entity("QuantumCore.Game.Persistence.Entities.Player", b =>
@@ -299,6 +306,36 @@ namespace QuantumCore.Game.Persistence.Migrations.Postgresql
                     b.HasKey("Id");
 
                     b.ToTable("Players");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1L,
+                            AccountId = new Guid("e34fd5ab-fb3b-428e-935b-7db5bd08a3e5"),
+                            AvailableStatusPoints = 0L,
+                            BodyPart = 0L,
+                            CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Dx = (byte)99,
+                            Empire = (byte)0,
+                            Experience = 0L,
+                            GivenStatusPoints = 0L,
+                            Gold = 2000000000L,
+                            HairPart = 0L,
+                            Health = 99999L,
+                            Ht = (byte)99,
+                            Iq = (byte)99,
+                            Level = (byte)99,
+                            Mana = 99999L,
+                            Name = "Admin",
+                            PlayTime = 0L,
+                            PlayerClass = (byte)0,
+                            PositionX = 958870,
+                            PositionY = 272788,
+                            SkillGroup = (byte)0,
+                            St = (byte)99,
+                            Stamina = 0L,
+                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        });
                 });
 
             modelBuilder.Entity("QuantumCore.Game.Persistence.Entities.Item", b =>

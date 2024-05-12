@@ -14,5 +14,12 @@ public class PermUser
     public static void Configure(EntityTypeBuilder<PermUser> builder, DatabaseFacade database)
     {
         builder.HasKey(x => new {x.GroupId, x.PlayerId});
+        builder.HasData([
+            new PermUser
+            {
+                PlayerId = 1,
+                GroupId = PermGroup.OperatorGroup
+            }
+        ]);
     }
 }
