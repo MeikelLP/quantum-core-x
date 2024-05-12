@@ -812,6 +812,46 @@ namespace QuantumCore.Game.World.Entities
             await Persist();
         }
 
+        public int GetMobItemRate()
+        {
+            // todo: implement server rates, and premium server rates
+            if (GetPremiumRemainSeconds(EPremiumTypes.Item) > 0)
+                return 100;
+            return 100;
+        }
+
+        public int GetPremiumRemainSeconds(EPremiumTypes type)
+        {
+            _logger.LogTrace("GetPremiumRemainSeconds not implemented yet");
+            return 0; // todo: implement premium system
+        }
+        
+        public bool HasUniqueGroupItemEquipped(uint itemProtoId)
+        {
+            _logger.LogTrace("HasUniqueGroupItemEquipped not implemented yet");
+            return false; // todo: implement unique group item system
+        }
+
+        public bool HasUniqueItemEquipped(uint itemProtoId)
+        {
+            {
+                var item = Inventory.EquipmentWindow.GetItem(EquipmentSlots.Unique1);
+                if (item != null && item.ItemId == itemProtoId)
+                {
+                    return true;
+                }
+            }
+            {
+                var item = Inventory.EquipmentWindow.GetItem(EquipmentSlots.Unique2);
+                if (item != null && item.ItemId == itemProtoId)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         public ItemInstance? GetItem(byte window, ushort position)
         {
             switch (window)

@@ -4,7 +4,10 @@ using System.Text;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
+using QuantumCore.API.Core.Models;
+using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.World;
+using QuantumCore.Core.Utils;
 using QuantumCore.Game.World.Entities;
 
 namespace QuantumCore.Game.Services;
@@ -67,11 +70,82 @@ public class DropProvider : IDropProvider
             .ToArray();
         return Task.CompletedTask;
     }
+    
+    // todo: move and refactor this
+    int NumberEx(int from, int to)
+    {
+        if (from > to)
+        {
+            (from, to) = (to, from);
+        }
+
+        int returnValue = 0;
+
+        if ((to - from + 1) != 0)
+            returnValue = (new Random().Next(to - from + 1)) + from;
+        else
+            Console.WriteLine("number(): divided by 0");
+
+        return returnValue;
+    }
 
     public (int deltaPercentage, int dropRange) CalculateDropPercentages(IPlayerEntity player, MonsterEntity monster)
     {
         var deltaPercentage = 0;
         var dropRange = 0;
+
+        var levelDropDelta = (int) (monster.GetPoint(EPoints.Level) + 15 - player.GetPoint(EPoints.Level));
+
+        deltaPercentage = monster is {IsStone: false, Rank: >= EEntityRank.Boss}
+            ? _bossPercentageDeltas[MathUtils.MinMax(0, levelDropDelta, _bossPercentageDeltas.Length)]
+            : _mobPercentageDeltas[MathUtils.MinMax(0, levelDropDelta, _mobPercentageDeltas.Length)];
+        
+        if (1 == NumberEx(1, 50000))
+            deltaPercentage += 1000;
+        else if (1 == NumberEx(1, 10000))
+            deltaPercentage += 500;
+        
+        _logger.LogDebug("CalculateDropPercentages for level: {Level} rank: {Rank} percentage: {DeltaPercentage}", 
+            player.GetPoint(EPoints.Level), monster.Rank.ToString(), deltaPercentage);
+        
+        deltaPercentage = deltaPercentage * player.GetMobItemRate() / 100;
+        
+        if (player.GetPoint(EPoints.MallItemBonus) > 0)
+        {
+            deltaPercentage += (int) (deltaPercentage * player.GetPoint(EPoints.MallItemBonus) / 100);
+        }
+        
+        const int UNIQUE_GROUP_DOUBLE_ITEM = 10002; // todo: magic numbers
+        const int UNIQUE_ITEM_DOUBLE_ITEM = 70043;  // todo: magic numbers
+        
+        // Premium
+        if (player.GetPremiumRemainSeconds(EPremiumTypes.Item) > 0 || player.HasUniqueGroupItemEquipped(UNIQUE_GROUP_DOUBLE_ITEM))
+        {
+            deltaPercentage += deltaPercentage;
+        }
+        // Premium end
+
+        var bonus = 0;
+        if (player.HasUniqueItemEquipped(UNIQUE_ITEM_DOUBLE_ITEM) && player.GetPremiumRemainSeconds(EPremiumTypes.Item) > 0)
+        {
+            // irremovable gloves + mall item bonus
+            bonus = 100;
+            _logger.LogDebug("Player has irremovable gloves and mall item bonus");
+        }
+        else if (player.HasUniqueItemEquipped(UNIQUE_ITEM_DOUBLE_ITEM) 
+                 || (player.HasUniqueGroupItemEquipped(UNIQUE_GROUP_DOUBLE_ITEM) && player.GetPremiumRemainSeconds(EPremiumTypes.Item) > 0))
+        {
+            // irremovable gloves OR removeable gloves + mall item bonus
+            bonus = 50;
+            _logger.LogDebug("Player has irremovable gloves OR removeable gloves and mall item bonus");
+        }
+        
+        var itemDropBonus = (int) Math.Min(100, player.GetPoint(EPoints.ItemDropBonus));
+
+        var empireBonusDrop = 0; // todo: implement server / empire rates
+        
+        dropRange = 4_000_000;
+        dropRange = dropRange * 100 / (100 + empireBonusDrop + bonus + itemDropBonus);
         
         return (deltaPercentage, dropRange);
     }

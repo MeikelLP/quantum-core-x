@@ -13,7 +13,18 @@ namespace QuantumCore.API.Game.World
     {
         Monster = 0,
         Npc = 1,
+        MetinStone = 2,
         Player = 6
+    }
+    
+    public enum EEntityRank
+    {
+        Pawn,
+        SPawn,
+        Knight,
+        SKnight,
+        Boss,
+        King,
     }
 
     public interface IEntity

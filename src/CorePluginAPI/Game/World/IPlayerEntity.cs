@@ -50,5 +50,9 @@ namespace QuantumCore.API.Game.World
         void Disconnect();
         string ToString();
         Task OnDespawnAsync();
+        int GetMobItemRate();
+        bool HasUniqueItemEquipped(uint itemProtoId);
+        bool HasUniqueGroupItemEquipped(uint itemProtoId);
+        int GetPremiumRemainSeconds(EPremiumTypes type);
     }
 }

@@ -17,6 +17,8 @@ namespace QuantumCore.Game.World.Entities
         private readonly IDropProvider _dropProvider;
         private readonly ILogger _logger;
         public override EEntityType Type => EEntityType.Monster;
+        public bool IsStone => _proto.Type == (byte) EEntityType.MetinStone;
+        public EEntityRank Rank => (EEntityRank) _proto.Rank;
 
         public IBehaviour? Behaviour
         {
@@ -238,8 +240,15 @@ namespace QuantumCore.Game.World.Entities
                 _logger.LogWarning("No drops configured for mob {Name} ({MobProtoId})", _proto.TranslatedName, _proto.Id);
                 return;
             }
+
+            bool dropDebug = true; // todo: parse from config
             
             var (delta, range) = _dropProvider.CalculateDropPercentages(LastAttacker, this);
+            
+            if (dropDebug)
+            {
+                _logger.LogInformation("Drop chance for {Name} ({MobProtoId}) is {Delta} with range {Range}", _proto.TranslatedName, _proto.Id, delta, range);
+            }
 
             foreach (var drop in mobDrops)
             {
@@ -334,6 +343,7 @@ namespace QuantumCore.Game.World.Entities
                 Vid = Vid
             });
         }
+        
 
         public override string ToString()
         {
