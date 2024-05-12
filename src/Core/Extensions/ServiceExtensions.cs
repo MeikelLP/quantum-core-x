@@ -1,10 +1,7 @@
-﻿using System.Data;
 using System.Reflection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using MySqlConnector;
 using QuantumCore.API.PluginTypes;
 using QuantumCore.Networking;
 using Serilog;
@@ -23,22 +20,10 @@ public static class ServiceExtensions
     /// </summary>
     /// <param name="services"></param>
     /// <param name="pluginCatalog"></param>
+    /// <param name="configuration"></param>
     /// <returns></returns>
-    public static IServiceCollection AddQuantumCoreDatabase(this IServiceCollection services)
-    {
-        services.AddOptions<DatabaseOptions>()
-            .BindConfiguration("Database")
-            .ValidateDataAnnotations();
-        services.AddTransient<IDbConnection>(provider =>
-        {
-            var options = provider.GetRequiredService<IOptions<DatabaseOptions>>().Value;
-            return new MySqlConnection(options.ConnectionString);
-        });
-
-        return services;
-    }
-
-    public static IServiceCollection AddCoreServices(this IServiceCollection services, IPluginCatalog pluginCatalog, IConfiguration configuration)
+    public static IServiceCollection AddCoreServices(this IServiceCollection services, IPluginCatalog pluginCatalog,
+        IConfiguration configuration)
     {
         services.AddOptions<HostingOptions>()
             .BindConfiguration("Hosting")
@@ -54,10 +39,10 @@ public static class ServiceExtensions
             var handlerTypes = AppDomain.CurrentDomain.GetAssemblies().SelectMany(x => x.ExportedTypes)
                 .Where(x =>
                     x.IsAssignableTo(typeof(IPacketHandler)) &&
-                    x is { IsClass: true, IsAbstract: false, IsInterface: false })
+                    x is {IsClass: true, IsAbstract: false, IsInterface: false})
                 .OrderBy(x => x.FullName)
                 .ToArray();
-            return ActivatorUtilities.CreateInstance<PacketManager>(provider, new object[] { (IEnumerable<Type>)packetTypes, handlerTypes });
+            return ActivatorUtilities.CreateInstance<PacketManager>(provider, [packetTypes, handlerTypes]);
         });
         services.AddSingleton<IPacketReader, PacketReader>();
         services.AddSingleton<PluginExecutor>();

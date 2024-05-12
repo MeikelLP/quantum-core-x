@@ -1,5 +1,5 @@
-﻿using System.Data;
 using BenchmarkDotNet.Attributes;
+using Core.Persistence.Extensions;
 using Game.Caching.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -28,11 +28,9 @@ namespace Game.Benchmarks.Benchmarks;
 [MediumRunJob]
 public class WorldUpdateBenchmark
 {
-    [Params(0, 100, 1000)]
-    public int MobAmount;
+    [Params(0, 100, 1000)] public int MobAmount;
 
-    [Params(0, 1, 10)]
-    public int PlayerAmount;
+    [Params(0, 1, 10)] public int PlayerAmount;
 
     private World _world = null!;
 
@@ -50,28 +48,30 @@ public class WorldUpdateBenchmark
             .AddGameCaching()
             .AddQuantumCoreDatabase()
             .AddGameServices()
-            .Replace(new ServiceDescriptor(typeof(IDbConnection), _ => new Mock<IDbConnection>().Object, ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(IAtlasProvider), provider =>
             {
                 var mock = new Mock<IAtlasProvider>();
-                mock.Setup(x => x.GetAsync(It.IsAny<IWorld>())).ReturnsAsync<IWorld, IAtlasProvider, IEnumerable<IMap>>(world => new []
-                {
-                    new Map(provider.GetRequiredService<IMonsterManager>(),
-                        provider.GetRequiredService<IAnimationManager>(),
-                        provider.GetRequiredService<ICacheManager>(), world,
-                        provider.GetRequiredService<IOptions<HostingOptions>>(),
-                        provider.GetRequiredService<ILogger<Map>>(),
-                        provider.GetRequiredService<ISpawnPointProvider>(),
-                        provider.GetRequiredService<IDropProvider>(),
-                        provider.GetRequiredService<IItemManager>(),
-                        "test_map", 0, 0, 1024, 1024)
-                });
+                mock.Setup(x => x.GetAsync(It.IsAny<IWorld>())).ReturnsAsync<IWorld, IAtlasProvider, IEnumerable<IMap>>(
+                    world => new[]
+                    {
+                        new Map(provider.GetRequiredService<IMonsterManager>(),
+                            provider.GetRequiredService<IAnimationManager>(),
+                            provider.GetRequiredService<ICacheManager>(), world,
+                            provider.GetRequiredService<IOptions<HostingOptions>>(),
+                            provider.GetRequiredService<ILogger<Map>>(),
+                            provider.GetRequiredService<ISpawnPointProvider>(), 
+                            provider.GetRequiredService<IDropProvider>(),
+                            provider.GetRequiredService<IItemManager>(),
+                            "test_map", 0, 0, 1024, 1024
+                        )
+                    });
+                        
                 return mock.Object;
             }, ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(ICacheManager), _ =>
             {
                 var mock = new Mock<ICacheManager>();
-                mock.Setup(x => x.Keys("maps:*")).ReturnsAsync(new []{"maps:test_map"});
+                mock.Setup(x => x.Keys("maps:*")).ReturnsAsync(new[] {"maps:test_map"});
                 mock.Setup(x => x.Subscribe()).Returns(new Mock<IRedisSubscriber>().Object);
                 return mock.Object;
             }, ServiceLifetime.Singleton))
@@ -107,7 +107,7 @@ public class WorldUpdateBenchmark
                 var mock = new Mock<IMonsterManager>();
                 mock.Setup(x => x.GetMonster(42)).Returns(new MonsterData
                 {
-                    Type = (byte)EEntityType.Monster
+                    Type = (byte) EEntityType.Monster
                 });
                 return mock.Object;
             }, ServiceLifetime.Singleton))
@@ -130,10 +130,12 @@ public class WorldUpdateBenchmark
             var entity = ActivatorUtilities.CreateInstance<PlayerEntity>(services, _world, player, conn);
             _world.SpawnEntity(entity);
         }
+
         foreach (var e in _world.GetMapAt(0, 0)!.Entities)
         {
             e?.Goto(0, 0);
         }
+
         _world.Update(0.2); // spawn entities
     }
 

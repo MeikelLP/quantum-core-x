@@ -7,6 +7,7 @@ namespace Game.Caching;
 public class CachePlayerRepository : ICachePlayerRepository
 {
     private readonly ICacheManager _cacheManager;
+
     public CachePlayerRepository(ICacheManager cacheManager)
     {
         _cacheManager = cacheManager;
@@ -29,10 +30,10 @@ public class CachePlayerRepository : ICachePlayerRepository
         return await _cacheManager.Get<PlayerData>(key);
     }
 
-    public async Task SetPlayerAsync(PlayerData player, byte slot)
+    public async Task SetPlayerAsync(PlayerData player)
     {
         await _cacheManager.Set($"player:{player.Id.ToString()}", player);
-        await _cacheManager.Set($"players:{player.AccountId.ToString()}:{slot}", player);
+        await _cacheManager.Set($"players:{player.AccountId.ToString()}:{player.Slot}", player);
     }
 
     public async Task CreateAsync(PlayerData player)
@@ -63,7 +64,18 @@ public class CachePlayerRepository : ICachePlayerRepository
         }
 
         // TODO delete items from players inventory
-        key = $"items:{player.Id}:{(byte)WindowType.Inventory}";
+        key = $"items:{player.Id}:{(byte) WindowType.Inventory}";
         await _cacheManager.Del(key);
+    }
+
+    public async Task<byte?> GetTempEmpireAsync(Guid accountId)
+    {
+        var empireRedisKey = $"temp:empire-selection:{accountId}";
+        return await _cacheManager.Get<byte?>(empireRedisKey);
+    }
+
+    public async Task SetTempEmpireAsync(Guid accountId, byte empire)
+    {
+        await _cacheManager.Set($"temp:empire-selection:{accountId}", empire);
     }
 }

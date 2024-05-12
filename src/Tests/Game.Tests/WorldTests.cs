@@ -1,4 +1,4 @@
-using System.Data;
+using Core.Persistence.Extensions;
 using Game.Caching.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,7 +9,6 @@ using NSubstitute;
 using QuantumCore;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
-using QuantumCore.API.Data;
 using QuantumCore.API.Game.World;
 using QuantumCore.Caching;
 using QuantumCore.Caching.Extensions;
@@ -26,14 +25,16 @@ namespace Game.Tests;
 
 public class WorldTests
 {
-
     private World _world = null!;
     private readonly PlayerEntity _playerEntity;
 
     public WorldTests()
     {
         var config = new ConfigurationBuilder()
-            .AddInMemoryCollection(new Dictionary<string, string>())
+            .AddInMemoryCollection(new Dictionary<string, string>
+            {
+                {"Hosting:IpAddress", "0.0.0.0"}
+            })
             .Build();
         var services = new ServiceCollection()
             .AddLogging()
@@ -43,12 +44,15 @@ public class WorldTests
             .AddGameCaching()
             .AddQuantumCoreDatabase()
             .AddGameServices()
-            .Replace(new ServiceDescriptor(typeof(IDbConnection), _ => Substitute.For<IDbConnection>(), ServiceLifetime.Singleton))
-            .Replace(new ServiceDescriptor(typeof(IAccountRepository), _ => Substitute.For<IAccountRepository>(), ServiceLifetime.Singleton))
+            .Configure<DatabaseOptions>(opts =>
+            {
+                opts.ConnectionString = "Server:abc;";
+                opts.Provider = DatabaseProvider.Mysql;
+            })
             .Replace(new ServiceDescriptor(typeof(IAtlasProvider), provider =>
             {
                 var mock = Substitute.For<IAtlasProvider>();
-                mock.GetAsync(Arg.Any<IWorld>()).Returns(info => new []
+                mock.GetAsync(Arg.Any<IWorld>()).Returns(info => new[]
                 {
                     new Map(provider.GetRequiredService<IMonsterManager>(),
                         provider.GetRequiredService<IAnimationManager>(),
@@ -65,7 +69,7 @@ public class WorldTests
             .Replace(new ServiceDescriptor(typeof(ICacheManager), _ =>
             {
                 var mock = Substitute.For<ICacheManager>();
-                mock.Keys("maps:*").Returns(new []{"maps:test_map"});
+                mock.Keys("maps:*").Returns(new[] {"maps:test_map"});
                 mock.Subscribe().Returns(Substitute.For<IRedisSubscriber>());
                 return mock;
             }, ServiceLifetime.Singleton))
@@ -101,7 +105,7 @@ public class WorldTests
                 var mock = Substitute.For<IMonsterManager>();
                 mock.GetMonster(42).Returns(new MonsterData
                 {
-                    Type = (byte)EEntityType.Monster
+                    Type = (byte) EEntityType.Monster
                 });
                 return mock;
             }, ServiceLifetime.Singleton))

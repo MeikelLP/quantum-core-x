@@ -5,6 +5,7 @@ using QuantumCore.API.Game;
 using QuantumCore.API.Game.World;
 using QuantumCore.Caching;
 using QuantumCore.Extensions;
+using QuantumCore.Game.Extensions;
 
 namespace QuantumCore.Game.Commands
 {
@@ -30,7 +31,7 @@ namespace QuantumCore.Game.Commands
 
             if (target is null)
             {
-                context.Player.SendChatMessage("Target not found");
+                context.Player.SendChatInfo("Target not found");
             }
             else
             {

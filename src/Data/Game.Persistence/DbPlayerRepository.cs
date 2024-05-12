@@ -1,58 +1,113 @@
-﻿using System.Data;
-using Dapper;
+﻿using Microsoft.EntityFrameworkCore;
 using QuantumCore.API.Core.Models;
+using QuantumCore.Game.Persistence.Entities;
+using QuantumCore.Game.Persistence.Extensions;
 
 namespace QuantumCore.Game.Persistence;
 
 public class DbPlayerRepository : IDbPlayerRepository
 {
-    private readonly IDbConnection _db;
+    private readonly GameDbContext _db;
 
-    public DbPlayerRepository(IDbConnection db)
+    public DbPlayerRepository(GameDbContext db)
     {
         _db = db;
     }
-    
+
     public async Task<PlayerData[]> GetPlayersAsync(Guid accountId)
     {
-       var players = await _db.QueryAsync<PlayerData>("SELECT * FROM game.players WHERE AccountId = @AccountId ORDER BY CreatedAt",
-            new { AccountId = accountId });
-
-       return players.ToArray();
+        return await _db.Players
+            .AsNoTracking()
+            .Where(x => x.AccountId == accountId)
+            .SelectPlayerData()
+            .ToArrayAsync();
     }
 
     public async Task<bool> IsNameInUseAsync(string name)
     {
-        var count = await _db.QuerySingleAsync<int>("SELECT COUNT(*) FROM game.players WHERE Name = @Name", new {Name = name});
-        return count > 0;
+        return await _db.Players.AnyAsync(x => x.Name == name);
     }
 
     public async Task CreateAsync(PlayerData player)
     {
-        var result = await _db.ExecuteAsync(@"
-INSERT INTO game.players (Id, AccountId, PlayerClass, SkillGroup, PlayTime, Level, Experience, Gold, St, Ht, Dx, Iq, PositionX, PositionY, Health, Mana, Stamina, BodyPart, HairPart, Name, GivenStatusPoints, AvailableStatusPoints)
-VALUES (@Id, @AccountId, @PlayerClass, @SkillGroup, @PlayTime, @Level, @Experience, @Gold, @St, @Ht, @Dx, @Iq, @PositionX, @PositionY, @Health, @Mana, @Stamina, @BodyPart, @HairPart, @Name, @GivenStatusPoints, @AvailableStatusPoints)", player);
-        if (result != 1)
+        _db.Add(new Player
         {
-            throw new Exception("Failed to create player");
-        }
+            Id = player.Id,
+            AccountId = player.AccountId,
+            Name = player.Name,
+            PlayerClass = player.PlayerClass,
+            SkillGroup = player.SkillGroup,
+            PlayTime = player.PlayTime,
+            Level = player.Level,
+            Experience = player.Experience,
+            Gold = player.Gold,
+            St = player.St,
+            Ht = player.Ht,
+            Dx = player.Dx,
+            Iq = player.Iq,
+            PositionX = player.PositionX,
+            PositionY = player.PositionY,
+            Health = player.Health,
+            Mana = player.Mana,
+            Stamina = player.Stamina,
+            BodyPart = player.BodyPart,
+            HairPart = player.HairPart,
+            GivenStatusPoints = player.GivenStatusPoints,
+            AvailableStatusPoints = player.AvailableStatusPoints,
+            Empire = player.Empire,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        });
+        await _db.SaveChangesAsync();
     }
 
     public async Task DeletePlayerAsync(PlayerData player)
     {
-        await _db.ExecuteAsync("""
-            START TRANSACTION;
-            INSERT INTO game.deleted_players (Id, AccountId, PlayerClass, SkillGroup, PlayTime, Level, Experience, Gold, St, Ht, Dx, Iq, PositionX, PositionY, Health, Mana, Stamina, BodyPart, HairPart, Name, DeletedAt)
-            VALUES (@Id, @AccountId, @PlayerClass, @SkillGroup, @PlayTime, @Level, @Experience, @Gold, @St, @Ht, @Dx, @Iq, @PositionX, @PositionY, @Health, @Mana, @Stamina, @BodyPart, @HairPart, @Name, UTC_TIMESTAMP());
-            DELETE FROM game.items WHERE PlayerId = @Id;
-            DELETE FROM game.players WHERE Id = @Id;
-            COMMIT;
-            """, player);
+        await _db.Players.Where(x => x.Id == player.Id).ExecuteDeleteAsync();
+    }
+
+    public async Task UpdateEmpireAsync(Guid accountId, Guid playerId, byte empire)
+    {
+        await _db.Players
+            .Where(x => x.AccountId == accountId && x.Id == playerId)
+            .ExecuteUpdateAsync(setters => setters.SetProperty(x => x.Empire, empire));
+    }
+
+    public async Task SetPlayerAsync(PlayerData data)
+    {
+        var entity = await _db.Players.FirstOrDefaultAsync(x => x.Id == data.Id);
+        if (entity is null) return;
+
+        entity.Empire = data.Empire;
+        entity.PlayerClass = data.PlayerClass;
+        entity.SkillGroup = data.SkillGroup;
+        entity.PlayTime = data.PlayTime;
+        entity.Level = data.Level;
+        entity.Experience = data.Experience;
+        entity.Gold = data.Gold;
+        entity.St = data.St;
+        entity.Ht = data.Ht;
+        entity.Dx = data.Dx;
+        entity.Iq = data.Iq;
+        entity.PositionX = data.PositionX;
+        entity.PositionY = data.PositionY;
+        entity.Health = data.Health;
+        entity.Mana = data.Mana;
+        entity.Stamina = data.Stamina;
+        entity.BodyPart = data.BodyPart;
+        entity.HairPart = data.HairPart;
+        entity.Name = data.Name;
+        entity.GivenStatusPoints = data.GivenStatusPoints;
+        entity.AvailableStatusPoints = data.AvailableStatusPoints;
+
+        await _db.SaveChangesAsync();
     }
 
     public async Task<PlayerData?> GetPlayerAsync(Guid playerId)
     {
-        return await _db.QueryFirstOrDefaultAsync<PlayerData>("SELECT * FROM game.players WHERE Id = @PlayerId", 
-            new {PlayerId = playerId});
+        return await _db.Players
+            .Where(x => x.Id == playerId)
+            .SelectPlayerData()
+            .FirstOrDefaultAsync();
     }
 }

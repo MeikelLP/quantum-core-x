@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using System.Text.RegularExpressions;
 using EnumsNET;
 using QuantumCore.API.Game.World;
@@ -21,34 +21,34 @@ internal static partial class ParserUtils
         {
             Type = Enums.Parse<ESpawnPointType>(splitted[0].AsSpan()[..1], true, EnumFormat.EnumMemberValue),
             IsAggressive = splitted[0].Length > 1 &&
-                           splitted[0].AsSpan()[1..2].Equals("a", INV_CUL),
+                           splitted[0].AsSpan()[1..2].Equals("a", StringComparison.InvariantCultureIgnoreCase),
             X = int.Parse(splitted[1]),
             Y = int.Parse(splitted[2]),
             RangeX = int.Parse(splitted[3]),
             RangeY = int.Parse(splitted[4]),
             Direction = int.Parse(splitted[5]),
             // splitted[6],
-            RespawnTime = ParseSecondsFromTimespanString(splitted[7]),
+            RespawnTime = ParseSecondsFromTimespanString(splitted[7].Trim()),
             Chance = short.Parse(splitted[8]),
             MaxAmount = short.Parse(splitted[9]),
             Monster = uint.Parse(splitted[10])
         };
     }
 
-    private static int ParseSecondsFromTimespanString(string str)
+    private static int ParseSecondsFromTimespanString(ReadOnlySpan<char> str)
     {
-        var value = int.Parse(str.AsSpan()[..^1]);
-        if (str.EndsWith("s", INV_CUL))
+        var value = int.Parse(str[..^1]);
+        if (str.EndsWith("s", StringComparison.InvariantCultureIgnoreCase))
         {
             return value;
         }
 
-        if (str.EndsWith("m", INV_CUL))
+        if (str.EndsWith("m", StringComparison.InvariantCultureIgnoreCase))
         {
             return value * 60;
         }
 
-        if (str.EndsWith("h", INV_CUL))
+        if (str.EndsWith("h", StringComparison.InvariantCultureIgnoreCase))
         {
             return value * 3600;
         }
@@ -71,14 +71,13 @@ internal static partial class ParserUtils
         line = (await sr.ReadLineAsync())!;
         item.Id = uint.Parse(line.Replace("Vnum", "").Trim());
         line = (await sr.ReadLineAsync())!;
-        item.Leader = uint.Parse(SplitByWhitespaceRegex().Split(LeaderReplaceRegex().Replace(line, "", 1).Trim())[1]
-            .Trim());
+        item.Leader = uint.Parse(SplitLine(LeaderReplaceRegex().Replace(line, "", 1).Trim())[1].Trim());
         while ((line = (await sr.ReadLineAsync())!.Trim()) != "}")
         {
             if (string.IsNullOrWhiteSpace(line)) break;
             item.Members.Add(new SpawnMember
             {
-                Id = uint.Parse(SplitByWhitespaceRegex().Split(line)[^1].Trim())
+                Id = uint.Parse(SplitByWhitespaceOrTabRegex().Split(line)[^1].Trim())
             });
         }
 
@@ -158,18 +157,35 @@ internal static partial class ParserUtils
         {
             if (string.IsNullOrWhiteSpace(line)) continue;
             var splitted = SplitByWhitespaceRegex().Split(line);
+            var id = uint.Parse(splitted[1].Trim());
+            var amount = splitted.Length == 2
+                ? (byte) 1
+                : byte.Parse(splitted[2].Trim());
             item.Groups.Add(new SpawnGroupCollectionMember
             {
-                Id = uint.Parse(splitted[^2].Trim()),
-                Amount = byte.Parse(splitted[^1].Trim())
+                Id = id,
+                Amount = amount
             });
         }
 
         return item;
     }
 
+    public static string[] SplitLine(string line)
+    {
+        if (line.Contains('\t'))
+        {
+            return line.Split('\t', StringSplitOptions.RemoveEmptyEntries);
+        }
+
+        return line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+    }
+
     [GeneratedRegex("(?: {2,}|\\t+)")]
     private static partial Regex SplitByWhitespaceRegex();
+
+    [GeneratedRegex(@"\s+")]
+    private static partial Regex SplitByWhitespaceOrTabRegex();
 
     [GeneratedRegex("Leader")]
     private static partial Regex LeaderReplaceRegex();

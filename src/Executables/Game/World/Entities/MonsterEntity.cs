@@ -225,6 +225,13 @@ namespace QuantumCore.Game.World.Entities
             if (LastAttacker is null) return;
 
             var mobDrops = _dropProvider.GetDropsForMob(_proto.Id);
+
+            if (mobDrops.IsDefaultOrEmpty)
+            {
+                _logger.LogWarning("No drops configured for mob {Name} ({MobProtoId})", _proto.TranslatedName, _proto.Id);
+                return;
+            }
+            
             foreach (var drop in mobDrops)
             {
                 if (!drop.CanDropFor(LastAttacker)) continue;

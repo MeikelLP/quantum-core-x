@@ -6,8 +6,11 @@ obj/
 examples/
 *.user
 .DS_Store
+**/logs/*
 
 # Generated
 ItemProto.cs
 MobProto.cs
 packages.lock.json
+
+appsettings.*.json

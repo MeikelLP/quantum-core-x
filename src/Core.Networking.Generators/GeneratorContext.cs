@@ -56,7 +56,7 @@ internal class GeneratorContext
             var desPosition = field.Order!.Value;
             if (desPosition >= fields.Count)
             {
-                throw new DiagnosticException("QCX-G000004",
+                throw new DiagnosticException("QCX000004",
                     $"Field cannot have a higher number ({desPosition}) than actual fields count {fields.Count}",
                     field.SyntaxNode.GetLocation());
             }
@@ -67,7 +67,7 @@ internal class GeneratorContext
             }
             catch (ArgumentOutOfRangeException)
             {
-                throw new DiagnosticException("QCX-G000005",
+                throw new DiagnosticException("QCX000005",
                     $"Field configuration for type {type.Identifier.Text} is invalid", field.SyntaxNode.GetLocation());
             }
         }
@@ -81,7 +81,7 @@ internal class GeneratorContext
                 var index = finalArr.FindIndex(x => x.Name == sizeFieldName);
                 if (index > i)
                 {
-                    throw new DiagnosticException("QCX-G000003",
+                    throw new DiagnosticException("QCX000003",
                         "Size fields must be have a position before their array", field.SyntaxNode.GetLocation());
                 }
             }
@@ -144,7 +144,7 @@ internal class GeneratorContext
         if ((fieldType.Name == "String" && stringLength is null && sizeFieldName is null) ||
             (type is ArrayTypeSyntax && sizeFieldName is null && arrayLength is null))
         {
-            throw new DiagnosticException("QCX-G000002",
+            throw new DiagnosticException("QCX000002",
                 "String or array must have a defined a static length either via FieldAttribute or an array constructor as default value. Dynamic fields must have a field that refers to it's size like \"public uint Size => Message.Length;\"",
                 name.Parent!.GetLocation());
         }
