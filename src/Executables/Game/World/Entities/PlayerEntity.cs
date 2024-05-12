@@ -755,12 +755,21 @@ namespace QuantumCore.Game.World.Entities
 
                 return;
             }
+            
+            if (groundItem.OwnerName != null && !string.Equals(groundItem.OwnerName, Name))
+            {
+                SendChatInfo("This item is not yours");
+                return;
+            }
 
             if (!Inventory.PlaceItem(item).Result) // TODO
             {
                 SendChatInfo("No inventory space left");
                 return;
             }
+            
+            var itemName = _itemManager.GetItem(item.ItemId)?.TranslatedName ?? "Unknown";
+            SendChatInfo($"You picked up {groundItem.Amount}x {itemName}");
 
             SendItem(item);
             Map.DespawnEntity(groundItem);
