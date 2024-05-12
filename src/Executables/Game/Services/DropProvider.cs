@@ -1,8 +1,11 @@
 ﻿using System.Collections.Immutable;
 using System.Globalization;
 using System.Text;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
+using QuantumCore.API.Game.World;
+using QuantumCore.Game.World.Entities;
 
 namespace QuantumCore.Game.Services;
 
@@ -12,13 +15,17 @@ public class DropProvider : IDropProvider
     private readonly Dictionary<uint, float> _simpleMobDrops = new();
 
     private readonly ILogger<DropProvider> _logger;
+    private readonly IConfiguration _configuration;
     private readonly IItemManager _itemManager;
     private readonly IMonsterManager _monsterManager;
     private static readonly Encoding FileEncoding = Encoding.GetEncoding("EUC-KR");
+    private int[] _bossPercentageDeltas;
+    private int[] _mobPercentageDeltas;
 
-    public DropProvider(ILogger<DropProvider> logger, IItemManager itemManager, IMonsterManager monsterManager)
+    public DropProvider(ILogger<DropProvider> logger, IConfiguration configuration, IItemManager itemManager, IMonsterManager monsterManager)
     {
         _logger = logger;
+        _configuration = configuration;
         _itemManager = itemManager;
         _monsterManager = monsterManager;
     }
@@ -38,10 +45,35 @@ public class DropProvider : IDropProvider
     public async Task LoadAsync(CancellationToken cancellationToken = default)
     {
         await Task.WhenAll(
+            LoadDeltaPercentagesAsync(cancellationToken),
             LoadDropsForMonstersAsync(cancellationToken),
             LoadSimpleMobDropsAsync(cancellationToken),
             LoadCommonMobDropsAsync(cancellationToken)
         );
+    }
+
+    private Task LoadDeltaPercentagesAsync(CancellationToken cancellationToken = default)
+    {
+        _bossPercentageDeltas = _configuration.GetSection("drops:delta:boss")
+            .AsEnumerable(true)
+            .OrderBy(x => x.Value)
+            .Select(x => int.Parse(x.Value!))
+            .ToArray();
+        
+        _mobPercentageDeltas = _configuration.GetSection("drops:delta:normal")
+            .AsEnumerable(true)
+            .OrderBy(x => x.Value)
+            .Select(x => int.Parse(x.Value!))
+            .ToArray();
+        return Task.CompletedTask;
+    }
+
+    public (int deltaPercentage, int dropRange) CalculateDropPercentages(IPlayerEntity player, MonsterEntity monster)
+    {
+        var deltaPercentage = 0;
+        var dropRange = 0;
+        
+        return (deltaPercentage, dropRange);
     }
 
     private async Task LoadCommonMobDropsAsync(CancellationToken cancellationToken)

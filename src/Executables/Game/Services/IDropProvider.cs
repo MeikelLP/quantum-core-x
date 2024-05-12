@@ -1,4 +1,6 @@
 ﻿using System.Collections.Immutable;
+using QuantumCore.API.Game.World;
+using QuantumCore.Game.World.Entities;
 
 namespace QuantumCore.Game.Services;
 
@@ -17,4 +19,6 @@ public interface IDropProvider
     ImmutableArray<CommonDropEntry> CommonDrops { get; }
 
     Task LoadAsync(CancellationToken cancellationToken = default);
+    
+    (int deltaPercentage, int dropRange) CalculateDropPercentages(IPlayerEntity player, MonsterEntity monster);
 }

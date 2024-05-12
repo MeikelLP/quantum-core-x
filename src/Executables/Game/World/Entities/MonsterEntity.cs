@@ -233,12 +233,13 @@ namespace QuantumCore.Game.World.Entities
 
             var mobDrops = _dropProvider.GetPossibleMobDropsForPlayer(LastAttacker, _proto.Id);
 
-            if (mobDrops.Length == 0)
+            if (mobDrops.IsDefaultOrEmpty)
             {
-                _logger.LogWarning("No drops configured for mob {Name} ({MobProtoId})", _proto.TranslatedName,
-                    _proto.Id);
+                _logger.LogWarning("No drops configured for mob {Name} ({MobProtoId})", _proto.TranslatedName, _proto.Id);
                 return;
             }
+            
+            var (delta, range) = _dropProvider.CalculateDropPercentages(LastAttacker, this);
 
             foreach (var drop in mobDrops)
             {
