@@ -14,11 +14,6 @@ public static class DropExtensions
                drop.MaxLevel >= player.GetPoint(EPoints.Level);
     }
 
-    public static bool CanDropFor(this MonsterDropEntry drop, IPlayerEntity player)
-    {
-        return drop.MinLevel <= player.GetPoint(EPoints.Level);
-    }
-
     public static ImmutableArray<CommonDropEntry> GetPossibleCommonDropsForPlayer(this IDropProvider dropProvider,
         IPlayerEntity player)
     {

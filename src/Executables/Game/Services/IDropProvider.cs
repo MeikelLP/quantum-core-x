@@ -8,7 +8,6 @@ namespace QuantumCore.Game.Services;
 
 public record struct CommonDropEntry(byte MinLevel, byte MaxLevel, uint ItemProtoId, float Chance);
 public record struct EtcItemDropEntry(uint ItemProtoId, float Multiplier);
-public record struct MonsterDropEntry(uint ItemProtoId, float Chance, float RareChance, uint MinLevel = 0, uint MinKillCount = 0, byte Amount = 1);
 
 public interface IDropProvider
 {

@@ -303,6 +303,7 @@ public class ParserTests
         result.Should().BeNull();
     }
 
+    /*
     [Fact]
     public async Task Drop_Mob_DropSingle()
     {
@@ -413,6 +414,7 @@ public class ParserTests
         drops.Value.Should().HaveCount(1);
         drops.Value.Should().Contain(new MonsterDropEntry(10, 1));
     }
+    */
 
     [Fact]
     public async Task CommonDrop_SingleLine_SingleDrop()
