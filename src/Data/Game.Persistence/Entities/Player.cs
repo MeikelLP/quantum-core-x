@@ -1,16 +1,14 @@
 ﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace QuantumCore.Game.Persistence.Entities;
 
-[Table("players")]
 public class Player
 {
-    public required Guid Id { get; set; }
+    public required uint Id { get; set; }
     public required Guid AccountId { get; set; }
     public required DateTime CreatedAt { get; set; }
     public required DateTime UpdatedAt { get; set; }
@@ -57,11 +55,6 @@ public class Player
             builder.Property(x => x.UpdatedAt).HasDefaultValueSql("(CAST(CURRENT_TIMESTAMP AS DATETIME(6)))");
         }
 
-        if (database.IsNpgsql())
-        {
-            builder.Property(x => x.Id).ValueGeneratedOnAdd().HasDefaultValueSql("gen_random_uuid()");
-        }
-
         builder.HasData([
             new Player
             {
@@ -86,7 +79,7 @@ public class Player
                 Gold = 2_000_000_000,
                 PositionX = 958870,
                 PositionY = 272788,
-                Id = Guid.Parse("FEFA4396-C5D1-4D7F-BC84-5DF40867EAC8"),
+                Id = 1,
                 UpdatedAt = default,
                 Empire = 0,
                 SkillGroup = 0,

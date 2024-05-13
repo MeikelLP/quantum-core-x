@@ -6,7 +6,7 @@ namespace QuantumCore.Game.PlayerUtils
 {
     public class Equipment : IEquipment
     {
-        public Guid Owner { get; }
+        public uint Owner { get; }
         public ItemInstance? Body { get; private set; }
         public ItemInstance? Head { get; private set; }
         public ItemInstance? Shoes { get; private set; }
@@ -19,7 +19,7 @@ namespace QuantumCore.Game.PlayerUtils
 
         private long _offset;
 
-        public Equipment(Guid owner, long offset)
+        public Equipment(uint owner, long offset)
         {
             Owner = owner;
             _offset = offset;
@@ -32,7 +32,7 @@ namespace QuantumCore.Game.PlayerUtils
 
         public bool SetItem(ItemInstance item, ushort position)
         {
-            switch ((EquipmentSlots)(position - _offset))
+            switch ((EquipmentSlots) (position - _offset))
             {
                 case EquipmentSlots.Body:
                     Body = item;
@@ -62,6 +62,7 @@ namespace QuantumCore.Game.PlayerUtils
                     Hair = item;
                     return true;
             }
+
             return false;
         }
 
@@ -99,7 +100,7 @@ namespace QuantumCore.Game.PlayerUtils
 
         public bool RemoveItem(ItemInstance item)
         {
-            switch ((EquipmentSlots)(item.Position - _offset))
+            switch ((EquipmentSlots) (item.Position - _offset))
             {
                 case EquipmentSlots.Body:
                     Body = null;
@@ -139,34 +140,42 @@ namespace QuantumCore.Game.PlayerUtils
             {
                 player.SendItem(Body);
             }
+
             if (Head != null)
             {
                 player.SendItem(Head);
             }
+
             if (Shoes != null)
             {
                 player.SendItem(Shoes);
             }
+
             if (Bracelet != null)
             {
                 player.SendItem(Bracelet);
             }
+
             if (Weapon != null)
             {
                 player.SendItem(Weapon);
             }
+
             if (Necklace != null)
             {
                 player.SendItem(Necklace);
             }
+
             if (Earrings != null)
             {
                 player.SendItem(Earrings);
             }
+
             if (Costume != null)
             {
                 player.SendItem(Costume);
             }
+
             if (Hair != null)
             {
                 player.SendItem(Hair);
@@ -183,7 +192,7 @@ namespace QuantumCore.Game.PlayerUtils
 
             var wearFlags = (EWearFlags) proto.WearFlags;
 
-            switch ((EquipmentSlots)(position - _offset))
+            switch ((EquipmentSlots) (position - _offset))
             {
                 case EquipmentSlots.Body:
                     return wearFlags.HasFlag(EWearFlags.Body);
@@ -213,25 +222,25 @@ namespace QuantumCore.Game.PlayerUtils
             var proto = itemManager.GetItem(itemId);
             if (proto == null)
             {
-                return _offset + (ushort)EquipmentSlots.Body;
+                return _offset + (ushort) EquipmentSlots.Body;
             }
 
             var wearFlags = (EWearFlags) proto.WearFlags;
 
             if (wearFlags.HasFlag(EWearFlags.Head))
-                return _offset + (ushort)EquipmentSlots.Head;
+                return _offset + (ushort) EquipmentSlots.Head;
             else if (wearFlags.HasFlag(EWearFlags.Shoes))
-                return _offset + (ushort)EquipmentSlots.Shoes;
+                return _offset + (ushort) EquipmentSlots.Shoes;
             else if (wearFlags.HasFlag(EWearFlags.Bracelet))
-                return _offset + (ushort)EquipmentSlots.Bracelet;
+                return _offset + (ushort) EquipmentSlots.Bracelet;
             else if (wearFlags.HasFlag(EWearFlags.Weapon))
-                return _offset + (ushort)EquipmentSlots.Weapon;
+                return _offset + (ushort) EquipmentSlots.Weapon;
             else if (wearFlags.HasFlag(EWearFlags.Necklace))
-                return _offset + (ushort)EquipmentSlots.Necklace;
+                return _offset + (ushort) EquipmentSlots.Necklace;
             else if (wearFlags.HasFlag(EWearFlags.Earrings))
-                return _offset +  (ushort)EquipmentSlots.Earring;
+                return _offset + (ushort) EquipmentSlots.Earring;
 
-            return _offset + (ushort)EquipmentSlots.Body;
+            return _offset + (ushort) EquipmentSlots.Body;
         }
     }
 }

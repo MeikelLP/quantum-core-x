@@ -5,7 +5,7 @@ namespace QuantumCore.API;
 
 public interface IInventory
 {
-    Guid Owner { get; }
+    uint Owner { get; }
     byte Window { get; }
     ReadOnlyCollection<ItemInstance> Items { get; }
     IEquipment EquipmentWindow { get; }

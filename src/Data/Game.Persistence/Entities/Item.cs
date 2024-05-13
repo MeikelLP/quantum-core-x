@@ -1,15 +1,13 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace QuantumCore.Game.Persistence.Entities;
 
-[Table("items")]
 public class Item
 {
     public required Guid Id { get; init; }
-    public required Guid PlayerId { get; init; }
+    public required uint PlayerId { get; init; }
     public required uint ItemId { get; init; }
     public required byte Window { get; init; }
     public required uint Position { get; init; }
