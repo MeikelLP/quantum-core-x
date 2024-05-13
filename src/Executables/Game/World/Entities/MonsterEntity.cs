@@ -216,7 +216,7 @@ namespace QuantumCore.Game.World.Entities
                 return;
             }
 
-            DoDrops();
+            CalculateDrops();
 
             base.Die();
 
@@ -230,12 +230,12 @@ namespace QuantumCore.Game.World.Entities
             }
         }
 
-        private void DoDrops()
+        private void CalculateDrops()
         {
             // no drops if no killer
             if (LastAttacker is null) return;
             
-            List<ItemInstance> drops = new();
+            var drops = new List<ItemInstance>();
             
             var (delta, range) = _dropProvider.CalculateDropPercentages(LastAttacker, this);
             

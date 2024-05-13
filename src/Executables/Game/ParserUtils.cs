@@ -277,7 +277,7 @@ internal static partial class ParserUtils
         
         var minLevel = byte.Parse(line[minLevelStartIndex..minLevelEndIndex]);
         var maxLevel = byte.Parse(line[maxLevelStartIndex..maxLevelEndIndex]);
-        var percentage = (float) decimal.Parse(line[percentageStartIndex..percentageEndIndex], CultureInfo.InvariantCulture); // math percentage
+        var percentage = float.Parse(line[percentageStartIndex..percentageEndIndex], CultureInfo.InvariantCulture); // math percentage
         var itemId = uint.Parse(line[itemIdStartIndex..itemIdEndIndex]);
         var outOf = uint.Parse(line[outOfStartIndex..outOfEndIndex]); // TODO: what to do with this value? Doesnt seem to be used, needs confirmation
 
