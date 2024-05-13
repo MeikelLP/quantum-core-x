@@ -31,7 +31,6 @@ namespace QuantumCore.Game
 
         public ItemData? GetItemByName(ReadOnlySpan<char> name)
         {
-            ItemData? item = null;
             foreach (var dataItem in _items)
             {
                 if (name.Equals(dataItem.Name, StringComparison.InvariantCulture))
@@ -39,8 +38,7 @@ namespace QuantumCore.Game
                     return dataItem;
                 }
             }
-
-            return item;
+            return null;
         }
 
         /// <summary>

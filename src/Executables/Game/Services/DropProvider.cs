@@ -1,4 +1,4 @@
-﻿using System.Collections.Immutable;
+using System.Collections.Immutable;
 using System.Globalization;
 using System.Text;
 using Microsoft.Extensions.Configuration;
@@ -57,17 +57,10 @@ public class DropProvider : IDropProvider
 
     private Task LoadDeltaPercentagesAsync(CancellationToken cancellationToken = default)
     {
-        _bossPercentageDeltas = _configuration.GetSection("drops:delta:boss")
-            .AsEnumerable(true)
-            .OrderBy(x => x.Value)
-            .Select(x => int.Parse(x.Value!))
-            .ToArray();
-        
-        _mobPercentageDeltas = _configuration.GetSection("drops:delta:normal")
-            .AsEnumerable(true)
-            .OrderBy(x => x.Value)
-            .Select(x => int.Parse(x.Value!))
-            .ToArray();
+        _bossPercentageDeltas = _configuration.GetSection("drops:delta:boss").Get<int[]>() 
+                                ?? throw new InvalidOperationException("Missing boss delta percentages");
+        _mobPercentageDeltas = _configuration.GetSection("drops:delta:normal").Get<int[]>() 
+                               ?? throw new InvalidOperationException("Missing mob delta percentages");
         return Task.CompletedTask;
     }
 
