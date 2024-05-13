@@ -213,8 +213,7 @@ public class DropProvider : IDropProvider
             return null;
         }
 
-        // divide by 100 to make a human percentage to math percentage
-        return new KeyValuePair<uint, float>(item.Id, multiplierValue / 100);
+        return new KeyValuePair<uint, float>(item.Id, multiplierValue * 10000.0f); // 1 to 1000
     }
 
     private async Task LoadDropsForMonstersAsync(CancellationToken cancellationToken)
