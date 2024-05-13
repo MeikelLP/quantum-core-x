@@ -38,7 +38,7 @@ jobs:
 
       # finally tests
       - name: Test
-        run: dotnet test --verbosity normal src/QuantumCore.sln
+        run: dotnet test --verbosity minimal src/QuantumCore.sln
   deploy:
     needs:
       - test
