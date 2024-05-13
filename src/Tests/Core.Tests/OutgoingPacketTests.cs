@@ -1,10 +1,10 @@
 using System.Text;
 using AutoBogus;
 using Bogus;
+using Core.Tests.Extensions;
 using FluentAssertions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using QuantumCore.Extensions;
 using QuantumCore.Game.Packets;
 using QuantumCore.Game.Packets.General;
@@ -12,7 +12,6 @@ using QuantumCore.Game.Packets.Quest;
 using QuantumCore.Game.Packets.QuickBar;
 using QuantumCore.Game.Packets.Shop;
 using QuantumCore.Networking;
-using Serilog;
 using Weikio.PluginFramework.Catalogs;
 using Xunit;
 using Xunit.Abstractions;
@@ -28,13 +27,7 @@ public class OutgoingPacketTests
         var services = new ServiceCollection()
             .AddCoreServices(new EmptyPluginCatalog(), new ConfigurationBuilder().Build())
             .AddSingleton<IPacketSerializer, DefaultPacketSerializer>()
-            .AddLogging(x =>
-            {
-                x.ClearProviders();
-                x.AddSerilog(new LoggerConfiguration()
-                    .WriteTo.TestOutput(testOutputHelper)
-                    .CreateLogger());
-            })
+            .AddQuantumCoreTestLogger(testOutputHelper)
             .BuildServiceProvider();
         _serializer = services.GetRequiredService<IPacketSerializer>();
     }
