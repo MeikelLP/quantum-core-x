@@ -36,9 +36,11 @@ jobs:
           sudo chmod +x generate_kaitai.sh
           ./generate_kaitai.sh
 
-      # finally tests
+      - name: Build
+        run: dotnet build --verbosity minimal src/QuantumCore.sln
+
       - name: Test
-        run: dotnet test --verbosity minimal src/QuantumCore.sln
+        run: dotnet test --no-build src/QuantumCore.sln
   deploy:
     needs:
       - test
