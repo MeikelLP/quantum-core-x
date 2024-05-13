@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using System.Collections.Immutable;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
@@ -13,13 +14,14 @@ internal class GeneratorContext
         Type = type;
     }
 
-    internal IReadOnlyList<FieldData> GetFieldsOfType(TypeDeclarationSyntax type)
+    internal ImmutableArray<FieldData> GetFieldsOfType(TypeDeclarationSyntax type)
     {
         var fields = new List<FieldData>();
+        var fieldIndex = 0;
         if (type is RecordDeclarationSyntax record)
         {
             fields.AddRange(record.ParameterList!.Parameters
-                .Select(x => BuildFieldData(type, x.Type!, x.Identifier, null, null, true, false))
+                .Select(x => BuildFieldData(type, x.Type!, x.Identifier, ref fieldIndex, null, null, true, false))
             );
         }
 
@@ -42,8 +44,8 @@ internal class GeneratorContext
                 }
 
                 var arrayLength = GetArrayLength(x);
-                return BuildFieldData(type, x.Type, x.Identifier, arrayLength, orderStr, false,
-                    x is { ExpressionBody: not null }, stringLengthAttr);
+                return BuildFieldData(type, x.Type, x.Identifier, ref fieldIndex, arrayLength, orderStr, false,
+                    x is {ExpressionBody: not null}, stringLengthAttr);
             })
         );
 
@@ -87,7 +89,7 @@ internal class GeneratorContext
             }
         }
 
-        return finalArr;
+        return finalArr.OrderBy(x => x.Order).ToImmutableArray();
     }
 
     private static int? GetArrayLength(PropertyDeclarationSyntax x)
@@ -102,7 +104,7 @@ internal class GeneratorContext
             arrayCreationExpressionSyntax.Type.RankSpecifiers.Any() &&
             arrayCreationExpressionSyntax.Type.RankSpecifiers.First().Sizes.OfType<LiteralExpressionSyntax>().Any())
         {
-            return (int?)arrayCreationExpressionSyntax.Type.RankSpecifiers
+            return (int?) arrayCreationExpressionSyntax.Type.RankSpecifiers
                 .First().Sizes.OfType<LiteralExpressionSyntax>()
                 .First().Token.Value;
         }
@@ -111,12 +113,13 @@ internal class GeneratorContext
     }
 
     private FieldData BuildFieldData(TypeDeclarationSyntax declaringType, TypeSyntax type, SyntaxToken name,
+        ref int fieldIndex,
         int? arrayLength = null,
         string? orderStr = null, bool isRecordParameter = false, bool isReadonly = false, int? stringLength = null)
     {
         var isArray = type is ArrayTypeSyntax;
         var fieldType = GetTypeInfo(type)!;
-        var enumType = isArray ? null : (INamedTypeSymbol)fieldType;
+        var enumType = isArray ? null : (INamedTypeSymbol) fieldType;
         var isEnum = enumType?.TypeKind is TypeKind.Enum;
         string? sizeFieldName = null;
 
@@ -149,6 +152,10 @@ internal class GeneratorContext
                 name.Parent!.GetLocation());
         }
 
+        var order = int.TryParse(orderStr, out var orderVal) && orderVal != fieldIndex
+            ? orderVal
+            : fieldIndex++;
+
         return new FieldData
         {
             Name = name.Text,
@@ -161,7 +168,7 @@ internal class GeneratorContext
             ElementSize = elementSize,
             IsRecordParameter = isRecordParameter,
             IsReadonly = isReadonly,
-            Order = orderStr != null ? int.Parse(orderStr) : null,
+            Order = order,
             SizeFieldName = sizeFieldName
         };
     }
@@ -261,7 +268,7 @@ internal class GeneratorContext
         var typeKeyWords = type switch
         {
             StructDeclarationSyntax => "struct",
-            RecordDeclarationSyntax { ClassOrStructKeyword.Text: "struct" } => "record struct",
+            RecordDeclarationSyntax {ClassOrStructKeyword.Text: "struct"} => "record struct",
             RecordDeclarationSyntax => "record",
             _ => "class"
         };
@@ -299,7 +306,7 @@ internal class GeneratorContext
         return attr.ArgumentList.Arguments[0].ToString();
     }
 
-    public string? GetSubHeaderForType(TypeDeclarationSyntax type)
+    public (byte Value, int Position)? GetSubHeaderForType(TypeDeclarationSyntax type)
     {
         var attr = type
             .DescendantNodes()
@@ -308,7 +315,10 @@ internal class GeneratorContext
                 .DescendantTokens()
                 .Any(dt => dt.IsKind(SyntaxKind.IdentifierToken) &&
                            GetTypeInfo(dt.Parent!).GetFullName() == GeneratorConstants.SUBPACKETATTRIBUTE_FULLNAME));
-        return attr?.ArgumentList?.Arguments[0].ToString();
+        var value = attr?.ArgumentList?.Arguments[0].ToString();
+        if (value is null) return null;
+        var position = attr?.ArgumentList?.Arguments.ElementAtOrDefault(1)?.ToString();
+        return (Convert.ToByte(value, 16), position is not null ? Convert.ToInt32(position) : 0);
     }
 
     public bool HasTypeSequence(TypeDeclarationSyntax type)
@@ -316,6 +326,6 @@ internal class GeneratorContext
         var attr = type.AttributeLists.SelectMany(x => x.Attributes).FirstOrDefault(x => x.Name.ToString() == "Packet");
         return attr?.ArgumentList?.Arguments.Any(x =>
             x.NameEquals?.Name.Identifier.Text == "Sequence" &&
-            ((LiteralExpressionSyntax)x.Expression).Token.Text == "true") ?? false;
+            ((LiteralExpressionSyntax) x.Expression).Token.Text == "true") ?? false;
     }
 }
