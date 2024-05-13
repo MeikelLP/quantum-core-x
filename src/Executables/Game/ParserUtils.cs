@@ -204,6 +204,8 @@ internal static partial class ParserUtils
 
     private static CommonDropEntry? ParseCommonDropFromLine(ReadOnlySpan<char> line, out int read)
     {
+        //todo: each line has 4 sections (1 section for each rank), currently only parsing the first one
+        
         var startIndex = 0;
         while (line.Length > startIndex && line[startIndex] == '\t')
         {
@@ -249,17 +251,18 @@ internal static partial class ParserUtils
             read = 0;
             return null;
         }
-
+        
         var minLevel = byte.Parse(line[minLevelStartIndex..minLevelEndIndex]);
         var maxLevel = byte.Parse(line[maxLevelStartIndex..maxLevelEndIndex]);
-        var percentage = float.Parse(line[percentageStartIndex..percentageEndIndex], CultureInfo.InvariantCulture); // TODO check if values are human percentage or math percentage => 50% vs 0.5
+        var percentage = (float) decimal.Parse(line[percentageStartIndex..percentageEndIndex], CultureInfo.InvariantCulture); // math percentage
         var itemId = uint.Parse(line[itemIdStartIndex..itemIdEndIndex]);
-        var outOf = uint.Parse(line[outOfStartIndex..outOfEndIndex]);
+        var outOf = uint.Parse(line[outOfStartIndex..outOfEndIndex]); // TODO: what to do with this value? According to c++ version it is read but not used.
 
         read = outOfEndIndex + 1;
-
-        // TODO monster level
-        return new CommonDropEntry(minLevel, maxLevel, itemId, percentage / outOf);
+        
+        percentage *= 10000.0f; // because percentage here is 1 - 1000
+        
+        return new CommonDropEntry(minLevel, maxLevel, itemId, percentage);
     }
 
     public static string[] SplitLine(string line)

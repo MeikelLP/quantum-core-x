@@ -48,10 +48,10 @@ public class DropProvider : IDropProvider
     public async Task LoadAsync(CancellationToken cancellationToken = default)
     {
         await Task.WhenAll(
+            LoadCommonMobDropsAsync(cancellationToken),
             LoadDeltaPercentagesAsync(cancellationToken),
             LoadDropsForMonstersAsync(cancellationToken),
-            LoadSimpleMobDropsAsync(cancellationToken),
-            LoadCommonMobDropsAsync(cancellationToken)
+            LoadSimpleMobDropsAsync(cancellationToken)
         );
     }
 
@@ -70,24 +70,6 @@ public class DropProvider : IDropProvider
             .ToArray();
         return Task.CompletedTask;
     }
-    
-    // todo: move and refactor this
-    int NumberEx(int from, int to)
-    {
-        if (from > to)
-        {
-            (from, to) = (to, from);
-        }
-
-        int returnValue = 0;
-
-        if ((to - from + 1) != 0)
-            returnValue = (new Random().Next(to - from + 1)) + from;
-        else
-            Console.WriteLine("number(): divided by 0");
-
-        return returnValue;
-    }
 
     public (int deltaPercentage, int dropRange) CalculateDropPercentages(IPlayerEntity player, MonsterEntity monster)
     {
@@ -100,9 +82,9 @@ public class DropProvider : IDropProvider
             ? _bossPercentageDeltas[MathUtils.MinMax(0, levelDropDelta, _bossPercentageDeltas.Length)]
             : _mobPercentageDeltas[MathUtils.MinMax(0, levelDropDelta, _mobPercentageDeltas.Length)];
         
-        if (1 == NumberEx(1, 50000))
+        if (1 == CoreRandom.GenerateInt32(1, 50001))
             deltaPercentage += 1000;
-        else if (1 == NumberEx(1, 10000))
+        else if (1 == CoreRandom.GenerateInt32(1, 10001))
             deltaPercentage += 500;
         
         _logger.LogDebug("CalculateDropPercentages for level: {Level} rank: {Rank} percentage: {DeltaPercentage}", 

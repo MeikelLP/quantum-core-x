@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
@@ -7,6 +8,7 @@ using QuantumCore.API.Game.World.AI;
 using QuantumCore.Core.Utils;
 using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Packets;
+using QuantumCore.Game.PlayerUtils;
 using QuantumCore.Game.Services;
 using QuantumCore.Game.World.AI;
 
@@ -232,43 +234,91 @@ namespace QuantumCore.Game.World.Entities
         {
             // no drops if no killer
             if (LastAttacker is null) return;
-
-            var mobDrops = _dropProvider.GetPossibleMobDropsForPlayer(LastAttacker, _proto.Id);
-
-            if (mobDrops.IsDefaultOrEmpty)
-            {
-                _logger.LogWarning("No drops configured for mob {Name} ({MobProtoId})", _proto.TranslatedName, _proto.Id);
-                return;
-            }
+            
+            List<ItemInstance> drops = new();
 
             bool dropDebug = true; // todo: parse from config
             
             var (delta, range) = _dropProvider.CalculateDropPercentages(LastAttacker, this);
-            
             if (dropDebug)
             {
                 _logger.LogInformation("Drop chance for {Name} ({MobProtoId}) is {Delta} with range {Range}", _proto.TranslatedName, _proto.Id, delta, range);
             }
-
-            foreach (var drop in mobDrops)
-            {
-                var chance = drop.Chance * Globals.DROP_MULTIPLIER;
-                if (chance > Random.Shared.NextSingle())
-                {
-                    var itemInstance = _itemManager.CreateItem(_itemManager.GetItem(drop.ItemProtoId));
-                    _map.AddGroundItem(itemInstance, PositionX, PositionY, drop.Amount, LastAttacker.Name);
-                }
-            }
-
+            
+            // Common drops (common_drop_item.txt)
             var commonDrops = _dropProvider.GetPossibleCommonDropsForPlayer(LastAttacker);
             foreach (var drop in commonDrops)
             {
-                var chance = drop.Chance * Globals.DROP_MULTIPLIER;
-                if (chance > Random.Shared.NextSingle())
+                var percent = (drop.Chance * delta) / 100;
+                var target = CoreRandom.GenerateInt32(1, range + 1);
+                
+                if (dropDebug)
                 {
-                    var itemInstance = _itemManager.CreateItem(_itemManager.GetItem(drop.ItemProtoId));
-                    _map.AddGroundItem(itemInstance, PositionX, PositionY, 1, LastAttacker.Name);
+                    float realPercent = percent / range * 100;
+                    _logger.LogInformation("Drop chance for {Name} ({MobProtoId}) is {RealPercent}%", _proto.TranslatedName, _proto.Id, realPercent);
                 }
+                
+                if (percent >= target)
+                {
+                    var itemProto = _itemManager.GetItem(drop.ItemProtoId);
+                    if (itemProto is null)
+                    {
+                        _logger.LogWarning("Could not find item proto for {ItemProtoId}", drop.ItemProtoId);
+                        continue;
+                    }
+                    
+                    var itemInstance = _itemManager.CreateItem(itemProto);
+
+                    if ((EItemType) itemProto.Type ==  EItemType.Polymorph)
+                    {
+                        if (Proto.PolymorphItemId == itemProto.Id)
+                        {
+                            // todo: set item socket 0 to race number (when ItemInstance have sockets implemented)
+                        }
+                    }
+                    
+                    drops.Add(itemInstance);
+                }
+            }
+            
+            // Drop Item Group (drop_item_group.txt)
+            // TODO: so far, was not able to find any example of this file anywhere. We can implement the logic, but without any example file, it's "impossible" to test.
+
+            // Mob Drop Item Group (mob_drop_item.txt)
+            var mobDrops = _dropProvider.GetPossibleMobDropsForPlayer(LastAttacker, _proto.Id);
+            if (mobDrops.IsDefaultOrEmpty)
+            {
+                mobDrops = [];
+            }
+            foreach (var drop in mobDrops)
+            {
+                var percent = 40000 * delta / drop.MinKillCount;
+                var target = CoreRandom.GenerateInt32(1, range + 1);
+
+                if (dropDebug)
+                {
+                    float realPercent = (float) percent / range * 100;
+                    _logger.LogInformation("Drop chance for {Name} ({MobProtoId}) is {RealPercent}%", _proto.TranslatedName, _proto.Id, realPercent);
+                }
+                
+                if (percent > target)
+                {
+                    var itemProto = _itemManager.GetItem(drop.ItemProtoId);
+                    if (itemProto is null)
+                    {
+                        _logger.LogWarning("Could not find item proto for {ItemProtoId}", drop.ItemProtoId);
+                        continue;
+                    }
+                    
+                    var itemInstance = _itemManager.CreateItem(itemProto, drop.Amount);
+                    drops.Add(itemInstance);
+                }
+            }
+
+            // Finally, drop the items
+            foreach (var drop in drops)
+            {
+                _map.AddGroundItem(drop, PositionX, PositionY, 1, LastAttacker.Name);
             }
         }
 
