@@ -187,6 +187,7 @@ namespace QuantumCore.Game.Commands
                         return;
                     }
 
+                    await using var scope = _serviceProvider.CreateAsyncScope();
                     if (commandCache.OptionsType is not null)
                     {
                         var parserMethod = typeof(Parser)
@@ -238,7 +239,7 @@ namespace QuantumCore.Game.Commands
                             })!;
                         var cmdExecuteMethodInfo = typeof(ICommandHandler<>).MakeGenericType(commandCache.OptionsType)
                             .GetMethod(nameof(ICommandHandler<object>.ExecuteAsync))!;
-                        var cmd = ActivatorUtilities.CreateInstance(_serviceProvider, commandCache.Type);
+                        var cmd = ActivatorUtilities.CreateInstance(scope.ServiceProvider, commandCache.Type);
 
                         try
                         {
@@ -258,7 +259,7 @@ namespace QuantumCore.Game.Commands
                     }
                     else
                     {
-                        var cmd = (ICommandHandler) ActivatorUtilities.CreateInstance(_serviceProvider,
+                        var cmd = (ICommandHandler) ActivatorUtilities.CreateInstance(scope.ServiceProvider,
                             commandCache.Type);
                         await cmd.ExecuteAsync(new CommandContext(connection.Player));
                     }
