@@ -226,7 +226,7 @@ internal static partial class ParserUtils
     }
     
     [DebuggerDisplay("{Fields.Count} Fields - {Data.Count} Drops")]
-    private class MobDropGroup
+    internal class MobDropGroup
     {
         public string Name { get; set; }
         public Dictionary<string, string> Fields { get; } = new(StringComparer.InvariantCultureIgnoreCase);
@@ -259,13 +259,12 @@ internal static partial class ParserUtils
         }
     }
     
-    public static IEnumerable<MonsterDropContainer> GetDropsForGroupBlocks(string filePath,
-        Encoding encoding, IItemManager itemManager)
+    public static async Task<List<MobDropGroup>> GetDropsForGroupBlocks(StreamReader sr)
     {
         var groups = new List<MobDropGroup>();
         MobDropGroup? currentMobDropGroup = null;
-
-        foreach (var line in File.ReadLines(filePath, encoding))
+        
+        while (await sr.ReadLineAsync() is { } line && sr.EndOfStream == false)
         {
             if (line.Trim().All(c => c == '\t') || string.IsNullOrWhiteSpace(line.Trim()))
             {
@@ -307,14 +306,7 @@ internal static partial class ParserUtils
             groups.Add(currentMobDropGroup);
         }
         
-        foreach (var group in groups)
-        {
-            var container = ParseMobGroup(group, itemManager);
-            if (container != null)
-            {
-                yield return container;
-            }
-        }
+        return groups;
     }
     
     private static bool IsEmptyOrContainsNewlineOrTab(string str)
@@ -322,7 +314,7 @@ internal static partial class ParserUtils
         return string.IsNullOrEmpty(str) || str.Contains("\n") || str.Contains("\t") || str.Contains("{") || str.Contains("}");
     }
 
-    private static MonsterDropContainer? ParseMobGroup(MobDropGroup group, IItemManager itemManager)
+    internal static MonsterDropContainer? ParseMobGroup(MobDropGroup group, IItemManager itemManager)
     {
         uint minKillCount = 0;
         uint levelLimit = 0;
@@ -394,7 +386,7 @@ internal static partial class ParserUtils
                     throw new InvalidOperationException("Invalid count");
                 }
                 
-                uint chance = uint.Parse(dropData[3], InvNum);
+                uint chance = uint.TryParse(dropData[3], InvNum, out var ch) ? ch : 0;
                 if (chance <= 0)
                 {
                     throw new InvalidOperationException("Invalid chance");

@@ -1,6 +1,10 @@
-﻿using FluentAssertions;
+﻿using System.Text;
+using FluentAssertions;
+using NSubstitute;
+using QuantumCore.API;
 using QuantumCore.API.Game.World;
 using QuantumCore.Game;
+using QuantumCore.Game.Drops;
 using QuantumCore.Game.Services;
 using QuantumCore.Game.World;
 using Xunit;
@@ -302,120 +306,908 @@ public class ParserTests
 
         result.Should().BeNull();
     }
-
-    /*
-    [Fact]
-    public async Task Drop_Mob_DropSingle()
+    
+    private static StreamReader GetStreamReader(string input)
     {
-        var input = new StringReader("""
-                             Group	Abc
-                             {
-                             	Mob	101
-                             	Type	drop
-                             	1	10	1	0.09
-                             }
-                             """);
-
-        var result = await ParserUtils.GetDropsForBlockAsync(input);
-        result.Should().NotBeNull();
-        var drops = result!.Value;
-        drops.Key.Should().Be(101);
-        drops.Value.Should().HaveCount(1);
-        drops.Value[0].ItemProtoId.Should().Be(10);
-        drops.Value[0].Chance.Should().BeApproximately(0.0009f, 0.0005f);
+        return new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(input)));
     }
 
     [Fact]
-    public async Task Drop_Mob_DropMultiple()
+    public async Task Drop_MobGroupItem_SingleDrop_SingleGroup()
     {
-        var input = new StringReader("""
-                             Group	Abc
-                             {
-                             	Mob	101
-                             	Type	drop
-                             	1	10	1	0.1
-                             	2	11	2	1
-                             }
-                             """);
+        var input = GetStreamReader("""
+                                    Group	Abc
+                                    {
+                                    	Mob	101
+                                    	Type	drop
+                                    	1	10	1	0.09
+                                    }
+                                    """);
 
-        var result = await ParserUtils.GetDropsForBlockAsync(input);
-        result.Should().NotBeNull();
-        var drops = result!.Value;
-        drops.Key.Should().Be(101);
-        drops.Value.Should().HaveCount(2);
-        drops.Value[0].Should().BeEquivalentTo(new MonsterDropEntry(10, 0.001f));
-        drops.Value[1].Should().BeEquivalentTo(new MonsterDropEntry(11, 0.01f, Amount: 2));
+        var itemManager = Substitute.For<IItemManager>();
+
+        var groups = await ParserUtils.GetDropsForGroupBlocks(input);
+
+        var mobDrops = groups.Select(x => ParserUtils.ParseMobGroup(x, itemManager)).ToList();
+        
+        groups.Should().HaveCount(1);
+        groups[0].Should().BeEquivalentTo(new ParserUtils.MobDropGroup
+        {
+            Name = "Abc",
+            Fields =
+            {
+                { "Mob", "101" },
+                { "Type", "drop" }
+            },
+            Data =
+            {
+                new List<string>() { "1", "10", "1", "0.09" }
+            }
+        });
+        mobDrops.Should().HaveCount(1);
+        mobDrops[0].Should().NotBeNull();
+        mobDrops[0].Should().BeEquivalentTo(new DropItemGroup
+        {
+            MonsterProtoId = 101,
+            Drops = new List<DropItemGroup.Drop>
+            {
+                new()
+                {
+                    ItemProtoId = 10,
+                    Amount = 1,
+                    Chance = 0.09f * 10000.0f
+                }
+            }
+        });
+    }
+    
+    [Fact]
+    public async Task Drop_MobGroupItem_SingleDrop_MultipleGroup()
+    {
+        var input = GetStreamReader("""
+                                    Group	Abc
+                                    {
+                                    	Mob	101
+                                    	Type	drop
+                                    	1	10	1	0.09
+                                    }
+                                    Group	Def
+                                    {
+                                    	Mob	102
+                                    	Type	drop
+                                    	1	11	2	0.05
+                                    }
+                                    """);
+
+        var itemManager = Substitute.For<IItemManager>();
+
+        var groups = await ParserUtils.GetDropsForGroupBlocks(input);
+
+        var mobDrops = groups.Select(x => ParserUtils.ParseMobGroup(x, itemManager)).ToList();
+        
+        groups.Should().HaveCount(2);
+        groups[0].Should().BeEquivalentTo(new ParserUtils.MobDropGroup
+        {
+            Name = "Abc",
+            Fields =
+            {
+                { "Mob", "101" },
+                { "Type", "drop" }
+            },
+            Data =
+            {
+                new List<string>() { "1", "10", "1", "0.09" }
+            }
+        });
+        groups[1].Should().BeEquivalentTo(new ParserUtils.MobDropGroup
+        {
+            Name = "Def",
+            Fields =
+            {
+                { "Mob", "102" },
+                { "Type", "drop" }
+            },
+            Data =
+            {
+                new List<string>() { "1", "11", "2", "0.05" }
+            }
+        });
+        
+        mobDrops.Should().HaveCount(2);
+        mobDrops[0].Should().NotBeNull();
+        mobDrops[0].Should().BeEquivalentTo(new DropItemGroup
+        {
+            MonsterProtoId = 101,
+            Drops = new List<DropItemGroup.Drop>
+            {
+                new()
+                {
+                    ItemProtoId = 10,
+                    Amount = 1,
+                    Chance = 0.09f * 10000.0f
+                }
+            }
+        });
+        mobDrops[1].Should().NotBeNull();
+        mobDrops[1].Should().BeEquivalentTo(new DropItemGroup
+        {
+            MonsterProtoId = 102,
+            Drops = new List<DropItemGroup.Drop>
+            {
+                new()
+                {
+                    ItemProtoId = 11,
+                    Amount = 2,
+                    Chance = 0.05f * 10000.0f
+                }
+            }
+        });
+    }
+    
+    [Fact]
+    public async Task Drop_MobGroupItem_MultipleDrop_SingleGroup()
+    {
+        var input = GetStreamReader("""
+                                    Group	Abc
+                                    {
+                                    	Mob	101
+                                    	Type	drop
+                                    	1	10	1	0.09
+                                    	2	11	2	1
+                                    }
+                                    """);
+
+        var itemManager = Substitute.For<IItemManager>();
+
+        var groups = await ParserUtils.GetDropsForGroupBlocks(input);
+
+        var mobDrops = groups.Select(x => ParserUtils.ParseMobGroup(x, itemManager)).ToList();
+        
+        groups.Should().HaveCount(1);
+        groups[0].Should().BeEquivalentTo(new ParserUtils.MobDropGroup
+        {
+            Name = "Abc",
+            Fields =
+            {
+                { "Mob", "101" },
+                { "Type", "drop" }
+            },
+            Data =
+            {
+                new List<string>() { "1", "10", "1", "0.09" },
+                new List<string>() { "2", "11", "2", "1" }
+            }
+        });
+        mobDrops.Should().HaveCount(1);
+        mobDrops[0].Should().NotBeNull();
+        mobDrops[0].Should().BeEquivalentTo(new DropItemGroup
+        {
+            MonsterProtoId = 101,
+            Drops = new List<DropItemGroup.Drop>
+            {
+                new()
+                {
+                    ItemProtoId = 10,
+                    Amount = 1,
+                    Chance = 0.09f * 10000.0f
+                },
+                new()
+                {
+                    ItemProtoId = 11,
+                    Amount = 2,
+                    Chance = 1.0f * 10000.0f
+                }
+            }
+        });
+    }
+    
+    [Fact]
+    public async Task Drop_MobGroupItem_MultipleDrop_MultipleGroup()
+    {
+        var input = GetStreamReader("""
+                                    Group	Abc
+                                    {
+                                    	Mob	101
+                                    	Type	drop
+                                    	1	10	1	0.09
+                                    	2	11	2	0.05
+                                    }
+                                    Group	Def
+                                    {
+                                    	Mob	102
+                                    	Type	drop
+                                    	1	11	2	0.05
+                                    	2	10	1	0.09
+                                    }
+                                    """);
+
+        var itemManager = Substitute.For<IItemManager>();
+
+        var groups = await ParserUtils.GetDropsForGroupBlocks(input);
+
+        var mobDrops = groups.Select(x => ParserUtils.ParseMobGroup(x, itemManager)).ToList();
+        
+        groups.Should().HaveCount(2);
+        groups[0].Should().BeEquivalentTo(new ParserUtils.MobDropGroup
+        {
+            Name = "Abc",
+            Fields =
+            {
+                { "Mob", "101" },
+                { "Type", "drop" }
+            },
+            Data =
+            {
+                new List<string>() { "1", "10", "1", "0.09" },
+                new List<string>() { "2", "11", "2", "0.05" }
+            }
+        });
+        groups[1].Should().BeEquivalentTo(new ParserUtils.MobDropGroup
+        {
+            Name = "Def",
+            Fields =
+            {
+                { "Mob", "102" },
+                { "Type", "drop" }
+            },
+            Data =
+            {
+                new List<string>() { "1", "11", "2", "0.05" },
+                new List<string>() { "2", "10", "1", "0.09" }
+            }
+        });
+        
+        mobDrops.Should().HaveCount(2);
+        mobDrops[0].Should().NotBeNull();
+        mobDrops[0].Should().BeEquivalentTo(new DropItemGroup
+        {
+            MonsterProtoId = 101,
+            Drops = new List<DropItemGroup.Drop>
+            {
+                new()
+                {
+                    ItemProtoId = 10,
+                    Amount = 1,
+                    Chance = 0.09f * 10000.0f
+                },
+                new()
+                {
+                    ItemProtoId = 11,
+                    Amount = 2,
+                    Chance = 0.05f * 10000.0f
+                }
+            }
+        });
+        mobDrops[1].Should().NotBeNull();
+        mobDrops[1].Should().BeEquivalentTo(new DropItemGroup
+        {
+            MonsterProtoId = 102,
+            Drops = new List<DropItemGroup.Drop>
+            {
+                new()
+                {
+                    ItemProtoId = 11,
+                    Amount = 2,
+                    Chance = 0.05f * 10000.0f
+                },
+                new()
+                {
+                    ItemProtoId = 10,
+                    Amount = 1,
+                    Chance = 0.09f * 10000.0f
+                }
+            }
+        });
+    }
+    
+    [Fact]
+    public async Task Drop_LevelItem_SingleDrop_SingleGroup()
+    {
+        var input = GetStreamReader("""
+                                    Group	Abc
+                                    {
+                                        Level_limit	75
+                                    	Mob	101
+                                    	Type	limit
+                                    	1	10	1	0.09
+                                    }
+                                    """);
+
+        var itemManager = Substitute.For<IItemManager>();
+
+        var groups = await ParserUtils.GetDropsForGroupBlocks(input);
+
+        var mobDrops = groups.Select(x => ParserUtils.ParseMobGroup(x, itemManager)).ToList();
+        
+        groups.Should().HaveCount(1);
+        groups[0].Should().BeEquivalentTo(new ParserUtils.MobDropGroup
+        {
+            Name = "Abc",
+            Fields =
+            {
+                { "Level_limit", "75" },
+                { "Mob", "101" },
+                { "Type", "limit" }
+            },
+            Data =
+            {
+                new List<string>() { "1", "10", "1", "0.09" }
+            }
+        });
+        mobDrops.Should().HaveCount(1);
+        mobDrops[0].Should().NotBeNull();
+        mobDrops[0].Should().BeEquivalentTo(new LevelItemGroup
+        {
+            LevelLimit = 75,
+            Drops = new List<LevelItemGroup.Drop>
+            {
+                new()
+                {
+                    ItemProtoId = 10,
+                    Amount = 1,
+                    Chance = 0.09f * 10000.0f
+                }
+            }
+        });
     }
 
     [Fact]
-    public async Task Drop_MultipleMob()
+    public async Task Drop_LevelItem_SingleDrop_MultipleGroup()
     {
-        var input = new StringReader("""
-                             Group	Abc
-                             {
-                             	Mob	101
-                             	Type	drop
-                             	1	10	1	0.1
-                             }
-                             Group	Abc2
-                             {
-                             	Mob	102
-                             	Type	drop
-                             	1	10	1	0.1
-                             }
-                             """);
+        var input = GetStreamReader("""
+                                    Group	Abc
+                                    {
+                                        Level_limit	75
+                                    	Mob	101
+                                    	Type	limit
+                                    	1	10	1	0.09
+                                    }
+                                    Group	Def
+                                    {
+                                        Level_limit	75
+                                    	Mob	102
+                                    	Type	limit
+                                    	1	11	2	0.05
+                                    }
+                                    """);
 
-        var result = await ParserUtils.GetDropsForBlockAsync(input);
-        result.Should().NotBeNull();
-        var drops = result!.Value;
-        drops.Key.Should().Be(101);
-        drops.Value.Should().HaveCount(1);
-        drops.Value.Should().Contain(new MonsterDropEntry(10, 0.001f));
+        var itemManager = Substitute.For<IItemManager>();
+
+        var groups = await ParserUtils.GetDropsForGroupBlocks(input);
+
+        var mobDrops = groups.Select(x => ParserUtils.ParseMobGroup(x, itemManager)).ToList();
+        
+        groups.Should().HaveCount(2);
+        groups[0].Should().BeEquivalentTo(new ParserUtils.MobDropGroup
+        {
+            Name = "Abc",
+            Fields =
+            {
+                { "Level_limit", "75" },
+                { "Mob", "101" },
+                { "Type", "limit" }
+            },
+            Data =
+            {
+                new List<string>() { "1", "10", "1", "0.09" }
+            }
+        });
+        groups[1].Should().BeEquivalentTo(new ParserUtils.MobDropGroup
+        {
+            Name = "Def",
+            Fields =
+            {
+                { "Level_limit", "75" },
+                { "Mob", "102" },
+                { "Type", "limit" }
+            },
+            Data =
+            {
+                new List<string>() { "1", "11", "2", "0.05" }
+            }
+        });
+        mobDrops.Should().HaveCount(2);
+        mobDrops[0].Should().NotBeNull();
+        mobDrops[0].Should().BeEquivalentTo(new LevelItemGroup
+        {
+            LevelLimit = 75,
+            Drops = new List<LevelItemGroup.Drop>
+            {
+                new()
+                {
+                    ItemProtoId = 10,
+                    Amount = 1,
+                    Chance = 0.09f * 10000.0f
+                }
+            }
+        });
+        mobDrops[1].Should().NotBeNull();
+        mobDrops[1].Should().BeEquivalentTo(new LevelItemGroup
+        {
+            LevelLimit = 75,
+            Drops = new List<LevelItemGroup.Drop>
+            {
+                new()
+                {
+                    ItemProtoId = 11,
+                    Amount = 2,
+                    Chance = 0.05f * 10000.0f
+                }
+            }
+        });
+    }
+    
+    [Fact]
+    public async Task Drop_LevelItem_MultipleDrop_SingleGroup()
+    {
+        var input = GetStreamReader("""
+                                    Group	Abc
+                                    {
+                                        Level_limit	75
+                                    	Mob	101
+                                    	Type	limit
+                                    	1	10	1	0.09
+                                    	2	11	2	1
+                                    }
+                                    """);
+
+        var itemManager = Substitute.For<IItemManager>();
+
+        var groups = await ParserUtils.GetDropsForGroupBlocks(input);
+
+        var mobDrops = groups.Select(x => ParserUtils.ParseMobGroup(x, itemManager)).ToList();
+        
+        groups.Should().HaveCount(1);
+        groups[0].Should().BeEquivalentTo(new ParserUtils.MobDropGroup
+        {
+            Name = "Abc",
+            Fields =
+            {
+                { "Level_limit", "75" },
+                { "Mob", "101" },
+                { "Type", "limit" }
+            },
+            Data =
+            {
+                new List<string>() { "1", "10", "1", "0.09" },
+                new List<string>() { "2", "11", "2", "1" }
+            }
+        });
+        mobDrops.Should().HaveCount(1);
+        mobDrops[0].Should().NotBeNull();
+        mobDrops[0].Should().BeEquivalentTo(new LevelItemGroup()
+        {
+            LevelLimit = 75,
+            Drops = new List<LevelItemGroup.Drop>
+            {
+                new()
+                {
+                    ItemProtoId = 10,
+                    Amount = 1,
+                    Chance = 0.09f * 10000.0f
+                },
+                new()
+                {
+                    ItemProtoId = 11,
+                    Amount = 2,
+                    Chance = 1.0f * 10000.0f
+                }
+            }
+        });
+    }
+    
+    [Fact]
+    public async Task Drop_LevelItem_MultipleDrop_MultipleGroup()
+    {
+        var input = GetStreamReader("""
+                                    Group	Abc
+                                    {
+                                        Level_limit	75
+                                    	Mob	101
+                                    	Type	limit
+                                    	1	10	1	0.09
+                                    	2	11	2	1
+                                    }
+                                    Group	Def
+                                    {
+                                        Level_limit	75
+                                    	Mob	102
+                                    	Type	limit
+                                    	1	11	2	0.05
+                                    	2	10	1	0.09
+                                    }
+                                    """);
+
+        var itemManager = Substitute.For<IItemManager>();
+
+        var groups = await ParserUtils.GetDropsForGroupBlocks(input);
+
+        var mobDrops = groups.Select(x => ParserUtils.ParseMobGroup(x, itemManager)).ToList();
+        
+        groups.Should().HaveCount(2);
+        groups[0].Should().BeEquivalentTo(new ParserUtils.MobDropGroup
+        {
+            Name = "Abc",
+            Fields =
+            {
+                { "Level_limit", "75" },
+                { "Mob", "101" },
+                { "Type", "limit" }
+            },
+            Data =
+            {
+                new List<string>() { "1", "10", "1", "0.09" },
+                new List<string>() { "2", "11", "2", "1" }
+            }
+        });
+        groups[1].Should().BeEquivalentTo(new ParserUtils.MobDropGroup
+        {
+            Name = "Def",
+            Fields =
+            {
+                { "Level_limit", "75" },
+                { "Mob", "102" },
+                { "Type", "limit" }
+            },
+            Data =
+            {
+                new List<string>() { "1", "11", "2", "0.05" },
+                new List<string>() { "2", "10", "1", "0.09" }
+            }
+        });
+        mobDrops.Should().HaveCount(2);
+        mobDrops[0].Should().NotBeNull();
+        mobDrops[0].Should().BeEquivalentTo(new LevelItemGroup()
+        {
+            LevelLimit = 75,
+            Drops = new List<LevelItemGroup.Drop>
+            {
+                new()
+                {
+                    ItemProtoId = 10,
+                    Amount = 1,
+                    Chance = 0.09f * 10000.0f
+                },
+                new()
+                {
+                    ItemProtoId = 11,
+                    Amount = 2,
+                    Chance = 1.0f * 10000.0f
+                }
+            }
+        });
+        mobDrops[1].Should().NotBeNull();
+        mobDrops[1].Should().BeEquivalentTo(new LevelItemGroup()
+        {
+            LevelLimit = 75,
+            Drops = new List<LevelItemGroup.Drop>
+            {
+                new()
+                {
+                    ItemProtoId = 11,
+                    Amount = 2,
+                    Chance = 0.05f * 10000.0f
+                },
+                new()
+                {
+                    ItemProtoId = 10,
+                    Amount = 1,
+                    Chance = 0.09f * 10000.0f
+                }
+            }
+        });
     }
 
     [Fact]
-    public async Task Drop_FloatForUint()
+    public async Task Drop_MonsterItem_SingleDrop_SingleGroup()
     {
-        var input = new StringReader("""
-                             Group	Abc
-                             {
-                             	Kill_drop	4.0
-                             	Mob	101
-                             	Type	drop
-                             	1	10	1	100
-                             }
-                             """);
+        var input = GetStreamReader("""
+                                    Group	Abc
+                                    {
+                                        Kill_drop	75
+                                    	Mob	101
+                                    	Type	kill
+                                    	1	10	1	20	30
+                                    }
+                                    """);
 
-        var result = await ParserUtils.GetDropsForBlockAsync(input);
-        result.Should().NotBeNull();
-        var drops = result!.Value;
-        drops.Key.Should().Be(101);
-        drops.Value.Should().HaveCount(1);
-        drops.Value.Should().Contain(new MonsterDropEntry(10, 1, MinKillCount: 4));
+        var itemManager = Substitute.For<IItemManager>();
+
+        var groups = await ParserUtils.GetDropsForGroupBlocks(input);
+
+        var mobDrops = groups.Select(x => ParserUtils.ParseMobGroup(x, itemManager)).ToList();
+        
+        groups.Should().HaveCount(1);
+        groups[0].Should().BeEquivalentTo(new ParserUtils.MobDropGroup
+        {
+            Name = "Abc",
+            Fields =
+            {
+                { "Kill_drop", "75" },
+                { "Mob", "101" },
+                { "Type", "kill" }
+            },
+            Data =
+            {
+                new List<string>() { "1", "10", "1", "20", "30" }
+            }
+        });
+        mobDrops.Should().HaveCount(1);
+        mobDrops[0].Should().NotBeNull();
+        mobDrops[0].Should().BeEquivalentTo(new MonsterItemGroup()
+        {
+            MonsterProtoId = 101,
+            MinKillCount = 75,
+            Probabilities = new List<uint>() { 20 },
+            Drops = new List<MonsterItemGroup.Drop>
+            {
+                new()
+                {
+                    ItemProtoId = 10,
+                    Amount = 1,
+                    Chance = 30
+                }
+            }
+        });
     }
 
     [Fact]
-    public async Task Drop_StringItemId_WillBeIgnored()
+    public async Task Drop_MonsterItem_SingleDrop_MultipleGroup()
     {
-        var input = new StringReader("""
-                             Group	Abc
-                             {
-                             	Mob	101
-                             	Type	drop
-                             	1	10	1	100
-                             	2	Blub	1	100
-                             }
-                             """);
+        var input = GetStreamReader("""
+                                    Group	Abc
+                                    {
+                                        Kill_drop	75
+                                    	Mob	101
+                                    	Type	kill
+                                    	1	10	1	20	30
+                                    }
+                                    Group	Def
+                                    {
+                                        Kill_drop	75
+                                    	Mob	102
+                                    	Type	kill
+                                    	1	11	2	20	30
+                                    }
+                                    """);
 
-        var result = await ParserUtils.GetDropsForBlockAsync(input);
-        result.Should().NotBeNull();
-        var drops = result!.Value;
-        drops.Key.Should().Be(101);
-        drops.Value.Should().HaveCount(1);
-        drops.Value.Should().Contain(new MonsterDropEntry(10, 1));
+        var itemManager = Substitute.For<IItemManager>();
+
+        var groups = await ParserUtils.GetDropsForGroupBlocks(input);
+
+        var mobDrops = groups.Select(x => ParserUtils.ParseMobGroup(x, itemManager)).ToList();
+        
+        groups.Should().HaveCount(2);
+        groups[0].Should().BeEquivalentTo(new ParserUtils.MobDropGroup
+        {
+            Name = "Abc",
+            Fields =
+            {
+                { "Kill_drop", "75" },
+                { "Mob", "101" },
+                { "Type", "kill" }
+            },
+            Data =
+            {
+                new List<string>() { "1", "10", "1", "20", "30" }
+            }
+        });
+        groups[1].Should().BeEquivalentTo(new ParserUtils.MobDropGroup
+        {
+            Name = "Def",
+            Fields =
+            {
+                { "Kill_drop", "75" },
+                { "Mob", "102" },
+                { "Type", "kill" }
+            },
+            Data =
+            {
+                new List<string>() { "1", "11", "2", "20", "30" }
+            }
+        });
+        mobDrops.Should().HaveCount(2);
+        mobDrops[0].Should().NotBeNull();
+        mobDrops[0].Should().BeEquivalentTo(new MonsterItemGroup()
+        {
+            MonsterProtoId = 101,
+            MinKillCount = 75,
+            Probabilities = new List<uint>() { 20 },
+            Drops = new List<MonsterItemGroup.Drop>
+            {
+                new()
+                {
+                    ItemProtoId = 10,
+                    Amount = 1,
+                    Chance = 30
+                }
+            }
+        });
+        mobDrops[1].Should().NotBeNull();
+        mobDrops[1].Should().BeEquivalentTo(new MonsterItemGroup()
+        {
+            MonsterProtoId = 102,
+            MinKillCount = 75,
+            Probabilities = new List<uint>() { 20 },
+            Drops = new List<MonsterItemGroup.Drop>
+            {
+                new()
+                {
+                    ItemProtoId = 11,
+                    Amount = 2,
+                    Chance = 30
+                }
+            }
+        });
     }
-    */
+    
+    [Fact]
+    public async Task Drop_MonsterItem_MultipleDrop_SingleGroup()
+    {
+        var input = GetStreamReader("""
+                                    Group	Abc
+                                    {
+                                        Kill_drop	75
+                                    	Mob	101
+                                    	Type	kill
+                                    	1	10	1	20	30
+                                    	2	11	2	25	35
+                                    }
+                                    """);
 
+        var itemManager = Substitute.For<IItemManager>();
+
+        var groups = await ParserUtils.GetDropsForGroupBlocks(input);
+
+        var mobDrops = groups.Select(x => ParserUtils.ParseMobGroup(x, itemManager)).ToList();
+        
+        groups.Should().HaveCount(1);
+        groups[0].Should().BeEquivalentTo(new ParserUtils.MobDropGroup
+        {
+            Name = "Abc",
+            Fields =
+            {
+                { "Kill_drop", "75" },
+                { "Mob", "101" },
+                { "Type", "kill" }
+            },
+            Data =
+            {
+                new List<string>() { "1", "10", "1", "20", "30" },
+                new List<string>() { "2", "11", "2", "25", "35" }
+            }
+        });
+        mobDrops.Should().HaveCount(1);
+        mobDrops[0].Should().NotBeNull();
+        mobDrops[0].Should().BeEquivalentTo(new MonsterItemGroup()
+        {
+            MonsterProtoId = 101,
+            MinKillCount = 75,
+            Probabilities = new List<uint>() { 20, 25 },
+            Drops = new List<MonsterItemGroup.Drop>
+            {
+                new()
+                {
+                    ItemProtoId = 10,
+                    Amount = 1,
+                    Chance = 30
+                },
+                new()
+                {
+                    ItemProtoId = 11,
+                    Amount = 2,
+                    Chance = 35
+                }
+            }
+        });
+    }
+    
+    [Fact]
+    public async Task Drop_MonsterItem_MultipleDrop_MultipleGroup()
+    {
+        var input = GetStreamReader("""
+                                    Group	Abc
+                                    {
+                                        Kill_drop	75
+                                    	Mob	101
+                                    	Type	kill
+                                    	1	10	1	20	30
+                                    	2	11	2	25	35
+                                    }
+                                    Group	Def
+                                    {
+                                        Kill_drop	75
+                                    	Mob	102
+                                    	Type	kill
+                                    	1	11	2	20	30
+                                    	2	11	2	25	35
+                                    }
+                                    """);
+
+        var itemManager = Substitute.For<IItemManager>();
+
+        var groups = await ParserUtils.GetDropsForGroupBlocks(input);
+
+        var mobDrops = groups.Select(x => ParserUtils.ParseMobGroup(x, itemManager)).ToList();
+        
+        groups.Should().HaveCount(2);
+        groups[0].Should().BeEquivalentTo(new ParserUtils.MobDropGroup
+        {
+            Name = "Abc",
+            Fields =
+            {
+                { "Kill_drop", "75" },
+                { "Mob", "101" },
+                { "Type", "kill" }
+            },
+            Data =
+            {
+                new List<string>() { "1", "10", "1", "20", "30" },
+                new List<string>() { "2", "11", "2", "25", "35" }
+            }
+        });
+        groups[1].Should().BeEquivalentTo(new ParserUtils.MobDropGroup
+        {
+            Name = "Def",
+            Fields =
+            {
+                { "Kill_drop", "75" },
+                { "Mob", "102" },
+                { "Type", "kill" }
+            },
+            Data =
+            {
+                new List<string>() { "1", "11", "2", "20", "30" },
+                new List<string>() { "2", "11", "2", "25", "35" }
+            }
+        });
+        mobDrops.Should().HaveCount(2);
+        mobDrops[0].Should().NotBeNull();
+        mobDrops[0].Should().BeEquivalentTo(new MonsterItemGroup()
+        {
+            MonsterProtoId = 101,
+            MinKillCount = 75,
+            Probabilities = new List<uint>() { 20, 25 },
+            Drops = new List<MonsterItemGroup.Drop>
+            {
+                new()
+                {
+                    ItemProtoId = 10,
+                    Amount = 1,
+                    Chance = 30
+                },
+                new()
+                {
+                    ItemProtoId = 11,
+                    Amount = 2,
+                    Chance = 35
+                }
+            }
+        });
+        mobDrops[1].Should().NotBeNull();
+        mobDrops[1].Should().BeEquivalentTo(new MonsterItemGroup()
+        {
+            MonsterProtoId = 102,
+            MinKillCount = 75,
+            Probabilities = new List<uint>() { 20, 25 },
+            Drops = new List<MonsterItemGroup.Drop>
+            {
+                new()
+                {
+                    ItemProtoId = 11,
+                    Amount = 2,
+                    Chance = 30
+                },
+                new()
+                {
+                    ItemProtoId = 11,
+                    Amount = 2,
+                    Chance = 35
+                }
+            }
+        });
+    }
+    
     [Fact]
     public async Task CommonDrop_SingleLine_SingleDrop()
     {

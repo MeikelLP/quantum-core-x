@@ -141,16 +141,33 @@ public class DropProvider : IDropProvider
         return new KeyValuePair<uint, float>(item.Id, multiplierValue * 10000.0f); // 1 to 1000
     }
     
-    private Task LoadDropsForMonstersAsync()
+    private async Task LoadDropsForMonstersAsync()
     {
         const string file = "data/mob_drop_item.txt";
-        if (!File.Exists(file)) return Task.CompletedTask;
+        if (!File.Exists(file)) return;
         
         _logger.LogDebug("Loading drops from {FilePath}", file);
-        
-        var groups = ParserUtils.GetDropsForGroupBlocks(file, FileEncoding, _itemManager);
 
-        var monsters = groups.OfType<MonsterItemGroup>();
+        using var sr = new StreamReader(file, FileEncoding);
+        
+        var parsedGroups = new List<MonsterDropContainer>();
+        var mobGroups = await ParserUtils.GetDropsForGroupBlocks(sr);
+        
+        foreach (var mobGroup in mobGroups)
+        {
+            var container = ParserUtils.ParseMobGroup(mobGroup, _itemManager);
+            if (container != null)
+            {
+                parsedGroups.Add(container);
+            }
+            else
+            {
+                // We're skipping groups with no data. But if there is data, we throw an exception because it shouldn't occur.
+                if (mobGroup.Data.Count > 0) throw new InvalidOperationException("Invalid group format");
+            }
+        }
+
+        var monsters = parsedGroups.OfType<MonsterItemGroup>();
         foreach (var monster in monsters)
         {
             if (_monsterDrops.ContainsKey(monster.MonsterProtoId))
@@ -161,7 +178,7 @@ public class DropProvider : IDropProvider
             _monsterDrops[monster.MonsterProtoId] = monster;
         }
         
-        var dropItems = groups.OfType<DropItemGroup>();
+        var dropItems = parsedGroups.OfType<DropItemGroup>();
         foreach (var dropItem in dropItems)
         {
             if (_itemDrops.ContainsKey(dropItem.MonsterProtoId))
@@ -172,11 +189,9 @@ public class DropProvider : IDropProvider
             _itemDrops[dropItem.MonsterProtoId] = dropItem;
         }
         
-        LevelDrops = [..groups.OfType<LevelItemGroup>()];
+        LevelDrops = [..parsedGroups.OfType<LevelItemGroup>()];
 
-        _logger.LogDebug("Found {Count:D} group drops", groups.Count());
-        
-        return Task.CompletedTask;
+        _logger.LogDebug("Found {Count:D} group drops", parsedGroups.Count());
     }
     
     private Task LoadDeltaPercentagesAsync(CancellationToken cancellationToken = default)
