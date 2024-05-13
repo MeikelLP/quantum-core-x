@@ -1,8 +1,13 @@
 using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Globalization;
+using System.Text;
 using System.Text.RegularExpressions;
 using EnumsNET;
+using QuantumCore.API;
 using QuantumCore.API.Game.World;
+using QuantumCore.Core.Utils;
+using QuantumCore.Game.Drops;
 using QuantumCore.Game.Services;
 using QuantumCore.Game.World;
 
@@ -104,7 +109,7 @@ internal static partial class ParserUtils
         while ((line = (await sr.ReadLineAsync(cancellationToken))!.Trim()) != "}")
         {
             if (string.IsNullOrWhiteSpace(line)) break;
-
+            
             if (line.StartsWith("Level_limit", INV_CUL))
             {
                 minLevel = uint.Parse(line.Replace("Level_limit", "", INV_CUL).Trim(), InvNum);
@@ -113,20 +118,38 @@ internal static partial class ParserUtils
             {
                 mob = uint.Parse(line.Replace("Mob", "", INV_CUL).Trim(), InvNum);
             }
-            else if (line.StartsWith("kill_drop", INV_CUL))
+            
+            if (line.StartsWith("kill_drop", INV_CUL))
             {
                 // may contain 0.0 or similar floating value
                 minKillCount = (uint)decimal.Parse(line.Replace("kill_drop", "", INV_CUL).Trim(), InvNum);
             }
 
+            // Actual drops
             if (StartsWithNumberRegex().IsMatch(line))
             {
                 var splitted = line.Split('\t');
+                
                 if (uint.TryParse(splitted[1], InvNum, out var itemId))
                 {
+                    // hack: because we read line by line, and this should only apply when the type of the group is
+                    // NOT "kill", we can't really know that according to the file structure and how we read it.
+                    // todo: improve this by reading the entire (group) and act accordingly
+                    if (minKillCount == 0)
+                    {
+                        minKillCount = 1; // used in divide by zero check
+                    }
+                    
                     var amount = byte.Parse(splitted[2], InvNum);
-                    var chance = float.Parse(splitted[3], InvNum) / 100; // to make it 0-1 not 0-100
-                    drops.Add(new MonsterDropEntry(itemId, chance, minLevel, minKillCount, amount));
+                    var chance = float.Parse(splitted[3], InvNum); // to make it 0-1 not 0-100
+                    var rareChance = 0;
+                    if (splitted.Length > 4)
+                    {
+                        rareChance = int.Parse(splitted[4], InvNum);
+                    }
+
+                    rareChance = MathUtils.MinMax(0, rareChance, 100);
+                    drops.Add(new MonsterDropEntry(itemId, chance, rareChance, minLevel, minKillCount, amount));
                 }
                 else
                 {
@@ -204,7 +227,7 @@ internal static partial class ParserUtils
 
     private static CommonDropEntry? ParseCommonDropFromLine(ReadOnlySpan<char> line, out int read)
     {
-        //todo: each line has 4 sections (1 section for each rank), currently only parsing the first one
+        //todo: each line has 4 sections (1 section for each mob rank), currently only parsing the first one
         
         var startIndex = 0;
         while (line.Length > startIndex && line[startIndex] == '\t')
@@ -256,7 +279,7 @@ internal static partial class ParserUtils
         var maxLevel = byte.Parse(line[maxLevelStartIndex..maxLevelEndIndex]);
         var percentage = (float) decimal.Parse(line[percentageStartIndex..percentageEndIndex], CultureInfo.InvariantCulture); // math percentage
         var itemId = uint.Parse(line[itemIdStartIndex..itemIdEndIndex]);
-        var outOf = uint.Parse(line[outOfStartIndex..outOfEndIndex]); // TODO: what to do with this value? According to c++ version it is read but not used.
+        var outOf = uint.Parse(line[outOfStartIndex..outOfEndIndex]); // TODO: what to do with this value? Doesnt seem to be used, needs confirmation
 
         read = outOfEndIndex + 1;
         
@@ -273,6 +296,269 @@ internal static partial class ParserUtils
         }
 
         return line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+    }
+    
+    [DebuggerDisplay("{Fields.Count} Fields - {Data.Count} Drops")]
+    private class MobDropGroup
+    {
+        public string Name { get; set; }
+        public Dictionary<string, string> Fields { get; } = new(StringComparer.InvariantCultureIgnoreCase);
+        public List<List<string>> Data { get; } = new List<List<string>>();
+        
+        public T? GetField<T>(string key)
+        {
+            var foundKey = Fields.Keys.FirstOrDefault(k => k.Equals(key, StringComparison.InvariantCultureIgnoreCase));
+            if (foundKey == null)
+            {
+                return default;
+            }
+            var value = Fields[foundKey];
+            return (T) Convert.ChangeType(value, typeof(T));
+        }
+
+        public override string ToString()
+        {
+            var result = $"Group {Name}\n{{\n";
+            foreach (var field in Fields)
+            {
+                result += $"\t{field.Key}\t{field.Value}\n";
+            }
+            foreach (var datum in Data)
+            {
+                result += $"\t{string.Join("\t", datum)}\n";
+            }
+            result += "}\n";
+            return result;
+        }
+    }
+    
+    public static IEnumerable<MonsterDropContainer> GetDropsForGroupBlocks(string filePath,
+        Encoding encoding, IItemManager itemManager)
+    {
+        var groups = new List<MobDropGroup>();
+        MobDropGroup? currentMobDropGroup = null;
+
+        foreach (var line in File.ReadLines(filePath, encoding))
+        {
+            if (line.Trim().All(c => c == '\t') || string.IsNullOrWhiteSpace(line.Trim()))
+            {
+                continue;
+            }
+            if (line.StartsWith("Group", INV_CUL))
+            {
+                if (currentMobDropGroup != null)
+                {
+                    groups.Add(currentMobDropGroup);
+                }
+                currentMobDropGroup = new MobDropGroup { Name = line.Split()[1] };
+            }
+            else if (!string.IsNullOrWhiteSpace(line) && currentMobDropGroup != null)
+            {
+                var parts = line.Split('\t').ToList();
+                
+                parts.RemoveAll(IsEmptyOrContainsNewlineOrTab);
+                
+                if (parts.Count == 2)
+                {
+                    currentMobDropGroup.Fields[parts[0].Trim()] = parts[1].Trim();
+                }
+                else
+                {
+                    if (parts.Count == 0) continue; // can happen due to filtering
+                    parts.ForEach(p => p.Trim());
+                    currentMobDropGroup.Data.Add(parts);
+                }
+            }
+        }
+
+        if (currentMobDropGroup != null)
+        {
+            if (currentMobDropGroup.Fields.Keys.Any(k => StartsWithNumberRegex().IsMatch(k)))
+            {
+                throw new Exception("Invalid group format");
+            }
+            groups.Add(currentMobDropGroup);
+        }
+        
+        foreach (var group in groups)
+        {
+            var container = ParseMobGroup(group, itemManager);
+            if (container != null)
+            {
+                yield return container;
+            }
+        }
+    }
+    
+    private static bool IsEmptyOrContainsNewlineOrTab(string str)
+    {
+        return string.IsNullOrEmpty(str) || str.Contains("\n") || str.Contains("\t") || str.Contains("{") || str.Contains("}");
+    }
+
+    private static MonsterDropContainer? ParseMobGroup(MobDropGroup group, IItemManager itemManager)
+    {
+        uint minKillCount = 0;
+        uint levelLimit = 0;
+        
+        var type = group.GetField<string>("Type");
+        if (type == default)
+        {
+            // todo: custom exceptions
+            throw new InvalidOperationException("Type not found in group");
+        }
+        
+        var mobId = group.GetField<uint>("Mob");
+        if (mobId == default)
+        {
+            throw new InvalidOperationException("Mob not found in group");
+        }
+
+        if (type.Equals("Kill", INV_CUL))
+        {
+            minKillCount = group.GetField<uint>("kill_drop");
+        }
+        else
+        {
+            minKillCount = 1;
+        }
+        
+        if (type.Equals("Limit", INV_CUL))
+        {
+            levelLimit = group.GetField<uint>("Level_limit");
+            if (levelLimit == default)
+            {
+                throw new InvalidOperationException("Level_limit not found in group when type is limit");
+            }
+        }
+        else
+        {
+            levelLimit = 0;
+        }
+
+        if (minKillCount == 0)
+        {
+            return null;
+        }
+
+        if (type.Equals("Kill", INV_CUL)) // MobItemGroup
+        {
+            var entry = new MonsterItemGroup
+            {
+                MonsterProtoId = mobId,
+                MinKillCount = minKillCount,
+            };
+
+            foreach (var dropData in group.Data)
+            {
+                uint itemProtoId = uint.TryParse(dropData[1], InvNum, out var id) ? id : 0;
+                if (itemProtoId < 1)
+                {
+                    var item = itemManager.GetItemByName(dropData[1]); // Some entries are the names instead of the id
+                    if (item == null)
+                    {
+                        throw new InvalidOperationException("Invalid item proto id");
+                    }
+                    itemProtoId = item.Id;
+                }
+                
+                uint count = uint.Parse(dropData[2], InvNum);
+                if (count < 1)
+                {
+                    throw new InvalidOperationException("Invalid count");
+                }
+                
+                uint chance = uint.Parse(dropData[3], InvNum);
+                if (chance <= 0)
+                {
+                    throw new InvalidOperationException("Invalid chance");
+                }
+                
+                int rareChance = int.Parse(dropData[4], InvNum);
+                rareChance = MathUtils.MinMax(0, rareChance, 100);
+                
+                entry.AddDrop(itemProtoId, count, chance, (uint) rareChance);
+            }
+            
+            return entry;
+            
+        }
+
+        if (type.Equals("Drop", INV_CUL)) // DropItemGroup
+        {
+            var entry = new DropItemGroup
+            {
+                MonsterProtoId = mobId,
+            };
+
+            foreach (var dropData in group.Data)
+            {
+                uint itemProtoId = uint.Parse(dropData[1], InvNum);
+                if (itemProtoId < 1)
+                {
+                    throw new InvalidOperationException("Invalid item id");
+                }
+                
+                uint count = uint.Parse(dropData[2], InvNum);
+                if (count < 1)
+                {
+                    throw new InvalidOperationException("Invalid count");
+                }
+                
+                float chance = float.Parse(dropData[3], InvNum);
+                if (chance <= 0)
+                {
+                    throw new InvalidOperationException("Invalid chance");
+                }
+                
+                chance *= 10000.0f; // to make it 0-1000
+                
+                entry.Drops.Add(new DropItemGroup.Drop { ItemProtoId = itemProtoId, Amount = count, Chance = chance });
+            }
+            
+            return entry;
+        }
+
+        if (type.Equals("Limit", INV_CUL)) // LevelItemGroup
+        {
+            var entry = new LevelItemGroup
+            {
+                LevelLimit = levelLimit
+            };
+            
+            foreach (var dropData in group.Data)
+            {
+                uint itemProtoId = uint.TryParse(dropData[1], InvNum, out var id) ? id : 0;
+                if (itemProtoId < 1)
+                {
+                    var item = itemManager.GetItemByName(dropData[1]); // Some entries are the names instead of the id
+                    if (item == null)
+                    {
+                        throw new InvalidOperationException("Invalid item proto id");
+                    }
+                    itemProtoId = item.Id;
+                }
+                
+                uint count = uint.Parse(dropData[2], InvNum);
+                if (count < 1)
+                {
+                    throw new InvalidOperationException("Invalid count");
+                }
+                
+                float chance = float.Parse(dropData[3], InvNum);
+                if (chance <= 0)
+                {
+                    throw new InvalidOperationException("Invalid chance");
+                }
+                
+                chance *= 10000.0f; // to make it 0-1000
+                
+                entry.Drops.Add(new LevelItemGroup.Drop { ItemProtoId = itemProtoId, Amount = count, Chance = chance });
+            }
+            
+            return entry;
+        }
+        
+        return null;
     }
 
     [GeneratedRegex("(?: {2,}|\\t+)")]

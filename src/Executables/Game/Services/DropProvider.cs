@@ -1,4 +1,4 @@
-using System.Collections.Immutable;
+﻿using System.Collections.Immutable;
 using System.Globalization;
 using System.Text;
 using Microsoft.Extensions.Configuration;
@@ -8,14 +8,19 @@ using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.World;
 using QuantumCore.Core.Utils;
+using QuantumCore.Game.Drops;
+using QuantumCore.Game.Extensions;
+using QuantumCore.Game.PlayerUtils;
 using QuantumCore.Game.World.Entities;
 
 namespace QuantumCore.Game.Services;
 
 public class DropProvider : IDropProvider
 {
-    private readonly Dictionary<uint, ImmutableArray<MonsterDropEntry>> _monsterDrops = new();
-    private readonly Dictionary<uint, float> _simpleMobDrops = new();
+    private readonly Dictionary<uint, MonsterItemGroup> _monsterDrops = new();
+    private readonly Dictionary<uint, DropItemGroup> _itemDrops = new();
+
+    private const bool DropDebug = true; // todo: config
 
     private readonly ILogger<DropProvider> _logger;
     private readonly IConfiguration _configuration;
@@ -32,29 +37,148 @@ public class DropProvider : IDropProvider
         _itemManager = itemManager;
         _monsterManager = monsterManager;
     }
-
-    public ImmutableArray<MonsterDropEntry> GetDropsForMob(uint monsterProtoId)
+    
+    public MonsterItemGroup? GetMonsterDropsForMob(uint monsterProtoId)
     {
-        if (_monsterDrops.TryGetValue(monsterProtoId, out var arr))
-        {
-            return arr;
-        }
+        return _monsterDrops.TryGetValue(monsterProtoId, out var arr) ? arr : null;
+    }
 
-        return new ImmutableArray<MonsterDropEntry>();
+    public DropItemGroup? GetDropItemsGroupForMob(uint monsterProtoId)
+    {
+        return _itemDrops.TryGetValue(monsterProtoId, out var arr) ? arr : null;
     }
 
     public ImmutableArray<CommonDropEntry> CommonDrops { get; private set; } = ImmutableArray<CommonDropEntry>.Empty;
 
+    public ImmutableArray<EtcItemDropEntry> EtcDrops { get; private set; } = ImmutableArray<EtcItemDropEntry>.Empty;
+    public ImmutableArray<LevelItemGroup> LevelDrops { get; private set; } = ImmutableArray<LevelItemGroup>.Empty;
+
     public async Task LoadAsync(CancellationToken cancellationToken = default)
     {
-        await Task.WhenAll(
-            LoadCommonMobDropsAsync(cancellationToken),
-            LoadDeltaPercentagesAsync(cancellationToken),
-            LoadDropsForMonstersAsync(cancellationToken),
-            LoadSimpleMobDropsAsync(cancellationToken)
-        );
+        await LoadCommonMobDropsAsync(cancellationToken);
+        await LoadDeltaPercentagesAsync(cancellationToken);
+        await LoadSimpleMobDropsAsync(cancellationToken);
+        await LoadDropsForMonstersAsync();
+
     }
 
+    #region Loading
+
+    private async Task LoadCommonMobDropsAsync(CancellationToken cancellationToken)
+    {
+        const string file = "data/common_drop_item.txt";
+        if (!File.Exists(file)) return;
+
+        _logger.LogDebug("Loading common drops from {FilePath}", file);
+
+        using var sr = new StreamReader(file, FileEncoding);
+
+        CommonDrops = await ParserUtils.GetCommonDropsAsync(sr, cancellationToken);
+
+        _logger.LogDebug("Found {Count:D} common drops", CommonDrops.Length);
+    }
+
+    /// <summary>
+    /// The parsed file contains an additional multiplier drop chance for some items.
+    /// </summary>
+    private async Task LoadSimpleMobDropsAsync(CancellationToken cancellationToken)
+    {
+        const string file = "data/etc_drop_item.txt";
+        if (!File.Exists(file)) return;
+
+        _logger.LogDebug("Loading item drop modifiers from {FilePath}", file);
+
+        using var sr = new StreamReader(file, FileEncoding);
+
+        var lineIndex = 0;
+        // loop while line is not null
+        var etcDrops = new List<EtcItemDropEntry>();
+        while ((await sr.ReadLineAsync(cancellationToken))! is { } line)
+        {
+            var result = ParseCommonLine(line, lineIndex, file);
+
+            if (result is not null)
+            {
+                etcDrops.Add(new EtcItemDropEntry(result.Value.Key, result.Value.Value));
+            }
+
+            lineIndex++;
+        }
+        
+        EtcDrops = etcDrops.ToImmutableArray();
+
+        _logger.LogDebug("Found simple drops for {Count:D} items", EtcDrops.Length);
+    }
+
+    private KeyValuePair<uint, float>? ParseCommonLine(ReadOnlySpan<char> line, int lineIndex, string file)
+    {
+        var i = line.IndexOf('\t');
+
+        if (i == -1)
+        {
+            _logger.LogDebug("Line {LineNumber} of the file {FilePath} is not valid", lineIndex + 1, file);
+            return null;
+        }
+
+        var itemName = line[..i];
+        var chance = line[(i + 1)..];
+
+        var item = _itemManager.GetItemByName(itemName);
+
+        if (item is null)
+        {
+            _logger.LogDebug("Could find item for name {ItemName}", itemName.ToString());
+            return null;
+        }
+
+        if (!float.TryParse(chance, CultureInfo.InvariantCulture, out var multiplierValue))
+        {
+            _logger.LogDebug("Cannot parse multiplier value {Value} of item {ItemName}", chance.ToString(),
+                itemName.ToString());
+            return null;
+        }
+
+        return new KeyValuePair<uint, float>(item.Id, multiplierValue * 10000.0f); // 1 to 1000
+    }
+    
+    private Task LoadDropsForMonstersAsync()
+    {
+        const string file = "data/mob_drop_item.txt";
+        if (!File.Exists(file)) return Task.CompletedTask;
+        
+        _logger.LogDebug("Loading drops from {FilePath}", file);
+        
+        var groups = ParserUtils.GetDropsForGroupBlocks(file, FileEncoding, _itemManager);
+
+        var monsters = groups.OfType<MonsterItemGroup>();
+        foreach (var monster in monsters)
+        {
+            if (_monsterDrops.ContainsKey(monster.MonsterProtoId))
+            {
+                _logger.LogWarning("Duplicate monster drop entry for {MonsterProtoId}", monster.MonsterProtoId);
+                continue;
+            }
+            _monsterDrops[monster.MonsterProtoId] = monster;
+        }
+        
+        var dropItems = groups.OfType<DropItemGroup>();
+        foreach (var dropItem in dropItems)
+        {
+            if (_itemDrops.ContainsKey(dropItem.MonsterProtoId))
+            {
+                _itemDrops[dropItem.MonsterProtoId].Drops.AddRange(dropItem.Drops);
+                continue;
+            }
+            _itemDrops[dropItem.MonsterProtoId] = dropItem;
+        }
+        
+        LevelDrops = [..groups.OfType<LevelItemGroup>()];
+
+        _logger.LogDebug("Found {Count:D} group drops", groups.Count());
+        
+        return Task.CompletedTask;
+    }
+    
     private Task LoadDeltaPercentagesAsync(CancellationToken cancellationToken = default)
     {
         _bossPercentageDeltas = _configuration.GetSection("drops:delta:boss").Get<int[]>() 
@@ -63,6 +187,8 @@ public class DropProvider : IDropProvider
                                ?? throw new InvalidOperationException("Missing mob delta percentages");
         return Task.CompletedTask;
     }
+
+    #endregion
 
     public (int deltaPercentage, int dropRange) CalculateDropPercentages(IPlayerEntity player, MonsterEntity monster)
     {
@@ -125,143 +251,194 @@ public class DropProvider : IDropProvider
         return (deltaPercentage, dropRange);
     }
 
-    private async Task LoadCommonMobDropsAsync(CancellationToken cancellationToken)
+    #region Drop Calculations
+
+    public List<ItemInstance> CalculateCommonDropItems(IPlayerEntity player, MonsterEntity monster, int delta, int range)
     {
-        const string file = "data/common_drop_item.txt";
-        if (!File.Exists(file)) return;
-
-        _logger.LogDebug("Loading common drops from {FilePath}", file);
-
-        using var sr = new StreamReader(file, FileEncoding);
-
-        CommonDrops = await ParserUtils.GetCommonDropsAsync(sr, cancellationToken);
-
-        _logger.LogDebug("Found {Count:D} common drops", CommonDrops.Length);
-    }
-
-    /// <summary>
-    /// The parsed file contains the default drop chances for items.
-    /// Drops defined in mob_proto's drop_item column get their chance from this file.
-    /// </summary>
-    private async Task LoadSimpleMobDropsAsync(CancellationToken cancellationToken)
-    {
-        const string file = "data/etc_drop_item.txt";
-        if (!File.Exists(file)) return;
-
-        _logger.LogDebug("Loading item drop modifiers from {FilePath}", file);
-
-        using var sr = new StreamReader(file, FileEncoding);
-
-        var lineIndex = 0;
-        // loop while line is not null
-        var simpleMobDrops = new Dictionary<uint, float>();
-        while ((await sr.ReadLineAsync(cancellationToken))! is { } line)
+        var items = new List<ItemInstance>();
+        
+        var commonDrops = this.GetPossibleCommonDropsForPlayer(player);
+        foreach (var drop in commonDrops)
         {
-            var result = ParseCommonLine(line, lineIndex, file);
-
-            if (result is not null)
+            var percent = (drop.Chance * delta) / 100;
+            var target = CoreRandom.GenerateInt32(1, range + 1);
+                
+            if (DropDebug)
             {
-                simpleMobDrops.Add(result.Value.Key, result.Value.Value);
+                var realPercent = percent / range * 100;
+                _logger.LogInformation("Drop chance for {Name} ({MobProtoId}) is {RealPercent}%", 
+                    monster.Proto.TranslatedName, monster.Proto.Id, realPercent);
             }
-
-            lineIndex++;
-        }
-
-        foreach (var mobId in _monsterDrops.Keys.ToArray()) // copy
-        {
-            var mob = _monsterManager.GetMonster(mobId);
-            if (mob is null)
+                
+            if (percent >= target)
             {
-                _logger.LogWarning("Cannot load simple drop for mob {Id} because that mob does not exist", mobId);
-                continue;
-            }
-            if (mob.DropItemId != 0 &&
-                simpleMobDrops.TryGetValue(mob.DropItemId, out var chance))
-            {
-                _monsterDrops[mobId] = _monsterDrops[mobId].Add(new MonsterDropEntry(mob.DropItemId, chance));
-            }
-        }
-
-        _logger.LogDebug("Found simple drops for {Count:D} items", _simpleMobDrops.Count);
-    }
-
-    private KeyValuePair<uint, float>? ParseCommonLine(ReadOnlySpan<char> line, int lineIndex, string file)
-    {
-        var i = line.IndexOf('\t');
-
-        if (i == -1)
-        {
-            _logger.LogDebug("Line {LineNumber} of the file {FilePath} is not valid", lineIndex + 1, file);
-            return null;
-        }
-
-        var itemName = line[..i];
-        var chance = line[(i + 1)..];
-
-        var item = _itemManager.GetItemByName(itemName);
-
-        if (item is null)
-        {
-            _logger.LogDebug("Could find item for name {ItemName}", itemName.ToString());
-            return null;
-        }
-
-        if (!float.TryParse(chance, CultureInfo.InvariantCulture, out var multiplierValue))
-        {
-            _logger.LogDebug("Cannot parse multiplier value {Value} of item {ItemName}", chance.ToString(),
-                itemName.ToString());
-            return null;
-        }
-
-        return new KeyValuePair<uint, float>(item.Id, multiplierValue * 10000.0f); // 1 to 1000
-    }
-
-    private async Task LoadDropsForMonstersAsync(CancellationToken cancellationToken)
-    {
-        const string file = "data/mob_drop_item.txt";
-        if (!File.Exists(file)) return;
-
-        _logger.LogDebug("Loading drops from {FilePath}", file);
-
-        using var sr = new StreamReader(file);
-        do
-        {
-            var item = await ParserUtils.GetDropsForBlockAsync(sr, cancellationToken);
-            if (item != null)
-            {
-                if (_monsterDrops.TryGetValue(item.Value.Key, out var list))
+                var itemProto = _itemManager.GetItem(drop.ItemProtoId);
+                if (itemProto is null)
                 {
-                    _monsterDrops[item.Value.Key] = list.AddRange(item.Value.Value);
+                    _logger.LogWarning("Could not find item proto for {ItemProtoId}", drop.ItemProtoId);
+                    continue;
                 }
-                else
-                {
-                    _monsterDrops.Add(item.Value.Key, item.Value.Value.ToImmutableArray());
-                }
-            }
-        } while (!sr.EndOfStream);
+                    
+                var itemInstance = _itemManager.CreateItem(itemProto);
 
-        foreach (var monster in _monsterManager.GetMonsters())
-        {
-            if (monster.DropItemId == 0) continue;
-
-            if (_simpleMobDrops.TryGetValue(monster.DropItemId, out var chance))
-            {
-                if (_monsterDrops.TryGetValue(monster.Id, out var list))
+                if ((EItemType) itemProto.Type ==  EItemType.Polymorph)
                 {
-                    _monsterDrops[monster.Id] = list.Add(new MonsterDropEntry(monster.DropItemId, chance));
-                }
-                else
-                {
-                    var arr = new []
+                    if (monster.Proto.PolymorphItemId == itemProto.Id)
                     {
-                        new MonsterDropEntry(monster.DropItemId, chance)
-                    }.ToImmutableArray();
-                    _monsterDrops.Add(monster.Id, arr);
+                        // todo: set item socket 0 value to monster proto id (when ItemInstance have sockets implemented)
+                    }
+                }
+                    
+                items.Add(itemInstance);
+            }
+        }
+        return items;
+    }
+
+    public List<ItemInstance> CalculateDropItemGroupItems(MonsterEntity monster, int delta, int range)
+    {
+        var items = new List<ItemInstance>();
+        
+        var mobItemGroupDrops = GetDropItemsGroupForMob(monster.Proto.Id);
+        if (mobItemGroupDrops is not null)
+        {
+            foreach (var drop in mobItemGroupDrops.Drops)
+            {
+                var percent = drop.Chance * delta / 100;
+                var target = CoreRandom.GenerateInt32(1, range + 1);
+                    
+                if (DropDebug)
+                {
+                    var realPercent = percent / range * 100;
+                    _logger.LogInformation("Drop chance for {Name} ({MobProtoId}) is {RealPercent}%", 
+                        monster.Proto.TranslatedName, monster.Proto.Id, realPercent);
+                }
+                    
+                if (percent >= target)
+                {
+                    var itemProto = _itemManager.GetItem(drop.ItemProtoId);
+                    if (itemProto is null)
+                    {
+                        _logger.LogWarning("Could not find item proto for {ItemProtoId}", drop.ItemProtoId);
+                        continue;
+                    }
+                        
+                    if ((EItemType) itemProto.Type ==  EItemType.Polymorph)
+                    {
+                        if (monster.Proto.PolymorphItemId == itemProto.Id)
+                        {
+                            // todo: set item socket 0 value to monster proto id (when ItemInstance have sockets implemented)
+                        }
+                    }
+                        
+                    var itemInstance = _itemManager.CreateItem(itemProto, (byte) drop.Amount);
+                    items.Add(itemInstance);
                 }
             }
-
         }
-
-        _logger.LogDebug("Found drops for {Count:D} mobs", _monsterDrops.Count);
+        return items;
     }
+
+    public List<ItemInstance> CalculateMobDropItemGroupItems(IPlayerEntity player, MonsterEntity monster, int delta, int range)
+    {
+        var items = new List<ItemInstance>();
+        var mobDrops = this.GetPossibleMobDropsForPlayer(player, monster.Proto.Id);
+        if (mobDrops is {IsEmpty: false})
+        {
+            var percent = 40000 * delta / mobDrops.MinKillCount;
+            var target = CoreRandom.GenerateInt32(1, range + 1);
+
+            if (DropDebug)
+            {
+                var realPercent = (float) percent / range * 100;
+                _logger.LogInformation("Drop chance for {Name} ({MobProtoId}) is {RealPercent}%",
+                    monster.Proto.TranslatedName, monster.Proto.Id, realPercent);
+            }
+                
+            if (percent >= target)
+            {
+                var randomDrop = mobDrops.GetDrop();
+                var itemProto = _itemManager.GetItem(randomDrop?.ItemProtoId ?? 0);
+                if (itemProto is not null)
+                {
+                    var itemInstance = _itemManager.CreateItem(itemProto, (byte) randomDrop!.Amount);
+                    items.Add(itemInstance);
+                }
+            }
+        }
+        return items;
+    }
+
+    public List<ItemInstance> CalculateLevelDropItems(IPlayerEntity player, MonsterEntity monster, int delta, int range)
+    {
+        var items = new List<ItemInstance>();
+        foreach (var levelDrop in LevelDrops)
+        {
+            if (levelDrop.LevelLimit <= player.GetPoint(EPoints.Level))
+            {
+                foreach (var drop in levelDrop.Drops)
+                {
+                    var percent = drop.Chance;
+                    var target = CoreRandom.GenerateInt32(1, 1_000_000 + 1);
+                    
+                    if (DropDebug)
+                    {
+                        var realPercent = percent / range * 100;
+                        _logger.LogInformation("Drop chance for {Name} ({MobProtoId}) is {RealPercent}%",
+                            monster.Proto.TranslatedName, monster.Proto.Id, realPercent);
+                    }
+                    
+                    if (percent >= target)
+                    {
+                        var itemProto = _itemManager.GetItem(drop.ItemProtoId);
+                        if (itemProto is null)
+                        {
+                            _logger.LogWarning("Could not find item proto for {ItemProtoId}", drop.ItemProtoId);
+                            continue;
+                        }
+                            
+                        var itemInstance = _itemManager.CreateItem(itemProto, (byte) drop.Amount);
+                        items.Add(itemInstance);
+                    }
+                }
+            }
+        }
+        return items;
+    }
+
+    public List<ItemInstance> CalculateEtcDropItems(MonsterEntity monster, int delta, int range)
+    {
+        var items = new List<ItemInstance>();
+        var etcDrops = EtcDrops.Where(x => x.ItemProtoId == monster.Proto.DropItemId);
+        foreach (var drop in etcDrops)
+        {
+            var percent = drop.Multiplier * delta / 100;
+            var target = CoreRandom.GenerateInt32(1, range + 1);
+                
+            if (DropDebug)
+            {
+                var realPercent = percent / range * 100;
+                _logger.LogInformation("Drop chance for {Name} ({MobProtoId}) is {RealPercent}%", 
+                    monster.Proto.TranslatedName, monster.Proto.Id, realPercent);
+            }
+                
+            if (percent >= target)
+            {
+                var itemProto = _itemManager.GetItem(drop.ItemProtoId);
+                if (itemProto is null)
+                {
+                    _logger.LogWarning("Could not find item proto for {ItemProtoId}", drop.ItemProtoId);
+                    continue;
+                }
+                    
+                var itemInstance = _itemManager.CreateItem(itemProto);
+                items.Add(itemInstance);
+            }
+        }
+        return items;
+    }
+
+    #endregion
+
+    
 }

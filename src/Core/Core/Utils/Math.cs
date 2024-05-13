@@ -28,8 +28,8 @@
         
         public static int MinMax(int min, int value, int max)
         {
-            var tv = (min > value ? min : value);
-            return (max < tv) ? max : tv;
+            var temp = (min > value ? min : value);
+            return (max < temp) ? max : temp;
         }
     }
 }

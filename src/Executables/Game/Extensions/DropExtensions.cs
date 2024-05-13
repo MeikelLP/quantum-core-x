@@ -1,6 +1,7 @@
 ﻿using System.Collections.Immutable;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.World;
+using QuantumCore.Game.Drops;
 using QuantumCore.Game.Services;
 
 namespace QuantumCore.Game.Extensions;
@@ -24,9 +25,9 @@ public static class DropExtensions
         return [..dropProvider.CommonDrops.Where(x => x.CanDropFor(player))];
     }
 
-    public static ImmutableArray<MonsterDropEntry> GetPossibleMobDropsForPlayer(this IDropProvider dropProvider,
+    public static MonsterItemGroup? GetPossibleMobDropsForPlayer(this IDropProvider dropProvider,
         IPlayerEntity player, uint monsterProtoId)
     {
-        return [..dropProvider.GetDropsForMob(monsterProtoId).Where(x => x.CanDropFor(player))];
+        return dropProvider.GetMonsterDropsForMob(monsterProtoId);
     }
 }

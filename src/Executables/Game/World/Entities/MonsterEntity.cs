@@ -236,88 +236,34 @@ namespace QuantumCore.Game.World.Entities
             if (LastAttacker is null) return;
             
             List<ItemInstance> drops = new();
-
-            bool dropDebug = true; // todo: parse from config
             
             var (delta, range) = _dropProvider.CalculateDropPercentages(LastAttacker, this);
-            if (dropDebug)
-            {
-                _logger.LogInformation("Drop chance for {Name} ({MobProtoId}) is {Delta} with range {Range}", _proto.TranslatedName, _proto.Id, delta, range);
-            }
             
             // Common drops (common_drop_item.txt)
-            var commonDrops = _dropProvider.GetPossibleCommonDropsForPlayer(LastAttacker);
-            foreach (var drop in commonDrops)
-            {
-                var percent = (drop.Chance * delta) / 100;
-                var target = CoreRandom.GenerateInt32(1, range + 1);
-                
-                if (dropDebug)
-                {
-                    float realPercent = percent / range * 100;
-                    _logger.LogInformation("Drop chance for {Name} ({MobProtoId}) is {RealPercent}%", _proto.TranslatedName, _proto.Id, realPercent);
-                }
-                
-                if (percent >= target)
-                {
-                    var itemProto = _itemManager.GetItem(drop.ItemProtoId);
-                    if (itemProto is null)
-                    {
-                        _logger.LogWarning("Could not find item proto for {ItemProtoId}", drop.ItemProtoId);
-                        continue;
-                    }
-                    
-                    var itemInstance = _itemManager.CreateItem(itemProto);
-
-                    if ((EItemType) itemProto.Type ==  EItemType.Polymorph)
-                    {
-                        if (Proto.PolymorphItemId == itemProto.Id)
-                        {
-                            // todo: set item socket 0 to race number (when ItemInstance have sockets implemented)
-                        }
-                    }
-                    
-                    drops.Add(itemInstance);
-                }
-            }
+            drops.AddRange(_dropProvider.CalculateCommonDropItems(LastAttacker, this, delta, range));
             
-            // Drop Item Group (drop_item_group.txt)
-            // TODO: so far, was not able to find any example of this file anywhere. We can implement the logic, but without any example file, it's "impossible" to test.
-
+            // Drop Item Group (mob_drop_item.txt)
+            drops.AddRange(_dropProvider.CalculateDropItemGroupItems(this, delta, range));
+            
             // Mob Drop Item Group (mob_drop_item.txt)
-            var mobDrops = _dropProvider.GetPossibleMobDropsForPlayer(LastAttacker, _proto.Id);
-            if (mobDrops.IsDefaultOrEmpty)
-            {
-                mobDrops = [];
-            }
-            foreach (var drop in mobDrops)
-            {
-                var percent = 40000 * delta / drop.MinKillCount;
-                var target = CoreRandom.GenerateInt32(1, range + 1);
-
-                if (dropDebug)
-                {
-                    float realPercent = (float) percent / range * 100;
-                    _logger.LogInformation("Drop chance for {Name} ({MobProtoId}) is {RealPercent}%", _proto.TranslatedName, _proto.Id, realPercent);
-                }
-                
-                if (percent > target)
-                {
-                    var itemProto = _itemManager.GetItem(drop.ItemProtoId);
-                    if (itemProto is null)
-                    {
-                        _logger.LogWarning("Could not find item proto for {ItemProtoId}", drop.ItemProtoId);
-                        continue;
-                    }
-                    
-                    var itemInstance = _itemManager.CreateItem(itemProto, drop.Amount);
-                    drops.Add(itemInstance);
-                }
-            }
+            drops.AddRange(_dropProvider.CalculateMobDropItemGroupItems(LastAttacker, this, delta, range));
+            
+            // Level drops (mob_drop_item.txt)
+            drops.AddRange(_dropProvider.CalculateLevelDropItems(LastAttacker, this, delta, range));
+            
+            // Etc item drops (etc_drop_item.txt)
+            drops.AddRange(_dropProvider.CalculateEtcDropItems(this, delta, range));
+            
+            // todo:
+            // - metin stone drops
+            // - horse riding skill drops
+            // - quest item drops
+            // - event item drops
 
             // Finally, drop the items
             foreach (var drop in drops)
             {
+                // todo: if drop is yang, adjust the amount in function below instead of '1'
                 _map.AddGroundItem(drop, PositionX, PositionY, 1, LastAttacker.Name);
             }
         }
