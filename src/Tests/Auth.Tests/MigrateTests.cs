@@ -1,4 +1,4 @@
-﻿using Core.Tests.Extensions;
+﻿using Auth.Tests.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
