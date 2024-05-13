@@ -36,6 +36,14 @@ public class Player
     [DefaultValue(0)] public required uint GivenStatusPoints { get; set; }
     [DefaultValue(0)] public required uint AvailableStatusPoints { get; set; }
 
+    public uint? GuildId { get; set; }
+    public Guild? Guild { get; set; }
+
+    /// <summary>
+    /// Guilds where the player is leader of. Should be empty or 1
+    /// </summary>
+    public ICollection<Guild> GuildsToLead { get; set; } = null!;
+
     public static void Configure(EntityTypeBuilder<Player> builder, DatabaseFacade database)
     {
         if (database.IsSqlite() || database.IsNpgsql())

@@ -105,6 +105,50 @@ namespace QuantumCore.Game.Persistence.Migrations.Postgresql
                     b.ToTable("deleted_players");
                 });
 
+            modelBuilder.Entity("QuantumCore.Game.Persistence.Entities.Guild", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint")
+                        .HasDefaultValueSql("gen_random_uuid()");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("current_timestamp");
+
+                    b.Property<long>("Experience")
+                        .HasColumnType("bigint");
+
+                    b.Property<long>("Gold")
+                        .HasColumnType("bigint");
+
+                    b.Property<Guid>("LeaderId")
+                        .HasColumnType("uuid");
+
+                    b.Property<byte>("Level")
+                        .HasColumnType("smallint");
+
+                    b.Property<int>("MaxMemberCount")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(12)
+                        .HasColumnType("character varying(12)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("current_timestamp");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LeaderId");
+
+                    b.ToTable("guilds");
+                });
+
             modelBuilder.Entity("QuantumCore.Game.Persistence.Entities.Item", b =>
                 {
                     b.Property<Guid>("Id")
@@ -251,6 +295,9 @@ namespace QuantumCore.Game.Persistence.Migrations.Postgresql
                     b.Property<long>("Gold")
                         .HasColumnType("bigint");
 
+                    b.Property<long?>("GuildId")
+                        .HasColumnType("bigint");
+
                     b.Property<long>("HairPart")
                         .HasColumnType("bigint");
 
@@ -302,6 +349,8 @@ namespace QuantumCore.Game.Persistence.Migrations.Postgresql
 
                     b.HasKey("Id");
 
+                    b.HasIndex("GuildId");
+
                     b.ToTable("players");
 
                     b.HasData(
@@ -333,6 +382,17 @@ namespace QuantumCore.Game.Persistence.Migrations.Postgresql
                             Stamina = 0L,
                             UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         });
+                });
+
+            modelBuilder.Entity("QuantumCore.Game.Persistence.Entities.Guild", b =>
+                {
+                    b.HasOne("QuantumCore.Game.Persistence.Entities.Player", "Leader")
+                        .WithMany("GuildsToLead")
+                        .HasForeignKey("LeaderId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Leader");
                 });
 
             modelBuilder.Entity("QuantumCore.Game.Persistence.Entities.Item", b =>
@@ -376,11 +436,30 @@ namespace QuantumCore.Game.Persistence.Migrations.Postgresql
                     b.Navigation("Player");
                 });
 
+            modelBuilder.Entity("QuantumCore.Game.Persistence.Entities.Player", b =>
+                {
+                    b.HasOne("QuantumCore.Game.Persistence.Entities.Guild", "Guild")
+                        .WithMany("Members")
+                        .HasForeignKey("GuildId");
+
+                    b.Navigation("Guild");
+                });
+
+            modelBuilder.Entity("QuantumCore.Game.Persistence.Entities.Guild", b =>
+                {
+                    b.Navigation("Members");
+                });
+
             modelBuilder.Entity("QuantumCore.Game.Persistence.Entities.PermGroup", b =>
                 {
                     b.Navigation("Permissions");
 
                     b.Navigation("Users");
+                });
+
+            modelBuilder.Entity("QuantumCore.Game.Persistence.Entities.Player", b =>
+                {
+                    b.Navigation("GuildsToLead");
                 });
 #pragma warning restore 612, 618
         }

@@ -9,6 +9,7 @@ using QuantumCore.Caching;
 using QuantumCore.Core.Utils;
 using QuantumCore.Extensions;
 using QuantumCore.Game.Packets;
+using QuantumCore.Game.Packets.Guild;
 using QuantumCore.Game.Persistence;
 using QuantumCore.Game.PlayerUtils;
 
@@ -21,6 +22,7 @@ namespace QuantumCore.Game.World.Entities
         public string Name => Player.Name;
         public IGameConnection Connection { get; }
         public PlayerData Player { get; private set; }
+        public GuildData? Guild { get; private set; }
         public IInventory Inventory { get; private set; }
         public IEntity? Target { get; set; }
         public IList<Guid> Groups { get; private set; }
@@ -165,6 +167,8 @@ namespace QuantumCore.Game.World.Entities
             Health = (int) GetPoint(EPoints.MaxHp); // todo: cache hp of player
             Mana = (int) GetPoint(EPoints.MaxSp);
             await LoadPermGroups();
+            var guildManager = _scope.ServiceProvider.GetRequiredService<IGuildManager>();
+            Guild = await guildManager.GetGuildForPlayerAsync(Player.Id);
             _questManager.InitializePlayer(this);
 
             CalculateDefence();
@@ -276,6 +280,39 @@ namespace QuantumCore.Game.World.Entities
             }
 
             Connection.Send(dead);
+        }
+
+        private void SendGuildInfo()
+        {
+            if (Guild is not null)
+            {
+                Connection.Send(new GuildInfo
+                {
+                    Level = Guild.Level,
+                    Name = Guild.Name!,
+                    Gold = Guild.Gold,
+                    GuildId = Guild.Id,
+                    Exp = Guild.Experience,
+                    HasLand = 0,
+                    MasterPid = 0, // TODO
+                    MemberCount = (ushort) Guild.Members.Length,
+                    MaxMemberCount = Guild.MaxMemberCount
+                });
+                Connection.Send(new GuildName
+                {
+                    Id = Guild.Id,
+                    Name = Guild.Name
+                });
+            }
+        }
+
+        public async Task RefreshGuildAsync()
+        {
+            var guildManager = _scope.ServiceProvider.GetRequiredService<IGuildManager>();
+            Guild = await guildManager.GetGuildForPlayerAsync(Player.Id);
+
+            SendGuildInfo();
+            SendCharacterUpdate();
         }
 
         public void Respawn(bool town)
@@ -954,6 +991,7 @@ namespace QuantumCore.Game.World.Entities
 
         public override void ShowEntity(IConnection connection)
         {
+            SendGuildInfo();
             SendCharacter(connection);
             SendCharacterAdditional(connection);
         }
@@ -1049,6 +1087,7 @@ namespace QuantumCore.Game.World.Entities
                 Name = Player.Name,
                 Empire = Player.Empire,
                 Level = Player.Level,
+                GuildId = Guild?.Id ?? 0,
                 Parts = new ushort[]
                 {
                     (ushort) (Inventory.EquipmentWindow.Body?.ItemId ?? 0),
@@ -1071,7 +1110,8 @@ namespace QuantumCore.Game.World.Entities
                     (ushort) (Inventory.EquipmentWindow.Hair?.ItemId ?? 0)
                 },
                 MoveSpeed = MovementSpeed,
-                AttackSpeed = _attackSpeed
+                AttackSpeed = _attackSpeed,
+                GuildId = Guild?.Id ?? 0
             };
 
             Connection.Send(packet);

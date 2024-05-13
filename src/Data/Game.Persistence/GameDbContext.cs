@@ -11,12 +11,14 @@ public abstract class GameDbContext : DbContext
     public DbSet<PermAuth> Permissions { get; set; } = null!;
     public DbSet<PermGroup> PermissionGroups { get; set; } = null!;
     public DbSet<PermUser> PermissionUsers { get; set; } = null!;
+    public DbSet<Guild> Guilds { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         DeletedPlayer.Configure(modelBuilder.Entity<DeletedPlayer>(), Database);
         Player.Configure(modelBuilder.Entity<Player>(), Database);
         Item.Configure(modelBuilder.Entity<Item>(), Database);
+        Guild.Configure(modelBuilder.Entity<Guild>(), Database);
         PermAuth.Configure(modelBuilder.Entity<PermAuth>(), Database);
         PermGroup.Configure(modelBuilder.Entity<PermGroup>(), Database);
         PermUser.Configure(modelBuilder.Entity<PermUser>(), Database);

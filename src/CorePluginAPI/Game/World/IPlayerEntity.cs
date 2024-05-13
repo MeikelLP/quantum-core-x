@@ -50,5 +50,6 @@ namespace QuantumCore.API.Game.World
         void Disconnect();
         string ToString();
         Task OnDespawnAsync();
+        Task RefreshGuildAsync();
     }
 }
