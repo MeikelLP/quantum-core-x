@@ -429,7 +429,7 @@ public class ParserTests
         result[0].MinLevel.Should().Be(1);
         result[0].MaxLevel.Should().Be(15);
         result[0].ItemProtoId.Should().Be(11);
-        result[0].Chance.Should().BeApproximately(0.08f / 5000, CHANCE_ALLOWED_APPROXIMATION);
+        result[0].Chance.Should().BeApproximately(0.08f * 10000, CHANCE_ALLOWED_APPROXIMATION);
     }
 
     [Fact]
@@ -445,7 +445,7 @@ public class ParserTests
         result[0].MinLevel.Should().Be(1);
         result[0].MaxLevel.Should().Be(15);
         result[0].ItemProtoId.Should().Be(11);
-        result[0].Chance.Should().BeApproximately(0.08f / 5000, CHANCE_ALLOWED_APPROXIMATION);
+        result[0].Chance.Should().BeApproximately(0.08f * 10000, CHANCE_ALLOWED_APPROXIMATION);
     }
 
     [Fact]
@@ -473,22 +473,22 @@ public class ParserTests
         result[0].MinLevel.Should().Be(1);
         result[0].MaxLevel.Should().Be(15);
         result[0].ItemProtoId.Should().Be(11);
-        result[0].Chance.Should().BeApproximately(0.08f / 5000, CHANCE_ALLOWED_APPROXIMATION);
+        result[0].Chance.Should().BeApproximately(0.08f * 10000, CHANCE_ALLOWED_APPROXIMATION);
 
         result[1].MinLevel.Should().Be(1);
         result[1].MaxLevel.Should().Be(15);
         result[1].ItemProtoId.Should().Be(11);
-        result[1].Chance.Should().BeApproximately(0.104f / 3846, CHANCE_ALLOWED_APPROXIMATION);
+        result[1].Chance.Should().BeApproximately(0.104f * 10000, CHANCE_ALLOWED_APPROXIMATION);
 
         result[2].MinLevel.Should().Be(1);
         result[2].MaxLevel.Should().Be(15);
         result[2].ItemProtoId.Should().Be(11);
-        result[2].Chance.Should().BeApproximately(0.12f / 3333, CHANCE_ALLOWED_APPROXIMATION);
+        result[2].Chance.Should().BeApproximately(0.12f * 10000, CHANCE_ALLOWED_APPROXIMATION);
 
         result[3].MinLevel.Should().Be(1);
         result[3].MaxLevel.Should().Be(15);
         result[3].ItemProtoId.Should().Be(11);
-        result[3].Chance.Should().BeApproximately(0.32f / 1250, CHANCE_ALLOWED_APPROXIMATION);
+        result[3].Chance.Should().BeApproximately(0.32f * 10000, CHANCE_ALLOWED_APPROXIMATION);
     }
 
     [Fact]
@@ -504,21 +504,21 @@ public class ParserTests
         result[0].MinLevel.Should().Be(1);
         result[0].MaxLevel.Should().Be(15);
         result[0].ItemProtoId.Should().Be(12);
-        result[0].Chance.Should().BeApproximately(0.04f / 10000, CHANCE_ALLOWED_APPROXIMATION);
+        result[0].Chance.Should().BeApproximately(0.04f * 10000, CHANCE_ALLOWED_APPROXIMATION);
 
         result[1].MinLevel.Should().Be(1);
         result[1].MaxLevel.Should().Be(15);
         result[1].ItemProtoId.Should().Be(12);
-        result[1].Chance.Should().BeApproximately(0.052f / 7692, CHANCE_ALLOWED_APPROXIMATION);
+        result[1].Chance.Should().BeApproximately(0.052f * 10000, CHANCE_ALLOWED_APPROXIMATION);
 
         result[2].MinLevel.Should().Be(1);
         result[2].MaxLevel.Should().Be(15);
         result[2].ItemProtoId.Should().Be(12);
-        result[2].Chance.Should().BeApproximately(0.06f / 6666, CHANCE_ALLOWED_APPROXIMATION);
+        result[2].Chance.Should().BeApproximately(0.06f * 10000, CHANCE_ALLOWED_APPROXIMATION);
 
         result[3].MinLevel.Should().Be(1);
         result[3].MaxLevel.Should().Be(15);
         result[3].ItemProtoId.Should().Be(12);
-        result[3].Chance.Should().BeApproximately(0.16f / 2500, CHANCE_ALLOWED_APPROXIMATION);
+        result[3].Chance.Should().BeApproximately(0.16f * 10000, CHANCE_ALLOWED_APPROXIMATION);
     }
 }
