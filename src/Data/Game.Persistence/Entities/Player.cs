@@ -1,16 +1,14 @@
 ﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace QuantumCore.Game.Persistence.Entities;
 
-[Table("players")]
 public class Player
 {
-    public required Guid Id { get; set; }
+    public required uint Id { get; set; }
     public required Guid AccountId { get; set; }
     public required DateTime CreatedAt { get; set; }
     public required DateTime UpdatedAt { get; set; }
@@ -49,9 +47,41 @@ public class Player
             builder.Property(x => x.UpdatedAt).HasDefaultValueSql("(CAST(CURRENT_TIMESTAMP AS DATETIME(6)))");
         }
 
-        if (database.IsNpgsql())
-        {
-            builder.Property(x => x.Id).ValueGeneratedOnAdd().HasDefaultValueSql("gen_random_uuid()");
-        }
+        builder.HasData([
+            new Player
+            {
+                AccountId = Guid.Parse("E34FD5AB-FB3B-428E-935B-7DB5BD08A3E5"),
+                Name = "Admin",
+                St = 99,
+                Ht = 99,
+                Dx = 99,
+                Iq = 99,
+                Health = 99_999,
+                Mana = 99_999,
+                Experience = 0,
+                Level = 99,
+                PlayerClass = 0,
+                CreatedAt = new DateTime(2024,
+                    1,
+                    1,
+                    0,
+                    0,
+                    0,
+                    DateTimeKind.Utc),
+                Gold = 2_000_000_000,
+                PositionX = 958870,
+                PositionY = 272788,
+                Id = 1,
+                UpdatedAt = default,
+                Empire = 0,
+                SkillGroup = 0,
+                PlayTime = 0,
+                Stamina = 0,
+                BodyPart = 0,
+                HairPart = 0,
+                GivenStatusPoints = 0,
+                AvailableStatusPoints = 0
+            }
+        ]);
     }
 }
