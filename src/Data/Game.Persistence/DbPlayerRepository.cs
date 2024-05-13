@@ -112,9 +112,4 @@ public class DbPlayerRepository : IDbPlayerRepository
             .SelectPlayerData()
             .FirstOrDefaultAsync();
     }
-
-    public Task<PlayerData?> GetPlayerAsync(Guid playerId)
-    {
-        throw new NotImplementedException();
-    }
 }
