@@ -4,7 +4,7 @@ using Serilog;
 using Serilog.Events;
 using Xunit.Abstractions;
 
-namespace Core.Tests.Extensions;
+namespace Auth.Tests.Extensions;
 
 public static class ServiceExtensions
 {
