@@ -1,11 +1,9 @@
-﻿using System;
-using System.Linq;
-using System.Text;
+﻿using System.Text;
 using AutoBogus;
+using Core.Tests.Extensions;
 using FluentAssertions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using QuantumCore.Core.Packets;
 using QuantumCore.Extensions;
 using QuantumCore.Game.Packets;
@@ -13,7 +11,6 @@ using QuantumCore.Game.Packets.Quest;
 using QuantumCore.Game.Packets.QuickBar;
 using QuantumCore.Game.Packets.Shop;
 using QuantumCore.Networking;
-using Serilog;
 using Weikio.PluginFramework.Catalogs;
 using Xunit;
 using Xunit.Abstractions;
@@ -30,13 +27,7 @@ public class IncomingPacketTests
         var services = new ServiceCollection()
             .AddCoreServices(new EmptyPluginCatalog(), new ConfigurationBuilder().Build())
             .AddSingleton<IPacketSerializer, DefaultPacketSerializer>()
-            .AddLogging(x =>
-            {
-                x.ClearProviders();
-                x.AddSerilog(new LoggerConfiguration()
-                    .WriteTo.TestOutput(testOutputHelper)
-                    .CreateLogger());
-            })
+            .AddQuantumCoreTestLogger(testOutputHelper)
             .BuildServiceProvider();
 
         _serializer = services.GetRequiredService<IPacketSerializer>();
@@ -74,10 +65,11 @@ public class IncomingPacketTests
     {
         var expected = new AutoFaker<ChatIncoming>().Generate();
         var bytes = Array.Empty<byte>()
-            .Concat(BitConverter.GetBytes((ushort)(expected.Size + 1 + 3))) // size includes all package size + 0 terminating byte at end of string
-            .Append((byte)expected.MessageType)
+            .Concat(BitConverter.GetBytes((ushort) (expected.Size + 1 +
+                                                    3))) // size includes all package size + 0 terminating byte at end of string
+            .Append((byte) expected.MessageType)
             .Concat(Encoding.ASCII.GetBytes(expected.Message))
-            .Append((byte)0) // null byte for end of message
+            .Append((byte) 0) // null byte for end of message
             .ToArray();
 
         var result = _serializer.Deserialize<ChatIncoming>(bytes);
@@ -162,7 +154,7 @@ public class IncomingPacketTests
         // var expected = new AutoFaker<EnterGame>().Generate();
         var bytes = Array.Empty<byte>()
             .ToArray();
-        var result =  _serializer.Deserialize<EnterGame>(bytes);
+        var result = _serializer.Deserialize<EnterGame>(bytes);
 
         var ex = Assert.Throws<InvalidOperationException>(() => result.Should().BeEquivalentTo(new EnterGame()));
         ex.Message.Should()
@@ -294,7 +286,7 @@ public class IncomingPacketTests
     {
         // var expected = new AutoFaker<ShopClose>().Generate();
         var bytes = Array.Empty<byte>()
-            .Append((byte)0x00)
+            .Append((byte) 0x00)
             .ToArray();
         var result = _serializer.Deserialize<ShopClose>(bytes);
 
