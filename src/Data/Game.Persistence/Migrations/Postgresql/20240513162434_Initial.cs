@@ -1,6 +1,7 @@
 ﻿#nullable disable
 
 using Microsoft.EntityFrameworkCore.Migrations;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 namespace QuantumCore.Game.Persistence.Migrations.Postgresql
 {
@@ -55,7 +56,9 @@ namespace QuantumCore.Game.Persistence.Migrations.Postgresql
                 name: "Players",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "bigint", nullable: false, defaultValueSql: "gen_random_uuid()"),
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy",
+                            NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     AccountId = table.Column<Guid>(type: "uuid", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false,
                         defaultValueSql: "current_timestamp"),

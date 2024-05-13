@@ -219,8 +219,9 @@ namespace QuantumCore.Game.Persistence.Migrations.Postgresql
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasDefaultValueSql("gen_random_uuid()");
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<Guid>("AccountId")
                         .HasColumnType("uuid");

@@ -30,7 +30,7 @@ public class DbPlayerRepository : IDbPlayerRepository
 
     public async Task CreateAsync(PlayerData player)
     {
-        _db.Add(new Player
+        var entity = new Player
         {
             Id = player.Id,
             AccountId = player.AccountId,
@@ -57,8 +57,10 @@ public class DbPlayerRepository : IDbPlayerRepository
             Empire = player.Empire,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
-        });
+        };
+        _db.Add(entity);
         await _db.SaveChangesAsync();
+        player.Id = entity.Id;
     }
 
     public async Task DeletePlayerAsync(PlayerData player)

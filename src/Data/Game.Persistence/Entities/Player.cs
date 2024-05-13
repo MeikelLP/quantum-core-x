@@ -47,11 +47,6 @@ public class Player
             builder.Property(x => x.UpdatedAt).HasDefaultValueSql("(CAST(CURRENT_TIMESTAMP AS DATETIME(6)))");
         }
 
-        if (database.IsNpgsql())
-        {
-            builder.Property(x => x.Id).ValueGeneratedOnAdd().HasDefaultValueSql("gen_random_uuid()");
-        }
-
         builder.HasData([
             new Player
             {

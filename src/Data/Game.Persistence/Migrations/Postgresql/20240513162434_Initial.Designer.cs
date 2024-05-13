@@ -12,7 +12,7 @@ using QuantumCore.Game.Persistence;
 namespace QuantumCore.Game.Persistence.Migrations.Postgresql
 {
     [DbContext(typeof(PostgresqlGameDbContext))]
-    [Migration("20240513161439_Initial")]
+    [Migration("20240513162434_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -222,8 +222,9 @@ namespace QuantumCore.Game.Persistence.Migrations.Postgresql
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint")
-                        .HasDefaultValueSql("gen_random_uuid()");
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
                     b.Property<Guid>("AccountId")
                         .HasColumnType("uuid");
