@@ -1,16 +1,14 @@
 ﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace QuantumCore.Game.Persistence.Entities;
 
-[Table("players")]
 public class Player
 {
-    public required Guid Id { get; set; }
+    public required uint Id { get; set; }
     public required Guid AccountId { get; set; }
     public required DateTime CreatedAt { get; set; }
     public required DateTime UpdatedAt { get; set; }

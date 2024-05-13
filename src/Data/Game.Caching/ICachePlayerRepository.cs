@@ -5,7 +5,7 @@ namespace Game.Caching;
 
 public interface ICachePlayerRepository : IPlayerRepository
 {
-    Task<PlayerData?> GetPlayerAsync(Guid playerId, byte slot);
+    Task<PlayerData?> GetPlayerAsync(Guid accountId, byte slot);
     Task SetPlayerAsync(PlayerData player);
     Task CreateAsync(PlayerData player);
     Task DeletePlayerAsync(PlayerData player);

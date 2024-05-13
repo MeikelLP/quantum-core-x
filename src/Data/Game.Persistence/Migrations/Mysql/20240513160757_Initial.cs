@@ -1,5 +1,6 @@
 ﻿#nullable disable
 
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace QuantumCore.Game.Persistence.Migrations.Mysql
@@ -14,7 +15,7 @@ namespace QuantumCore.Game.Persistence.Migrations.Mysql
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                    name: "deleted_players",
+                    name: "DeletedPlayers",
                     columns: table => new
                     {
                         Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
@@ -45,27 +46,32 @@ namespace QuantumCore.Game.Persistence.Migrations.Mysql
                         Name = table.Column<string>(type: "varchar(24)", maxLength: 24, nullable: false)
                             .Annotation("MySql:CharSet", "utf8mb4")
                     },
-                    constraints: table => { table.PrimaryKey("PK_deleted_players", x => x.Id); })
+                    constraints: table => { table.PrimaryKey("PK_DeletedPlayers", x => x.Id); })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                    name: "perm_groups",
+                    name: "PermissionGroups",
                     columns: table => new
                     {
                         Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                         Name = table.Column<string>(type: "varchar(30)", maxLength: 30, nullable: false)
                             .Annotation("MySql:CharSet", "utf8mb4")
                     },
-                    constraints: table => { table.PrimaryKey("PK_perm_groups", x => x.Id); })
+                    constraints: table => { table.PrimaryKey("PK_PermissionGroups", x => x.Id); })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                    name: "players",
+                    name: "Players",
                     columns: table => new
                     {
-                        Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                        Id = table.Column<uint>(type: "int unsigned", nullable: false)
+                            .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
                         AccountId =
                             table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                        CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false,
+                            defaultValueSql: "(CAST(CURRENT_TIMESTAMP AS DATETIME(6)))"),
+                        UpdatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false,
+                            defaultValueSql: "(CAST(CURRENT_TIMESTAMP AS DATETIME(6)))"),
                         Empire = table.Column<byte>(type: "tinyint unsigned", nullable: false),
                         PlayerClass = table.Column<byte>(type: "tinyint unsigned", nullable: false),
                         SkillGroup = table.Column<byte>(type: "tinyint unsigned", nullable: false),
@@ -84,20 +90,16 @@ namespace QuantumCore.Game.Persistence.Migrations.Mysql
                         Stamina = table.Column<long>(type: "bigint", nullable: false),
                         BodyPart = table.Column<uint>(type: "int unsigned", nullable: false),
                         HairPart = table.Column<uint>(type: "int unsigned", nullable: false),
-                        CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false,
-                            defaultValueSql: "(CAST(CURRENT_TIMESTAMP AS DATETIME(6)))"),
-                        UpdatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false,
-                            defaultValueSql: "(CAST(CURRENT_TIMESTAMP AS DATETIME(6)))"),
                         Name = table.Column<string>(type: "varchar(24)", maxLength: 24, nullable: false)
                             .Annotation("MySql:CharSet", "utf8mb4"),
                         GivenStatusPoints = table.Column<uint>(type: "int unsigned", nullable: false),
                         AvailableStatusPoints = table.Column<uint>(type: "int unsigned", nullable: false)
                     },
-                    constraints: table => { table.PrimaryKey("PK_players", x => x.Id); })
+                    constraints: table => { table.PrimaryKey("PK_Players", x => x.Id); })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                    name: "perm_auth",
+                    name: "Permissions",
                     columns: table => new
                     {
                         Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
@@ -107,22 +109,22 @@ namespace QuantumCore.Game.Persistence.Migrations.Mysql
                     },
                     constraints: table =>
                     {
-                        table.PrimaryKey("PK_perm_auth", x => x.Id);
+                        table.PrimaryKey("PK_Permissions", x => x.Id);
                         table.ForeignKey(
-                            name: "FK_perm_auth_perm_groups_GroupId",
+                            name: "FK_Permissions_PermissionGroups_GroupId",
                             column: x => x.GroupId,
-                            principalTable: "perm_groups",
+                            principalTable: "PermissionGroups",
                             principalColumn: "Id",
                             onDelete: ReferentialAction.Cascade);
                     })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                    name: "items",
+                    name: "Items",
                     columns: table => new
                     {
                         Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                        PlayerId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
+                        PlayerId = table.Column<uint>(type: "int unsigned", nullable: false),
                         ItemId = table.Column<uint>(type: "int unsigned", nullable: false),
                         Window = table.Column<byte>(type: "tinyint unsigned", nullable: false),
                         Position = table.Column<uint>(type: "int unsigned", nullable: false),
@@ -134,65 +136,65 @@ namespace QuantumCore.Game.Persistence.Migrations.Mysql
                     },
                     constraints: table =>
                     {
-                        table.PrimaryKey("PK_items", x => x.Id);
+                        table.PrimaryKey("PK_Items", x => x.Id);
                         table.ForeignKey(
-                            name: "FK_items_players_PlayerId",
+                            name: "FK_Items_Players_PlayerId",
                             column: x => x.PlayerId,
-                            principalTable: "players",
+                            principalTable: "Players",
                             principalColumn: "Id",
                             onDelete: ReferentialAction.Cascade);
                     })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
-                    name: "perm_users",
+                    name: "PermissionUsers",
                     columns: table => new
                     {
                         GroupId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
-                        PlayerId = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci")
+                        PlayerId = table.Column<uint>(type: "int unsigned", nullable: false)
                     },
                     constraints: table =>
                     {
-                        table.PrimaryKey("PK_perm_users", x => new {x.GroupId, x.PlayerId});
+                        table.PrimaryKey("PK_PermissionUsers", x => new {x.GroupId, x.PlayerId});
                         table.ForeignKey(
-                            name: "FK_perm_users_perm_groups_GroupId",
+                            name: "FK_PermissionUsers_PermissionGroups_GroupId",
                             column: x => x.GroupId,
-                            principalTable: "perm_groups",
+                            principalTable: "PermissionGroups",
                             principalColumn: "Id",
                             onDelete: ReferentialAction.Cascade);
                         table.ForeignKey(
-                            name: "FK_perm_users_players_PlayerId",
+                            name: "FK_PermissionUsers_Players_PlayerId",
                             column: x => x.PlayerId,
-                            principalTable: "players",
+                            principalTable: "Players",
                             principalColumn: "Id",
                             onDelete: ReferentialAction.Cascade);
                     })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.InsertData(
-                table: "perm_groups",
+                table: "PermissionGroups",
                 columns: new[] {"Id", "Name"},
                 values: new object[] {new Guid("45bff707-1836-42b7-956d-00b9b69e0ee0"), "Operator"});
 
             migrationBuilder.CreateIndex(
-                name: "IX_items_PlayerId",
-                table: "items",
+                name: "IX_Items_PlayerId",
+                table: "Items",
                 column: "PlayerId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_perm_auth_GroupId",
-                table: "perm_auth",
-                column: "GroupId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_perm_groups_Name",
-                table: "perm_groups",
+                name: "IX_PermissionGroups_Name",
+                table: "PermissionGroups",
                 column: "Name",
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_perm_users_PlayerId",
-                table: "perm_users",
+                name: "IX_Permissions_GroupId",
+                table: "Permissions",
+                column: "GroupId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PermissionUsers_PlayerId",
+                table: "PermissionUsers",
                 column: "PlayerId");
         }
 
@@ -200,22 +202,22 @@ namespace QuantumCore.Game.Persistence.Migrations.Mysql
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "deleted_players");
+                name: "DeletedPlayers");
 
             migrationBuilder.DropTable(
-                name: "items");
+                name: "Items");
 
             migrationBuilder.DropTable(
-                name: "perm_auth");
+                name: "Permissions");
 
             migrationBuilder.DropTable(
-                name: "perm_users");
+                name: "PermissionUsers");
 
             migrationBuilder.DropTable(
-                name: "perm_groups");
+                name: "PermissionGroups");
 
             migrationBuilder.DropTable(
-                name: "players");
+                name: "Players");
         }
     }
 }

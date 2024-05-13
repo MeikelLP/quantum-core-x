@@ -97,7 +97,7 @@ namespace QuantumCore.Game.Persistence.Migrations.Sqlite
 
                     b.HasKey("Id");
 
-                    b.ToTable("deleted_players");
+                    b.ToTable("DeletedPlayers");
                 });
 
             modelBuilder.Entity("QuantumCore.Game.Persistence.Entities.Item", b =>
@@ -117,8 +117,8 @@ namespace QuantumCore.Game.Persistence.Migrations.Sqlite
                     b.Property<uint>("ItemId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<Guid>("PlayerId")
-                        .HasColumnType("TEXT");
+                    b.Property<uint>("PlayerId")
+                        .HasColumnType("INTEGER");
 
                     b.Property<uint>("Position")
                         .HasColumnType("INTEGER");
@@ -135,7 +135,7 @@ namespace QuantumCore.Game.Persistence.Migrations.Sqlite
 
                     b.HasIndex("PlayerId");
 
-                    b.ToTable("items");
+                    b.ToTable("Items");
                 });
 
             modelBuilder.Entity("QuantumCore.Game.Persistence.Entities.PermAuth", b =>
@@ -156,7 +156,7 @@ namespace QuantumCore.Game.Persistence.Migrations.Sqlite
 
                     b.HasIndex("GroupId");
 
-                    b.ToTable("perm_auth");
+                    b.ToTable("Permissions");
                 });
 
             modelBuilder.Entity("QuantumCore.Game.Persistence.Entities.PermGroup", b =>
@@ -175,7 +175,7 @@ namespace QuantumCore.Game.Persistence.Migrations.Sqlite
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("perm_groups");
+                    b.ToTable("PermissionGroups");
 
                     b.HasData(
                         new
@@ -190,21 +190,21 @@ namespace QuantumCore.Game.Persistence.Migrations.Sqlite
                     b.Property<Guid>("GroupId")
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid>("PlayerId")
-                        .HasColumnType("TEXT");
+                    b.Property<uint>("PlayerId")
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("GroupId", "PlayerId");
 
                     b.HasIndex("PlayerId");
 
-                    b.ToTable("perm_users");
+                    b.ToTable("PermissionUsers");
                 });
 
             modelBuilder.Entity("QuantumCore.Game.Persistence.Entities.Player", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<uint>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("INTEGER");
 
                     b.Property<Guid>("AccountId")
                         .HasColumnType("TEXT");
@@ -286,7 +286,7 @@ namespace QuantumCore.Game.Persistence.Migrations.Sqlite
 
                     b.HasKey("Id");
 
-                    b.ToTable("players");
+                    b.ToTable("Players");
                 });
 
             modelBuilder.Entity("QuantumCore.Game.Persistence.Entities.Item", b =>

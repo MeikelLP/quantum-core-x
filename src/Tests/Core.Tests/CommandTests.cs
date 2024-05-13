@@ -137,7 +137,7 @@ public class CommandTests : IAsyncLifetime
                 _ =>
                 {
                     var mock = Substitute.For<ICommandPermissionRepository>();
-                    mock.GetGroupsForPlayer(Arg.Any<Guid>()).Returns([PermGroup.OperatorGroup]);
+                    mock.GetGroupsForPlayer(Arg.Any<uint>()).Returns([PermGroup.OperatorGroup]);
                     return mock;
                 }, ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(IPlayerRepository), _ => Substitute.For<IPlayerRepository>(),

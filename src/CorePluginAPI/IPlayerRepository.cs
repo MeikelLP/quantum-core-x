@@ -2,9 +2,7 @@
 
 namespace QuantumCore.API;
 
-#nullable enable
-
 public interface IPlayerRepository
 {
-    Task<PlayerData?> GetPlayerAsync(Guid playerId);
+    Task<PlayerData?> GetPlayerAsync(uint playerId);
 }

@@ -102,7 +102,7 @@ namespace QuantumCore.Game.Persistence.Migrations.Postgresql
 
                     b.HasKey("Id");
 
-                    b.ToTable("deleted_players");
+                    b.ToTable("DeletedPlayers");
                 });
 
             modelBuilder.Entity("QuantumCore.Game.Persistence.Entities.Item", b =>
@@ -123,8 +123,8 @@ namespace QuantumCore.Game.Persistence.Migrations.Postgresql
                     b.Property<long>("ItemId")
                         .HasColumnType("bigint");
 
-                    b.Property<Guid>("PlayerId")
-                        .HasColumnType("uuid");
+                    b.Property<long>("PlayerId")
+                        .HasColumnType("bigint");
 
                     b.Property<long>("Position")
                         .HasColumnType("bigint");
@@ -141,7 +141,7 @@ namespace QuantumCore.Game.Persistence.Migrations.Postgresql
 
                     b.HasIndex("PlayerId");
 
-                    b.ToTable("items");
+                    b.ToTable("Items");
                 });
 
             modelBuilder.Entity("QuantumCore.Game.Persistence.Entities.PermAuth", b =>
@@ -163,7 +163,7 @@ namespace QuantumCore.Game.Persistence.Migrations.Postgresql
 
                     b.HasIndex("GroupId");
 
-                    b.ToTable("perm_auth");
+                    b.ToTable("Permissions");
                 });
 
             modelBuilder.Entity("QuantumCore.Game.Persistence.Entities.PermGroup", b =>
@@ -183,7 +183,7 @@ namespace QuantumCore.Game.Persistence.Migrations.Postgresql
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("perm_groups");
+                    b.ToTable("PermissionGroups");
 
                     b.HasData(
                         new
@@ -198,21 +198,21 @@ namespace QuantumCore.Game.Persistence.Migrations.Postgresql
                     b.Property<Guid>("GroupId")
                         .HasColumnType("uuid");
 
-                    b.Property<Guid>("PlayerId")
-                        .HasColumnType("uuid");
+                    b.Property<long>("PlayerId")
+                        .HasColumnType("bigint");
 
                     b.HasKey("GroupId", "PlayerId");
 
                     b.HasIndex("PlayerId");
 
-                    b.ToTable("perm_users");
+                    b.ToTable("PermissionUsers");
                 });
 
             modelBuilder.Entity("QuantumCore.Game.Persistence.Entities.Player", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
+                        .HasColumnType("bigint")
                         .HasDefaultValueSql("gen_random_uuid()");
 
                     b.Property<Guid>("AccountId")
@@ -295,7 +295,7 @@ namespace QuantumCore.Game.Persistence.Migrations.Postgresql
 
                     b.HasKey("Id");
 
-                    b.ToTable("players");
+                    b.ToTable("Players");
                 });
 
             modelBuilder.Entity("QuantumCore.Game.Persistence.Entities.Item", b =>
