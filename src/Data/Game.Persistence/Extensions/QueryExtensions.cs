@@ -51,7 +51,9 @@ public static class QueryExtensions
             Members = x.Members.Select(member => new GuildMemberData
             {
                 Id = member.Id,
-                Name = member.Name
+                Name = member.Name,
+                Level = member.Level,
+                Class = member.PlayerClass
             }).ToImmutableArray()
         });
     }

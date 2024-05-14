@@ -23,7 +23,7 @@ public class GuildManager : IGuildManager
             .FirstOrDefaultAsync();
     }
 
-    public async Task<GuildData?> GetGuildForPlayerAsync(Guid playerId)
+    public async Task<GuildData?> GetGuildForPlayerAsync(uint playerId)
     {
         return await _db.Guilds
             .Where(x => x.Members.Any(m => m.Id == playerId))
@@ -31,7 +31,7 @@ public class GuildManager : IGuildManager
             .FirstOrDefaultAsync();
     }
 
-    public async Task<GuildData> CreateGuildAsync(string name, Guid leaderId)
+    public async Task<GuildData> CreateGuildAsync(string name, uint leaderId)
     {
         var guild = new Guild
         {

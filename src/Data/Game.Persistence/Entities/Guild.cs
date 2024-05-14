@@ -1,12 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace QuantumCore.Game.Persistence.Entities;
 
-[Table("guilds")]
 public class Guild
 {
     public uint Id { get; set; }
@@ -15,7 +13,7 @@ public class Guild
 
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
-    public Guid LeaderId { get; set; }
+    public uint LeaderId { get; set; }
     public byte Level { get; set; }
     public uint Experience { get; set; }
     public ushort MaxMemberCount { get; set; }
@@ -39,11 +37,6 @@ public class Guild
         {
             builder.Property(x => x.CreatedAt).HasDefaultValueSql("(CAST(CURRENT_TIMESTAMP AS DATETIME(6)))");
             builder.Property(x => x.UpdatedAt).HasDefaultValueSql("(CAST(CURRENT_TIMESTAMP AS DATETIME(6)))");
-        }
-
-        if (database.IsNpgsql())
-        {
-            builder.Property(x => x.Id).ValueGeneratedOnAdd().HasDefaultValueSql("gen_random_uuid()");
         }
     }
 }

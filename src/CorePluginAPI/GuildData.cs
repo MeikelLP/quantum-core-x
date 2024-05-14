@@ -6,7 +6,7 @@ public class GuildData
 {
     public uint Id { get; set; }
     public string Name { get; set; } = "";
-    public Guid LeaderId { get; set; }
+    public uint LeaderId { get; set; }
     public byte Level { get; set; }
     public uint Experience { get; set; }
     public ushort MaxMemberCount { get; set; }

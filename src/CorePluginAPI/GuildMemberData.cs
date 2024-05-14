@@ -2,6 +2,8 @@
 
 public class GuildMemberData
 {
-    public Guid Id { get; set; }
+    public uint Id { get; set; }
     public string Name { get; set; } = "";
+    public byte Level { get; set; }
+    public byte Class { get; set; }
 }

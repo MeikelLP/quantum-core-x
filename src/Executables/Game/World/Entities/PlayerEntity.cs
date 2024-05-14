@@ -286,6 +286,20 @@ namespace QuantumCore.Game.World.Entities
         {
             if (Guild is not null)
             {
+                Connection.Send(new GuildMemberPacket
+                {
+                    Members = Guild.Members
+                        .Select(guildMember => new GuildMember
+                        {
+                            PlayerId = guildMember.Id,
+                            Class = guildMember.Class,
+                            Level = guildMember.Level,
+                            IsGeneral = guildMember.Id == Guild.LeaderId,
+                            Name = guildMember.Name,
+                            IsNameSent = true
+                        })
+                        .ToArray()
+                });
                 Connection.Send(new GuildInfo
                 {
                     Level = Guild.Level,
@@ -293,8 +307,8 @@ namespace QuantumCore.Game.World.Entities
                     Gold = Guild.Gold,
                     GuildId = Guild.Id,
                     Exp = Guild.Experience,
-                    HasLand = 0,
-                    MasterPid = 0, // TODO
+                    HasLand = false,
+                    LeaderId = Guild.LeaderId,
                     MemberCount = (ushort) Guild.Members.Length,
                     MaxMemberCount = Guild.MaxMemberCount
                 });
