@@ -272,8 +272,8 @@ namespace QuantumCore.Game.Persistence.Migrations.Mysql
                         .HasMaxLength(24)
                         .HasColumnType("varchar(24)");
 
-                    b.Property<uint>("PlayTime")
-                        .HasColumnType("int unsigned");
+                    b.Property<ulong>("PlayTime")
+                        .HasColumnType("bigint unsigned");
 
                     b.Property<byte>("PlayerClass")
                         .HasColumnType("tinyint unsigned");

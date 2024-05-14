@@ -22,6 +22,7 @@ namespace QuantumCore.API.Game.Types
         StatusPoints = 26,
         MinAttackDamage = 29,
         MaxAttackDamage = 30,
+        PlayTime = 31,
         CriticalPercentage = 40,
         PenetratePercentage = 41,
         

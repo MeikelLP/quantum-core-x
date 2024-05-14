@@ -45,7 +45,7 @@ internal class MockedGameConnection : IGameConnection
     public EPhases Phase { get; set; }
     public Task ExecuteTask { get; } = null!;
 
-    public void Close()
+    public void Close(bool expected = true)
     {
     }
 
@@ -67,7 +67,7 @@ internal class MockedGameConnection : IGameConnection
         return Task.CompletedTask;
     }
 
-    public IServerBase Server { get; } = null!;
+    public IServerBase Server { get; } = Substitute.For<IServerBase>();
     public Guid? AccountId { get; set; } = Guid.NewGuid();
     public string Username { get; set; } = "";
     public IPlayerEntity? Player { get; set; }
@@ -158,6 +158,7 @@ public class CommandTests : IAsyncLifetime
         _commandManager.Register("QuantumCore.Game.Commands", typeof(SpawnCommand).Assembly);
         _connection = _services.GetRequiredService<IGameConnection>();
         _player = _services.GetRequiredService<IPlayerEntity>();
+        _player.Player.PlayTime = 0;
         _connection.Player = _player;
     }
 
@@ -231,7 +232,7 @@ public class CommandTests : IAsyncLifetime
     {
         var item = new ItemInstance {ItemId = 1, Count = 1};
         var wearSlot = _player.Inventory.EquipmentWindow.GetWearPosition(_itemManager, item.ItemId);
-
+        
         _player.SetItem(item, (byte) WindowType.Inventory, (ushort) wearSlot);
 
         await _commandManager.Handle(_connection, "debug_damage");
@@ -439,9 +440,13 @@ public class CommandTests : IAsyncLifetime
         world.SpawnEntity(_player);
 
         world.GetPlayer(_player.Name).Should().NotBeNull();
+        
+        _player.Player.PlayTime = 0;
+        _connection.Server.ServerTime.Returns(60000); // 1 minute in ms
 
         await _commandManager.Handle(_connection, "/logout");
 
+        _player.GetPoint(EPoints.PlayTime).Should().Be(1);
         world.GetPlayer(_player.Name).Should().BeNull();
     }
 
@@ -456,9 +461,13 @@ public class CommandTests : IAsyncLifetime
         {
             Phase = EPhases.Select
         });
+        
+        _player.Player.PlayTime = 0;
+        _connection.Server.ServerTime.Returns(60000);
 
         await _commandManager.Handle(_connection, "/phase_select");
 
+        _player.GetPoint(EPoints.PlayTime).Should().Be(1);
         _player.Connection.Phase.Should().Be(EPhases.Select);
         (_connection as MockedGameConnection).SentPhases.Should().ContainEquivalentOf(new GCPhase
         {

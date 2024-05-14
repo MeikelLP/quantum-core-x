@@ -49,7 +49,7 @@ namespace QuantumCore.Core.Networking
 
         protected abstract void OnHandshakeFinished();
 
-        protected abstract Task OnClose();
+        protected abstract Task OnClose(bool expected = true);
 
         protected abstract Task OnReceive(IPacketSerializable packet);
 
@@ -85,22 +85,22 @@ namespace QuantumCore.Core.Networking
             catch (IOException e)
             {
                 _logger.LogDebug(e, "Connection was closed. Probably by the other party");
-                Close();
+                Close(false);
             }
             catch (Exception e)
             {
                 _logger.LogError(e, "Failed to read from stream");
-                Close();
+                Close(false);
             }
 
-            Close();
+            Close(false);
         }
 
-        public void Close()
+        public void Close(bool expected = true)
         {
             _cts?.Cancel();
             _client?.Close();
-            OnClose();
+            OnClose(expected);
         }
 
         public void Send<T>(T packet) where T : IPacketSerializable

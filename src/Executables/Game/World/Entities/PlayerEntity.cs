@@ -568,6 +568,9 @@ namespace QuantumCore.Game.World.Entities
                 case EPoints.StatusPoints:
                     Player.AvailableStatusPoints += (uint) value;
                     break;
+                case EPoints.PlayTime:
+                    Player.PlayTime += (uint) value;
+                    break;
                 default:
                     _logger.LogError("Failed to add point to {Point}, unsupported", point);
                     break;
@@ -608,6 +611,9 @@ namespace QuantumCore.Game.World.Entities
                     break;
                 case EPoints.Gold:
                     Player.Gold = value;
+                    break;
+                case EPoints.PlayTime:
+                    Player.PlayTime = value;
                     break;
                 default:
                     _logger.LogError("Failed to set point to {Point}, unsupported", point);
@@ -677,6 +683,8 @@ namespace QuantumCore.Game.World.Entities
                     return _defence;
                 case EPoints.StatusPoints:
                     return Player.AvailableStatusPoints;
+                case EPoints.PlayTime:
+                    return (uint) TimeSpan.FromMilliseconds(Player.PlayTime).TotalMinutes;
                 default:
                     if (Enum.GetValues<EPoints>().Contains(point))
                     {
@@ -850,6 +858,16 @@ namespace QuantumCore.Game.World.Entities
             }
 
             return false;
+        }
+
+        public async Task CalculatePlayedTimeAsync()
+        {
+            var key = $"player:{Player.Id}:loggedInTime";
+            var startSessionTime = await _cacheManager.Get<long>(key);
+            var totalSessionTime = Connection.Server.ServerTime - startSessionTime;
+            if (totalSessionTime <= 0) return;
+            
+            AddPoint(EPoints.PlayTime, (int) totalSessionTime);
         }
 
         public ItemInstance? GetItem(byte window, ushort position)
