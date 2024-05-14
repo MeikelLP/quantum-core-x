@@ -12,7 +12,7 @@ namespace QuantumCore.Game.Persistence.Migrations.Postgresql
         {
             migrationBuilder.AlterColumn<decimal>(
                 name: "PlayTime",
-                table: "players",
+                table: "Players",
                 type: "numeric(20,0)",
                 nullable: false,
                 oldClrType: typeof(long),
@@ -24,7 +24,7 @@ namespace QuantumCore.Game.Persistence.Migrations.Postgresql
         {
             migrationBuilder.AlterColumn<long>(
                 name: "PlayTime",
-                table: "players",
+                table: "Players",
                 type: "bigint",
                 nullable: false,
                 oldClrType: typeof(decimal),

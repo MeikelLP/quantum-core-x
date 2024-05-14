@@ -12,7 +12,7 @@ namespace QuantumCore.Game.Persistence.Migrations.Mysql
         {
             migrationBuilder.AlterColumn<ulong>(
                 name: "PlayTime",
-                table: "players",
+                table: "Players",
                 type: "bigint unsigned",
                 nullable: false,
                 oldClrType: typeof(uint),
@@ -24,7 +24,7 @@ namespace QuantumCore.Game.Persistence.Migrations.Mysql
         {
             migrationBuilder.AlterColumn<uint>(
                 name: "PlayTime",
-                table: "players",
+                table: "Players",
                 type: "int unsigned",
                 nullable: false,
                 oldClrType: typeof(ulong),

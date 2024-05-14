@@ -158,6 +158,7 @@ public class CommandTests : IAsyncLifetime
         _commandManager.Register("QuantumCore.Game.Commands", typeof(SpawnCommand).Assembly);
         _connection = _services.GetRequiredService<IGameConnection>();
         _player = _services.GetRequiredService<IPlayerEntity>();
+        _player.Player.PlayTime = 0;
         _connection.Player = _player;
     }
 
@@ -231,7 +232,7 @@ public class CommandTests : IAsyncLifetime
     {
         var item = new ItemInstance {ItemId = 1, Count = 1};
         var wearSlot = _player.Inventory.EquipmentWindow.GetWearPosition(_itemManager, item.ItemId);
-
+        
         _player.SetItem(item, (byte) WindowType.Inventory, (ushort) wearSlot);
 
         await _commandManager.Handle(_connection, "debug_damage");
