@@ -137,9 +137,7 @@ internal class SerializeGenerator
             : namedTypeSymbol.Name;
         var cast = namedTypeSymbol.TypeKind is TypeKind.Enum
             ? $"({namedTypeSymbol.EnumUnderlyingType.GetFullName()})"
-            : GeneratorConstants.CastableToByteTypes.Contains(namedTypeSymbol.Name)
-                ? $"({namedTypeSymbol.GetFullName()})"
-                : "";
+            : "";
 
         if (GeneratorConstants.SupportedTypesByBitConverter.Contains(type))
         {
@@ -172,11 +170,6 @@ internal class SerializeGenerator
             }
         }
 
-        if (GeneratorConstants.CastableToByteTypes.Contains(type))
-        {
-            return $"{indentPrefix}bytes[{offsetStr}] = {cast}{fieldExpression};";
-        }
-
         if (GeneratorConstants.NoCastTypes.Contains(type))
         {
             return $"{indentPrefix}bytes[{offsetStr}] = {cast}{fieldExpression};";
@@ -186,6 +179,11 @@ internal class SerializeGenerator
         {
             return GetLineForString(fieldData, fieldExpression, ref offset, dynamicOffset, tempDynamicOffset,
                 indentPrefix);
+        }
+
+        if (namedTypeSymbol.GetFullName() == "System.Boolean")
+        {
+            return $"{indentPrefix}bytes[{offsetStr}] = (byte)({fieldExpression} ? 1 : 0);";
         }
 
 
