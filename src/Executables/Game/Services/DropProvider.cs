@@ -155,7 +155,7 @@ public class DropProvider : IDropProvider
         using var sr = new StreamReader(file, FileEncoding);
         
         var parsedGroups = new List<MonsterDropContainer>();
-        var mobGroups = await ParserUtils.GetDropsForGroupBlocks(sr);
+        var mobGroups = await ParserUtils.ParseFileGroups(sr);
         
         foreach (var mobGroup in mobGroups)
         {

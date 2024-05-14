@@ -61,66 +61,6 @@ internal static partial class ParserUtils
         throw new ArgumentOutOfRangeException(nameof(str), $"Don't know how to parse \"{str}\" to TimeSpan");
     }
 
-    public static async Task<SpawnGroup?> GetSpawnGroupFromBlock(TextReader sr)
-    {
-        var item = new SpawnGroup();
-        string? line;
-        do
-        {
-            line = await sr.ReadLineAsync();
-            if (line is null) return null; // EOS
-        } while (!line.StartsWith("Group"));
-
-        item.Name = GroupReplaceRegex().Replace(line, "", 1).Trim();
-        await sr.ReadLineAsync();
-        line = (await sr.ReadLineAsync())!;
-        item.Id = uint.Parse(line.Replace("Vnum", "").Trim());
-        line = (await sr.ReadLineAsync())!;
-        item.Leader = uint.Parse(SplitLine(LeaderReplaceRegex().Replace(line, "", 1).Trim())[1].Trim());
-        while ((line = (await sr.ReadLineAsync())!.Trim()) != "}")
-        {
-            if (string.IsNullOrWhiteSpace(line)) break;
-            item.Members.Add(new SpawnMember
-            {
-                Id = uint.Parse(SplitByWhitespaceOrTabRegex().Split(line)[^1].Trim())
-            });
-        }
-
-        return item;
-    }
-
-    public static async Task<SpawnGroupCollection?> GetSpawnGroupCollectionFromBlock(TextReader sr)
-    {
-        var item = new SpawnGroupCollection();
-        string? line;
-        do
-        {
-            line = await sr.ReadLineAsync();
-            if (line is null) return null; // EOS
-        } while (!line.StartsWith("Group"));
-
-        item.Name = GroupReplaceRegex().Replace(line, "", 1).Trim();
-        await sr.ReadLineAsync();
-        line = (await sr.ReadLineAsync())!;
-        item.Id = uint.Parse(line.Replace("Vnum", "").Trim());
-        while ((line = (await sr.ReadLineAsync())!.Trim()) != "}")
-        {
-            if (string.IsNullOrWhiteSpace(line)) continue;
-            var splitted = SplitByWhitespaceRegex().Split(line);
-            var id = uint.Parse(splitted[1].Trim());
-            var amount = splitted.Length == 2
-                ? (byte) 1
-                : byte.Parse(splitted[2].Trim());
-            item.Groups.Add(new SpawnGroupCollectionMember
-            {
-                Id = id,
-                Amount = amount
-            });
-        }
-
-        return item;
-    }
-
     public static async Task<ImmutableArray<CommonDropEntry>> GetCommonDropsAsync(TextReader sr, CancellationToken cancellationToken = default)
     {
         var list = new List<CommonDropEntry>();
@@ -213,21 +153,11 @@ internal static partial class ParserUtils
         
         return new CommonDropEntry(minLevel, maxLevel, itemId, percentage);
     }
-
-    public static string[] SplitLine(string line)
-    {
-        if (line.Contains('\t'))
-        {
-            return line.Split('\t', StringSplitOptions.RemoveEmptyEntries);
-        }
-
-        return line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-    }
     
-    public static async Task<List<MobDropGroup>> GetDropsForGroupBlocks(StreamReader sr)
+    public static async Task<List<DataFileGroup>> ParseFileGroups(StreamReader sr)
     {
-        var groups = new List<MobDropGroup>();
-        MobDropGroup? currentMobDropGroup = null;
+        var groups = new List<DataFileGroup>();
+        DataFileGroup? currentGroup = null;
         
         while (await sr.ReadLineAsync() is { } line && sr.EndOfStream == false)
         {
@@ -237,34 +167,44 @@ internal static partial class ParserUtils
             }
             if (line.StartsWith("Group", INV_CUL))
             {
-                if (currentMobDropGroup != null)
+                line = line.Trim();
+                if (currentGroup != null)
                 {
-                    groups.Add(currentMobDropGroup);
+                    groups.Add(currentGroup);
                 }
-                currentMobDropGroup = new MobDropGroup { Name = line.Split()[1] };
+                
+                // remove empty or whitespace entries
+                line = SplitByWhitespaceOrTabRegex().Replace(line, " ");
+                currentGroup = new DataFileGroup { Name = line.Split()[1] };
             }
-            else if (!string.IsNullOrWhiteSpace(line) && currentMobDropGroup != null)
+            else if (!string.IsNullOrWhiteSpace(line) && currentGroup != null)
             {
-                var parts = line.Split('\t').ToList();
+                var parts = SplitByWhitespaceOrTabRegex().Split(line).ToList();
                 
                 parts.RemoveAll(IsEmptyOrContainsNewlineOrTab);
                 
-                if (parts.Count == 2)
+                if (parts.Count == 0) continue; // can happen due to filtering
+                
+                for (var i = 0; i < parts.Count; i++)
                 {
-                    currentMobDropGroup.Fields[parts[0].Trim()] = parts[1].Trim();
+                    parts[i] = parts[i].Trim();
+                }
+                
+                if (!StartsWithNumberRegex().IsMatch(parts[0])) // Assuming all fields do not start with a number
+                {
+                    currentGroup.Fields[parts[0].Trim()] = parts[^1].Trim();
                 }
                 else
                 {
                     if (parts.Count == 0) continue; // can happen due to filtering
-                    parts.ForEach(p => p.Trim());
-                    currentMobDropGroup.Data.Add(parts);
+                    currentGroup.Data.Add(parts);
                 }
             }
         }
 
-        if (currentMobDropGroup != null)
+        if (currentGroup != null)
         {
-            groups.Add(currentMobDropGroup);
+            groups.Add(currentGroup);
         }
         
         return groups;
@@ -272,10 +212,14 @@ internal static partial class ParserUtils
     
     private static bool IsEmptyOrContainsNewlineOrTab(string str)
     {
-        return string.IsNullOrEmpty(str) || str.Contains("\n") || str.Contains("\t") || str.Contains("{") || str.Contains("}");
+        return string.IsNullOrEmpty(str) 
+               || str.Contains("\n") 
+               || str.Contains("\t") 
+               || str.Contains("{") 
+               || str.Contains("}");
     }
 
-    internal static MonsterDropContainer? ParseMobGroup(MobDropGroup group, IItemManager itemManager)
+    internal static MonsterDropContainer? ParseMobGroup(DataFileGroup group, IItemManager itemManager)
     {
         uint minKillCount = 0;
         uint levelLimit = 0;
@@ -440,8 +384,8 @@ internal static partial class ParserUtils
         return null;
     }
     
-    [DebuggerDisplay("{Fields.Count} Fields - {Data.Count} Drops")]
-    internal class MobDropGroup
+    [DebuggerDisplay("{Name} | {Fields.Count} - {Data.Count}")]
+    internal class DataFileGroup
     {
         public string Name { get; set; }
         public Dictionary<string, string> Fields { get; } = new(StringComparer.InvariantCultureIgnoreCase);
@@ -479,12 +423,6 @@ internal static partial class ParserUtils
 
     [GeneratedRegex(@"\s+")]
     private static partial Regex SplitByWhitespaceOrTabRegex();
-
-    [GeneratedRegex("Leader")]
-    private static partial Regex LeaderReplaceRegex();
-
-    [GeneratedRegex("Group")]
-    private static partial Regex GroupReplaceRegex();
 
     [GeneratedRegex(@"^\d")]
     private static partial Regex StartsWithNumberRegex();

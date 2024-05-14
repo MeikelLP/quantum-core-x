@@ -5,6 +5,7 @@ using QuantumCore.API;
 using QuantumCore.API.Game.World;
 using QuantumCore.Game;
 using QuantumCore.Game.Drops;
+using QuantumCore.Game.Extensions;
 using QuantumCore.Game.World;
 using Xunit;
 
@@ -74,16 +75,19 @@ public class ParserTests
     [Fact]
     public async Task Group_Regular()
     {
-        var input = new StringReader("""
-                                     Group	Test
-                                     {
-                                         Vnum	101
-                                         Leader	Test	101
-                                         1	Test	101
-                                         2	Test	101
-                                     }
-                                     """);
-        var result = await ParserUtils.GetSpawnGroupFromBlock(input);
+        var input = GetStreamReader("""
+                                    Group	Test
+                                    {
+                                        Vnum	101
+                                        Leader	Test	101
+                                        1	Test	101
+                                        2	Test	101
+                                    }
+                                    """);
+
+        var groups = await ParserUtils.ParseFileGroups(input);
+        
+        var result = groups.Select(x => x.ToSpawnGroup()).FirstOrDefault();
 
         result.Should().BeEquivalentTo(new SpawnGroup
         {
@@ -101,20 +105,23 @@ public class ParserTests
     [Fact]
     public async Task Group_Whitespace()
     {
-        var input = new StringReader("""
-                                     Group   GroupName
-                                     {
-                                     	Vnum    2430
-                                     		Leader  Leader    2493
-                                     		1   Mob1  2492
-                                     		2   Mob2  2414
-                                     		3   Mob2  2414
-                                     		4   Mob3  2411
-                                     		5   Mob3  2411
-                                     		6   Mob3  2411
-                                     }
-                                     """);
-        var result = await ParserUtils.GetSpawnGroupFromBlock(input);
+        var input = GetStreamReader("""
+                                    Group   GroupName
+                                    {
+                                    	Vnum    2430
+                                    		Leader  Leader    2493
+                                    		1   Mob1  2492
+                                    		2   Mob2  2414
+                                    		3   Mob2  2414
+                                    		4   Mob3  2411
+                                    		5   Mob3  2411
+                                    		6   Mob3  2411
+                                    }
+                                    """);
+        
+        var groups = await ParserUtils.ParseFileGroups(input);
+        
+        var result = groups.Select(x => x.ToSpawnGroup()).FirstOrDefault();
 
         result.Should().BeEquivalentTo(new SpawnGroup
         {
@@ -136,17 +143,20 @@ public class ParserTests
     [Fact]
     public async Task Group_WhitespaceInsteadOfTab()
     {
-        var input = new StringReader("""
-                                     Group	GroupName
-                                     {
-                                     	Vnum	2430
-                                     	Leader	Leader	2493
-                                     	1	Mob1	2447
-                                     	2	Mob2 2447
-                                     	3	Mob 3	2513
-                                     }
-                                     """);
-        var result = await ParserUtils.GetSpawnGroupFromBlock(input);
+        var input = GetStreamReader("""
+                                    Group	GroupName
+                                    {
+                                    	Vnum	2430
+                                    	Leader	Leader	2493
+                                    	1	Mob1	2447
+                                    	2	Mob2 2447
+                                    	3	Mob 3	2513
+                                    }
+                                    """);
+
+        var groups = await ParserUtils.ParseFileGroups(input);
+        
+        var result = groups.Select(x => x.ToSpawnGroup()).FirstOrDefault();
 
         result.Should().BeEquivalentTo(new SpawnGroup
         {
@@ -165,15 +175,18 @@ public class ParserTests
     [Fact]
     public async Task GroupCollection_Regular()
     {
-        var input = new StringReader("""
-                                     Group	a1_01
-                                     {
-                                     	Vnum	101
-                                     	1	101	1
-                                     	2	171	1
-                                     }
-                                     """);
-        var result = await ParserUtils.GetSpawnGroupCollectionFromBlock(input);
+        var input = GetStreamReader("""
+                                    Group	a1_01
+                                    {
+                                    	Vnum	101
+                                    	1	101	1
+                                    	2	171	1
+                                    }
+                                    """);
+        
+        var groups = await ParserUtils.ParseFileGroups(input);
+        
+        var result = groups.Select(x => x.ToSpawnGroupCollection()).FirstOrDefault();
 
         result.Should().BeEquivalentTo(new SpawnGroupCollection
         {
@@ -190,22 +203,25 @@ public class ParserTests
     [Fact]
     public async Task GroupCollection_Multiple()
     {
-        var input = new StringReader("""
-                                     Group	a1_01
-                                     {
-                                     	Vnum	101
-                                     	1	101	1
-                                     	2	171	1
-                                     }
-                                     			
-                                     Group	a1_02
-                                     {
-                                     	Vnum	102
-                                     	1	102	1
-                                     	2	171	1
-                                     }
-                                     """);
-        var result = await ParserUtils.GetSpawnGroupCollectionFromBlock(input);
+        var input = GetStreamReader("""
+                                    Group	a1_01
+                                    {
+                                    	Vnum	101
+                                    	1	101	1
+                                    	2	171	1
+                                    }
+                                    			
+                                    Group	a1_02
+                                    {
+                                    	Vnum	102
+                                    	1	102	1
+                                    	2	171	1
+                                    }
+                                    """);
+        
+        var groups = await ParserUtils.ParseFileGroups(input);
+        
+        var result = groups.Select(x => x.ToSpawnGroupCollection()).FirstOrDefault();
 
         result.Should().BeEquivalentTo(new SpawnGroupCollection
         {
@@ -222,17 +238,20 @@ public class ParserTests
     [Fact]
     public async Task GroupCollection_EmptyLines()
     {
-        var input = new StringReader("""
-                                     Group	a1_01
-                                     {
-                                     	Vnum	101
-                                     	1	101	1
-                                     	2	171	1
-                                     }
-                                     			
-                                     			
-                                     """);
-        var result = await ParserUtils.GetSpawnGroupCollectionFromBlock(input);
+        var input = GetStreamReader("""
+                                    Group	a1_01
+                                    {
+                                    	Vnum	101
+                                    	1	101	1
+                                    	2	171	1
+                                    }
+                                    			
+                                    			
+                                    """);
+        
+        var groups = await ParserUtils.ParseFileGroups(input);
+        
+        var result = groups.Select(x => x.ToSpawnGroupCollection()).FirstOrDefault();
 
         result.Should().BeEquivalentTo(new SpawnGroupCollection
         {
@@ -249,16 +268,19 @@ public class ParserTests
     [Fact]
     public async Task GroupCollection_EmptyLinesInside()
     {
-        var input = new StringReader("""
-                                     Group	a1_05
-                                     {
-                                     	Vnum	105
-                                     			
-                                     	1	112	1
-                                     	2	113	1
-                                     }
-                                     """);
-        var result = await ParserUtils.GetSpawnGroupCollectionFromBlock(input);
+        var input = GetStreamReader("""
+                                    Group	a1_05
+                                    {
+                                    	Vnum	105
+                                    			
+                                    	1	112	1
+                                    	2	113	1
+                                    }
+                                    """);
+        
+        var groups = await ParserUtils.ParseFileGroups(input);
+        
+        var result = groups.Select(x => x.ToSpawnGroupCollection()).FirstOrDefault();
 
         result.Should().BeEquivalentTo(new SpawnGroupCollection
         {
@@ -275,14 +297,17 @@ public class ParserTests
     [Fact]
     public async Task GroupCollection_WithoutAmount()
     {
-        var input = new StringReader("""
-                                     Group	a1_05
-                                     {
-                                     	Vnum	105
-                                     	1	112
-                                     }
-                                     """);
-        var result = await ParserUtils.GetSpawnGroupCollectionFromBlock(input);
+        var input = GetStreamReader("""
+                                    Group	a1_05
+                                    {
+                                    	Vnum	105
+                                    	1	112
+                                    }
+                                    """);
+        
+        var groups = await ParserUtils.ParseFileGroups(input);
+        
+        var result = groups.Select(x => x.ToSpawnGroupCollection()).FirstOrDefault();
 
         result.Should().BeEquivalentTo(new SpawnGroupCollection
         {
@@ -298,10 +323,13 @@ public class ParserTests
     [Fact]
     public async Task GroupCollection_NoContent()
     {
-        var input = new StringReader("""
-                                     			
-                                     """);
-        var result = await ParserUtils.GetSpawnGroupCollectionFromBlock(input);
+        var input = GetStreamReader("""
+                                    			
+                                    """);
+        
+        var groups = await ParserUtils.ParseFileGroups(input);
+        
+        var result = groups.Select(x => x.ToSpawnGroup()).FirstOrDefault();
 
         result.Should().BeNull();
     }
@@ -325,12 +353,12 @@ public class ParserTests
 
         var itemManager = Substitute.For<IItemManager>();
 
-        var groups = await ParserUtils.GetDropsForGroupBlocks(input);
+        var groups = await ParserUtils.ParseFileGroups(input);
 
         var mobDrops = groups.Select(x => ParserUtils.ParseMobGroup(x, itemManager)).ToList();
         
         groups.Should().HaveCount(1);
-        groups[0].Should().BeEquivalentTo(new ParserUtils.MobDropGroup
+        groups[0].Should().BeEquivalentTo(new ParserUtils.DataFileGroup
         {
             Name = "Abc",
             Fields =
@@ -380,12 +408,12 @@ public class ParserTests
 
         var itemManager = Substitute.For<IItemManager>();
 
-        var groups = await ParserUtils.GetDropsForGroupBlocks(input);
+        var groups = await ParserUtils.ParseFileGroups(input);
 
         var mobDrops = groups.Select(x => ParserUtils.ParseMobGroup(x, itemManager)).ToList();
         
         groups.Should().HaveCount(2);
-        groups[0].Should().BeEquivalentTo(new ParserUtils.MobDropGroup
+        groups[0].Should().BeEquivalentTo(new ParserUtils.DataFileGroup
         {
             Name = "Abc",
             Fields =
@@ -398,7 +426,7 @@ public class ParserTests
                 new List<string>() { "1", "10", "1", "0.09" }
             }
         });
-        groups[1].Should().BeEquivalentTo(new ParserUtils.MobDropGroup
+        groups[1].Should().BeEquivalentTo(new ParserUtils.DataFileGroup
         {
             Name = "Def",
             Fields =
@@ -458,12 +486,12 @@ public class ParserTests
 
         var itemManager = Substitute.For<IItemManager>();
 
-        var groups = await ParserUtils.GetDropsForGroupBlocks(input);
+        var groups = await ParserUtils.ParseFileGroups(input);
 
         var mobDrops = groups.Select(x => ParserUtils.ParseMobGroup(x, itemManager)).ToList();
         
         groups.Should().HaveCount(1);
-        groups[0].Should().BeEquivalentTo(new ParserUtils.MobDropGroup
+        groups[0].Should().BeEquivalentTo(new ParserUtils.DataFileGroup
         {
             Name = "Abc",
             Fields =
@@ -522,12 +550,12 @@ public class ParserTests
 
         var itemManager = Substitute.For<IItemManager>();
 
-        var groups = await ParserUtils.GetDropsForGroupBlocks(input);
+        var groups = await ParserUtils.ParseFileGroups(input);
 
         var mobDrops = groups.Select(x => ParserUtils.ParseMobGroup(x, itemManager)).ToList();
         
         groups.Should().HaveCount(2);
-        groups[0].Should().BeEquivalentTo(new ParserUtils.MobDropGroup
+        groups[0].Should().BeEquivalentTo(new ParserUtils.DataFileGroup
         {
             Name = "Abc",
             Fields =
@@ -541,7 +569,7 @@ public class ParserTests
                 new List<string>() { "2", "11", "2", "0.05" }
             }
         });
-        groups[1].Should().BeEquivalentTo(new ParserUtils.MobDropGroup
+        groups[1].Should().BeEquivalentTo(new ParserUtils.DataFileGroup
         {
             Name = "Def",
             Fields =
@@ -614,12 +642,12 @@ public class ParserTests
 
         var itemManager = Substitute.For<IItemManager>();
 
-        var groups = await ParserUtils.GetDropsForGroupBlocks(input);
+        var groups = await ParserUtils.ParseFileGroups(input);
 
         var mobDrops = groups.Select(x => ParserUtils.ParseMobGroup(x, itemManager)).ToList();
         
         groups.Should().HaveCount(1);
-        groups[0].Should().BeEquivalentTo(new ParserUtils.MobDropGroup
+        groups[0].Should().BeEquivalentTo(new ParserUtils.DataFileGroup
         {
             Name = "Abc",
             Fields =
@@ -672,12 +700,12 @@ public class ParserTests
 
         var itemManager = Substitute.For<IItemManager>();
 
-        var groups = await ParserUtils.GetDropsForGroupBlocks(input);
+        var groups = await ParserUtils.ParseFileGroups(input);
 
         var mobDrops = groups.Select(x => ParserUtils.ParseMobGroup(x, itemManager)).ToList();
         
         groups.Should().HaveCount(2);
-        groups[0].Should().BeEquivalentTo(new ParserUtils.MobDropGroup
+        groups[0].Should().BeEquivalentTo(new ParserUtils.DataFileGroup
         {
             Name = "Abc",
             Fields =
@@ -691,7 +719,7 @@ public class ParserTests
                 new List<string>() { "1", "10", "1", "0.09" }
             }
         });
-        groups[1].Should().BeEquivalentTo(new ParserUtils.MobDropGroup
+        groups[1].Should().BeEquivalentTo(new ParserUtils.DataFileGroup
         {
             Name = "Def",
             Fields =
@@ -752,12 +780,12 @@ public class ParserTests
 
         var itemManager = Substitute.For<IItemManager>();
 
-        var groups = await ParserUtils.GetDropsForGroupBlocks(input);
+        var groups = await ParserUtils.ParseFileGroups(input);
 
         var mobDrops = groups.Select(x => ParserUtils.ParseMobGroup(x, itemManager)).ToList();
         
         groups.Should().HaveCount(1);
-        groups[0].Should().BeEquivalentTo(new ParserUtils.MobDropGroup
+        groups[0].Should().BeEquivalentTo(new ParserUtils.DataFileGroup
         {
             Name = "Abc",
             Fields =
@@ -819,12 +847,12 @@ public class ParserTests
 
         var itemManager = Substitute.For<IItemManager>();
 
-        var groups = await ParserUtils.GetDropsForGroupBlocks(input);
+        var groups = await ParserUtils.ParseFileGroups(input);
 
         var mobDrops = groups.Select(x => ParserUtils.ParseMobGroup(x, itemManager)).ToList();
         
         groups.Should().HaveCount(2);
-        groups[0].Should().BeEquivalentTo(new ParserUtils.MobDropGroup
+        groups[0].Should().BeEquivalentTo(new ParserUtils.DataFileGroup
         {
             Name = "Abc",
             Fields =
@@ -839,7 +867,7 @@ public class ParserTests
                 new List<string>() { "2", "11", "2", "1" }
             }
         });
-        groups[1].Should().BeEquivalentTo(new ParserUtils.MobDropGroup
+        groups[1].Should().BeEquivalentTo(new ParserUtils.DataFileGroup
         {
             Name = "Def",
             Fields =
@@ -912,12 +940,12 @@ public class ParserTests
 
         var itemManager = Substitute.For<IItemManager>();
 
-        var groups = await ParserUtils.GetDropsForGroupBlocks(input);
+        var groups = await ParserUtils.ParseFileGroups(input);
 
         var mobDrops = groups.Select(x => ParserUtils.ParseMobGroup(x, itemManager)).ToList();
         
         groups.Should().HaveCount(1);
-        groups[0].Should().BeEquivalentTo(new ParserUtils.MobDropGroup
+        groups[0].Should().BeEquivalentTo(new ParserUtils.DataFileGroup
         {
             Name = "Abc",
             Fields =
@@ -972,12 +1000,12 @@ public class ParserTests
 
         var itemManager = Substitute.For<IItemManager>();
 
-        var groups = await ParserUtils.GetDropsForGroupBlocks(input);
+        var groups = await ParserUtils.ParseFileGroups(input);
 
         var mobDrops = groups.Select(x => ParserUtils.ParseMobGroup(x, itemManager)).ToList();
         
         groups.Should().HaveCount(2);
-        groups[0].Should().BeEquivalentTo(new ParserUtils.MobDropGroup
+        groups[0].Should().BeEquivalentTo(new ParserUtils.DataFileGroup
         {
             Name = "Abc",
             Fields =
@@ -991,7 +1019,7 @@ public class ParserTests
                 new List<string>() { "1", "10", "1", "20", "30" }
             }
         });
-        groups[1].Should().BeEquivalentTo(new ParserUtils.MobDropGroup
+        groups[1].Should().BeEquivalentTo(new ParserUtils.DataFileGroup
         {
             Name = "Def",
             Fields =
@@ -1056,12 +1084,12 @@ public class ParserTests
 
         var itemManager = Substitute.For<IItemManager>();
 
-        var groups = await ParserUtils.GetDropsForGroupBlocks(input);
+        var groups = await ParserUtils.ParseFileGroups(input);
 
         var mobDrops = groups.Select(x => ParserUtils.ParseMobGroup(x, itemManager)).ToList();
         
         groups.Should().HaveCount(1);
-        groups[0].Should().BeEquivalentTo(new ParserUtils.MobDropGroup
+        groups[0].Should().BeEquivalentTo(new ParserUtils.DataFileGroup
         {
             Name = "Abc",
             Fields =
@@ -1125,12 +1153,12 @@ public class ParserTests
 
         var itemManager = Substitute.For<IItemManager>();
 
-        var groups = await ParserUtils.GetDropsForGroupBlocks(input);
+        var groups = await ParserUtils.ParseFileGroups(input);
 
         var mobDrops = groups.Select(x => ParserUtils.ParseMobGroup(x, itemManager)).ToList();
         
         groups.Should().HaveCount(2);
-        groups[0].Should().BeEquivalentTo(new ParserUtils.MobDropGroup
+        groups[0].Should().BeEquivalentTo(new ParserUtils.DataFileGroup
         {
             Name = "Abc",
             Fields =
@@ -1145,7 +1173,7 @@ public class ParserTests
                 new List<string>() { "2", "11", "2", "25", "35" }
             }
         });
-        groups[1].Should().BeEquivalentTo(new ParserUtils.MobDropGroup
+        groups[1].Should().BeEquivalentTo(new ParserUtils.DataFileGroup
         {
             Name = "Def",
             Fields =
@@ -1210,7 +1238,7 @@ public class ParserTests
     [Fact]
     public async Task MobDropGroup_Kill_InvalidKillDrop()
     {
-        var input = new ParserUtils.MobDropGroup
+        var input = new ParserUtils.DataFileGroup
         {
             Name = "Abc",
             Fields =
@@ -1235,7 +1263,7 @@ public class ParserTests
     [Fact]
     public async Task MobDropGroup_Kill_NoKillDrop()
     {
-        var input = new ParserUtils.MobDropGroup
+        var input = new ParserUtils.DataFileGroup
         {
             Name = "Abc",
             Fields =
@@ -1259,7 +1287,7 @@ public class ParserTests
     [Fact]
     public async Task MobDropGroup_Kill_NoMob()
     {
-        var input = new ParserUtils.MobDropGroup
+        var input = new ParserUtils.DataFileGroup
         {
             Name = "Abc",
             Fields =
@@ -1283,7 +1311,7 @@ public class ParserTests
     [Fact]
     public async Task MobDropGroup_Limit_NoLevel()
     {
-        var input = new ParserUtils.MobDropGroup
+        var input = new ParserUtils.DataFileGroup
         {
             Name = "Abc",
             Fields =
@@ -1307,7 +1335,7 @@ public class ParserTests
     [Fact]
     public async Task MobDropGroup_NoType()
     {
-        var input = new ParserUtils.MobDropGroup
+        var input = new ParserUtils.DataFileGroup
         {
             Name = "Abc",
             Fields =
