@@ -144,22 +144,10 @@ internal class DeserializeGenerator
             return $"await stream.ReadStringFromStreamAsync(buffer, (int){size})";
         }
 
-        if (typeName is "Half" or "UInt16" or "Int16")
-        {
-            return $"await stream.ReadValueFromStreamAsync<{typeName}>(buffer)";
-        }
-
-        if (typeName is "Single" or "UInt32" or "Int32")
-        {
-            return $"await stream.ReadValueFromStreamAsync<{typeName}>(buffer)";
-        }
-
-        if (typeName is "Int64" or "UInt64" or "Double")
-        {
-            return $"await stream.ReadValueFromStreamAsync<{typeName}>(buffer)";
-        }
-
-        if (typeName == "Byte")
+        if (typeName is "Half" or "UInt16" or "Int16"
+            or "Single" or "UInt32" or "Int32"
+            or "Int64" or "UInt64" or "Double"
+            or "Byte" or "Boolean")
         {
             return $"await stream.ReadValueFromStreamAsync<{typeName}>(buffer)";
         }
@@ -320,8 +308,7 @@ internal class DeserializeGenerator
                 return $"({cast})System.BitConverter.To{namedTypeSymbol.EnumUnderlyingType.Name}(bytes[{offsetStr}])";
             }
 
-            if (GeneratorConstants.CastableToByteTypes.Contains(enumUnderlyingTypeName) ||
-                GeneratorConstants.NoCastTypes.Contains(enumUnderlyingTypeName))
+            if (GeneratorConstants.NoCastTypes.Contains(enumUnderlyingTypeName))
             {
                 return $"({cast})bytes[{offsetStr}]";
             }
@@ -337,9 +324,10 @@ internal class DeserializeGenerator
             return $"bytes[{offsetStr}]";
         }
 
-        if (GeneratorConstants.CastableToByteTypes.Contains(namedTypeSymbol.Name))
+
+        if (namedTypeSymbol.GetFullName() == "System.Boolean")
         {
-            return $"({cast})bytes[{offsetStr}]";
+            return $"bytes[{offsetStr}] == 1";
         }
 
         if (namedTypeSymbol.Name == "String")
