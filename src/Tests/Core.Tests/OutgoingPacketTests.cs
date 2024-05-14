@@ -1,12 +1,10 @@
-using System;
-using System.Linq;
 using System.Text;
 using AutoBogus;
 using Bogus;
+using Core.Tests.Extensions;
 using FluentAssertions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using QuantumCore.Extensions;
 using QuantumCore.Game.Packets;
 using QuantumCore.Game.Packets.General;
@@ -14,7 +12,6 @@ using QuantumCore.Game.Packets.Quest;
 using QuantumCore.Game.Packets.QuickBar;
 using QuantumCore.Game.Packets.Shop;
 using QuantumCore.Networking;
-using Serilog;
 using Weikio.PluginFramework.Catalogs;
 using Xunit;
 using Xunit.Abstractions;
@@ -30,13 +27,7 @@ public class OutgoingPacketTests
         var services = new ServiceCollection()
             .AddCoreServices(new EmptyPluginCatalog(), new ConfigurationBuilder().Build())
             .AddSingleton<IPacketSerializer, DefaultPacketSerializer>()
-            .AddLogging(x =>
-            {
-                x.ClearProviders();
-                x.AddSerilog(new LoggerConfiguration()
-                    .WriteTo.TestOutput(testOutputHelper)
-                    .CreateLogger());
-            })
+            .AddQuantumCoreTestLogger(testOutputHelper)
             .BuildServiceProvider();
         _serializer = services.GetRequiredService<IPacketSerializer>();
     }
@@ -44,7 +35,7 @@ public class OutgoingPacketTests
     [Fact]
     public void NullReturnsArrayWithDefaultValues()
     {
-        Assert.Throws<NullReferenceException>(() => _serializer.Serialize((ServerStatusPacket)null!));
+        Assert.Throws<NullReferenceException>(() => _serializer.Serialize((ServerStatusPacket) null!));
     }
 
     [Fact]
@@ -119,7 +110,7 @@ public class OutgoingPacketTests
                 .Concat(BitConverter.GetBytes(obj.PositionY))
                 .Concat(BitConverter.GetBytes(obj.Time))
                 .Concat(BitConverter.GetBytes(obj.Duration))
-                .Append((byte)0x00)
+                .Append((byte) 0x00)
         );
     }
 
@@ -134,12 +125,12 @@ public class OutgoingPacketTests
                 {
                     0x04
                 }
-                .Concat(BitConverter.GetBytes((short)obj.GetSize()))
-                .Append((byte)obj.MessageType)
+                .Concat(BitConverter.GetBytes((short) obj.GetSize()))
+                .Append((byte) obj.MessageType)
                 .Concat(BitConverter.GetBytes(obj.Vid))
                 .Append(obj.Empire)
                 .Concat(Encoding.ASCII.GetBytes(obj.Message))
-                .Append((byte)0)
+                .Append((byte) 0)
         );
     }
 
@@ -161,7 +152,7 @@ public class OutgoingPacketTests
                 .Append(obj.Slot)
                 .Concat(BitConverter.GetBytes(obj.Character.Id))
                 .Concat(Encoding.ASCII.GetBytes(obj.Character.Name))
-                .Append((byte)0) // null byte for end of string
+                .Append((byte) 0) // null byte for end of string
                 .Append(obj.Character.Level)
                 .Concat(BitConverter.GetBytes(obj.Character.Playtime))
                 .Append(obj.Character.St)
@@ -218,9 +209,9 @@ public class OutgoingPacketTests
 
         bytes.Should().Equal(
             new byte[]
-                {
-                    0x0B
-                }
+            {
+                0x0B
+            }
         );
     }
 
@@ -299,13 +290,13 @@ public class OutgoingPacketTests
     {
         var itemBonusFaker = new AutoFaker<ItemBonus>();
         var obj = new AutoFaker<SetItem>()
-            .RuleFor(x => x.Sockets, faker => new []
+            .RuleFor(x => x.Sockets, faker => new[]
             {
                 faker.Random.UInt(),
                 faker.Random.UInt(),
                 faker.Random.UInt()
             })
-            .RuleFor(x => x.Bonuses, _ => new []
+            .RuleFor(x => x.Bonuses, _ => new[]
             {
                 itemBonusFaker.Generate(),
                 itemBonusFaker.Generate(),
@@ -333,7 +324,7 @@ public class OutgoingPacketTests
                 .Concat(obj.Sockets.SelectMany(BitConverter.GetBytes))
                 .Concat(obj.Bonuses.SelectMany(bonus =>
                 {
-                    return new[] { bonus.BonusId }.Concat(BitConverter.GetBytes(bonus.Value));
+                    return new[] {bonus.BonusId}.Concat(BitConverter.GetBytes(bonus.Value));
                 }))
         );
     }
@@ -489,13 +480,13 @@ public class OutgoingPacketTests
     {
         var itemBonusFaker = new AutoFaker<ItemBonus>();
         var shopItemFaker = new AutoFaker<ShopItem>()
-            .RuleFor(x => x.Sockets, faker => new []
+            .RuleFor(x => x.Sockets, faker => new[]
             {
                 faker.Random.UInt(),
                 faker.Random.UInt(),
                 faker.Random.UInt()
             })
-            .RuleFor(x => x.Bonuses, _ => new []
+            .RuleFor(x => x.Bonuses, _ => new[]
             {
                 itemBonusFaker.Generate(),
                 itemBonusFaker.Generate(),
@@ -515,7 +506,7 @@ public class OutgoingPacketTests
                 {
                     0x26
                 }
-                .Append((byte)0x00)
+                .Append((byte) 0x00)
                 .Concat(BitConverter.GetBytes(obj.GetSize()))
                 .Concat(BitConverter.GetBytes(obj.Vid))
                 .Concat(obj.Items.SelectMany(item => Array.Empty<byte>()
@@ -542,7 +533,7 @@ public class OutgoingPacketTests
                 {
                     0x26
                 }
-                .Append((byte)0x05)
+                .Append((byte) 0x05)
                 .Concat(BitConverter.GetBytes(obj.Size))
         );
     }
@@ -558,8 +549,7 @@ public class OutgoingPacketTests
                 {
                     0x26
                 }
-                .Append((byte)0x07)
-                .Concat(BitConverter.GetBytes(obj.Size))
+                .Append((byte) 0x07)
         );
     }
 
@@ -578,7 +568,7 @@ public class OutgoingPacketTests
                 .Append(obj.Skin)
                 .Concat(BitConverter.GetBytes(obj.SourceSize))
                 .Concat(Encoding.ASCII.GetBytes(obj.Source))
-                .Append((byte)0) // null byte for end of string
+                .Append((byte) 0) // null byte for end of string
         );
     }
 

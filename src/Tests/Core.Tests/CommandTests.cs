@@ -1,11 +1,11 @@
 using AutoBogus;
 using Bogus;
+using Core.Tests.Extensions;
 using FluentAssertions;
 using FluentAssertions.Equivalency;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NSubstitute;
 using QuantumCore.API;
@@ -26,7 +26,6 @@ using QuantumCore.Game.PlayerUtils;
 using QuantumCore.Game.World;
 using QuantumCore.Game.World.Entities;
 using QuantumCore.Networking;
-using Serilog;
 using Weikio.PluginFramework.Catalogs;
 using Xunit;
 using Xunit.Abstractions;
@@ -124,20 +123,14 @@ public class CommandTests : IAsyncLifetime
         _services = new ServiceCollection()
             .AddCoreServices(new EmptyPluginCatalog(), new ConfigurationBuilder().Build())
             .AddGameServices()
-            .AddLogging(x =>
-            {
-                x.ClearProviders();
-                x.AddSerilog(new LoggerConfiguration()
-                    .WriteTo.TestOutput(testOutputHelper)
-                    .CreateLogger());
-            })
+            .AddQuantumCoreTestLogger(testOutputHelper)
             .Replace(new ServiceDescriptor(typeof(IItemRepository), _ => Substitute.For<IItemRepository>(),
                 ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(ICommandPermissionRepository),
                 _ =>
                 {
                     var mock = Substitute.For<ICommandPermissionRepository>();
-                    mock.GetGroupsForPlayer(Arg.Any<Guid>()).Returns([PermGroup.OperatorGroup]);
+                    mock.GetGroupsForPlayer(Arg.Any<uint>()).Returns([PermGroup.OperatorGroup]);
                     return mock;
                 }, ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(IPlayerRepository), _ => Substitute.For<IPlayerRepository>(),

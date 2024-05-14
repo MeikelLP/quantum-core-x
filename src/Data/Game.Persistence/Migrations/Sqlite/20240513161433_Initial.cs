@@ -11,7 +11,7 @@ namespace QuantumCore.Game.Persistence.Migrations.Sqlite
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "deleted_players",
+                name: "DeletedPlayers",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
@@ -40,23 +40,28 @@ namespace QuantumCore.Game.Persistence.Migrations.Sqlite
                     DeletedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
                     Name = table.Column<string>(type: "TEXT", maxLength: 24, nullable: false)
                 },
-                constraints: table => { table.PrimaryKey("PK_deleted_players", x => x.Id); });
+                constraints: table => { table.PrimaryKey("PK_DeletedPlayers", x => x.Id); });
 
             migrationBuilder.CreateTable(
-                name: "perm_groups",
+                name: "PermissionGroups",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
                     Name = table.Column<string>(type: "TEXT", maxLength: 30, nullable: false)
                 },
-                constraints: table => { table.PrimaryKey("PK_perm_groups", x => x.Id); });
+                constraints: table => { table.PrimaryKey("PK_PermissionGroups", x => x.Id); });
 
             migrationBuilder.CreateTable(
-                name: "players",
+                name: "Players",
                 columns: table => new
                 {
-                    Id = table.Column<Guid>(type: "TEXT", nullable: false),
+                    Id = table.Column<uint>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
                     AccountId = table.Column<Guid>(type: "TEXT", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false,
+                        defaultValueSql: "current_timestamp"),
+                    UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: false,
+                        defaultValueSql: "current_timestamp"),
                     Empire = table.Column<byte>(type: "INTEGER", nullable: false),
                     PlayerClass = table.Column<byte>(type: "INTEGER", nullable: false),
                     SkillGroup = table.Column<byte>(type: "INTEGER", nullable: false),
@@ -75,18 +80,14 @@ namespace QuantumCore.Game.Persistence.Migrations.Sqlite
                     Stamina = table.Column<long>(type: "INTEGER", nullable: false),
                     BodyPart = table.Column<uint>(type: "INTEGER", nullable: false),
                     HairPart = table.Column<uint>(type: "INTEGER", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false,
-                        defaultValueSql: "current_timestamp"),
-                    UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: false,
-                        defaultValueSql: "current_timestamp"),
                     Name = table.Column<string>(type: "TEXT", maxLength: 24, nullable: false),
                     GivenStatusPoints = table.Column<uint>(type: "INTEGER", nullable: false),
                     AvailableStatusPoints = table.Column<uint>(type: "INTEGER", nullable: false)
                 },
-                constraints: table => { table.PrimaryKey("PK_players", x => x.Id); });
+                constraints: table => { table.PrimaryKey("PK_Players", x => x.Id); });
 
             migrationBuilder.CreateTable(
-                name: "perm_auth",
+                name: "Permissions",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
@@ -95,21 +96,21 @@ namespace QuantumCore.Game.Persistence.Migrations.Sqlite
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_perm_auth", x => x.Id);
+                    table.PrimaryKey("PK_Permissions", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_perm_auth_perm_groups_GroupId",
+                        name: "FK_Permissions_PermissionGroups_GroupId",
                         column: x => x.GroupId,
-                        principalTable: "perm_groups",
+                        principalTable: "PermissionGroups",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "items",
+                name: "Items",
                 columns: table => new
                 {
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
-                    PlayerId = table.Column<Guid>(type: "TEXT", nullable: false),
+                    PlayerId = table.Column<uint>(type: "INTEGER", nullable: false),
                     ItemId = table.Column<uint>(type: "INTEGER", nullable: false),
                     Window = table.Column<byte>(type: "INTEGER", nullable: false),
                     Position = table.Column<uint>(type: "INTEGER", nullable: false),
@@ -121,63 +122,84 @@ namespace QuantumCore.Game.Persistence.Migrations.Sqlite
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_items", x => x.Id);
+                    table.PrimaryKey("PK_Items", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_items_players_PlayerId",
+                        name: "FK_Items_Players_PlayerId",
                         column: x => x.PlayerId,
-                        principalTable: "players",
+                        principalTable: "Players",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
-                name: "perm_users",
+                name: "PermissionUsers",
                 columns: table => new
                 {
                     GroupId = table.Column<Guid>(type: "TEXT", nullable: false),
-                    PlayerId = table.Column<Guid>(type: "TEXT", nullable: false)
+                    PlayerId = table.Column<uint>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_perm_users", x => new {x.GroupId, x.PlayerId});
+                    table.PrimaryKey("PK_PermissionUsers", x => new {x.GroupId, x.PlayerId});
                     table.ForeignKey(
-                        name: "FK_perm_users_perm_groups_GroupId",
+                        name: "FK_PermissionUsers_PermissionGroups_GroupId",
                         column: x => x.GroupId,
-                        principalTable: "perm_groups",
+                        principalTable: "PermissionGroups",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_perm_users_players_PlayerId",
+                        name: "FK_PermissionUsers_Players_PlayerId",
                         column: x => x.PlayerId,
-                        principalTable: "players",
+                        principalTable: "Players",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.InsertData(
-                table: "perm_groups",
+                table: "PermissionGroups",
                 columns: new[] {"Id", "Name"},
                 values: new object[] {new Guid("45bff707-1836-42b7-956d-00b9b69e0ee0"), "Operator"});
 
+            migrationBuilder.InsertData(
+                table: "Players",
+                columns: new[]
+                {
+                    "Id", "AccountId", "AvailableStatusPoints", "BodyPart", "CreatedAt", "Dx", "Empire", "Experience",
+                    "GivenStatusPoints", "Gold", "HairPart", "Health", "Ht", "Iq", "Level", "Mana", "Name", "PlayTime",
+                    "PlayerClass", "PositionX", "PositionY", "SkillGroup", "St", "Stamina"
+                },
+                values: new object[]
+                {
+                    1u, new Guid("e34fd5ab-fb3b-428e-935b-7db5bd08a3e5"), 0u, 0u,
+                    new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), (byte) 99, (byte) 0, 0u, 0u, 2000000000u,
+                    0u, 99999L, (byte) 99, (byte) 99, (byte) 99, 99999L, "Admin", 0u, (byte) 0, 958870, 272788,
+                    (byte) 0, (byte) 99, 0L
+                });
+
+            migrationBuilder.InsertData(
+                table: "PermissionUsers",
+                columns: new[] {"GroupId", "PlayerId"},
+                values: new object[] {new Guid("45bff707-1836-42b7-956d-00b9b69e0ee0"), 1u});
+
             migrationBuilder.CreateIndex(
-                name: "IX_items_PlayerId",
-                table: "items",
+                name: "IX_Items_PlayerId",
+                table: "Items",
                 column: "PlayerId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_perm_auth_GroupId",
-                table: "perm_auth",
-                column: "GroupId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_perm_groups_Name",
-                table: "perm_groups",
+                name: "IX_PermissionGroups_Name",
+                table: "PermissionGroups",
                 column: "Name",
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_perm_users_PlayerId",
-                table: "perm_users",
+                name: "IX_Permissions_GroupId",
+                table: "Permissions",
+                column: "GroupId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_PermissionUsers_PlayerId",
+                table: "PermissionUsers",
                 column: "PlayerId");
         }
 
@@ -185,22 +207,22 @@ namespace QuantumCore.Game.Persistence.Migrations.Sqlite
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "deleted_players");
+                name: "DeletedPlayers");
 
             migrationBuilder.DropTable(
-                name: "items");
+                name: "Items");
 
             migrationBuilder.DropTable(
-                name: "perm_auth");
+                name: "Permissions");
 
             migrationBuilder.DropTable(
-                name: "perm_users");
+                name: "PermissionUsers");
 
             migrationBuilder.DropTable(
-                name: "perm_groups");
+                name: "PermissionGroups");
 
             migrationBuilder.DropTable(
-                name: "players");
+                name: "Players");
         }
     }
 }

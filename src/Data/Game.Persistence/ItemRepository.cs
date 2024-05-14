@@ -8,9 +8,9 @@ namespace QuantumCore.Game.Persistence;
 
 public interface IItemRepository
 {
-    Task<IEnumerable<Guid>> GetItemIdsForPlayerAsync(Guid player, byte window);
+    Task<IEnumerable<Guid>> GetItemIdsForPlayerAsync(uint playerId, byte window);
     Task<ItemInstance?> GetItemAsync(Guid id);
-    Task DeletePlayerItemsAsync(Guid playerId);
+    Task DeletePlayerItemsAsync(uint playerId);
 }
 
 public class ItemRepository : IItemRepository
@@ -22,10 +22,10 @@ public class ItemRepository : IItemRepository
         _db = db;
     }
 
-    public async Task<IEnumerable<Guid>> GetItemIdsForPlayerAsync(Guid player, byte window)
+    public async Task<IEnumerable<Guid>> GetItemIdsForPlayerAsync(uint playerId, byte window)
     {
         return await _db.Items
-            .Where(x => x.PlayerId == player && x.Window == window)
+            .Where(x => x.PlayerId == playerId && x.Window == window)
             .Select(x => x.Id)
             .ToArrayAsync();
     }
@@ -38,7 +38,7 @@ public class ItemRepository : IItemRepository
             .FirstOrDefaultAsync();
     }
 
-    public async Task DeletePlayerItemsAsync(Guid playerId)
+    public async Task DeletePlayerItemsAsync(uint playerId)
     {
         await _db.Items.Where(x => x.PlayerId == playerId).ExecuteDeleteAsync();
     }

@@ -1,6 +1,4 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using Core.Tests.Extensions;
 using FluentAssertions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -15,7 +13,6 @@ using QuantumCore.Caching;
 using QuantumCore.Game.Services;
 using QuantumCore.Game.World;
 using QuantumCore.Game.World.Entities;
-using Serilog;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -53,7 +50,7 @@ public class MapTests
             .AddSingleton<IAtlasProvider>(_ =>
             {
                 var mock = Substitute.For<IAtlasProvider>();
-                mock.GetAsync(Arg.Any<IWorld>()).Returns(_ => new[] { _map }!);
+                mock.GetAsync(Arg.Any<IWorld>()).Returns(_ => new[] {_map}!);
                 return mock;
             })
             .AddSingleton<IConfiguration>(_ => new ConfigurationBuilder().Build())
@@ -69,19 +66,20 @@ public class MapTests
                         Leader = 101,
                         Members =
                         {
-                            new SpawnMember{Id = 101},
-                            new SpawnMember{Id = 101}
+                            new SpawnMember {Id = 101},
+                            new SpawnMember {Id = 101}
                         }
                     }
                 });
-                mock.GetSpawnGroupCollectionsAsync().Returns(_ => new []
+                mock.GetSpawnGroupCollectionsAsync().Returns(_ => new[]
                 {
                     // equal items but only one will be spawned
                     new SpawnGroupCollection
                     {
                         Id = 101,
                         Name = "TestGroupCollection",
-                        Groups = {
+                        Groups =
+                        {
                             new SpawnGroupCollectionMember
                             {
                                 Id = 101, Amount = 1
@@ -92,7 +90,8 @@ public class MapTests
                     {
                         Id = 101,
                         Name = "TestGroupCollection",
-                        Groups = {
+                        Groups =
+                        {
                             new SpawnGroupCollectionMember
                             {
                                 Id = 101, Amount = 1
@@ -110,11 +109,7 @@ public class MapTests
                 return mock;
             })
             .AddOptions<HostingOptions>().Services
-            .AddLogging(x =>
-            {
-                x.ClearProviders();
-                x.AddSerilog(new LoggerConfiguration().WriteTo.TestOutput(testOutputHelper).CreateLogger());
-            })
+            .AddQuantumCoreTestLogger(testOutputHelper)
             .BuildServiceProvider();
         var monsterManager = provider.GetRequiredService<IMonsterManager>();
         var animationManager = provider.GetRequiredService<IAnimationManager>();

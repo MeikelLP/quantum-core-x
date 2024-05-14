@@ -2,7 +2,7 @@
 
 public class PlayerData
 {
-    public Guid Id { get; set; }
+    public uint Id { get; set; }
     public Guid AccountId { get; set; }
     public string Name { get; set; } = "";
     public byte PlayerClass { get; set; }

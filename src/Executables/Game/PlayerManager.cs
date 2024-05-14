@@ -46,7 +46,7 @@ public class PlayerManager : IPlayerManager
         return cachedPlayer;
     }
 
-    public async Task<PlayerData?> GetPlayer(Guid playerId)
+    public async Task<PlayerData?> GetPlayer(uint playerId)
     {
         var cachedPlayer = await _cachePlayerRepository.GetPlayerAsync(playerId);
         if (cachedPlayer is null)
@@ -121,7 +121,7 @@ public class PlayerManager : IPlayerManager
         // Create player data
         var player = new PlayerData
         {
-            Id = Guid.NewGuid(),
+            Id = 0,
             AccountId = accountId,
             Name = playerName,
             PlayerClass = @class,
@@ -150,7 +150,7 @@ public class PlayerManager : IPlayerManager
         await _cachePlayerRepository.DeletePlayerAsync(player);
     }
 
-    public async Task SetPlayerEmpireAsync(Guid accountId, Guid playerId, byte empire)
+    public async Task SetPlayerEmpireAsync(Guid accountId, uint playerId, byte empire)
     {
         await _dbPlayerRepository.UpdateEmpireAsync(accountId, playerId, empire);
     }

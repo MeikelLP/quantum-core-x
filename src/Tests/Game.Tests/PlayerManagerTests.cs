@@ -90,7 +90,7 @@ public class PlayerManagerTests : IClassFixture<RedisFixture>, IClassFixture<Dat
             PositionX = 958870,
             PositionY = 272788
         }, cfg => cfg.Excluding(x => x.Id));
-        player.Id.Should().NotBeEmpty();
+        player.Id.Should().NotBe(0);
 
         var dbPlayer = await _dbPlayerRepository.GetPlayerAsync(player.Id);
         dbPlayer.Should().BeEquivalentTo(player);
@@ -121,7 +121,7 @@ public class PlayerManagerTests : IClassFixture<RedisFixture>, IClassFixture<Dat
     [Fact]
     public async Task GetPlayerById()
     {
-        var playerId = Guid.NewGuid();
+        var playerId = (uint) Random.Shared.Next();
         var input = new PlayerData
         {
             Id = playerId,
@@ -137,7 +137,7 @@ public class PlayerManagerTests : IClassFixture<RedisFixture>, IClassFixture<Dat
     [Fact]
     public async Task GetPlayer_OnlyInDb_CreatesCache()
     {
-        var playerId = Guid.NewGuid();
+        var playerId = (uint) Random.Shared.Next();
         await _dbPlayerRepository.CreateAsync(new PlayerData
         {
             Id = playerId,
@@ -184,14 +184,14 @@ public class PlayerManagerTests : IClassFixture<RedisFixture>, IClassFixture<Dat
         output1.Should().BeEquivalentTo(input1, cfg => cfg.Excluding(x => x.Id));
         output2.Should().BeEquivalentTo(input2, cfg => cfg.Excluding(x => x.Id));
 
-        output1!.Id.Should().NotBeEmpty();
-        output2!.Id.Should().NotBeEmpty();
+        output1!.Id.Should().NotBe(0);
+        output2!.Id.Should().NotBe(0);
     }
 
     [Fact]
     public async Task GetPlayerByAccountIdAndSlot_OnlyInDb_CreatesCache()
     {
-        var playerId = Guid.NewGuid();
+        var playerId = (uint) Random.Shared.Next();
         var accountId = Guid.NewGuid();
         await _dbPlayerRepository.CreateAsync(new PlayerData
         {
@@ -212,7 +212,7 @@ public class PlayerManagerTests : IClassFixture<RedisFixture>, IClassFixture<Dat
     [Fact]
     public async Task GetPlayerById_NotFound()
     {
-        var output = await _playerManager.GetPlayer(Guid.NewGuid());
+        var output = await _playerManager.GetPlayer((uint) Random.Shared.Next());
 
         output.Should().BeNull();
     }
