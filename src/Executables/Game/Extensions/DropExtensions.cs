@@ -13,6 +13,11 @@ public static class DropExtensions
         return drop.MinLevel <= player.GetPoint(EPoints.Level) &&
                drop.MaxLevel >= player.GetPoint(EPoints.Level);
     }
+    
+    public static bool CanDropFor(this LevelItemGroup drop, IPlayerEntity player)
+    {
+        return drop.LevelLimit <= player.GetPoint(EPoints.Level);
+    }
 
     public static ImmutableArray<CommonDropEntry> GetPossibleCommonDropsForPlayer(this IDropProvider dropProvider,
         IPlayerEntity player)
@@ -20,9 +25,14 @@ public static class DropExtensions
         return [..dropProvider.CommonDrops.Where(x => x.CanDropFor(player))];
     }
 
-    public static MonsterItemGroup? GetPossibleMobDropsForPlayer(this IDropProvider dropProvider,
-        IPlayerEntity player, uint monsterProtoId)
+    public static MonsterItemGroup? GetPossibleMobDropsForPlayer(this IDropProvider dropProvider, uint monsterProtoId)
     {
         return dropProvider.GetMonsterDropsForMob(monsterProtoId);
+    }
+    
+    public static ImmutableArray<LevelItemGroup> GetPossibleLevelDropsForPlayer(this IDropProvider dropProvider,
+        IPlayerEntity player)
+    {
+        return [..dropProvider.LevelDrops.Where(x => x.CanDropFor(player))];
     }
 }

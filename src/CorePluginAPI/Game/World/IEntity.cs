@@ -16,16 +16,6 @@ namespace QuantumCore.API.Game.World
         MetinStone = 2,
         Player = 6
     }
-    
-    public enum EEntityRank
-    {
-        Pawn,
-        SPawn,
-        Knight,
-        SKnight,
-        Boss,
-        King,
-    }
 
     public interface IEntity
     {

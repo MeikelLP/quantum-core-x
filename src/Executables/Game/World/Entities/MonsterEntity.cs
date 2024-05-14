@@ -20,7 +20,7 @@ namespace QuantumCore.Game.World.Entities
         private readonly ILogger _logger;
         public override EEntityType Type => EEntityType.Monster;
         public bool IsStone => _proto.Type == (byte) EEntityType.MetinStone;
-        public EEntityRank Rank => (EEntityRank) _proto.Rank;
+        public EMonsterLevel Rank => (EMonsterLevel) _proto.Rank;
 
         public IBehaviour? Behaviour
         {
@@ -319,17 +319,6 @@ namespace QuantumCore.Game.World.Entities
                     Name = _proto.TranslatedName
                 });
             }
-            // foreach (var drop in _dropProvider.CommonDrops)
-            // {
-            //     if (!drop.CanDropFor(LastAttacker)) continue;
-            //
-            //     var chance = drop.Chance * Globals.DROP_MULTIPLIER * Globals.DROP_MULTIPLIER;
-            //     if (chance > Random.Shared.NextSingle())
-            //     {
-            //         var itemInstance = _itemManager.CreateItem(_itemManager.GetItem(drop.ItemProtoId));
-            //         _map.AddGroundItem(itemInstance, PositionX, PositionY, Globals.DROP_COMMON_AMOUNT, LastAttacker.Name);
-            //     }
-            // }
         }
 
         public override void HideEntity(IConnection connection)
