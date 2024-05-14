@@ -14,7 +14,8 @@ public class EmpireHandler : IGamePacketHandler<Empire>
     private readonly ICacheManager _cacheManager;
     private readonly ICachePlayerRepository _playerCache;
 
-    public EmpireHandler(ILogger<EmpireHandler> logger, IPlayerManager playerManager, ICacheManager cacheManager, ICachePlayerRepository playerCache)
+    public EmpireHandler(ILogger<EmpireHandler> logger, IPlayerManager playerManager, ICacheManager cacheManager,
+        ICachePlayerRepository playerCache)
     {
         _logger = logger;
         _playerManager = playerManager;
@@ -28,10 +29,11 @@ public class EmpireHandler : IGamePacketHandler<Empire>
         {
             _logger.LogInformation("Empire selected: {Empire}", ctx.Packet.EmpireId);
             var cacheKey = $"account:{ctx.Connection.AccountId}:game:select:selected-player";
-            var player = await _cacheManager.Get<Guid?>(cacheKey);
+            var player = await _cacheManager.Get<uint?>(cacheKey);
             if (player is not null)
             {
-                await _playerManager.SetPlayerEmpireAsync(ctx.Connection.AccountId!.Value, player.Value, ctx.Packet.EmpireId);
+                await _playerManager.SetPlayerEmpireAsync(ctx.Connection.AccountId!.Value, player.Value,
+                    ctx.Packet.EmpireId);
                 await _cacheManager.Del(cacheKey);
             }
             else

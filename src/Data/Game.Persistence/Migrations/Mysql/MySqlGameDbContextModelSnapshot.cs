@@ -102,7 +102,7 @@ namespace QuantumCore.Game.Persistence.Migrations.Mysql
 
                     b.HasKey("Id");
 
-                    b.ToTable("deleted_players");
+                    b.ToTable("DeletedPlayers");
                 });
 
             modelBuilder.Entity("QuantumCore.Game.Persistence.Entities.Item", b =>
@@ -122,8 +122,8 @@ namespace QuantumCore.Game.Persistence.Migrations.Mysql
                     b.Property<uint>("ItemId")
                         .HasColumnType("int unsigned");
 
-                    b.Property<Guid>("PlayerId")
-                        .HasColumnType("char(36)");
+                    b.Property<uint>("PlayerId")
+                        .HasColumnType("int unsigned");
 
                     b.Property<uint>("Position")
                         .HasColumnType("int unsigned");
@@ -140,7 +140,7 @@ namespace QuantumCore.Game.Persistence.Migrations.Mysql
 
                     b.HasIndex("PlayerId");
 
-                    b.ToTable("items");
+                    b.ToTable("Items");
                 });
 
             modelBuilder.Entity("QuantumCore.Game.Persistence.Entities.PermAuth", b =>
@@ -161,7 +161,7 @@ namespace QuantumCore.Game.Persistence.Migrations.Mysql
 
                     b.HasIndex("GroupId");
 
-                    b.ToTable("perm_auth");
+                    b.ToTable("Permissions");
                 });
 
             modelBuilder.Entity("QuantumCore.Game.Persistence.Entities.PermGroup", b =>
@@ -180,7 +180,7 @@ namespace QuantumCore.Game.Persistence.Migrations.Mysql
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.ToTable("perm_groups");
+                    b.ToTable("PermissionGroups");
 
                     b.HasData(
                         new
@@ -195,21 +195,30 @@ namespace QuantumCore.Game.Persistence.Migrations.Mysql
                     b.Property<Guid>("GroupId")
                         .HasColumnType("char(36)");
 
-                    b.Property<Guid>("PlayerId")
-                        .HasColumnType("char(36)");
+                    b.Property<uint>("PlayerId")
+                        .HasColumnType("int unsigned");
 
                     b.HasKey("GroupId", "PlayerId");
 
                     b.HasIndex("PlayerId");
 
-                    b.ToTable("perm_users");
+                    b.ToTable("PermissionUsers");
+
+                    b.HasData(
+                        new
+                        {
+                            GroupId = new Guid("45bff707-1836-42b7-956d-00b9b69e0ee0"),
+                            PlayerId = 1u
+                        });
                 });
 
             modelBuilder.Entity("QuantumCore.Game.Persistence.Entities.Player", b =>
                 {
-                    b.Property<Guid>("Id")
+                    b.Property<uint>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("char(36)");
+                        .HasColumnType("int unsigned");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<uint>("Id"));
 
                     b.Property<Guid>("AccountId")
                         .HasColumnType("char(36)");
@@ -291,7 +300,37 @@ namespace QuantumCore.Game.Persistence.Migrations.Mysql
 
                     b.HasKey("Id");
 
-                    b.ToTable("players");
+                    b.ToTable("Players");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1u,
+                            AccountId = new Guid("e34fd5ab-fb3b-428e-935b-7db5bd08a3e5"),
+                            AvailableStatusPoints = 0u,
+                            BodyPart = 0u,
+                            CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
+                            Dx = (byte)99,
+                            Empire = (byte)0,
+                            Experience = 0u,
+                            GivenStatusPoints = 0u,
+                            Gold = 2000000000u,
+                            HairPart = 0u,
+                            Health = 99999L,
+                            Ht = (byte)99,
+                            Iq = (byte)99,
+                            Level = (byte)99,
+                            Mana = 99999L,
+                            Name = "Admin",
+                            PlayTime = 0u,
+                            PlayerClass = (byte)0,
+                            PositionX = 958870,
+                            PositionY = 272788,
+                            SkillGroup = (byte)0,
+                            St = (byte)99,
+                            Stamina = 0L,
+                            UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        });
                 });
 
             modelBuilder.Entity("QuantumCore.Game.Persistence.Entities.Item", b =>

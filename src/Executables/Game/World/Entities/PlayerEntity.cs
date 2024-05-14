@@ -719,7 +719,7 @@ namespace QuantumCore.Game.World.Entities
             {
                 RemoveItem(item);
                 SendRemoveItem(item.Window, (ushort) item.Position);
-                item.Set(_cacheManager, Guid.Empty, 0, 0).Wait(); // TODO
+                item.Set(_cacheManager, 0, 0, 0).Wait(); // TODO
             }
             else
             {

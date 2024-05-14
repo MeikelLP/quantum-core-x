@@ -3,7 +3,7 @@
 public class ItemInstance
 {
     public Guid Id { get; set; }
-    public Guid PlayerId { get; set; }
+    public uint PlayerId { get; set; }
     public uint ItemId { get; set; }
     public byte Window { get; set; }
     public uint Position { get; set; }

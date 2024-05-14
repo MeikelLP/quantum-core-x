@@ -5,7 +5,7 @@ namespace QuantumCore.API;
 
 public interface IEquipment
 {
-    Guid Owner { get; }
+    uint Owner { get; }
     ItemInstance? Body { get; }
     ItemInstance? Head { get; }
     ItemInstance? Shoes { get; }
