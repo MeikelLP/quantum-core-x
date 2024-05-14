@@ -213,8 +213,8 @@ public class DropProvider : IDropProvider
         var levelDropDelta = (int) (monster.GetPoint(EPoints.Level) + 15 - player.GetPoint(EPoints.Level));
 
         deltaPercentage = monster is {IsStone: false, Rank: >= EEntityRank.Boss}
-            ? _bossPercentageDeltas[MathUtils.MinMax(0, levelDropDelta, _bossPercentageDeltas.Length)]
-            : _mobPercentageDeltas[MathUtils.MinMax(0, levelDropDelta, _mobPercentageDeltas.Length)];
+            ? _bossPercentageDeltas[MathUtils.MinMax(0, levelDropDelta, _bossPercentageDeltas.Length - 1)]
+            : _mobPercentageDeltas[MathUtils.MinMax(0, levelDropDelta, _mobPercentageDeltas.Length - 1)];
         
         if (1 == CoreRandom.GenerateInt32(1, 50001))
             deltaPercentage += 1000;
@@ -281,7 +281,7 @@ public class DropProvider : IDropProvider
             if (DropDebug)
             {
                 var realPercent = percent / range * 100;
-                _logger.LogInformation("Drop chance for {Name} ({MobProtoId}) is {RealPercent}%", 
+                _logger.LogTrace("Drop chance for {Name} ({MobProtoId}) is {RealPercent}%", 
                     monster.Proto.TranslatedName, monster.Proto.Id, realPercent);
             }
                 
@@ -293,6 +293,9 @@ public class DropProvider : IDropProvider
                     _logger.LogWarning("Could not find item proto for {ItemProtoId}", drop.ItemProtoId);
                     continue;
                 }
+                
+                _logger.LogDebug("Monster {Name} ({MobProtoId}) dropped an item group ({Item})", 
+                    monster.Proto.TranslatedName, monster.Proto.Id, itemProto.TranslatedName);
                     
                 var itemInstance = _itemManager.CreateItem(itemProto);
 
@@ -325,7 +328,7 @@ public class DropProvider : IDropProvider
                 if (DropDebug)
                 {
                     var realPercent = percent / range * 100;
-                    _logger.LogInformation("Drop chance for {Name} ({MobProtoId}) is {RealPercent}%", 
+                    _logger.LogTrace("Drop chance for {Name} ({MobProtoId}) is {RealPercent}%", 
                         monster.Proto.TranslatedName, monster.Proto.Id, realPercent);
                 }
                     
@@ -337,6 +340,9 @@ public class DropProvider : IDropProvider
                         _logger.LogWarning("Could not find item proto for {ItemProtoId}", drop.ItemProtoId);
                         continue;
                     }
+                    
+                    _logger.LogDebug("Monster {Name} ({MobProtoId}) dropped an item group ({Item})", 
+                        monster.Proto.TranslatedName, monster.Proto.Id, itemProto.TranslatedName);
                         
                     if ((EItemType) itemProto.Type ==  EItemType.Polymorph)
                     {
@@ -366,7 +372,7 @@ public class DropProvider : IDropProvider
             if (DropDebug)
             {
                 var realPercent = (float) percent / range * 100;
-                _logger.LogInformation("Drop chance for {Name} ({MobProtoId}) is {RealPercent}%",
+                _logger.LogTrace("Drop chance for {Name} ({MobProtoId}) is {RealPercent}%",
                     monster.Proto.TranslatedName, monster.Proto.Id, realPercent);
             }
                 
@@ -376,8 +382,14 @@ public class DropProvider : IDropProvider
                 var itemProto = _itemManager.GetItem(randomDrop?.ItemProtoId ?? 0);
                 if (itemProto is not null)
                 {
+                    _logger.LogDebug("Monster {Name} ({MobProtoId}) dropped an item group ({Item})", 
+                        monster.Proto.TranslatedName, monster.Proto.Id, itemProto.TranslatedName);
                     var itemInstance = _itemManager.CreateItem(itemProto, (byte) randomDrop!.Amount);
                     items.Add(itemInstance);
+                }
+                else
+                {
+                    _logger.LogWarning("Could not find item proto for {ItemProtoId}", randomDrop?.ItemProtoId);
                 }
             }
         }
@@ -399,7 +411,7 @@ public class DropProvider : IDropProvider
                     if (DropDebug)
                     {
                         var realPercent = percent / range * 100;
-                        _logger.LogInformation("Drop chance for {Name} ({MobProtoId}) is {RealPercent}%",
+                        _logger.LogTrace("Drop chance for {Name} ({MobProtoId}) is {RealPercent}%",
                             monster.Proto.TranslatedName, monster.Proto.Id, realPercent);
                     }
                     
@@ -411,6 +423,9 @@ public class DropProvider : IDropProvider
                             _logger.LogWarning("Could not find item proto for {ItemProtoId}", drop.ItemProtoId);
                             continue;
                         }
+                        
+                        _logger.LogDebug("Monster {Name} ({MobProtoId}) dropped an item group ({Item})", 
+                            monster.Proto.TranslatedName, monster.Proto.Id, itemProto.TranslatedName);
                             
                         var itemInstance = _itemManager.CreateItem(itemProto, (byte) drop.Amount);
                         items.Add(itemInstance);
@@ -433,7 +448,7 @@ public class DropProvider : IDropProvider
             if (DropDebug)
             {
                 var realPercent = percent / range * 100;
-                _logger.LogInformation("Drop chance for {Name} ({MobProtoId}) is {RealPercent}%", 
+                _logger.LogTrace("Drop chance for {Name} ({MobProtoId}) is {RealPercent}%", 
                     monster.Proto.TranslatedName, monster.Proto.Id, realPercent);
             }
                 
@@ -445,6 +460,9 @@ public class DropProvider : IDropProvider
                     _logger.LogWarning("Could not find item proto for {ItemProtoId}", drop.ItemProtoId);
                     continue;
                 }
+                
+                _logger.LogDebug("Monster {Name} ({MobProtoId}) dropped an item group ({Item})", 
+                    monster.Proto.TranslatedName, monster.Proto.Id, itemProto.TranslatedName);
                     
                 var itemInstance = _itemManager.CreateItem(itemProto);
                 items.Add(itemInstance);

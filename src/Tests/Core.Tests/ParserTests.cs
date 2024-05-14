@@ -5,7 +5,6 @@ using QuantumCore.API;
 using QuantumCore.API.Game.World;
 using QuantumCore.Game;
 using QuantumCore.Game.Drops;
-using QuantumCore.Game.Services;
 using QuantumCore.Game.World;
 using Xunit;
 
@@ -1206,6 +1205,127 @@ public class ParserTests
                 }
             }
         });
+    }
+
+    [Fact]
+    public async Task MobDropGroup_Kill_InvalidKillDrop()
+    {
+        var input = new ParserUtils.MobDropGroup
+        {
+            Name = "Abc",
+            Fields =
+            {
+                { "Mob", "101" },
+                { "Type", "Kill" },
+                { "Kill_drop", "0" }
+            },
+            Data =
+            {
+                new List<string>() { "1", "10", "1", "0.09" },
+                new List<string>() { "2", "11", "2", "0.05" }
+            }
+        };
+        var itemManager = Substitute.For<IItemManager>();
+        
+        var result = ParserUtils.ParseMobGroup(input, itemManager);
+        
+        result.Should().BeNull();
+    }
+    
+    [Fact]
+    public async Task MobDropGroup_Kill_NoKillDrop()
+    {
+        var input = new ParserUtils.MobDropGroup
+        {
+            Name = "Abc",
+            Fields =
+            {
+                { "Mob", "101" },
+                { "Type", "Kill" },
+            },
+            Data =
+            {
+                new List<string>() { "1", "10", "1", "0.09" },
+                new List<string>() { "2", "11", "2", "0.05" }
+            }
+        };
+        var itemManager = Substitute.For<IItemManager>();
+        
+        var result = ParserUtils.ParseMobGroup(input, itemManager);
+        
+        result.Should().BeNull();
+    }
+    
+    [Fact]
+    public async Task MobDropGroup_Kill_NoMob()
+    {
+        var input = new ParserUtils.MobDropGroup
+        {
+            Name = "Abc",
+            Fields =
+            {
+                { "Type", "Kill" },
+                { "Kill_drop", "10" }
+            },
+            Data =
+            {
+                new List<string>() { "1", "10", "1", "0.09" },
+                new List<string>() { "2", "11", "2", "0.05" }
+            }
+        };
+        var itemManager = Substitute.For<IItemManager>();
+
+        var action = new Action(() => { ParserUtils.ParseMobGroup(input, itemManager); });
+
+        Assert.Throws<MissingRequiredFieldException>(action);
+    }
+    
+    [Fact]
+    public async Task MobDropGroup_Limit_NoLevel()
+    {
+        var input = new ParserUtils.MobDropGroup
+        {
+            Name = "Abc",
+            Fields =
+            {
+                { "Mob", "101" },
+                { "Type", "Limit" },
+            },
+            Data =
+            {
+                new List<string>() { "1", "10", "1", "0.09" },
+                new List<string>() { "2", "11", "2", "0.05" }
+            }
+        };
+        var itemManager = Substitute.For<IItemManager>();
+
+        var action = new Action(() => { ParserUtils.ParseMobGroup(input, itemManager); });
+
+        Assert.Throws<MissingRequiredFieldException>(action);
+    }
+    
+    [Fact]
+    public async Task MobDropGroup_NoType()
+    {
+        var input = new ParserUtils.MobDropGroup
+        {
+            Name = "Abc",
+            Fields =
+            {
+                { "Mob", "101" },
+                { "Kill_drop", "10" }
+            },
+            Data =
+            {
+                new List<string>() { "1", "10", "1", "0.09" },
+                new List<string>() { "2", "11", "2", "0.05" }
+            }
+        };
+        var itemManager = Substitute.For<IItemManager>();
+
+        var action = new Action(() => { ParserUtils.ParseMobGroup(input, itemManager); });
+
+        Assert.Throws<MissingRequiredFieldException>(action);
     }
     
     [Fact]

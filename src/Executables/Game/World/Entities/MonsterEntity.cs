@@ -255,7 +255,7 @@ namespace QuantumCore.Game.World.Entities
             drops.AddRange(_dropProvider.CalculateEtcDropItems(this, delta, range));
             
             // todo:
-            // - metin stone drops
+            // - metin stone drops (only stones +0,+1,+2.., no items, those are already in the other drop lists)
             // - horse riding skill drops
             // - quest item drops
             // - event item drops

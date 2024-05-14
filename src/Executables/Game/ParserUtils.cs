@@ -1,7 +1,6 @@
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Globalization;
-using System.Text;
 using System.Text.RegularExpressions;
 using EnumsNET;
 using QuantumCore.API;
@@ -225,40 +224,6 @@ internal static partial class ParserUtils
         return line.Split(' ', StringSplitOptions.RemoveEmptyEntries);
     }
     
-    [DebuggerDisplay("{Fields.Count} Fields - {Data.Count} Drops")]
-    internal class MobDropGroup
-    {
-        public string Name { get; set; }
-        public Dictionary<string, string> Fields { get; } = new(StringComparer.InvariantCultureIgnoreCase);
-        public List<List<string>> Data { get; } = new List<List<string>>();
-        
-        public T? GetField<T>(string key)
-        {
-            var foundKey = Fields.Keys.FirstOrDefault(k => k.Equals(key, StringComparison.InvariantCultureIgnoreCase));
-            if (foundKey == null)
-            {
-                return default;
-            }
-            var value = Fields[foundKey];
-            return (T) Convert.ChangeType(value, typeof(T));
-        }
-
-        public override string ToString()
-        {
-            var result = $"Group {Name}\n{{\n";
-            foreach (var field in Fields)
-            {
-                result += $"\t{field.Key}\t{field.Value}\n";
-            }
-            foreach (var datum in Data)
-            {
-                result += $"\t{string.Join("\t", datum)}\n";
-            }
-            result += "}\n";
-            return result;
-        }
-    }
-    
     public static async Task<List<MobDropGroup>> GetDropsForGroupBlocks(StreamReader sr)
     {
         var groups = new List<MobDropGroup>();
@@ -299,10 +264,6 @@ internal static partial class ParserUtils
 
         if (currentMobDropGroup != null)
         {
-            if (currentMobDropGroup.Fields.Keys.Any(k => StartsWithNumberRegex().IsMatch(k)))
-            {
-                throw new Exception("Invalid group format");
-            }
             groups.Add(currentMobDropGroup);
         }
         
@@ -322,14 +283,13 @@ internal static partial class ParserUtils
         var type = group.GetField<string>("Type");
         if (type == default)
         {
-            // todo: custom exceptions
-            throw new InvalidOperationException("Type not found in group");
+            throw new MissingRequiredFieldException("Type");
         }
         
-        var mobId = group.GetField<uint>("Mob");
-        if (mobId == default)
+        var monsterProtoId = group.GetField<uint>("Mob");
+        if (monsterProtoId == default)
         {
-            throw new InvalidOperationException("Mob not found in group");
+            throw new MissingRequiredFieldException("Mob");
         }
 
         if (type.Equals("Kill", INV_CUL))
@@ -346,7 +306,7 @@ internal static partial class ParserUtils
             levelLimit = group.GetField<uint>("Level_limit");
             if (levelLimit == default)
             {
-                throw new InvalidOperationException("Level_limit not found in group when type is limit");
+                throw new MissingRequiredFieldException("Level_limit");
             }
         }
         else
@@ -363,36 +323,36 @@ internal static partial class ParserUtils
         {
             var entry = new MonsterItemGroup
             {
-                MonsterProtoId = mobId,
+                MonsterProtoId = monsterProtoId,
                 MinKillCount = minKillCount,
             };
 
             foreach (var dropData in group.Data)
             {
-                uint itemProtoId = uint.TryParse(dropData[1], InvNum, out var id) ? id : 0;
+                var itemProtoId = uint.TryParse(dropData[1], InvNum, out var id) ? id : 0;
                 if (itemProtoId < 1)
                 {
                     var item = itemManager.GetItemByName(dropData[1]); // Some entries are the names instead of the id
                     if (item == null)
                     {
-                        throw new InvalidOperationException("Invalid item proto id");
+                        throw new MissingRequiredFieldException("ItemProtoId");
                     }
                     itemProtoId = item.Id;
                 }
                 
-                uint count = uint.Parse(dropData[2], InvNum);
+                var count = uint.Parse(dropData[2], InvNum);
                 if (count < 1)
                 {
-                    throw new InvalidOperationException("Invalid count");
+                    throw new MissingRequiredFieldException("Count");
                 }
                 
-                uint chance = uint.TryParse(dropData[3], InvNum, out var ch) ? ch : 0;
+                var chance = uint.TryParse(dropData[3], InvNum, out var ch) ? ch : 0;
                 if (chance <= 0)
                 {
-                    throw new InvalidOperationException("Invalid chance");
+                    throw new MissingRequiredFieldException("Chance");
                 }
                 
-                int rareChance = int.Parse(dropData[4], InvNum);
+                var rareChance = int.Parse(dropData[4], InvNum);
                 rareChance = MathUtils.MinMax(0, rareChance, 100);
                 
                 entry.AddDrop(itemProtoId, count, chance, (uint) rareChance);
@@ -406,27 +366,27 @@ internal static partial class ParserUtils
         {
             var entry = new DropItemGroup
             {
-                MonsterProtoId = mobId,
+                MonsterProtoId = monsterProtoId,
             };
 
             foreach (var dropData in group.Data)
             {
-                uint itemProtoId = uint.Parse(dropData[1], InvNum);
+                var itemProtoId = uint.Parse(dropData[1], InvNum);
                 if (itemProtoId < 1)
                 {
-                    throw new InvalidOperationException("Invalid item id");
+                    throw new MissingRequiredFieldException("ItemProtoId");
                 }
                 
-                uint count = uint.Parse(dropData[2], InvNum);
+                var count = uint.Parse(dropData[2], InvNum);
                 if (count < 1)
                 {
-                    throw new InvalidOperationException("Invalid count");
+                    throw new MissingRequiredFieldException("Count");
                 }
                 
-                float chance = float.Parse(dropData[3], InvNum);
+                var chance = float.Parse(dropData[3], InvNum);
                 if (chance <= 0)
                 {
-                    throw new InvalidOperationException("Invalid chance");
+                    throw new MissingRequiredFieldException("Chance");
                 }
                 
                 chance *= 10000.0f; // to make it 0-1000
@@ -452,21 +412,21 @@ internal static partial class ParserUtils
                     var item = itemManager.GetItemByName(dropData[1]); // Some entries are the names instead of the id
                     if (item == null)
                     {
-                        throw new InvalidOperationException("Invalid item proto id");
+                        throw new MissingRequiredFieldException("ItemProtoId");
                     }
                     itemProtoId = item.Id;
                 }
                 
-                uint count = uint.Parse(dropData[2], InvNum);
+                var count = uint.Parse(dropData[2], InvNum);
                 if (count < 1)
                 {
-                    throw new InvalidOperationException("Invalid count");
+                    throw new MissingRequiredFieldException("Count");
                 }
                 
-                float chance = float.Parse(dropData[3], InvNum);
+                var chance = float.Parse(dropData[3], InvNum);
                 if (chance <= 0)
                 {
-                    throw new InvalidOperationException("Invalid chance");
+                    throw new MissingRequiredFieldException("Chance");
                 }
                 
                 chance *= 10000.0f; // to make it 0-1000
@@ -478,6 +438,40 @@ internal static partial class ParserUtils
         }
         
         return null;
+    }
+    
+    [DebuggerDisplay("{Fields.Count} Fields - {Data.Count} Drops")]
+    internal class MobDropGroup
+    {
+        public string Name { get; set; }
+        public Dictionary<string, string> Fields { get; } = new(StringComparer.InvariantCultureIgnoreCase);
+        public List<List<string>> Data { get; } = new();
+        
+        public T? GetField<T>(string key)
+        {
+            var foundKey = Fields.Keys.FirstOrDefault(k => k.Equals(key, StringComparison.InvariantCultureIgnoreCase));
+            if (foundKey == null)
+            {
+                return default;
+            }
+            var value = Fields[foundKey];
+            return (T) Convert.ChangeType(value, typeof(T));
+        }
+
+        public override string ToString()
+        {
+            var result = $"Group {Name}\n{{\n";
+            foreach (var field in Fields)
+            {
+                result += $"\t{field.Key}\t{field.Value}\n";
+            }
+            foreach (var datum in Data)
+            {
+                result += $"\t{string.Join("\t", datum)}\n";
+            }
+            result += "}\n";
+            return result;
+        }
     }
 
     [GeneratedRegex("(?: {2,}|\\t+)")]
