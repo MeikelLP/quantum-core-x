@@ -683,7 +683,7 @@ namespace QuantumCore.Game.World.Entities
                 case EPoints.StatusPoints:
                     return Player.AvailableStatusPoints;
                 case EPoints.PlayTime:
-                    return Player.PlayTime == 0 ? 0 : (uint) Player.PlayTime / 60000; // milliseconds to minutes
+                    return (uint) TimeSpan.FromMilliseconds(Player.PlayTime).TotalMinutes;
                 default:
                     if (Enum.GetValues<EPoints>().Contains(point))
                     {
