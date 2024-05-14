@@ -275,8 +275,8 @@ namespace QuantumCore.Game.Persistence.Migrations.Postgresql
                         .HasMaxLength(24)
                         .HasColumnType("character varying(24)");
 
-                    b.Property<long>("PlayTime")
-                        .HasColumnType("bigint");
+                    b.Property<decimal>("PlayTime")
+                        .HasColumnType("numeric(20,0)");
 
                     b.Property<byte>("PlayerClass")
                         .HasColumnType("smallint");

@@ -13,7 +13,7 @@ public static class PaketExtensions
             Name = player.Name,
             Class = player.PlayerClass,
             Level = player.Level,
-            Playtime = player.PlayTime,
+            Playtime = (uint) TimeSpan.FromMilliseconds(player.PlayTime).TotalMinutes,
             St = player.St,
             Ht = player.Ht,
             Dx = player.Dx,

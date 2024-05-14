@@ -14,14 +14,13 @@ namespace QuantumCore.Game.Commands
             _world = world;
         }
 
-        public Task ExecuteAsync(CommandContext context)
+        public async Task ExecuteAsync(CommandContext context)
         {
             context.Player.SendChatInfo("End the game. Please wait.");
             context.Player.SendChatCommand("quit");
-            _world.DespawnPlayerAsync(context.Player);
+            await context.Player.CalculatePlayedTimeAsync();
+            await _world.DespawnPlayerAsync(context.Player);
             context.Player.Disconnect();
-
-            return Task.CompletedTask;
         }
     }
 }
