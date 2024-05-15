@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using AutoBogus;
 using Bogus;
 using Core.Tests.Extensions;
@@ -86,6 +87,7 @@ public class CommandTests : IAsyncLifetime
     private readonly IPlayerEntity _player;
     private readonly IItemManager _itemManager;
     private readonly Faker<PlayerData> _playerDataFaker;
+    private readonly IGameServer _gameServer;
 
     public CommandTests(ITestOutputHelper testOutputHelper)
     {
@@ -158,6 +160,7 @@ public class CommandTests : IAsyncLifetime
             .AddSingleton<IGameConnection>(_ => new MockedGameConnection())
             .AddSingleton<IPlayerEntity, PlayerEntity>()
             .AddSingleton(_ => _playerDataFaker.Generate())
+            .AddSingleton(Substitute.For<IGameServer>())
             .BuildServiceProvider();
         _itemManager = _services.GetRequiredService<IItemManager>();
         _commandManager = _services.GetRequiredService<ICommandManager>();
@@ -166,6 +169,7 @@ public class CommandTests : IAsyncLifetime
         _player = _services.GetRequiredService<IPlayerEntity>();
         _player.Player.PlayTime = 0;
         _connection.Player = _player;
+        _gameServer = _services.GetRequiredService<IGameServer>();
     }
 
     public async Task InitializeAsync()
@@ -619,6 +623,20 @@ public class CommandTests : IAsyncLifetime
         {
             Message = "mall test",
             MessageType = ChatMessageTypes.Command
+        }, cfg => cfg.Including(x => x.Message));
+    }
+    
+    [Fact]
+    public async Task UserCommand()
+    {
+        _gameServer.Connections.Returns([_connection]);
+        
+        await _commandManager.Handle(_connection, "/user");
+
+        ((MockedGameConnection) _connection).SentMessages.Should().ContainEquivalentOf(new ChatOutcoming
+        {
+            Message = $"Lv{_player.GetPoint(EPoints.Level)} {_player.Name}",
+            MessageType = ChatMessageTypes.Info
         }, cfg => cfg.Including(x => x.Message));
     }
 }
