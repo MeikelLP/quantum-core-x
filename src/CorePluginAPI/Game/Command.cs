@@ -1,6 +1,6 @@
 ﻿namespace QuantumCore.API.Game
 {
-    [AttributeUsage(AttributeTargets.Class)]
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
     public class CommandAttribute : Attribute
     {
         public CommandAttribute(string name, string description)
@@ -8,17 +8,9 @@
             Name = name;
             Description = description;
         }
-        
-        public CommandAttribute(string name, string description, params string[] alias)
-        {
-            Name = name;
-            Description = description;
-            Alias = alias.ToList();
-        }
 
         public string Name { get; }
         public string Description { get; }
-        public List<string> Alias { get; set; } = [];
     }
 
     [AttributeUsage(AttributeTargets.Method)]

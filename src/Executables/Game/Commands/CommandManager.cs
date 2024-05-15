@@ -51,18 +51,32 @@ namespace QuantumCore.Game.Commands
 
             foreach (var type in types)
             {
-                var cmdAttr = type.GetCustomAttribute<CommandAttribute>();
+                var cmdAttrs = type.GetCustomAttributes<CommandAttribute>().ToList();
+                if (cmdAttrs.Count > 0)
+                {
+                    foreach (var cmdAttr in cmdAttrs)
+                    {
+                        ProcessCommandAttribute(type, cmdAttr);
+                    }
+                }
+                else
+                {
+                    _logger.LogWarning("Command {Type} does not have a CommandAttribute", type.Name);
+                }
+            }
+
+            void ProcessCommandAttribute(Type type, CommandAttribute? cmdAttr)
+            {
                 if (cmdAttr is null)
                 {
                     _logger.LogWarning(
                         "Command handler {Type} is implementing {HandlerInterface} but is missing a {AttributeName}",
                         type.Name, nameof(ICommandHandler), nameof(CommandAttribute));
-                    continue;
+                    return;
                 }
 
                 var cmd = cmdAttr.Name;
                 var desc = cmdAttr.Description;
-                var validAlias = cmdAttr.Alias;
                 var bypass = type.GetCustomAttribute<CommandNoPermissionAttribute>() is not null;
                 Type? optionsType = null;
                 var intf = type.GetInterfaces().FirstOrDefault(x =>
@@ -73,13 +87,6 @@ namespace QuantumCore.Game.Commands
                 }
 
                 _commandHandlers.Add(cmd, new CommandDescriptor(type, cmd, desc, optionsType, bypass));
-
-                if (validAlias.Count <= 0) continue;
-                
-                foreach (var alias in validAlias)
-                {
-                    _commandHandlers.Add(alias, new CommandDescriptor(type, cmd, desc, optionsType, bypass));
-                }
             }
         }
 
