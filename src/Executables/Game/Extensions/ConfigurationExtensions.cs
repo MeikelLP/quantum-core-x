@@ -6,6 +6,20 @@ public static class ConfigurationExtensions
 {
     public static void AddQuantumCoreDefaults(this IConfigurationBuilder config)
     {
+        // Empire Start Locations
+        config.AddInMemoryCollection(new Dictionary<string, string?>
+        {
+            {"game:empire:0:x", "0"},        // Ignored
+            {"game:empire:0:y", "0"},
+            {"game:empire:1:x", "475000"},   // Red
+            {"game:empire:1:y", "966100"},
+            {"game:empire:2:x", "60000"},    // Yellow
+            {"game:empire:2:y", "156000"},
+            {"game:empire:3:x", "963400"},   // Blue
+            {"game:empire:3:y", "278200"},
+        });
+        
+        // Character Stats
         config.AddInMemoryCollection(new Dictionary<string, string?>
         {
             {"job:0:Id", "0"},
