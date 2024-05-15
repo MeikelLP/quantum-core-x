@@ -8,9 +8,17 @@
             Name = name;
             Description = description;
         }
+        
+        public CommandAttribute(string name, string description, params string[] alias)
+        {
+            Name = name;
+            Description = description;
+            Alias = alias.ToList();
+        }
 
         public string Name { get; }
         public string Description { get; }
+        public List<string> Alias { get; set; } = [];
     }
 
     [AttributeUsage(AttributeTargets.Method)]

@@ -62,6 +62,7 @@ namespace QuantumCore.Game.Commands
 
                 var cmd = cmdAttr.Name;
                 var desc = cmdAttr.Description;
+                var validAlias = cmdAttr.Alias;
                 var bypass = type.GetCustomAttribute<CommandNoPermissionAttribute>() is not null;
                 Type? optionsType = null;
                 var intf = type.GetInterfaces().FirstOrDefault(x =>
@@ -72,6 +73,13 @@ namespace QuantumCore.Game.Commands
                 }
 
                 _commandHandlers.Add(cmd, new CommandDescriptor(type, cmd, desc, optionsType, bypass));
+
+                if (validAlias.Count <= 0) continue;
+                
+                foreach (var alias in validAlias)
+                {
+                    _commandHandlers.Add(alias, new CommandDescriptor(type, cmd, desc, optionsType, bypass));
+                }
             }
         }
 
