@@ -92,6 +92,7 @@ public class CommandTests : IAsyncLifetime
     public CommandTests(ITestOutputHelper testOutputHelper)
     {
         _playerDataFaker = new AutoFaker<PlayerData>()
+            .RuleFor(x => x.Name, r => r.Name.FirstName()) // Mostly due to command param handling
             .RuleFor(x => x.Level, _ => (byte) 1)
             .RuleFor(x => x.St, _ => (byte) 1)
             .RuleFor(x => x.Ht, _ => (byte) 1)
@@ -99,7 +100,8 @@ public class CommandTests : IAsyncLifetime
             .RuleFor(x => x.Gold, _ => (uint) 0)
             .RuleFor(x => x.Experience, _ => (uint) 0)
             .RuleFor(x => x.PositionX, _ => (int) (10 * Map.MapUnit))
-            .RuleFor(x => x.PositionY, _ => (int) (26 * Map.MapUnit));
+            .RuleFor(x => x.PositionY, _ => (int) (26 * Map.MapUnit))
+            .RuleFor(x => x.PlayTime, _ => 0u);
         var monsterManagerMock = Substitute.For<IMonsterManager>();
         monsterManagerMock.GetMonster(Arg.Any<uint>()).Returns(callerInfo =>
             new AutoFaker<MonsterData>().RuleFor(x => x.Id, _ => callerInfo.Arg<uint>()).Generate());
@@ -631,6 +633,55 @@ public class CommandTests : IAsyncLifetime
         {
             Message = $"Lv{_player.GetPoint(EPoints.Level)} {_player.Name}",
             MessageType = ChatMessageTypes.Info
+        }, cfg => cfg.Including(x => x.Message));
+    }
+
+    [Fact]
+    public async Task AdvanceCommand_NoLevel()
+    {
+        _player.SetPoint(EPoints.Level, 1);
+        
+        await _commandManager.Handle(_connection, $"/a $self");
+        
+        _player.GetPoint(EPoints.Level).Should().Be(2);
+        
+        ((MockedGameConnection) _connection).SentMessages.Should().ContainEquivalentOf(new ChatOutcoming
+        {
+            Message = "You have advanced to level 2"
+        }, cfg => cfg.Including(x => x.Message));
+    }
+    
+    [Fact]
+    public async Task AdvanceCommand_LevelSpecified()
+    {
+        _player.SetPoint(EPoints.Level, 1);
+        
+        await _commandManager.Handle(_connection, $"/a $self 10");
+        
+        _player.GetPoint(EPoints.Level).Should().Be(11);
+        
+        ((MockedGameConnection) _connection).SentMessages.Should().ContainEquivalentOf(new ChatOutcoming
+        {
+            Message = "You have advanced to level 11"
+        }, cfg => cfg.Including(x => x.Message));
+    }
+    
+    [Fact]
+    public async Task AdvanceCommand_OtherTarget()
+    {
+        var player2 = ActivatorUtilities.CreateInstance<PlayerEntity>(_services, _playerDataFaker.Generate());
+        player2.SetPoint(EPoints.Level, 1);
+        
+        var world = await PrepareWorldAsync();
+        world.SpawnEntity(player2);
+        
+        await _commandManager.Handle(_connection, $"/a {player2.Player.Name} 4");
+        
+        player2.GetPoint(EPoints.Level).Should().Be(5);
+        
+        ((MockedGameConnection) _connection).SentMessages.Should().ContainEquivalentOf(new ChatOutcoming
+        {
+            Message = "You have advanced to level 5"
         }, cfg => cfg.Including(x => x.Message));
     }
 }

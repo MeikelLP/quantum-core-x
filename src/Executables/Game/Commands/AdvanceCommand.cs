@@ -30,10 +30,8 @@ public class AdvanceCommand : ICommandHandler<AdvanceCommandOptions>
         {
             if (context.Arguments.Level <= 0)
             {
-                context.Player.SendChatInfo("Level must be greater than 0");
-                return;
+                context.Arguments.Level = 1;
             }
-            
             
             // todo: cap level
             target.SetPoint(EPoints.Level, (uint) (target.GetPoint(EPoints.Level) + context.Arguments.Level));
