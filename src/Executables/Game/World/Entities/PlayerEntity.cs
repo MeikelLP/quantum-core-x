@@ -348,10 +348,8 @@ namespace QuantumCore.Game.World.Entities
 
             if (exp >= needed)
             {
-                // todo level up animation
-
-                AddPoint(EPoints.Level, 1);
                 SetPoint(EPoints.Experience, exp - needed);
+                LevelUp();
 
                 if (!CheckLevelUp())
                 {
@@ -363,6 +361,29 @@ namespace QuantumCore.Game.World.Entities
 
             GiveStatusPoints();
             return false;
+        }
+
+        private void LevelUp(int level = 1)
+        {
+            if (Player.Level + level > _experienceManager.MaxLevel)
+            {
+                return;
+            }
+            
+            Player.Level = (byte) (Player.Level + level);
+            
+            // todo: animation
+            
+            foreach (var entity in NearbyEntities)
+            {
+                if (entity is IPlayerEntity other)
+                {
+                    SendCharacterAdditional(other.Connection);
+                }
+            }
+
+            GiveStatusPoints();
+            SendPoints();
         }
 
         public uint CalculateAttackDamage(uint baseDamage)
@@ -471,16 +492,7 @@ namespace QuantumCore.Game.World.Entities
             switch (point)
             {
                 case EPoints.Level:
-                    Player.Level = (byte) (Player.Level + value);
-                    foreach (var entity in NearbyEntities)
-                    {
-                        if (entity is IPlayerEntity other)
-                        {
-                            SendCharacterAdditional(other.Connection);
-                        }
-                    }
-
-                    GiveStatusPoints();
+                    LevelUp(value);
                     break;
                 case EPoints.Experience:
                     if (_experienceManager.GetNeededExperience((byte) GetPoint(EPoints.Level)) == 0)
@@ -593,16 +605,15 @@ namespace QuantumCore.Game.World.Entities
             switch (point)
             {
                 case EPoints.Level:
-                    Player.Level = (byte) value;
-                    foreach (var entity in NearbyEntities)
+                    var currentLevel = GetPoint(EPoints.Level);
+                    if (value > currentLevel)
                     {
-                        if (entity is IPlayerEntity other)
-                        {
-                            SendCharacterAdditional(other.Connection);
-                        }
+                        LevelUp((int) (value - currentLevel));
                     }
-
-                    GiveStatusPoints();
+                    else
+                    {
+                        LevelUp(-(int) (currentLevel - value));
+                    }
                     break;
                 case EPoints.Experience:
                     Player.Experience = value;

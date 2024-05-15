@@ -107,6 +107,7 @@ public class CommandTests : IAsyncLifetime
             new AutoFaker<MonsterData>().RuleFor(x => x.Id, _ => callerInfo.Arg<uint>()).Generate());
         var experienceManagerMock = Substitute.For<IExperienceManager>();
         experienceManagerMock.GetNeededExperience(Arg.Any<byte>()).Returns(1000u);
+        experienceManagerMock.MaxLevel.Returns((byte)100);
         var jobManagerMock = Substitute.For<IJobManager>();
         jobManagerMock.Get(Arg.Any<byte>()).Returns(new Job());
         var itemManagerMock = Substitute.For<IItemManager>();

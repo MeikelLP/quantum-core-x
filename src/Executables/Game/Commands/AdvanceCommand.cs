@@ -32,10 +32,8 @@ public class AdvanceCommand : ICommandHandler<AdvanceCommandOptions>
             {
                 context.Arguments.Level = 1;
             }
-            
-            // todo: cap level
-            target.SetPoint(EPoints.Level, (uint) (target.GetPoint(EPoints.Level) + context.Arguments.Level));
-            target.SendPoints();
+
+            target.AddPoint(EPoints.Level, context.Arguments.Level);
             target.SendChatInfo($"You have advanced to level {target.GetPoint(EPoints.Level)}");
         }
     }
