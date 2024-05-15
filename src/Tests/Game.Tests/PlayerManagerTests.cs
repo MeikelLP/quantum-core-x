@@ -1,13 +1,16 @@
-﻿using FluentAssertions;
+﻿using System.Drawing;
+using FluentAssertions;
 using Game.Caching;
 using Game.Tests.Fixtures;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using QuantumCore;
 using QuantumCore.API.Core.Models;
 using QuantumCore.Caching;
+using QuantumCore.Core.Utils;
 using QuantumCore.Game;
 using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Persistence;
@@ -24,6 +27,7 @@ public class PlayerManagerTests : IClassFixture<RedisFixture>, IClassFixture<Dat
     private readonly ICachePlayerRepository _cachePlayer;
     private readonly AsyncServiceScope _scope;
     private readonly MySqlGameDbContext _db;
+    private readonly GameOptions _gameOptions;
 
     public PlayerManagerTests(ITestOutputHelper outputHelper, RedisFixture redisFixture,
         DatabaseFixture databaseFixture)
@@ -37,7 +41,15 @@ public class PlayerManagerTests : IClassFixture<RedisFixture>, IClassFixture<Dat
             .AddSingleton<IConfiguration>(_ => new ConfigurationBuilder()
                 .AddInMemoryCollection(new Dictionary<string, string?>
                 {
-                    {"job:0:Ht", "4"}
+                    {"job:0:Ht", "4"},
+                    {"game:empire:0:x", "0"},
+                    {"game:empire:0:y", "0"},
+                    {"game:empire:1:x", "10"},
+                    {"game:empire:1:y", "15"},
+                    {"game:empire:2:x", "20"},
+                    {"game:empire:2:y", "25"},
+                    {"game:empire:3:x", "30"},
+                    {"game:empire:3:y", "35"},
                 })
                 .Build())
             .AddGameServices()
@@ -54,6 +66,7 @@ public class PlayerManagerTests : IClassFixture<RedisFixture>, IClassFixture<Dat
         _cachePlayer = services.GetRequiredService<ICachePlayerRepository>();
         _scope = services.CreateAsyncScope();
         _db = _scope.ServiceProvider.GetRequiredService<MySqlGameDbContext>();
+        _gameOptions = services.GetRequiredService<IOptions<GameOptions>>().Value;
     }
 
     public Task InitializeAsync()
@@ -73,22 +86,25 @@ public class PlayerManagerTests : IClassFixture<RedisFixture>, IClassFixture<Dat
         await _scope.DisposeAsync();
     }
 
-    [Fact]
-    public async Task CreateCharacter()
+    [Theory]
+    [InlineData(1)]
+    [InlineData(2)]
+    [InlineData(3)]
+    public async Task CreateCharacter(byte empire)
     {
         var accountId = Guid.NewGuid();
-        await _cachePlayer.SetTempEmpireAsync(accountId, 2);
+        await _cachePlayer.SetTempEmpireAsync(accountId, empire);
         var player = await _playerManager.CreateAsync(accountId, "Testificate", 0, 1);
-
+        
         player.Should().BeEquivalentTo(new PlayerData
         {
             AccountId = accountId,
             Name = "Testificate",
             PlayerClass = 0,
-            Empire = 2,
+            Empire = empire,
             Ht = 4,
-            PositionX = 958870,
-            PositionY = 272788
+            PositionX = _gameOptions.Empire[empire].X,
+            PositionY = _gameOptions.Empire[empire].Y
         }, cfg => cfg.Excluding(x => x.Id));
         player.Id.Should().NotBe(0);
 
@@ -155,27 +171,28 @@ public class PlayerManagerTests : IClassFixture<RedisFixture>, IClassFixture<Dat
     [Fact]
     public async Task GetPlayerByAccountIdAndSlot()
     {
+        byte empire = 3;
         var accountId = Guid.NewGuid();
         var input1 = new PlayerData
         {
             Name = "1234",
             AccountId = accountId,
-            PositionX = 958870,
-            PositionY = 272788,
+            PositionX = _gameOptions.Empire[empire].X,
+            PositionY = _gameOptions.Empire[empire].Y,
             Ht = 4,
-            Empire = 2
+            Empire = empire
         };
         var input2 = new PlayerData
         {
             Name = "12345",
             AccountId = accountId,
-            PositionX = 958870,
-            PositionY = 272788,
+            PositionX = _gameOptions.Empire[empire].X,
+            PositionY = _gameOptions.Empire[empire].Y,
             Ht = 4,
-            Empire = 2,
+            Empire = empire,
             Slot = 1
         };
-        await _cachePlayer.SetTempEmpireAsync(accountId, 2);
+        await _cachePlayer.SetTempEmpireAsync(accountId, empire);
         await _playerManager.CreateAsync(accountId, input1.Name, 0, 0);
         await _playerManager.CreateAsync(accountId, input2.Name, 0, 0);
         var output1 = await _playerManager.GetPlayer(accountId, 0);
