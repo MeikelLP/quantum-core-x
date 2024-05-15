@@ -370,6 +370,9 @@ namespace QuantumCore.Game.World.Entities
                 return;
             }
             
+            AddPoint(EPoints.Skill, level);
+            AddPoint(EPoints.SubSkill, level < 10 ? 0 : level - Math.Max((int)Player.Level, 9));
+            
             Player.Level = (byte) (Player.Level + level);
             
             // todo: animation
