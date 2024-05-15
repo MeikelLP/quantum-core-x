@@ -1,10 +1,12 @@
-﻿using FluentAssertions;
+﻿using System.Drawing;
+using FluentAssertions;
 using Game.Caching;
 using Game.Tests.Fixtures;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using QuantumCore;
 using QuantumCore.API.Core.Models;
 using QuantumCore.Caching;
@@ -25,7 +27,7 @@ public class PlayerManagerTests : IClassFixture<RedisFixture>, IClassFixture<Dat
     private readonly ICachePlayerRepository _cachePlayer;
     private readonly AsyncServiceScope _scope;
     private readonly MySqlGameDbContext _db;
-    private readonly IList<Coordinate> _empireStartCoordinates;
+    private readonly GameOptions _gameOptions;
 
     public PlayerManagerTests(ITestOutputHelper outputHelper, RedisFixture redisFixture,
         DatabaseFixture databaseFixture)
@@ -40,12 +42,14 @@ public class PlayerManagerTests : IClassFixture<RedisFixture>, IClassFixture<Dat
                 .AddInMemoryCollection(new Dictionary<string, string?>
                 {
                     {"job:0:Ht", "4"},
-                    {"empire:0:x", "10"},
-                    {"empire:0:y", "15"},
-                    {"empire:1:x", "20"},
-                    {"empire:1:y", "25"},
-                    {"empire:2:x", "30"},
-                    {"empire:2:y", "35"},
+                    {"game:empire:0:x", "0"},
+                    {"game:empire:0:y", "0"},
+                    {"game:empire:1:x", "10"},
+                    {"game:empire:1:y", "15"},
+                    {"game:empire:2:x", "20"},
+                    {"game:empire:2:y", "25"},
+                    {"game:empire:3:x", "30"},
+                    {"game:empire:3:y", "35"},
                 })
                 .Build())
             .AddGameServices()
@@ -62,7 +66,7 @@ public class PlayerManagerTests : IClassFixture<RedisFixture>, IClassFixture<Dat
         _cachePlayer = services.GetRequiredService<ICachePlayerRepository>();
         _scope = services.CreateAsyncScope();
         _db = _scope.ServiceProvider.GetRequiredService<MySqlGameDbContext>();
-        _empireStartCoordinates = services.GetRequiredService<IConfiguration>().GetSection("empire").Get<List<Coordinate>>()!;
+        _gameOptions = services.GetRequiredService<IOptions<GameOptions>>().Value;
     }
 
     public Task InitializeAsync()
@@ -99,8 +103,8 @@ public class PlayerManagerTests : IClassFixture<RedisFixture>, IClassFixture<Dat
             PlayerClass = 0,
             Empire = empire,
             Ht = 4,
-            PositionX = _empireStartCoordinates[empire - 1].X,
-            PositionY = _empireStartCoordinates[empire - 1].Y
+            PositionX = _gameOptions.Empire[empire].X,
+            PositionY = _gameOptions.Empire[empire].Y
         }, cfg => cfg.Excluding(x => x.Id));
         player.Id.Should().NotBe(0);
 
@@ -173,8 +177,8 @@ public class PlayerManagerTests : IClassFixture<RedisFixture>, IClassFixture<Dat
         {
             Name = "1234",
             AccountId = accountId,
-            PositionX = _empireStartCoordinates[empire - 1].X,
-            PositionY = _empireStartCoordinates[empire - 1].Y,
+            PositionX = _gameOptions.Empire[empire].X,
+            PositionY = _gameOptions.Empire[empire].Y,
             Ht = 4,
             Empire = empire
         };
@@ -182,8 +186,8 @@ public class PlayerManagerTests : IClassFixture<RedisFixture>, IClassFixture<Dat
         {
             Name = "12345",
             AccountId = accountId,
-            PositionX = _empireStartCoordinates[empire - 1].X,
-            PositionY = _empireStartCoordinates[empire - 1].Y,
+            PositionX = _gameOptions.Empire[empire].X,
+            PositionY = _gameOptions.Empire[empire].Y,
             Ht = 4,
             Empire = empire,
             Slot = 1

@@ -9,12 +9,14 @@ public static class ConfigurationExtensions
         // Empire Start Locations
         config.AddInMemoryCollection(new Dictionary<string, string?>
         {
-            {"empire:0:x", "475000"}, // Red
-            {"empire:0:y", "966100"},
-            {"empire:1:x", "60000"}, // Yellow
-            {"empire:1:y", "156000"},
-            {"empire:2:x", "963400"}, // Blue
-            {"empire:2:y", "278200"},
+            {"game:empire:0:x", "0"},        // Ignored
+            {"game:empire:0:y", "0"},
+            {"game:empire:1:x", "475000"},   // Red
+            {"game:empire:1:y", "966100"},
+            {"game:empire:2:x", "60000"},    // Yellow
+            {"game:empire:2:y", "156000"},
+            {"game:empire:3:x", "963400"},   // Blue
+            {"game:empire:3:y", "278200"},
         });
         
         // Character Stats
