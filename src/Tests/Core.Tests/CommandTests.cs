@@ -145,7 +145,13 @@ public class CommandTests : IAsyncLifetime
                 .AddInMemoryCollection(new Dictionary<string, string?>
                 {
                     {"maps:0", "map_a2"},
-                    {"maps:1", "map_b2"}
+                    {"maps:1", "map_b2"},
+                    {"empire:0:x", "10"},
+                    {"empire:0:y", "15"},
+                    {"empire:1:x", "20"},
+                    {"empire:1:y", "25"},
+                    {"empire:2:x", "30"},
+                    {"empire:2:y", "35"},
                 })
                 .Build())
             .AddSingleton(Substitute.For<IDbPlayerRepository>())

@@ -80,7 +80,7 @@ namespace QuantumCore.Game.PacketHandlers
             }
 
             // When there are no characters belonging to the account, the empire status is stored in the cache.
-            byte empire = 0;
+            byte empire = 1;
             if (charactersFromCacheOrDb.Length > 0)
             {
                 empire = charactersFromCacheOrDb[0].Empire;

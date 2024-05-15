@@ -1,6 +1,8 @@
 ﻿using Game.Caching;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API.Core.Models;
+using QuantumCore.Core.Utils;
 using QuantumCore.Game.Persistence;
 using QuantumCore.Game.PlayerUtils;
 
@@ -12,14 +14,17 @@ public class PlayerManager : IPlayerManager
     private readonly ICachePlayerRepository _cachePlayerRepository;
     private readonly ILogger<PlayerManager> _logger;
     private readonly IJobManager _jobManager;
-
+    private readonly IList<Coordinate> _empireStartCoordinates;
+    
     public PlayerManager(IDbPlayerRepository dbPlayerRepository, ICachePlayerRepository cachePlayerRepository,
-        ILogger<PlayerManager> logger, IJobManager jobManager)
+        ILogger<PlayerManager> logger, IJobManager jobManager, IConfiguration configuration)
     {
         _dbPlayerRepository = dbPlayerRepository;
         _cachePlayerRepository = cachePlayerRepository;
         _logger = logger;
         _jobManager = jobManager;
+        _empireStartCoordinates = configuration.GetSection("empire").Get<List<Coordinate>>() ?? 
+                                  throw new InvalidOperationException("Could not load empire start coordinates");
     }
 
     public async Task<PlayerData?> GetPlayer(Guid accountId, byte slot)
@@ -111,7 +116,7 @@ public class PlayerManager : IPlayerManager
             var empireFromCache = await _cachePlayerRepository.GetTempEmpireAsync(accountId);
             if (empireFromCache is null)
             {
-                _logger.LogError("No empire has been selected before. This should not happen.");
+                _logger.LogError("No empire has been selected before. This should not happen");
                 throw new InvalidOperationException("No empire has been selected before. This should not happen.");
             }
 
@@ -125,8 +130,8 @@ public class PlayerManager : IPlayerManager
             AccountId = accountId,
             Name = playerName,
             PlayerClass = @class,
-            PositionX = 958870,
-            PositionY = 272788,
+            PositionX = _empireStartCoordinates[empire - 1].X,
+            PositionY = _empireStartCoordinates[empire - 1].Y,
             St = job.St,
             Iq = job.Iq,
             Dx = job.Dx,
