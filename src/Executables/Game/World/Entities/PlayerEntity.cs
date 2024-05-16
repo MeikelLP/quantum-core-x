@@ -616,7 +616,6 @@ namespace QuantumCore.Game.World.Entities
                 case EPoints.Gold:
                     Player.Gold = value;
                     break;
-                    break;
                 case EPoints.PlayTime:
                     Player.PlayTime = value;
                     break;
