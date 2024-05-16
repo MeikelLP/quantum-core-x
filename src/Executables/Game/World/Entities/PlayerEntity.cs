@@ -375,14 +375,12 @@ namespace QuantumCore.Game.World.Entities
             
             Player.Level = (byte) (Player.Level + level);
             
-            // todo: animation
+            // todo: animation (I think this actually is a quest sent by the server on character login and not an actual packet at this stage)
             
             foreach (var entity in NearbyEntities)
             {
-                if (entity is IPlayerEntity other)
-                {
-                    SendCharacterAdditional(other.Connection);
-                }
+                if (entity is not IPlayerEntity other) continue;
+                SendCharacterAdditional(other.Connection);
             }
 
             GiveStatusPoints();
@@ -609,14 +607,7 @@ namespace QuantumCore.Game.World.Entities
             {
                 case EPoints.Level:
                     var currentLevel = GetPoint(EPoints.Level);
-                    if (value > currentLevel)
-                    {
-                        LevelUp((int) (value - currentLevel));
-                    }
-                    else
-                    {
-                        LevelUp(-(int) (currentLevel - value));
-                    }
+                    LevelUp((int) (value - currentLevel));
                     break;
                 case EPoints.Experience:
                     Player.Experience = value;
@@ -624,6 +615,7 @@ namespace QuantumCore.Game.World.Entities
                     break;
                 case EPoints.Gold:
                     Player.Gold = value;
+                    break;
                     break;
                 case EPoints.PlayTime:
                     Player.PlayTime = value;
