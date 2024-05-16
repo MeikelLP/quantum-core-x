@@ -20,6 +20,8 @@ namespace QuantumCore.API.Game.Types
         MoveSpeed = 19,
         Defence = 20,
         StatusPoints = 26,
+        SubSkill = 27,
+        Skill = 28,
         MinAttackDamage = 29,
         MaxAttackDamage = 30,
         PlayTime = 31,
