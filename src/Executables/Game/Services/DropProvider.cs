@@ -1,8 +1,8 @@
 ﻿using System.Collections.Immutable;
 using System.Globalization;
 using System.Text;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game.Types;
@@ -27,19 +27,15 @@ public class DropProvider : IDropProvider
     #endif
     
     private readonly ILogger<DropProvider> _logger;
-    private readonly IConfiguration _configuration;
     private readonly IItemManager _itemManager;
-    private readonly IMonsterManager _monsterManager;
     private static readonly Encoding FileEncoding = Encoding.GetEncoding("EUC-KR");
-    private int[] _bossPercentageDeltas;
-    private int[] _mobPercentageDeltas;
+    private readonly DropOptions _options;
 
-    public DropProvider(ILogger<DropProvider> logger, IConfiguration configuration, IItemManager itemManager, IMonsterManager monsterManager)
+    public DropProvider(ILogger<DropProvider> logger, IOptions<GameOptions> gameOptions, IItemManager itemManager)
     {
         _logger = logger;
-        _configuration = configuration;
+        _options = gameOptions.Value.Drops;
         _itemManager = itemManager;
-        _monsterManager = monsterManager;
     }
     
     public MonsterItemGroup? GetMonsterDropsForMob(uint monsterProtoId)
@@ -59,11 +55,10 @@ public class DropProvider : IDropProvider
 
     public async Task LoadAsync(CancellationToken cancellationToken = default)
     {
+        // TODO: Task.AwaitAll
         await LoadCommonMobDropsAsync(cancellationToken);
-        await LoadDeltaPercentagesAsync(cancellationToken);
         await LoadSimpleMobDropsAsync(cancellationToken);
         await LoadDropsForMonstersAsync();
-
     }
 
     #region Loading
@@ -197,15 +192,6 @@ public class DropProvider : IDropProvider
 
         _logger.LogDebug("Found {Count:D} group drops", parsedGroups.Count());
     }
-    
-    private Task LoadDeltaPercentagesAsync(CancellationToken cancellationToken = default)
-    {
-        _bossPercentageDeltas = _configuration.GetSection("drops:delta:boss").Get<int[]>() 
-                                ?? throw new InvalidOperationException("Missing boss delta percentages");
-        _mobPercentageDeltas = _configuration.GetSection("drops:delta:normal").Get<int[]>() 
-                               ?? throw new InvalidOperationException("Missing mob delta percentages");
-        return Task.CompletedTask;
-    }
 
     #endregion
 
@@ -217,8 +203,8 @@ public class DropProvider : IDropProvider
         var levelDropDelta = (int) (monster.GetPoint(EPoints.Level) + 15 - player.GetPoint(EPoints.Level));
 
         deltaPercentage = monster is {IsStone: false, Rank: >= EMonsterLevel.Boss}
-            ? _bossPercentageDeltas[MathUtils.MinMax(0, levelDropDelta, _bossPercentageDeltas.Length - 1)]
-            : _mobPercentageDeltas[MathUtils.MinMax(0, levelDropDelta, _mobPercentageDeltas.Length - 1)];
+            ? (int) _options.Delta.Boss[MathUtils.MinMax(0, levelDropDelta, _options.Delta.Boss.Count - 1)]
+            : (int) _options.Delta.Normal[MathUtils.MinMax(0, levelDropDelta, _options.Delta.Normal.Count - 1)];
         
         if (1 == CoreRandom.GenerateInt32(1, 50001))
             deltaPercentage += 1000;
@@ -473,6 +459,89 @@ public class DropProvider : IDropProvider
             }
         }
         return items;
+    }
+
+    private (int SpiritStoneId, int Chance) DetermineDropMetinStone(MonsterEntity monster)
+    {
+        var metinStoneId = (int) monster.Proto.Id;
+            
+        // calculate the lower bound
+        var index = 0;
+        var upper = _options.MetinStones.Count - 1;
+        while (index < upper)
+        {
+            var middle = index + (upper - index) / 2;
+            if (_options.MetinStones[middle].MonsterProtoId.CompareTo(metinStoneId) < 0)
+            {
+                index = middle + 1;
+            }
+            else
+            {
+                upper = middle;
+            }
+        }
+            
+        if (index >= _options.MetinStones.Count || _options.MetinStones[index].MonsterProtoId != metinStoneId)
+        {
+            return (0, 0);
+        }
+
+        var stoneInfo = _options.MetinStones[index];
+        
+        // ItemProtoId of the spirit stone
+        var spiritStoneId = (int) _options.SpiritStones[CoreRandom.GenerateInt32(0, _options.SpiritStones.Count)];
+        var rank = CoreRandom.GenerateInt32(0, 101);
+            
+        // determine the rank (+0, +1, +2...)
+        foreach (var rankChance in stoneInfo.RankChance)
+        {
+            if (rank <= rankChance)
+            {
+                break;
+            }
+
+            rank -= rankChance;
+            spiritStoneId += 100; // each rank is 100+ higher than the previous one
+        }
+        
+        return (spiritStoneId, stoneInfo.DropChance);
+    }
+    
+    public List<ItemInstance> CalculateMetinDropItems(MonsterEntity monster, int delta, int range)
+    {
+        if (!monster.IsStone) return [];
+
+        var (spiritStoneId, chance) = DetermineDropMetinStone(monster);
+        
+        if (spiritStoneId == 0) return [];
+
+        var percent = chance * delta * 400;
+        var target = CoreRandom.GenerateInt32(1, range + 1);
+        
+        if (DropDebug)
+        {
+            var realPercent = percent / range * 100;
+            _logger.LogTrace("Drop chance for {Name} ({MobProtoId}) is {RealPercent}%", 
+                monster.Proto.TranslatedName, monster.Proto.Id, realPercent);
+        }
+
+        if (percent >= target)
+        {
+            var itemProto = _itemManager.GetItem((uint) spiritStoneId);
+            if (itemProto is null)
+            {
+                _logger.LogWarning("Could not find item proto for {ItemProtoId}", spiritStoneId);
+                return [];
+            }
+            
+            _logger.LogDebug("Monster {Name} ({MobProtoId}) dropped an item group ({Item})", 
+                monster.Proto.TranslatedName, monster.Proto.Id, itemProto.TranslatedName);
+                    
+            var itemInstance = _itemManager.CreateItem(itemProto);
+            return [itemInstance];
+        }
+        
+        return [];
     }
 
     #endregion

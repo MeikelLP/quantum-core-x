@@ -6,6 +6,7 @@ using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.World;
 using QuantumCore.API.Game.World.AI;
 using QuantumCore.Core.Utils;
+using QuantumCore.Game.Drops;
 using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Packets;
 using QuantumCore.Game.PlayerUtils;
@@ -86,6 +87,11 @@ namespace QuantumCore.Game.World.Entities
             else if (_proto.Type == (byte) EEntityType.Npc)
             {
                 // npc
+            }
+            else if (_proto.Type == (byte) EEntityType.MetinStone)
+            {
+                // metin stone
+                //todo: metin stone behaviour ?
             }
         }
 
@@ -254,8 +260,13 @@ namespace QuantumCore.Game.World.Entities
             // Etc item drops (etc_drop_item.txt)
             drops.AddRange(_dropProvider.CalculateEtcDropItems(this, delta, range));
             
+            if (IsStone)
+            {
+                // Spirit stone drops
+                drops.AddRange(_dropProvider.CalculateMetinDropItems(this, delta, range));
+            }
+            
             // todo:
-            // - metin stone drops (only stones +0,+1,+2.., no items, those are already in the other drop lists)
             // - horse riding skill drops
             // - quest item drops
             // - event item drops

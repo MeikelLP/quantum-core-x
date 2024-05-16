@@ -4,6 +4,8 @@ namespace QuantumCore.Game.Drops;
 
 public class MonsterDropContainer { }
 
+public record MetinStoneDrop(int MonsterProtoId, int DropChance, int[] RankChance);
+
 public class MonsterItemGroup : MonsterDropContainer
 {
     public class Drop
