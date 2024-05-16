@@ -1,4 +1,4 @@
-﻿using System.Drawing;
+using System.Drawing;
 using FluentAssertions;
 using Game.Caching;
 using Game.Tests.Fixtures;

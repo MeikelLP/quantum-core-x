@@ -21,6 +21,7 @@ public static class ServiceExtensions
     /// </summary>
     /// <param name="services"></param>
     /// <param name="pluginCatalog"></param>
+    /// <param name="configuration"></param>
     /// <returns></returns>
     public static IServiceCollection AddCoreServices(this IServiceCollection services, IPluginCatalog pluginCatalog,
         IConfiguration configuration)

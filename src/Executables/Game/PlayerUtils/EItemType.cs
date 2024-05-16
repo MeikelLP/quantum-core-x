@@ -5,6 +5,7 @@
         None = 0,
         Weapon,
         Armor,
-        Use
+        Use,
+        Polymorph = 19,
     }
 }

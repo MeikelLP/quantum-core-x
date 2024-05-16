@@ -36,6 +36,7 @@ public static class ServiceExtensions
         services.AddSingleton<IPlayerFactory, PlayerFactory>();
         services.AddSingleton<ISpawnGroupProvider, SpawnGroupProvider>();
         services.AddSingleton<ISpawnPointProvider, SpawnPointProvider>();
+        services.AddSingleton<IDropProvider, DropProvider>();
         services.AddSingleton<IItemManager, ItemManager>();
         services.AddSingleton<IMonsterManager, MonsterManager>();
         services.AddSingleton<IJobManager, JobManager>();

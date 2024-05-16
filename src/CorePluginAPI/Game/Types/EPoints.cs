@@ -27,8 +27,14 @@ namespace QuantumCore.API.Game.Types
         PlayTime = 31,
         CriticalPercentage = 40,
         PenetratePercentage = 41,
+        
+        ItemDropBonus = 85,
+        
         AttackBonus = 93,
         DefenceBonus = 94,
+        
+        MallItemBonus = 117,
+        
         MagicAttackBonus = 132,
         ResistCritical = 136,
         ResistPenetrate = 137,

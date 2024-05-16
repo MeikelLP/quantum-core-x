@@ -8,6 +8,7 @@ using QuantumCore.API.Game.World;
 using QuantumCore.Caching;
 using QuantumCore.Core.Utils;
 using QuantumCore.Extensions;
+using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Packets;
 using QuantumCore.Game.Persistence;
 using QuantumCore.Game.PlayerUtils;
@@ -767,12 +768,21 @@ namespace QuantumCore.Game.World.Entities
 
                 return;
             }
+            
+            if (groundItem.OwnerName != null && !string.Equals(groundItem.OwnerName, Name))
+            {
+                SendChatInfo("This item is not yours");
+                return;
+            }
 
             if (!Inventory.PlaceItem(item).Result) // TODO
             {
                 SendChatInfo("No inventory space left");
                 return;
             }
+            
+            var itemName = _itemManager.GetItem(item.ItemId)?.TranslatedName ?? "Unknown";
+            SendChatInfo($"You picked up {groundItem.Amount}x {itemName}");
 
             SendItem(item);
             Map.DespawnEntity(groundItem);
@@ -813,6 +823,46 @@ namespace QuantumCore.Game.World.Entities
         public async Task OnDespawnAsync()
         {
             await Persist();
+        }
+
+        public int GetMobItemRate()
+        {
+            // todo: implement server rates, and premium server rates
+            if (GetPremiumRemainSeconds(EPremiumTypes.Item) > 0)
+                return 100;
+            return 100;
+        }
+
+        public int GetPremiumRemainSeconds(EPremiumTypes type)
+        {
+            _logger.LogTrace("GetPremiumRemainSeconds not implemented yet");
+            return 0; // todo: implement premium system
+        }
+        
+        public bool HasUniqueGroupItemEquipped(uint itemProtoId)
+        {
+            _logger.LogTrace("HasUniqueGroupItemEquipped not implemented yet");
+            return false; // todo: implement unique group item system
+        }
+
+        public bool HasUniqueItemEquipped(uint itemProtoId)
+        {
+            {
+                var item = Inventory.EquipmentWindow.GetItem(EquipmentSlots.Unique1);
+                if (item != null && item.ItemId == itemProtoId)
+                {
+                    return true;
+                }
+            }
+            {
+                var item = Inventory.EquipmentWindow.GetItem(EquipmentSlots.Unique2);
+                if (item != null && item.ItemId == itemProtoId)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         public async Task CalculatePlayedTimeAsync()

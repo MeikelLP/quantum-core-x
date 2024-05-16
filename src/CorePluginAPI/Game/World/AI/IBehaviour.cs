@@ -1,5 +1,3 @@
-using System.Threading.Tasks;
-
 namespace QuantumCore.API.Game.World.AI
 {
     public interface IBehaviour

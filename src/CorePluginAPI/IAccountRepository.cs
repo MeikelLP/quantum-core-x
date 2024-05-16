@@ -1,6 +1,4 @@
-﻿using QuantumCore.API.Core.Models;
-
-namespace QuantumCore.Auth.Persistence;
+using QuantumCore.API.Core.Models;
 
 public interface IAccountRepository
 {

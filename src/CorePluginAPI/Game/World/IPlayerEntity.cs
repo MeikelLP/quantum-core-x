@@ -51,5 +51,9 @@ namespace QuantumCore.API.Game.World
         string ToString();
         Task OnDespawnAsync();
         Task CalculatePlayedTimeAsync();
+        int GetMobItemRate();
+        bool HasUniqueItemEquipped(uint itemProtoId);
+        bool HasUniqueGroupItemEquipped(uint itemProtoId);
+        int GetPremiumRemainSeconds(EPremiumTypes type);
     }
 }
