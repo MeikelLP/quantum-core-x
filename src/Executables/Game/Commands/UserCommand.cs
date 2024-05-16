@@ -19,7 +19,7 @@ public class UserCommand : ICommandHandler
         var message = string.Join("\n",
             _server.Connections.Select(x => $"Lv{x.Player!.GetPoint(EPoints.Level)} {x.Player!.Name}"));
 
-        context.Player.SendChatMessage(message);
+        context.Player.SendChatInfo(message);
         return Task.CompletedTask;
     }
 }
