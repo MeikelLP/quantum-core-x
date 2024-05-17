@@ -152,8 +152,9 @@ namespace QuantumCore.Core.Networking
                             _logger.LogError(e, "Failed to send packet");
                         }
 
+                        _logger.LogDebug("OUT: {Type} => {Packet} ({Bytes})", packet.GetType(),
+                            JsonSerializer.Serialize(obj), BitConverter.ToString(bytesToSend.ToArray()));
                         ArrayPool<byte>.Shared.Return(bytes);
-                        _logger.LogDebug("OUT: {Type} => {Packet}", packet.GetType(), JsonSerializer.Serialize(obj));
                     }
                     else
                     {
