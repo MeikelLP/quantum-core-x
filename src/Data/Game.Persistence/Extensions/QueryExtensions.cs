@@ -1,7 +1,8 @@
 ﻿using System.Collections.Immutable;
-using QuantumCore.API;
 using QuantumCore.API.Core.Models;
+using QuantumCore.API.Game.Guild;
 using QuantumCore.Game.Persistence.Entities;
+using QuantumCore.Game.Persistence.Entities.Guilds;
 
 namespace QuantumCore.Game.Persistence.Extensions;
 
@@ -46,14 +47,23 @@ public static class QueryExtensions
             Level = x.Level,
             Experience = x.Experience,
             Gold = x.Gold,
-            LeaderId = x.LeaderId,
+            OwnerId = x.OwnerId,
             MaxMemberCount = x.MaxMemberCount,
             Members = x.Members.Select(member => new GuildMemberData
             {
-                Id = member.Id,
-                Name = member.Name,
-                Level = member.Level,
-                Class = member.PlayerClass
+                Id = member.Player.Id,
+                Name = member.Player.Name,
+                Level = member.Player.Level,
+                Class = member.Player.PlayerClass,
+                SpentExperience = member.SpentExperience,
+                Rank = member.RankId,
+                IsLeader = member.IsLeader
+            }).ToImmutableArray(),
+            Ranks = x.Ranks.Select(rank => new GuildRankData
+            {
+                Rank = rank.Rank,
+                Name = rank.Name,
+                Permissions = rank.Permissions
             }).ToImmutableArray()
         });
     }

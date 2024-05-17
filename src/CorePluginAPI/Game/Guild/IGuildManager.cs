@@ -1,4 +1,4 @@
-﻿namespace QuantumCore.API;
+﻿namespace QuantumCore.API.Game.Guild;
 
 public interface IGuildManager
 {

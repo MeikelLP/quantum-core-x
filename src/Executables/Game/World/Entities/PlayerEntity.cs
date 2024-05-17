@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
+using QuantumCore.API.Game.Guild;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.World;
 using QuantumCore.Caching;
@@ -295,21 +296,35 @@ namespace QuantumCore.Game.World.Entities
                             PlayerId = guildMember.Id,
                             Class = guildMember.Class,
                             Level = guildMember.Level,
-                            IsGeneral = guildMember.Id == Guild.LeaderId,
+                            IsGeneral = guildMember.IsLeader,
                             Name = guildMember.Name,
+                            Rank = guildMember.Rank,
+                            SpentExperience = guildMember.SpentExperience,
                             IsNameSent = true
                         })
+                        .ToArray()
+                });
+                Connection.Send(new GuildRankPacket
+                {
+                    Ranks = Guild.Ranks
+                        .Select(rank => new GuildRankDataPacket
+                        {
+                            Rank = rank.Rank,
+                            Name = rank.Name,
+                            Permissions = rank.Permissions
+                        })
+                        .Take(GuildConstants.RANKS_LENGTH)
                         .ToArray()
                 });
                 Connection.Send(new GuildInfo
                 {
                     Level = Guild.Level,
-                    Name = Guild.Name!,
+                    Name = Guild.Name,
                     Gold = Guild.Gold,
                     GuildId = Guild.Id,
                     Exp = Guild.Experience,
                     HasLand = false,
-                    LeaderId = Guild.LeaderId,
+                    LeaderId = Guild.OwnerId,
                     MemberCount = (ushort) Guild.Members.Length,
                     MaxMemberCount = Guild.MaxMemberCount
                 });
@@ -421,14 +436,14 @@ namespace QuantumCore.Game.World.Entities
             {
                 return;
             }
-            
+
             AddPoint(EPoints.Skill, level);
-            AddPoint(EPoints.SubSkill, level < 10 ? 0 : level - Math.Max((int)Player.Level, 9));
-            
+            AddPoint(EPoints.SubSkill, level < 10 ? 0 : level - Math.Max((int) Player.Level, 9));
+
             Player.Level = (byte) (Player.Level + level);
-            
+
             // todo: animation (I think this actually is a quest sent by the server on character login and not an actual packet at this stage)
-            
+
             foreach (var entity in NearbyEntities)
             {
                 if (entity is not IPlayerEntity other) continue;
@@ -819,7 +834,7 @@ namespace QuantumCore.Game.World.Entities
 
                 return;
             }
-            
+
             if (groundItem.OwnerName != null && !string.Equals(groundItem.OwnerName, Name))
             {
                 SendChatInfo("This item is not yours");
@@ -831,7 +846,7 @@ namespace QuantumCore.Game.World.Entities
                 SendChatInfo("No inventory space left");
                 return;
             }
-            
+
             var itemName = _itemManager.GetItem(item.ItemId)?.TranslatedName ?? "Unknown";
             SendChatInfo($"You picked up {groundItem.Amount}x {itemName}");
 
@@ -889,7 +904,7 @@ namespace QuantumCore.Game.World.Entities
             _logger.LogTrace("GetPremiumRemainSeconds not implemented yet");
             return 0; // todo: implement premium system
         }
-        
+
         public bool HasUniqueGroupItemEquipped(uint itemProtoId)
         {
             _logger.LogTrace("HasUniqueGroupItemEquipped not implemented yet");
@@ -922,7 +937,7 @@ namespace QuantumCore.Game.World.Entities
             var startSessionTime = await _cacheManager.Get<long>(key);
             var totalSessionTime = Connection.Server.ServerTime - startSessionTime;
             if (totalSessionTime <= 0) return;
-            
+
             AddPoint(EPoints.PlayTime, (int) totalSessionTime);
         }
 

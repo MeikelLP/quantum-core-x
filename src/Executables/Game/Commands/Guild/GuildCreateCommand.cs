@@ -1,8 +1,8 @@
 ﻿using CommandLine;
-using QuantumCore.API;
 using QuantumCore.API.Game;
+using QuantumCore.API.Game.Guild;
 
-namespace QuantumCore.Game.Commands;
+namespace QuantumCore.Game.Commands.Guild;
 
 [Command("guild_create", "Create guild")]
 public class GuildCreateCommand : ICommandHandler<GuildCreateCommandOptions>

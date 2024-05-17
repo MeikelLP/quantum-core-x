@@ -2,180 +2,235 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using QuantumCore.Game.Persistence;
 
 #nullable disable
 
-namespace QuantumCore.Game.Persistence.Migrations.Sqlite
+namespace QuantumCore.Game.Persistence.Migrations.Mysql
 {
-    [DbContext(typeof(SqliteGameDbContext))]
-    [Migration("20240513223531_AddGuild")]
+    [DbContext(typeof(MySqlGameDbContext))]
+    [Migration("20240514125529_AddGuild")]
     partial class AddGuild
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "8.0.4");
+            modelBuilder
+                .HasAnnotation("ProductVersion", "8.0.4")
+                .HasAnnotation("Relational:MaxIdentifierLength", 64);
+
+            MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
 
             modelBuilder.Entity("QuantumCore.Game.Persistence.Entities.DeletedPlayer", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("char(36)");
 
                     b.Property<Guid>("AccountId")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("char(36)");
 
                     b.Property<int>("BodyPart")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT")
-                        .HasDefaultValueSql("current_timestamp");
+                        .HasColumnType("datetime(6)")
+                        .HasDefaultValueSql("(CAST(CURRENT_TIMESTAMP AS DATETIME(6)))");
 
                     b.Property<DateTime>("DeletedAt")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<byte>("Dx")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("tinyint unsigned");
 
                     b.Property<int>("Experience")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.Property<byte>("Gold")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("tinyint unsigned");
 
                     b.Property<int>("HairPart")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.Property<long>("Health")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("bigint");
 
                     b.Property<byte>("Ht")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("tinyint unsigned");
 
                     b.Property<byte>("Iq")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("tinyint unsigned");
 
                     b.Property<byte>("Level")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("tinyint unsigned");
 
                     b.Property<long>("Mana")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(24)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("varchar(24)");
 
                     b.Property<int>("PlayTime")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.Property<byte>("PlayerClass")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("tinyint unsigned");
 
                     b.Property<int>("PositionX")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.Property<int>("PositionY")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.Property<byte>("SkillGroup")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("tinyint unsigned");
 
                     b.Property<byte>("St")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("tinyint unsigned");
 
                     b.Property<long>("Stamina")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("bigint");
 
                     b.Property<DateTime>("UpdatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT")
-                        .HasDefaultValueSql("current_timestamp");
+                        .HasColumnType("datetime(6)")
+                        .HasDefaultValueSql("(CAST(CURRENT_TIMESTAMP AS DATETIME(6)))");
 
                     b.HasKey("Id");
 
                     b.ToTable("DeletedPlayers");
                 });
 
-            modelBuilder.Entity("QuantumCore.Game.Persistence.Entities.Guild", b =>
+            modelBuilder.Entity("QuantumCore.Game.Persistence.Entities.Guilds.Guild", b =>
                 {
                     b.Property<uint>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int unsigned");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<uint>("Id"));
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT")
-                        .HasDefaultValueSql("current_timestamp");
+                        .HasColumnType("datetime(6)")
+                        .HasDefaultValueSql("(CAST(CURRENT_TIMESTAMP AS DATETIME(6)))");
 
                     b.Property<uint>("Experience")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int unsigned");
 
                     b.Property<uint>("Gold")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<uint>("LeaderId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int unsigned");
 
                     b.Property<byte>("Level")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("tinyint unsigned");
 
                     b.Property<ushort>("MaxMemberCount")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("smallint unsigned");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(12)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("varchar(12)");
+
+                    b.Property<uint>("OwnerId")
+                        .HasColumnType("int unsigned");
 
                     b.Property<DateTime>("UpdatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT")
-                        .HasDefaultValueSql("current_timestamp");
+                        .HasColumnType("datetime(6)")
+                        .HasDefaultValueSql("(CAST(CURRENT_TIMESTAMP AS DATETIME(6)))");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("LeaderId");
+                    b.HasIndex("OwnerId");
 
                     b.ToTable("Guilds");
+                });
+
+            modelBuilder.Entity("QuantumCore.Game.Persistence.Entities.Guilds.GuildMember", b =>
+                {
+                    b.Property<uint>("GuildId")
+                        .HasColumnType("int unsigned");
+
+                    b.Property<uint>("PlayerId")
+                        .HasColumnType("int unsigned");
+
+                    b.Property<bool>("IsLeader")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<byte>("RankId")
+                        .HasColumnType("tinyint unsigned");
+
+                    b.Property<uint>("SpentExperience")
+                        .HasColumnType("int unsigned");
+
+                    b.HasKey("GuildId", "PlayerId");
+
+                    b.HasIndex("PlayerId")
+                        .IsUnique();
+
+                    b.HasIndex("GuildId", "RankId");
+
+                    b.ToTable("GuildMembers");
+                });
+
+            modelBuilder.Entity("QuantumCore.Game.Persistence.Entities.Guilds.GuildRank", b =>
+                {
+                    b.Property<uint>("GuildId")
+                        .HasColumnType("int unsigned");
+
+                    b.Property<byte>("Rank")
+                        .HasColumnType("tinyint unsigned");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(8)
+                        .HasColumnType("varchar(8)");
+
+                    b.Property<byte>("Permissions")
+                        .HasColumnType("tinyint unsigned");
+
+                    b.HasKey("GuildId", "Rank");
+
+                    b.ToTable("GuildRanks");
                 });
 
             modelBuilder.Entity("QuantumCore.Game.Persistence.Entities.Item", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("char(36)");
 
                     b.Property<byte>("Count")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("tinyint unsigned");
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT")
-                        .HasDefaultValueSql("current_timestamp");
+                        .HasColumnType("datetime(6)")
+                        .HasDefaultValueSql("(CAST(CURRENT_TIMESTAMP AS DATETIME(6)))");
 
                     b.Property<uint>("ItemId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int unsigned");
 
                     b.Property<uint>("PlayerId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int unsigned");
 
                     b.Property<uint>("Position")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int unsigned");
 
                     b.Property<DateTime>("UpdatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT")
-                        .HasDefaultValueSql("current_timestamp");
+                        .HasColumnType("datetime(6)")
+                        .HasDefaultValueSql("(CAST(CURRENT_TIMESTAMP AS DATETIME(6)))");
 
                     b.Property<byte>("Window")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("tinyint unsigned");
 
                     b.HasKey("Id");
 
@@ -188,15 +243,15 @@ namespace QuantumCore.Game.Persistence.Migrations.Sqlite
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("char(36)");
 
                     b.Property<string>("Command")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("varchar(255)");
 
                     b.Property<Guid>("GroupId")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("char(36)");
 
                     b.HasKey("Id");
 
@@ -209,12 +264,12 @@ namespace QuantumCore.Game.Persistence.Migrations.Sqlite
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT");
+                        .HasColumnType("char(36)");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(30)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("varchar(30)");
 
                     b.HasKey("Id");
 
@@ -234,10 +289,10 @@ namespace QuantumCore.Game.Persistence.Migrations.Sqlite
             modelBuilder.Entity("QuantumCore.Game.Persistence.Entities.PermUser", b =>
                 {
                     b.Property<Guid>("GroupId")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("char(36)");
 
                     b.Property<uint>("PlayerId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int unsigned");
 
                     b.HasKey("GroupId", "PlayerId");
 
@@ -257,88 +312,90 @@ namespace QuantumCore.Game.Persistence.Migrations.Sqlite
                 {
                     b.Property<uint>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int unsigned");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<uint>("Id"));
 
                     b.Property<Guid>("AccountId")
-                        .HasColumnType("TEXT");
+                        .HasColumnType("char(36)");
 
                     b.Property<uint>("AvailableStatusPoints")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int unsigned");
 
                     b.Property<uint>("BodyPart")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int unsigned");
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT")
-                        .HasDefaultValueSql("current_timestamp");
+                        .HasColumnType("datetime(6)")
+                        .HasDefaultValueSql("(CAST(CURRENT_TIMESTAMP AS DATETIME(6)))");
 
                     b.Property<byte>("Dx")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("tinyint unsigned");
 
                     b.Property<byte>("Empire")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("tinyint unsigned");
 
                     b.Property<uint>("Experience")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int unsigned");
 
                     b.Property<uint>("GivenStatusPoints")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int unsigned");
 
                     b.Property<uint>("Gold")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int unsigned");
 
                     b.Property<uint?>("GuildId")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int unsigned");
 
                     b.Property<uint>("HairPart")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int unsigned");
 
                     b.Property<long>("Health")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("bigint");
 
                     b.Property<byte>("Ht")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("tinyint unsigned");
 
                     b.Property<byte>("Iq")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("tinyint unsigned");
 
                     b.Property<byte>("Level")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("tinyint unsigned");
 
                     b.Property<long>("Mana")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("bigint");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(24)
-                        .HasColumnType("TEXT");
+                        .HasColumnType("varchar(24)");
 
                     b.Property<uint>("PlayTime")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int unsigned");
 
                     b.Property<byte>("PlayerClass")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("tinyint unsigned");
 
                     b.Property<int>("PositionX")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.Property<int>("PositionY")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("int");
 
                     b.Property<byte>("SkillGroup")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("tinyint unsigned");
 
                     b.Property<byte>("St")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("tinyint unsigned");
 
                     b.Property<long>("Stamina")
-                        .HasColumnType("INTEGER");
+                        .HasColumnType("bigint");
 
                     b.Property<DateTime>("UpdatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("TEXT")
-                        .HasDefaultValueSql("current_timestamp");
+                        .HasColumnType("datetime(6)")
+                        .HasDefaultValueSql("(CAST(CURRENT_TIMESTAMP AS DATETIME(6)))");
 
                     b.HasKey("Id");
 
@@ -377,15 +434,53 @@ namespace QuantumCore.Game.Persistence.Migrations.Sqlite
                         });
                 });
 
-            modelBuilder.Entity("QuantumCore.Game.Persistence.Entities.Guild", b =>
+            modelBuilder.Entity("QuantumCore.Game.Persistence.Entities.Guilds.Guild", b =>
                 {
                     b.HasOne("QuantumCore.Game.Persistence.Entities.Player", "Leader")
                         .WithMany("GuildsToLead")
-                        .HasForeignKey("LeaderId")
+                        .HasForeignKey("OwnerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Leader");
+                });
+
+            modelBuilder.Entity("QuantumCore.Game.Persistence.Entities.Guilds.GuildMember", b =>
+                {
+                    b.HasOne("QuantumCore.Game.Persistence.Entities.Guilds.Guild", "Guild")
+                        .WithMany("Members")
+                        .HasForeignKey("GuildId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("QuantumCore.Game.Persistence.Entities.Player", "Player")
+                        .WithMany("Guilds")
+                        .HasForeignKey("PlayerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("QuantumCore.Game.Persistence.Entities.Guilds.GuildRank", "Rank")
+                        .WithMany("Members")
+                        .HasForeignKey("GuildId", "RankId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Guild");
+
+                    b.Navigation("Player");
+
+                    b.Navigation("Rank");
+                });
+
+            modelBuilder.Entity("QuantumCore.Game.Persistence.Entities.Guilds.GuildRank", b =>
+                {
+                    b.HasOne("QuantumCore.Game.Persistence.Entities.Guilds.Guild", "Guild")
+                        .WithMany("Ranks")
+                        .HasForeignKey("GuildId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Guild");
                 });
 
             modelBuilder.Entity("QuantumCore.Game.Persistence.Entities.Item", b =>
@@ -431,14 +526,21 @@ namespace QuantumCore.Game.Persistence.Migrations.Sqlite
 
             modelBuilder.Entity("QuantumCore.Game.Persistence.Entities.Player", b =>
                 {
-                    b.HasOne("QuantumCore.Game.Persistence.Entities.Guild", "Guild")
-                        .WithMany("Members")
+                    b.HasOne("QuantumCore.Game.Persistence.Entities.Guilds.Guild", "Guild")
+                        .WithMany()
                         .HasForeignKey("GuildId");
 
                     b.Navigation("Guild");
                 });
 
-            modelBuilder.Entity("QuantumCore.Game.Persistence.Entities.Guild", b =>
+            modelBuilder.Entity("QuantumCore.Game.Persistence.Entities.Guilds.Guild", b =>
+                {
+                    b.Navigation("Members");
+
+                    b.Navigation("Ranks");
+                });
+
+            modelBuilder.Entity("QuantumCore.Game.Persistence.Entities.Guilds.GuildRank", b =>
                 {
                     b.Navigation("Members");
                 });
@@ -452,6 +554,8 @@ namespace QuantumCore.Game.Persistence.Migrations.Sqlite
 
             modelBuilder.Entity("QuantumCore.Game.Persistence.Entities.Player", b =>
                 {
+                    b.Navigation("Guilds");
+
                     b.Navigation("GuildsToLead");
                 });
 #pragma warning restore 612, 618

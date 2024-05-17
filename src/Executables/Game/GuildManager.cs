@@ -1,8 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using QuantumCore.API;
+using QuantumCore.API.Game.Guild;
 using QuantumCore.Game.Persistence;
-using QuantumCore.Game.Persistence.Entities;
+using QuantumCore.Game.Persistence.Entities.Guilds;
 using QuantumCore.Game.Persistence.Extensions;
+using GuildMember = QuantumCore.Game.Persistence.Entities.Guilds.GuildMember;
 
 namespace QuantumCore.Game;
 
@@ -26,18 +27,41 @@ public class GuildManager : IGuildManager
     public async Task<GuildData?> GetGuildForPlayerAsync(uint playerId)
     {
         return await _db.Guilds
-            .Where(x => x.Members.Any(m => m.Id == playerId))
+            .Where(x => x.Members.Any(m => m.PlayerId == playerId))
             .SelectData()
             .FirstOrDefaultAsync();
     }
 
     public async Task<GuildData> CreateGuildAsync(string name, uint leaderId)
     {
+        var leaderRank = new GuildRank
+        {
+            Rank = 1,
+            Name = "Leader",
+            Permissions = GuildRankPermission.All
+        };
         var guild = new Guild
         {
             Name = name,
-            LeaderId = leaderId,
-            Level = 1
+            OwnerId = leaderId,
+            Level = 1,
+            Members = new List<GuildMember>
+            {
+                new GuildMember
+                {
+                    PlayerId = leaderId,
+                    IsLeader = true,
+                    Rank = leaderRank
+                }
+            },
+            Ranks = Enumerable.Range(2, GuildConstants.RANKS_LENGTH - 1)
+                .Select(rank => new GuildRank
+                {
+                    Rank = (byte) rank,
+                    Name = "Member"
+                })
+                .Prepend(leaderRank)
+                .ToList()
         };
         _db.Guilds.Add(guild);
         await _db.SaveChangesAsync();
@@ -52,7 +76,7 @@ public class GuildManager : IGuildManager
             Name = name,
             Level = 1,
             MaxMemberCount = 10,
-            LeaderId = leaderId
+            OwnerId = leaderId
         };
     }
 }
