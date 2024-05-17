@@ -1,9 +1,8 @@
 ﻿using System.Reflection;
-using QuantumCore.API;
 using QuantumCore.API.Game;
 using QuantumCore.API.Game.World;
 
-namespace QuantumCore.Game.Commands;
+namespace QuantumCore.API;
 
 public interface ICommandManager
 {

@@ -1,4 +1,5 @@
 ﻿using CommandLine;
+using QuantumCore.API;
 using QuantumCore.API.Game;
 using QuantumCore.API.Game.World;
 
@@ -16,16 +17,16 @@ public class ReloadPermissionsCommand : ICommandHandler<ReloadPermissionsCommand
         _world = world;
         _commandManager = commandManager;
     }
-    
+
     public async Task ExecuteAsync(CommandContext<ReloadPermissionsCommandOptions> context)
     {
         // Reload in-memory + cache permissions
         await _commandManager.ReloadAsync();
-        
+
         var target = string.Equals(context.Arguments.Target, "$self", StringComparison.InvariantCultureIgnoreCase)
             ? context.Player
             : _world.GetPlayer(context.Arguments.Target);
-        
+
         // Reload permissions for target player or all players
         if (target is not null)
         {
@@ -36,7 +37,7 @@ public class ReloadPermissionsCommand : ICommandHandler<ReloadPermissionsCommand
             var players = _world.GetPlayers();
             await Task.WhenAll(players.Select(x => x.ReloadPermissions()));
         }
-        
+
         context.Player.SendChatInfo("Permissions reloaded");
     }
 }
