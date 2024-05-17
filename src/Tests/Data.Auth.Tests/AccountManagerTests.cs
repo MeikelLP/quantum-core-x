@@ -1,4 +1,4 @@
-﻿using Data.Auth.Tests.Fixtures;
+using Data.Auth.Tests.Fixtures;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;

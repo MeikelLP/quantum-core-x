@@ -10,6 +10,7 @@ namespace QuantumCore.Game.PlayerUtils
         Weapon = (1 << 4),
         Necklace = (1 << 5),
         Earrings = (1 << 6),
+        Unique = (1 << 7),
         Shield = (1 << 8),
         Arrow = (1 << 9),
     }

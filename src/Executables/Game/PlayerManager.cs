@@ -1,6 +1,11 @@
-﻿using Game.Caching;
+﻿using System.Drawing;
+using Game.Caching;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using QuantumCore.API.Core.Models;
+using QuantumCore.Core.Utils;
+using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Persistence;
 using QuantumCore.Game.PlayerUtils;
 
@@ -12,14 +17,16 @@ public class PlayerManager : IPlayerManager
     private readonly ICachePlayerRepository _cachePlayerRepository;
     private readonly ILogger<PlayerManager> _logger;
     private readonly IJobManager _jobManager;
-
+    private readonly GameOptions _gameOptions;
+    
     public PlayerManager(IDbPlayerRepository dbPlayerRepository, ICachePlayerRepository cachePlayerRepository,
-        ILogger<PlayerManager> logger, IJobManager jobManager)
+        ILogger<PlayerManager> logger, IJobManager jobManager, IOptions<GameOptions> gameOptions)
     {
         _dbPlayerRepository = dbPlayerRepository;
         _cachePlayerRepository = cachePlayerRepository;
         _logger = logger;
         _jobManager = jobManager;
+        _gameOptions = gameOptions.Value;
     }
 
     public async Task<PlayerData?> GetPlayer(Guid accountId, byte slot)
@@ -46,7 +53,7 @@ public class PlayerManager : IPlayerManager
         return cachedPlayer;
     }
 
-    public async Task<PlayerData?> GetPlayer(Guid playerId)
+    public async Task<PlayerData?> GetPlayer(uint playerId)
     {
         var cachedPlayer = await _cachePlayerRepository.GetPlayerAsync(playerId);
         if (cachedPlayer is null)
@@ -111,7 +118,7 @@ public class PlayerManager : IPlayerManager
             var empireFromCache = await _cachePlayerRepository.GetTempEmpireAsync(accountId);
             if (empireFromCache is null)
             {
-                _logger.LogError("No empire has been selected before. This should not happen.");
+                _logger.LogError("No empire has been selected before. This should not happen");
                 throw new InvalidOperationException("No empire has been selected before. This should not happen.");
             }
 
@@ -121,12 +128,12 @@ public class PlayerManager : IPlayerManager
         // Create player data
         var player = new PlayerData
         {
-            Id = Guid.NewGuid(),
+            Id = 0,
             AccountId = accountId,
             Name = playerName,
             PlayerClass = @class,
-            PositionX = 958870,
-            PositionY = 272788,
+            PositionX = _gameOptions.Empire[empire].X,
+            PositionY = _gameOptions.Empire[empire].Y,
             St = job.St,
             Iq = job.Iq,
             Dx = job.Dx,
@@ -150,7 +157,7 @@ public class PlayerManager : IPlayerManager
         await _cachePlayerRepository.DeletePlayerAsync(player);
     }
 
-    public async Task SetPlayerEmpireAsync(Guid accountId, Guid playerId, byte empire)
+    public async Task SetPlayerEmpireAsync(Guid accountId, uint playerId, byte empire)
     {
         await _dbPlayerRepository.UpdateEmpireAsync(accountId, playerId, empire);
     }

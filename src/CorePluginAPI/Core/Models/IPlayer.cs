@@ -2,12 +2,12 @@
 
 public class PlayerData
 {
-    public Guid Id { get; set; }
+    public uint Id { get; set; }
     public Guid AccountId { get; set; }
     public string Name { get; set; } = "";
     public byte PlayerClass { get; set; }
     public byte SkillGroup { get; set; }
-    public uint PlayTime { get; set; }
+    public ulong PlayTime { get; set; }
     public byte Level { get; set; } = 1;
     public uint Experience { get; set; }
     public uint Gold { get; set; }

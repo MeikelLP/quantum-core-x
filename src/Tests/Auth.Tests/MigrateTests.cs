@@ -1,11 +1,10 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Auth.Tests.Extensions;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using QuantumCore;
 using QuantumCore.Auth.Persistence;
 using QuantumCore.Auth.Persistence.Extensions;
-using Serilog;
 using Testcontainers.MySql;
 using Testcontainers.PostgreSql;
 using Xunit;
@@ -59,15 +58,7 @@ public class MigrateTests
     private async Task ExecuteMigrate(DatabaseProvider provider, string connectionString)
     {
         var services = new ServiceCollection()
-            .AddLogging(cfg =>
-            {
-                cfg.ClearProviders();
-                cfg.AddSerilog(new LoggerConfiguration()
-                    .WriteTo.TestOutput(_testOutputHelper)
-                    .WriteTo.Console()
-                    .MinimumLevel.Debug()
-                    .CreateLogger());
-            })
+            .AddQuantumCoreTestLogger(_testOutputHelper)
             .AddSingleton<IConfiguration>(_ => new ConfigurationBuilder().Build())
             .AddAuthDatabase()
             .Configure<DatabaseOptions>(opts =>

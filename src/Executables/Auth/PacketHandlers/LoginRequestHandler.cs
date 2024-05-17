@@ -1,9 +1,7 @@
-using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.PluginTypes;
 using QuantumCore.Auth.Cache;
 using QuantumCore.Auth.Packets;
-using QuantumCore.Auth.Persistence;
 using QuantumCore.Caching;
 using QuantumCore.Core.Utils;
 

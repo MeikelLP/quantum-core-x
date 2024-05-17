@@ -22,7 +22,7 @@ public class ItemPickupHandler : IGamePacketHandler<ItemPickup>
             // we can only pick up ground items
             return Task.CompletedTask;
         }
-
+        
         player.Pickup(groundItem);
         return Task.CompletedTask;
     }

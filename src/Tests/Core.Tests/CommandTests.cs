@@ -1,11 +1,12 @@
+using System.Collections.Immutable;
 using AutoBogus;
 using Bogus;
+using Core.Tests.Extensions;
 using FluentAssertions;
 using FluentAssertions.Equivalency;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NSubstitute;
 using QuantumCore.API;
@@ -26,7 +27,6 @@ using QuantumCore.Game.PlayerUtils;
 using QuantumCore.Game.World;
 using QuantumCore.Game.World.Entities;
 using QuantumCore.Networking;
-using Serilog;
 using Weikio.PluginFramework.Catalogs;
 using Xunit;
 using Xunit.Abstractions;
@@ -46,7 +46,7 @@ internal class MockedGameConnection : IGameConnection
     public EPhases Phase { get; set; }
     public Task ExecuteTask { get; } = null!;
 
-    public void Close()
+    public void Close(bool expected = true)
     {
     }
 
@@ -68,7 +68,7 @@ internal class MockedGameConnection : IGameConnection
         return Task.CompletedTask;
     }
 
-    public IServerBase Server { get; } = null!;
+    public IServerBase Server { get; } = Substitute.For<IServerBase>();
     public Guid? AccountId { get; set; } = Guid.NewGuid();
     public string Username { get; set; } = "";
     public IPlayerEntity? Player { get; set; }
@@ -87,10 +87,12 @@ public class CommandTests : IAsyncLifetime
     private readonly IPlayerEntity _player;
     private readonly IItemManager _itemManager;
     private readonly Faker<PlayerData> _playerDataFaker;
+    private readonly IGameServer _gameServer;
 
     public CommandTests(ITestOutputHelper testOutputHelper)
     {
         _playerDataFaker = new AutoFaker<PlayerData>()
+            .RuleFor(x => x.Name, r => r.Name.FirstName()) // Mostly due to command param handling
             .RuleFor(x => x.Level, _ => (byte) 1)
             .RuleFor(x => x.St, _ => (byte) 1)
             .RuleFor(x => x.Ht, _ => (byte) 1)
@@ -98,12 +100,14 @@ public class CommandTests : IAsyncLifetime
             .RuleFor(x => x.Gold, _ => (uint) 0)
             .RuleFor(x => x.Experience, _ => (uint) 0)
             .RuleFor(x => x.PositionX, _ => (int) (10 * Map.MapUnit))
-            .RuleFor(x => x.PositionY, _ => (int) (26 * Map.MapUnit));
+            .RuleFor(x => x.PositionY, _ => (int) (26 * Map.MapUnit))
+            .RuleFor(x => x.PlayTime, _ => 0u);
         var monsterManagerMock = Substitute.For<IMonsterManager>();
         monsterManagerMock.GetMonster(Arg.Any<uint>()).Returns(callerInfo =>
             new AutoFaker<MonsterData>().RuleFor(x => x.Id, _ => callerInfo.Arg<uint>()).Generate());
         var experienceManagerMock = Substitute.For<IExperienceManager>();
         experienceManagerMock.GetNeededExperience(Arg.Any<byte>()).Returns(1000u);
+        experienceManagerMock.MaxLevel.Returns((byte)100);
         var jobManagerMock = Substitute.For<IJobManager>();
         jobManagerMock.Get(Arg.Any<byte>()).Returns(new Job());
         var itemManagerMock = Substitute.For<IItemManager>();
@@ -124,20 +128,14 @@ public class CommandTests : IAsyncLifetime
         _services = new ServiceCollection()
             .AddCoreServices(new EmptyPluginCatalog(), new ConfigurationBuilder().Build())
             .AddGameServices()
-            .AddLogging(x =>
-            {
-                x.ClearProviders();
-                x.AddSerilog(new LoggerConfiguration()
-                    .WriteTo.TestOutput(testOutputHelper)
-                    .CreateLogger());
-            })
+            .AddQuantumCoreTestLogger(testOutputHelper)
             .Replace(new ServiceDescriptor(typeof(IItemRepository), _ => Substitute.For<IItemRepository>(),
                 ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(ICommandPermissionRepository),
                 _ =>
                 {
                     var mock = Substitute.For<ICommandPermissionRepository>();
-                    mock.GetGroupsForPlayer(Arg.Any<Guid>()).Returns([PermGroup.OperatorGroup]);
+                    mock.GetGroupsForPlayer(Arg.Any<uint>()).Returns([PermGroup.OperatorGroup]);
                     return mock;
                 }, ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(IPlayerRepository), _ => Substitute.For<IPlayerRepository>(),
@@ -152,20 +150,29 @@ public class CommandTests : IAsyncLifetime
                 .AddInMemoryCollection(new Dictionary<string, string?>
                 {
                     {"maps:0", "map_a2"},
-                    {"maps:1", "map_b2"}
+                    {"maps:1", "map_b2"},
+                    {"empire:0:x", "10"},
+                    {"empire:0:y", "15"},
+                    {"empire:1:x", "20"},
+                    {"empire:1:y", "25"},
+                    {"empire:2:x", "30"},
+                    {"empire:2:y", "35"},
                 })
                 .Build())
             .AddSingleton(Substitute.For<IDbPlayerRepository>())
             .AddSingleton<IGameConnection>(_ => new MockedGameConnection())
             .AddSingleton<IPlayerEntity, PlayerEntity>()
             .AddSingleton(_ => _playerDataFaker.Generate())
+            .AddSingleton(Substitute.For<IGameServer>())
             .BuildServiceProvider();
         _itemManager = _services.GetRequiredService<IItemManager>();
         _commandManager = _services.GetRequiredService<ICommandManager>();
         _commandManager.Register("QuantumCore.Game.Commands", typeof(SpawnCommand).Assembly);
         _connection = _services.GetRequiredService<IGameConnection>();
         _player = _services.GetRequiredService<IPlayerEntity>();
+        _player.Player.PlayTime = 0;
         _connection.Player = _player;
+        _gameServer = _services.GetRequiredService<IGameServer>();
     }
 
     public async Task InitializeAsync()
@@ -238,7 +245,7 @@ public class CommandTests : IAsyncLifetime
     {
         var item = new ItemInstance {ItemId = 1, Count = 1};
         var wearSlot = _player.Inventory.EquipmentWindow.GetWearPosition(_itemManager, item.ItemId);
-
+        
         _player.SetItem(item, (byte) WindowType.Inventory, (ushort) wearSlot);
 
         await _commandManager.Handle(_connection, "debug_damage");
@@ -446,9 +453,13 @@ public class CommandTests : IAsyncLifetime
         world.SpawnEntity(_player);
 
         world.GetPlayer(_player.Name).Should().NotBeNull();
+        
+        _player.Player.PlayTime = 0;
+        _connection.Server.ServerTime.Returns(60000); // 1 minute in ms
 
         await _commandManager.Handle(_connection, "/logout");
 
+        _player.GetPoint(EPoints.PlayTime).Should().Be(1);
         world.GetPlayer(_player.Name).Should().BeNull();
     }
 
@@ -463,9 +474,13 @@ public class CommandTests : IAsyncLifetime
         {
             Phase = EPhases.Select
         });
+        
+        _player.Player.PlayTime = 0;
+        _connection.Server.ServerTime.Returns(60000);
 
         await _commandManager.Handle(_connection, "/phase_select");
 
+        _player.GetPoint(EPoints.PlayTime).Should().Be(1);
         _player.Connection.Phase.Should().Be(EPhases.Select);
         (_connection as MockedGameConnection).SentPhases.Should().ContainEquivalentOf(new GCPhase
         {
@@ -611,6 +626,69 @@ public class CommandTests : IAsyncLifetime
         {
             Message = "mall test",
             MessageType = ChatMessageTypes.Command
+        }, cfg => cfg.Including(x => x.Message));
+    }
+    
+    [Fact]
+    public async Task UserCommand()
+    {
+        _gameServer.Connections.Returns([_connection]);
+        
+        await _commandManager.Handle(_connection, "/user");
+
+        ((MockedGameConnection) _connection).SentMessages.Should().ContainEquivalentOf(new ChatOutcoming
+        {
+            Message = $"Lv{_player.GetPoint(EPoints.Level)} {_player.Name}",
+            MessageType = ChatMessageTypes.Info
+        }, cfg => cfg.Including(x => x.Message));
+    }
+
+    [Fact]
+    public async Task AdvanceCommand_NoLevel()
+    {
+        _player.SetPoint(EPoints.Level, 1);
+        
+        await _commandManager.Handle(_connection, $"/a $self");
+        
+        _player.GetPoint(EPoints.Level).Should().Be(2);
+        
+        ((MockedGameConnection) _connection).SentMessages.Should().ContainEquivalentOf(new ChatOutcoming
+        {
+            Message = "You have advanced to level 2"
+        }, cfg => cfg.Including(x => x.Message));
+    }
+    
+    [Fact]
+    public async Task AdvanceCommand_LevelSpecified()
+    {
+        _player.SetPoint(EPoints.Level, 1);
+        
+        await _commandManager.Handle(_connection, $"/a $self 10");
+        
+        _player.GetPoint(EPoints.Level).Should().Be(11);
+        
+        ((MockedGameConnection) _connection).SentMessages.Should().ContainEquivalentOf(new ChatOutcoming
+        {
+            Message = "You have advanced to level 11"
+        }, cfg => cfg.Including(x => x.Message));
+    }
+    
+    [Fact]
+    public async Task AdvanceCommand_OtherTarget()
+    {
+        var player2 = ActivatorUtilities.CreateInstance<PlayerEntity>(_services, _playerDataFaker.Generate());
+        player2.SetPoint(EPoints.Level, 1);
+        
+        var world = await PrepareWorldAsync();
+        world.SpawnEntity(player2);
+        
+        await _commandManager.Handle(_connection, $"/a {player2.Player.Name} 4");
+        
+        player2.GetPoint(EPoints.Level).Should().Be(5);
+        
+        ((MockedGameConnection) _connection).SentMessages.Should().ContainEquivalentOf(new ChatOutcoming
+        {
+            Message = "You have advanced to level 5"
         }, cfg => cfg.Including(x => x.Message));
     }
 }

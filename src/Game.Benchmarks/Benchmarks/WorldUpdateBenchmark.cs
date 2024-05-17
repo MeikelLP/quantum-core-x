@@ -1,4 +1,4 @@
-﻿using BenchmarkDotNet.Attributes;
+using BenchmarkDotNet.Attributes;
 using Core.Persistence.Extensions;
 using Game.Caching.Extensions;
 using Microsoft.Extensions.Configuration;
@@ -59,8 +59,13 @@ public class WorldUpdateBenchmark
                             provider.GetRequiredService<ICacheManager>(), world,
                             provider.GetRequiredService<IOptions<HostingOptions>>(),
                             provider.GetRequiredService<ILogger<Map>>(),
-                            provider.GetRequiredService<ISpawnPointProvider>(), "test_map", 0, 0, 1024, 1024)
+                            provider.GetRequiredService<ISpawnPointProvider>(), 
+                            provider.GetRequiredService<IDropProvider>(),
+                            provider.GetRequiredService<IItemManager>(),
+                            "test_map", 0, 0, 1024, 1024
+                        )
                     });
+                        
                 return mock.Object;
             }, ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(ICacheManager), _ =>

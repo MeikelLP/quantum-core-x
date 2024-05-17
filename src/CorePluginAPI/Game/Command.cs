@@ -1,6 +1,6 @@
 ﻿namespace QuantumCore.API.Game
 {
-    [AttributeUsage(AttributeTargets.Class)]
+    [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
     public class CommandAttribute : Attribute
     {
         public CommandAttribute(string name, string description)
