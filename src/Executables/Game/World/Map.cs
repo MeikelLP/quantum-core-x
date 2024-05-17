@@ -1,4 +1,4 @@
-﻿using System.Collections.Concurrent;
+using System.Collections.Concurrent;
 using System.Security.Cryptography;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -27,6 +27,8 @@ namespace QuantumCore.Game.World
         public uint UnitY => PositionY / MapUnit;
         public uint Width { get; private set; }
         public uint Height { get; private set; }
+
+        public IWorld World => _world;
         public IReadOnlyCollection<IEntity> Entities => _entities;
 
         private readonly List<IEntity> _entities = new();
@@ -44,10 +46,12 @@ namespace QuantumCore.Game.World
         private readonly ILogger _logger;
         private readonly ISpawnPointProvider _spawnPointProvider;
         private readonly HostingOptions _options;
+        private readonly IDropProvider _dropProvider;
+        private readonly IItemManager _itemManager;
 
         public Map(IMonsterManager monsterManager, IAnimationManager animationManager, ICacheManager cacheManager,
             IWorld world, IOptions<HostingOptions> options, ILogger logger, ISpawnPointProvider spawnPointProvider,
-            string name, uint x, uint y, uint width, uint height)
+            IDropProvider dropProvider, IItemManager itemManager, string name, uint x, uint y, uint width, uint height)
         {
             _monsterManager = monsterManager;
             _animationManager = animationManager;
@@ -55,6 +59,8 @@ namespace QuantumCore.Game.World
             _world = world;
             _logger = logger;
             _spawnPointProvider = spawnPointProvider;
+            _dropProvider = dropProvider;
+            _itemManager = itemManager;
             _options = options.Value;
             Name = name;
             PositionX = x;
@@ -75,7 +81,7 @@ namespace QuantumCore.Game.World
             _spawnPoints.AddRange(await _spawnPointProvider.GetSpawnPointsForMap(Name));
 
             _logger.LogDebug("Loaded {SpawnPointsCount} spawn points for map {MapName}", _spawnPoints.Count, Name);
-
+            
             // Populate map
             foreach (var spawnPoint in _spawnPoints)
             {
@@ -281,7 +287,8 @@ namespace QuantumCore.Game.World
                 baseY += RandomNumberGenerator.GetInt32(-spawnPoint.RangeX, spawnPoint.RangeY);
             }
 
-            var monster = new MonsterEntity(_monsterManager, _animationManager, _world, _logger, id,
+            var monster = new MonsterEntity(_monsterManager, _dropProvider, _animationManager, this, _logger, _itemManager,
+                id,
                 (int) (PositionX + (baseX + RandomNumberGenerator.GetInt32(-SPAWN_BASE_OFFSET, SPAWN_BASE_OFFSET)) *
                     SPAWN_POSITION_MULTIPLIER),
                 (int) (PositionY + (baseY + RandomNumberGenerator.GetInt32(-SPAWN_BASE_OFFSET, SPAWN_BASE_OFFSET)) *
@@ -321,10 +328,10 @@ namespace QuantumCore.Game.World
         /// <param name="x">Position X</param>
         /// <param name="y">Position Y</param>
         /// <param name="amount">Only used for gold as we have a higher limit here</param>
-        public void AddGroundItem(ItemInstance item, int x, int y, uint amount = 0)
+        /// <param name="ownerName"></param>
+        public void AddGroundItem(ItemInstance item, int x, int y, uint amount = 0, string? ownerName = null)
         {
-            var groundItem = new GroundItem(_animationManager, _world.GenerateVid(), item, amount)
-            {
+            var groundItem = new GroundItem(_animationManager, _world.GenerateVid(), item, amount, ownerName) {
                 PositionX = x,
                 PositionY = y
             };

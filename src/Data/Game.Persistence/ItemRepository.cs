@@ -1,6 +1,7 @@
-﻿#nullable enable
+#nullable enable
 
 using Microsoft.EntityFrameworkCore;
+using QuantumCore.API;
 using QuantumCore.API.Core.Models;
 using QuantumCore.Game.Persistence.Extensions;
 

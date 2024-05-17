@@ -4,6 +4,7 @@ using QuantumCore.API.Game;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.World;
 using QuantumCore.Core.Utils;
+using QuantumCore.Caching;
 using QuantumCore.Extensions;
 using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Packets;
@@ -30,7 +31,9 @@ namespace QuantumCore.Game.Commands
             context.Player.SendChatInfo("Going back to character selection. Please wait.");
 
             // todo implement wait
-
+            
+            await context.Player.CalculatePlayedTimeAsync();
+            
             await _world.DespawnPlayerAsync(context.Player);
             context.Player.Connection.SetPhase(EPhases.Select);
 

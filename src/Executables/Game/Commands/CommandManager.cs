@@ -51,13 +51,28 @@ namespace QuantumCore.Game.Commands
 
             foreach (var type in types)
             {
-                var cmdAttr = type.GetCustomAttribute<CommandAttribute>();
+                var cmdAttrs = type.GetCustomAttributes<CommandAttribute>().ToList();
+                if (cmdAttrs.Count > 0)
+                {
+                    foreach (var cmdAttr in cmdAttrs)
+                    {
+                        ProcessCommandAttribute(type, cmdAttr);
+                    }
+                }
+                else
+                {
+                    _logger.LogWarning("Command {Type} does not have a CommandAttribute", type.Name);
+                }
+            }
+
+            void ProcessCommandAttribute(Type type, CommandAttribute? cmdAttr)
+            {
                 if (cmdAttr is null)
                 {
                     _logger.LogWarning(
                         "Command handler {Type} is implementing {HandlerInterface} but is missing a {AttributeName}",
                         type.Name, nameof(ICommandHandler), nameof(CommandAttribute));
-                    continue;
+                    return;
                 }
 
                 var cmd = cmdAttr.Name;

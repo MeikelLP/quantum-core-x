@@ -1,4 +1,4 @@
-﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 using QuantumCore.API.Core.Models;
 using QuantumCore.Auth.Persistence.Entities;
 using QuantumCore.Auth.Persistence.Extensions;

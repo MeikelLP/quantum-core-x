@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace QuantumCore.Core.Utils
+﻿namespace QuantumCore.Core.Utils
 {
     public static class MathUtils
     {
@@ -26,6 +24,12 @@ namespace QuantumCore.Core.Utils
             var rotationDegress = rotationRadians * (180 / Math.PI);
             if (rotationDegress < 0) rotationDegress += 360;
             return rotationDegress;
+        }
+        
+        public static int MinMax(int min, int value, int max)
+        {
+            var temp = (min > value ? min : value);
+            return (max < temp) ? max : temp;
         }
     }
 }

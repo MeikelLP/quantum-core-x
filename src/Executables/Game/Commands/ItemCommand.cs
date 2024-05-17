@@ -4,6 +4,7 @@ using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game;
 using QuantumCore.Caching;
 using QuantumCore.Extensions;
+using QuantumCore.Game.Extensions;
 
 namespace QuantumCore.Game.Commands
 {

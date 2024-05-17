@@ -2,7 +2,6 @@
 using QuantumCore.API;
 using QuantumCore.API.PluginTypes;
 using QuantumCore.Game.Packets;
-using QuantumCore.Game.PlayerUtils;
 
 namespace QuantumCore.Game.PacketHandlers.Game;
 

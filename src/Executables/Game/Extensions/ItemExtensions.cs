@@ -4,7 +4,7 @@ using QuantumCore.Caching;
 using QuantumCore.Game.Persistence;
 using QuantumCore.Game.PlayerUtils;
 
-namespace QuantumCore.Extensions;
+namespace QuantumCore.Game.Extensions;
 
 public static class ItemExtensions
 {
