@@ -8,7 +8,7 @@ using QuantumCore.Extensions;
 using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Packets;
 
-namespace QuantumCore.Game.Commands.Guild
+namespace QuantumCore.Game.Commands
 {
     [Command("phase_select", "Go back to character selection")]
     [CommandNoPermission]
