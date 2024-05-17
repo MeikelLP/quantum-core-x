@@ -1,4 +1,4 @@
-﻿using System.Collections.Immutable;
+using System.Collections.Immutable;
 using QuantumCore.API.Game.World;
 using QuantumCore.Networking;
 

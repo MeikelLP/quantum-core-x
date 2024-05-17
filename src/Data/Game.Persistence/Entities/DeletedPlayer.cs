@@ -1,13 +1,11 @@
 ﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace QuantumCore.Game.Persistence.Entities;
 
-[Table("deleted_players")]
 public class DeletedPlayer
 {
     public required Guid Id { get; init; }

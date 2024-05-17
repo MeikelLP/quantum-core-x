@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using QuantumCore.API.PluginTypes;
 using QuantumCore.Networking;
 using Serilog;
+using Serilog.Events;
 using Weikio.PluginFramework.Abstractions;
 using Weikio.PluginFramework.Microsoft.DependencyInjection;
 
@@ -20,6 +21,7 @@ public static class ServiceExtensions
     /// </summary>
     /// <param name="services"></param>
     /// <param name="pluginCatalog"></param>
+    /// <param name="configuration"></param>
     /// <returns></returns>
     public static IServiceCollection AddCoreServices(this IServiceCollection services, IPluginCatalog pluginCatalog,
         IConfiguration configuration)
@@ -61,11 +63,8 @@ public static class ServiceExtensions
         var config = new LoggerConfiguration();
 
         // add minimum log level for the instances
-#if DEBUG
-        config.MinimumLevel.Verbose();
-#else
-            config.MinimumLevel.Information();
-#endif
+        config.MinimumLevel.Information()
+            .MinimumLevel.Override("Microsoft.EntityFrameworkCore.Query", LogEventLevel.Warning);
 
         // add destructuring for entities
         config.Destructure.ToMaximumDepth(4)

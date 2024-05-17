@@ -22,7 +22,7 @@ namespace QuantumCore.Auth
             _cacheManager = cacheManager;
         }
 
-        protected async override Task ExecuteAsync(CancellationToken token)
+        protected override async Task ExecuteAsync(CancellationToken token)
         {
             // Register auth server features
             RegisterNewConnectionListener(NewConnection);

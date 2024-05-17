@@ -1,4 +1,5 @@
-﻿using Core.Persistence.Extensions;
+using System.Text;
+using Core.Persistence.Extensions;
 using Game.Caching.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -22,6 +23,8 @@ hostBuilder.Services.AddGameCaching();
 hostBuilder.Services.AddHostedService<GameServer>();
 hostBuilder.Services.AddSingleton<IGameServer>(provider =>
     provider.GetServices<IHostedService>().OfType<GameServer>().Single());
+
+Encoding.RegisterProvider(CodePagesEncodingProvider.Instance); // register korean locale
 
 var host = hostBuilder.Build();
 await using (var scope = host.Services.CreateAsyncScope())

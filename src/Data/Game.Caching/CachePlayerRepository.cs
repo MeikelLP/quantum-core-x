@@ -13,7 +13,7 @@ public class CachePlayerRepository : ICachePlayerRepository
         _cacheManager = cacheManager;
     }
 
-    public async Task<PlayerData?> GetPlayerAsync(Guid playerId)
+    public async Task<PlayerData?> GetPlayerAsync(uint playerId)
     {
         var playerKey = $"player:{playerId.ToString()}";
         if (await _cacheManager.Exists(playerKey) > 0)
@@ -24,9 +24,9 @@ public class CachePlayerRepository : ICachePlayerRepository
         return null;
     }
 
-    public async Task<PlayerData?> GetPlayerAsync(Guid account, byte slot)
+    public async Task<PlayerData?> GetPlayerAsync(Guid accountId, byte slot)
     {
-        var key = $"players:{account.ToString()}:{slot}";
+        var key = $"players:{accountId.ToString()}:{slot}";
         return await _cacheManager.Get<PlayerData>(key);
     }
 

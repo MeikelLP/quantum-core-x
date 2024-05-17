@@ -30,7 +30,7 @@ public class DbPlayerRepository : IDbPlayerRepository
 
     public async Task CreateAsync(PlayerData player)
     {
-        _db.Add(new Player
+        var entity = new Player
         {
             Id = player.Id,
             AccountId = player.AccountId,
@@ -57,8 +57,10 @@ public class DbPlayerRepository : IDbPlayerRepository
             Empire = player.Empire,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
-        });
+        };
+        _db.Add(entity);
         await _db.SaveChangesAsync();
+        player.Id = entity.Id;
     }
 
     public async Task DeletePlayerAsync(PlayerData player)
@@ -66,7 +68,7 @@ public class DbPlayerRepository : IDbPlayerRepository
         await _db.Players.Where(x => x.Id == player.Id).ExecuteDeleteAsync();
     }
 
-    public async Task UpdateEmpireAsync(Guid accountId, Guid playerId, byte empire)
+    public async Task UpdateEmpireAsync(Guid accountId, uint playerId, byte empire)
     {
         await _db.Players
             .Where(x => x.AccountId == accountId && x.Id == playerId)
@@ -103,7 +105,7 @@ public class DbPlayerRepository : IDbPlayerRepository
         await _db.SaveChangesAsync();
     }
 
-    public async Task<PlayerData?> GetPlayerAsync(Guid playerId)
+    public async Task<PlayerData?> GetPlayerAsync(uint playerId)
     {
         return await _db.Players
             .Where(x => x.Id == playerId)

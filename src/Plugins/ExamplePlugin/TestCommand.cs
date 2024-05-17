@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using QuantumCore.API.Game;
+﻿using QuantumCore.API.Game;
 using QuantumCore.API.Game.World;
 
 namespace ExamplePlugin

@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using QuantumCore.API;
@@ -19,7 +19,7 @@ public class InventoryTests
             .GetItem(Arg.Any<uint>())
             .Returns(new ItemData
             {
-                WearFlags = (uint)EWearFlags.Body,
+                WearFlags = (uint) EWearFlags.Body,
                 Size = 1
             });
         var inv = new Inventory(itemManager,
@@ -27,8 +27,8 @@ public class InventoryTests
         var changed = 0;
         inv.OnSlotChanged += (_, _) => changed++;
 
-        var pos = (ushort)inv.EquipmentWindow.GetWearPosition(itemManager, 1);
-        inv.SetEquipment(new ItemInstance { ItemId = 1 }, pos);
+        var pos = (ushort) inv.EquipmentWindow.GetWearPosition(itemManager, 1);
+        inv.SetEquipment(new ItemInstance {ItemId = 1}, pos);
 
         inv.EquipmentWindow.Body!.ItemId.Should().Be(1);
         changed.Should().Be(1);
