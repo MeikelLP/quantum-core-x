@@ -1,10 +1,10 @@
-using Data.Auth.Tests.Fixtures;
+﻿using Data.Auth.Tests.Fixtures;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Moq;
+using NSubstitute;
 using QuantumCore;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
@@ -116,10 +116,9 @@ public class AccountManagerTests : IClassFixture<RedisFixture>, IClassFixture<Da
     [Fact]
     public async Task CreateAccount_DuplicateUserName()
     {
-        var accountRepositoryMock = new Mock<IAccountRepository>();
-        accountRepositoryMock.Setup(x => x.FindByNameAsync("testificate"))
-            .ReturnsAsync(() => new AccountData());
-        var accountManager = new AccountManager(accountRepositoryMock.Object, _passwordHasher);
+        var accountRepositoryMock = Substitute.For<IAccountRepository>();
+        accountRepositoryMock.FindByNameAsync("testificate").Returns(new AccountData());
+        var accountManager = new AccountManager(accountRepositoryMock, _passwordHasher);
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
             accountManager.CreateAsync("testificate", "testificate", "some@gmail.com", "1234567"));
     }
