@@ -1,9 +1,8 @@
-using System.Collections.Immutable;
 using AutoBogus;
 using Bogus;
-using Core.Tests.Extensions;
 using FluentAssertions;
 using FluentAssertions.Equivalency;
+using Game.Tests.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -29,13 +28,12 @@ using QuantumCore.Game.World;
 using QuantumCore.Game.World.Entities;
 using QuantumCore.Networking;
 using Weikio.PluginFramework.Catalogs;
-using Xunit;
 using Xunit.Abstractions;
 
 // cannot cast MockedGameConnection to IGameConnection ???
 #pragma warning disable CS8602
 
-namespace Core.Tests;
+namespace Game.Tests;
 
 // Custom mock instead of Mock<T> because IPacketSerializable for IGameConnection.Send<T> cannot be used as generic
 // parameter
@@ -108,7 +106,7 @@ public class CommandTests : IAsyncLifetime
             new AutoFaker<MonsterData>().RuleFor(x => x.Id, _ => callerInfo.Arg<uint>()).Generate());
         var experienceManagerMock = Substitute.For<IExperienceManager>();
         experienceManagerMock.GetNeededExperience(Arg.Any<byte>()).Returns(1000u);
-        experienceManagerMock.MaxLevel.Returns((byte)100);
+        experienceManagerMock.MaxLevel.Returns((byte) 100);
         var jobManagerMock = Substitute.For<IJobManager>();
         jobManagerMock.Get(Arg.Any<byte>()).Returns(new Job());
         var itemManagerMock = Substitute.For<IItemManager>();
@@ -152,6 +150,7 @@ public class CommandTests : IAsyncLifetime
             .AddSingleton<IConfiguration>(_ => new ConfigurationBuilder()
                 .AddInMemoryCollection(new Dictionary<string, string?>
                 {
+                    {"Game:Commands:StrictMode", "true"},
                     {"maps:0", "map_a2"},
                     {"maps:1", "map_b2"},
                     {"empire:0:x", "10"},
@@ -248,7 +247,7 @@ public class CommandTests : IAsyncLifetime
     {
         var item = new ItemInstance {ItemId = 1, Count = 1};
         var wearSlot = _player.Inventory.EquipmentWindow.GetWearPosition(_itemManager, item.ItemId);
-        
+
         _player.SetItem(item, (byte) WindowType.Inventory, (ushort) wearSlot);
 
         await _commandManager.Handle(_connection, "debug_damage");
@@ -456,7 +455,7 @@ public class CommandTests : IAsyncLifetime
         world.SpawnEntity(_player);
 
         world.GetPlayer(_player.Name).Should().NotBeNull();
-        
+
         _player.Player.PlayTime = 0;
         _connection.Server.ServerTime.Returns(60000); // 1 minute in ms
 
@@ -477,7 +476,7 @@ public class CommandTests : IAsyncLifetime
         {
             Phase = EPhases.Select
         });
-        
+
         _player.Player.PlayTime = 0;
         _connection.Server.ServerTime.Returns(60000);
 
@@ -631,12 +630,12 @@ public class CommandTests : IAsyncLifetime
             MessageType = ChatMessageTypes.Command
         }, cfg => cfg.Including(x => x.Message));
     }
-    
+
     [Fact]
     public async Task UserCommand()
     {
         _gameServer.Connections.Returns([_connection]);
-        
+
         await _commandManager.Handle(_connection, "/user");
 
         ((MockedGameConnection) _connection).SentMessages.Should().ContainEquivalentOf(new ChatOutcoming
@@ -650,45 +649,45 @@ public class CommandTests : IAsyncLifetime
     public async Task AdvanceCommand_NoLevel()
     {
         _player.SetPoint(EPoints.Level, 1);
-        
+
         await _commandManager.Handle(_connection, $"/a $self");
-        
+
         _player.GetPoint(EPoints.Level).Should().Be(2);
-        
+
         ((MockedGameConnection) _connection).SentMessages.Should().ContainEquivalentOf(new ChatOutcoming
         {
             Message = "You have advanced to level 2"
         }, cfg => cfg.Including(x => x.Message));
     }
-    
+
     [Fact]
     public async Task AdvanceCommand_LevelSpecified()
     {
         _player.SetPoint(EPoints.Level, 1);
-        
+
         await _commandManager.Handle(_connection, $"/a $self 10");
-        
+
         _player.GetPoint(EPoints.Level).Should().Be(11);
-        
+
         ((MockedGameConnection) _connection).SentMessages.Should().ContainEquivalentOf(new ChatOutcoming
         {
             Message = "You have advanced to level 11"
         }, cfg => cfg.Including(x => x.Message));
     }
-    
+
     [Fact]
     public async Task AdvanceCommand_OtherTarget()
     {
         var player2 = ActivatorUtilities.CreateInstance<PlayerEntity>(_services, _playerDataFaker.Generate());
         player2.SetPoint(EPoints.Level, 1);
-        
+
         var world = await PrepareWorldAsync();
         world.SpawnEntity(player2);
-        
+
         await _commandManager.Handle(_connection, $"/a {player2.Player.Name} 4");
-        
+
         player2.GetPoint(EPoints.Level).Should().Be(5);
-        
+
         ((MockedGameConnection) _connection).SentMessages.Should().ContainEquivalentOf(new ChatOutcoming
         {
             Message = "You have advanced to level 5"
