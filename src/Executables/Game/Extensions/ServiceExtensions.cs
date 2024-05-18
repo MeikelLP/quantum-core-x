@@ -25,6 +25,7 @@ public static class ServiceExtensions
         });
         services.AddGameDatabase();
         services.AddGameCaching();
+        services.AddGameCommands();
         services.AddOptions<AuthOptions>().BindConfiguration("Auth");
         services.AddOptions<GameOptions>().BindConfiguration("Game");
         services.AddHttpClient("", (provider, http) =>
@@ -43,7 +44,6 @@ public static class ServiceExtensions
         services.AddSingleton<IAtlasProvider, AtlasProvider>();
         services.AddSingleton<IAnimationManager, AnimationManager>();
         services.AddSingleton<IExperienceManager, ExperienceManager>();
-        services.AddSingleton<ICommandManager, CommandManager>();
         services.AddSingleton<IChatManager, ChatManager>();
         services.AddSingleton<IQuestManager, QuestManager>();
         services.AddSingleton<IWorld, World.World>();

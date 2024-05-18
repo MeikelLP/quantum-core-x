@@ -1,13 +1,10 @@
-﻿using System.Drawing;
-using Game.Caching;
-using Microsoft.Extensions.Configuration;
+﻿using Game.Caching;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using QuantumCore.API;
 using QuantumCore.API.Core.Models;
-using QuantumCore.Core.Utils;
 using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Persistence;
-using QuantumCore.Game.PlayerUtils;
 
 namespace QuantumCore.Game;
 
@@ -18,7 +15,7 @@ public class PlayerManager : IPlayerManager
     private readonly ILogger<PlayerManager> _logger;
     private readonly IJobManager _jobManager;
     private readonly GameOptions _gameOptions;
-    
+
     public PlayerManager(IDbPlayerRepository dbPlayerRepository, ICachePlayerRepository cachePlayerRepository,
         ILogger<PlayerManager> logger, IJobManager jobManager, IOptions<GameOptions> gameOptions)
     {

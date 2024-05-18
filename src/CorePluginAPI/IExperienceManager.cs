@@ -1,4 +1,4 @@
-﻿namespace QuantumCore.Game.PlayerUtils;
+﻿namespace QuantumCore.API;
 
 public interface IExperienceManager
 {

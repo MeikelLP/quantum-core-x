@@ -7,7 +7,6 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="CommandLineParser" Version="2.9.1" />
       <PackageReference Include="Enums.NET" Version="5.0.0" />
       <PackageReference Include="Microsoft.Extensions.Http" Version="8.0.0"/>
     </ItemGroup>
@@ -21,6 +20,7 @@
       <ProjectReference Include="..\..\Data\Game.Caching\Game.Caching.csproj" />
       <ProjectReference Include="..\..\Data\Game.Persistence\Game.Persistence.csproj" />
       <ProjectReference Include="..\..\Core.Networking.Generators\Core.Networking.Generators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+        <ProjectReference Include="..\..\Libraries\Game.Commands\Game.Commands.csproj"/>
     </ItemGroup>
 
     <ItemGroup>

@@ -1,6 +1,6 @@
 ﻿using QuantumCore.API.Game.Types;
 
-namespace QuantumCore.Game.PlayerUtils;
+namespace QuantumCore.API;
 
 public class Job
 {
