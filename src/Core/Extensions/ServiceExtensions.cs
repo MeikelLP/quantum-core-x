@@ -37,7 +37,9 @@ public static class ServiceExtensions
                             x.GetCustomAttribute<PacketAttribute>()?.Direction.HasFlag(EDirection.Incoming) == true)
                 .OrderBy(x => x.FullName)
                 .ToArray();
-            var handlerTypes = AppDomain.CurrentDomain.GetAssemblies().SelectMany(x => x.ExportedTypes)
+            var handlerTypes = AppDomain.CurrentDomain.GetAssemblies()
+                .Where(x => !x.IsDynamic)
+                .SelectMany(x => x.ExportedTypes)
                 .Where(x =>
                     x.IsAssignableTo(typeof(IPacketHandler)) &&
                     x is {IsClass: true, IsAbstract: false, IsInterface: false})
