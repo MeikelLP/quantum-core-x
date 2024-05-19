@@ -6,10 +6,7 @@ namespace QuantumCore.Auth.Packets
     [PacketGenerator]
     public partial class LoginFailed
     {
-        [Field(0)]
-        public byte Unknown { get; set; }
-
-        [Field(1, Length = 9)]
+        [Field(0, Length = 9)]
         public string Status { get; set; } = "";
     }
 }

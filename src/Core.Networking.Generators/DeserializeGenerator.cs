@@ -18,7 +18,8 @@ internal class DeserializeGenerator
     public string Generate(TypeDeclarationSyntax type, string dynamicByteIndex)
     {
         var source = new StringBuilder();
-        source.AppendLine($"        public void Deserialize(ReadOnlySpan<byte> bytes, in int offset = 0)");
+        source.AppendLine(
+            $"        public void Deserialize(ReadOnlySpan<byte> bytes, in int offset = 0)");
         source.AppendLine("        {");
         source.AppendLine(GenerateMethodBody(type, dynamicByteIndex, "            ", false));
         source.AppendLine("        }");
@@ -101,7 +102,7 @@ internal class DeserializeGenerator
             return $"({enumType}) await stream.ReadEnumFromStreamAsync<{enumType}>(buffer)";
         }
 
-        if (field.IsArray && ((IArrayTypeSymbol)field.SemanticType).ElementType.Name == "Byte")
+        if (field.IsArray && ((IArrayTypeSymbol) field.SemanticType).ElementType.Name == "Byte")
         {
             // special handling for byte arrays
             // other array values are returned as usual when in stream mode
@@ -135,7 +136,8 @@ internal class DeserializeGenerator
             nameof(Int32) or
             nameof(Int64) or
             nameof(UInt64) or
-            nameof(Double))
+            nameof(Double) or
+            nameof(Boolean))
         {
             return $"await stream.ReadValueFromStreamAsync<{typeName}>(buffer)";
         }
@@ -303,9 +305,9 @@ internal class DeserializeGenerator
             return $"bytes[{offsetStr}]";
         }
 
-        if (GeneratorConstants.ConvertTypes.Contains(namedTypeSymbol.Name))
+        if (namedTypeSymbol.GetFullName() == "System.Boolean")
         {
-            return $"System.Convert.To{typeName}(bytes[{offsetStr}])";
+            return $"bytes[{offsetStr}] == 1";
         }
 
         if (namedTypeSymbol.Name == "String")

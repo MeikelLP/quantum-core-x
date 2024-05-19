@@ -1,8 +1,7 @@
 using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game;
-using QuantumCore.API.Game.World;
 using QuantumCore.Caching;
-using QuantumCore.Extensions;
+using QuantumCore.Game.Extensions;
 
 namespace QuantumCore.Game.Commands
 {
@@ -34,23 +33,11 @@ namespace QuantumCore.Game.Commands
             foreach (var item in items)
             {
                 ctx.Player.RemoveItem(item);
-                ctx.Player.SendRemoveItem(item.Window, (ushort)item.Position);
+                ctx.Player.SendRemoveItem(item.Window, (ushort) item.Position);
                 await item.Destroy(_cacheManager);
             }
 
             ctx.Player.SendInventory();
         }
     }
-
-    public interface ICommandHandler
-    {
-        Task ExecuteAsync(CommandContext context);
-    }
-    public interface ICommandHandler<T>
-    {
-        Task ExecuteAsync(CommandContext<T> context);
-    }
-
-    public record struct CommandContext<T>(IPlayerEntity Player, T Arguments);
-    public record struct CommandContext(IPlayerEntity Player);
 }

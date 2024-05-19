@@ -16,7 +16,7 @@ public interface IPlayerManager
     /// First tries to load player from cache then from database.
     /// If player is not found in cache but in database: The cache will be updated.
     /// </summary>
-    Task<PlayerData?> GetPlayer(Guid playerId);
+    Task<PlayerData?> GetPlayer(uint playerId);
 
     /// <summary>
     /// Gets all players for account ID
@@ -32,4 +32,6 @@ public interface IPlayerManager
     Task<PlayerData> CreateAsync(Guid accountId, string playerName, byte @class, byte appearance);
 
     Task DeletePlayerAsync(PlayerData player);
+    Task SetPlayerEmpireAsync(Guid accountId, uint playerId, byte empire);
+    Task SetPlayerAsync(PlayerData data);
 }

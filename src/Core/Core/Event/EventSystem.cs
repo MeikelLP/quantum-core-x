@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-// using Prometheus; // TODO
+﻿// using Prometheus; // TODO
 
 namespace QuantumCore.Core.Event
 {

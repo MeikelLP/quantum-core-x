@@ -22,22 +22,41 @@ internal class SerializeGenerator
         var source = new StringBuilder();
         source.AppendLine("        public void Serialize(byte[] bytes, in int offset = 0)");
         source.AppendLine("        {");
-        source.AppendLine(GenerateWriteHeader(header, subHeader));
-        var staticByteIndex = subHeader is not null ? 2 : 1;
-        foreach (var field in fields.ToArray())
+        source.AppendLine(GenerateWriteHeader(header));
+        var staticByteIndex = 1;
+        if (fields.Length == 0 && subHeader is not null)
         {
-            var fieldExpression = fields.Any(x => x.SizeFieldName == field.Name)
-                ? "this.GetSize()"
-                : $"this.{field.Name}";
+            source.AppendLine(
+                $"            bytes[offset + 1] = 0x{Convert.ToString(subHeader.Value.Value, 16).PadLeft(2, '0')};");
+            staticByteIndex++;
+        }
+        else
+        {
+            for (var index = 0; index < fields.Length; index++)
+            {
+                var field = fields[index];
+                var fieldExpression = fields.Any(x => x.SizeFieldName == field.Name)
+                    ? "this.GetSize()"
+                    : $"this.{field.Name}";
 
-            var line = GenerateMethodLine(field, fieldExpression, ref staticByteIndex, dynamicByteIndex, "", "            ");
-            source.AppendLine(line);
+                if (subHeader is not null && subHeader.Value.Position == index)
+                {
+                    source.AppendLine(
+                        $"            bytes[offset + {staticByteIndex}] = 0x{Convert.ToString(subHeader.Value.Value, 16).PadLeft(2, '0')};");
+                    staticByteIndex++;
+                }
+
+                var line = GenerateMethodLine(field, fieldExpression, ref staticByteIndex, dynamicByteIndex, "",
+                    "            ");
+                source.AppendLine(line);
+            }
         }
 
         if (hasSequence)
         {
             source.AppendLine($"            bytes[offset + {staticByteIndex}{dynamicByteIndex}] = default;");
         }
+
         source.AppendLine("        }");
         source.AppendLine();
         GenerateGetSizeMethod(type, source, dynamicByteIndex.ToString(), subHeader is not null, hasSequence);
@@ -45,16 +64,20 @@ internal class SerializeGenerator
         return source.ToString();
     }
 
-    internal string GenerateMethodLine(FieldData field, string fieldExpression, ref int offset, StringBuilder dynamicOffset, string tempDynamicOffset, string indentPrefix)
+    internal string GenerateMethodLine(FieldData field, string fieldExpression, ref int offset,
+        StringBuilder dynamicOffset, string tempDynamicOffset, string indentPrefix)
     {
         var finalLine = field switch
         {
             // handle Custom[]
-            { IsArray: true } => GetLineForArray(field, fieldExpression, ref offset, dynamicOffset, tempDynamicOffset, indentPrefix),
+            {IsArray: true} => GetLineForArray(field, fieldExpression, ref offset, dynamicOffset, tempDynamicOffset,
+                indentPrefix),
             // handle string
-            { SemanticType.Name: "String" } => GetLineForString(field, fieldExpression, ref offset, dynamicOffset, tempDynamicOffset, indentPrefix),
+            {SemanticType.Name: "String"} => GetLineForString(field, fieldExpression, ref offset, dynamicOffset,
+                tempDynamicOffset, indentPrefix),
             // handle enum
-            { IsEnum: true } => GetLineForSingleValue(field, (INamedTypeSymbol)field.SemanticType, fieldExpression, ref offset, dynamicOffset, tempDynamicOffset, indentPrefix),
+            {IsEnum: true} => GetLineForSingleValue(field, (INamedTypeSymbol) field.SemanticType, fieldExpression,
+                ref offset, dynamicOffset, tempDynamicOffset, indentPrefix),
             // misc
             _ => GenerateLineForMisc(field, fieldExpression, ref offset, dynamicOffset, tempDynamicOffset, indentPrefix)
         };
@@ -69,7 +92,8 @@ internal class SerializeGenerator
         return finalLine;
     }
 
-    internal static string GetLineForString(FieldData fieldData, string fieldExpression, ref int offset, StringBuilder dynamicOffset,
+    internal static string GetLineForString(FieldData fieldData, string fieldExpression, ref int offset,
+        StringBuilder dynamicOffset,
         string tempDynamicOffset, string indentPrefix)
     {
         var offsetStr = $"offset + {offset}{dynamicOffset}{tempDynamicOffset}";
@@ -118,8 +142,8 @@ internal class SerializeGenerator
         if (GeneratorConstants.SupportedTypesByBitConverter.Contains(type) || GeneratorConstants.ConvertTypes.Contains(type))
         {
             if (type is "Int32" or "UInt32" or
-                        "Int16" or "UInt16" or
-                        "Int64" or "UInt64")
+                "Int16" or "UInt16" or
+                "Int64" or "UInt64")
             {
                 var sb = new StringBuilder();
                 var elementSize = GeneratorConstants.GetSizeOfPrimitiveType(type);
@@ -142,12 +166,9 @@ internal class SerializeGenerator
             }
             else
             {
-                return $"{indentPrefix}System.BitConverter.GetBytes({cast}{fieldExpression}).CopyTo(bytes, {offsetStr});";
+                return
+                    $"{indentPrefix}System.BitConverter.GetBytes({cast}{fieldExpression}).CopyTo(bytes, {offsetStr});";
             }
-        }
-        if (GeneratorConstants.ConvertTypes.Contains(type))
-        {
-            return $"{indentPrefix}bytes[{offsetStr}] = {cast}{fieldExpression};";
         }
 
         if (GeneratorConstants.NoCastTypes.Contains(type))
@@ -159,13 +180,20 @@ internal class SerializeGenerator
 
         if (type == "String")
         {
-            return GetLineForString(fieldData, fieldExpression, ref offset, dynamicOffset, tempDynamicOffset, indentPrefix);
+            return GetLineForString(fieldData, fieldExpression, ref offset, dynamicOffset, tempDynamicOffset,
+                indentPrefix);
+        }
+
+        if (namedTypeSymbol.GetFullName() == "System.Boolean")
+        {
+            return $"{indentPrefix}bytes[{offsetStr}] = (byte)({fieldExpression} ? 1 : 0);";
         }
 
         throw new InvalidOperationException($"Don't know how to handle type {namedTypeSymbol.Name}");
     }
 
-    private string GenerateLineForMisc(FieldData field, string fieldExpression, ref int offset, StringBuilder dynamicOffset,
+    private string GenerateLineForMisc(FieldData field, string fieldExpression, ref int offset,
+        StringBuilder dynamicOffset,
         string tempDynamicOffset, string indentPrefix = "")
     {
         if (field.IsCustom)
@@ -174,13 +202,13 @@ internal class SerializeGenerator
             var type = _context.GetTypeDeclaration(field.SemanticType);
             var subFields = _context.GetFieldsOfType(type);
             var lines = new StringBuilder();
-            for (var i = 0; i < subFields.Count; i++)
+            for (var i = 0; i < subFields.Length; i++)
             {
                 var subField = subFields[i];
                 var subLine = GenerateMethodLine(subField, $"{fieldExpression}.{subField.Name}", ref offset,
                     dynamicOffset, tempDynamicOffset, indentPrefix);
 
-                if (i < subFields.Count - 1)
+                if (i < subFields.Length - 1)
                 {
                     lines.AppendLine(subLine);
                 }
@@ -194,7 +222,8 @@ internal class SerializeGenerator
         }
         else if (field.SemanticType is INamedTypeSymbol namedTypeSymbol)
         {
-            return GetLineForSingleValue(field, namedTypeSymbol, fieldExpression, ref offset, dynamicOffset, tempDynamicOffset, indentPrefix);
+            return GetLineForSingleValue(field, namedTypeSymbol, fieldExpression, ref offset, dynamicOffset,
+                tempDynamicOffset, indentPrefix);
         }
 
         throw new NotImplementedException("???");
@@ -207,7 +236,8 @@ internal class SerializeGenerator
         {
             if (field.ArrayLength.HasValue)
             {
-                return GetLineForFixedArray(field, fieldExpression, ref offset, dynamicOffset, tempDynamicOffset, indentPrefix, arr);
+                return GetLineForFixedArray(field, fieldExpression, ref offset, dynamicOffset, tempDynamicOffset,
+                    indentPrefix, arr);
             }
             else
             {
@@ -216,7 +246,7 @@ internal class SerializeGenerator
         }
 
         throw new NotImplementedException(
-            $"Don't know how to handle array of {((IArrayTypeSymbol)field.SemanticType).ElementType}");
+            $"Don't know how to handle array of {((IArrayTypeSymbol) field.SemanticType).ElementType}");
     }
 
     private string GetLineForDynamicArray(FieldData field, string fieldExpression, ref int offset,
@@ -240,7 +270,7 @@ internal class SerializeGenerator
                 var subType = _context.GetTypeDeclaration(arr.ElementType);
                 var subTypes = _context.GetFieldsOfType(subType);
 
-                for (var ii = 0; ii < subTypes.Count; ii++)
+                for (var ii = 0; ii < subTypes.Length; ii++)
                 {
                     var member = subTypes[ii];
                     var subFieldExpression = $"{fieldExpression}[i].{member.Name}";
@@ -248,12 +278,13 @@ internal class SerializeGenerator
                         $" + i * {field.ElementSize}", $"{indentPrefix}    ");
                     lines.AppendLine(line);
                 }
+
                 offset -= field.ElementSize; // reduce the offset after the array to make the offset correct
                 dynamicOffset.Append($" + {fieldExpression}.Length * {field.ElementSize}");
             }
             else
             {
-                var elementType = (INamedTypeSymbol)((IArrayTypeSymbol)field.SemanticType).ElementType;
+                var elementType = (INamedTypeSymbol) ((IArrayTypeSymbol) field.SemanticType).ElementType;
                 var subFieldExpression = $"{fieldExpression}[i]";
                 var line = GetLineForSingleValue(field, elementType, subFieldExpression, ref offset, dynamicOffset,
                     $" + i * {field.ElementSize}", $"{indentPrefix}    ");
@@ -274,7 +305,8 @@ internal class SerializeGenerator
 
         if (subTypeFullName == "System.Byte")
         {
-            return GetLineForFixedByteArray(field, fieldExpression, ref offset, dynamicOffset, tempDynamicOffset, indentPrefix);
+            return GetLineForFixedByteArray(field, fieldExpression, ref offset, dynamicOffset, tempDynamicOffset,
+                indentPrefix);
         }
         else
         {
@@ -286,7 +318,7 @@ internal class SerializeGenerator
                     // recursive call to generate lines for each field in sub type
                     var subType = _context.GetTypeDeclaration(arr.ElementType);
                     var members = _context.GetFieldsOfType(subType);
-                    for (var ii = 0; ii < members.Count; ii++)
+                    for (var ii = 0; ii < members.Length; ii++)
                     {
                         var member = members[ii];
                         var line = GenerateMethodLine(member, $"{fieldExpression}[{i}].{member.Name}", ref offset,
@@ -305,7 +337,7 @@ internal class SerializeGenerator
                 else
                 {
                     var subFieldExpression = $"{fieldExpression}[{i}]";
-                    var elementType = (INamedTypeSymbol)((IArrayTypeSymbol)field.SemanticType).ElementType;
+                    var elementType = (INamedTypeSymbol) ((IArrayTypeSymbol) field.SemanticType).ElementType;
                     var line = GetLineForSingleValue(field, elementType, subFieldExpression, ref offset, dynamicOffset,
                         tempDynamicOffset, indentPrefix);
                     offset += field.ElementSize;
@@ -317,7 +349,8 @@ internal class SerializeGenerator
         return lines.ToString().TrimEnd();
     }
 
-    private void GenerateGetSizeMethod(TypeDeclarationSyntax type, StringBuilder sb, string dynamicSize, bool hasSubHeader, bool hasSequence)
+    private void GenerateGetSizeMethod(TypeDeclarationSyntax type, StringBuilder sb, string dynamicSize,
+        bool hasSubHeader, bool hasSequence)
     {
         var fields = _context.GetFieldsOfType(type);
         var size = GeneratorContext.GetStaticSizeOfType(fields) + 1; // + header
@@ -325,10 +358,12 @@ internal class SerializeGenerator
         {
             size++;
         }
+
         if (hasSequence)
         {
             size++;
         }
+
         sb.AppendLine("        public ushort GetSize()");
         sb.AppendLine("        {");
 
@@ -340,6 +375,7 @@ internal class SerializeGenerator
         {
             dynamicString = $"{dynamicString} + 1";
         }
+
         var body = dynamicString != ""
             ? $"            return (ushort)({size}{dynamicString});"
             : $"            return {size.ToString()};";
@@ -348,16 +384,8 @@ internal class SerializeGenerator
         sb.AppendLine("        }");
     }
 
-    internal static string GenerateWriteHeader(string header, string? subHeader)
+    internal static string GenerateWriteHeader(string header)
     {
-        var sb = new StringBuilder();
-        sb.Append($"            bytes[offset + 0] = {header};");
-        if (subHeader is not null)
-        {
-            sb.AppendLine();
-            sb.Append($"            bytes[offset + 1] = {subHeader};");
-        }
-
-        return sb.ToString();
+        return $"            bytes[offset + 0] = {header};";
     }
 }

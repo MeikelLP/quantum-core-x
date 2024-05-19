@@ -1,7 +1,8 @@
+using System.Net.Http.Json;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
+using QuantumCore.API.Core.Models;
 using QuantumCore.API.PluginTypes;
-using QuantumCore.Auth.Persistence;
 using QuantumCore.Game.Packets;
 
 namespace QuantumCore.Game.PacketHandlers.Select;
@@ -10,13 +11,13 @@ public class DeleteCharacterHandler : IGamePacketHandler<DeleteCharacter>
 {
     private readonly ILogger<DeleteCharacterHandler> _logger;
     private readonly IPlayerManager _playerManager;
-    private readonly IAccountRepository _accountRepository;
+    private readonly HttpClient _http;
 
-    public DeleteCharacterHandler(ILogger<DeleteCharacterHandler> logger, IPlayerManager playerManager, IAccountRepository accountRepository)
+    public DeleteCharacterHandler(ILogger<DeleteCharacterHandler> logger, IPlayerManager playerManager, HttpClient http)
     {
         _logger = logger;
         _playerManager = playerManager;
-        _accountRepository = accountRepository;
+        _http = http;
     }
 
     public async Task ExecuteAsync(GamePacketContext<DeleteCharacter> ctx, CancellationToken token = default)
@@ -31,9 +32,10 @@ public class DeleteCharacterHandler : IGamePacketHandler<DeleteCharacter>
             return;
         }
 
-        var account = await _accountRepository.FindByIdAsync(accountId.Value);
+        var account = await _http.GetFromJsonAsync<AccountData>($"/account/{accountId.Value}", token);
 
-        if (account is null) {
+        if (account is null)
+        {
             ctx.Connection.Close();
             _logger.LogWarning("Account was not found");
             return;
@@ -55,7 +57,9 @@ public class DeleteCharacterHandler : IGamePacketHandler<DeleteCharacter>
         var sentDeleteCode = ctx.Packet.Code[..^1];
         if (account.DeleteCode != sentDeleteCode)
         {
-            _logger.LogInformation("Account {AccountId} tried to delete player {PlayerId} but provided an invalid delete code", accountId, player.Id);
+            _logger.LogInformation(
+                "Account {AccountId} tried to delete player {PlayerId} but provided an invalid delete code", accountId,
+                player.Id);
             ctx.Connection.Send(new DeleteCharacterFail());
             return;
         }

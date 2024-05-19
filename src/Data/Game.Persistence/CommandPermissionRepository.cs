@@ -1,40 +1,59 @@
-﻿using System.Data;
-using Dapper;
+using Microsoft.EntityFrameworkCore;
+using QuantumCore.API.Game;
 
 namespace QuantumCore.Game.Persistence;
 
 public interface ICommandPermissionRepository
 {
     Task<IEnumerable<string>> GetPermissionsForGroupAsync(Guid groupId);
-    Task<IEnumerable<Guid>> GetPlayerIdsInGroupAsync(Guid groupId);
-    Task<IEnumerable<(Guid Id, string Name)>> GetGroupsAsync();
+    Task<IEnumerable<uint>> GetPlayerIdsInGroupAsync(Guid groupId);
+    Task<IEnumerable<PermissionGroup>> GetGroupsAsync();
+    Task<IEnumerable<Guid>> GetGroupsForPlayer(uint playerId);
 }
 
 public class CommandPermissionRepository : ICommandPermissionRepository
 {
-    private readonly IDbConnection _db;
+    private readonly GameDbContext _db;
 
-    public CommandPermissionRepository(IDbConnection db)
+    public CommandPermissionRepository(GameDbContext db)
     {
         _db = db;
     }
 
+    public async Task<IEnumerable<Guid>> GetGroupsForPlayer(uint playerId)
+    {
+        return await _db.PermissionUsers
+            .Where(x => x.PlayerId == playerId)
+            .Select(x => x.GroupId)
+            .ToArrayAsync();
+    }
+
     public async Task<IEnumerable<string>> GetPermissionsForGroupAsync(Guid groupId)
     {
-        return await _db.QueryAsync<string>("SELECT Command FROM perm_auth WHERE `Group` = @Group", new { Group = groupId });
+        return await _db.Permissions
+            .Where(x => x.GroupId == groupId)
+            .Select(x => x.Command)
+            .ToArrayAsync();
     }
 
-    public async Task<IEnumerable<Guid>> GetPlayerIdsInGroupAsync(Guid groupId)
+    public async Task<IEnumerable<uint>> GetPlayerIdsInGroupAsync(Guid groupId)
     {
-        // for some reason the Id cannot be selected as GUID thus we have to convert on it client side
-        var ids = await _db.QueryAsync<string>("SELECT Player FROM perm_users WHERE `Group` = @Group", new { Group = groupId });
-        return ids.Select(Guid.Parse).ToArray();
+        return await _db.PermissionUsers
+            .Where(x => x.GroupId == groupId)
+            .Select(x => x.PlayerId)
+            .ToArrayAsync();
     }
 
-    public async Task<IEnumerable<(Guid Id, string Name)>> GetGroupsAsync()
+    public async Task<IEnumerable<PermissionGroup>> GetGroupsAsync()
     {
-        // for some reason the Id cannot be selected as GUID thus we have to convert on it client side
-        var values = await _db.QueryAsync<(string Id, string Name)>("SELECT Id, Name FROM perm_groups");
-        return values.Select(x => (Guid.Parse(x.Id), x.Name)).ToArray();
+        return await _db.PermissionGroups
+            .Select(x => new PermissionGroup
+            {
+                Id = x.Id,
+                Name = x.Name,
+                Permissions = x.Permissions.Select(p => p.Command).ToList(),
+                Users = x.Users.Select(u => u.PlayerId).ToList()
+            })
+            .ToArrayAsync();
     }
 }

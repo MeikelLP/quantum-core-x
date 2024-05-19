@@ -1,4 +1,4 @@
-﻿using QuantumCore.API.Core.Models;
+using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game.Types;
 
 namespace QuantumCore.API.Game.World
@@ -19,6 +19,7 @@ namespace QuantumCore.API.Game.World
         EAntiFlags AntiFlagGender { get; }
 
         Task Load();
+        Task ReloadPermissions();
         T? GetQuestInstance<T>() where T : class, IQuest;
         void Respawn(bool town);
         uint CalculateAttackDamage(uint baseDamage);
@@ -48,5 +49,11 @@ namespace QuantumCore.API.Game.World
         void SendTarget();
         void Disconnect();
         string ToString();
+        Task OnDespawnAsync();
+        Task CalculatePlayedTimeAsync();
+        int GetMobItemRate();
+        bool HasUniqueItemEquipped(uint itemProtoId);
+        bool HasUniqueGroupItemEquipped(uint itemProtoId);
+        int GetPremiumRemainSeconds(EPremiumTypes type);
     }
 }

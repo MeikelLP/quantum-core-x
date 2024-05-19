@@ -1,4 +1,6 @@
-﻿namespace QuantumCore.API;
+﻿using QuantumCore.API.Core.Models;
+
+namespace QuantumCore.API;
 
 public interface IPasswordHasher
 {

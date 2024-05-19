@@ -25,5 +25,11 @@
             if (rotationDegress < 0) rotationDegress += 360;
             return rotationDegress;
         }
+        
+        public static int MinMax(int min, int value, int max)
+        {
+            var temp = (min > value ? min : value);
+            return (max < temp) ? max : temp;
+        }
     }
 }

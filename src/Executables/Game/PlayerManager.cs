@@ -1,8 +1,10 @@
 ﻿using Game.Caching;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using QuantumCore.API;
 using QuantumCore.API.Core.Models;
+using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Persistence;
-using QuantumCore.Game.PlayerUtils;
 
 namespace QuantumCore.Game;
 
@@ -12,13 +14,16 @@ public class PlayerManager : IPlayerManager
     private readonly ICachePlayerRepository _cachePlayerRepository;
     private readonly ILogger<PlayerManager> _logger;
     private readonly IJobManager _jobManager;
+    private readonly GameOptions _gameOptions;
 
-    public PlayerManager(IDbPlayerRepository dbPlayerRepository, ICachePlayerRepository cachePlayerRepository, ILogger<PlayerManager> logger, IJobManager jobManager)
+    public PlayerManager(IDbPlayerRepository dbPlayerRepository, ICachePlayerRepository cachePlayerRepository,
+        ILogger<PlayerManager> logger, IJobManager jobManager, IOptions<GameOptions> gameOptions)
     {
         _dbPlayerRepository = dbPlayerRepository;
         _cachePlayerRepository = cachePlayerRepository;
         _logger = logger;
         _jobManager = jobManager;
+        _gameOptions = gameOptions.Value;
     }
 
     public async Task<PlayerData?> GetPlayer(Guid accountId, byte slot)
@@ -30,21 +35,22 @@ public class PlayerManager : IPlayerManager
             for (var i = 0; i < players.Length; i++)
             {
                 var player = players[i];
-                player.Slot = (byte)i;
+                player.Slot = (byte) i;
 
                 if (i == slot)
                 {
-                    await _cachePlayerRepository.SetPlayerAsync(player, slot);
+                    await _cachePlayerRepository.SetPlayerAsync(player);
                     return player;
                 }
             }
 
             _logger.LogWarning("Could not find player for account {AccountId} at slot {Slot}", accountId, slot);
         }
+
         return cachedPlayer;
     }
 
-    public async Task<PlayerData?> GetPlayer(Guid playerId)
+    public async Task<PlayerData?> GetPlayer(uint playerId)
     {
         var cachedPlayer = await _cachePlayerRepository.GetPlayerAsync(playerId);
         if (cachedPlayer is null)
@@ -56,11 +62,18 @@ public class PlayerManager : IPlayerManager
             }
             else
             {
-                await _cachePlayerRepository.SetPlayerAsync(player, player.Slot);
+                await _cachePlayerRepository.SetPlayerAsync(player);
                 return player;
             }
         }
+
         return cachedPlayer;
+    }
+
+    public async Task SetPlayerAsync(PlayerData data)
+    {
+        await _cachePlayerRepository.SetPlayerAsync(data);
+        await _dbPlayerRepository.SetPlayerAsync(data);
     }
 
     public async Task<PlayerData[]> GetPlayers(Guid accountId)
@@ -70,7 +83,7 @@ public class PlayerManager : IPlayerManager
         var players = await _dbPlayerRepository.GetPlayersAsync(accountId);
 
         // update cache
-        await Task.WhenAll(players.Select((x, i) => _cachePlayerRepository.SetPlayerAsync(x, (byte)i)));
+        await Task.WhenAll(players.Select((x, i) => _cachePlayerRepository.SetPlayerAsync(x)));
 
         return players;
     }
@@ -84,35 +97,53 @@ public class PlayerManager : IPlayerManager
     {
         var job = _jobManager.Get(@class);
 
-        // Create player data
-        var player = new PlayerData
-        {
-            Id = Guid.NewGuid(),
-            AccountId = accountId,
-            Name = playerName,
-            PlayerClass = @class,
-            PositionX = 958870,
-            PositionY = 272788,
-            St = job.St,
-            Iq = job.Iq,
-            Dx = job.Dx,
-            Ht = job.Ht,
-            Health = job.StartHp,
-            Mana = job.StartSp
-        };
-
-        var existingPlayers = await _dbPlayerRepository.GetPlayersAsync(player.AccountId);
+        var existingPlayers = await _dbPlayerRepository.GetPlayersAsync(accountId);
 
         if (existingPlayers.Length >= PlayerConstants.MAX_PLAYERS_PER_ACCOUNT)
         {
             throw new InvalidOperationException("Already have max allowed players for this account");
         }
 
+        byte empire;
+        if (existingPlayers.Length > 0)
+        {
+            // reuse empire from first character
+            empire = existingPlayers[0].Empire;
+        }
+        else
+        {
+            var empireFromCache = await _cachePlayerRepository.GetTempEmpireAsync(accountId);
+            if (empireFromCache is null)
+            {
+                _logger.LogError("No empire has been selected before. This should not happen");
+                throw new InvalidOperationException("No empire has been selected before. This should not happen.");
+            }
+
+            empire = empireFromCache.Value;
+        }
+
+        // Create player data
+        var player = new PlayerData
+        {
+            Id = 0,
+            AccountId = accountId,
+            Name = playerName,
+            PlayerClass = @class,
+            PositionX = _gameOptions.Empire[empire].X,
+            PositionY = _gameOptions.Empire[empire].Y,
+            St = job.St,
+            Iq = job.Iq,
+            Dx = job.Dx,
+            Ht = job.Ht,
+            Health = job.StartHp,
+            Mana = job.StartSp,
+            Empire = empire,
+            Slot = (byte) existingPlayers.Length
+        };
+
+
         await _dbPlayerRepository.CreateAsync(player);
         await _cachePlayerRepository.CreateAsync(player);
-
-        // new index is equivalent to the previous length
-        player.Slot = (byte)existingPlayers.Length;
 
         return player;
     }
@@ -121,5 +152,10 @@ public class PlayerManager : IPlayerManager
     {
         await _dbPlayerRepository.DeletePlayerAsync(player);
         await _cachePlayerRepository.DeletePlayerAsync(player);
+    }
+
+    public async Task SetPlayerEmpireAsync(Guid accountId, uint playerId, byte empire)
+    {
+        await _dbPlayerRepository.UpdateEmpireAsync(accountId, playerId, empire);
     }
 }

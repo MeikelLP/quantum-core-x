@@ -1,7 +1,4 @@
-﻿using System;
-using System.Threading;
-using System.Threading.Tasks;
-using QuantumCore.API.Game.Types;
+﻿using QuantumCore.API.Game.Types;
 using QuantumCore.Networking;
 
 namespace QuantumCore.API
@@ -11,7 +8,7 @@ namespace QuantumCore.API
         Guid Id { get; }
         EPhases Phase { get; set; }
         Task ExecuteTask { get; }
-        void Close();
+        void Close(bool expected = true);
         void Send<T>(T packet) where T : IPacketSerializable;
         Task StartAsync(CancellationToken token = default);
     }

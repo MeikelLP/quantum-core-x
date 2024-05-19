@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -21,8 +21,10 @@ public static class ServiceExtensions
     /// </summary>
     /// <param name="services"></param>
     /// <param name="pluginCatalog"></param>
+    /// <param name="configuration"></param>
     /// <returns></returns>
-    public static IServiceCollection AddCoreServices(this IServiceCollection services, IPluginCatalog pluginCatalog, IConfiguration configuration)
+    public static IServiceCollection AddCoreServices(this IServiceCollection services, IPluginCatalog pluginCatalog,
+        IConfiguration configuration)
     {
         services.AddOptions<HostingOptions>()
             .BindConfiguration("Hosting")
@@ -35,13 +37,15 @@ public static class ServiceExtensions
                             x.GetCustomAttribute<PacketAttribute>()?.Direction.HasFlag(EDirection.Incoming) == true)
                 .OrderBy(x => x.FullName)
                 .ToArray();
-            var handlerTypes = AppDomain.CurrentDomain.GetAssemblies().SelectMany(x => x.ExportedTypes)
+            var handlerTypes = AppDomain.CurrentDomain.GetAssemblies()
+                .Where(x => !x.IsDynamic)
+                .SelectMany(x => x.ExportedTypes)
                 .Where(x =>
                     x.IsAssignableTo(typeof(IPacketHandler)) &&
-                    x is { IsClass: true, IsAbstract: false, IsInterface: false })
+                    x is {IsClass: true, IsAbstract: false, IsInterface: false})
                 .OrderBy(x => x.FullName)
                 .ToArray();
-            return ActivatorUtilities.CreateInstance<PacketManager>(provider, new object[] { (IEnumerable<Type>)packetTypes, handlerTypes });
+            return ActivatorUtilities.CreateInstance<PacketManager>(provider, [packetTypes, handlerTypes]);
         });
         services.AddSingleton<IPacketReader, PacketReader>();
         services.AddSingleton<PluginExecutor>();
@@ -61,11 +65,8 @@ public static class ServiceExtensions
         var config = new LoggerConfiguration();
 
         // add minimum log level for the instances
-#if DEBUG
-        config.MinimumLevel.Verbose();
-#else
-            config.MinimumLevel.Information();
-#endif
+        config.MinimumLevel.Information()
+            .MinimumLevel.Override("Microsoft.EntityFrameworkCore.Query", LogEventLevel.Warning);
 
         // add destructuring for entities
         config.Destructure.ToMaximumDepth(4)
@@ -91,8 +92,6 @@ public static class ServiceExtensions
 
         // sink to console
         config.WriteTo.Console(outputTemplate: MessageTemplate);
-
-        config.MinimumLevel.Override("QuantumCore.Core.Networking", LogEventLevel.Warning);
 
         // sink to rolling file
         config.WriteTo.RollingFile($"{Directory.GetCurrentDirectory()}/logs/api.log",

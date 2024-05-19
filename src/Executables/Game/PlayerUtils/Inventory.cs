@@ -4,6 +4,7 @@ using QuantumCore.API.Core.Models;
 using QuantumCore.Caching;
 using QuantumCore.Core.Utils;
 using QuantumCore.Extensions;
+using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Persistence;
 using Serilog;
 using ILogger = Microsoft.Extensions.Logging.ILogger;
@@ -41,8 +42,8 @@ namespace QuantumCore.Game.PlayerUtils
                 if (position < 0) return null;
                 if (position >= _width * _height) return null;
 
-                var x = (uint)(position % _width);
-                var y = (uint)(position / _width);
+                var x = (uint) (position % _width);
+                var y = (uint) (position / _width);
 
                 return _grid.Get(x, y);
             }
@@ -52,8 +53,8 @@ namespace QuantumCore.Game.PlayerUtils
                 if (position < 0) return false;
                 if (position >= _width * _height) return false;
 
-                var x = (uint)(position % _width);
-                var y = (uint)(position / _width);
+                var x = (uint) (position % _width);
+                var y = (uint) (position / _width);
 
                 var item = _grid.Get(x, y);
                 if (item == null) return false;
@@ -111,8 +112,8 @@ namespace QuantumCore.Game.PlayerUtils
                 if (position < 0) return false;
                 if (position >= _width * _height) return false;
 
-                var x = (uint)(position % _width);
-                var y = (uint)(position / _width);
+                var x = (uint) (position % _width);
+                var y = (uint) (position / _width);
 
                 return Place(item, x, y);
             }
@@ -122,8 +123,8 @@ namespace QuantumCore.Game.PlayerUtils
                 if (position < 0) return false;
                 if (position >= _width * _height) return false;
 
-                var x = (uint)(position % _width);
-                var y = (uint)(position / _width);
+                var x = (uint) (position % _width);
+                var y = (uint) (position / _width);
 
                 var proto = _itemManager.GetItem(item.ItemId);
                 if (proto == null) return false;
@@ -148,22 +149,20 @@ namespace QuantumCore.Game.PlayerUtils
         }
 
         public event EventHandler<SlotChangedEventArgs>? OnSlotChanged;
-        public Guid Owner { get; private set; }
+        public uint Owner { get; private set; }
         public byte Window { get; private set; }
 
-        public ReadOnlyCollection<ItemInstance> Items {
-            get {
-                return _items.AsReadOnly();
-            }
+        public ReadOnlyCollection<ItemInstance> Items
+        {
+            get { return _items.AsReadOnly(); }
         }
 
         public IEquipment EquipmentWindow { get; private set; }
 
 
-        public long Size {
-            get {
-                return _width * _height * _pages.Length;
-            }
+        public long Size
+        {
+            get { return _width * _height * _pages.Length; }
         }
 
         private readonly Page[] _pages;
@@ -176,7 +175,7 @@ namespace QuantumCore.Game.PlayerUtils
         private readonly IItemRepository _itemRepository;
 
         public Inventory(IItemManager itemManager, ICacheManager cacheManager, ILogger logger,
-            IItemRepository itemRepository, Guid owner, byte window, ushort width, ushort height, ushort pages)
+            IItemRepository itemRepository, uint owner, byte window, ushort width, ushort height, ushort pages)
         {
             Owner = owner;
             Window = window;
@@ -204,7 +203,7 @@ namespace QuantumCore.Game.PlayerUtils
             _items.Clear();
 
             var pageSize = _width * _height;
-            await foreach(var item in _itemRepository.GetItems(_cacheManager, Owner, Window))
+            await foreach (var item in _itemRepository.GetItems(_cacheManager, Owner, Window))
             {
                 // Calculate page
                 var page = item.Position / pageSize;
@@ -212,7 +211,8 @@ namespace QuantumCore.Game.PlayerUtils
                 {
                     if (!EquipmentWindow.SetItem(item))
                     {
-                        Log.Warning("Failed to load item {Id} in position {Position} as it is outside the inventory!", item.Id, item.Position);
+                        Log.Warning("Failed to load item {Id} in position {Position} as it is outside the inventory!",
+                            item.Id, item.Position);
                     }
 
                     continue;
@@ -237,7 +237,7 @@ namespace QuantumCore.Game.PlayerUtils
         /// <returns>True if placement was successful. False if no space is available</returns>
         public async Task<bool> PlaceItem(ItemInstance item)
         {
-            for(var i = 0; i < _pages.Length; i++)
+            for (var i = 0; i < _pages.Length; i++)
             {
                 var page = _pages[i];
 
@@ -254,6 +254,7 @@ namespace QuantumCore.Game.PlayerUtils
                         // if item is now "equipped"
                         OnSlotChanged?.Invoke(this, new SlotChangedEventArgs(item, wearSlot.Value));
                     }
+
                     return true;
                 }
             }

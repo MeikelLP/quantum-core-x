@@ -4,7 +4,7 @@ using QuantumCore.Caching;
 using QuantumCore.Game.Persistence;
 using QuantumCore.Game.PlayerUtils;
 
-namespace QuantumCore.Extensions;
+namespace QuantumCore.Game.Extensions;
 
 public static class ItemExtensions
 {
@@ -72,26 +72,32 @@ public static class ItemExtensions
         {
             return EquipmentSlots.Head;
         }
+
         if (wearFlags.HasFlag(EWearFlags.Shoes))
         {
             return EquipmentSlots.Shoes;
         }
+
         if (wearFlags.HasFlag(EWearFlags.Bracelet))
         {
             return EquipmentSlots.Bracelet;
         }
+
         if (wearFlags.HasFlag(EWearFlags.Weapon))
         {
             return EquipmentSlots.Weapon;
         }
+
         if (wearFlags.HasFlag(EWearFlags.Necklace))
         {
             return EquipmentSlots.Necklace;
         }
+
         if (wearFlags.HasFlag(EWearFlags.Earrings))
         {
             return EquipmentSlots.Earring;
         }
+
         if (wearFlags.HasFlag(EWearFlags.Body))
         {
             return EquipmentSlots.Body;
@@ -100,7 +106,8 @@ public static class ItemExtensions
         return null;
     }
 
-    public static async Task<ItemInstance?> GetItem(this IItemRepository repository, ICacheManager cacheManager, Guid id)
+    public static async Task<ItemInstance?> GetItem(this IItemRepository repository, ICacheManager cacheManager,
+        Guid id)
     {
         var key = "item:" + id;
 
@@ -115,7 +122,7 @@ public static class ItemExtensions
     }
 
     public static async IAsyncEnumerable<ItemInstance> GetItems(this IItemRepository repository,
-        ICacheManager cacheManager, Guid player, byte window)
+        ICacheManager cacheManager, uint player, byte window)
     {
         var key = "items:" + player + ":" + window;
 
@@ -156,7 +163,7 @@ public static class ItemExtensions
     {
         var key = "item:" + item.Id;
 
-        if (item.PlayerId != Guid.Empty)
+        if (item.PlayerId != default)
         {
             var oldList = cacheManager.CreateList<Guid>($"items:{item.PlayerId}:{item.Window}");
             await oldList.Rem(1, item.Id);
@@ -181,18 +188,18 @@ public static class ItemExtensions
     /// <param name="owner">Owner the item is given to</param>
     /// <param name="window">Window the item is placed in</param>
     /// <param name="pos">Position of the item in the window</param>
-    public static async Task Set(this ItemInstance item, ICacheManager cacheManager, Guid owner, byte window, uint pos)
+    public static async Task Set(this ItemInstance item, ICacheManager cacheManager, uint owner, byte window, uint pos)
     {
         if (item.PlayerId != owner || item.Window != window)
         {
-            if (item.PlayerId != Guid.Empty)
+            if (item.PlayerId != default)
             {
                 // Remove from last list
                 var oldList = cacheManager.CreateList<Guid>($"items:{item.PlayerId}:{item.Window}");
                 await oldList.Rem(1, item.Id);
             }
 
-            if (owner != Guid.Empty)
+            if (owner != default)
             {
                 var newList = cacheManager.CreateList<Guid>($"items:{owner}:{window}");
                 await newList.Push(item.Id);
