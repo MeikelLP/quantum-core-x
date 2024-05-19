@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
+using QuantumCore.API.Game.Guild;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.World;
 using QuantumCore.Caching;
@@ -10,6 +11,7 @@ using QuantumCore.Core.Utils;
 using QuantumCore.Extensions;
 using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Packets;
+using QuantumCore.Game.Packets.Guild;
 using QuantumCore.Game.Persistence;
 using QuantumCore.Game.PlayerUtils;
 
@@ -22,6 +24,7 @@ namespace QuantumCore.Game.World.Entities
         public string Name => Player.Name;
         public IGameConnection Connection { get; }
         public PlayerData Player { get; private set; }
+        public GuildData? Guild { get; private set; }
         public IInventory Inventory { get; private set; }
         public IEntity? Target { get; set; }
         public IList<Guid> Groups { get; private set; }
@@ -166,6 +169,8 @@ namespace QuantumCore.Game.World.Entities
             Health = (int) GetPoint(EPoints.MaxHp); // todo: cache hp of player
             Mana = (int) GetPoint(EPoints.MaxSp);
             await LoadPermGroups();
+            var guildManager = _scope.ServiceProvider.GetRequiredService<IGuildManager>();
+            Guild = await guildManager.GetGuildForPlayerAsync(Player.Id);
             _questManager.InitializePlayer(this);
 
             CalculateDefence();
@@ -279,6 +284,67 @@ namespace QuantumCore.Game.World.Entities
             Connection.Send(dead);
         }
 
+        private void SendGuildInfo()
+        {
+            if (Guild is not null)
+            {
+                Connection.Send(new GuildMemberPacket
+                {
+                    Members = Guild.Members
+                        .Select(guildMember => new GuildMember
+                        {
+                            PlayerId = guildMember.Id,
+                            Class = guildMember.Class,
+                            Level = guildMember.Level,
+                            IsGeneral = guildMember.IsLeader,
+                            Name = guildMember.Name,
+                            Rank = guildMember.Rank,
+                            SpentExperience = guildMember.SpentExperience,
+                            IsNameSent = true
+                        })
+                        .ToArray()
+                });
+                Connection.Send(new GuildRankPacket
+                {
+                    Ranks = Guild.Ranks
+                        .Select(rank => new GuildRankDataPacket
+                        {
+                            Rank = rank.Rank,
+                            Name = rank.Name,
+                            Permissions = rank.Permissions
+                        })
+                        .Take(GuildConstants.RANKS_LENGTH)
+                        .ToArray()
+                });
+                Connection.Send(new GuildInfo
+                {
+                    Level = Guild.Level,
+                    Name = Guild.Name,
+                    Gold = Guild.Gold,
+                    GuildId = Guild.Id,
+                    Exp = Guild.Experience,
+                    HasLand = false,
+                    LeaderId = Guild.OwnerId,
+                    MemberCount = (ushort) Guild.Members.Length,
+                    MaxMemberCount = Guild.MaxMemberCount
+                });
+                Connection.Send(new GuildName
+                {
+                    Id = Guild.Id,
+                    Name = Guild.Name
+                });
+            }
+        }
+
+        public async Task RefreshGuildAsync()
+        {
+            var guildManager = _scope.ServiceProvider.GetRequiredService<IGuildManager>();
+            Guild = await guildManager.GetGuildForPlayerAsync(Player.Id);
+
+            SendGuildInfo();
+            SendCharacterUpdate();
+        }
+
         public void Respawn(bool town)
         {
             if (!Dead)
@@ -370,14 +436,14 @@ namespace QuantumCore.Game.World.Entities
             {
                 return;
             }
-            
+
             AddPoint(EPoints.Skill, level);
-            AddPoint(EPoints.SubSkill, level < 10 ? 0 : level - Math.Max((int)Player.Level, 9));
-            
+            AddPoint(EPoints.SubSkill, level < 10 ? 0 : level - Math.Max((int) Player.Level, 9));
+
             Player.Level = (byte) (Player.Level + level);
-            
+
             // todo: animation (I think this actually is a quest sent by the server on character login and not an actual packet at this stage)
-            
+
             foreach (var entity in NearbyEntities)
             {
                 if (entity is not IPlayerEntity other) continue;
@@ -768,7 +834,7 @@ namespace QuantumCore.Game.World.Entities
 
                 return;
             }
-            
+
             if (groundItem.OwnerName != null && !string.Equals(groundItem.OwnerName, Name))
             {
                 SendChatInfo("This item is not yours");
@@ -780,7 +846,7 @@ namespace QuantumCore.Game.World.Entities
                 SendChatInfo("No inventory space left");
                 return;
             }
-            
+
             var itemName = _itemManager.GetItem(item.ItemId)?.TranslatedName ?? "Unknown";
             SendChatInfo($"You picked up {groundItem.Amount}x {itemName}");
 
@@ -838,7 +904,7 @@ namespace QuantumCore.Game.World.Entities
             _logger.LogTrace("GetPremiumRemainSeconds not implemented yet");
             return 0; // todo: implement premium system
         }
-        
+
         public bool HasUniqueGroupItemEquipped(uint itemProtoId)
         {
             _logger.LogTrace("HasUniqueGroupItemEquipped not implemented yet");
@@ -871,7 +937,7 @@ namespace QuantumCore.Game.World.Entities
             var startSessionTime = await _cacheManager.Get<long>(key);
             var totalSessionTime = Connection.Server.ServerTime - startSessionTime;
             if (totalSessionTime <= 0) return;
-            
+
             AddPoint(EPoints.PlayTime, (int) totalSessionTime);
         }
 
@@ -1027,6 +1093,7 @@ namespace QuantumCore.Game.World.Entities
 
         public override void ShowEntity(IConnection connection)
         {
+            SendGuildInfo();
             SendCharacter(connection);
             SendCharacterAdditional(connection);
         }
@@ -1122,6 +1189,7 @@ namespace QuantumCore.Game.World.Entities
                 Name = Player.Name,
                 Empire = Player.Empire,
                 Level = Player.Level,
+                GuildId = Guild?.Id ?? 0,
                 Parts = new ushort[]
                 {
                     (ushort) (Inventory.EquipmentWindow.Body?.ItemId ?? 0),
@@ -1144,7 +1212,8 @@ namespace QuantumCore.Game.World.Entities
                     (ushort) (Inventory.EquipmentWindow.Hair?.ItemId ?? 0)
                 },
                 MoveSpeed = MovementSpeed,
-                AttackSpeed = _attackSpeed
+                AttackSpeed = _attackSpeed,
+                GuildId = Guild?.Id ?? 0
             };
 
             Connection.Send(packet);

@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using QuantumCore.API;
+using QuantumCore.API.Game.Guild;
 using QuantumCore.API.Game.World;
 using QuantumCore.API.PluginTypes;
 using QuantumCore.Game.Commands;
@@ -34,6 +35,7 @@ public static class ServiceExtensions
             http.BaseAddress = new Uri(options.BaseUrl);
         });
         services.AddScoped<IPlayerManager, PlayerManager>();
+        services.AddScoped<IGuildManager, GuildManager>();
         services.AddSingleton<IPlayerFactory, PlayerFactory>();
         services.AddSingleton<ISpawnGroupProvider, SpawnGroupProvider>();
         services.AddSingleton<ISpawnPointProvider, SpawnPointProvider>();

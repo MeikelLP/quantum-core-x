@@ -1,6 +1,7 @@
 ﻿using System.Buffers;
 using System.Runtime.CompilerServices;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
 namespace QuantumCore.Networking;
@@ -9,17 +10,21 @@ public class PacketReader : IPacketReader
 {
     private readonly ILogger<PacketReader> _logger;
     private readonly IPacketManager _packetManager;
+    private readonly IHostEnvironment _env;
     private readonly int _bufferSize;
 
-    public PacketReader(ILogger<PacketReader> logger, IPacketManager packetManager, IConfiguration configuration)
+    public PacketReader(ILogger<PacketReader> logger, IPacketManager packetManager, IConfiguration configuration,
+        IHostEnvironment env)
     {
         _logger = logger;
         _packetManager = packetManager;
+        _env = env;
         _bufferSize = configuration.GetValue<int?>("BufferSize") ?? 4096;
         _logger.LogDebug("Using buffer size {BufferSize}", _bufferSize);
     }
 
-    public async IAsyncEnumerable<object> EnumerateAsync(Stream stream, [EnumeratorCancellation] CancellationToken token = default)
+    public async IAsyncEnumerable<object> EnumerateAsync(Stream stream,
+        [EnumeratorCancellation] CancellationToken token = default)
     {
         var buffer = ArrayPool<byte>.Shared.Rent(_bufferSize);
         while (true)
@@ -39,6 +44,7 @@ public class PacketReader : IPacketReader
                 _logger.LogDebug("Connection was most likely closed while reading a packet. This may be fine");
                 break;
             }
+
             var header = buffer[0];
 
             // read sub header
@@ -65,14 +71,23 @@ public class PacketReader : IPacketReader
 
             if (!_packetManager.TryGetPacketInfo(header, subHeader, out var packetInfo))
             {
-                throw new NotImplementedException($"Received unknown header 0x{header:X2}");
+                var headerString = Convert.ToString(header, 16);
+                var subHeaderString = subHeader is not null ? $"|0x{Convert.ToString(subHeader.Value, 16)}" : "";
+                if (_env.IsDevelopment())
+                {
+                    var bytes = await GetAsMuchDataAsPossibleAsync(stream);
+                    _logger.LogDebug("Received unknown header: {Header}{SubHeader}. Payload: {Payload}", header,
+                        subHeaderString, bytes);
+                }
+
+                throw new NotImplementedException($"Received unknown header 0x{headerString}{subHeaderString}");
             }
 
             // read full packet from stream
             IPacketSerializable packet;
             try
             {
-                packet = (IPacketSerializable)await packetInfo.DeserializeFromStreamAsync(stream);
+                packet = (IPacketSerializable) await packetInfo.DeserializeFromStreamAsync(stream);
             }
             catch (ArgumentOutOfRangeException e)
             {
@@ -96,7 +111,6 @@ public class PacketReader : IPacketReader
 
             try
             {
-
                 if (packetInfo.HasSequence)
                 {
                     // read sequence to finalize the package read process
@@ -114,6 +128,27 @@ public class PacketReader : IPacketReader
                 break;
             }
         }
+
         ArrayPool<byte>.Shared.Return(buffer);
+    }
+
+    /// <summary>
+    /// Tries to read as many bytes as possible in 1s
+    /// </summary>
+    private async Task<byte[]> GetAsMuchDataAsPossibleAsync(Stream stream)
+    {
+        var bytes = new byte[1024];
+        var waiter = Task.Delay(1000);
+        var totalRead = 0;
+        while (waiter.Status != TaskStatus.RanToCompletion)
+        {
+            // read one at a time or timeout
+            var readTask = stream.ReadExactlyAsync(bytes, totalRead, 1).AsTask();
+            await Task.WhenAny(waiter, readTask);
+            totalRead++;
+        }
+
+        Array.Resize(ref bytes, totalRead);
+        return bytes;
     }
 }

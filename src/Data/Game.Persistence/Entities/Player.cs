@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using QuantumCore.Game.Persistence.Entities.Guilds;
 
 namespace QuantumCore.Game.Persistence.Entities;
 
@@ -33,6 +34,16 @@ public class Player
     [StringLength(24)] public required string Name { get; set; }
     [DefaultValue(0)] public required uint GivenStatusPoints { get; set; }
     [DefaultValue(0)] public required uint AvailableStatusPoints { get; set; }
+
+    public uint? GuildId { get; set; }
+    public Guild? Guild { get; set; }
+
+    /// <summary>
+    /// Guilds where the player is leader of. Should be empty or 1
+    /// </summary>
+    public ICollection<Guild> GuildsToLead { get; set; } = null!;
+
+    public ICollection<GuildMember> Guilds { get; set; } = null!;
 
     public static void Configure(EntityTypeBuilder<Player> builder, DatabaseFacade database)
     {

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using QuantumCore.Game.Persistence;
 
@@ -11,9 +12,11 @@ using QuantumCore.Game.Persistence;
 namespace QuantumCore.Game.Persistence.Migrations.Mysql
 {
     [DbContext(typeof(MySqlGameDbContext))]
-    partial class MySqlGameDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240514125529_AddGuild")]
+    partial class AddGuild
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -368,8 +371,8 @@ namespace QuantumCore.Game.Persistence.Migrations.Mysql
                         .HasMaxLength(24)
                         .HasColumnType("varchar(24)");
 
-                    b.Property<ulong>("PlayTime")
-                        .HasColumnType("bigint unsigned");
+                    b.Property<uint>("PlayTime")
+                        .HasColumnType("int unsigned");
 
                     b.Property<byte>("PlayerClass")
                         .HasColumnType("tinyint unsigned");

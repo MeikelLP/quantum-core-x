@@ -1,4 +1,4 @@
-using QuantumCore.API.Core.Models;
+﻿using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game.Types;
 
 namespace QuantumCore.API.Game.World
@@ -55,5 +55,6 @@ namespace QuantumCore.API.Game.World
         bool HasUniqueItemEquipped(uint itemProtoId);
         bool HasUniqueGroupItemEquipped(uint itemProtoId);
         int GetPremiumRemainSeconds(EPremiumTypes type);
+        Task RefreshGuildAsync();
     }
 }
