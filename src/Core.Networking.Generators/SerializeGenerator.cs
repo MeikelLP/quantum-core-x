@@ -82,12 +82,6 @@ internal class SerializeGenerator
             _ => GenerateLineForMisc(field, fieldExpression, ref offset, dynamicOffset, tempDynamicOffset, indentPrefix)
         };
 
-
-        if (!field.IsArray)
-        {
-            offset += field.ElementSize;
-        }
-
         // handle anything else
         return finalLine;
     }
@@ -127,7 +121,8 @@ internal class SerializeGenerator
         return $"{indentPrefix}{fieldExpression}.CopyTo(bytes, {offsetStr});";
     }
 
-    internal static string GetLineForSingleValue(FieldData fieldData, INamedTypeSymbol namedTypeSymbol, string fieldExpression,
+    internal static string GetLineForSingleValue(FieldData fieldData, INamedTypeSymbol namedTypeSymbol,
+        string fieldExpression,
         ref int offset,
         StringBuilder dynamicOffset, string tempDynamicOffset, string indentPrefix)
     {
@@ -139,18 +134,20 @@ internal class SerializeGenerator
             ? $"({namedTypeSymbol.EnumUnderlyingType!.GetFullName()})"
             : "";
 
-        if (GeneratorConstants.SupportedTypesByBitConverter.Contains(type) || GeneratorConstants.ConvertTypes.Contains(type))
+        if (GeneratorConstants.SupportedTypesByBitConverter.Contains(type))
         {
-            if (type is "Int32" or "UInt32" or
+            if (type is
                 "Int16" or "UInt16" or
+                "Int32" or "UInt32" or
                 "Int64" or "UInt64")
             {
                 var sb = new StringBuilder();
                 var elementSize = GeneratorConstants.GetSizeOfPrimitiveType(type);
-                for (int i = 0; i < elementSize; i++)
+                for (var i = 0; i < elementSize; i++)
                 {
-                    var offsetStrLocal = $"offset + {offset + i}{dynamicOffset}{tempDynamicOffset}";
-                    var line = $"{indentPrefix}bytes[{offsetStrLocal}] = (System.Byte)({cast}{fieldExpression} >> {8 * i});";
+                    var offsetStrLocal = $"offset + {offset}{dynamicOffset}{tempDynamicOffset}";
+                    var line =
+                        $"{indentPrefix}bytes[{offsetStrLocal}] = (System.Byte)({cast}{fieldExpression} >> {8 * i});";
 
                     if (i < elementSize - 1)
                     {
@@ -160,6 +157,8 @@ internal class SerializeGenerator
                     {
                         sb.Append(line);
                     }
+
+                    offset++;
                 }
 
                 return sb.ToString();
@@ -173,6 +172,7 @@ internal class SerializeGenerator
 
         if (GeneratorConstants.NoCastTypes.Contains(type))
         {
+            offset++;
             return fieldData.IsEnum
                 ? $"{indentPrefix}bytes[{offsetStr}] = {cast}{fieldExpression};"
                 : $"{indentPrefix}bytes[{offsetStr}] = {fieldExpression};";

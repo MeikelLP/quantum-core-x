@@ -10,9 +10,11 @@ namespace Core.Networking.Generators.Tests;
 public class PacketDeserializerGeneratorTests
 {
     [Theory]
-    [InlineData(4, null, false, "(bytes[(System.Index)(offset + 0)..(System.Index)(offset + 0 + 4)]).ReadNullTerminatedString()")]
+    [InlineData(4, null, false,
+        "(bytes[(System.Index)(offset + 0)..(System.Index)(offset + 0 + 4)]).ReadNullTerminatedString()")]
     [InlineData(4, null, true, "await stream.ReadStringFromStreamAsync(buffer, (int)4)")]
-    [InlineData(0, "TestificateSize", false, "(bytes[(System.Index)(offset + 0)..(System.Index)(offset + 0 + __TestificateSize)]).ReadNullTerminatedString()")]
+    [InlineData(0, "TestificateSize", false,
+        "(bytes[(System.Index)(offset + 0)..(System.Index)(offset + 0 + __TestificateSize)]).ReadNullTerminatedString()")]
     public void GetValueForString(int elementSize, string? sizeFieldName, bool isStreamMode, string expected)
     {
         var offset = 0;
@@ -43,14 +45,17 @@ public class PacketDeserializerGeneratorTests
     [InlineData(2, "", "", null, false, "(System.Index)(offset + 2)")]
     [InlineData(2, " + abc", "", null, false, "(System.Index)(offset + 2 + abc)")]
     [InlineData(2, " + abc", " + def", null, false, "(System.Index)(offset + 2 + abc + def)")]
-    [InlineData(2, " + abc", " + def", 4, false, "(System.Index)(offset + 2 + abc + def)..(System.Index)(offset + 2 + abc + def + 4)")]
+    [InlineData(2, " + abc", " + def", 4, false,
+        "(System.Index)(offset + 2 + abc + def)..(System.Index)(offset + 2 + abc + def + 4)")]
     [InlineData(2, "", "", 4, false, "(System.Index)(offset + 2)..(System.Index)(offset + 2 + 4)")]
     [InlineData(2, "", "", 4, true, "(System.Index)(2)..(System.Index)(2 + 4)")]
     [InlineData(2, " + abc", " + def", 4, true, "(System.Index)(2 + abc + def)..(System.Index)(2 + abc + def + 4)")]
-    public void GetOffsetString(int offset, string dynamicOffsetStart, string tempDynamicOffset, int? arrayLength, bool doNotPrependOffsetVariable, string expected)
+    public void GetOffsetString(int offset, string dynamicOffsetStart, string tempDynamicOffset, int? arrayLength,
+        bool doNotPrependOffsetVariable, string expected)
     {
         var dynamicOffset = new StringBuilder(dynamicOffsetStart);
-        var result = DeserializeGenerator.GetOffsetString(offset, dynamicOffset, tempDynamicOffset, arrayLength, doNotPrependOffsetVariable);
+        var result = DeserializeGenerator.GetOffsetString(offset, dynamicOffset, tempDynamicOffset, arrayLength,
+            doNotPrependOffsetVariable);
 
         result.Should().BeEquivalentTo(expected);
     }
@@ -58,12 +63,15 @@ public class PacketDeserializerGeneratorTests
     [Theory]
     [InlineData(0, 2, "", "", false, "bytes[(System.Index)(offset + 0)..(System.Index)(offset + 2)].ToArray()")]
     [InlineData(2, 2, "", "", false, "bytes[(System.Index)(offset + 2)..(System.Index)(offset + 4)].ToArray()")]
-    [InlineData(2, 2, " + abc", "", false, "bytes[(System.Index)(offset + 2 + abc)..(System.Index)(offset + 4 + abc)].ToArray()")]
-    [InlineData(2, 2, " + abc", " + def", false, "bytes[(System.Index)(offset + 2 + abc + def)..(System.Index)(offset + 4 + abc + def)].ToArray()")]
+    [InlineData(2, 2, " + abc", "", false,
+        "bytes[(System.Index)(offset + 2 + abc)..(System.Index)(offset + 4 + abc)].ToArray()")]
+    [InlineData(2, 2, " + abc", " + def", false,
+        "bytes[(System.Index)(offset + 2 + abc + def)..(System.Index)(offset + 4 + abc + def)].ToArray()")]
     [InlineData(2, 4, "", "", false, "bytes[(System.Index)(offset + 2)..(System.Index)(offset + 6)].ToArray()")]
     [InlineData(2, 2, "", "", true, "await stream.ReadByteArrayFromStreamAsync(buffer, 2)")]
     [InlineData(2, 4, "", "", true, "await stream.ReadByteArrayFromStreamAsync(buffer, 4)")]
-    public void GetLineForFixedByteArray(int offset, int arrayLength, string dynamicOffsetStart, string tempDynamicOffset, bool isStreamMode, string expected)
+    public void GetLineForFixedByteArray(int offset, int arrayLength, string dynamicOffsetStart,
+        string tempDynamicOffset, bool isStreamMode, string expected)
     {
         var semanticType = Substitute.For<INamedTypeSymbol>();
         var dynamicOffset = new StringBuilder(dynamicOffsetStart);
@@ -87,12 +95,18 @@ public class PacketDeserializerGeneratorTests
     }
 
     [Theory]
-    [InlineData(0, "TestificateLength", "", "", false, "bytes[(System.Index)(offset + 0)..(System.Index)(offset + 0 + __TestificateLength)].ToArray()")]
-    [InlineData(2, "TestificateLength", "", "", false, "bytes[(System.Index)(offset + 2)..(System.Index)(offset + 2 + __TestificateLength)].ToArray()")]
-    [InlineData(2, "TestificateLength", " + abc", "", false, "bytes[(System.Index)(offset + 2 + abc)..(System.Index)(offset + 2 + abc + __TestificateLength)].ToArray()")]
-    [InlineData(2, "TestificateLength", " + abc", " + def", false, "bytes[(System.Index)(offset + 2 + abc + def)..(System.Index)(offset + 2 + abc + __TestificateLength + def)].ToArray()")]
-    [InlineData(2, "TestificateLength", "", "", true, "await stream.ReadByteArrayFromStreamAsync(buffer, (int)__TestificateLength)")]
-    public void GetLineForDynamicByteArray(int offset, string sizeFieldName, string dynamicOffsetStart, string tempDynamicOffset, bool isStreamMode, string expected)
+    [InlineData(0, "TestificateLength", "", "", false,
+        "bytes[(System.Index)(offset + 0)..(System.Index)(offset + 0 + __TestificateLength)].ToArray()")]
+    [InlineData(2, "TestificateLength", "", "", false,
+        "bytes[(System.Index)(offset + 2)..(System.Index)(offset + 2 + __TestificateLength)].ToArray()")]
+    [InlineData(2, "TestificateLength", " + abc", "", false,
+        "bytes[(System.Index)(offset + 2 + abc)..(System.Index)(offset + 2 + abc + __TestificateLength)].ToArray()")]
+    [InlineData(2, "TestificateLength", " + abc", " + def", false,
+        "bytes[(System.Index)(offset + 2 + abc + def)..(System.Index)(offset + 2 + abc + __TestificateLength + def)].ToArray()")]
+    [InlineData(2, "TestificateLength", "", "", true,
+        "await stream.ReadByteArrayFromStreamAsync(buffer, (int)__TestificateLength)")]
+    public void GetLineForDynamicByteArray(int offset, string sizeFieldName, string dynamicOffsetStart,
+        string tempDynamicOffset, bool isStreamMode, string expected)
     {
         var semanticType = Substitute.For<INamedTypeSymbol>();
         var dynamicOffset = new StringBuilder(dynamicOffsetStart);
@@ -116,17 +130,22 @@ public class PacketDeserializerGeneratorTests
     }
 
     [Theory]
-    [InlineData("String", "TestificateLength", "(bytes[(System.Index)(offset + 2)..(System.Index)(offset + 2 + __TestificateLength)]).ReadNullTerminatedString()")]
+    [InlineData("String", "TestificateLength",
+        "(bytes[(System.Index)(offset + 2)..(System.Index)(offset + 2 + __TestificateLength)]).ReadNullTerminatedString()")]
     [InlineData("Byte", null, "bytes[(System.Index)(offset + 2)]")]
     [InlineData("SByte", null, "bytes[(System.Index)(offset + 2)]")]
     [InlineData("Boolean", null, "System.Convert.ToBoolean(bytes[(System.Index)(offset + 2)])")]
-    [InlineData("Int16", null, "System.BitConverter.ToInt16(bytes[(System.Index)(offset + 2)..(System.Index)(offset + 2 + 2)])")]
-    [InlineData("Int32", null, "System.BitConverter.ToInt32(bytes[(System.Index)(offset + 2)..(System.Index)(offset + 2 + 4)])")]
-    [InlineData("Int64", null, "System.BitConverter.ToInt64(bytes[(System.Index)(offset + 2)..(System.Index)(offset + 2 + 8)])")]
-    public void GetValueForSingleValue(string type, string sizeFieldName, string expected)
+    [InlineData("Int16", null,
+        "System.BitConverter.ToInt16(bytes[(System.Index)(offset + 2)..(System.Index)(offset + 2 + 2)])")]
+    [InlineData("Int32", null,
+        "System.BitConverter.ToInt32(bytes[(System.Index)(offset + 2)..(System.Index)(offset + 2 + 4)])")]
+    [InlineData("Int64", null,
+        "System.BitConverter.ToInt64(bytes[(System.Index)(offset + 2)..(System.Index)(offset + 2 + 8)])")]
+    public void GetValueForSingleValue(string type, string? sizeFieldName, string expected)
     {
         var offset = 2;
         var semanticType = Substitute.For<INamedTypeSymbol>();
+        semanticType.ContainingNamespace.Name.Returns("System");
         semanticType.Name.Returns(type);
         var dynamicOffset = new StringBuilder();
         var result = DeserializeGenerator.GetValueForSingleValue(new FieldData
@@ -152,9 +171,12 @@ public class PacketDeserializerGeneratorTests
     [InlineData("Byte", "", "(QuantumCore.EPhases)bytes[(System.Index)(offset + 2)]")]
     [InlineData("SByte", "", "(QuantumCore.EPhases)bytes[(System.Index)(offset + 2)]")]
     [InlineData("Boolean", "", "(QuantumCore.EPhases)System.Convert.ToBoolean(bytes[(System.Index)(offset + 2)])")]
-    [InlineData("Int16", "", "(QuantumCore.EPhases)System.BitConverter.ToInt16(bytes[(System.Index)(offset + 2)..(System.Index)(offset + 2 + 2)])")]
-    [InlineData("Int32", "", "(QuantumCore.EPhases)System.BitConverter.ToInt32(bytes[(System.Index)(offset + 2)..(System.Index)(offset + 2 + 4)])")]
-    [InlineData("Int64", "", "(QuantumCore.EPhases)System.BitConverter.ToInt64(bytes[(System.Index)(offset + 2)..(System.Index)(offset + 2 + 8)])")]
+    [InlineData("Int16", "",
+        "(QuantumCore.EPhases)System.BitConverter.ToInt16(bytes[(System.Index)(offset + 2)..(System.Index)(offset + 2 + 2)])")]
+    [InlineData("Int32", "",
+        "(QuantumCore.EPhases)System.BitConverter.ToInt32(bytes[(System.Index)(offset + 2)..(System.Index)(offset + 2 + 4)])")]
+    [InlineData("Int64", "",
+        "(QuantumCore.EPhases)System.BitConverter.ToInt64(bytes[(System.Index)(offset + 2)..(System.Index)(offset + 2 + 8)])")]
     public void GetValueForSingleValue_Enum(string underlyingType, string sizeFieldName, string expected)
     {
         var offset = 2;
@@ -194,7 +216,8 @@ public class PacketDeserializerGeneratorTests
     }
 
     [Theory]
-    [InlineData("String", 0, "TestificateLength", "await stream.ReadStringFromStreamAsync(buffer, (int)__TestificateLength)")]
+    [InlineData("String", 0, "TestificateLength",
+        "await stream.ReadStringFromStreamAsync(buffer, (int)__TestificateLength)")]
     [InlineData("String", 4, null, "await stream.ReadStringFromStreamAsync(buffer, (int)4)")]
     [InlineData("Byte", 0, null, "await stream.ReadValueFromStreamAsync<Byte>(buffer)")]
     [InlineData("Half", 0, null, "await stream.ReadValueFromStreamAsync<Half>(buffer)")]
@@ -230,7 +253,8 @@ public class PacketDeserializerGeneratorTests
     }
 
     [Theory]
-    [InlineData("Byte", null, "TestificateLength", "await stream.ReadByteArrayFromStreamAsync(buffer, __TestificateLength)")]
+    [InlineData("Byte", null, "TestificateLength",
+        "await stream.ReadByteArrayFromStreamAsync(buffer, __TestificateLength)")]
     [InlineData("Byte", 4, null, "await stream.ReadByteArrayFromStreamAsync(buffer, 4)")]
     [InlineData("SByte", null, null, "await stream.ReadValueFromStreamAsync<SByte>(buffer)")]
     [InlineData("Int16", null, null, "await stream.ReadValueFromStreamAsync<Int16>(buffer)")]
@@ -337,15 +361,15 @@ public class PacketDeserializerGeneratorTests
     }
 
     [Theory]
-    [InlineData("Byte",  1)]
-    [InlineData("SByte",  1)]
-    [InlineData("Boolean",  1)]
-    [InlineData("Int16",  2)]
-    [InlineData("Int32",  4)]
-    [InlineData("Int64",  8)]
-    [InlineData("Half",  2)]
-    [InlineData("Single",  4)]
-    [InlineData("Double",  8)]
+    [InlineData("Byte", 1)]
+    [InlineData("SByte", 1)]
+    [InlineData("Boolean", 1)]
+    [InlineData("Int16", 2)]
+    [InlineData("Int32", 4)]
+    [InlineData("Int64", 8)]
+    [InlineData("Half", 2)]
+    [InlineData("Single", 4)]
+    [InlineData("Double", 8)]
     public static void GetSizeOfPrimitiveType(string type, int expected)
     {
         GeneratorConstants.GetSizeOfPrimitiveType(type).Should().Be(expected);

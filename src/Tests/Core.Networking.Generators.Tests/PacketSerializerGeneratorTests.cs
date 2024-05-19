@@ -15,7 +15,8 @@ public class PacketSerializerGeneratorTests
     [InlineData("", 2, " + abc", "", "this.CopyTo(bytes, offset + 2 + abc);")]
     [InlineData("", 2, " + abc", " + def", "this.CopyTo(bytes, offset + 2 + abc + def);")]
     [InlineData("  ", 2, " + abc", " + def", "  this.CopyTo(bytes, offset + 2 + abc + def);")]
-    public void GetLineForFixedByteArray(string indentPrefix, int offset, string dynamicOffsetStart, string tempDynamicOffset, string expected)
+    public void GetLineForFixedByteArray(string indentPrefix, int offset, string dynamicOffsetStart,
+        string tempDynamicOffset, string expected)
     {
         var initialOffset = offset;
         var semanticType = Substitute.For<INamedTypeSymbol>();
@@ -52,7 +53,8 @@ public class PacketSerializerGeneratorTests
                                         "bytes[offset + 3] = (System.Byte)(this.Testificate >> 8);\r\n" +
                                         "bytes[offset + 4] = (System.Byte)(this.Testificate >> 16);\r\n" +
                                         "bytes[offset + 5] = (System.Byte)(this.Testificate >> 24);")]
-    public void GetLineForSingleValue(string type, string indentPrefix, int offset, string dynamicOffsetStart, string tempDynamicOffset, string expected)
+    public void GetLineForSingleValue(string type, string indentPrefix, int offset, string dynamicOffsetStart,
+        string tempDynamicOffset, string expected)
     {
         // TODO test enum
         // TODO test array
@@ -142,7 +144,8 @@ public class PacketSerializerGeneratorTests
             IsReadonly = false,
         }, semanticType, "this.Testificate", ref offset, dynamicOffset, "", "");
 
-        result.Should().BeEquivalentTo("bytes.WriteString(this.Testificate, offset + 2, (int)this.TestificateLength);");
+        result.Should()
+            .BeEquivalentTo("bytes.WriteString(this.Testificate, offset + 2, (int)this.TestificateLength + 1);");
         offset.Should().Be(initialOffset);
     }
 
@@ -179,32 +182,36 @@ public class PacketSerializerGeneratorTests
     [InlineData("", 2, " + abc", "", "this.Test.CopyTo(bytes, offset + 2 + abc);")]
     [InlineData("", 2, " + abc", " + def", "this.Test.CopyTo(bytes, offset + 2 + abc + def);")]
     [InlineData("  ", 2, "", "", "  this.Test.CopyTo(bytes, offset + 2);")]
-    public void GetLineForDynamicByteArray(string indentPrefix, int offset, string dynamicOffsetStart, string tempDynamicOffset, string expected)
+    public void GetLineForDynamicByteArray(string indentPrefix, int offset, string dynamicOffsetStart,
+        string tempDynamicOffset, string expected)
     {
         var dynamicOffset = new StringBuilder(dynamicOffsetStart);
-        var result = SerializeGenerator.GetLineForDynamicByteArray("this.Test", ref offset, dynamicOffset, tempDynamicOffset, indentPrefix);
+        var result = SerializeGenerator.GetLineForDynamicByteArray("this.Test", ref offset, dynamicOffset,
+            tempDynamicOffset, indentPrefix);
 
         result.Should().BeEquivalentTo(expected);
         dynamicOffset.ToString().Should().BeEquivalentTo($"{dynamicOffsetStart} + this.Test.Length");
     }
 
     [Theory]
-    [InlineData("0x0F", null, "            bytes[offset + 0] = 0x0F;")]
-    [InlineData("0x0F", "0x20", "            bytes[offset + 0] = 0x0F;\r\n            bytes[offset + 1] = 0x20;")]
-    public void GenerateWriteHeader(string header, string subHeader, string expected)
+    [InlineData("0x0F", "            bytes[offset + 0] = 0x0F;")]
+    public void GenerateWriteHeader(string header, string expected)
     {
-        var result = SerializeGenerator.GenerateWriteHeader(header, subHeader);
+        var result = SerializeGenerator.GenerateWriteHeader(header);
 
         result.Should().BeEquivalentTo(expected);
     }
 
     [Theory]
-    [InlineData(2, "", "", "", "bytes.WriteString(this.Testificate, offset + 2, (int)this.TestificateLength);")]
-    [InlineData(2, "", "", "  ", "  bytes.WriteString(this.Testificate, offset + 2, (int)this.TestificateLength);")]
-    [InlineData(2, " + abc", "", "", "bytes.WriteString(this.Testificate, offset + 2 + abc, (int)this.TestificateLength);")]
-    [InlineData(2, " + abc", " + def", "", "bytes.WriteString(this.Testificate, offset + 2 + abc + def, (int)this.TestificateLength);")]
-    [InlineData(4, "", "", "", "bytes.WriteString(this.Testificate, offset + 4, (int)this.TestificateLength);")]
-    public void GetLineForString(int offset, string dynamicOffsetStart, string tempDynamicOffset, string indentPrefix, string expected)
+    [InlineData(2, "", "", "", "bytes.WriteString(this.Testificate, offset + 2, (int)this.TestificateLength + 1);")]
+    [InlineData(2, "", "", "  ", "  bytes.WriteString(this.Testificate, offset + 2, (int)this.TestificateLength + 1);")]
+    [InlineData(2, " + abc", "", "",
+        "bytes.WriteString(this.Testificate, offset + 2 + abc, (int)this.TestificateLength + 1);")]
+    [InlineData(2, " + abc", " + def", "",
+        "bytes.WriteString(this.Testificate, offset + 2 + abc + def, (int)this.TestificateLength + 1);")]
+    [InlineData(4, "", "", "", "bytes.WriteString(this.Testificate, offset + 4, (int)this.TestificateLength + 1);")]
+    public void GetLineForString(int offset, string dynamicOffsetStart, string tempDynamicOffset, string indentPrefix,
+        string expected)
     {
         var initialOffset = offset;
         var semanticType = Substitute.For<INamedTypeSymbol>();

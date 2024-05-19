@@ -16,7 +16,8 @@ public class PacketSerializerGenerator : IIncrementalGenerator
     {
         var assemblyName = context.CompilationProvider.Select(static (c, _) => c.AssemblyName);
         var sourceFiles = context.SyntaxProvider
-            .ForAttributeWithMetadataName(GeneratorConstants.PACKETGENEREATOR_ATTRIBUTE_FULLNAME, CouldBeEnumerationAsync, GetTypeInfo)
+            .ForAttributeWithMetadataName(GeneratorConstants.PACKETGENEREATOR_ATTRIBUTE_FULLNAME,
+                CouldBeEnumerationAsync, GetTypeInfo)
             .Collect()
             .SelectMany((info, _) => info.Distinct());
 
@@ -28,7 +29,7 @@ public class PacketSerializerGenerator : IIncrementalGenerator
             _generatorContext = new GeneratorContext(typeInfo);
             _serializeGenerator = new SerializeGenerator(_generatorContext);
             _deserializeGenerator = new DeserializeGenerator(_generatorContext);
-            var typeDeclarationSyntax = (TypeDeclarationSyntax)_generatorContext.Type.Node;
+            var typeDeclarationSyntax = (TypeDeclarationSyntax) _generatorContext.Type.Node;
             try
             {
                 var (name, source) = GenerateFile(typeDeclarationSyntax, _generatorContext.Type.Node.SyntaxTree);
@@ -51,7 +52,6 @@ public class PacketSerializerGenerator : IIncrementalGenerator
                         true), typeDeclarationSyntax.GetLocation(), typeDeclarationSyntax.Identifier.Text,
                     e.GetType(), e.Message));
             }
-
         });
     }
 
@@ -62,14 +62,17 @@ public class PacketSerializerGenerator : IIncrementalGenerator
         var typeKeyWords = GeneratorContext.GetTypeKeyWords(type);
         var packetAttr = type.AttributeLists
             .SelectMany(x => x.Attributes)
-            .First(x => ((IdentifierNameSyntax)x.Name).Identifier.Text == "Packet");
-        var header = ((LiteralExpressionSyntax)packetAttr.ArgumentList!.Arguments[0].Expression).Token.Text;
+            .First(x => ((IdentifierNameSyntax) x.Name).Identifier.Text == "Packet");
+        var header = ((LiteralExpressionSyntax) packetAttr.ArgumentList!.Arguments[0].Expression).Token.Text;
         var subPacketAttr = type.AttributeLists
             .SelectMany(x => x.Attributes)
-            .FirstOrDefault(x => ((IdentifierNameSyntax)x.Name).Identifier.Text == "SubPacket");
-        var subHeader = (subPacketAttr?.ArgumentList?.Arguments.FirstOrDefault()?.Expression as LiteralExpressionSyntax)?.Token.Text ?? "null";
+            .FirstOrDefault(x => ((IdentifierNameSyntax) x.Name).Identifier.Text == "SubPacket");
+        var subHeader = (subPacketAttr?.ArgumentList?.Arguments.FirstOrDefault()?.Expression as LiteralExpressionSyntax)
+            ?.Token.Text ?? "null";
         var hasStaticSize = _generatorContext.GetFieldsOfType(type).All(x => !x.HasDynamicLength);
-        var hasSequence = packetAttr.ArgumentList.Arguments.Any(x => x.NameEquals?.Name.Identifier.Text == "Sequence" && ((LiteralExpressionSyntax)x.Expression).Token.Text == "true");//packetAttr.ArgumentList
+        var hasSequence = packetAttr.ArgumentList.Arguments.Any(x =>
+            x.NameEquals?.Name.Identifier.Text == "Sequence" &&
+            ((LiteralExpressionSyntax) x.Expression).Token.Text == "true"); //packetAttr.ArgumentList
         var source = new StringBuilder();
         ApplyHeader(source, typeKeyWords, ns, name, header, subHeader, hasStaticSize, hasSequence);
 
@@ -99,7 +102,7 @@ public class PacketSerializerGenerator : IIncrementalGenerator
         CancellationToken cancellationToken)
     {
         return syntaxNode is StructDeclarationSyntax or ClassDeclarationSyntax &&
-               IsPartial((TypeDeclarationSyntax)syntaxNode);
+               IsPartial((TypeDeclarationSyntax) syntaxNode);
     }
 
     private static bool IsPartial(TypeDeclarationSyntax declaration)
@@ -111,7 +114,8 @@ public class PacketSerializerGenerator : IIncrementalGenerator
         GeneratorAttributeSyntaxContext context,
         CancellationToken cancellationToken)
     {
-        return new SerializerTypeInfo((INamedTypeSymbol)context.TargetSymbol, context.TargetNode, context.SemanticModel);
+        return new SerializerTypeInfo((INamedTypeSymbol) context.TargetSymbol, context.TargetNode,
+            context.SemanticModel);
     }
 
     private static void ApplyHeader(StringBuilder sb, string typeKeywords, string ns, string name, string header,
@@ -125,7 +129,7 @@ using System.Threading.Tasks;
 using QuantumCore.Networking;
 
 // no async warning if no properties
-#pragma warning disable CS1998 
+#pragma warning disable CS1998
 
 namespace {ns} {{
 

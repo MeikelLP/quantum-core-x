@@ -93,7 +93,7 @@ internal class DeserializeGenerator
     internal static string GetStreamReaderLine(FieldData field)
     {
         var typeName = field.IsArray
-            ? ((IArrayTypeSymbol)field.SemanticType).ElementType.Name
+            ? ((IArrayTypeSymbol) field.SemanticType).ElementType.Name
             : field.SemanticType.Name;
         if (field.IsEnum)
         {
@@ -109,7 +109,8 @@ internal class DeserializeGenerator
 
             if (field.HasDynamicLength)
             {
-                return $"await stream.ReadByteArrayFromStreamAsync(buffer, {GetVariableNameForExpression(field.SizeFieldName!)})";
+                return
+                    $"await stream.ReadByteArrayFromStreamAsync(buffer, {GetVariableNameForExpression(field.SizeFieldName!)})";
             }
             else
             {
@@ -305,9 +306,9 @@ internal class DeserializeGenerator
             return $"bytes[{offsetStr}]";
         }
 
-        if (namedTypeSymbol.GetFullName() == "System.Boolean")
+        if (GeneratorConstants.ConvertTypes.Contains(namedTypeSymbol.Name))
         {
-            return $"bytes[{offsetStr}] == 1";
+            return $"System.Convert.To{namedTypeSymbol.Name}(bytes[{offsetStr}])";
         }
 
         if (namedTypeSymbol.Name == "String")

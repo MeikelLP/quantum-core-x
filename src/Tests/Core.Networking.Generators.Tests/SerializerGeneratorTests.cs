@@ -74,18 +74,18 @@ namespace QuantumCore.Core.Packets {
         public void Serialize(byte[] bytes, in int offset = 0)
         {
             bytes[offset + 0] = 0xff;
-            bytes[offset + 1] = (byte)(this.Handshake >> 0);
-            bytes[offset + 2] = (byte)(this.Handshake >> 8);
-            bytes[offset + 3] = (byte)(this.Handshake >> 16);
-            bytes[offset + 4] = (byte)(this.Handshake >> 24);
-            bytes[offset + 5] = (byte)(this.Time >> 0);
-            bytes[offset + 6] = (byte)(this.Time >> 8);
-            bytes[offset + 7] = (byte)(this.Time >> 16);
-            bytes[offset + 8] = (byte)(this.Time >> 24);
-            bytes[offset + 9] = (byte)(this.Delta >> 0);
-            bytes[offset + 10] = (byte)(this.Delta >> 8);
-            bytes[offset + 11] = (byte)(this.Delta >> 16);
-            bytes[offset + 12] = (byte)(this.Delta >> 24);
+            bytes[offset + 1] = (System.Byte)(this.Handshake >> 0);
+            bytes[offset + 2] = (System.Byte)(this.Handshake >> 8);
+            bytes[offset + 3] = (System.Byte)(this.Handshake >> 16);
+            bytes[offset + 4] = (System.Byte)(this.Handshake >> 24);
+            bytes[offset + 5] = (System.Byte)(this.Time >> 0);
+            bytes[offset + 6] = (System.Byte)(this.Time >> 8);
+            bytes[offset + 7] = (System.Byte)(this.Time >> 16);
+            bytes[offset + 8] = (System.Byte)(this.Time >> 24);
+            bytes[offset + 9] = (System.Byte)(this.Delta >> 0);
+            bytes[offset + 10] = (System.Byte)(this.Delta >> 8);
+            bytes[offset + 11] = (System.Byte)(this.Delta >> 16);
+            bytes[offset + 12] = (System.Byte)(this.Delta >> 24);
         }
 
         public ushort GetSize()
@@ -192,18 +192,18 @@ namespace QuantumCore.Core.Packets {
         public void Serialize(byte[] bytes, in int offset = 0)
         {
             bytes[offset + 0] = 0xff;
-            bytes[offset + 1] = (byte)(this.Handshake >> 0);
-            bytes[offset + 2] = (byte)(this.Handshake >> 8);
-            bytes[offset + 3] = (byte)(this.Handshake >> 16);
-            bytes[offset + 4] = (byte)(this.Handshake >> 24);
-            bytes[offset + 5] = (byte)(this.Time >> 0);
-            bytes[offset + 6] = (byte)(this.Time >> 8);
-            bytes[offset + 7] = (byte)(this.Time >> 16);
-            bytes[offset + 8] = (byte)(this.Time >> 24);
-            bytes[offset + 9] = (byte)(this.Delta >> 0);
-            bytes[offset + 10] = (byte)(this.Delta >> 8);
-            bytes[offset + 11] = (byte)(this.Delta >> 16);
-            bytes[offset + 12] = (byte)(this.Delta >> 24);
+            bytes[offset + 1] = (System.Byte)(this.Handshake >> 0);
+            bytes[offset + 2] = (System.Byte)(this.Handshake >> 8);
+            bytes[offset + 3] = (System.Byte)(this.Handshake >> 16);
+            bytes[offset + 4] = (System.Byte)(this.Handshake >> 24);
+            bytes[offset + 5] = (System.Byte)(this.Time >> 0);
+            bytes[offset + 6] = (System.Byte)(this.Time >> 8);
+            bytes[offset + 7] = (System.Byte)(this.Time >> 16);
+            bytes[offset + 8] = (System.Byte)(this.Time >> 24);
+            bytes[offset + 9] = (System.Byte)(this.Delta >> 0);
+            bytes[offset + 10] = (System.Byte)(this.Delta >> 8);
+            bytes[offset + 11] = (System.Byte)(this.Delta >> 16);
+            bytes[offset + 12] = (System.Byte)(this.Delta >> 24);
         }
 
         public ushort GetSize()
@@ -314,10 +314,10 @@ namespace QuantumCore.Core.Packets {
         public void Serialize(byte[] bytes, in int offset = 0)
         {
             bytes[offset + 0] = 0xff;
-            bytes[offset + 1] = (byte)(this.Handshake >> 0);
-            bytes[offset + 2] = (byte)(this.Handshake >> 8);
-            bytes[offset + 3] = (byte)(this.Handshake >> 16);
-            bytes[offset + 4] = (byte)(this.Handshake >> 24);
+            bytes[offset + 1] = (System.Byte)(this.Handshake >> 0);
+            bytes[offset + 2] = (System.Byte)(this.Handshake >> 8);
+            bytes[offset + 3] = (System.Byte)(this.Handshake >> 16);
+            bytes[offset + 4] = (System.Byte)(this.Handshake >> 24);
             bytes[offset + 5] = (System.Byte)this.Type;
         }
 
@@ -425,14 +425,14 @@ namespace QuantumCore.Core.Packets {
         public void Serialize(byte[] bytes, in int offset = 0)
         {
             bytes[offset + 0] = 0xff;
-            bytes[offset + 1] = (byte)(this.Handshake >> 0);
-            bytes[offset + 2] = (byte)(this.Handshake >> 8);
-            bytes[offset + 3] = (byte)(this.Handshake >> 16);
-            bytes[offset + 4] = (byte)(this.Handshake >> 24);
-            bytes[offset + 5] = (byte)((System.Int32)this.Type >> 0);
-            bytes[offset + 6] = (byte)((System.Int32)this.Type >> 8);
-            bytes[offset + 7] = (byte)((System.Int32)this.Type >> 16);
-            bytes[offset + 8] = (byte)((System.Int32)this.Type >> 24);
+            bytes[offset + 1] = (System.Byte)(this.Handshake >> 0);
+            bytes[offset + 2] = (System.Byte)(this.Handshake >> 8);
+            bytes[offset + 3] = (System.Byte)(this.Handshake >> 16);
+            bytes[offset + 4] = (System.Byte)(this.Handshake >> 24);
+            bytes[offset + 5] = (System.Byte)((System.Int32)this.Type >> 0);
+            bytes[offset + 6] = (System.Byte)((System.Int32)this.Type >> 8);
+            bytes[offset + 7] = (System.Byte)((System.Int32)this.Type >> 16);
+            bytes[offset + 8] = (System.Byte)((System.Int32)this.Type >> 24);
         }
 
         public ushort GetSize()
@@ -538,18 +538,18 @@ namespace QuantumCore.Core.Packets {
         public void Serialize(byte[] bytes, in int offset = 0)
         {
             bytes[offset + 0] = 0xff;
-            bytes[offset + 1] = (byte)(this.Size >> 0);
-            bytes[offset + 2] = (byte)(this.Size >> 8);
-            bytes[offset + 3] = (byte)(this.Size >> 16);
-            bytes[offset + 4] = (byte)(this.Size >> 24);
-            bytes[offset + 5] = (byte)(this.Handshake >> 0);
-            bytes[offset + 6] = (byte)(this.Handshake >> 8);
-            bytes[offset + 7] = (byte)(this.Handshake >> 16);
-            bytes[offset + 8] = (byte)(this.Handshake >> 24);
-            bytes[offset + 9] = (byte)(this.Time >> 0);
-            bytes[offset + 10] = (byte)(this.Time >> 8);
-            bytes[offset + 11] = (byte)(this.Time >> 16);
-            bytes[offset + 12] = (byte)(this.Time >> 24);
+            bytes[offset + 1] = (System.Byte)(this.Size >> 0);
+            bytes[offset + 2] = (System.Byte)(this.Size >> 8);
+            bytes[offset + 3] = (System.Byte)(this.Size >> 16);
+            bytes[offset + 4] = (System.Byte)(this.Size >> 24);
+            bytes[offset + 5] = (System.Byte)(this.Handshake >> 0);
+            bytes[offset + 6] = (System.Byte)(this.Handshake >> 8);
+            bytes[offset + 7] = (System.Byte)(this.Handshake >> 16);
+            bytes[offset + 8] = (System.Byte)(this.Handshake >> 24);
+            bytes[offset + 9] = (System.Byte)(this.Time >> 0);
+            bytes[offset + 10] = (System.Byte)(this.Time >> 8);
+            bytes[offset + 11] = (System.Byte)(this.Time >> 16);
+            bytes[offset + 12] = (System.Byte)(this.Time >> 24);
         }
 
         public ushort GetSize()
@@ -658,10 +658,10 @@ namespace QuantumCore.Core.Packets {
         {
             bytes[offset + 0] = 0xff;
             bytes[offset + 1] = this.Type;
-            bytes[offset + 2] = (byte)(this.GetSize() >> 0);
-            bytes[offset + 3] = (byte)(this.GetSize() >> 8);
-            bytes[offset + 4] = (byte)(this.GetSize() >> 16);
-            bytes[offset + 5] = (byte)(this.GetSize() >> 24);
+            bytes[offset + 2] = (System.Byte)(this.GetSize() >> 0);
+            bytes[offset + 3] = (System.Byte)(this.GetSize() >> 8);
+            bytes[offset + 4] = (System.Byte)(this.GetSize() >> 16);
+            bytes[offset + 5] = (System.Byte)(this.GetSize() >> 24);
             bytes.WriteString(this.Message, offset + 6, (int)this.Size + 1);
         }
 
@@ -771,10 +771,10 @@ namespace QuantumCore.Core.Packets {
         {
             bytes[offset + 0] = 0xff;
             bytes[offset + 1] = this.Type;
-            bytes[offset + 2] = (byte)(this.GetSize() >> 0);
-            bytes[offset + 3] = (byte)(this.GetSize() >> 8);
-            bytes[offset + 4] = (byte)(this.GetSize() >> 16);
-            bytes[offset + 5] = (byte)(this.GetSize() >> 24);
+            bytes[offset + 2] = (System.Byte)(this.GetSize() >> 0);
+            bytes[offset + 3] = (System.Byte)(this.GetSize() >> 8);
+            bytes[offset + 4] = (System.Byte)(this.GetSize() >> 16);
+            bytes[offset + 5] = (System.Byte)(this.GetSize() >> 24);
             this.Flags.CopyTo(bytes, offset + 6);
         }
 
@@ -995,10 +995,10 @@ namespace QuantumCore.Core.Packets {
         {
             bytes[offset + 0] = 0xff;
             bytes[offset + 1] = this.Type;
-            bytes[offset + 2] = (byte)(this.Flags[0] >> 0);
-            bytes[offset + 3] = (byte)(this.Flags[0] >> 8);
-            bytes[offset + 4] = (byte)(this.Flags[1] >> 0);
-            bytes[offset + 5] = (byte)(this.Flags[1] >> 8);
+            bytes[offset + 2] = (System.Byte)(this.Flags[0] >> 0);
+            bytes[offset + 3] = (System.Byte)(this.Flags[0] >> 8);
+            bytes[offset + 4] = (System.Byte)(this.Flags[1] >> 0);
+            bytes[offset + 5] = (System.Byte)(this.Flags[1] >> 8);
         }
 
         public ushort GetSize()
@@ -1229,10 +1229,10 @@ namespace QuantumCore.Core.Packets {
         {
             bytes[offset + 0] = 0x02;
             bytes[offset + 1] = this.AttackType;
-            bytes[offset + 2] = (byte)(this.Vid >> 0);
-            bytes[offset + 3] = (byte)(this.Vid >> 8);
-            bytes[offset + 4] = (byte)(this.Vid >> 16);
-            bytes[offset + 5] = (byte)(this.Vid >> 24);
+            bytes[offset + 2] = (System.Byte)(this.Vid >> 0);
+            bytes[offset + 3] = (System.Byte)(this.Vid >> 8);
+            bytes[offset + 4] = (System.Byte)(this.Vid >> 16);
+            bytes[offset + 5] = (System.Byte)(this.Vid >> 24);
             this.Unknown.CopyTo(bytes, offset + 6);
             bytes[offset + 8] = default;
         }
@@ -1348,8 +1348,8 @@ namespace QuantumCore.Game.Packets {
         public void Serialize(byte[] bytes, in int offset = 0)
         {
             bytes[offset + 0] = 0x03;
-            bytes[offset + 1] = (byte)(this.GetSize() >> 0);
-            bytes[offset + 2] = (byte)(this.GetSize() >> 8);
+            bytes[offset + 1] = (System.Byte)(this.GetSize() >> 0);
+            bytes[offset + 2] = (System.Byte)(this.GetSize() >> 8);
             bytes[offset + 3] = this.MessageType;
             bytes.WriteString(this.Message, offset + 4, (int)this.Size + 1);
             bytes[offset + 4 + this.Message.Length] = default;
@@ -1698,14 +1698,14 @@ namespace QuantumCore.Core.Packets {
         {
             bytes[offset + 0] = 0xff;
             bytes[offset + 1] = this.Type;
-            bytes[offset + 2] = (byte)(this.GetSize() >> 0);
-            bytes[offset + 3] = (byte)(this.GetSize() >> 8);
-            bytes[offset + 4] = (byte)(this.GetSize() >> 16);
-            bytes[offset + 5] = (byte)(this.GetSize() >> 24);
+            bytes[offset + 2] = (System.Byte)(this.GetSize() >> 0);
+            bytes[offset + 3] = (System.Byte)(this.GetSize() >> 8);
+            bytes[offset + 4] = (System.Byte)(this.GetSize() >> 16);
+            bytes[offset + 5] = (System.Byte)(this.GetSize() >> 24);
             for (var i = 0; i < this.Flags.Length; i++)
             {
-                bytes[offset + 6 + i * 2] = (byte)(this.Flags[i] >> 0);
-                bytes[offset + 7 + i * 2] = (byte)(this.Flags[i] >> 8);
+                bytes[offset + 6 + i * 2] = (System.Byte)(this.Flags[i] >> 0);
+                bytes[offset + 7 + i * 2] = (System.Byte)(this.Flags[i] >> 8);
             }
         }
 
@@ -1849,10 +1849,10 @@ namespace QuantumCore.Core.Packets {
         {
             bytes[offset + 0] = 0xff;
             bytes[offset + 1] = this.Type;
-            bytes[offset + 2] = (byte)(this.GetSize() >> 0);
-            bytes[offset + 3] = (byte)(this.GetSize() >> 8);
-            bytes[offset + 4] = (byte)(this.GetSize() >> 16);
-            bytes[offset + 5] = (byte)(this.GetSize() >> 24);
+            bytes[offset + 2] = (System.Byte)(this.GetSize() >> 0);
+            bytes[offset + 3] = (System.Byte)(this.GetSize() >> 8);
+            bytes[offset + 4] = (System.Byte)(this.GetSize() >> 16);
+            bytes[offset + 5] = (System.Byte)(this.GetSize() >> 24);
             bytes.WriteString(this.Message, offset + 6, (int)this.Size + 1);
             bytes[offset + 6 + this.Message.Length] = this.Location;
         }
@@ -1968,18 +1968,18 @@ namespace QuantumCore.Core.Packets {
         public void Serialize(byte[] bytes, in int offset = 0)
         {
             bytes[offset + 0] = 0xff;
-            bytes[offset + 1] = (byte)(this.Handshake >> 0);
-            bytes[offset + 2] = (byte)(this.Handshake >> 8);
-            bytes[offset + 3] = (byte)(this.Handshake >> 16);
-            bytes[offset + 4] = (byte)(this.Handshake >> 24);
-            bytes[offset + 5] = (byte)(this.Time >> 0);
-            bytes[offset + 6] = (byte)(this.Time >> 8);
-            bytes[offset + 7] = (byte)(this.Time >> 16);
-            bytes[offset + 8] = (byte)(this.Time >> 24);
-            bytes[offset + 9] = (byte)(this.Delta >> 0);
-            bytes[offset + 10] = (byte)(this.Delta >> 8);
-            bytes[offset + 11] = (byte)(this.Delta >> 16);
-            bytes[offset + 12] = (byte)(this.Delta >> 24);
+            bytes[offset + 1] = (System.Byte)(this.Handshake >> 0);
+            bytes[offset + 2] = (System.Byte)(this.Handshake >> 8);
+            bytes[offset + 3] = (System.Byte)(this.Handshake >> 16);
+            bytes[offset + 4] = (System.Byte)(this.Handshake >> 24);
+            bytes[offset + 5] = (System.Byte)(this.Time >> 0);
+            bytes[offset + 6] = (System.Byte)(this.Time >> 8);
+            bytes[offset + 7] = (System.Byte)(this.Time >> 16);
+            bytes[offset + 8] = (System.Byte)(this.Time >> 24);
+            bytes[offset + 9] = (System.Byte)(this.Delta >> 0);
+            bytes[offset + 10] = (System.Byte)(this.Delta >> 8);
+            bytes[offset + 11] = (System.Byte)(this.Delta >> 16);
+            bytes[offset + 12] = (System.Byte)(this.Delta >> 24);
         }
 
         public ushort GetSize()
@@ -2159,18 +2159,18 @@ namespace QuantumCore.Core.Packets {
         public void Serialize(byte[] bytes, in int offset = 0)
         {
             bytes[offset + 0] = 0xff;
-            bytes[offset + 1] = (byte)(this.Handshake >> 0);
-            bytes[offset + 2] = (byte)(this.Handshake >> 8);
-            bytes[offset + 3] = (byte)(this.Handshake >> 16);
-            bytes[offset + 4] = (byte)(this.Handshake >> 24);
-            bytes[offset + 5] = (byte)(this.Time >> 0);
-            bytes[offset + 6] = (byte)(this.Time >> 8);
-            bytes[offset + 7] = (byte)(this.Time >> 16);
-            bytes[offset + 8] = (byte)(this.Time >> 24);
-            bytes[offset + 9] = (byte)(this.Delta >> 0);
-            bytes[offset + 10] = (byte)(this.Delta >> 8);
-            bytes[offset + 11] = (byte)(this.Delta >> 16);
-            bytes[offset + 12] = (byte)(this.Delta >> 24);
+            bytes[offset + 1] = (System.Byte)(this.Handshake >> 0);
+            bytes[offset + 2] = (System.Byte)(this.Handshake >> 8);
+            bytes[offset + 3] = (System.Byte)(this.Handshake >> 16);
+            bytes[offset + 4] = (System.Byte)(this.Handshake >> 24);
+            bytes[offset + 5] = (System.Byte)(this.Time >> 0);
+            bytes[offset + 6] = (System.Byte)(this.Time >> 8);
+            bytes[offset + 7] = (System.Byte)(this.Time >> 16);
+            bytes[offset + 8] = (System.Byte)(this.Time >> 24);
+            bytes[offset + 9] = (System.Byte)(this.Delta >> 0);
+            bytes[offset + 10] = (System.Byte)(this.Delta >> 8);
+            bytes[offset + 11] = (System.Byte)(this.Delta >> 16);
+            bytes[offset + 12] = (System.Byte)(this.Delta >> 24);
         }
 
         public ushort GetSize()
@@ -2230,18 +2230,20 @@ namespace QuantumCore.Core.Packets {
     [Fact]
     public void Class()
     {
-        var inputCompilation = CreateCompilation(@"
-using QuantumCore.Networking;
+        var inputCompilation = CreateCompilation("""
 
-namespace QuantumCore.Core.Packets;
+                                                 using QuantumCore.Networking;
 
-[Packet(0xff, EDirection.Incoming | EDirection.Outgoing)]
-[PacketGenerator]
-public partial class GCHandshake {
-    public uint Handshake { get; set; }
-    public uint Time { get; set; }
-    public uint Delta { get; set; }
-}");
+                                                 namespace QuantumCore.Core.Packets;
+
+                                                 [Packet(0xff, EDirection.Incoming | EDirection.Outgoing)]
+                                                 [PacketGenerator]
+                                                 public partial class GCHandshake {
+                                                     public uint Handshake { get; set; }
+                                                     public uint Time { get; set; }
+                                                     public uint Delta { get; set; }
+                                                 }
+                                                 """);
 
         GeneratorDriver driver = CSharpGeneratorDriver.Create(new PacketSerializerGenerator());
 
@@ -2258,94 +2260,76 @@ public partial class GCHandshake {
         runResult.Results[0].GeneratedSources.Should().HaveCount(1);
         runResult.Results[0].Diagnostics.Should().BeEmpty();
         runResult.Results[0].Exception.Should().BeNull();
-        runResult.Results[0].GeneratedSources[0].SourceText.ToString().Should().BeEquivalentTo(@"/// <auto-generated/>
-using System;
-using System.Buffers;
-using System.IO;
-using System.Threading.Tasks;
-using QuantumCore.Networking;
+        runResult.Results[0].GeneratedSources[0].SourceText.ToString().Should().BeEquivalentTo("""
+            /// <auto-generated/>
+            using System;
+            using System.Buffers;
+            using System.IO;
+            using System.Threading.Tasks;
+            using QuantumCore.Networking;
 
-// no async warning if no properties
-#pragma warning disable CS1998 
+            // no async warning if no properties
+            #pragma warning disable CS1998
 
-namespace QuantumCore.Core.Packets {
-
-    public partial class GCHandshake : IPacketSerializable
-    {
-        public static byte Header => 0xff;
-        public static byte? SubHeader => null;
-        public static bool HasStaticSize => true;
-        public static bool HasSequence => false;
-
-        public void Serialize(byte[] bytes, in int offset = 0)
-        {
-            bytes[offset + 0] = 0xff;
-            bytes[offset + 1] = (byte)(this.Handshake >> 0);
-            bytes[offset + 2] = (byte)(this.Handshake >> 8);
-            bytes[offset + 3] = (byte)(this.Handshake >> 16);
-            bytes[offset + 4] = (byte)(this.Handshake >> 24);
-            bytes[offset + 5] = (byte)(this.Time >> 0);
-            bytes[offset + 6] = (byte)(this.Time >> 8);
-            bytes[offset + 7] = (byte)(this.Time >> 16);
-            bytes[offset + 8] = (byte)(this.Time >> 24);
-            bytes[offset + 9] = (byte)(this.Delta >> 0);
-            bytes[offset + 10] = (byte)(this.Delta >> 8);
-            bytes[offset + 11] = (byte)(this.Delta >> 16);
-            bytes[offset + 12] = (byte)(this.Delta >> 24);
-        }
-
-        public ushort GetSize()
-        {
-            return 13;
-        }
-
-        public static GCHandshake Deserialize(ReadOnlySpan<byte> bytes, in int offset = 0)
-        {
-            var __Handshake = System.BitConverter.ToUInt32(bytes[(offset + 0)..(offset + 0 + 4)]);
-            var __Time = System.BitConverter.ToUInt32(bytes[(offset + 4)..(offset + 4 + 4)]);
-            var __Delta = System.BitConverter.ToUInt32(bytes[(offset + 8)..(offset + 8 + 4)]);
-            var obj = new QuantumCore.Core.Packets.GCHandshake
-            {
-                Handshake = __Handshake,
-                Time = __Time,
-                Delta = __Delta
-            };
-            return obj;
-        }
-
-        public static T Deserialize<T>(ReadOnlySpan<byte> bytes, in int offset = 0)
-            where T : IPacketSerializable
-        {
-            return (T)(object)Deserialize(bytes, offset);
-        }
-
-        public static async ValueTask<object> DeserializeFromStreamAsync(Stream stream)
-        {
-            var buffer = ArrayPool<byte>.Shared.Rent(NetworkingConstants.BufferSize);
-            try
-            {
-                var __Handshake = await stream.ReadValueFromStreamAsync<UInt32>(buffer);
-                var __Time = await stream.ReadValueFromStreamAsync<UInt32>(buffer);
-                var __Delta = await stream.ReadValueFromStreamAsync<UInt32>(buffer);
-                var obj = new QuantumCore.Core.Packets.GCHandshake
+            namespace QuantumCore.Core.Packets {
+            
+                public partial class GCHandshake : IPacketSerializable
                 {
-                    Handshake = __Handshake,
-                    Time = __Time,
-                    Delta = __Delta
-                };
-                return obj;
+                    public byte Header => 0xff;
+                    public byte? SubHeader => null;
+                    public bool HasStaticSize => true;
+                    public bool HasSequence => false;
+            
+                    public void Serialize(byte[] bytes, in int offset = 0)
+                    {
+                        bytes[offset + 0] = 0xff;
+                        bytes[offset + 1] = (System.Byte)(this.Handshake >> 0);
+                        bytes[offset + 2] = (System.Byte)(this.Handshake >> 8);
+                        bytes[offset + 3] = (System.Byte)(this.Handshake >> 16);
+                        bytes[offset + 4] = (System.Byte)(this.Handshake >> 24);
+                        bytes[offset + 5] = (System.Byte)(this.Time >> 0);
+                        bytes[offset + 6] = (System.Byte)(this.Time >> 8);
+                        bytes[offset + 7] = (System.Byte)(this.Time >> 16);
+                        bytes[offset + 8] = (System.Byte)(this.Time >> 24);
+                        bytes[offset + 9] = (System.Byte)(this.Delta >> 0);
+                        bytes[offset + 10] = (System.Byte)(this.Delta >> 8);
+                        bytes[offset + 11] = (System.Byte)(this.Delta >> 16);
+                        bytes[offset + 12] = (System.Byte)(this.Delta >> 24);
+                    }
+            
+                    public ushort GetSize()
+                    {
+                        return 13;
+                    }
+            
+                    public void Deserialize(ReadOnlySpan<byte> bytes, in int offset = 0)
+                    {
+                        Handshake = System.BitConverter.ToUInt32(bytes[(System.Index)(offset + 0)..(System.Index)(offset + 0 + 4)]);
+                        Time = System.BitConverter.ToUInt32(bytes[(System.Index)(offset + 4)..(System.Index)(offset + 4 + 4)]);
+                        Delta = System.BitConverter.ToUInt32(bytes[(System.Index)(offset + 8)..(System.Index)(offset + 8 + 4)]);
+                    }
+            
+                    public async ValueTask DeserializeFromStreamAsync(Stream stream)
+                    {
+                        var buffer = ArrayPool<byte>.Shared.Rent(NetworkingConstants.BufferSize);
+                        try
+                        {
+                            Handshake = await stream.ReadValueFromStreamAsync<UInt32>(buffer);
+                            Time = await stream.ReadValueFromStreamAsync<UInt32>(buffer);
+                            Delta = await stream.ReadValueFromStreamAsync<UInt32>(buffer);
+                        }
+                        catch (Exception)
+                        {
+                            throw;
+                        }
+                        finally
+                        {
+                            ArrayPool<byte>.Shared.Return(buffer);
+                        }
+                    }
+                }
             }
-            catch (Exception)
-            {
-                throw;
-            }
-            finally
-            {
-                ArrayPool<byte>.Shared.Return(buffer);
-            }
-        }
-    }
-}");
+            """);
     }
 
     [Fact]
@@ -2399,7 +2383,7 @@ namespace QuantumCore.Core.Packets {
         public void Serialize(byte[] bytes, in int offset = 0)
         {
             bytes[offset + 0] = 0xff;
-            bytes[offset + 1] = (byte)(this.IsHandsome ? 1 : 0);
+            bytes[offset + 1] = (System.Byte)(this.IsHandsome ? 1 : 0);
         }
 
         public ushort GetSize()
@@ -2503,13 +2487,13 @@ namespace QuantumCore.Core.Packets {
         public void Serialize(byte[] bytes, in int offset = 0)
         {
             bytes[offset + 0] = 0x4B;
-            bytes[offset + 1] = (byte)(this.GetSize() >> 0);
-            bytes[offset + 2] = (byte)(this.GetSize() >> 8);
+            bytes[offset + 1] = (System.Byte)(this.GetSize() >> 0);
+            bytes[offset + 2] = (System.Byte)(this.GetSize() >> 8);
             bytes[offset + 3] = 0x10;
-            bytes[offset + 4] = (byte)(this.Id >> 0);
-            bytes[offset + 5] = (byte)(this.Id >> 8);
-            bytes[offset + 6] = (byte)(this.Id >> 16);
-            bytes[offset + 7] = (byte)(this.Id >> 24);
+            bytes[offset + 4] = (System.Byte)(this.Id >> 0);
+            bytes[offset + 5] = (System.Byte)(this.Id >> 8);
+            bytes[offset + 6] = (System.Byte)(this.Id >> 16);
+            bytes[offset + 7] = (System.Byte)(this.Id >> 24);
             bytes.WriteString(this.Name, offset + 8, (int)this.Size + 1);
         }
 
@@ -2720,22 +2704,22 @@ namespace QuantumCore.Core.Packets {
         public void Serialize(byte[] bytes, in int offset = 0)
         {
             bytes[offset + 0] = 0xff;
-            bytes[offset + 1] = (byte)(this.Handshake >> 0);
-            bytes[offset + 2] = (byte)(this.Handshake >> 8);
-            bytes[offset + 3] = (byte)(this.Handshake >> 16);
-            bytes[offset + 4] = (byte)(this.Handshake >> 24);
-            bytes[offset + 5] = (byte)(this.Time >> 0);
-            bytes[offset + 6] = (byte)(this.Time >> 8);
-            bytes[offset + 7] = (byte)(this.Time >> 16);
-            bytes[offset + 8] = (byte)(this.Time >> 24);
-            bytes[offset + 9] = (byte)(this.Delta >> 0);
-            bytes[offset + 10] = (byte)(this.Delta >> 8);
-            bytes[offset + 11] = (byte)(this.Delta >> 16);
-            bytes[offset + 12] = (byte)(this.Delta >> 24);
-            bytes[offset + 13] = (byte)(this.Sub.SomeSubData >> 0);
-            bytes[offset + 14] = (byte)(this.Sub.SomeSubData >> 8);
-            bytes[offset + 15] = (byte)(this.Sub.SomeSubData >> 16);
-            bytes[offset + 16] = (byte)(this.Sub.SomeSubData >> 24);
+            bytes[offset + 1] = (System.Byte)(this.Handshake >> 0);
+            bytes[offset + 2] = (System.Byte)(this.Handshake >> 8);
+            bytes[offset + 3] = (System.Byte)(this.Handshake >> 16);
+            bytes[offset + 4] = (System.Byte)(this.Handshake >> 24);
+            bytes[offset + 5] = (System.Byte)(this.Time >> 0);
+            bytes[offset + 6] = (System.Byte)(this.Time >> 8);
+            bytes[offset + 7] = (System.Byte)(this.Time >> 16);
+            bytes[offset + 8] = (System.Byte)(this.Time >> 24);
+            bytes[offset + 9] = (System.Byte)(this.Delta >> 0);
+            bytes[offset + 10] = (System.Byte)(this.Delta >> 8);
+            bytes[offset + 11] = (System.Byte)(this.Delta >> 16);
+            bytes[offset + 12] = (System.Byte)(this.Delta >> 24);
+            bytes[offset + 13] = (System.Byte)(this.Sub.SomeSubData >> 0);
+            bytes[offset + 14] = (System.Byte)(this.Sub.SomeSubData >> 8);
+            bytes[offset + 15] = (System.Byte)(this.Sub.SomeSubData >> 16);
+            bytes[offset + 16] = (System.Byte)(this.Sub.SomeSubData >> 24);
         }
 
         public ushort GetSize()
@@ -2854,18 +2838,18 @@ namespace QuantumCore.Core.Packets {
         public void Serialize(byte[] bytes, in int offset = 0)
         {
             bytes[offset + 0] = 0xff;
-            bytes[offset + 1] = (byte)(this.Handshake >> 0);
-            bytes[offset + 2] = (byte)(this.Handshake >> 8);
-            bytes[offset + 3] = (byte)(this.Handshake >> 16);
-            bytes[offset + 4] = (byte)(this.Handshake >> 24);
-            bytes[offset + 5] = (byte)(this.Time >> 0);
-            bytes[offset + 6] = (byte)(this.Time >> 8);
-            bytes[offset + 7] = (byte)(this.Time >> 16);
-            bytes[offset + 8] = (byte)(this.Time >> 24);
-            bytes[offset + 9] = (byte)(this.Delta >> 0);
-            bytes[offset + 10] = (byte)(this.Delta >> 8);
-            bytes[offset + 11] = (byte)(this.Delta >> 16);
-            bytes[offset + 12] = (byte)(this.Delta >> 24);
+            bytes[offset + 1] = (System.Byte)(this.Handshake >> 0);
+            bytes[offset + 2] = (System.Byte)(this.Handshake >> 8);
+            bytes[offset + 3] = (System.Byte)(this.Handshake >> 16);
+            bytes[offset + 4] = (System.Byte)(this.Handshake >> 24);
+            bytes[offset + 5] = (System.Byte)(this.Time >> 0);
+            bytes[offset + 6] = (System.Byte)(this.Time >> 8);
+            bytes[offset + 7] = (System.Byte)(this.Time >> 16);
+            bytes[offset + 8] = (System.Byte)(this.Time >> 24);
+            bytes[offset + 9] = (System.Byte)(this.Delta >> 0);
+            bytes[offset + 10] = (System.Byte)(this.Delta >> 8);
+            bytes[offset + 11] = (System.Byte)(this.Delta >> 16);
+            bytes[offset + 12] = (System.Byte)(this.Delta >> 24);
         }
 
         public ushort GetSize()
@@ -2985,50 +2969,50 @@ namespace QuantumCore.Core.Packets {
         public void Serialize(byte[] bytes, in int offset = 0)
         {
             bytes[offset + 0] = 0xff;
-            bytes[offset + 1] = (byte)(this.Handshake >> 0);
-            bytes[offset + 2] = (byte)(this.Handshake >> 8);
-            bytes[offset + 3] = (byte)(this.Handshake >> 16);
-            bytes[offset + 4] = (byte)(this.Handshake >> 24);
-            bytes[offset + 5] = (byte)(this.Time >> 0);
-            bytes[offset + 6] = (byte)(this.Time >> 8);
-            bytes[offset + 7] = (byte)(this.Time >> 16);
-            bytes[offset + 8] = (byte)(this.Time >> 24);
-            bytes[offset + 9] = (byte)(this.Delta >> 0);
-            bytes[offset + 10] = (byte)(this.Delta >> 8);
-            bytes[offset + 11] = (byte)(this.Delta >> 16);
-            bytes[offset + 12] = (byte)(this.Delta >> 24);
-            bytes[offset + 13] = (byte)(this.Subs[0].SomeSubData >> 0);
-            bytes[offset + 14] = (byte)(this.Subs[0].SomeSubData >> 8);
-            bytes[offset + 15] = (byte)(this.Subs[0].SomeSubData >> 16);
-            bytes[offset + 16] = (byte)(this.Subs[0].SomeSubData >> 24);
-            bytes[offset + 17] = (byte)(this.Subs[0].SomeSubData2 >> 0);
-            bytes[offset + 18] = (byte)(this.Subs[0].SomeSubData2 >> 8);
-            bytes[offset + 19] = (byte)(this.Subs[0].SomeSubData2 >> 16);
-            bytes[offset + 20] = (byte)(this.Subs[0].SomeSubData2 >> 24);
-            bytes[offset + 21] = (byte)(this.Subs[1].SomeSubData >> 0);
-            bytes[offset + 22] = (byte)(this.Subs[1].SomeSubData >> 8);
-            bytes[offset + 23] = (byte)(this.Subs[1].SomeSubData >> 16);
-            bytes[offset + 24] = (byte)(this.Subs[1].SomeSubData >> 24);
-            bytes[offset + 25] = (byte)(this.Subs[1].SomeSubData2 >> 0);
-            bytes[offset + 26] = (byte)(this.Subs[1].SomeSubData2 >> 8);
-            bytes[offset + 27] = (byte)(this.Subs[1].SomeSubData2 >> 16);
-            bytes[offset + 28] = (byte)(this.Subs[1].SomeSubData2 >> 24);
-            bytes[offset + 29] = (byte)(this.Subs[2].SomeSubData >> 0);
-            bytes[offset + 30] = (byte)(this.Subs[2].SomeSubData >> 8);
-            bytes[offset + 31] = (byte)(this.Subs[2].SomeSubData >> 16);
-            bytes[offset + 32] = (byte)(this.Subs[2].SomeSubData >> 24);
-            bytes[offset + 33] = (byte)(this.Subs[2].SomeSubData2 >> 0);
-            bytes[offset + 34] = (byte)(this.Subs[2].SomeSubData2 >> 8);
-            bytes[offset + 35] = (byte)(this.Subs[2].SomeSubData2 >> 16);
-            bytes[offset + 36] = (byte)(this.Subs[2].SomeSubData2 >> 24);
-            bytes[offset + 37] = (byte)(this.Subs[3].SomeSubData >> 0);
-            bytes[offset + 38] = (byte)(this.Subs[3].SomeSubData >> 8);
-            bytes[offset + 39] = (byte)(this.Subs[3].SomeSubData >> 16);
-            bytes[offset + 40] = (byte)(this.Subs[3].SomeSubData >> 24);
-            bytes[offset + 41] = (byte)(this.Subs[3].SomeSubData2 >> 0);
-            bytes[offset + 42] = (byte)(this.Subs[3].SomeSubData2 >> 8);
-            bytes[offset + 43] = (byte)(this.Subs[3].SomeSubData2 >> 16);
-            bytes[offset + 44] = (byte)(this.Subs[3].SomeSubData2 >> 24);
+            bytes[offset + 1] = (System.Byte)(this.Handshake >> 0);
+            bytes[offset + 2] = (System.Byte)(this.Handshake >> 8);
+            bytes[offset + 3] = (System.Byte)(this.Handshake >> 16);
+            bytes[offset + 4] = (System.Byte)(this.Handshake >> 24);
+            bytes[offset + 5] = (System.Byte)(this.Time >> 0);
+            bytes[offset + 6] = (System.Byte)(this.Time >> 8);
+            bytes[offset + 7] = (System.Byte)(this.Time >> 16);
+            bytes[offset + 8] = (System.Byte)(this.Time >> 24);
+            bytes[offset + 9] = (System.Byte)(this.Delta >> 0);
+            bytes[offset + 10] = (System.Byte)(this.Delta >> 8);
+            bytes[offset + 11] = (System.Byte)(this.Delta >> 16);
+            bytes[offset + 12] = (System.Byte)(this.Delta >> 24);
+            bytes[offset + 13] = (System.Byte)(this.Subs[0].SomeSubData >> 0);
+            bytes[offset + 14] = (System.Byte)(this.Subs[0].SomeSubData >> 8);
+            bytes[offset + 15] = (System.Byte)(this.Subs[0].SomeSubData >> 16);
+            bytes[offset + 16] = (System.Byte)(this.Subs[0].SomeSubData >> 24);
+            bytes[offset + 17] = (System.Byte)(this.Subs[0].SomeSubData2 >> 0);
+            bytes[offset + 18] = (System.Byte)(this.Subs[0].SomeSubData2 >> 8);
+            bytes[offset + 19] = (System.Byte)(this.Subs[0].SomeSubData2 >> 16);
+            bytes[offset + 20] = (System.Byte)(this.Subs[0].SomeSubData2 >> 24);
+            bytes[offset + 21] = (System.Byte)(this.Subs[1].SomeSubData >> 0);
+            bytes[offset + 22] = (System.Byte)(this.Subs[1].SomeSubData >> 8);
+            bytes[offset + 23] = (System.Byte)(this.Subs[1].SomeSubData >> 16);
+            bytes[offset + 24] = (System.Byte)(this.Subs[1].SomeSubData >> 24);
+            bytes[offset + 25] = (System.Byte)(this.Subs[1].SomeSubData2 >> 0);
+            bytes[offset + 26] = (System.Byte)(this.Subs[1].SomeSubData2 >> 8);
+            bytes[offset + 27] = (System.Byte)(this.Subs[1].SomeSubData2 >> 16);
+            bytes[offset + 28] = (System.Byte)(this.Subs[1].SomeSubData2 >> 24);
+            bytes[offset + 29] = (System.Byte)(this.Subs[2].SomeSubData >> 0);
+            bytes[offset + 30] = (System.Byte)(this.Subs[2].SomeSubData >> 8);
+            bytes[offset + 31] = (System.Byte)(this.Subs[2].SomeSubData >> 16);
+            bytes[offset + 32] = (System.Byte)(this.Subs[2].SomeSubData >> 24);
+            bytes[offset + 33] = (System.Byte)(this.Subs[2].SomeSubData2 >> 0);
+            bytes[offset + 34] = (System.Byte)(this.Subs[2].SomeSubData2 >> 8);
+            bytes[offset + 35] = (System.Byte)(this.Subs[2].SomeSubData2 >> 16);
+            bytes[offset + 36] = (System.Byte)(this.Subs[2].SomeSubData2 >> 24);
+            bytes[offset + 37] = (System.Byte)(this.Subs[3].SomeSubData >> 0);
+            bytes[offset + 38] = (System.Byte)(this.Subs[3].SomeSubData >> 8);
+            bytes[offset + 39] = (System.Byte)(this.Subs[3].SomeSubData >> 16);
+            bytes[offset + 40] = (System.Byte)(this.Subs[3].SomeSubData >> 24);
+            bytes[offset + 41] = (System.Byte)(this.Subs[3].SomeSubData2 >> 0);
+            bytes[offset + 42] = (System.Byte)(this.Subs[3].SomeSubData2 >> 8);
+            bytes[offset + 43] = (System.Byte)(this.Subs[3].SomeSubData2 >> 16);
+            bytes[offset + 44] = (System.Byte)(this.Subs[3].SomeSubData2 >> 24);
         }
 
         public ushort GetSize()
@@ -3193,30 +3177,30 @@ namespace QuantumCore.Core.Packets {
         public void Serialize(byte[] bytes, in int offset = 0)
         {
             bytes[offset + 0] = 0xff;
-            bytes[offset + 1] = (byte)(this.Handshake >> 0);
-            bytes[offset + 2] = (byte)(this.Handshake >> 8);
-            bytes[offset + 3] = (byte)(this.Handshake >> 16);
-            bytes[offset + 4] = (byte)(this.Handshake >> 24);
-            bytes[offset + 5] = (byte)(this.Time >> 0);
-            bytes[offset + 6] = (byte)(this.Time >> 8);
-            bytes[offset + 7] = (byte)(this.Time >> 16);
-            bytes[offset + 8] = (byte)(this.Time >> 24);
-            bytes[offset + 9] = (byte)(this.GetSize() >> 0);
-            bytes[offset + 10] = (byte)(this.GetSize() >> 8);
-            bytes[offset + 11] = (byte)(this.GetSize() >> 16);
-            bytes[offset + 12] = (byte)(this.GetSize() >> 24);
+            bytes[offset + 1] = (System.Byte)(this.Handshake >> 0);
+            bytes[offset + 2] = (System.Byte)(this.Handshake >> 8);
+            bytes[offset + 3] = (System.Byte)(this.Handshake >> 16);
+            bytes[offset + 4] = (System.Byte)(this.Handshake >> 24);
+            bytes[offset + 5] = (System.Byte)(this.Time >> 0);
+            bytes[offset + 6] = (System.Byte)(this.Time >> 8);
+            bytes[offset + 7] = (System.Byte)(this.Time >> 16);
+            bytes[offset + 8] = (System.Byte)(this.Time >> 24);
+            bytes[offset + 9] = (System.Byte)(this.GetSize() >> 0);
+            bytes[offset + 10] = (System.Byte)(this.GetSize() >> 8);
+            bytes[offset + 11] = (System.Byte)(this.GetSize() >> 16);
+            bytes[offset + 12] = (System.Byte)(this.GetSize() >> 24);
             for (var i = 0; i < this.Subs.Length; i++)
             {
-                bytes[offset + 13 + i * 5] = (byte)(this.Subs[i].SomeSubData >> 0);
-                bytes[offset + 14 + i * 5] = (byte)(this.Subs[i].SomeSubData >> 8);
-                bytes[offset + 15 + i * 5] = (byte)(this.Subs[i].SomeSubData >> 16);
-                bytes[offset + 16 + i * 5] = (byte)(this.Subs[i].SomeSubData >> 24);
+                bytes[offset + 13 + i * 5] = (System.Byte)(this.Subs[i].SomeSubData >> 0);
+                bytes[offset + 14 + i * 5] = (System.Byte)(this.Subs[i].SomeSubData >> 8);
+                bytes[offset + 15 + i * 5] = (System.Byte)(this.Subs[i].SomeSubData >> 16);
+                bytes[offset + 16 + i * 5] = (System.Byte)(this.Subs[i].SomeSubData >> 24);
                 bytes[offset + 17 + i * 5] = this.Subs[i].SubByte;
             }
-            bytes[offset + 13 + this.Subs.Length * 5] = (byte)(this.Delta >> 0);
-            bytes[offset + 14 + this.Subs.Length * 5] = (byte)(this.Delta >> 8);
-            bytes[offset + 15 + this.Subs.Length * 5] = (byte)(this.Delta >> 16);
-            bytes[offset + 16 + this.Subs.Length * 5] = (byte)(this.Delta >> 24);
+            bytes[offset + 13 + this.Subs.Length * 5] = (System.Byte)(this.Delta >> 0);
+            bytes[offset + 14 + this.Subs.Length * 5] = (System.Byte)(this.Delta >> 8);
+            bytes[offset + 15 + this.Subs.Length * 5] = (System.Byte)(this.Delta >> 16);
+            bytes[offset + 16 + this.Subs.Length * 5] = (System.Byte)(this.Delta >> 24);
         }
 
         public ushort GetSize()
@@ -3325,112 +3309,114 @@ public partial class CharacterInfo {
         runResult.Results[0].GeneratedSources.Should().HaveCount(1);
         runResult.Results[0].Diagnostics.Should().BeEmpty();
         runResult.Results[0].Exception.Should().BeNull();
-        runResult.Results[0].GeneratedSources[0].SourceText.ToString().Should().BeEquivalentTo(@"/// <auto-generated/>
-using System;
-using System.Buffers;
-using System.IO;
-using System.Threading.Tasks;
-using QuantumCore.Networking;
+        runResult.Results[0].GeneratedSources[0].SourceText.ToString().Should().BeEquivalentTo("""
+            /// <auto-generated/>
+            using System;
+            using System.Buffers;
+            using System.IO;
+            using System.Threading.Tasks;
+            using QuantumCore.Networking;
 
-// no async warning if no properties
-#pragma warning disable CS1998 
+            // no async warning if no properties
+            #pragma warning disable CS1998
 
-namespace QuantumCore.Core.Packets {
-
-    public partial class CharacterInfo : IPacketSerializable
-    {
-        public static byte Header => 0x88;
-        public static byte? SubHeader => null;
-        public static bool HasStaticSize => true;
-        public static bool HasSequence => false;
-
-        public void Serialize(byte[] bytes, in int offset = 0)
-        {
-            bytes[offset + 0] = 0x88;
-            bytes[offset + 1] = (byte)(this.Vid >> 0);
-            bytes[offset + 2] = (byte)(this.Vid >> 8);
-            bytes[offset + 3] = (byte)(this.Vid >> 16);
-            bytes[offset + 4] = (byte)(this.Vid >> 24);
-            bytes.WriteString(this.Name, offset + 5, (int)25);
-            bytes[offset + 30] = (byte)(this.Parts[0] >> 0);
-            bytes[offset + 31] = (byte)(this.Parts[0] >> 8);
-            bytes[offset + 32] = (byte)(this.Parts[1] >> 0);
-            bytes[offset + 33] = (byte)(this.Parts[1] >> 8);
-            bytes[offset + 34] = (byte)(this.Parts[2] >> 0);
-            bytes[offset + 35] = (byte)(this.Parts[2] >> 8);
-            bytes[offset + 36] = (byte)(this.Parts[3] >> 0);
-            bytes[offset + 37] = (byte)(this.Parts[3] >> 8);
-            bytes[offset + 38] = this.Empire;
-        }
-
-        public ushort GetSize()
-        {
-            return 39;
-        }
-
-        public static CharacterInfo Deserialize(ReadOnlySpan<byte> bytes, in int offset = 0)
-        {
-            var __Vid = System.BitConverter.ToUInt32(bytes[(offset + 0)..(offset + 0 + 4)]);
-            var __Name = (bytes[(offset + 4)..(offset + 4 + 25)]).ReadNullTerminatedString();
-            var __Parts = new []
-            {
-                System.BitConverter.ToUInt16(bytes[(offset + 29)..(offset + 29 + 2)]),
-                System.BitConverter.ToUInt16(bytes[(offset + 31)..(offset + 31 + 2)]),
-                System.BitConverter.ToUInt16(bytes[(offset + 33)..(offset + 33 + 2)]),
-                System.BitConverter.ToUInt16(bytes[(offset + 35)..(offset + 35 + 2)])
-            };
-            var __Empire = bytes[(offset + 37)];
-            var obj = new QuantumCore.Core.Packets.CharacterInfo
-            {
-                Vid = __Vid,
-                Name = __Name,
-                Parts = __Parts,
-                Empire = __Empire
-            };
-            return obj;
-        }
-
-        public static T Deserialize<T>(ReadOnlySpan<byte> bytes, in int offset = 0)
-            where T : IPacketSerializable
-        {
-            return (T)(object)Deserialize(bytes, offset);
-        }
-
-        public static async ValueTask<object> DeserializeFromStreamAsync(Stream stream)
-        {
-            var buffer = ArrayPool<byte>.Shared.Rent(NetworkingConstants.BufferSize);
-            try
-            {
-                var __Vid = await stream.ReadValueFromStreamAsync<UInt32>(buffer);
-                var __Name = await stream.ReadStringFromStreamAsync(buffer, (int)25);
-                var __Parts = new []
+            namespace QuantumCore.Core.Packets {
+            
+                public partial class CharacterInfo : IPacketSerializable
                 {
-                    await stream.ReadValueFromStreamAsync<UInt16>(buffer),
-                    await stream.ReadValueFromStreamAsync<UInt16>(buffer),
-                    await stream.ReadValueFromStreamAsync<UInt16>(buffer),
-                    await stream.ReadValueFromStreamAsync<UInt16>(buffer)
-                };
-                var __Empire = await stream.ReadValueFromStreamAsync<Byte>(buffer);
-                var obj = new QuantumCore.Core.Packets.CharacterInfo
-                {
-                    Vid = __Vid,
-                    Name = __Name,
-                    Parts = __Parts,
-                    Empire = __Empire
-                };
-                return obj;
+                    public byte Header => 0x88;
+                    public byte? SubHeader => null;
+                    public bool HasStaticSize => true;
+                    public bool HasSequence => false;
+            
+                    public void Serialize(byte[] bytes, in int offset = 0)
+                    {
+                        bytes[offset + 0] = 0x88;
+                        bytes[offset + 1] = (System.Byte)(this.Vid >> 0);
+                        bytes[offset + 2] = (System.Byte)(this.Vid >> 8);
+                        bytes[offset + 3] = (System.Byte)(this.Vid >> 16);
+                        bytes[offset + 4] = (System.Byte)(this.Vid >> 24);
+                        bytes.WriteString(this.Name, offset + 5, (int)25);
+                        bytes[offset + 30] = (System.Byte)(this.Parts[0] >> 0);
+                        bytes[offset + 31] = (System.Byte)(this.Parts[0] >> 8);
+                        bytes[offset + 32] = (System.Byte)(this.Parts[1] >> 0);
+                        bytes[offset + 33] = (System.Byte)(this.Parts[1] >> 8);
+                        bytes[offset + 34] = (System.Byte)(this.Parts[2] >> 0);
+                        bytes[offset + 35] = (System.Byte)(this.Parts[2] >> 8);
+                        bytes[offset + 36] = (System.Byte)(this.Parts[3] >> 0);
+                        bytes[offset + 37] = (System.Byte)(this.Parts[3] >> 8);
+                        bytes[offset + 38] = this.Empire;
+                    }
+            
+                    public ushort GetSize()
+                    {
+                        return 39;
+                    }
+            
+                    public static CharacterInfo Deserialize(ReadOnlySpan<byte> bytes, in int offset = 0)
+                    {
+                        var __Vid = System.BitConverter.ToUInt32(bytes[(offset + 0)..(offset + 0 + 4)]);
+                        var __Name = (bytes[(offset + 4)..(offset + 4 + 25)]).ReadNullTerminatedString();
+                        var __Parts = new []
+                        {
+                            System.BitConverter.ToUInt16(bytes[(offset + 29)..(offset + 29 + 2)]),
+                            System.BitConverter.ToUInt16(bytes[(offset + 31)..(offset + 31 + 2)]),
+                            System.BitConverter.ToUInt16(bytes[(offset + 33)..(offset + 33 + 2)]),
+                            System.BitConverter.ToUInt16(bytes[(offset + 35)..(offset + 35 + 2)])
+                        };
+                        var __Empire = bytes[(offset + 37)];
+                        var obj = new QuantumCore.Core.Packets.CharacterInfo
+                        {
+                            Vid = __Vid,
+                            Name = __Name,
+                            Parts = __Parts,
+                            Empire = __Empire
+                        };
+                        return obj;
+                    }
+            
+                    public static T Deserialize<T>(ReadOnlySpan<byte> bytes, in int offset = 0)
+                        where T : IPacketSerializable
+                    {
+                        return (T)(object)Deserialize(bytes, offset);
+                    }
+            
+                    public static async ValueTask<object> DeserializeFromStreamAsync(Stream stream)
+                    {
+                        var buffer = ArrayPool<byte>.Shared.Rent(NetworkingConstants.BufferSize);
+                        try
+                        {
+                            var __Vid = await stream.ReadValueFromStreamAsync<UInt32>(buffer);
+                            var __Name = await stream.ReadStringFromStreamAsync(buffer, (int)25);
+                            var __Parts = new []
+                            {
+                                await stream.ReadValueFromStreamAsync<UInt16>(buffer),
+                                await stream.ReadValueFromStreamAsync<UInt16>(buffer),
+                                await stream.ReadValueFromStreamAsync<UInt16>(buffer),
+                                await stream.ReadValueFromStreamAsync<UInt16>(buffer)
+                            };
+                            var __Empire = await stream.ReadValueFromStreamAsync<Byte>(buffer);
+                            var obj = new QuantumCore.Core.Packets.CharacterInfo
+                            {
+                                Vid = __Vid,
+                                Name = __Name,
+                                Parts = __Parts,
+                                Empire = __Empire
+                            };
+                            return obj;
+                        }
+                        catch (Exception)
+                        {
+                            throw;
+                        }
+                        finally
+                        {
+                            ArrayPool<byte>.Shared.Return(buffer);
+                        }
+                    }
+                }
             }
-            catch (Exception)
-            {
-                throw;
-            }
-            finally
-            {
-                ArrayPool<byte>.Shared.Return(buffer);
-            }
-        }
-    }
-}");
+            """);
     }
 
     [Fact]
@@ -3517,14 +3503,14 @@ namespace QuantumCore.Game.Packets {
         public void Serialize(byte[] bytes, in int offset = 0)
         {
             bytes[offset + 0] = 0x20;
-            bytes[offset + 1] = (byte)(this.CharacterList[0].Id >> 0);
-            bytes[offset + 2] = (byte)(this.CharacterList[0].Id >> 8);
-            bytes[offset + 3] = (byte)(this.CharacterList[0].Id >> 16);
-            bytes[offset + 4] = (byte)(this.CharacterList[0].Id >> 24);
-            bytes[offset + 5] = (byte)(this.CharacterList[1].Id >> 0);
-            bytes[offset + 6] = (byte)(this.CharacterList[1].Id >> 8);
-            bytes[offset + 7] = (byte)(this.CharacterList[1].Id >> 16);
-            bytes[offset + 8] = (byte)(this.CharacterList[1].Id >> 24);
+            bytes[offset + 1] = (System.Byte)(this.CharacterList[0].Id >> 0);
+            bytes[offset + 2] = (System.Byte)(this.CharacterList[0].Id >> 8);
+            bytes[offset + 3] = (System.Byte)(this.CharacterList[0].Id >> 16);
+            bytes[offset + 4] = (System.Byte)(this.CharacterList[0].Id >> 24);
+            bytes[offset + 5] = (System.Byte)(this.CharacterList[1].Id >> 0);
+            bytes[offset + 6] = (System.Byte)(this.CharacterList[1].Id >> 8);
+            bytes[offset + 7] = (System.Byte)(this.CharacterList[1].Id >> 16);
+            bytes[offset + 8] = (System.Byte)(this.CharacterList[1].Id >> 24);
         }
 
         public ushort GetSize()
@@ -3700,32 +3686,32 @@ namespace QuantumCore.Game.Packets {
     {
         var inputCompilation = CreateCompilation(
             """
-                       using QuantumCore.Networking;
-                       using System;
+            using QuantumCore.Networking;
+            using System;
 
-                       namespace QuantumCore.Game.Packets;
+            namespace QuantumCore.Game.Packets;
 
-                       [Packet(0xD2, EDirection.Outgoing)]
-                       [PacketGenerator]
-                       public partial class ServerStatusPacket
-                       {
-                           [Field(0)] public uint Size => (uint)Statuses.Length;
-                       
-                           [Field(1)]
-                           public ServerStatus[] Statuses { get; set; } = Array.Empty<ServerStatus>();
-                       
-                           [Field(2)] public byte IsSuccess { get; set; }
-                       }
+            [Packet(0xD2, EDirection.Outgoing)]
+            [PacketGenerator]
+            public partial class ServerStatusPacket
+            {
+                [Field(0)] public uint Size => (uint)Statuses.Length;
+            
+                [Field(1)]
+                public ServerStatus[] Statuses { get; set; } = Array.Empty<ServerStatus>();
+            
+                [Field(2)] public byte IsSuccess { get; set; }
+            }
 
-                       public class ServerStatus
-                       {
-                           [Field(0)]
-                           public short Port { get; set; }
-                       
-                           [Field(1)]
-                           public byte Status { get; set; }
-                       }
-                       """);
+            public class ServerStatus
+            {
+                [Field(0)]
+                public short Port { get; set; }
+            
+                [Field(1)]
+                public byte Status { get; set; }
+            }
+            """);
 
         GeneratorDriver driver = CSharpGeneratorDriver.Create(new PacketSerializerGenerator());
 
@@ -3749,10 +3735,10 @@ namespace QuantumCore.Game.Packets {
             using System.IO;
             using System.Threading.Tasks;
             using QuantumCore.Networking;
-            
+
             // no async warning if no properties
-            #pragma warning disable CS1998 
-            
+            #pragma warning disable CS1998
+
             namespace QuantumCore.Game.Packets {
             
                 public partial class ServerStatusPacket : IPacketSerializable
@@ -3828,22 +3814,22 @@ namespace QuantumCore.Game.Packets {
     {
         var inputCompilation = CreateCompilation(
             """
-                       using QuantumCore.Networking;
-                       
-                       namespace QuantumCore.Game.Packets;
-                       
-                       [Packet(0x02, EDirection.Incoming, Sequence = true)]
-                       [PacketGenerator]
-                       public partial class Attack
-                       {
-                           [Field(0)]
-                           public byte AttackType { get; set; }
-                           [Field(1)]
-                           public uint Vid { get; set; }
-                           [Field(2, ArrayLength = 2)]
-                           public byte[] Unknown { get; set; } = new byte[2]{0,0};
-                       }
-                       """);
+            using QuantumCore.Networking;
+
+            namespace QuantumCore.Game.Packets;
+
+            [Packet(0x02, EDirection.Incoming, Sequence = true)]
+            [PacketGenerator]
+            public partial class Attack
+            {
+                [Field(0)]
+                public byte AttackType { get; set; }
+                [Field(1)]
+                public uint Vid { get; set; }
+                [Field(2, ArrayLength = 2)]
+                public byte[] Unknown { get; set; } = new byte[2]{0,0};
+            }
+            """);
 
         GeneratorDriver driver = CSharpGeneratorDriver.Create(new PacketSerializerGenerator());
 
@@ -3867,10 +3853,10 @@ namespace QuantumCore.Game.Packets {
             using System.IO;
             using System.Threading.Tasks;
             using QuantumCore.Networking;
-            
+
             // no async warning if no properties
-            #pragma warning disable CS1998 
-            
+            #pragma warning disable CS1998
+
             namespace QuantumCore.Game.Packets {
             
                 public partial class ServerStatusPacket : IPacketSerializable
