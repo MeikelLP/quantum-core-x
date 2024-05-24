@@ -6,7 +6,7 @@ using Weikio.PluginFramework.Abstractions;
 
 namespace QuantumCore;
 
-public class PluginExecutor
+public class PluginExecutor : IPluginExecutor
 {
     private readonly ImmutableDictionary<Type, object[]> _allPlugins;
 
@@ -32,6 +32,7 @@ public class PluginExecutor
                 dict[intf].Add(ActivatorUtilities.CreateInstance(provider, type));
             }
         }
+
         _allPlugins = dict.ToImmutableDictionary(x => x.Key, x => x.Value.ToArray());
     }
 
@@ -49,7 +50,8 @@ public class PluginExecutor
                 }
                 catch (Exception e)
                 {
-                    logger.LogError(e, "The plugin {PluginType} for {Interface} failed executing", plugins[i], typeof(T));
+                    logger.LogError(e, "The plugin {PluginType} for {Interface} failed executing", plugins[i],
+                        typeof(T));
                     // exception is thrown before any await
                     taskArr[i] = Task.CompletedTask;
                 }

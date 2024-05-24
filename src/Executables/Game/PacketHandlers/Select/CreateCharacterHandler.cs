@@ -1,14 +1,13 @@
 using Microsoft.Extensions.Logging;
-using QuantumCore.API;
 using QuantumCore.API.Game.World;
-using QuantumCore.API.PluginTypes;
 using QuantumCore.Core.Utils;
 using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Packets;
 
 namespace QuantumCore.Game.PacketHandlers.Select;
 
-public class CreateCharacterHandler : IGamePacketHandler<CreateCharacter>
+[PacketHandler(typeof(CreateCharacter))]
+public class CreateCharacterHandler
 {
     private readonly ILogger<CreateCharacterHandler> _logger;
     private readonly IWorld _world;
@@ -21,9 +20,9 @@ public class CreateCharacterHandler : IGamePacketHandler<CreateCharacter>
         _playerManager = playerManager;
     }
 
-    public async Task ExecuteAsync(GamePacketContext<CreateCharacter> ctx, CancellationToken token = default)
+    public void Execute(GamePacketContext ctx, CreateCharacter packet)
     {
-        _logger.LogDebug("Create character in slot {Slot}", ctx.Packet.Slot);
+        _logger.LogDebug("Create character in slot {Slot}", packet.Slot);
 
         var accountId = ctx.Connection.AccountId;
         if (accountId is null)
@@ -33,26 +32,21 @@ public class CreateCharacterHandler : IGamePacketHandler<CreateCharacter>
             return;
         }
 
-        var isNameInUse = await _playerManager.IsNameInUseAsync(ctx.Packet.Name);
+        var isNameInUse = await _playerManager.IsNameInUseAsync(packet.Name);
         if (isNameInUse)
         {
-            ctx.Connection.Send(new CreateCharacterFailure());
+            ctx.Connection.Send(new CreateCharacterFailure(0));
             return;
         }
 
 
-        var player = await _playerManager.CreateAsync(accountId.Value, ctx.Packet.Name, (byte)ctx.Packet.Class, ctx.Packet.Appearance);
+        var player =
+            await _playerManager.CreateAsync(accountId.Value, packet.Name, (byte) packet.Class, packet.Appearance);
         // Query responsible host for the map
         var host = _world.GetMapHost(player.PositionX, player.PositionY);
 
         // Send success response
-        var character = player.ToCharacter();
-        character.Ip = IpUtils.ConvertIpToUInt(host.Ip);
-        character.Port = host.Port;
-        ctx.Connection.Send(new CreateCharacterSuccess
-        {
-            Slot = player.Slot,
-            Character = character
-        });
+        var character = player.ToCharacter(IpUtils.ConvertIpToUInt(host.Ip), host.Port);
+        ctx.Connection.Send(new CreateCharacterSuccess(player.Slot, character));
     }
 }

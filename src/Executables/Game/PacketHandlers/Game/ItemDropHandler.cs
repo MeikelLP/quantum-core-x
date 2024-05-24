@@ -1,36 +1,34 @@
-﻿using QuantumCore.API;
-using QuantumCore.API.PluginTypes;
-using QuantumCore.Game.Packets;
+﻿using QuantumCore.Game.Packets;
 
 namespace QuantumCore.Game.PacketHandlers.Game;
 
-public class ItemDropHandler : IGamePacketHandler<ItemDrop>
+[PacketHandler(typeof(ItemDrop))]
+public class ItemDropHandler
 {
-    public Task ExecuteAsync(GamePacketContext<ItemDrop> ctx, CancellationToken token = default)
+    public void Execute(GamePacketContext ctx, ItemDrop packet)
     {
         var player = ctx.Connection.Player;
         if (player == null)
         {
             ctx.Connection.Close();
-            return Task.CompletedTask;
+            return;
         }
 
-        if (ctx.Packet.Gold > 0)
+        if (packet.Gold > 0)
         {
             // We're dropping gold...
-            player.DropGold(ctx.Packet.Gold);
+            player.DropGold(packet.Gold);
         }
         else
         {
             // We're dropping an item...
-            var item = player.GetItem(ctx.Packet.Window, ctx.Packet.Position);
+            var item = player.GetItem(packet.Window, packet.Position);
             if (item == null)
             {
-                return Task.CompletedTask; // Item slot is empty
+                return; // Item slot is empty
             }
 
-            player.DropItem(item, ctx.Packet.Count);
+            player.DropItem(item, packet.Count);
         }
-        return Task.CompletedTask;
     }
 }

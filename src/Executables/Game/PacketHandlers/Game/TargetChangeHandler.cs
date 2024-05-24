@@ -1,11 +1,10 @@
 ﻿using Microsoft.Extensions.Logging;
-using QuantumCore.API;
-using QuantumCore.API.PluginTypes;
 using QuantumCore.Game.Packets;
 
 namespace QuantumCore.Game.PacketHandlers.Game;
 
-public class TargetChangeHandler : IGamePacketHandler<TargetChange>
+[PacketHandler(typeof(TargetChange))]
+public class TargetChangeHandler
 {
     private readonly ILogger<TargetChangeHandler> _logger;
 
@@ -14,26 +13,25 @@ public class TargetChangeHandler : IGamePacketHandler<TargetChange>
         _logger = logger;
     }
 
-    public Task ExecuteAsync(GamePacketContext<TargetChange> ctx, CancellationToken token = default)
+    public void Execute(GamePacketContext ctx, TargetChange packet)
     {
         var player = ctx.Connection.Player;
         if (player == null)
         {
             _logger.LogWarning("Target Change without having a player instance");
             ctx.Connection.Close();
-            return Task.CompletedTask;
+            return;
         }
 
-        var entity = player.Map?.GetEntity(ctx.Packet.TargetVid);
+        var entity = player.Map?.GetEntity(packet.TargetVid);
         if (entity == null)
         {
-            return Task.CompletedTask;
+            return;
         }
 
         player.Target?.TargetedBy.Remove(player);
         player.Target = entity;
         entity.TargetedBy.Add(player);
         player.SendTarget();
-        return Task.CompletedTask;
     }
 }

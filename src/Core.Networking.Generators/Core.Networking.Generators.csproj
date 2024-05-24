@@ -19,5 +19,9 @@
       <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.9.2" PrivateAssets="all" />
     </ItemGroup>
 
+    <ItemGroup>
+        <Compile Remove="PacketSerializerGenerator.cs"/>
+    </ItemGroup>
+
 
 </Project>

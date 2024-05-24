@@ -1,13 +1,11 @@
 using System.Buffers;
 using System.Collections.Concurrent;
 using System.Net.Sockets;
-using System.Text.Json;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game.Types;
-using QuantumCore.API.PluginTypes;
 using QuantumCore.Core.Packets;
 using QuantumCore.Core.Utils;
 using QuantumCore.Extensions;
@@ -18,8 +16,8 @@ namespace QuantumCore.Core.Networking
     public abstract class Connection : BackgroundService, IConnection
     {
         private readonly ILogger _logger;
-        private readonly PluginExecutor _pluginExecutor;
-        private readonly ConcurrentQueue<object> _packetsToSend = new();
+        private readonly IPluginExecutor _pluginExecutor;
+        private readonly ConcurrentQueue<byte[]> _packetsToSend = new();
         private readonly IPacketReader _packetReader;
 
         private TcpClient? _client;
@@ -32,7 +30,7 @@ namespace QuantumCore.Core.Networking
         public bool Handshaking { get; private set; }
         public EPhases Phase { get; set; }
 
-        protected Connection(ILogger logger, PluginExecutor pluginExecutor, IPacketReader packetReader)
+        protected Connection(ILogger logger, IPluginExecutor pluginExecutor, IPacketReader packetReader)
         {
             _logger = logger;
             _pluginExecutor = pluginExecutor;
@@ -51,8 +49,6 @@ namespace QuantumCore.Core.Networking
 
         protected abstract Task OnClose(bool expected = true);
 
-        protected abstract Task OnReceive(IPacketSerializable packet);
-
         protected abstract long GetServerTime();
 
         protected async override Task ExecuteAsync(CancellationToken stoppingToken)
@@ -70,17 +66,10 @@ namespace QuantumCore.Core.Networking
 
             try
             {
-                await foreach (var packet in _packetReader.EnumerateAsync(_stream, stoppingToken))
-                {
-                    _logger.LogDebug(" IN: {Type} {Data}", packet.GetType(), JsonSerializer.Serialize(packet));
-                    await _pluginExecutor.ExecutePlugins<IPacketOperationListener>(_logger,
-                        x => x.OnPrePacketReceivedAsync(packet, Array.Empty<byte>(), stoppingToken));
-
-                    await OnReceive((IPacketSerializable) packet);
-
-                    await _pluginExecutor.ExecutePlugins<IPacketOperationListener>(_logger,
-                        x => x.OnPostPacketReceivedAsync(packet, Array.Empty<byte>(), stoppingToken));
-                }
+                // await Task.Factory.StartNew(async () =>
+                // {
+                //     await _packetReader.EnumerateAsync(_stream, stoppingToken);
+                // }, TaskCreationOptions.LongRunning);
             }
             catch (IOException e)
             {
@@ -103,7 +92,7 @@ namespace QuantumCore.Core.Networking
             OnClose(expected);
         }
 
-        public void Send<T>(T packet) where T : IPacketSerializable
+        public void Send(byte[] packet)
         {
             _packetsToSend.Enqueue(packet);
         }
@@ -120,15 +109,8 @@ namespace QuantumCore.Core.Networking
             {
                 try
                 {
-                    if (_packetsToSend.TryDequeue(out var obj))
+                    if (_packetsToSend.TryDequeue(out var bytes))
                     {
-                        var packet = (IPacketSerializable) obj;
-                        var size = packet.GetSize();
-                        var bytes = ArrayPool<byte>.Shared.Rent(size);
-                        Array.Clear(bytes, 0, size);
-                        packet.Serialize(bytes);
-                        var bytesToSend = bytes.AsMemory(0, size);
-
                         try
                         {
                             if (_stream is null)
@@ -138,14 +120,14 @@ namespace QuantumCore.Core.Networking
                                 break;
                             }
 
-                            await _pluginExecutor
-                                .ExecutePlugins<IPacketOperationListener>(_logger,
-                                    x => x.OnPrePacketSentAsync(obj, CancellationToken.None)).ConfigureAwait(false);
-                            await _stream.WriteAsync(bytesToSend).ConfigureAwait(false);
+                            // await _pluginExecutor
+                            // .ExecutePlugins<IPacketOperationListener>(_logger,
+                            //     x => x.OnPrePacketSentAsync(obj, CancellationToken.None)).ConfigureAwait(false);
+                            await _stream.WriteAsync(bytes).ConfigureAwait(false);
                             await _stream.FlushAsync().ConfigureAwait(false);
-                            await _pluginExecutor.ExecutePlugins<IPacketOperationListener>(_logger,
-                                    x => x.OnPostPacketReceivedAsync(obj, bytes, CancellationToken.None))
-                                .ConfigureAwait(false);
+                            // await _pluginExecutor.ExecutePlugins<IPacketOperationListener>(_logger,
+                            //     x => x.OnPostPacketReceivedAsync(obj, bytes, CancellationToken.None))
+                            // .ConfigureAwait(false);
                         }
                         catch (Exception e)
                         {
@@ -153,7 +135,7 @@ namespace QuantumCore.Core.Networking
                         }
 
                         ArrayPool<byte>.Shared.Return(bytes);
-                        _logger.LogDebug("OUT: {Type} => {Packet}", packet.GetType(), JsonSerializer.Serialize(obj));
+                        // _logger.LogDebug("OUT: {Type} => {Packet}", packet.GetType(), JsonSerializer.Serialize(obj));
                     }
                     else
                     {
@@ -232,7 +214,7 @@ namespace QuantumCore.Core.Networking
         {
             var time = GetServerTime();
             _lastHandshakeTime = time;
-            Send(new GCHandshake {Handshake = Handshake, Time = (uint) time});
+            Send(new GCHandshake {Handshake = Handshake, Time = (uint) time, Delta = 0});
         }
 
         private void SendHandshake(uint time, uint delta)

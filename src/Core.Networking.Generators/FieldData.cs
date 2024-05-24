@@ -1,33 +1,33 @@
 ﻿using System.Diagnostics;
-using Microsoft.CodeAnalysis;
 
 namespace QuantumCore.Networking;
 
-[DebuggerDisplay("{SemanticType.Name} {Name}")]
+[DebuggerDisplay("{TypeFullName} {FieldName}")]
 internal class FieldData
 {
-    public string Name { get; set; } = "";
+    public string FieldName { get; set; } = "";
     public bool IsArray { get; set; }
     public bool IsEnum { get; set; }
     public int? ArrayLength { get; set; }
     public int ElementSize { get; set; }
-    public int? Order { get; set; }
+    public string? ElementTypeFullName { get; set; }
+    public FieldData[]? ElementTypeFields { get; set; }
 
-    public int FieldSize => HasDynamicLength 
-        ? 0 
+    public int FieldSize => HasDynamicLength
+        ? 0
         : ElementSize * (ArrayLength ?? 1);
 
-    public bool HasDynamicLength => (SemanticType.Name == "String" && ElementSize == 0) || 
+    public bool HasDynamicLength => (TypeFullName == "System.String" && ElementSize == 0) ||
                                     (IsArray && ArrayLength == null);
-    public ITypeSymbol SemanticType { get; set; } = null!;
-    public SyntaxNode SyntaxNode { get; set; } = null!;
+
     public string? SizeFieldName { get; set; }
     public bool IsCustom { get; set; }
-    public bool IsRecordParameter { get; set; }
     public bool IsReadonly { get; set; }
+    public string TypeFullName { get; set; } = "";
+    public FieldData[]? SubFields { get; set; }
 
     public string GetVariableName()
     {
-        return $"__{Name[0].ToString().ToLower()}{Name.Substring(1)}";
+        return $"__{FieldName[0].ToString().ToLower()}{FieldName.Substring(1)}";
     }
 }

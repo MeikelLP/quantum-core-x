@@ -1,11 +1,10 @@
 ﻿using Microsoft.Extensions.Logging;
-using QuantumCore.API;
-using QuantumCore.API.PluginTypes;
 using QuantumCore.Game.Packets;
 
 namespace QuantumCore.Game.PacketHandlers.Game;
 
-public class ItemGiveHandler : IGamePacketHandler<ItemGive>
+[PacketHandler(typeof(ItemGive))]
+public class ItemGiveHandler
 {
     private readonly ILogger<ItemGiveHandler> _logger;
 
@@ -14,7 +13,7 @@ public class ItemGiveHandler : IGamePacketHandler<ItemGive>
         _logger = logger;
     }
 
-    public async Task ExecuteAsync(GamePacketContext<ItemGive> ctx, CancellationToken token = default)
+    public void Execute(GamePacketContext ctx, ItemGive packet)
     {
         var player = ctx.Connection.Player;
         if (player == null)
@@ -23,14 +22,14 @@ public class ItemGiveHandler : IGamePacketHandler<ItemGive>
             return;
         }
 
-        var entity = player.Map?.GetEntity(ctx.Packet.TargetVid);
+        var entity = player.Map?.GetEntity(packet.TargetVid);
         if (entity == null)
         {
             _logger.LogDebug("Ignore item give to non existing entity");
             return;
         }
 
-        var item = player.GetItem(ctx.Packet.Window, ctx.Packet.Position);
+        var item = player.GetItem(packet.Window, packet.Position);
         if (item == null)
         {
             return;

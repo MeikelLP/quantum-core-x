@@ -1,13 +1,12 @@
 ﻿using Game.Caching;
 using Microsoft.Extensions.Logging;
-using QuantumCore.API;
-using QuantumCore.API.PluginTypes;
 using QuantumCore.Caching;
 using QuantumCore.Game.Packets;
 
 namespace QuantumCore.Game.PacketHandlers.Select;
 
-public class EmpireHandler : IGamePacketHandler<Empire>
+[PacketHandler(typeof(Empire))]
+public class EmpireHandler
 {
     private readonly ILogger<EmpireHandler> _logger;
     private readonly IPlayerManager _playerManager;
@@ -23,28 +22,28 @@ public class EmpireHandler : IGamePacketHandler<Empire>
         _playerCache = playerCache;
     }
 
-    public async Task ExecuteAsync(GamePacketContext<Empire> ctx, CancellationToken token = default)
+    public void Execute(GamePacketContext ctx, Empire packet)
     {
-        if (ctx.Packet.EmpireId is > 0 and < 4)
+        if (packet.EmpireId is > 0 and < 4)
         {
-            _logger.LogInformation("Empire selected: {Empire}", ctx.Packet.EmpireId);
+            _logger.LogInformation("Empire selected: {Empire}", packet.EmpireId);
             var cacheKey = $"account:{ctx.Connection.AccountId}:game:select:selected-player";
             var player = await _cacheManager.Get<uint?>(cacheKey);
             if (player is not null)
             {
                 await _playerManager.SetPlayerEmpireAsync(ctx.Connection.AccountId!.Value, player.Value,
-                    ctx.Packet.EmpireId);
+                    packet.EmpireId);
                 await _cacheManager.Del(cacheKey);
             }
             else
             {
                 // No player created yet. This is the first time an empire is selected before creating an account
-                await _playerCache.SetTempEmpireAsync(ctx.Connection.AccountId!.Value, ctx.Packet.EmpireId);
+                await _playerCache.SetTempEmpireAsync(ctx.Connection.AccountId!.Value, packet.EmpireId);
             }
         }
         else
         {
-            _logger.LogWarning("Unexpected empire choice {Empire}", ctx.Packet.EmpireId);
+            _logger.LogWarning("Unexpected empire choice {Empire}", packet.EmpireId);
         }
     }
 }

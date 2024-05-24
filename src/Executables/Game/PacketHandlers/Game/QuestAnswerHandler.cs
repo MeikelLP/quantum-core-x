@@ -1,32 +1,28 @@
 ﻿using Microsoft.Extensions.Logging;
-using QuantumCore.API;
-using QuantumCore.API.PluginTypes;
 using QuantumCore.Game.Packets.Quest;
 
-namespace QuantumCore.Game.PacketHandlers.Game
+namespace QuantumCore.Game.PacketHandlers.Game;
+
+[PacketHandler(typeof(QuestAnswer))]
+public class QuestAnswerHandler
 {
-    public class QuestAnswerHandler : IGamePacketHandler<QuestAnswer>
+    private readonly ILogger<QuestAnswerHandler> _logger;
+
+    public QuestAnswerHandler(ILogger<QuestAnswerHandler> logger)
     {
-        private readonly ILogger<QuestAnswerHandler> _logger;
+        _logger = logger;
+    }
 
-        public QuestAnswerHandler(ILogger<QuestAnswerHandler> logger)
+    public void Execute(GamePacketContext ctx, QuestAnswer packet)
+    {
+        var player = ctx.Connection.Player;
+        if (player == null)
         {
-            _logger = logger;
+            ctx.Connection.Close();
+            return;
         }
-        
-        public Task ExecuteAsync(GamePacketContext<QuestAnswer> ctx, CancellationToken token = default)
-        {
-            var player = ctx.Connection.Player;
-            if (player == null)
-            {
-                ctx.Connection.Close();
-                return Task.CompletedTask;
-            }
-            
-            _logger.LogInformation("Quest answer: {Answer}", ctx.Packet.Answer);
-            player.CurrentQuest?.Answer(ctx.Packet.Answer);
 
-            return Task.CompletedTask;
-        }
+        _logger.LogInformation("Quest answer: {Answer}", packet.Answer);
+        player.CurrentQuest?.Answer(packet.Answer);
     }
 }

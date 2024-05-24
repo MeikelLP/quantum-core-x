@@ -23,7 +23,12 @@ public class Shop : IShop
 
     public uint Vid { get; set; }
     public string Name { get; set; } = "";
-    public IReadOnlyList<ShopItem> Items { get { return _items; } }
+
+    public IReadOnlyList<ShopItem> Items
+    {
+        get { return _items; }
+    }
+
     public List<IPlayerEntity> Visitors { get; } = new();
 
     private Grid<ShopItem> _grid = new(4, 5);
@@ -52,7 +57,8 @@ public class Shop : IShop
         }
 
         var position = (byte) (x + y * _grid.Width);
-        var item = new ShopItem {
+        var item = new ShopItem
+        {
             ItemId = itemId, Count = count, Price = price == 0 ? proto.BuyPrice * count : price, Position = position
         };
         _items.Add(item);
@@ -69,17 +75,15 @@ public class Shop : IShop
         p.Shop = this;
         Visitors.Add(p);
 
-        var shopStart = new ShopOpen { Vid = Vid };
-        foreach (var item in _items)
-        {
+        var shopStart = new ShopOpen(Vid, _items.Select(item => new Packets.Shop.ShopItem(
             // For some reason the item also contains the position while the client uses the array index as position
-            shopStart.Items[item.Position] = new Packets.Shop.ShopItem {
-                Position = item.Position,
-                ItemId = item.ItemId,
-                Count = item.Count,
-                Price = item.Price
-            };
-        }
+            item.ItemId,
+            item.Price,
+            item.Count,
+            item.Position,
+            [],
+            []
+        )).ToArray());
         p.Connection.Send(shopStart);
     }
 
@@ -124,7 +128,8 @@ public class Shop : IShop
         {
             p.Connection.Send(new ShopNoSpaceLeft());
         }
-        p.AddPoint(EPoints.Gold, -(int)item.Price);
+
+        p.AddPoint(EPoints.Gold, -(int) item.Price);
 
         p.SendPoints();
         p.SendItem(playerItem);

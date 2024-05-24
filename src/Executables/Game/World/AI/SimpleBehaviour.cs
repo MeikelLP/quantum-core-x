@@ -8,232 +8,233 @@ using QuantumCore.Core.Utils;
 using QuantumCore.Game.Packets;
 using QuantumCore.Game.World.Entities;
 
-namespace QuantumCore.Game.World.AI
+namespace QuantumCore.Game.World.AI;
+
+public class SimpleBehaviour : IBehaviour
 {
-    public class SimpleBehaviour : IBehaviour
+    private readonly IMonsterManager _monsterManager;
+    private MonsterData? _proto;
+    private IEntity? _entity;
+    private long _nextMovementIn;
+
+    private int _spawnX;
+    private int _spawnY;
+
+    private double _attackCooldown;
+    private int _lastAttackX;
+    private int _lastAttackY;
+
+    private IEntity? _targetEntity;
+    private readonly Dictionary<uint, uint> _damageMap = new();
+
+    private const int MoveRadius = 1000;
+
+    public SimpleBehaviour(IMonsterManager monsterManager)
     {
-        private readonly IMonsterManager _monsterManager;
-        private MonsterData? _proto;
-        private IEntity? _entity;
-        private long _nextMovementIn;
+        _monsterManager = monsterManager;
+        CalculateNextMovement();
+    }
 
-        private int _spawnX;
-        private int _spawnY;
+    public void Init(IEntity entity)
+    {
+        Debug.Assert(_entity == null);
+        _entity = entity;
 
-        private double _attackCooldown;
-        private int _lastAttackX;
-        private int _lastAttackY;
+        _proto = _monsterManager.GetMonster(_entity.EntityClass);
 
-        private IEntity? _targetEntity;
-        private readonly Dictionary<uint, uint> _damageMap = new();
+        _spawnX = entity.PositionX;
+        _spawnY = entity.PositionY;
+    }
 
-        private const int MoveRadius = 1000;
+    private void CalculateNextMovement()
+    {
+        _nextMovementIn = RandomNumberGenerator.GetInt32(10000, 20000);
+    }
 
-        public SimpleBehaviour(IMonsterManager monsterManager)
+    private void MoveToRandomLocation()
+    {
+        if (_entity is null) return;
+
+        var offsetX = RandomNumberGenerator.GetInt32(-MoveRadius, MoveRadius);
+        var offsetY = RandomNumberGenerator.GetInt32(-MoveRadius, MoveRadius);
+
+        var targetX = _spawnX + offsetX;
+        var targetY = _spawnY + offsetY;
+
+        _entity.Goto(targetX, targetY);
+    }
+
+    /// <summary>
+    /// Moves the monster in attack range to the given target
+    /// </summary>
+    /// <param name="target"></param>
+    private void MoveTo(IEntity target)
+    {
+        if (_entity is null || _proto is null) return;
+
+        // We're moving to a distance of half of our attack range so we do not have to directly move again
+        double directionX = target.PositionX - _entity.PositionX;
+        double directionY = target.PositionY - _entity.PositionY;
+        var directionLength = Math.Sqrt(directionX * directionX + directionY * directionY);
+        directionX /= directionLength;
+        directionY /= directionLength;
+
+        var targetPositionX = target.PositionX + directionX * _proto.AttackRange * 0.75;
+        var targetPositionY = target.PositionY + directionY * _proto.AttackRange * 0.75;
+
+        _entity.Goto((int) targetPositionX, (int) targetPositionY);
+    }
+
+    public void Update(double elapsedTime)
+    {
+        if (_entity is null || _proto is null)
         {
-            _monsterManager = monsterManager;
-            CalculateNextMovement();
+            return;
         }
 
-        public void Init(IEntity entity)
+        if (_targetEntity != null)
         {
-            Debug.Assert(_entity == null);
-            _entity = entity;
-
-            _proto = _monsterManager.GetMonster(_entity.EntityClass);
-
-            _spawnX = entity.PositionX;
-            _spawnY = entity.PositionY;
-        }
-
-        private void CalculateNextMovement()
-        {
-            _nextMovementIn = RandomNumberGenerator.GetInt32(10000, 20000);
-        }
-
-        private void MoveToRandomLocation()
-        {
-            if (_entity is null) return;
-
-            var offsetX = RandomNumberGenerator.GetInt32(-MoveRadius, MoveRadius);
-            var offsetY = RandomNumberGenerator.GetInt32(-MoveRadius, MoveRadius);
-
-            var targetX = _spawnX + offsetX;
-            var targetY = _spawnY + offsetY;
-
-            _entity.Goto(targetX, targetY);
-        }
-
-        /// <summary>
-        /// Moves the monster in attack range to the given target
-        /// </summary>
-        /// <param name="target"></param>
-        private void MoveTo(IEntity target)
-        {
-            if (_entity is null || _proto is null) return;
-
-            // We're moving to a distance of half of our attack range so we do not have to directly move again
-            double directionX = target.PositionX - _entity.PositionX;
-            double directionY = target.PositionY - _entity.PositionY;
-            var directionLength = Math.Sqrt(directionX * directionX + directionY * directionY);
-            directionX /= directionLength;
-            directionY /= directionLength;
-
-            var targetPositionX = target.PositionX + directionX * _proto.AttackRange * 0.75;
-            var targetPositionY = target.PositionY + directionY * _proto.AttackRange * 0.75;
-
-            _entity.Goto((int) targetPositionX, (int) targetPositionY);
-        }
-
-        public void Update(double elapsedTime)
-        {
-            if (_entity is null || _proto is null)
+            if (_targetEntity.Dead || _targetEntity.Map != _entity.Map)
             {
-                return;
+                // Switch to next target if available
+                _damageMap.Remove(_targetEntity.Vid);
+                _targetEntity = NextTarget();
             }
 
             if (_targetEntity != null)
             {
-                if (_targetEntity.Dead || _targetEntity.Map != _entity.Map)
+                if (_entity.State == EEntityState.Moving)
                 {
-                    // Switch to next target if available
-                    _damageMap.Remove(_targetEntity.Vid);
-                    _targetEntity = NextTarget();
-                }
-
-                if (_targetEntity != null)
-                {
-                    if (_entity.State == EEntityState.Moving)
+                    // Check if current movement goal is in attack range of our target
+                    var movementDistance = MathUtils.Distance(_entity.TargetPositionX, _entity.TargetPositionY,
+                        _targetEntity.PositionX, _targetEntity.PositionY);
+                    if (movementDistance > _proto.AttackRange)
                     {
-                        // Check if current movement goal is in attack range of our target
-                        var movementDistance = MathUtils.Distance(_entity.TargetPositionX, _entity.TargetPositionY,
-                            _targetEntity.PositionX, _targetEntity.PositionY);
-                        if (movementDistance > _proto.AttackRange)
-                        {
-                            MoveTo(_targetEntity);
-                        }
+                        MoveTo(_targetEntity);
+                    }
+                }
+                else
+                {
+                    // Check if we can potentially attack or not
+                    var distance = MathUtils.Distance(_entity.PositionX, _entity.PositionY, _targetEntity.PositionX,
+                        _targetEntity.PositionY);
+                    if (distance > _proto.AttackRange)
+                    {
+                        MoveTo(_targetEntity);
                     }
                     else
                     {
-                        // Check if we can potentially attack or not
-                        var distance = MathUtils.Distance(_entity.PositionX, _entity.PositionY, _targetEntity.PositionX,
-                            _targetEntity.PositionY);
-                        if (distance > _proto.AttackRange)
+                        _attackCooldown -= elapsedTime;
+                        if (_attackCooldown <= 0)
                         {
-                            MoveTo(_targetEntity);
-                        }
-                        else
-                        {
-                            _attackCooldown -= elapsedTime;
-                            if (_attackCooldown <= 0)
-                            {
-                                Attack(_targetEntity);
-                                _attackCooldown += 2000; // todo use attack speed
-                            }
+                            Attack(_targetEntity);
+                            _attackCooldown += 2000; // todo use attack speed
                         }
                     }
                 }
             }
+        }
 
-            if (_entity.State == EEntityState.Idle)
+        if (_entity.State == EEntityState.Idle)
+        {
+            _nextMovementIn -= (int) elapsedTime;
+
+            if (_nextMovementIn <= 0)
             {
-                _nextMovementIn -= (int) elapsedTime;
+                // Move to random location
+                MoveToRandomLocation();
+                CalculateNextMovement();
+            }
+        }
+    }
 
-                if (_nextMovementIn <= 0)
+    private void Attack(IEntity victim)
+    {
+        if (_entity is not MonsterEntity monster)
+        {
+            return;
+        }
+
+        monster.Rotation =
+            (float) MathUtils.Rotation(victim.PositionX - monster.PositionX, victim.PositionY - monster.PositionY);
+
+        monster.Attack(victim, monster.Proto.BattleType);
+
+        // Send attack packet
+        var packet = new CharacterMoveOut(
+            CharacterMovementType.Attack,
+            0,
+            (byte) (monster.Rotation / 5),
+            monster.Vid,
+            monster.PositionX,
+            monster.PositionY,
+            (uint) GameServer.Instance.ServerTime,
+            0
+        );
+        foreach (var entity in monster.NearbyEntities)
+        {
+            if (entity is PlayerEntity player)
+            {
+                player.Connection.Send(packet);
+            }
+        }
+    }
+
+    private IEntity? NextTarget()
+    {
+        if (_entity is null) return null;
+
+        IEntity? target = null;
+        uint maxDamage = 0;
+        foreach (var (vid, damage) in _damageMap)
+        {
+            if (damage > maxDamage)
+            {
+                var attacker = _entity.Map?.GetEntity(vid);
+                if (attacker != null)
                 {
-                    // Move to random location
-                    MoveToRandomLocation();
-                    CalculateNextMovement();
+                    target = attacker;
+                    maxDamage = damage;
                 }
             }
         }
 
-        private void Attack(IEntity victim)
+        return target;
+    }
+
+    public void TookDamage(IEntity attacker, uint damage)
+    {
+        if (_entity is null) return;
+        if (!_damageMap.ContainsKey(attacker.Vid))
         {
-            if (_entity is not MonsterEntity monster)
-            {
-                return;
-            }
-
-            monster.Rotation =
-                (float) MathUtils.Rotation(victim.PositionX - monster.PositionX, victim.PositionY - monster.PositionY);
-
-            monster.Attack(victim, monster.Proto.BattleType);
-
-            // Send attack packet
-            var packet = new CharacterMoveOut {
-                MovementType = CharacterMovementType.Attack,
-                Rotation = (byte) (monster.Rotation / 5),
-                Vid = monster.Vid,
-                PositionX = monster.PositionX,
-                PositionY = monster.PositionY,
-                Time = (uint) GameServer.Instance.ServerTime
-            };
-            foreach (var entity in monster.NearbyEntities)
-            {
-                if (entity is PlayerEntity player)
-                {
-                    player.Connection.Send(packet);
-                }
-            }
+            _damageMap[attacker.Vid] = damage;
+        }
+        else
+        {
+            _damageMap[attacker.Vid] += damage;
         }
 
-        private IEntity? NextTarget()
+        // Check if target has to be changed
+        if (_targetEntity?.Map != _entity.Map)
         {
-            if (_entity is null) return null;
-
-            IEntity? target = null;
-            uint maxDamage = 0;
-            foreach (var (vid, damage) in _damageMap)
-            {
-                if (damage > maxDamage)
-                {
-                    var attacker = _entity.Map?.GetEntity(vid);
-                    if (attacker != null)
-                    {
-                        target = attacker;
-                        maxDamage = damage;
-                    }
-                }
-            }
-
-            return target;
+            _targetEntity = attacker;
+            return;
         }
 
-        public void TookDamage(IEntity attacker, uint damage)
+        if (_targetEntity is null) return;
+        if (_targetEntity.Vid == attacker.Vid)
         {
-            if (_entity is null) return;
-            if (!_damageMap.ContainsKey(attacker.Vid))
-            {
-                _damageMap[attacker.Vid] = damage;
-            }
-            else
-            {
-                _damageMap[attacker.Vid] += damage;
-            }
-
-            // Check if target has to be changed
-            if (_targetEntity?.Map != _entity.Map)
-            {
-                _targetEntity = attacker;
-                return;
-            }
-
-            if (_targetEntity is null) return;
-            if (_targetEntity.Vid == attacker.Vid)
-            {
-                return;
-            }
-
-            if (_damageMap[_targetEntity.Vid] < _damageMap[attacker.Vid])
-            {
-                _targetEntity = attacker;
-            }
+            return;
         }
 
-        public void OnNewNearbyEntity(IEntity entity)
+        if (_damageMap[_targetEntity.Vid] < _damageMap[attacker.Vid])
         {
-            // todo implement aggressive flag
+            _targetEntity = attacker;
         }
+    }
+
+    public void OnNewNearbyEntity(IEntity entity)
+    {
+        // todo implement aggressive flag
     }
 }

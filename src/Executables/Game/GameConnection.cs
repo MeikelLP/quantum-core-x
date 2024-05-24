@@ -6,67 +6,60 @@ using QuantumCore.API.Game.World;
 using QuantumCore.Core.Networking;
 using QuantumCore.Networking;
 
-namespace QuantumCore.Game
+namespace QuantumCore.Game;
+
+public class GameConnection : Connection, IGameConnection
 {
-    public class GameConnection : Connection, IGameConnection
+    private readonly IWorld _world;
+    public IServerBase Server { get; }
+    public Guid? AccountId { get; set; }
+    public string Username { get; set; } = "";
+    public IPlayerEntity? Player { get; set; }
+
+    public GameConnection(IServerBase server, TcpClient client, ILogger<GameConnection> logger,
+        PluginExecutor pluginExecutor, IWorld world, IPacketReader packetReader)
+        : base(logger, pluginExecutor, packetReader)
     {
-        private readonly IWorld _world;
-        public IServerBase Server { get; }
-        public Guid? AccountId { get; set; }
-        public string Username { get; set; } = "";
-        public IPlayerEntity? Player { get; set; }
+        _world = world;
+        Server = server;
+        Init(client);
+    }
 
-        public GameConnection(IServerBase server, TcpClient client, ILogger<GameConnection> logger,
-            PluginExecutor pluginExecutor, IWorld world, IPacketReader packetReader)
-            : base(logger, pluginExecutor, packetReader)
-        {
-            _world = world;
-            Server = server;
-            Init(client);
-        }
+    protected override void OnHandshakeFinished()
+    {
+        GameServer.Instance.CallConnectionListener(this);
+    }
 
-        protected override void OnHandshakeFinished()
+    protected override async Task OnClose(bool expected = true)
+    {
+        if (Player != null)
         {
-            GameServer.Instance.CallConnectionListener(this);
-        }
-
-        protected override async Task OnClose(bool expected = true)
-        {
-            if (Player != null)
+            if (expected)
             {
-                if (expected)
-                {
-                    _world.DespawnEntity(Player);
-                }
-                else
-                {
-                    if (Phase is EPhases.Game or EPhases.Loading)
-                    {
-                        await Player.CalculatePlayedTimeAsync();
-                    }
-
-                    // In case of unexpected disconnection, we need to save the player's state
-                    if (Phase is EPhases.Game or EPhases.Loading or EPhases.Select)
-                    {
-                        await _world.DespawnPlayerAsync(Player);
-                    }
-                }
-                
+                _world.DespawnEntity(Player);
             }
+            else
+            {
+                if (Phase is EPhases.Game or EPhases.Loading)
+                {
+                    await Player.CalculatePlayedTimeAsync();
+                }
 
-            await Server.RemoveConnection(this);
-
-            // todo enable expiry on auth token
+                // In case of unexpected disconnection, we need to save the player's state
+                if (Phase is EPhases.Game or EPhases.Loading or EPhases.Select)
+                {
+                    await _world.DespawnPlayerAsync(Player);
+                }
+            }
         }
 
-        protected override async Task OnReceive(IPacketSerializable packet)
-        {
-            await Server.CallListener(this, packet);
-        }
+        await Server.RemoveConnection(this);
 
-        protected override long GetServerTime()
-        {
-            return Server.ServerTime;
-        }
+        // todo enable expiry on auth token
+    }
+
+    protected override long GetServerTime()
+    {
+        return Server.ServerTime;
     }
 }

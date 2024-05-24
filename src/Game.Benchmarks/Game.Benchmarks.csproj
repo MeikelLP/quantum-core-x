@@ -10,7 +10,8 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Executables\Game\Game.csproj" />
+        <ProjectReference Include="..\Core.Networking.Generators\Core.Networking.Generators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
+        <ProjectReference Include="..\Core\Core.csproj"/>
     </ItemGroup>
 
 </Project>

@@ -1,22 +1,20 @@
-﻿using QuantumCore.API;
-using QuantumCore.API.PluginTypes;
-using QuantumCore.Game.Packets;
+﻿using QuantumCore.Game.Packets;
 
 namespace QuantumCore.Game.PacketHandlers;
 
-public class StateCheckPacketHandler : IGamePacketHandler<StateCheckPacket>
+[PacketHandler(typeof(StateCheckPacket))]
+public class StateCheckPacketHandler
 {
-    public Task ExecuteAsync(GamePacketContext<StateCheckPacket> ctx, CancellationToken token = default)
+    public void Execute(GamePacketContext ctx, StateCheckPacket packet)
     {
-        ctx.Connection.Send(new ServerStatusPacket {
-            Statuses = new [] {
-                new ServerStatus {
-                    Port = 13001,
-                    Status = 1
-                }
-            },
-            IsSuccess = 1
-        });
-        return Task.CompletedTask;
+        ctx.Connection.Send(new ServerStatusPacket(
+            [
+                new ServerStatus(
+                    13001,
+                    1
+                )
+            ],
+            1
+        ));
     }
 }

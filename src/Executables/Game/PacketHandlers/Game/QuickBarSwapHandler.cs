@@ -1,21 +1,19 @@
-﻿using QuantumCore.API;
-using QuantumCore.API.PluginTypes;
-using QuantumCore.Game.Packets.QuickBar;
+﻿using QuantumCore.Game.Packets.QuickBar;
 
 namespace QuantumCore.Game.PacketHandlers.Game;
 
-public class QuickBarSwapHandler : IGamePacketHandler<QuickBarSwap>
+[PacketHandler(typeof(QuickBarSwap))]
+public class QuickBarSwapHandler
 {
-    public Task ExecuteAsync(GamePacketContext<QuickBarSwap> ctx, CancellationToken token = default)
+    public void Execute(GamePacketContext ctx, QuickBarSwap packet)
     {
         var player = ctx.Connection.Player;
         if (player == null)
         {
             ctx.Connection.Close();
-            return Task.CompletedTask;
+            return;
         }
 
-        player.QuickSlotBar.Swap(ctx.Packet.Position1, ctx.Packet.Position2);
-        return Task.CompletedTask;
+        player.QuickSlotBar.Swap(packet.Position1, packet.Position2);
     }
 }

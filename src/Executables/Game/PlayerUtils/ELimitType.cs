@@ -1,7 +1,6 @@
-namespace QuantumCore.Game.PlayerUtils
+namespace QuantumCore.Game.PlayerUtils;
+
+public enum ELimitType
 {
-    public enum ELimitType
-    {
-        Level = 1
-    }
+    Level = 1
 }

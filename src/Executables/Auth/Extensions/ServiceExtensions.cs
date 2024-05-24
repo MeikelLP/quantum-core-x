@@ -1,6 +1,6 @@
-﻿using QuantumCore.API.PluginTypes;
-using QuantumCore.Auth.Persistence.Extensions;
+﻿using QuantumCore.Auth.Persistence.Extensions;
 using QuantumCore.Caching.Extensions;
+using QuantumCore.Networking;
 
 namespace QuantumCore.Auth.Extensions;
 
@@ -10,13 +10,7 @@ public static class ServiceExtensions
     {
         services.AddAuthDatabase();
         services.AddQuantumCoreCaching();
-        services.Scan(scan =>
-        {
-            scan.FromAssemblyOf<AuthServer>()
-                .AddClasses(classes => classes.AssignableTo<IPacketHandler>())
-                .AsImplementedInterfaces()
-                .WithScopedLifetime();
-        });
+        services.AddSingleton<IPacketReader2, PacketReader2<>>();
 
         return services;
     }

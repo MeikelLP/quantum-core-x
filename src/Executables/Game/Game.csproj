@@ -4,6 +4,7 @@
         <OutputType>Exe</OutputType>
         <AssemblyName>QuantumCore.Game</AssemblyName>
         <RootNamespace>QuantumCore.Game</RootNamespace>
+        <Nullable>enable</Nullable>
     </PropertyGroup>
 
     <ItemGroup>

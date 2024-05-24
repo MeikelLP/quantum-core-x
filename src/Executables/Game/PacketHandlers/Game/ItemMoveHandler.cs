@@ -1,11 +1,10 @@
 ﻿using Microsoft.Extensions.Logging;
-using QuantumCore.API;
-using QuantumCore.API.PluginTypes;
 using QuantumCore.Game.Packets;
 
 namespace QuantumCore.Game.PacketHandlers.Game;
 
-public class ItemMoveHandler : IGamePacketHandler<ItemMove>
+[PacketHandler(typeof(ItemMove))]
+public class ItemMoveHandler
 {
     private readonly ILogger<ItemMoveHandler> _logger;
 
@@ -14,38 +13,38 @@ public class ItemMoveHandler : IGamePacketHandler<ItemMove>
         _logger = logger;
     }
 
-    public Task ExecuteAsync(GamePacketContext<ItemMove> ctx, CancellationToken token = default)
+    public void Execute(GamePacketContext ctx, ItemMove packet)
     {
         var player = ctx.Connection.Player;
         if (player == null)
         {
             ctx.Connection.Close();
-            return Task.CompletedTask;
+            return;
         }
 
-        _logger.LogDebug("Move item from {FromWindow},{FromPosition} to {ToWindow},{ToPosition}", ctx.Packet.FromWindow, ctx.Packet.FromPosition, ctx.Packet.ToWindow, ctx.Packet.ToPosition);
+        _logger.LogDebug("Move item from {FromWindow},{FromPosition} to {ToWindow},{ToPosition}", packet.FromWindow,
+            packet.FromPosition, packet.ToWindow, packet.ToPosition);
 
         // Get moved item
-        var item = player.GetItem(ctx.Packet.FromWindow, ctx.Packet.FromPosition);
+        var item = player.GetItem(packet.FromWindow, packet.FromPosition);
         if (item == null)
         {
             _logger.LogDebug("Moved item not found!");
-            return Task.CompletedTask;
+            return;
         }
 
         // Check if target space is available
-        if (player.IsSpaceAvailable(item, ctx.Packet.ToWindow, ctx.Packet.ToPosition))
+        if (player.IsSpaceAvailable(item, packet.ToWindow, packet.ToPosition))
         {
             // remove from old space
             player.RemoveItem(item);
 
             // place item
-            player.SetItem(item, ctx.Packet.ToWindow, ctx.Packet.ToPosition);
+            player.SetItem(item, packet.ToWindow, packet.ToPosition);
 
             // send item movement to client
-            player.SendRemoveItem(ctx.Packet.FromWindow, ctx.Packet.FromPosition);
+            player.SendRemoveItem(packet.FromWindow, packet.FromPosition);
             player.SendItem(item);
         }
-        return Task.CompletedTask;
     }
 }

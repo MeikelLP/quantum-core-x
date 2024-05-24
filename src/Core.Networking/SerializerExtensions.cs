@@ -9,14 +9,15 @@ public static class SerializerExtensions
     public static async ValueTask<T> ReadEnumFromStreamAsync<T>(this Stream stream, byte[] buffer)
     {
         await stream.ReadExactlyAsync(buffer.AsMemory(0, 1));
-        return (T) (object)buffer[0];
+        return (T) (object) buffer[0];
     }
 
     [MethodImpl(MethodImplOptions.AggressiveOptimization)]
     public static async ValueTask<T> ReadValueFromStreamAsync<T>(this Stream stream, byte[] buffer)
         where T : ISpanParsable<T> // should match all relevant types
     {
-        var length = typeof(T) switch {
+        var length = typeof(T) switch
+        {
             { } type when type == typeof(Half) || type == typeof(short) || type == typeof(ushort) => 2,
             { } type when type == typeof(int) || type == typeof(uint) || type == typeof(float) => 4,
             { } type when type == typeof(long) || type == typeof(ulong) || type == typeof(double) => 8,
@@ -24,7 +25,8 @@ public static class SerializerExtensions
             _ => throw new ArgumentOutOfRangeException(nameof(T), $"Type {typeof(T)} cannot be handled")
         };
         await stream.ReadExactlyAsync(buffer.AsMemory(0, length));
-        return typeof(T) switch {
+        return typeof(T) switch
+        {
             { } type when type == typeof(int) => (T) (object) BitConverter.ToInt32(buffer.AsSpan(0, length)),
             { } type when type == typeof(uint) => (T) (object) BitConverter.ToUInt32(buffer.AsSpan(0, length)),
             { } type when type == typeof(float) => (T) (object) BitConverter.ToSingle(buffer.AsSpan(0, length)),
@@ -75,6 +77,7 @@ public static class SerializerExtensions
         return Encoding.ASCII.GetString(span[..length]);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
     public static void WriteString(this byte[] bytes, string? str, in int index, in int length)
     {
         if (!string.IsNullOrWhiteSpace(str))
@@ -86,6 +89,25 @@ public static class SerializerExtensions
         else
         {
             Array.Clear(bytes, index, length);
+        }
+    }
+
+    [MethodImpl(MethodImplOptions.AggressiveInlining | MethodImplOptions.AggressiveOptimization)]
+    public static void WriteString(this Span<byte> bytes, string? str)
+    {
+        if (!string.IsNullOrWhiteSpace(str))
+        {
+            var asciiBytes = Encoding.ASCII.GetBytes(str, 0, Math.Min(str.Length, bytes.Length));
+            for (var i = 0; i < bytes.Length; i++)
+            {
+                bytes[i] = asciiBytes[i];
+            }
+
+            bytes[^1] = 0; // terminate string
+        }
+        else
+        {
+            bytes.Clear();
         }
     }
 }

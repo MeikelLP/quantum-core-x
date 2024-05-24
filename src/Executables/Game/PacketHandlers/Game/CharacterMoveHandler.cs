@@ -1,12 +1,11 @@
 ﻿using Microsoft.Extensions.Logging;
-using QuantumCore.API;
-using QuantumCore.API.PluginTypes;
 using QuantumCore.Game.Packets;
 using QuantumCore.Game.World.Entities;
 
 namespace QuantumCore.Game.PacketHandlers.Game;
 
-public class CharacterMoveHandler : IGamePacketHandler<CharacterMove>
+[PacketHandler(typeof(CharacterMove))]
+public class CharacterMoveHandler
 {
     private readonly ILogger<CharacterMoveHandler> _logger;
 
@@ -15,56 +14,54 @@ public class CharacterMoveHandler : IGamePacketHandler<CharacterMove>
         _logger = logger;
     }
 
-    public Task ExecuteAsync(GamePacketContext<CharacterMove> ctx, CancellationToken token = default)
+    public void Execute(GamePacketContext ctx, CharacterMove packet)
     {
-        if (ctx.Packet.MovementType > CharacterMovementType.Max &&
-            ctx.Packet.MovementType != CharacterMovementType.Skill)
+        if (packet.MovementType > CharacterMovementType.Max &&
+            packet.MovementType != CharacterMovementType.Skill)
         {
-            _logger.LogError("Received unknown movement type ({MovementType})", ctx.Packet.MovementType);
+            _logger.LogError("Received unknown movement type ({MovementType})", packet.MovementType);
             ctx.Connection.Close();
-            return Task.CompletedTask;
+            return;
         }
 
         if (ctx.Connection.Player is null)
         {
             _logger.LogCritical("Cannot move player that does not exist. This is a programmatic failure");
             ctx.Connection.Close();
-            return Task.CompletedTask;
+            return;
         }
 
-        _logger.LogDebug("Received movement packet with type {MovementType}", ctx.Packet.MovementType);
-        if (ctx.Packet.MovementType == CharacterMovementType.Move)
+        _logger.LogDebug("Received movement packet with type {MovementType}", packet.MovementType);
+        if (packet.MovementType == CharacterMovementType.Move)
         {
-            ctx.Connection.Player.Rotation = ctx.Packet.Rotation * 5;
-            ctx.Connection.Player.Goto(ctx.Packet.PositionX, ctx.Packet.PositionY);
+            ctx.Connection.Player.Rotation = packet.Rotation * 5;
+            ctx.Connection.Player.Goto(packet.PositionX, packet.PositionY);
         }
 
-        if (ctx.Packet.MovementType == CharacterMovementType.Wait)
+        if (packet.MovementType == CharacterMovementType.Wait)
         {
-            ctx.Connection.Player.Wait(ctx.Packet.PositionX, ctx.Packet.PositionY);
+            ctx.Connection.Player.Wait(packet.PositionX, packet.PositionY);
         }
 
-        var movement = new CharacterMoveOut
-        {
-            MovementType = ctx.Packet.MovementType,
-            Argument = ctx.Packet.Argument,
-            Rotation = ctx.Packet.Rotation,
-            Vid = ctx.Connection.Player.Vid,
-            PositionX = ctx.Packet.PositionX,
-            PositionY = ctx.Packet.PositionY,
-            Time = ctx.Packet.Time,
-            Duration = ctx.Packet.MovementType == CharacterMovementType.Move
+        var movement = new CharacterMoveOut(
+            packet.MovementType,
+            packet.Argument,
+            packet.Rotation,
+            ctx.Connection.Player.Vid,
+            packet.PositionX,
+            packet.PositionY,
+            packet.Time,
+            packet.MovementType == CharacterMovementType.Move
                 ? ctx.Connection.Player.MovementDuration
                 : 0
-        };
+        );
 
         foreach (var entity in ctx.Connection.Player.NearbyEntities)
         {
-            if(entity is PlayerEntity player)
+            if (entity is PlayerEntity player)
             {
                 player.Connection.Send(movement);
             }
         }
-        return Task.CompletedTask;
     }
 }
