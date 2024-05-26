@@ -1,32 +1,35 @@
 ﻿using QuantumCore.Networking;
 
-namespace QuantumCore.Game.Packets
+namespace QuantumCore.Game.Packets;
+
+[ServerToClientPacket(0x01)]
+public readonly ref partial struct SpawnCharacter
 {
-    [Packet(0x01, EDirection.Outgoing)]
-    [PacketGenerator]
-    public partial class SpawnCharacter
+    public readonly uint Vid;
+    public readonly float Angle;
+    public readonly int PositionX;
+    public readonly int PositionY;
+    public readonly int PositionZ;
+    public readonly byte CharacterType;
+    public readonly ushort Class;
+    public readonly byte MoveSpeed;
+    public readonly byte AttackSpeed;
+    public readonly CharacterMovementType State;
+    [FixedSizeArray(2)] public readonly uint[] Affects;
+
+    public SpawnCharacter(uint vid, float angle, int positionX, int positionY, int positionZ, byte characterType,
+        ushort @class, byte moveSpeed, byte attackSpeed, CharacterMovementType state, uint[] affects)
     {
-        [Field(0)]
-        public uint Vid { get; set; }
-        [Field(1)]
-        public float Angle { get; set; }
-        [Field(2)]
-        public int PositionX { get; set; }
-        [Field(3)]
-        public int PositionY { get; set; }
-        [Field(4)]
-        public int PositionZ { get; set; }
-        [Field(5)]
-        public byte CharacterType { get; set; }
-        [Field(6)]
-        public ushort Class { get; set; }
-        [Field(7)]
-        public byte MoveSpeed { get; set; }
-        [Field(8)]
-        public byte AttackSpeed { get; set; }
-        [Field(9)]
-        public byte State { get; set; }
-        [Field(10, ArrayLength = 2)]
-        public uint[] Affects { get; set; } = new uint[2];
+        Vid = vid;
+        Angle = angle;
+        PositionX = positionX;
+        PositionY = positionY;
+        PositionZ = positionZ;
+        CharacterType = characterType;
+        Class = @class;
+        MoveSpeed = moveSpeed;
+        AttackSpeed = attackSpeed;
+        State = state;
+        Affects = affects;
     }
 }

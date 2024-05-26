@@ -1,12 +1,14 @@
 ﻿using QuantumCore.Networking;
 
-namespace QuantumCore.Game.Packets
+namespace QuantumCore.Game.Packets;
+
+[ServerToClientPacket(0x79)]
+public readonly ref partial struct Channel
 {
-    [Packet(0x79, EDirection.Outgoing)]
-    [PacketGenerator]
-    public partial class Channel
+    public readonly byte ChannelNo;
+
+    public Channel(byte channelNo)
     {
-        [Field(0)]
-        public byte ChannelNo { get; set; }
+        ChannelNo = channelNo;
     }
 }

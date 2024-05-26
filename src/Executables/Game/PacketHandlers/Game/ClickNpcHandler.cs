@@ -1,12 +1,11 @@
-﻿using QuantumCore.API;
-using QuantumCore.API.PluginTypes;
-using QuantumCore.Game.Packets;
+﻿using QuantumCore.Game.Packets;
 
 namespace QuantumCore.Game.PacketHandlers.Game;
 
-public class ClickNpcHandler : IGamePacketHandler<ClickNpc>
+[PacketHandler(typeof(ClickNpc))]
+public class ClickNpcHandler
 {
-    public async Task ExecuteAsync(GamePacketContext<ClickNpc> ctx, CancellationToken token = default)
+    public void Execute(GamePacketContext ctx, ClickNpc packet)
     {
         var player = ctx.Connection.Player;
         if (player == null)
@@ -15,7 +14,7 @@ public class ClickNpcHandler : IGamePacketHandler<ClickNpc>
             return;
         }
 
-        var entity = player.Map?.GetEntity(ctx.Packet.Vid);
+        var entity = player.Map?.GetEntity(packet.Vid);
         if (entity == null)
         {
             ctx.Connection.Close();

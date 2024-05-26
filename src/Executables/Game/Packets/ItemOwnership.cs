@@ -2,12 +2,15 @@
 
 namespace QuantumCore.Game.Packets;
 
-[Packet(0x1F, EDirection.Outgoing)]
-[PacketGenerator]
-public partial class ItemOwnership
+[ServerToClientPacket(0x1F)]
+public readonly ref partial struct ItemOwnership
 {
-    public uint Vid { get; set; }
+    public readonly uint Vid;
+    [FixedSizeString(25)] public readonly string Player;
 
-    [Field(1, Length = 25)]
-    public string Player { get; set; }
+    public ItemOwnership(uint vid, string player)
+    {
+        Vid = vid;
+        Player = player;
+    }
 }

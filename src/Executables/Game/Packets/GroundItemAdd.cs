@@ -2,22 +2,21 @@
 
 namespace QuantumCore.Game.Packets;
 
-[Packet(0x1A, EDirection.Outgoing)]
-[PacketGenerator]
-public partial class GroundItemAdd
+[ServerToClientPacket(0x1A)]
+public readonly ref partial struct GroundItemAdd
 {
-    [Field(0)]
-    public int PositionX { get; set; }
-    
-    [Field(1)]
-    public int PositionY { get; set; }
-    
-    [Field(2)]
-    public int PositionZ { get; set; }
-    
-    [Field(3)]
-    public uint Vid { get; set; }
-    
-    [Field(4)]
-    public uint ItemId { get; set; }
+    public readonly int PositionX;
+    public readonly int PositionY;
+    public readonly int PositionZ;
+    public readonly uint Vid;
+    public readonly uint ItemId;
+
+    public GroundItemAdd(int positionX, int positionY, int positionZ, uint vid, uint itemId)
+    {
+        PositionX = positionX;
+        PositionY = positionY;
+        PositionZ = positionZ;
+        Vid = vid;
+        ItemId = itemId;
+    }
 }

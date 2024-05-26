@@ -1,16 +1,18 @@
 using QuantumCore.Networking;
 
-namespace QuantumCore.Game.Packets
+namespace QuantumCore.Game.Packets;
+
+[ClientToServerPacket(0x02, HasSequence = true)]
+public readonly ref partial struct Attack
 {
-    [Packet(0x02, EDirection.Incoming, Sequence = true)]
-    [PacketGenerator]
-    public partial class Attack
+    public readonly byte AttackType;
+    public readonly uint Vid;
+    public readonly ushort Unknown;
+
+    public Attack(byte attackType, uint vid, ushort unknown)
     {
-        [Field(0)]
-        public byte AttackType { get; set; }
-        [Field(1)]
-        public uint Vid { get; set; }
-        [Field(2, ArrayLength = 2)]
-        public byte[] Unknown { get; set; } = new byte[2]{0,0};
+        AttackType = attackType;
+        Vid = vid;
+        Unknown = unknown;
     }
 }

@@ -1,12 +1,14 @@
 ﻿using QuantumCore.Networking;
 
-namespace QuantumCore.Game.Packets
+namespace QuantumCore.Game.Packets;
+
+[ServerToClientPacket(0x0A)]
+public readonly ref partial struct DeleteCharacterSuccess
 {
-    [Packet(0x0A, EDirection.Outgoing)]
-    [PacketGenerator]
-    public partial class DeleteCharacterSuccess
+    public readonly byte Slot;
+
+    public DeleteCharacterSuccess(byte slot)
     {
-        [Field(0)]
-        public byte Slot { get; set; }
+        Slot = slot;
     }
 }

@@ -1,13 +1,11 @@
-using System.Net.Http.Json;
 using Microsoft.Extensions.Logging;
-using QuantumCore.API;
 using QuantumCore.API.Core.Models;
-using QuantumCore.API.PluginTypes;
 using QuantumCore.Game.Packets;
 
 namespace QuantumCore.Game.PacketHandlers.Select;
 
-public class DeleteCharacterHandler : IGamePacketHandler<DeleteCharacter>
+[PacketHandler(typeof(DeleteCharacter))]
+public class DeleteCharacterHandler
 {
     private readonly ILogger<DeleteCharacterHandler> _logger;
     private readonly IPlayerManager _playerManager;
@@ -20,9 +18,9 @@ public class DeleteCharacterHandler : IGamePacketHandler<DeleteCharacter>
         _http = http;
     }
 
-    public async Task ExecuteAsync(GamePacketContext<DeleteCharacter> ctx, CancellationToken token = default)
+    public void Execute(GamePacketContext ctx, DeleteCharacter packet)
     {
-        _logger.LogDebug("Deleting character in slot {Slot}", ctx.Packet.Slot);
+        _logger.LogDebug("Deleting character in slot {Slot}", packet.Slot);
 
         var accountId = ctx.Connection.AccountId;
         if (accountId is null)
@@ -41,12 +39,9 @@ public class DeleteCharacterHandler : IGamePacketHandler<DeleteCharacter>
             return;
         }
 
-        ctx.Connection.Send(new DeleteCharacterSuccess
-        {
-            Slot = ctx.Packet.Slot
-        });
+        ctx.Connection.Send(new DeleteCharacterSuccess(packet.Slot));
 
-        var player = await _playerManager.GetPlayer(accountId.Value, ctx.Packet.Slot);
+        var player = await _playerManager.GetPlayer(accountId.Value, packet.Slot);
         if (player == null)
         {
             ctx.Connection.Close();
@@ -54,7 +49,7 @@ public class DeleteCharacterHandler : IGamePacketHandler<DeleteCharacter>
             return;
         }
 
-        var sentDeleteCode = ctx.Packet.Code[..^1];
+        var sentDeleteCode = packet.Code[..^1];
         if (account.DeleteCode != sentDeleteCode)
         {
             _logger.LogInformation(
@@ -66,9 +61,6 @@ public class DeleteCharacterHandler : IGamePacketHandler<DeleteCharacter>
 
         await _playerManager.DeletePlayerAsync(player);
 
-        ctx.Connection.Send(new DeleteCharacterSuccess
-        {
-            Slot = ctx.Packet.Slot
-        });
+        ctx.Connection.Send(new DeleteCharacterSuccess(packet.Slot));
     }
 }

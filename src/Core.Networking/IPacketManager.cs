@@ -13,8 +13,8 @@ public interface IPacketManager
     /// <param name="packet"></param>
     /// <returns>True if found</returns>
     bool TryGetPacketInfo(in byte header, in byte? subHeader, out PacketInfo packet);
-    
-    
+
+
     /// <summary>
     /// Try to get a packet info by an actual packet
     /// </summary>
@@ -22,7 +22,7 @@ public interface IPacketManager
     /// <param name="info"></param>
     /// <returns>True if found</returns>
     bool TryGetPacketInfo(IPacketSerializable packet, out PacketInfo info);
-    
+
     /// <summary>
     /// Check if the given header has sub packets defined
     /// </summary>

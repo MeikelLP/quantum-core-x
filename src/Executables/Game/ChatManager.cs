@@ -43,13 +43,12 @@ public class ChatManager : IChatManager
             return;
         }
 
-        var chat = new ChatOutcoming
-        {
-            MessageType = message.Type,
-            Vid = 0,
-            Empire = 1, // todo
-            Message = message.Message
-        };
+        var chat = new ChatOutcoming(
+            message.Type,
+            0,
+            1, // todo
+            message.Message
+        );
 
         // Send message to all connections in the game phase
         GameServer.Instance.ForAllConnections(connection =>
@@ -66,12 +65,12 @@ public class ChatManager : IChatManager
     public void Talk(IEntity entity, string message)
     {
         var packet = new ChatOutcoming
-        {
-            MessageType = ChatMessageTypes.Normal,
-            Vid = entity.Vid,
-            Empire = entity.Empire,
-            Message = message
-        };
+        (
+            ChatMessageTypes.Normal,
+            entity.Vid,
+            entity.Empire,
+            message
+        );
 
         if (entity is IPlayerEntity player)
         {
@@ -90,12 +89,12 @@ public class ChatManager : IChatManager
     public async Task Shout(string message)
     {
         var chat = new ChatOutcoming
-        {
-            MessageType = ChatMessageTypes.Shout,
-            Vid = 0,
-            Empire = 1, // todo
-            Message = message
-        };
+        (
+            ChatMessageTypes.Shout,
+            0,
+            1, // todo
+            message
+        );
 
         // Send message to all connections in the game phase
         GameServer.Instance.ForAllConnections(connection =>

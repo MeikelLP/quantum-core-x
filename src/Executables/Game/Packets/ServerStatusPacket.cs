@@ -2,23 +2,17 @@
 
 namespace QuantumCore.Game.Packets;
 
-[Packet(0xD2, EDirection.Outgoing)]
-[PacketGenerator]
-public partial class ServerStatusPacket
+[ServerToClientPacket(0xD2)]
+public readonly ref partial struct ServerStatusPacket
 {
-    [Field(0)] public uint Size => (uint)Statuses.Length;
+    public readonly uint Size;
+    public readonly ServerStatus[] Statuses;
+    public readonly byte IsSuccess;
 
-    [Field(1)]
-    public ServerStatus[] Statuses { get; set; } = Array.Empty<ServerStatus>();
-
-    [Field(2)] public byte IsSuccess { get; set; }
-}
-
-public class ServerStatus
-{
-    [Field(0)]
-    public short Port { get; set; }
-
-    [Field(1)]
-    public byte Status { get; set; }
+    public ServerStatusPacket(ServerStatus[] statuses, byte isSuccess)
+    {
+        Size = (uint) statuses.Length;
+        Statuses = statuses;
+        IsSuccess = isSuccess;
+    }
 }

@@ -1,12 +1,15 @@
 ﻿using QuantumCore.Networking;
 
-namespace QuantumCore.Game.Packets
+namespace QuantumCore.Game.Packets;
+
+[ServerToClientPacket(0x5a, HasSequence = true)]
+[ClientToServerPacket(0x5a, HasSequence = true)]
+public readonly ref partial struct Empire
 {
-    [Packet(0x5a, EDirection.Incoming | EDirection.Outgoing, Sequence = true)]
-    [PacketGenerator]
-    public partial class Empire
+    public readonly byte EmpireId;
+
+    public Empire(byte empireId)
     {
-        [Field(0)]
-        public byte EmpireId { get; set; }
+        EmpireId = empireId;
     }
 }

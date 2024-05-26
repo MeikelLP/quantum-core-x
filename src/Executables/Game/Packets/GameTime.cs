@@ -1,12 +1,14 @@
 ﻿using QuantumCore.Networking;
 
-namespace QuantumCore.Game.Packets
+namespace QuantumCore.Game.Packets;
+
+[ServerToClientPacket(0x6a)]
+public readonly ref partial struct GameTime
 {
-    [Packet(0x6a, EDirection.Outgoing)]
-    [PacketGenerator]
-    public partial class GameTime
+    public readonly uint Time;
+
+    public GameTime(uint time)
     {
-        [Field(0)]
-        public uint Time { get; set; }
+        Time = time;
     }
 }

@@ -16,7 +16,8 @@ public class GroundItem : Entity, IGroundItem
     public uint Amount => _amount;
     public string? OwnerName => _ownerName;
 
-    public GroundItem(IAnimationManager animationManager, uint vid, ItemInstance item, uint amount, string? ownerName = null) : base(animationManager, vid)
+    public GroundItem(IAnimationManager animationManager, uint vid, ItemInstance item, uint amount,
+        string? ownerName = null) : base(animationManager, vid)
     {
         _item = item;
         _amount = amount;
@@ -41,13 +42,15 @@ public class GroundItem : Entity, IGroundItem
 
     public override void ShowEntity(IConnection connection)
     {
-        connection.Send(new GroundItemAdd {
-            PositionX = PositionX,
-            PositionY = PositionY,
-            Vid = Vid,
-            ItemId = _item.ItemId
-        });
-        connection.Send(new ItemOwnership {
+        connection.Send(new GroundItemAdd(
+            PositionX,
+            PositionY,
+            0,
+            Vid,
+            _item.ItemId
+        ));
+        connection.Send(new ItemOwnership
+        {
             Vid = Vid,
             Player = OwnerName ?? ""
         });
@@ -55,9 +58,7 @@ public class GroundItem : Entity, IGroundItem
 
     public override void HideEntity(IConnection connection)
     {
-        connection.Send(new GroundItemRemove {
-            Vid = Vid
-        });
+        connection.Send(new GroundItemRemove(Vid));
     }
 
     public override uint GetPoint(EPoints point)

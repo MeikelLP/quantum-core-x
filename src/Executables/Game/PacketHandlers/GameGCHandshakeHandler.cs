@@ -1,19 +1,18 @@
-﻿using QuantumCore.API;
-using QuantumCore.API.Core.Models;
-using QuantumCore.API.PluginTypes;
+﻿using QuantumCore.API.Core.Models;
 using QuantumCore.Core.Packets;
 
 namespace QuantumCore.Game.PacketHandlers;
 
-public class GameGCHandshakeHandler : IGamePacketHandler<GCHandshake>
+[PacketHandler(typeof(GCHandshake))]
+public class GameGCHandshakeHandler
 {
-    public Task ExecuteAsync(GamePacketContext<GCHandshake> ctx, CancellationToken token = default)
+    public void Execute(GamePacketContext ctx, GCHandshake packet)
     {
-        ctx.Connection.HandleHandshake(new GCHandshakeData {
-            Delta = ctx.Packet.Delta,
-            Handshake = ctx.Packet.Handshake,
-            Time = ctx.Packet.Time
+        ctx.Connection.HandleHandshake(new GCHandshakeData
+        {
+            Delta = packet.Delta,
+            Handshake = packet.Handshake,
+            Time = packet.Time
         });
-        return Task.CompletedTask;
     }
 }

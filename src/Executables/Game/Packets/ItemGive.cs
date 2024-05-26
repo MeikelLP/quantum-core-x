@@ -2,16 +2,19 @@ using QuantumCore.Networking;
 
 namespace QuantumCore.Game.Packets;
 
-[Packet(0x53, EDirection.Incoming, Sequence = true)]
-[PacketGenerator]
-public partial class ItemGive
+[ClientToServerPacket(0x53, HasSequence = true)]
+public readonly ref partial struct ItemGive
 {
-    [Field(0)]
-    public uint TargetVid { get; set; }
-    [Field(1)]
-    public byte Window { get; set; }
-    [Field(2)]
-    public ushort Position { get; set; }
-    [Field(3)]
-    public byte Count { get; set; }
+    public readonly uint TargetVid;
+    public readonly byte Window;
+    public readonly ushort Position;
+    public readonly byte Count;
+
+    public ItemGive(uint targetVid, byte window, ushort position, byte count)
+    {
+        TargetVid = targetVid;
+        Window = window;
+        Position = position;
+        Count = count;
+    }
 }

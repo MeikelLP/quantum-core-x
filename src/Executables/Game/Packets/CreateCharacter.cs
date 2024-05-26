@@ -1,20 +1,22 @@
 using QuantumCore.Networking;
 
-namespace QuantumCore.Game.Packets
+namespace QuantumCore.Game.Packets;
+
+[ClientToServerPacket(0x04, HasSequence = true)]
+public readonly ref partial struct CreateCharacter
 {
-    [Packet(0x04, EDirection.Incoming, Sequence = true)]
-    [PacketGenerator]
-    public partial class CreateCharacter
+    public readonly byte Slot;
+    [FixedSizeString(25)] public readonly string Name;
+    public readonly ushort Class;
+    public readonly byte Appearance;
+    [FixedSizeArray(4)] public readonly byte[] Unknown;
+
+    public CreateCharacter(byte slot, string name, ushort @class, byte appearance, byte[] unknown)
     {
-        [Field(0)]
-        public byte Slot { get; set; }
-        [Field(1, Length = 25)]
-        public string Name { get; set; } = "";
-        [Field(2)]
-        public ushort Class { get; set; }
-        [Field(3)]
-        public byte Appearance { get; set; }
-        [Field(4, ArrayLength = 4)]
-        public byte[] Unknown { get; set; } = new byte[4];
+        Slot = slot;
+        Name = name;
+        Class = @class;
+        Appearance = appearance;
+        Unknown = unknown;
     }
 }

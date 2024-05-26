@@ -1,29 +1,27 @@
-﻿using QuantumCore.API;
-using QuantumCore.API.PluginTypes;
-using QuantumCore.Game.Packets;
+﻿using QuantumCore.Game.Packets;
 using QuantumCore.Game.World.Entities;
 
 namespace QuantumCore.Game.PacketHandlers.Game;
 
-public class ItemPickupHandler : IGamePacketHandler<ItemPickup>
+[PacketHandler(typeof(ItemPickup))]
+public class ItemPickupHandler
 {
-    public Task ExecuteAsync(GamePacketContext<ItemPickup> ctx, CancellationToken token = default)
+    public void Execute(GamePacketContext ctx, ItemPickup packet)
     {
         var player = ctx.Connection.Player;
         if (player == null)
         {
             ctx.Connection.Close();
-            return Task.CompletedTask;
+            return;
         }
 
-        var entity = player.Map?.GetEntity(ctx.Packet.Vid);
+        var entity = player.Map?.GetEntity(packet.Vid);
         if (entity is not GroundItem groundItem)
         {
             // we can only pick up ground items
-            return Task.CompletedTask;
+            return;
         }
-        
+
         player.Pickup(groundItem);
-        return Task.CompletedTask;
     }
 }

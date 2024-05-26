@@ -1,14 +1,16 @@
 ﻿using QuantumCore.Networking;
 
-namespace QuantumCore.Game.Packets
+namespace QuantumCore.Game.Packets;
+
+[ClientToServerPacket(0x0b, HasSequence = true)]
+public readonly ref partial struct ItemUse
 {
-    [Packet(0x0b, EDirection.Incoming, Sequence = true)]
-    [PacketGenerator]
-    public partial class ItemUse
+    public readonly byte Window;
+    public readonly ushort Position;
+
+    public ItemUse(byte window, ushort position)
     {
-        [Field(0)]
-        public byte Window { get; set; }
-        [Field(1)]
-        public ushort Position { get; set; }
+        Window = window;
+        Position = position;
     }
 }

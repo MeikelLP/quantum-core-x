@@ -4,7 +4,6 @@ using QuantumCore.API.Game.Types;
 using QuantumCore.Caching;
 using QuantumCore.Core.Networking;
 using QuantumCore.Extensions;
-using QuantumCore.Networking;
 
 namespace QuantumCore.Auth
 {
@@ -13,10 +12,9 @@ namespace QuantumCore.Auth
         private readonly ILogger<AuthServer> _logger;
         private readonly ICacheManager _cacheManager;
 
-        public AuthServer(IOptions<HostingOptions> hostingOptions, IPacketManager packetManager,
-            ILogger<AuthServer> logger,
+        public AuthServer(IOptions<HostingOptions> hostingOptions, ILogger<AuthServer> logger,
             PluginExecutor pluginExecutor, IServiceProvider serviceProvider, ICacheManager cacheManager)
-            : base(packetManager, logger, pluginExecutor, serviceProvider, "auth", hostingOptions)
+            : base(logger, pluginExecutor, serviceProvider, "auth", hostingOptions)
         {
             _logger = logger;
             _cacheManager = cacheManager;

@@ -1,12 +1,14 @@
 ﻿using QuantumCore.Networking;
 
-namespace QuantumCore.Game.Packets
+namespace QuantumCore.Game.Packets;
+
+[ServerToClientPacket(0x0e)]
+public readonly ref partial struct CharacterDead
 {
-    [Packet(0x0e, EDirection.Outgoing)]
-    [PacketGenerator]
-    public partial class CharacterDead
+    public readonly uint Vid;
+
+    public CharacterDead(uint vid)
     {
-        [Field(0)]
-        public uint Vid { get; set; }
+        Vid = vid;
     }
 }

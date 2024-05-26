@@ -2,12 +2,15 @@ using QuantumCore.Networking;
 
 namespace QuantumCore.Game.Packets.QuickBar;
 
-[Packet(0x12, EDirection.Incoming, Sequence = true)]
-[PacketGenerator]
-public partial class QuickBarSwap
+[ClientToServerPacket(0x12, HasSequence = true)]
+public readonly ref partial struct QuickBarSwap
 {
-    [Field(0)]
-    public byte Position1 { get; set; }
-    [Field(1)]
-    public byte Position2 { get; set; }
+    public readonly byte Position1;
+    public readonly byte Position2;
+
+    public QuickBarSwap(byte position1, byte position2)
+    {
+        Position1 = position1;
+        Position2 = position2;
+    }
 }

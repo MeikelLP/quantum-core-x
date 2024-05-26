@@ -1,14 +1,16 @@
 using QuantumCore.Networking;
 
-namespace QuantumCore.Game.Packets
+namespace QuantumCore.Game.Packets;
+
+[ServerToClientPacket(0x3f)]
+public readonly ref partial struct SetTarget
 {
-    [Packet(0x3f, EDirection.Outgoing)]
-    [PacketGenerator]
-    public partial class SetTarget
+    public readonly uint TargetVid;
+    public readonly byte Percentage;
+
+    public SetTarget(uint targetVid, byte percentage)
     {
-        [Field(0)]
-        public uint TargetVid { get; set; }
-        [Field(1)]
-        public byte Percentage { get; set; }
+        TargetVid = targetVid;
+        Percentage = percentage;
     }
 }

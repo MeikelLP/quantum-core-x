@@ -1,20 +1,22 @@
 using QuantumCore.Networking;
 
-namespace QuantumCore.Game.Packets
+namespace QuantumCore.Game.Packets;
+
+[ClientToServerPacket(0x0d, HasSequence = true)]
+public readonly ref partial struct ItemMove
 {
-    [Packet(0x0d, EDirection.Incoming, Sequence = true)]
-    [PacketGenerator]
-    public partial class ItemMove
+    public readonly byte FromWindow;
+    public readonly ushort FromPosition;
+    public readonly byte ToWindow;
+    public readonly ushort ToPosition;
+    public readonly byte Count;
+
+    public ItemMove(byte fromWindow, ushort fromPosition, byte toWindow, ushort toPosition, byte count)
     {
-        [Field(0)]
-        public byte FromWindow { get; set; }
-        [Field(1)]
-        public ushort FromPosition { get; set; }
-        [Field(2)]
-        public byte ToWindow { get; set; }
-        [Field(3)]
-        public ushort ToPosition { get; set; }
-        [Field(4)]
-        public byte Count { get; set; }
+        FromWindow = fromWindow;
+        FromPosition = fromPosition;
+        ToWindow = toWindow;
+        ToPosition = toPosition;
+        Count = count;
     }
 }

@@ -2,10 +2,13 @@ using QuantumCore.Networking;
 
 namespace QuantumCore.Game.Packets.Quest;
 
-[Packet(0x1D, EDirection.Incoming, Sequence = true)]
-[PacketGenerator]
-public partial class QuestAnswer
+[ClientToServerPacket(0x1D, HasSequence = true)]
+public readonly ref partial struct QuestAnswer
 {
-    [Field(0)]
-    public byte Answer { get; set; }
+    public readonly byte Answer;
+
+    public QuestAnswer(byte answer)
+    {
+        Answer = answer;
+    }
 }

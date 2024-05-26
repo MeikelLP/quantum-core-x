@@ -1,23 +1,17 @@
-﻿#nullable enable
-using QuantumCore.Networking;
+﻿using QuantumCore.Networking;
 
-namespace QuantumCore.Game.Packets
+namespace QuantumCore.Game.Packets;
+
+[ServerToClientPacket(0x20)]
+public partial class Characters
 {
-    [Packet(0x20, EDirection.Outgoing)]
-    [PacketGenerator]
-    public partial class Characters
-    {
-        [Field(0, ArrayLength = 4)]
-        public Character[] CharacterList { get; set; } = new Character[4] {
-            new Character(), new Character(), new Character(), new Character()
-        };
-        [Field(1, ArrayLength = 4)]
-        public uint[] GuildIds { get; set; } = new uint[4];
-        [Field(2, ArrayLength = 4, Length = 13)]
-        public string[] GuildNames { get; set; } = new string[4];
-        [Field(3)]
-        public uint Unknown1 { get; set; }
-        [Field(4)]
-        public uint Unknown2 { get; set; }
-    }
+    [FixedSizeArray(4)] public Character[] CharacterList { get; set; } = [];
+    [FixedSizeArray(4)] public uint[] GuildIds { get; set; } = [];
+
+    [FixedSizeArray(4)]
+    [FixedSizeString(13)]
+    public string[] GuildNames { get; set; } = [];
+
+    public uint Unknown1 { get; set; }
+    public uint Unknown2 { get; set; }
 }

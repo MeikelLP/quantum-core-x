@@ -1,12 +1,14 @@
 ﻿using QuantumCore.Networking;
 
-namespace QuantumCore.Game.Packets
+namespace QuantumCore.Game.Packets;
+
+[ServerToClientPacket(0x10)]
+public readonly ref partial struct CharacterPoints
 {
-    [Packet(0x10, EDirection.Outgoing)]
-    [PacketGenerator]
-    public partial class CharacterPoints
+    [FixedSizeArray(255)] public readonly uint[] Points;
+
+    public CharacterPoints(uint[] points)
     {
-        [Field(0, ArrayLength = 255)]
-        public uint[] Points { get; set; } = new uint[255];
+        Points = points;
     }
 }

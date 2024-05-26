@@ -1,5 +1,5 @@
-﻿using QuantumCore.API.Game.Types;
-using QuantumCore.Networking;
+﻿using QuantumCore.API.Core.Models;
+using QuantumCore.API.Game.Types;
 
 namespace QuantumCore.API
 {
@@ -9,7 +9,8 @@ namespace QuantumCore.API
         EPhases Phase { get; set; }
         Task ExecuteTask { get; }
         void Close(bool expected = true);
-        void Send<T>(T packet) where T : IPacketSerializable;
+        void Send(byte[] packet);
         Task StartAsync(CancellationToken token = default);
+        bool HandleHandshake(GCHandshakeData handshake);
     }
 }

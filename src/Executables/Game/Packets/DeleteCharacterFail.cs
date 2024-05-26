@@ -1,10 +1,8 @@
 using QuantumCore.Networking;
 
-namespace QuantumCore.Game.Packets
+namespace QuantumCore.Game.Packets;
+
+[ServerToClientPacket(0x0B)]
+public readonly ref partial struct DeleteCharacterFail
 {
-    [Packet(0x0B, EDirection.Outgoing)]
-    [PacketGenerator]
-    public partial class DeleteCharacterFail
-    {
-    }
 }

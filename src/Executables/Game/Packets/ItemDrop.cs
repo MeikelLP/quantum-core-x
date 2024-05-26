@@ -2,19 +2,19 @@
 
 namespace QuantumCore.Game.Packets;
 
-[Packet(0x14, EDirection.Incoming, Sequence = true)]
-[PacketGenerator]
-public partial class ItemDrop
+[ClientToServerPacket(0x14, HasSequence = true)]
+public readonly ref partial struct ItemDrop
 {
-    [Field(0)]
-    public byte Window { get; set; }
-    
-    [Field(1)]
-    public ushort Position { get; set; }
-    
-    [Field(2)]
-    public uint Gold { get; set; }
-    
-    [Field(3)]
-    public byte Count { get; set; }
+    public readonly byte Window;
+    public readonly ushort Position;
+    public readonly uint Gold;
+    public readonly byte Count;
+
+    public ItemDrop(byte window, ushort position, uint gold, byte count)
+    {
+        Window = window;
+        Position = position;
+        Gold = gold;
+        Count = count;
+    }
 }

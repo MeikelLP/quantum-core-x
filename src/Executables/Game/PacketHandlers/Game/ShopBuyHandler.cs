@@ -1,23 +1,19 @@
-﻿using QuantumCore.API;
-using QuantumCore.API.PluginTypes;
-using QuantumCore.Game.Packets.Shop;
+﻿using QuantumCore.Game.Packets.Shop;
 
 namespace QuantumCore.Game.PacketHandlers.Game;
 
-public class ShopBuyHandler : IGamePacketHandler<ShopBuy>
+[PacketHandler(typeof(ShopBuy))]
+public class ShopBuyHandler
 {
-    public Task ExecuteAsync(GamePacketContext<ShopBuy> ctx, CancellationToken token = default)
+    public void Execute(GamePacketContext ctx, ShopBuy packet)
     {
         var player = ctx.Connection.Player;
         if (player == null)
         {
             ctx.Connection.Close();
-
-            return Task.CompletedTask;
+            return;
         }
 
-        player.Shop?.Buy(player, ctx.Packet.Position, ctx.Packet.Count);
-
-        return Task.CompletedTask;
+        player.Shop?.Buy(player, packet.Position, packet.Count);
     }
 }

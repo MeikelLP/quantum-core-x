@@ -9,14 +9,14 @@ public interface IPacketSerializable
     /// </summary>
     /// <returns></returns>
     ushort GetSize();
-    
+
     /// <summary>
     /// Serializes the current object into the given byte array
     /// </summary>
     /// <param name="bytes">Existing byte array to write into</param>
     /// <param name="offset">Start offset</param>
     void Serialize(byte[] bytes, in int offset = 0);
-    
+
     /// <summary>
     /// Deserializes from the given array and returns a new instance
     /// Assumes that the array starts after the header
@@ -50,7 +50,7 @@ public interface IPacketSerializable
     /// This is required to read bytes continuously while deserializing
     /// </summary>
     static abstract bool HasStaticSize { get; }
-    
+
     /// <summary>
     /// Does this package have a sequence?
     /// A sequence is a terminating byte at the end of the package - usually \0

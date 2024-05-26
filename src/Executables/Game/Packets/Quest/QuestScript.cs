@@ -2,15 +2,19 @@ using QuantumCore.Networking;
 
 namespace QuantumCore.Game.Packets.Quest;
 
-[Packet(0x2D, EDirection.Outgoing)]
-[PacketGenerator]
-public partial class QuestScript
+[ServerToClientPacket(0x2D)]
+public readonly ref partial struct QuestScript
 {
-    [Field(0)] public ushort PacketSize => (ushort)Source.Length;
-    [Field(1)]
-    public byte Skin { get; set; }
+    public readonly ushort PacketSize;
+    public readonly byte Skin;
+    public readonly ushort SourceSize;
+    public readonly string Source;
 
-    [Field(2)]
-    public ushort SourceSize { get; set; }
-    public string Source { get; set; } = "";
+    public QuestScript(byte skin, ushort sourceSize, string source)
+    {
+        Skin = skin;
+        SourceSize = sourceSize;
+        Source = source;
+        PacketSize = (ushort) Source.Length;
+    }
 }

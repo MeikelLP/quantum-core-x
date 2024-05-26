@@ -1,15 +1,16 @@
 ﻿using QuantumCore.Networking;
 
-namespace QuantumCore.Game.Packets
-{
-    [Packet(0x05, EDirection.Incoming, Sequence = true)]
-    [PacketGenerator]
-    public partial class DeleteCharacter
-    {
-        [Field(0)]
-        public byte Slot { get; set; }
+namespace QuantumCore.Game.Packets;
 
-        [Field(1, Length = 8)]
-        public string Code { get; set; } = "";
+[ClientToServerPacket(0x05, HasSequence = true)]
+public readonly ref partial struct DeleteCharacter
+{
+    public readonly byte Slot;
+    [FixedSizeString(8)] public readonly string Code;
+
+    public DeleteCharacter(byte slot, string code)
+    {
+        Slot = slot;
+        Code = code;
     }
 }

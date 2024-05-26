@@ -1,12 +1,14 @@
 ﻿using QuantumCore.Networking;
 
-namespace QuantumCore.Game.Packets
+namespace QuantumCore.Game.Packets;
+
+[ClientToServerPacket(0x06, HasSequence = true)]
+public readonly ref partial struct SelectCharacter
 {
-    [Packet(0x06, EDirection.Incoming, Sequence = true)]
-    [PacketGenerator]
-    public partial class SelectCharacter
+    public readonly byte Slot;
+
+    public SelectCharacter(byte slot)
     {
-        [Field(0)]
-        public byte Slot { get; set; }
+        Slot = slot;
     }
 }

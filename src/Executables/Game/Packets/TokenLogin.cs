@@ -1,21 +1,16 @@
 ﻿using QuantumCore.Networking;
 
-namespace QuantumCore.Game.Packets
+namespace QuantumCore.Game.Packets;
+
+[ClientToServerPacket(0x6d, HasSequence = true)]
+public partial class TokenLogin
 {
-    [Packet(0x6d, EDirection.Incoming, Sequence = true)]
-    [PacketGenerator]
-    public partial class TokenLogin
+    [FixedSizeString(31)] public required string Username { get; set; }
+    public uint Key { get; set; }
+    public uint[] Xteakeys { get; set; } = [];
+
+    public override string ToString()
     {
-        [Field(0, Length = 31)]
-        public string Username { get; set; } = "";
-        [Field(1)]
-        public uint Key { get; set; }
-
-        [Field(2)] public uint[] Xteakeys { get; set; } = new uint[4];
-
-        public override string ToString()
-        {
-            return base.ToString() + $" Username = {Username}, Key = {Key}";
-        }
+        return $" Username = {Username}, Key = {Key}";
     }
 }

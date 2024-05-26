@@ -1,26 +1,24 @@
 ﻿using QuantumCore.Game.Packets.General;
 using QuantumCore.Networking;
 
-namespace QuantumCore.Game.Packets.Shop
+namespace QuantumCore.Game.Packets.Shop;
+
+public readonly struct ShopItem
 {
-    public class ShopItem
+    public readonly uint ItemId;
+    public readonly uint Price;
+    public readonly byte Count;
+    public readonly byte Position;
+    [FixedSizeArray(3)] public readonly uint[] Sockets;
+    [FixedSizeArray(7)] public readonly ItemBonus[] Bonuses;
+
+    public ShopItem(uint itemId, uint price, byte count, byte position, uint[] sockets, ItemBonus[] bonuses)
     {
-        [Field(0)]
-        public uint ItemId { get; set; }
-        
-        [Field(1)]
-        public uint Price { get; set; }
-        
-        [Field(2)]
-        public byte Count { get; set; }
-        
-        [Field(3)]
-        public byte Position { get; set; }
-        
-        [Field(4, ArrayLength = 3)]
-        public uint[] Sockets { get; set; } = new uint[3];
-        
-        [Field(5, ArrayLength = 7)]
-        public ItemBonus[] Bonuses { get; set; } = new ItemBonus[7];
+        ItemId = itemId;
+        Price = price;
+        Count = count;
+        Position = position;
+        Sockets = sockets;
+        Bonuses = bonuses;
     }
 }

@@ -1,12 +1,9 @@
 ﻿using QuantumCore.Networking;
 
-namespace QuantumCore.Auth.Packets
+namespace QuantumCore.Auth.Packets;
+
+[ServerToClientPacket(0x07)]
+public partial class LoginFailed
 {
-    [Packet(0x07, EDirection.Outgoing)]
-    [PacketGenerator]
-    public partial class LoginFailed
-    {
-        [Field(0, Length = 9)]
-        public string Status { get; set; } = "";
-    }
+    [FixedSizeString(9)] public string Status { get; set; } = "";
 }

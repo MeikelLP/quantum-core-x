@@ -1,11 +1,10 @@
 ﻿using Microsoft.Extensions.Logging;
-using QuantumCore.API;
-using QuantumCore.API.PluginTypes;
 using Version = QuantumCore.Game.Packets.Version;
 
 namespace QuantumCore.Game.PacketHandlers.Game;
 
-public class ClientVersionPacketHandler : IGamePacketHandler<Version>
+[PacketHandler(typeof(Version))]
+public class ClientVersionPacketHandler
 {
     private readonly ILogger<ClientVersionPacketHandler> _logger;
 
@@ -13,11 +12,9 @@ public class ClientVersionPacketHandler : IGamePacketHandler<Version>
     {
         _logger = logger;
     }
-    
-    public Task ExecuteAsync(GamePacketContext<Version> ctx, CancellationToken token = default)
-    {
-        _logger.LogInformation("Received client version: {Name} {Timestamp}", ctx.Packet.ExecutableName, ctx.Packet.Timestamp);
 
-        return Task.CompletedTask;
+    public void Execute(GamePacketContext ctx, Version packet)
+    {
+        _logger.LogInformation("Received client version: {Name} {Timestamp}", packet.ExecutableName, packet.Timestamp);
     }
 }

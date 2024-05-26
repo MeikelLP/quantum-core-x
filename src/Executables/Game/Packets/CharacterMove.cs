@@ -1,33 +1,25 @@
 ﻿using QuantumCore.Networking;
 
-namespace QuantumCore.Game.Packets
+namespace QuantumCore.Game.Packets;
+
+[ClientToServerPacket(0x07, HasSequence = true)]
+public readonly ref partial struct CharacterMove
 {
-    [Packet(0x07, EDirection.Incoming, Sequence = true)]
-    [PacketGenerator]
-    public partial class CharacterMove
+    public readonly CharacterMovementType MovementType;
+    public readonly byte Argument;
+    public readonly byte Rotation;
+    public readonly int PositionX;
+    public readonly int PositionY;
+    public readonly uint Time;
+
+    public CharacterMove(CharacterMovementType movementType, byte argument, byte rotation, int positionX,
+        int positionY, uint time)
     {
-        public enum CharacterMovementType
-        {
-            Wait = 0,
-            Move = 1,
-            Attack = 2,
-            Combo = 3,
-            MobSkill = 4,
-            Max,
-            Skill = 0x80
-        }
-        
-        [Field(0)]
-        public byte MovementType { get; set; }
-        [Field(1)]
-        public byte Argument { get; set; }
-        [Field(2)]
-        public byte Rotation { get; set; }
-        [Field(3)]
-        public int PositionX { get; set; }
-        [Field(4)]
-        public int PositionY { get; set; }
-        [Field(5)]
-        public uint Time { get; set; }
+        MovementType = movementType;
+        Argument = argument;
+        Rotation = rotation;
+        PositionX = positionX;
+        PositionY = positionY;
+        Time = time;
     }
 }

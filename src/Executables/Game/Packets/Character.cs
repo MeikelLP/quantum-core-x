@@ -1,46 +1,49 @@
-﻿#nullable enable
+﻿using QuantumCore.Networking;
 
-using QuantumCore.Networking;
+namespace QuantumCore.Game.Packets;
 
-namespace QuantumCore.Game.Packets
+public readonly struct Character
 {
-    public class Character
-    {
-        [Field(0)]
-        public uint Id { get; set; }
+    public readonly uint Id;
+    [FixedSizeString(25)] public readonly string Name;
+    public readonly byte Class;
+    public readonly byte Level;
+    public readonly uint Playtime;
+    public readonly byte St;
+    public readonly byte Ht;
+    public readonly byte Dx;
+    public readonly byte Iq;
+    public readonly ushort BodyPart;
+    public readonly byte NameChange;
+    public readonly ushort HairPort;
+    public readonly uint Unknown;
+    public readonly int PositionX;
+    public readonly int PositionY;
+    public readonly int Ip;
+    public readonly ushort Port;
+    public readonly byte SkillGroup;
 
-        [Field(1, Length = 25)] public string Name { get; set; } = "";
-        [Field(2)]
-        public byte Class { get; set; }
-        [Field(3)]
-        public byte Level { get; set; }
-        [Field(4)]
-        public uint Playtime { get; set; }
-        [Field(5)]
-        public byte St { get; set; }
-        [Field(6)]
-        public byte Ht { get; set; }
-        [Field(7)]
-        public byte Dx { get; set; }
-        [Field(8)]
-        public byte Iq { get; set; }
-        [Field(9)]
-        public ushort BodyPart { get; set; }
-        [Field(10)]
-        public byte NameChange { get; set; }
-        [Field(11)]
-        public ushort HairPort { get; set; }
-        [Field(12)]
-        public uint Unknown { get; set; }
-        [Field(13)]
-        public int PositionX { get; set; }
-        [Field(14)]
-        public int PositionY { get; set; }
-        [Field(15)]
-        public int Ip { get; set; }
-        [Field(16)]
-        public ushort Port { get; set; }
-        [Field(17)]
-        public byte SkillGroup { get; set; }
+    public Character(uint id, string name, byte @class, byte level, uint playtime, byte st, byte ht, byte dx, byte iq,
+        ushort bodyPart, byte nameChange, ushort hairPort, uint unknown, int positionX, int positionY, int ip,
+        ushort port, byte skillGroup)
+    {
+        Id = id;
+        Name = name;
+        Class = @class;
+        Level = level;
+        Playtime = playtime;
+        St = st;
+        Ht = ht;
+        Dx = dx;
+        Iq = iq;
+        BodyPart = bodyPart;
+        NameChange = nameChange;
+        HairPort = hairPort;
+        Unknown = unknown;
+        PositionX = positionX;
+        PositionY = positionY;
+        Ip = ip;
+        Port = port;
+        SkillGroup = skillGroup;
     }
 }

@@ -2,11 +2,13 @@ using QuantumCore.Networking;
 
 namespace QuantumCore.Game.Packets.Shop;
 
-[Packet(0x26, EDirection.Outgoing)]
-[SubPacket(0x05, 0)]
-[PacketGenerator]
-public partial class ShopNotEnoughMoney
+[ServerToClientPacket(0x26, 0x05)]
+public readonly ref partial struct ShopNotEnoughMoney
 {
-    [Field(0)]
-    public ushort Size { get; set; }
+    public readonly ushort Size;
+
+    public ShopNotEnoughMoney(ushort size)
+    {
+        Size = size;
+    }
 }

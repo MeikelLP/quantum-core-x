@@ -1,14 +1,16 @@
 using QuantumCore.Networking;
 
-namespace QuantumCore.Game.Packets
+namespace QuantumCore.Game.Packets;
+
+[ServerToClientPacket(0x08)]
+public readonly ref partial struct CreateCharacterSuccess
 {
-    [Packet(0x08, EDirection.Outgoing)]
-    [PacketGenerator]
-    public partial class CreateCharacterSuccess
+    public readonly byte Slot;
+    public readonly Character Character;
+
+    public CreateCharacterSuccess(byte slot, Character character)
     {
-        [Field(0)]
-        public byte Slot { get; set; }
-        [Field(1)]
-        public Character Character { get; set; } = new Character();
+        Slot = slot;
+        Character = character;
     }
 }

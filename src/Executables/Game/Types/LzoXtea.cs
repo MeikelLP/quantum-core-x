@@ -1,34 +1,33 @@
 using QuantumCore.Core.Utils;
 
-namespace QuantumCore.Core.Types
+namespace QuantumCore.Core.Types;
+
+public class LzoXtea
 {
-    public class LzoXtea
+    private uint[] _key;
+    private uint _size;
+    private uint _xteaSize;
+
+    private readonly Lzo _lzoInstance;
+
+    public LzoXtea(uint size, uint xteaSize, params uint[] key)
     {
-        private uint[] _key;
-        private uint _size;
-        private uint _xteaSize;
+        _key = key;
+        _size = size;
+        _xteaSize = xteaSize;
+        _lzoInstance = new Lzo(size);
+    }
 
-        private readonly Lzo _lzoInstance;
-        
-        public LzoXtea(uint size, uint xteaSize, params uint[] key)
+    public byte[] Decode(byte[] input)
+    {
+        var decrypted = Xtea.Decrypt(input, _xteaSize, _key, 32);
+        if (decrypted[0] != 'M' || decrypted[1] != 'C' || decrypted[2] != 'O' || decrypted[3] != 'Z')
         {
-            _key = key;
-            _size = size;
-            _xteaSize = xteaSize;
-            _lzoInstance = new Lzo(size);
+            throw new InvalidDataException("Failed to decrypt data stream");
         }
 
-        public byte[] Decode(byte[] input)
-        {
-            var decrypted = Xtea.Decrypt(input, _xteaSize, _key, 32);
-            if (decrypted[0] != 'M' || decrypted[1] != 'C' || decrypted[2] != 'O' || decrypted[3] != 'Z')
-            {
-                throw new InvalidDataException("Failed to decrypt data stream");
-            }
-            
-            var decompressed = _lzoInstance.Decode(decrypted);
-            File.WriteAllBytes("test", decompressed);
-            return decompressed;
-        }
+        var decompressed = _lzoInstance.Decode(decrypted);
+        File.WriteAllBytes("test", decompressed);
+        return decompressed;
     }
 }

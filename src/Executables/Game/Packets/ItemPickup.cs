@@ -2,10 +2,13 @@
 
 namespace QuantumCore.Game.Packets;
 
-[Packet(0x0F, EDirection.Incoming, Sequence = true)]
-[PacketGenerator]
-public partial class ItemPickup
+[ClientToServerPacket(0x0F, HasSequence = true)]
+public readonly ref partial struct ItemPickup
 {
-    [Field(0)]
-    public uint Vid { get; set; }
+    public readonly uint Vid;
+
+    public ItemPickup(uint vid)
+    {
+        Vid = vid;
+    }
 }

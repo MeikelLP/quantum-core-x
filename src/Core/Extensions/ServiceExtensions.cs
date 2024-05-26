@@ -1,4 +1,3 @@
-using System.Reflection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -30,25 +29,8 @@ public static class ServiceExtensions
             .BindConfiguration("Hosting")
             .ValidateDataAnnotations();
         services.AddCustomLogging(configuration);
-        services.AddSingleton<IPacketManager>(provider =>
-        {
-            var packetTypes = AppDomain.CurrentDomain.GetAssemblies().SelectMany(x => x.ExportedTypes)
-                .Where(x => x.IsAssignableTo(typeof(IPacketSerializable)) &&
-                            x.GetCustomAttribute<PacketAttribute>()?.Direction.HasFlag(EDirection.Incoming) == true)
-                .OrderBy(x => x.FullName)
-                .ToArray();
-            var handlerTypes = AppDomain.CurrentDomain.GetAssemblies()
-                .Where(x => !x.IsDynamic)
-                .SelectMany(x => x.ExportedTypes)
-                .Where(x =>
-                    x.IsAssignableTo(typeof(IPacketHandler)) &&
-                    x is {IsClass: true, IsAbstract: false, IsInterface: false})
-                .OrderBy(x => x.FullName)
-                .ToArray();
-            return ActivatorUtilities.CreateInstance<PacketManager>(provider, [packetTypes, handlerTypes]);
-        });
         services.AddSingleton<IPacketReader, PacketReader>();
-        services.AddSingleton<PluginExecutor>();
+        services.AddSingleton<IPluginExecutor, PluginExecutor>();
         services.AddPluginFramework()
             .AddPluginCatalog(pluginCatalog)
             .AddPluginType<ISingletonPlugin>()

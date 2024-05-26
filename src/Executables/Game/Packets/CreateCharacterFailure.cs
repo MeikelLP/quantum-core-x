@@ -1,12 +1,14 @@
 using QuantumCore.Networking;
 
-namespace QuantumCore.Game.Packets
+namespace QuantumCore.Game.Packets;
+
+[ServerToClientPacket(0x09)]
+public readonly ref partial struct CreateCharacterFailure
 {
-    [Packet(0x09, EDirection.Outgoing)]
-    [PacketGenerator]
-    public partial class CreateCharacterFailure
+    public readonly byte Error;
+
+    public CreateCharacterFailure(byte error)
     {
-        [Field(0)]
-        public byte Error { get; set; }
+        Error = error;
     }
 }

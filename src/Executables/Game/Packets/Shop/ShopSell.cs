@@ -2,11 +2,15 @@
 
 namespace QuantumCore.Game.Packets.Shop;
 
-[Packet(0x32, EDirection.Incoming, Sequence = true)]
-[SubPacket(0x03, 0)]
-[PacketGenerator]
-public partial class ShopSell
+[ClientToServerPacket(0x32, 0x03, HasSequence = true)]
+public readonly ref partial struct ShopSell
 {
-    public byte Position { get; set; }
-    public byte Count { get; set; }
+    public readonly byte Position;
+    public readonly byte Count;
+
+    public ShopSell(byte position, byte count)
+    {
+        Position = position;
+        Count = count;
+    }
 }

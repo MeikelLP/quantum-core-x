@@ -1,12 +1,14 @@
 ﻿using QuantumCore.Networking;
 
-namespace QuantumCore.Game.Packets
+namespace QuantumCore.Game.Packets;
+
+[ClientToServerPacket(0x1a, HasSequence = true)]
+public readonly ref partial struct ClickNpc
 {
-    [Packet(0x1a, EDirection.Incoming, Sequence = true)]
-    [PacketGenerator]
-    public partial class ClickNpc
+    public readonly uint Vid;
+
+    public ClickNpc(uint vid)
     {
-        [Field(0)]
-        public uint Vid { get; set; }
+        Vid = vid;
     }
 }

@@ -1,12 +1,14 @@
 using QuantumCore.Networking;
 
-namespace QuantumCore.Game.Packets
+namespace QuantumCore.Game.Packets;
+
+[ClientToServerPacket(0x3d, HasSequence = true)]
+public readonly ref partial struct TargetChange
 {
-    [Packet(0x3d, EDirection.Incoming, Sequence = true)]
-    [PacketGenerator]
-    public partial class TargetChange
+    public readonly uint TargetVid;
+
+    public TargetChange(uint targetVid)
     {
-        [Field(0)]
-        public uint TargetVid { get; set; }
+        TargetVid = targetVid;
     }
 }

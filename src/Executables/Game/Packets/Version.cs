@@ -1,14 +1,16 @@
 ﻿using QuantumCore.Networking;
 
-namespace QuantumCore.Game.Packets
+namespace QuantumCore.Game.Packets;
+
+[ClientToServerPacket(0xf1, HasSequence = true)]
+public readonly ref partial struct Version
 {
-    [Packet(0xf1, EDirection.Incoming, Sequence = true)]
-    [PacketGenerator]
-    public partial class Version
+    [FixedSizeString(33)] public readonly string ExecutableName;
+    [FixedSizeString(33)] public readonly string Timestamp;
+
+    public Version(string executableName, string timestamp)
     {
-        [Field(0, Length = 33)]
-        public string ExecutableName { get; set; } = "";
-        [Field(1, Length = 33)]
-        public string Timestamp { get; set; } = "";
+        ExecutableName = executableName;
+        Timestamp = timestamp;
     }
 }

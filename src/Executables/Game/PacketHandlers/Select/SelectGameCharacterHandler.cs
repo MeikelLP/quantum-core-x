@@ -1,13 +1,11 @@
 ﻿using Microsoft.Extensions.Logging;
-using QuantumCore.API;
 using QuantumCore.API.Game.Types;
-using QuantumCore.API.PluginTypes;
-using QuantumCore.Extensions;
 using QuantumCore.Game.Packets;
 
 namespace QuantumCore.Game.PacketHandlers.Select;
 
-public class SelectGameCharacterHandler : IGamePacketHandler<SelectCharacter>
+[PacketHandler(typeof(SelectCharacter))]
+public class SelectGameCharacterHandler
 {
     private readonly ILogger<SelectGameCharacterHandler> _logger;
     private readonly IPlayerManager _playerManager;
@@ -21,9 +19,9 @@ public class SelectGameCharacterHandler : IGamePacketHandler<SelectCharacter>
         _playerFactory = playerFactory;
     }
 
-    public async Task ExecuteAsync(GamePacketContext<SelectCharacter> ctx, CancellationToken token = default)
+    public void Execute(GamePacketContext ctx, SelectCharacter packet)
     {
-        _logger.LogDebug("Selected character in slot {Slot}", ctx.Packet.Slot);
+        _logger.LogDebug("Selected character in slot {Slot}", packet.Slot);
         if (ctx.Connection.AccountId == null)
         {
             // We didn't received any login before
@@ -38,7 +36,7 @@ public class SelectGameCharacterHandler : IGamePacketHandler<SelectCharacter>
         ctx.Connection.SetPhase(EPhases.Loading);
 
         // Load player
-        var player = await _playerManager.GetPlayer(accountId, ctx.Packet.Slot);
+        var player = await _playerManager.GetPlayer(accountId, packet.Slot);
         if (player is null)
         {
             throw new InvalidOperationException("Player was not found. This should never happen at this point");

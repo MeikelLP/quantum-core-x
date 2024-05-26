@@ -2,10 +2,13 @@
 
 namespace QuantumCore.Game.Packets;
 
-[Packet(0x1B, EDirection.Outgoing)]
-[PacketGenerator]
-public partial class GroundItemRemove
+[ServerToClientPacket(0x1B)]
+public readonly ref partial struct GroundItemRemove
 {
-    [Field(0)]
-    public uint Vid { get; set; }
+    public readonly uint Vid;
+
+    public GroundItemRemove(uint vid)
+    {
+        Vid = vid;
+    }
 }

@@ -1,0 +1,32 @@
+﻿namespace QuantumCore.API.Packets;
+
+public enum GamePacketsIn
+{
+    Handshake = 0xff,
+    QuestAnswer = 0x1D,
+    QuestScript = 0x2D,
+    QuickBarAdd = 0x10,
+    QuickBarRemove = 0x11,
+    QuickBarSwap = 0x12,
+    ShopBuy = 0x32,
+    ShopClose = 0x32,
+    ShopSell = 0x32,
+    Attack = 0x02,
+    CharacterMove = 0x07,
+    Chat = 0x03,
+    ClickNpc = 0x1a,
+    CreateCharacter = 0x04,
+    DeleteCharacter = 0x05,
+    Empire = 0x5a,
+    EnterGame = 0x0a,
+    ItemDrop = 0x14,
+    ItemGive = 0x53,
+    ItemMove = 0x0d,
+    ItemPickup = 0x0F,
+    ItemUse = 0x0b,
+    SelectCharacter = 0x06,
+    StateCheckPacket = 0xCE,
+    TargetChange = 0x3d,
+    TokenLogin = 0x6d,
+    Version = 0xf1,
+}

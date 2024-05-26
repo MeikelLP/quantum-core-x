@@ -1,12 +1,13 @@
-﻿using QuantumCore.Networking;
+﻿namespace QuantumCore.Game.Packets.General;
 
-namespace QuantumCore.Game.Packets.General
+public readonly struct ItemBonus
 {
-    public class ItemBonus
+    public readonly byte BonusId;
+    public readonly ushort Value;
+
+    public ItemBonus(byte bonusId, ushort value)
     {
-        [Field(0)]
-        public byte BonusId { get; set; }
-        [Field(1)]
-        public ushort Value { get; set; }
+        BonusId = bonusId;
+        Value = value;
     }
 }

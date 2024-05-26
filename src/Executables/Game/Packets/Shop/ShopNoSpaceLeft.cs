@@ -2,9 +2,13 @@ using QuantumCore.Networking;
 
 namespace QuantumCore.Game.Packets.Shop;
 
-[Packet(0x26, EDirection.Outgoing)]
-[SubPacket(0x07, 0)]
-[PacketGenerator]
-public partial class ShopNoSpaceLeft
+[ServerToClientPacket(0x26, 0x07)]
+public readonly ref partial struct ShopNoSpaceLeft
 {
+    public readonly ushort Size;
+
+    public ShopNoSpaceLeft(ushort size)
+    {
+        Size = size;
+    }
 }

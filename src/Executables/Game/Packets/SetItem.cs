@@ -1,32 +1,32 @@
 using QuantumCore.Game.Packets.General;
 using QuantumCore.Networking;
 
-namespace QuantumCore.Game.Packets
+namespace QuantumCore.Game.Packets;
+
+[ServerToClientPacket(0x15)]
+public readonly ref partial struct SetItem
 {
-    [Packet(0x15, EDirection.Outgoing)]
-    [PacketGenerator]
-    public partial class SetItem
+    public readonly byte Window;
+    public readonly ushort Position;
+    public readonly uint ItemId;
+    public readonly byte Count;
+    public readonly uint Flags;
+    public readonly uint AnitFlags;
+    public readonly uint Highlight;
+    [FixedSizeArray(3)] public readonly uint[] Sockets;
+    [FixedSizeArray(7)] public readonly ItemBonus[] Bonuses;
+
+    public SetItem(byte window, ushort position, uint itemId, byte count, uint flags, uint anitFlags, uint highlight,
+        uint[] sockets, ItemBonus[] bonuses)
     {
-        [Field(0)]
-        public byte Window { get; set; }
-        [Field(1)]
-        public ushort Position { get; set; }
-        [Field(2)]
-        public uint ItemId { get; set; }
-        [Field(3)]
-        public byte Count { get; set; }
-        [Field(4)]
-        public uint Flags { get; set; }
-        [Field(5)]
-        public uint AnitFlags { get; set; }
-        [Field(6)]
-        public uint Highlight { get; set; }
-        [Field(7, ArrayLength = 3)]
-        public uint[] Sockets { get; set; } = new uint[3];
-        [Field(8, ArrayLength = 7)]
-        public ItemBonus[] Bonuses { get; set; } = new ItemBonus[7] {
-            new ItemBonus(), new ItemBonus(), new ItemBonus(), new ItemBonus(), 
-            new ItemBonus(), new ItemBonus(), new ItemBonus()
-        };
+        Window = window;
+        Position = position;
+        ItemId = itemId;
+        Count = count;
+        Flags = flags;
+        AnitFlags = anitFlags;
+        Highlight = highlight;
+        Sockets = sockets;
+        Bonuses = bonuses;
     }
 }

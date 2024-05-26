@@ -3,12 +3,15 @@ using QuantumCore.Networking;
 
 namespace QuantumCore.Game.Packets.QuickBar;
 
-[Packet(0x10, EDirection.Incoming, Sequence = true)]
-[PacketGenerator]
-public partial class QuickBarAdd
+[ClientToServerPacket(0x10, HasSequence = true)]
+public readonly ref partial struct QuickBarAdd
 {
-    [Field(0)]
-    public byte Position { get; set; }
-    [Field(1)]
-    public QuickSlot Slot { get; set; } = new QuickSlot();
+    public readonly byte Position;
+    public readonly QuickSlot Slot;
+
+    public QuickBarAdd(byte position, QuickSlot slot)
+    {
+        Position = position;
+        Slot = slot;
+    }
 }

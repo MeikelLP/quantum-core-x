@@ -2,25 +2,21 @@
 
 namespace QuantumCore.Game.Packets;
 
-[Packet(0x04, EDirection.Outgoing, Sequence = false)]
-[PacketGenerator]
-public partial class ChatOutcoming
+[ServerToClientPacket(0x04, HasSequence = false)]
+public readonly ref partial struct ChatOutcoming
 {
-    [Field(0)] public ushort Size => (ushort)Message.Length;
+    public readonly ushort Size;
+    public readonly ChatMessageTypes MessageType;
+    public readonly uint Vid;
+    public readonly byte Empire;
+    public readonly string Message;
 
-    [Field(1)]
-    public ChatMessageTypes MessageType { get; set; }
-
-    [Field(2)]
-    public uint Vid { get; set; }
-
-    [Field(3)]
-    public byte Empire { get; set; }
-
-    public string Message { get; set; } = "";
-
-    public override string ToString()
+    public ChatOutcoming(ChatMessageTypes messageType, uint vid, byte empire, string message)
     {
-        return base.ToString() + $" {Message}";
+        Size = (ushort) message.Length;
+        MessageType = messageType;
+        Vid = vid;
+        Empire = empire;
+        Message = message;
     }
 }

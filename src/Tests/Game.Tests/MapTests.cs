@@ -1,5 +1,5 @@
-using Core.Tests.Extensions;
 using FluentAssertions;
+using Game.Tests.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -13,7 +13,6 @@ using QuantumCore.Caching;
 using QuantumCore.Game.Services;
 using QuantumCore.Game.World;
 using QuantumCore.Game.World.Entities;
-using Xunit;
 using Xunit.Abstractions;
 
 namespace Core.Tests;
@@ -121,7 +120,8 @@ public class MapTests
         var options = provider.GetRequiredService<IOptions<HostingOptions>>();
         var logger = provider.GetRequiredService<ILogger<MapTests>>();
         _world = provider.GetRequiredService<IWorld>();
-        _map = new Map(monsterManager, animationManager, cacheManager, _world, options, logger, spawnPointProvider, dropProvider, itemManager,
+        _map = new Map(monsterManager, animationManager, cacheManager, _world, options, logger, spawnPointProvider,
+            dropProvider, itemManager,
             "Test", 0, 0, 4096, 4096);
     }
 

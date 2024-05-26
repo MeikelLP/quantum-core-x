@@ -1,13 +1,16 @@
 ﻿using QuantumCore.Networking;
 
-namespace QuantumCore.Game.Packets.Shop
+namespace QuantumCore.Game.Packets.Shop;
+
+[ClientToServerPacket(0x32, 0x01, HasSequence = true)]
+public readonly ref partial struct ShopBuy
 {
-    [Packet(0x32, EDirection.Incoming, Sequence = true)]
-    [SubPacket(0x01, 0)]
-    [PacketGenerator]
-    public partial class ShopBuy
+    public readonly byte Count;
+    public readonly byte Position;
+
+    public ShopBuy(byte count, byte position)
     {
-        public byte Count { get; set; }
-        public byte Position { get; set; }
+        Count = count;
+        Position = position;
     }
 }

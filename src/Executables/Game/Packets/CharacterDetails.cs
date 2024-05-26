@@ -1,26 +1,29 @@
 ﻿using QuantumCore.Networking;
 
-namespace QuantumCore.Game.Packets
+namespace QuantumCore.Game.Packets;
+
+[ServerToClientPacket(0x71)]
+public readonly ref partial struct CharacterDetails
 {
-    [Packet(0x71, EDirection.Outgoing)]
-    [PacketGenerator]
-    public partial class CharacterDetails
+    public readonly uint Vid;
+    public readonly ushort Class;
+    [FixedSizeString(25)] public readonly string Name;
+    public readonly int PositionX;
+    public readonly int PositionY;
+    public readonly int PositionZ;
+    public readonly byte Empire;
+    public readonly byte SkillGroup;
+
+    public CharacterDetails(uint vid, ushort @class, string name, int positionX, int positionY, int positionZ,
+        byte empire, byte skillGroup)
     {
-        [Field(0)]
-        public uint Vid { get; set; }
-        [Field(1)]
-        public ushort Class { get; set; }
-        [Field(2, Length = 25)]
-        public string Name { get; set; } = "";
-        [Field(3)]
-        public int PositionX { get; set; }
-        [Field(4)]
-        public int PositionY { get; set; }
-        [Field(5)]
-        public int PositionZ { get; set; }
-        [Field(6)]
-        public byte Empire { get; set; }
-        [Field(7)]
-        public byte SkillGroup { get; set; }
+        Vid = vid;
+        Class = @class;
+        Name = name;
+        PositionX = positionX;
+        PositionY = positionY;
+        PositionZ = positionZ;
+        Empire = empire;
+        SkillGroup = skillGroup;
     }
 }

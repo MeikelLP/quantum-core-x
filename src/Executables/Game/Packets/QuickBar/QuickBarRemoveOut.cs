@@ -2,10 +2,13 @@ using QuantumCore.Networking;
 
 namespace QuantumCore.Game.Packets.QuickBar;
 
-[Packet(0x1D, EDirection.Outgoing)]
-[PacketGenerator]
-public partial class QuickBarRemoveOut
+[ServerToClientPacket(0x1D)]
+public readonly ref partial struct QuickBarRemoveOut
 {
-    [Field(0)]
-    public byte Position { get; set; }
+    public readonly byte Position;
+
+    public QuickBarRemoveOut(byte position)
+    {
+        Position = position;
+    }
 }

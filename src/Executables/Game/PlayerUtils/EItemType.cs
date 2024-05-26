@@ -6,6 +6,6 @@
         Weapon,
         Armor,
         Use,
-        Polymorph = 19,
+        Polymorph = 19
     }
 }

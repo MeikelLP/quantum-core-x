@@ -1,15 +1,17 @@
-using QuantumCore.Networking;
-
 namespace QuantumCore.Game.Packets.General;
 
-public class QuickSlot
+public readonly struct QuickSlot
 {
-    [Field(0)]
-    public byte Type { get; set; }
-    
+    public readonly byte Type;
+
     /// <summary>
     /// Position of item in inventory or skill depending on the type
     /// </summary>
-    [Field(1)]
-    public byte Position { get; set; }
+    public readonly byte Position;
+
+    public QuickSlot(byte type, byte position)
+    {
+        Type = type;
+        Position = position;
+    }
 }

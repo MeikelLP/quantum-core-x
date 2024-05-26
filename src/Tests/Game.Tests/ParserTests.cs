@@ -7,7 +7,6 @@ using QuantumCore.Game;
 using QuantumCore.Game.Drops;
 using QuantumCore.Game.Extensions;
 using QuantumCore.Game.World;
-using Xunit;
 
 namespace Core.Tests;
 
@@ -86,7 +85,7 @@ public class ParserTests
                                     """);
 
         var groups = await ParserUtils.ParseFileGroups(input);
-        
+
         var result = groups.Select(x => x.ToSpawnGroup()).FirstOrDefault();
 
         result.Should().BeEquivalentTo(new SpawnGroup
@@ -118,9 +117,9 @@ public class ParserTests
                                     		6   Mob3  2411
                                     }
                                     """);
-        
+
         var groups = await ParserUtils.ParseFileGroups(input);
-        
+
         var result = groups.Select(x => x.ToSpawnGroup()).FirstOrDefault();
 
         result.Should().BeEquivalentTo(new SpawnGroup
@@ -155,7 +154,7 @@ public class ParserTests
                                     """);
 
         var groups = await ParserUtils.ParseFileGroups(input);
-        
+
         var result = groups.Select(x => x.ToSpawnGroup()).FirstOrDefault();
 
         result.Should().BeEquivalentTo(new SpawnGroup
@@ -183,9 +182,9 @@ public class ParserTests
                                     	2	171	1
                                     }
                                     """);
-        
+
         var groups = await ParserUtils.ParseFileGroups(input);
-        
+
         var result = groups.Select(x => x.ToSpawnGroupCollection()).FirstOrDefault();
 
         result.Should().BeEquivalentTo(new SpawnGroupCollection
@@ -218,9 +217,9 @@ public class ParserTests
                                     	2	171	1
                                     }
                                     """);
-        
+
         var groups = await ParserUtils.ParseFileGroups(input);
-        
+
         var result = groups.Select(x => x.ToSpawnGroupCollection()).FirstOrDefault();
 
         result.Should().BeEquivalentTo(new SpawnGroupCollection
@@ -248,9 +247,9 @@ public class ParserTests
                                     			
                                     			
                                     """);
-        
+
         var groups = await ParserUtils.ParseFileGroups(input);
-        
+
         var result = groups.Select(x => x.ToSpawnGroupCollection()).FirstOrDefault();
 
         result.Should().BeEquivalentTo(new SpawnGroupCollection
@@ -277,9 +276,9 @@ public class ParserTests
                                     	2	113	1
                                     }
                                     """);
-        
+
         var groups = await ParserUtils.ParseFileGroups(input);
-        
+
         var result = groups.Select(x => x.ToSpawnGroupCollection()).FirstOrDefault();
 
         result.Should().BeEquivalentTo(new SpawnGroupCollection
@@ -304,9 +303,9 @@ public class ParserTests
                                     	1	112
                                     }
                                     """);
-        
+
         var groups = await ParserUtils.ParseFileGroups(input);
-        
+
         var result = groups.Select(x => x.ToSpawnGroupCollection()).FirstOrDefault();
 
         result.Should().BeEquivalentTo(new SpawnGroupCollection
@@ -326,14 +325,14 @@ public class ParserTests
         var input = GetStreamReader("""
                                     			
                                     """);
-        
+
         var groups = await ParserUtils.ParseFileGroups(input);
-        
+
         var result = groups.Select(x => x.ToSpawnGroup()).FirstOrDefault();
 
         result.Should().BeNull();
     }
-    
+
     private static StreamReader GetStreamReader(string input)
     {
         return new StreamReader(new MemoryStream(Encoding.UTF8.GetBytes(input)));
@@ -356,19 +355,19 @@ public class ParserTests
         var groups = await ParserUtils.ParseFileGroups(input);
 
         var mobDrops = groups.Select(x => ParserUtils.ParseMobGroup(x, itemManager)).ToList();
-        
+
         groups.Should().HaveCount(1);
         groups[0].Should().BeEquivalentTo(new ParserUtils.DataFileGroup
         {
             Name = "Abc",
             Fields =
             {
-                { "Mob", "101" },
-                { "Type", "drop" }
+                {"Mob", "101"},
+                {"Type", "drop"}
             },
             Data =
             {
-                new List<string>() { "1", "10", "1", "0.09" }
+                new List<string>() {"1", "10", "1", "0.09"}
             }
         });
         mobDrops.Should().HaveCount(1);
@@ -387,7 +386,7 @@ public class ParserTests
             }
         });
     }
-    
+
     [Fact]
     public async Task Drop_MobGroupItem_SingleDrop_MultipleGroup()
     {
@@ -411,19 +410,19 @@ public class ParserTests
         var groups = await ParserUtils.ParseFileGroups(input);
 
         var mobDrops = groups.Select(x => ParserUtils.ParseMobGroup(x, itemManager)).ToList();
-        
+
         groups.Should().HaveCount(2);
         groups[0].Should().BeEquivalentTo(new ParserUtils.DataFileGroup
         {
             Name = "Abc",
             Fields =
             {
-                { "Mob", "101" },
-                { "Type", "drop" }
+                {"Mob", "101"},
+                {"Type", "drop"}
             },
             Data =
             {
-                new List<string>() { "1", "10", "1", "0.09" }
+                new List<string>() {"1", "10", "1", "0.09"}
             }
         });
         groups[1].Should().BeEquivalentTo(new ParserUtils.DataFileGroup
@@ -431,15 +430,15 @@ public class ParserTests
             Name = "Def",
             Fields =
             {
-                { "Mob", "102" },
-                { "Type", "drop" }
+                {"Mob", "102"},
+                {"Type", "drop"}
             },
             Data =
             {
-                new List<string>() { "1", "11", "2", "0.05" }
+                new List<string>() {"1", "11", "2", "0.05"}
             }
         });
-        
+
         mobDrops.Should().HaveCount(2);
         mobDrops[0].Should().NotBeNull();
         mobDrops[0].Should().BeEquivalentTo(new DropItemGroup
@@ -470,7 +469,7 @@ public class ParserTests
             }
         });
     }
-    
+
     [Fact]
     public async Task Drop_MobGroupItem_MultipleDrop_SingleGroup()
     {
@@ -489,20 +488,20 @@ public class ParserTests
         var groups = await ParserUtils.ParseFileGroups(input);
 
         var mobDrops = groups.Select(x => ParserUtils.ParseMobGroup(x, itemManager)).ToList();
-        
+
         groups.Should().HaveCount(1);
         groups[0].Should().BeEquivalentTo(new ParserUtils.DataFileGroup
         {
             Name = "Abc",
             Fields =
             {
-                { "Mob", "101" },
-                { "Type", "drop" }
+                {"Mob", "101"},
+                {"Type", "drop"}
             },
             Data =
             {
-                new List<string>() { "1", "10", "1", "0.09" },
-                new List<string>() { "2", "11", "2", "1" }
+                new List<string>() {"1", "10", "1", "0.09"},
+                new List<string>() {"2", "11", "2", "1"}
             }
         });
         mobDrops.Should().HaveCount(1);
@@ -527,7 +526,7 @@ public class ParserTests
             }
         });
     }
-    
+
     [Fact]
     public async Task Drop_MobGroupItem_MultipleDrop_MultipleGroup()
     {
@@ -553,20 +552,20 @@ public class ParserTests
         var groups = await ParserUtils.ParseFileGroups(input);
 
         var mobDrops = groups.Select(x => ParserUtils.ParseMobGroup(x, itemManager)).ToList();
-        
+
         groups.Should().HaveCount(2);
         groups[0].Should().BeEquivalentTo(new ParserUtils.DataFileGroup
         {
             Name = "Abc",
             Fields =
             {
-                { "Mob", "101" },
-                { "Type", "drop" }
+                {"Mob", "101"},
+                {"Type", "drop"}
             },
             Data =
             {
-                new List<string>() { "1", "10", "1", "0.09" },
-                new List<string>() { "2", "11", "2", "0.05" }
+                new List<string>() {"1", "10", "1", "0.09"},
+                new List<string>() {"2", "11", "2", "0.05"}
             }
         });
         groups[1].Should().BeEquivalentTo(new ParserUtils.DataFileGroup
@@ -574,16 +573,16 @@ public class ParserTests
             Name = "Def",
             Fields =
             {
-                { "Mob", "102" },
-                { "Type", "drop" }
+                {"Mob", "102"},
+                {"Type", "drop"}
             },
             Data =
             {
-                new List<string>() { "1", "11", "2", "0.05" },
-                new List<string>() { "2", "10", "1", "0.09" }
+                new List<string>() {"1", "11", "2", "0.05"},
+                new List<string>() {"2", "10", "1", "0.09"}
             }
         });
-        
+
         mobDrops.Should().HaveCount(2);
         mobDrops[0].Should().NotBeNull();
         mobDrops[0].Should().BeEquivalentTo(new DropItemGroup
@@ -626,7 +625,7 @@ public class ParserTests
             }
         });
     }
-    
+
     [Fact]
     public async Task Drop_LevelItem_SingleDrop_SingleGroup()
     {
@@ -645,20 +644,20 @@ public class ParserTests
         var groups = await ParserUtils.ParseFileGroups(input);
 
         var mobDrops = groups.Select(x => ParserUtils.ParseMobGroup(x, itemManager)).ToList();
-        
+
         groups.Should().HaveCount(1);
         groups[0].Should().BeEquivalentTo(new ParserUtils.DataFileGroup
         {
             Name = "Abc",
             Fields =
             {
-                { "Level_limit", "75" },
-                { "Mob", "101" },
-                { "Type", "limit" }
+                {"Level_limit", "75"},
+                {"Mob", "101"},
+                {"Type", "limit"}
             },
             Data =
             {
-                new List<string>() { "1", "10", "1", "0.09" }
+                new List<string>() {"1", "10", "1", "0.09"}
             }
         });
         mobDrops.Should().HaveCount(1);
@@ -703,20 +702,20 @@ public class ParserTests
         var groups = await ParserUtils.ParseFileGroups(input);
 
         var mobDrops = groups.Select(x => ParserUtils.ParseMobGroup(x, itemManager)).ToList();
-        
+
         groups.Should().HaveCount(2);
         groups[0].Should().BeEquivalentTo(new ParserUtils.DataFileGroup
         {
             Name = "Abc",
             Fields =
             {
-                { "Level_limit", "75" },
-                { "Mob", "101" },
-                { "Type", "limit" }
+                {"Level_limit", "75"},
+                {"Mob", "101"},
+                {"Type", "limit"}
             },
             Data =
             {
-                new List<string>() { "1", "10", "1", "0.09" }
+                new List<string>() {"1", "10", "1", "0.09"}
             }
         });
         groups[1].Should().BeEquivalentTo(new ParserUtils.DataFileGroup
@@ -724,13 +723,13 @@ public class ParserTests
             Name = "Def",
             Fields =
             {
-                { "Level_limit", "75" },
-                { "Mob", "102" },
-                { "Type", "limit" }
+                {"Level_limit", "75"},
+                {"Mob", "102"},
+                {"Type", "limit"}
             },
             Data =
             {
-                new List<string>() { "1", "11", "2", "0.05" }
+                new List<string>() {"1", "11", "2", "0.05"}
             }
         });
         mobDrops.Should().HaveCount(2);
@@ -763,7 +762,7 @@ public class ParserTests
             }
         });
     }
-    
+
     [Fact]
     public async Task Drop_LevelItem_MultipleDrop_SingleGroup()
     {
@@ -783,21 +782,21 @@ public class ParserTests
         var groups = await ParserUtils.ParseFileGroups(input);
 
         var mobDrops = groups.Select(x => ParserUtils.ParseMobGroup(x, itemManager)).ToList();
-        
+
         groups.Should().HaveCount(1);
         groups[0].Should().BeEquivalentTo(new ParserUtils.DataFileGroup
         {
             Name = "Abc",
             Fields =
             {
-                { "Level_limit", "75" },
-                { "Mob", "101" },
-                { "Type", "limit" }
+                {"Level_limit", "75"},
+                {"Mob", "101"},
+                {"Type", "limit"}
             },
             Data =
             {
-                new List<string>() { "1", "10", "1", "0.09" },
-                new List<string>() { "2", "11", "2", "1" }
+                new List<string>() {"1", "10", "1", "0.09"},
+                new List<string>() {"2", "11", "2", "1"}
             }
         });
         mobDrops.Should().HaveCount(1);
@@ -822,7 +821,7 @@ public class ParserTests
             }
         });
     }
-    
+
     [Fact]
     public async Task Drop_LevelItem_MultipleDrop_MultipleGroup()
     {
@@ -850,21 +849,21 @@ public class ParserTests
         var groups = await ParserUtils.ParseFileGroups(input);
 
         var mobDrops = groups.Select(x => ParserUtils.ParseMobGroup(x, itemManager)).ToList();
-        
+
         groups.Should().HaveCount(2);
         groups[0].Should().BeEquivalentTo(new ParserUtils.DataFileGroup
         {
             Name = "Abc",
             Fields =
             {
-                { "Level_limit", "75" },
-                { "Mob", "101" },
-                { "Type", "limit" }
+                {"Level_limit", "75"},
+                {"Mob", "101"},
+                {"Type", "limit"}
             },
             Data =
             {
-                new List<string>() { "1", "10", "1", "0.09" },
-                new List<string>() { "2", "11", "2", "1" }
+                new List<string>() {"1", "10", "1", "0.09"},
+                new List<string>() {"2", "11", "2", "1"}
             }
         });
         groups[1].Should().BeEquivalentTo(new ParserUtils.DataFileGroup
@@ -872,14 +871,14 @@ public class ParserTests
             Name = "Def",
             Fields =
             {
-                { "Level_limit", "75" },
-                { "Mob", "102" },
-                { "Type", "limit" }
+                {"Level_limit", "75"},
+                {"Mob", "102"},
+                {"Type", "limit"}
             },
             Data =
             {
-                new List<string>() { "1", "11", "2", "0.05" },
-                new List<string>() { "2", "10", "1", "0.09" }
+                new List<string>() {"1", "11", "2", "0.05"},
+                new List<string>() {"2", "10", "1", "0.09"}
             }
         });
         mobDrops.Should().HaveCount(2);
@@ -943,20 +942,20 @@ public class ParserTests
         var groups = await ParserUtils.ParseFileGroups(input);
 
         var mobDrops = groups.Select(x => ParserUtils.ParseMobGroup(x, itemManager)).ToList();
-        
+
         groups.Should().HaveCount(1);
         groups[0].Should().BeEquivalentTo(new ParserUtils.DataFileGroup
         {
             Name = "Abc",
             Fields =
             {
-                { "Kill_drop", "75" },
-                { "Mob", "101" },
-                { "Type", "kill" }
+                {"Kill_drop", "75"},
+                {"Mob", "101"},
+                {"Type", "kill"}
             },
             Data =
             {
-                new List<string>() { "1", "10", "1", "20", "30" }
+                new List<string>() {"1", "10", "1", "20", "30"}
             }
         });
         mobDrops.Should().HaveCount(1);
@@ -965,7 +964,7 @@ public class ParserTests
         {
             MonsterProtoId = 101,
             MinKillCount = 75,
-            Probabilities = new List<uint>() { 20 },
+            Probabilities = new List<uint>() {20},
             Drops = new List<MonsterItemGroup.Drop>
             {
                 new()
@@ -1003,20 +1002,20 @@ public class ParserTests
         var groups = await ParserUtils.ParseFileGroups(input);
 
         var mobDrops = groups.Select(x => ParserUtils.ParseMobGroup(x, itemManager)).ToList();
-        
+
         groups.Should().HaveCount(2);
         groups[0].Should().BeEquivalentTo(new ParserUtils.DataFileGroup
         {
             Name = "Abc",
             Fields =
             {
-                { "Kill_drop", "75" },
-                { "Mob", "101" },
-                { "Type", "kill" }
+                {"Kill_drop", "75"},
+                {"Mob", "101"},
+                {"Type", "kill"}
             },
             Data =
             {
-                new List<string>() { "1", "10", "1", "20", "30" }
+                new List<string>() {"1", "10", "1", "20", "30"}
             }
         });
         groups[1].Should().BeEquivalentTo(new ParserUtils.DataFileGroup
@@ -1024,13 +1023,13 @@ public class ParserTests
             Name = "Def",
             Fields =
             {
-                { "Kill_drop", "75" },
-                { "Mob", "102" },
-                { "Type", "kill" }
+                {"Kill_drop", "75"},
+                {"Mob", "102"},
+                {"Type", "kill"}
             },
             Data =
             {
-                new List<string>() { "1", "11", "2", "20", "30" }
+                new List<string>() {"1", "11", "2", "20", "30"}
             }
         });
         mobDrops.Should().HaveCount(2);
@@ -1039,7 +1038,7 @@ public class ParserTests
         {
             MonsterProtoId = 101,
             MinKillCount = 75,
-            Probabilities = new List<uint>() { 20 },
+            Probabilities = new List<uint>() {20},
             Drops = new List<MonsterItemGroup.Drop>
             {
                 new()
@@ -1055,7 +1054,7 @@ public class ParserTests
         {
             MonsterProtoId = 102,
             MinKillCount = 75,
-            Probabilities = new List<uint>() { 20 },
+            Probabilities = new List<uint>() {20},
             Drops = new List<MonsterItemGroup.Drop>
             {
                 new()
@@ -1067,7 +1066,7 @@ public class ParserTests
             }
         });
     }
-    
+
     [Fact]
     public async Task Drop_MonsterItem_MultipleDrop_SingleGroup()
     {
@@ -1087,21 +1086,21 @@ public class ParserTests
         var groups = await ParserUtils.ParseFileGroups(input);
 
         var mobDrops = groups.Select(x => ParserUtils.ParseMobGroup(x, itemManager)).ToList();
-        
+
         groups.Should().HaveCount(1);
         groups[0].Should().BeEquivalentTo(new ParserUtils.DataFileGroup
         {
             Name = "Abc",
             Fields =
             {
-                { "Kill_drop", "75" },
-                { "Mob", "101" },
-                { "Type", "kill" }
+                {"Kill_drop", "75"},
+                {"Mob", "101"},
+                {"Type", "kill"}
             },
             Data =
             {
-                new List<string>() { "1", "10", "1", "20", "30" },
-                new List<string>() { "2", "11", "2", "25", "35" }
+                new List<string>() {"1", "10", "1", "20", "30"},
+                new List<string>() {"2", "11", "2", "25", "35"}
             }
         });
         mobDrops.Should().HaveCount(1);
@@ -1110,7 +1109,7 @@ public class ParserTests
         {
             MonsterProtoId = 101,
             MinKillCount = 75,
-            Probabilities = new List<uint>() { 20, 25 },
+            Probabilities = new List<uint>() {20, 25},
             Drops = new List<MonsterItemGroup.Drop>
             {
                 new()
@@ -1128,7 +1127,7 @@ public class ParserTests
             }
         });
     }
-    
+
     [Fact]
     public async Task Drop_MonsterItem_MultipleDrop_MultipleGroup()
     {
@@ -1156,21 +1155,21 @@ public class ParserTests
         var groups = await ParserUtils.ParseFileGroups(input);
 
         var mobDrops = groups.Select(x => ParserUtils.ParseMobGroup(x, itemManager)).ToList();
-        
+
         groups.Should().HaveCount(2);
         groups[0].Should().BeEquivalentTo(new ParserUtils.DataFileGroup
         {
             Name = "Abc",
             Fields =
             {
-                { "Kill_drop", "75" },
-                { "Mob", "101" },
-                { "Type", "kill" }
+                {"Kill_drop", "75"},
+                {"Mob", "101"},
+                {"Type", "kill"}
             },
             Data =
             {
-                new List<string>() { "1", "10", "1", "20", "30" },
-                new List<string>() { "2", "11", "2", "25", "35" }
+                new List<string>() {"1", "10", "1", "20", "30"},
+                new List<string>() {"2", "11", "2", "25", "35"}
             }
         });
         groups[1].Should().BeEquivalentTo(new ParserUtils.DataFileGroup
@@ -1178,14 +1177,14 @@ public class ParserTests
             Name = "Def",
             Fields =
             {
-                { "Kill_drop", "75" },
-                { "Mob", "102" },
-                { "Type", "kill" }
+                {"Kill_drop", "75"},
+                {"Mob", "102"},
+                {"Type", "kill"}
             },
             Data =
             {
-                new List<string>() { "1", "11", "2", "20", "30" },
-                new List<string>() { "2", "11", "2", "25", "35" }
+                new List<string>() {"1", "11", "2", "20", "30"},
+                new List<string>() {"2", "11", "2", "25", "35"}
             }
         });
         mobDrops.Should().HaveCount(2);
@@ -1194,7 +1193,7 @@ public class ParserTests
         {
             MonsterProtoId = 101,
             MinKillCount = 75,
-            Probabilities = new List<uint>() { 20, 25 },
+            Probabilities = new List<uint>() {20, 25},
             Drops = new List<MonsterItemGroup.Drop>
             {
                 new()
@@ -1216,7 +1215,7 @@ public class ParserTests
         {
             MonsterProtoId = 102,
             MinKillCount = 75,
-            Probabilities = new List<uint>() { 20, 25 },
+            Probabilities = new List<uint>() {20, 25},
             Drops = new List<MonsterItemGroup.Drop>
             {
                 new()
@@ -1243,23 +1242,23 @@ public class ParserTests
             Name = "Abc",
             Fields =
             {
-                { "Mob", "101" },
-                { "Type", "Kill" },
-                { "Kill_drop", "0" }
+                {"Mob", "101"},
+                {"Type", "Kill"},
+                {"Kill_drop", "0"}
             },
             Data =
             {
-                new List<string>() { "1", "10", "1", "0.09" },
-                new List<string>() { "2", "11", "2", "0.05" }
+                new List<string>() {"1", "10", "1", "0.09"},
+                new List<string>() {"2", "11", "2", "0.05"}
             }
         };
         var itemManager = Substitute.For<IItemManager>();
-        
+
         var result = ParserUtils.ParseMobGroup(input, itemManager);
-        
+
         result.Should().BeNull();
     }
-    
+
     [Fact]
     public async Task MobDropGroup_Kill_NoKillDrop()
     {
@@ -1268,22 +1267,22 @@ public class ParserTests
             Name = "Abc",
             Fields =
             {
-                { "Mob", "101" },
-                { "Type", "Kill" },
+                {"Mob", "101"},
+                {"Type", "Kill"},
             },
             Data =
             {
-                new List<string>() { "1", "10", "1", "0.09" },
-                new List<string>() { "2", "11", "2", "0.05" }
+                new List<string>() {"1", "10", "1", "0.09"},
+                new List<string>() {"2", "11", "2", "0.05"}
             }
         };
         var itemManager = Substitute.For<IItemManager>();
-        
+
         var result = ParserUtils.ParseMobGroup(input, itemManager);
-        
+
         result.Should().BeNull();
     }
-    
+
     [Fact]
     public async Task MobDropGroup_Kill_NoMob()
     {
@@ -1292,13 +1291,13 @@ public class ParserTests
             Name = "Abc",
             Fields =
             {
-                { "Type", "Kill" },
-                { "Kill_drop", "10" }
+                {"Type", "Kill"},
+                {"Kill_drop", "10"}
             },
             Data =
             {
-                new List<string>() { "1", "10", "1", "0.09" },
-                new List<string>() { "2", "11", "2", "0.05" }
+                new List<string>() {"1", "10", "1", "0.09"},
+                new List<string>() {"2", "11", "2", "0.05"}
             }
         };
         var itemManager = Substitute.For<IItemManager>();
@@ -1307,7 +1306,7 @@ public class ParserTests
 
         Assert.Throws<MissingRequiredFieldException>(action);
     }
-    
+
     [Fact]
     public async Task MobDropGroup_Limit_NoLevel()
     {
@@ -1316,13 +1315,13 @@ public class ParserTests
             Name = "Abc",
             Fields =
             {
-                { "Mob", "101" },
-                { "Type", "Limit" },
+                {"Mob", "101"},
+                {"Type", "Limit"},
             },
             Data =
             {
-                new List<string>() { "1", "10", "1", "0.09" },
-                new List<string>() { "2", "11", "2", "0.05" }
+                new List<string>() {"1", "10", "1", "0.09"},
+                new List<string>() {"2", "11", "2", "0.05"}
             }
         };
         var itemManager = Substitute.For<IItemManager>();
@@ -1331,7 +1330,7 @@ public class ParserTests
 
         Assert.Throws<MissingRequiredFieldException>(action);
     }
-    
+
     [Fact]
     public async Task MobDropGroup_NoType()
     {
@@ -1340,13 +1339,13 @@ public class ParserTests
             Name = "Abc",
             Fields =
             {
-                { "Mob", "101" },
-                { "Kill_drop", "10" }
+                {"Mob", "101"},
+                {"Kill_drop", "10"}
             },
             Data =
             {
-                new List<string>() { "1", "10", "1", "0.09" },
-                new List<string>() { "2", "11", "2", "0.05" }
+                new List<string>() {"1", "10", "1", "0.09"},
+                new List<string>() {"2", "11", "2", "0.05"}
             }
         };
         var itemManager = Substitute.For<IItemManager>();
@@ -1355,7 +1354,7 @@ public class ParserTests
 
         Assert.Throws<MissingRequiredFieldException>(action);
     }
-    
+
     [Fact]
     public async Task CommonDrop_SingleLine_SingleDrop()
     {

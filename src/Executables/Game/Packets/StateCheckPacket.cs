@@ -2,8 +2,7 @@
 
 namespace QuantumCore.Game.Packets;
 
-[Packet(0xCE, EDirection.Incoming)]
-[PacketGenerator]
-public partial class StateCheckPacket
+[ClientToServerPacket(0xCE)]
+public readonly ref partial struct StateCheckPacket
 {
 }

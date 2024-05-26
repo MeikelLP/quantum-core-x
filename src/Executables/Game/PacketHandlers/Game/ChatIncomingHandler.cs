@@ -1,12 +1,11 @@
 ﻿using Microsoft.Extensions.Logging;
 using QuantumCore.API;
-using QuantumCore.API.PluginTypes;
-using QuantumCore.Game.Commands;
 using QuantumCore.Game.Packets;
 
 namespace QuantumCore.Game.PacketHandlers.Game;
 
-public class ChatIncomingHandler : IGamePacketHandler<ChatIncoming>
+[PacketHandler(typeof(ChatIncoming))]
+public class ChatIncomingHandler
 {
     private readonly ICommandManager _commandManager;
     private readonly IChatManager _chatManager;
@@ -20,7 +19,7 @@ public class ChatIncomingHandler : IGamePacketHandler<ChatIncoming>
         _logger = logger;
     }
 
-    public async Task ExecuteAsync(GamePacketContext<ChatIncoming> ctx, CancellationToken token = default)
+    public void Execute(GamePacketContext ctx, ChatIncoming packet)
     {
         if (ctx.Connection.Player is null)
         {
@@ -28,24 +27,25 @@ public class ChatIncomingHandler : IGamePacketHandler<ChatIncoming>
             ctx.Connection.Close();
             return;
         }
-        if (ctx.Packet.MessageType == ChatMessageTypes.Normal)
+
+        if (packet.MessageType == ChatMessageTypes.Normal)
         {
-            if (ctx.Packet.Message.StartsWith('/'))
+            if (packet.Message.StartsWith('/'))
             {
-                await _commandManager.Handle(ctx.Connection, ctx.Packet.Message);
+                await _commandManager.Handle(ctx.Connection, packet.Message);
             }
             else
             {
-                var message = ctx.Connection.Player.Name + ": " + ctx.Packet.Message;
+                var message = ctx.Connection.Player.Name + ": " + packet.Message;
 
                 _chatManager.Talk(ctx.Connection.Player, message);
             }
         }
 
-        if (ctx.Packet.MessageType == ChatMessageTypes.Shout)
+        if (packet.MessageType == ChatMessageTypes.Shout)
         {
             // todo check 15 seconds cooldown
-            var message = ctx.Connection.Player.Name + ": " + ctx.Packet.Message;
+            var message = ctx.Connection.Player.Name + ": " + packet.Message;
 
             await _chatManager.Shout(message);
         }

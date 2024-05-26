@@ -1,5 +1,3 @@
-using QuantumCore.API;
-using QuantumCore.API.PluginTypes;
 using QuantumCore.Auth.Cache;
 using QuantumCore.Auth.Packets;
 using QuantumCore.Caching;
@@ -13,14 +11,15 @@ public class LoginRequestHandler : IAuthPacketHandler<LoginRequest>
     private readonly ILogger<LoginRequestHandler> _logger;
     private readonly ICacheManager _cacheManager;
 
-    public LoginRequestHandler(IAccountRepository accountRepository, ILogger<LoginRequestHandler> logger, ICacheManager cacheManager)
+    public LoginRequestHandler(IAccountRepository accountRepository, ILogger<LoginRequestHandler> logger,
+        ICacheManager cacheManager)
     {
         _accountRepository = accountRepository;
         _logger = logger;
         _cacheManager = cacheManager;
     }
 
-    public async Task ExecuteAsync(AuthPacketContext<LoginRequest> ctx, CancellationToken token = default)
+    public async ValueTask ExecuteAsync(AuthPacketContext<LoginRequest> ctx, CancellationToken token = default)
     {
         var account = await _accountRepository.FindByNameAsync(ctx.Packet.Username);
         // Check if account was found
@@ -59,7 +58,8 @@ public class LoginRequestHandler : IAuthPacketHandler<LoginRequest>
         }
         catch (Exception e)
         {
-            _logger.LogWarning("Failed to verify password for account {Username}: {Message}", ctx.Packet.Username, e.Message);
+            _logger.LogWarning("Failed to verify password for account {Username}: {Message}", ctx.Packet.Username,
+                e.Message);
             status = "WRONGPWD";
         }
 

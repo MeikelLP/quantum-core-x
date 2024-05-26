@@ -1,11 +1,10 @@
 ﻿using Microsoft.Extensions.Logging;
-using QuantumCore.API;
-using QuantumCore.API.PluginTypes;
 using QuantumCore.Game.Packets;
 
 namespace QuantumCore.Game.PacketHandlers.Game;
 
-public class AttackHandler : IGamePacketHandler<Attack>
+[PacketHandler(typeof(Attack))]
+public class AttackHandler
 {
     private readonly ILogger<AttackHandler> _logger;
 
@@ -14,25 +13,25 @@ public class AttackHandler : IGamePacketHandler<Attack>
         _logger = logger;
     }
 
-    public Task ExecuteAsync(GamePacketContext<Attack> ctx, CancellationToken token = default)
+    public void Execute(GamePacketContext ctx, Attack packet)
     {
         var attacker = ctx.Connection.Player;
         if (attacker == null)
         {
             _logger.LogWarning("Attack without having a player instance");
             ctx.Connection.Close();
-            return Task.CompletedTask;
+            return;
         }
 
-        var entity = attacker.Map?.GetEntity(ctx.Packet.Vid);
+        var entity = attacker.Map?.GetEntity(packet.Vid);
         if (entity == null)
         {
-            return Task.CompletedTask;
+            return;
         }
 
-        _logger.LogDebug("Attack from {Attacker} with type {AttackType} target {TargetId}", attacker.Name, ctx.Packet.AttackType, ctx.Packet.Vid);
+        _logger.LogDebug("Attack from {Attacker} with type {AttackType} target {TargetId}", attacker.Name,
+            packet.AttackType, packet.Vid);
 
         attacker.Attack(entity, 0);
-        return Task.CompletedTask;
     }
 }
