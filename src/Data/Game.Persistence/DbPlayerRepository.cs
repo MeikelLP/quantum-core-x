@@ -54,6 +54,7 @@ public class DbPlayerRepository : IDbPlayerRepository
             HairPart = player.HairPart,
             GivenStatusPoints = player.GivenStatusPoints,
             AvailableStatusPoints = player.AvailableStatusPoints,
+            AvailableSkillPoints = player.AvailableSkillPoints,
             Empire = player.Empire,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
@@ -101,6 +102,7 @@ public class DbPlayerRepository : IDbPlayerRepository
         entity.Name = data.Name;
         entity.GivenStatusPoints = data.GivenStatusPoints;
         entity.AvailableStatusPoints = data.AvailableStatusPoints;
+        entity.AvailableSkillPoints = data.AvailableSkillPoints;
 
         await _db.SaveChangesAsync();
     }

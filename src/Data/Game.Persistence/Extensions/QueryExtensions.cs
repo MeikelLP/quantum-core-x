@@ -31,6 +31,7 @@ public static class QueryExtensions
             HairPart = x.HairPart,
             GivenStatusPoints = x.GivenStatusPoints,
             AvailableStatusPoints = x.AvailableStatusPoints,
+            AvailableSkillPoints = x.AvailableSkillPoints,
             Empire = x.Empire
         });
     }

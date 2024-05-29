@@ -1,6 +1,7 @@
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Net;
+using System.Reflection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using QuantumCore.API;
@@ -110,7 +111,7 @@ namespace QuantumCore.Game
             await World.Load();
 
             // Register all default commands
-            _commandManager.Register("QuantumCore.Game.Commands");
+            _commandManager.Register("QuantumCore.Game.Commands", Assembly.GetExecutingAssembly());
 
             // Put all new connections into login phase
             RegisterNewConnectionListener(connection =>
