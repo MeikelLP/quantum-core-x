@@ -3,9 +3,7 @@
 public interface IPlayerSkills
 {
     Task LoadAsync();
-    Task SaveAsync();
-    
-    IPlayerSkill? this[uint skillId] { get; set; }
+    Task PersistAsync();
     
     void SetSkillGroup(byte skillGroup);
     void ClearSkills();
@@ -14,4 +12,5 @@ public interface IPlayerSkills
     void SetLevel(uint skillId, byte level);
     void SkillUp(uint skillId);
     bool CanUse(uint skillId);
+    void SendAsync();
 }

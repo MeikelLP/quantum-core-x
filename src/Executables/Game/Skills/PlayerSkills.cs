@@ -1,24 +1,36 @@
 ﻿using System.Collections.Concurrent;
 using Microsoft.Extensions.Logging;
+using QuantumCore.API;
 using QuantumCore.API.Game;
 using QuantumCore.API.Game.Skills;
 using QuantumCore.API.Game.Types;
-using QuantumCore.Game.Packets.Skills;
+using QuantumCore.Game.Persistence;
 using QuantumCore.Game.World.Entities;
+using QuantumCore.Game.Persistence.Entities;
 
 namespace QuantumCore.Game.Skills;
 
 public class PlayerSkills : IPlayerSkills
 {
-    private readonly ConcurrentDictionary<uint, IPlayerSkill> _skills = new();
+    private readonly ConcurrentDictionary<uint, PlayerSkill> _skills = new(); //todo: probably no need for concurrent variant
     private readonly ILogger<PlayerSkills> _logger;
     private readonly PlayerEntity _player;
-    
+    private readonly IDbPlayerSkillsRepository _repository;
+    private readonly ISkillManager _skillManager;
+
     private const int SkillMaxNum = 255;
     private const int SkillMaxLevel = 40;
     private const int SkillCount = 6;
     private const int JobMaxNum = 4;
     private const int SkillGroupMaxNum = 2;
+    
+    private static readonly uint[,,] SkillList = new uint[JobMaxNum, SkillGroupMaxNum, SkillCount]
+    {
+        { { 1,  2,  3,  4,  5,  6  }, { 16,  17,  18,  19,  20,  21  } }, // Warrior
+        { { 31, 32, 33, 34, 35, 36 }, { 46,  47,  48,  49,  50,  51  } }, // Ninja
+        { { 61, 62, 63, 64, 65, 66 }, { 76,  77,  78,  79,  80,  81  } }, // Sura
+        { { 91, 92, 93, 94, 95, 96 }, { 106, 107, 108, 109, 110, 111 } }  // Shaman
+    };
 
     private static readonly uint[] PassiveSkillIds =
     [
@@ -39,26 +51,50 @@ public class PlayerSkills : IPlayerSkills
         (uint) ESkillIndexes.PenetrationResistance
     ];
 
-    public PlayerSkills(ILogger<PlayerSkills> logger, PlayerEntity player)
+    public PlayerSkills(ILogger<PlayerSkills> logger, PlayerEntity player, IDbPlayerSkillsRepository repository, ISkillManager skillManager)
     {
         _logger = logger;
         _player = player;
+        _repository = repository;
+        _skillManager = skillManager;
     }
 
-    public Task LoadAsync()
+    public async Task LoadAsync()
     {
-        return Task.CompletedTask;
+        if (_player.Player.SkillGroup > 0)
+        {
+            AssignDefaultActiveSkills();
+        }
+
+        AssignDefaultPassiveSkills();
+        
+        var skills = await _repository.GetPlayerSkillsAsync(_player.Player.Id);
+        
+        foreach (var skill in skills)
+        {
+            _skills[skill.SkillId] = skill as Persistence.Entities.PlayerSkill;
+        }
+        
+        // SendSkillLevelsPacket();
     }
 
-    public Task SaveAsync()
+    public async Task PersistAsync()
     {
-        throw new NotImplementedException();
-    }
-
-    public IPlayerSkill? this[uint skillId]
-    {
-        get => _skills.TryGetValue(skillId, out var skill) ? skill : null;
-        set => _skills[skillId] = value;
+        foreach (var (id, skill) in _skills)
+        {
+            // todo: remove this statement below
+            if (id > 6) continue;
+            await _repository.SavePlayerSkillAsync(new Persistence.Entities.PlayerSkill
+            {
+                Level = skill.Level,
+                MasterType = skill.MasterType,
+                NextReadTime = skill.NextReadTime,
+                PlayerId = _player.Player.Id,
+                SkillId = id,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            });
+        }
     }
 
     public void SetSkillGroup(byte skillGroup)
@@ -70,7 +106,9 @@ public class PlayerSkills : IPlayerSkills
         
         _player.Player.SkillGroup = skillGroup;
         
-        _player.Connection.Send(new ChangeSkillGroup
+        AssignDefaultActiveSkills();
+        
+        _player.Connection.Send(new QuantumCore.Game.Packets.Skills.ChangeSkillGroup
         {
             SkillGroup = skillGroup
         });
@@ -106,6 +144,11 @@ public class PlayerSkills : IPlayerSkills
         
         _skills.Clear();
         
+        if (_player.Player.SkillGroup > 0)
+        {
+            AssignDefaultActiveSkills();
+        }
+        
         foreach (var subSkill in subSkills)
         {
             _skills[subSkill.Key] = subSkill.Value;
@@ -117,15 +160,7 @@ public class PlayerSkills : IPlayerSkills
     private void ResetSubSkills()
     {
         // Assign default values to passive skills
-        foreach (var skillId in PassiveSkillIds)
-        {
-            _skills[skillId] = new PlayerSkill
-            {
-                Level = 0,
-                MasterType = ESkillMasterType.Normal,
-                NextReadTime = 0
-            };
-        }
+        AssignDefaultPassiveSkills();
 
         SendSkillLevelsPacket();
     }
@@ -148,7 +183,7 @@ public class PlayerSkills : IPlayerSkills
         if (level > 17)
             level = 17;
         
-        _player.SetPoint(EPoints.Skill, _player.GetPoint(EPoints.Skill) + level);
+        _player.AddPoint(EPoints.Skill, level);
 
         SendSkillLevelsPacket();
     }
@@ -186,8 +221,11 @@ public class PlayerSkills : IPlayerSkills
             return;
         }
         
+        SetLevel(skillId, (byte) (GetSkillLevel(skillId) + 1));
         
+        //todo: persist data
         
+        SendSkillLevelsPacket();
     }
 
     private bool IsLearnableSkill(uint skillId)
@@ -225,14 +263,6 @@ public class PlayerSkills : IPlayerSkills
 
         if (skillGroup > 0) // if skill group was chosen
         {
-            var SkillList = new uint[JobMaxNum, SkillGroupMaxNum, SkillCount]
-            {
-                { { 1,  2,  3,  4,  5,  6 },  { 16,  17,  18,  19,  20,  21 } }, // Warrior
-                { { 31, 32, 33, 34, 35, 36 }, { 46,  47,  48,  49,  50,  51 } }, // Ninja
-                { { 61, 62, 63, 64, 65, 66 }, { 76,  77,  78,  79,  80,  81 } }, // Sura
-                { { 91, 92, 93, 94, 95, 96 }, { 106, 107, 108, 109, 110, 111 } } // Shaman
-            };
-            
             for (var i = 0; i < SkillCount; i++)
             {
                 if (SkillList[_player.Player.PlayerClass, skillGroup - 1, i] == skillId)
@@ -270,16 +300,73 @@ public class PlayerSkills : IPlayerSkills
         return false;
     }
 
+    public void SendAsync()
+    {
+        SendSkillLevelsPacket();
+    }
+
     private void SendSkillLevelsPacket()
     {
-        _player.Connection.Send(new SkillLevels
+        var levels = new QuantumCore.Game.Packets.Skills.SkillLevels();
+        for (var i = 0; i < SkillMaxNum; i++)
         {
-            Skills = _skills.Values.Select(sk => new PlayerSkill
+            levels.Skills[i] = new QuantumCore.Game.Packets.Skills.PlayerSkill
             {
-                Level = sk.Level,
-                MasterType = sk.MasterType,
-                NextReadTime = sk.NextReadTime
-            }).ToArray()
-        });
+                Level = 0,
+                MasterType = ESkillMasterType.Normal,
+                NextReadTime = 0
+            };
+        }
+
+        for (var i = 0; i < _skills.Count; i++)
+        {
+            var skill = _skills.ElementAt(i);
+            
+            levels.Skills[skill.Key] = new  QuantumCore.Game.Packets.Skills.PlayerSkill
+            {
+                Level = skill.Value.Level,
+                MasterType = skill.Value.MasterType,
+                NextReadTime = skill.Value.NextReadTime
+            };
+        }
+        
+        _player.Connection.Send(levels);
+    }
+    
+    private void AssignDefaultActiveSkills()
+    {
+        for (var i = 0; i < SkillCount; i++)
+        {
+            var skillId = SkillList[_player.Player.PlayerClass, _player.Player.SkillGroup - 1, i];
+            if (skillId == 0) continue;
+            
+            _skills[skillId] = new PlayerSkill
+            {
+                Level = 0,
+                MasterType = ESkillMasterType.Normal,
+                NextReadTime = 0,
+                SkillId = skillId,
+                PlayerId = _player.Player.Id,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
+        }
+    }
+    
+    private void AssignDefaultPassiveSkills()
+    {
+        foreach (var skillId in PassiveSkillIds)
+        {
+            _skills[skillId] = new PlayerSkill
+            {
+                Level = 0,
+                MasterType = ESkillMasterType.Normal,
+                NextReadTime = 0,
+                SkillId = skillId,
+                PlayerId = _player.Player.Id,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
+        }
     }
 }

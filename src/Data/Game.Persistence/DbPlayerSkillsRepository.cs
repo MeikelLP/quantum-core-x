@@ -1,0 +1,65 @@
+﻿using Microsoft.EntityFrameworkCore;
+using QuantumCore.API.Game.Skills;
+using QuantumCore.Game.Persistence.Entities;
+using QuantumCore.Game.Persistence.Extensions;
+
+namespace QuantumCore.Game.Persistence;
+
+public class DbPlayerSkillsRepository : IDbPlayerSkillsRepository
+{
+    private readonly GameDbContext _db;
+    
+    public DbPlayerSkillsRepository(GameDbContext db)
+    {
+        _db = db;
+    }
+    
+    public async Task<IPlayerSkill?> GetPlayerSkillAsync(uint playerId, uint skillId)
+    {
+        return await _db.PlayerSkills
+            .AsNoTracking()
+            .Where(x => x.PlayerId == playerId && x.SkillId == skillId)
+            .SelectPlayerSkill()
+            .FirstOrDefaultAsync();
+    }
+
+    public async Task<ICollection<IPlayerSkill>> GetPlayerSkillsAsync(uint playerId)
+    {
+        return await _db.PlayerSkills
+            .AsNoTracking()
+            .Where(x => x.PlayerId == playerId)
+            .SelectPlayerSkill()
+            .ToArrayAsync();
+    }
+
+    public async Task SavePlayerSkillAsync(PlayerSkill skill)
+    {
+        var existingSkill = await _db.PlayerSkills
+            .Where(x => x.PlayerId == skill.PlayerId && x.SkillId == skill.SkillId)
+            .FirstOrDefaultAsync();
+        
+        if (existingSkill != null)
+        {
+            existingSkill.Level = skill.Level;
+            existingSkill.MasterType = skill.MasterType;
+            existingSkill.NextReadTime = skill.NextReadTime;
+            existingSkill.UpdatedAt = DateTime.UtcNow;
+            _db.PlayerSkills.Update(existingSkill);
+            await _db.SaveChangesAsync();
+            return;
+        }
+
+        var entity = new PlayerSkill
+        {
+            PlayerId = skill.PlayerId,
+            SkillId = skill.SkillId,
+            MasterType = skill.MasterType,
+            Level = skill.Level,
+            NextReadTime = skill.NextReadTime,
+            CreatedAt = DateTime.UtcNow,
+            UpdatedAt = DateTime.UtcNow
+        };
+        _db.PlayerSkills.Add(entity);
+        await _db.SaveChangesAsync();
+    }
+}

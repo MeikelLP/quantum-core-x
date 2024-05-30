@@ -26,8 +26,10 @@ public static class ServiceExtensions
             };
         });
         services.AddScoped<IDbPlayerRepository, DbPlayerRepository>();
+        services.AddScoped<IDbPlayerSkillsRepository, DbPlayerSkillsRepository>();
         services.AddScoped<ICommandPermissionRepository, CommandPermissionRepository>();
         services.AddScoped<IItemRepository, ItemRepository>();
+        services.AddScoped<IDbSkillProtoRepository, DbSkillProtoRepository>();
 
         return services;
     }

@@ -132,7 +132,9 @@ namespace QuantumCore.Game.World.Entities
             PositionX = player.PositionX;
             PositionY = player.PositionY;
             QuickSlotBar = new QuickSlotBar(_cacheManager, _logger, this);
-            Skills = new PlayerSkills(_scope.ServiceProvider.GetRequiredService<ILogger<PlayerSkills>>(), this);
+            Skills = new PlayerSkills(_scope.ServiceProvider.GetRequiredService<ILogger<PlayerSkills>>(), this,
+                _scope.ServiceProvider.GetRequiredService<IDbPlayerSkillsRepository>(),
+                _scope.ServiceProvider.GetRequiredService<ISkillManager>());
             
             MovementSpeed = 150;
             EntityClass = player.PlayerClass;
@@ -389,7 +391,7 @@ namespace QuantumCore.Game.World.Entities
                 if (entity is not IPlayerEntity other) continue;
                 SendCharacterAdditional(other.Connection);
             }
-
+            
             GiveStatusPoints();
             SendPoints();
         }
@@ -587,6 +589,9 @@ namespace QuantumCore.Game.World.Entities
                 case EPoints.StatusPoints:
                     Player.AvailableStatusPoints += (uint) value;
                     break;
+                case EPoints.Skill:
+                    Player.AvailableSkillPoints += (uint) value;
+                    break;
                 case EPoints.PlayTime:
                     Player.PlayTime += (uint) value;
                     break;
@@ -720,6 +725,8 @@ namespace QuantumCore.Game.World.Entities
             Player.PositionX = PositionX;
             Player.PositionY = PositionY;
 
+            await Skills.PersistAsync();
+            
             var playerManager = _scope.ServiceProvider.GetRequiredService<IPlayerManager>();
             await playerManager.SetPlayerAsync(Player);
         }

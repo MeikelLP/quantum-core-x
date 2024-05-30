@@ -1,0 +1,36 @@
+﻿namespace QuantumCore.API.Game.Skills;
+
+public enum ESkillAffectFlag
+{
+    Ymir,
+    Invisibility,
+    Spawn,
+    Poison,
+    Slow,
+    Stun,
+    DungeonReady,
+    ForceVisible,
+    BuildingConstructionSmall,
+    BuildingConstructionLarge,
+    BuildingUpgrade,
+    MovementSpeedPotion,
+    AttackSpeedPotion,
+    FishMide,
+    Jeongwihon,
+    Geomgyeong,
+    Cheongeun,
+    Gyeonggong,
+    Eunhyung,
+    Gwigum,
+    Terror,
+    Jumagap,
+    Hosin,
+    Boho,
+    Kwaesok,
+    Manashield,
+    Muyeong,
+    ReviveInvisible,
+    Fire,
+    Gicheon,
+    Jeungryeok
+}

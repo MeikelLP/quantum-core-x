@@ -24,6 +24,7 @@
 
     <ItemGroup>
         <Folder Include="Migrations\"/>
+        <Folder Include="Migrations\Mysql\" />
     </ItemGroup>
 
 </Project>
