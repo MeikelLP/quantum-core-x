@@ -4,8 +4,6 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-#pragma warning disable CA1814 // Prefer jagged arrays over multidimensional
-
 namespace QuantumCore.Game.Persistence.Migrations.Mysql
 {
     /// <inheritdoc />
@@ -109,81 +107,18 @@ namespace QuantumCore.Game.Persistence.Migrations.Mysql
                 name: "PlayerSkills",
                 columns: table => new
                 {
-                    PlayerId = table.Column<uint>(type: "int unsigned", nullable: false),
-                    SkillId = table.Column<uint>(type: "int unsigned", nullable: false),
+                    Id = table.Column<Guid>(type: "char(36)", nullable: false, collation: "ascii_general_ci"),
                     CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false, defaultValueSql: "(CAST(CURRENT_TIMESTAMP AS DATETIME(6)))"),
                     UpdatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false, defaultValueSql: "(CAST(CURRENT_TIMESTAMP AS DATETIME(6)))"),
+                    PlayerId = table.Column<uint>(type: "int unsigned", nullable: false),
+                    SkillId = table.Column<uint>(type: "int unsigned", nullable: false),
                     MasterType = table.Column<byte>(type: "tinyint unsigned", nullable: false),
                     Level = table.Column<byte>(type: "tinyint unsigned", nullable: false),
                     NextReadTime = table.Column<int>(type: "int", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_PlayerSkills", x => new { x.PlayerId, x.SkillId });
-                })
-                .Annotation("MySql:CharSet", "utf8mb4");
-
-            migrationBuilder.CreateTable(
-                name: "SkillProtos",
-                columns: table => new
-                {
-                    Id = table.Column<uint>(type: "int unsigned", nullable: false)
-                        .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
-                    Name = table.Column<string>(type: "varchar(32)", maxLength: 32, nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    Type = table.Column<short>(type: "smallint", nullable: false),
-                    LevelStep = table.Column<short>(type: "smallint", nullable: false),
-                    MaxLevel = table.Column<short>(type: "smallint", nullable: false),
-                    LevelLimit = table.Column<short>(type: "smallint", nullable: false),
-                    PointOn = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    PointPoly = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    SPCostPoly = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    DurationPoly = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    DurationSPCostPoly = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    CooldownPoly = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    MasterBonusPoly = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    AttackGradePoly = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    Flags = table.Column<string>(type: "longtext", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    AffectFlags = table.Column<string>(type: "longtext", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    PointOn2 = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    PointPoly2 = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    DurationPoly2 = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    AffectFlags2 = table.Column<string>(type: "longtext", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    PointOn3 = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    PointPoly3 = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    DurationPoly3 = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    GrandMasterAddSPCostPoly = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    PrerequisiteSkillVnum = table.Column<int>(type: "int", nullable: false),
-                    PrerequisiteSkillLevel = table.Column<int>(type: "int", nullable: false),
-                    SkillType = table.Column<string>(type: "longtext", nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    MaxHit = table.Column<short>(type: "smallint", nullable: false),
-                    SplashAroundDamageAdjustPoly = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
-                        .Annotation("MySql:CharSet", "utf8mb4"),
-                    TargetRange = table.Column<int>(type: "int", nullable: false),
-                    SplashRange = table.Column<uint>(type: "int unsigned", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_SkillProtos", x => x.Id);
+                    table.PrimaryKey("PK_PlayerSkills", x => x.Id);
                 })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -269,18 +204,6 @@ namespace QuantumCore.Game.Persistence.Migrations.Mysql
                 values: new object[] { 1u, new Guid("e34fd5ab-fb3b-428e-935b-7db5bd08a3e5"), 99u, 0u, 0u, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), (byte)99, (byte)0, 0u, 0u, 2000000000u, 0u, 99999L, (byte)99, (byte)99, (byte)99, 99999L, "Admin", 0ul, (byte)0, 958870, 272788, (byte)0, (byte)99, 0L });
 
             migrationBuilder.InsertData(
-                table: "SkillProtos",
-                columns: new[] { "Id", "AffectFlags", "AffectFlags2", "AttackGradePoly", "CooldownPoly", "DurationPoly", "DurationPoly2", "DurationPoly3", "DurationSPCostPoly", "Flags", "GrandMasterAddSPCostPoly", "LevelLimit", "LevelStep", "MasterBonusPoly", "MaxHit", "MaxLevel", "Name", "PointOn", "PointOn2", "PointOn3", "PointPoly", "PointPoly2", "PointPoly3", "PrerequisiteSkillLevel", "PrerequisiteSkillVnum", "SPCostPoly", "SkillType", "SplashAroundDamageAdjustPoly", "SplashRange", "TargetRange", "Type" },
-                values: new object[,]
-                {
-                    { 1u, "Ymir", "Ymir", "", "12", "", "", "", "", "Attack,UseMeleeDamage", "40+100*k", (short)0, (short)1, "-( 1.1*atk + (0.5*atk +  1.5 * str)*k)", (short)5, (short)1, "»ï¿¬Âü", "HP", "None", "", "-( 1.1*atk + (0.5*atk +  1.5 * str)*k)", "", "", 0, 0, "40+100*k", "Melee", "1", 0u, 0, (short)1 },
-                    { 2u, "Ymir", "Ymir", "", "15", "", "", "", "", "Attack,UseMeleeDamage", "50+130*k", (short)0, (short)1, "-(3*atk + (0.8*atk + str*5 + dex*3 +con)*k)", (short)12, (short)1, "ÆÈ¹æÇ³¿ì", "HP", "None", "", "-(3*atk + (0.8*atk + str*5 + dex*3 +con)*k)", "", "", 0, 0, "50+130*k", "Melee", "1", 200u, 0, (short)1 },
-                    { 3u, "Jeongwihon", "Ymir", "", "63+10*k", "60+90*k", "60+90*k", "", "", "SelfOnly", "50+140*k", (short)0, (short)1, "50*k", (short)1, (short)1, "Àü±ÍÈ¥", "ATT_SPEED", "MOV_SPEED", "", "50*k", "20*k", "", 0, 0, "50+140*k", "Normal", "1", 0u, 0, (short)1 },
-                    { 4u, "Geomgyeong", "Ymir", "", "30+10*k", "30+50*k", "", "", "", "SelfOnly", "100+200*k", (short)0, (short)1, "(100 + str + lv * 3)*k", (short)1, (short)1, "°Ë°æ", "ATT_GRADE", "NONE", "", "(100 + str + lv * 3)*k", "", "", 0, 0, "100+200*k", "Normal", "1", 0u, 0, (short)1 },
-                    { 5u, "Ymir", "Ymir", "", "12", "", "3", "", "", "Attack,UseMeleeDamage,Splash,Crush", "60+120*k", (short)0, (short)1, "-(2*atk + (atk + dex*3 + str*7 + con)*k)", (short)4, (short)1, "ÅºÈ¯°Ý", "HP", "MOV_SPEED", "", "-(2*atk + (atk + dex*3 + str*7 + con)*k)", "150", "", 0, 0, "60+120*k", "Melee", "1", 200u, 0, (short)1 }
-                });
-
-            migrationBuilder.InsertData(
                 table: "PermissionUsers",
                 columns: new[] { "GroupId", "PlayerId" },
                 values: new object[] { new Guid("45bff707-1836-42b7-956d-00b9b69e0ee0"), 1u });
@@ -324,9 +247,6 @@ namespace QuantumCore.Game.Persistence.Migrations.Mysql
 
             migrationBuilder.DropTable(
                 name: "PlayerSkills");
-
-            migrationBuilder.DropTable(
-                name: "SkillProtos");
 
             migrationBuilder.DropTable(
                 name: "PermissionGroups");

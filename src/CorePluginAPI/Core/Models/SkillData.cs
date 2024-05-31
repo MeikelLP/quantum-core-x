@@ -26,10 +26,6 @@ public class SkillData
     public required string PointPoly2 { get; set; } = "";
     public required string DurationPoly2 { get; set; } = "";
     public required ICollection<ESkillAffectFlag> AffectFlags2 { get; set; } = new List<ESkillAffectFlag>() { ESkillAffectFlag.Ymir };
-    public required string PointOn3 { get; set; } = "None";
-    public required string PointPoly3 { get; set; } = "";
-    public required string DurationPoly3 { get; set; } = "";
-    public required string GrandMasterAddSPCostPoly { get; set; } = "";
     public required int PrerequisiteSkillVnum { get; set; } = 0;
     public required int PrerequisiteSkillLevel { get; set; } = 0;
     public required ESkillType SkillType { get; set; } = ESkillType.Normal;

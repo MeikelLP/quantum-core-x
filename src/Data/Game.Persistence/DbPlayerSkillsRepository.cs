@@ -14,7 +14,7 @@ public class DbPlayerSkillsRepository : IDbPlayerSkillsRepository
         _db = db;
     }
     
-    public async Task<IPlayerSkill?> GetPlayerSkillAsync(uint playerId, uint skillId)
+    public async Task<Skill?> GetPlayerSkillAsync(uint playerId, uint skillId)
     {
         return await _db.PlayerSkills
             .AsNoTracking()
@@ -23,7 +23,7 @@ public class DbPlayerSkillsRepository : IDbPlayerSkillsRepository
             .FirstOrDefaultAsync();
     }
 
-    public async Task<ICollection<IPlayerSkill>> GetPlayerSkillsAsync(uint playerId)
+    public async Task<ICollection<Skill>> GetPlayerSkillsAsync(uint playerId)
     {
         return await _db.PlayerSkills
             .AsNoTracking()
@@ -32,7 +32,7 @@ public class DbPlayerSkillsRepository : IDbPlayerSkillsRepository
             .ToArrayAsync();
     }
 
-    public async Task SavePlayerSkillAsync(PlayerSkill skill)
+    public async Task SavePlayerSkillAsync(Skill skill)
     {
         var existingSkill = await _db.PlayerSkills
             .Where(x => x.PlayerId == skill.PlayerId && x.SkillId == skill.SkillId)
@@ -51,6 +51,7 @@ public class DbPlayerSkillsRepository : IDbPlayerSkillsRepository
 
         var entity = new PlayerSkill
         {
+            Id = Guid.NewGuid(),
             PlayerId = skill.PlayerId,
             SkillId = skill.SkillId,
             MasterType = skill.MasterType,

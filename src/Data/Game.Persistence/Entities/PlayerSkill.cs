@@ -6,8 +6,9 @@ using QuantumCore.API.Game.Skills;
 
 namespace QuantumCore.Game.Persistence.Entities;
 
-public class PlayerSkill : IPlayerSkill
+public class PlayerSkill
 {
+    public required Guid Id { get; set; } = Guid.NewGuid();
     public required DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public required DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
     
@@ -20,7 +21,7 @@ public class PlayerSkill : IPlayerSkill
     
     public static void Configure(EntityTypeBuilder<PlayerSkill> builder, DatabaseFacade database)
     {
-        builder.HasKey(x => new {x.PlayerId, x.SkillId});
+        builder.HasKey(x => new {x.Id});
         
         if (database.IsSqlite() || database.IsNpgsql())
         {

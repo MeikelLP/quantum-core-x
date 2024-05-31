@@ -12,7 +12,6 @@ public abstract class GameDbContext : DbContext
     public DbSet<PermAuth> Permissions { get; set; } = null!;
     public DbSet<PermGroup> PermissionGroups { get; set; } = null!;
     public DbSet<PermUser> PermissionUsers { get; set; } = null!;
-    public DbSet<SkillProto> SkillProtos { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -23,6 +22,5 @@ public abstract class GameDbContext : DbContext
         PermAuth.Configure(modelBuilder.Entity<PermAuth>(), Database);
         PermGroup.Configure(modelBuilder.Entity<PermGroup>(), Database);
         PermUser.Configure(modelBuilder.Entity<PermUser>(), Database);
-        SkillProto.Configure(modelBuilder.Entity<SkillProto>(), Database);
     }
 }

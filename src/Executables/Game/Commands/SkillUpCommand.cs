@@ -1,5 +1,6 @@
 ﻿using CommandLine;
 using QuantumCore.API.Game;
+using QuantumCore.API.Game.Skills;
 
 namespace QuantumCore.Game.Commands;
 
@@ -11,9 +12,24 @@ public class SkillUpCommand : ICommandHandler<SkillUpCommandOptions>
         var player = context.Player;
         var skill = context.Arguments.SkillId;
 
-        if (!player.Skills.CanUse(skill)) return Task.CompletedTask;
+        if (player.Skills.CanUse(skill))
+        {
+            player.Skills.SkillUp(skill);
+            return Task.CompletedTask;
+        }
 
-        player.Skills.SkillUp(skill);
+        switch (skill)
+        {
+            case (uint) ESkillIndexes.HoseWildAttack:
+            case (uint) ESkillIndexes.HorseCharge:
+            case (uint) ESkillIndexes.HorseEscape:
+            case (uint) ESkillIndexes.HorseWildAttackRange:
+                
+            case (uint) ESkillIndexes.AddHp:
+            case (uint) ESkillIndexes.PenetrationResistance:
+                player.Skills.SkillUp(skill);
+                break;
+        }
 
         return Task.CompletedTask;
     }

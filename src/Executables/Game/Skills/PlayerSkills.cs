@@ -1,18 +1,17 @@
 ﻿using System.Collections.Concurrent;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
-using QuantumCore.API.Game;
 using QuantumCore.API.Game.Skills;
 using QuantumCore.API.Game.Types;
+using QuantumCore.Core.Utils;
 using QuantumCore.Game.Persistence;
 using QuantumCore.Game.World.Entities;
-using QuantumCore.Game.Persistence.Entities;
 
 namespace QuantumCore.Game.Skills;
 
 public class PlayerSkills : IPlayerSkills
 {
-    private readonly ConcurrentDictionary<uint, PlayerSkill> _skills = new(); //todo: probably no need for concurrent variant
+    private readonly ConcurrentDictionary<uint, Skill> _skills = new(); //todo: probably no need for concurrent variant
     private readonly ILogger<PlayerSkills> _logger;
     private readonly PlayerEntity _player;
     private readonly IDbPlayerSkillsRepository _repository;
@@ -72,28 +71,15 @@ public class PlayerSkills : IPlayerSkills
         
         foreach (var skill in skills)
         {
-            _skills[skill.SkillId] = skill as Persistence.Entities.PlayerSkill;
+            _skills[skill.SkillId] = skill ?? throw new InvalidOperationException();
         }
-        
-        // SendSkillLevelsPacket();
     }
 
     public async Task PersistAsync()
     {
-        foreach (var (id, skill) in _skills)
+        foreach (var skill in _skills.Values)
         {
-            // todo: remove this statement below
-            if (id > 6) continue;
-            await _repository.SavePlayerSkillAsync(new Persistence.Entities.PlayerSkill
-            {
-                Level = skill.Level,
-                MasterType = skill.MasterType,
-                NextReadTime = skill.NextReadTime,
-                PlayerId = _player.Player.Id,
-                SkillId = id,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
-            });
+            await _repository.SavePlayerSkillAsync(skill);
         }
     }
 
@@ -208,10 +194,31 @@ public class PlayerSkills : IPlayerSkills
         };
     }
 
-    public void SkillUp(uint skillId)
+    public void SkillUp(uint skillId, ESkillLevelMethod method = ESkillLevelMethod.Point)
     {
         if (skillId >= SkillMaxNum)
         {
+            _logger.LogWarning("Invalid skill id: {SkillId}", skillId);
+            return;
+        }
+        
+        var proto = _skillManager.GetSkill(skillId);
+        if (proto == null)
+        {
+            _logger.LogWarning("Skill not found: {SkillId}", skillId);
+            return;
+        }
+        
+        if (proto.Id >= SkillMaxNum)
+        {
+            _logger.LogWarning("Invalid skill id: {SkillId}", skillId);
+            return;
+        }
+        
+        var skill = _skills.TryGetValue(proto.Id, out var playerSkill) ? playerSkill : null;
+        if (skill == null)
+        {
+            _logger.LogWarning("Skill not found: {SkillId}", skillId);
             return;
         }
 
@@ -220,11 +227,109 @@ public class PlayerSkills : IPlayerSkills
             _player.SendChatMessage("You cannot learn this skill.");
             return;
         }
+
+        if (proto.Type != 0)
+        {
+            switch (skill.MasterType)
+            {
+                case ESkillMasterType.GrandMaster:
+                    if (method != ESkillLevelMethod.Quest) return;
+                    break;
+                case ESkillMasterType.PerfectMaster:
+                    return;
+            }
+        }
         
-        SetLevel(skillId, (byte) (GetSkillLevel(skillId) + 1));
+        switch (method)
+        {
+            case ESkillLevelMethod.Point when skill.MasterType != ESkillMasterType.Normal:
+            case ESkillLevelMethod.Point when proto.Flags.Contains(ESkillFlag.DisableByPointUp):
+            case ESkillLevelMethod.Book when proto.Type != 0 && skill.MasterType != ESkillMasterType.Master:
+                return;
+        }
+
+        if (_player.GetPoint(EPoints.Level) < proto.LevelLimit) return;
+
+        if (proto.PrerequisiteSkillVnum > 0)
+        {
+            if (skill.MasterType == ESkillMasterType.Normal && GetSkillLevel(proto.Id) < proto.PrerequisiteSkillLevel)
+            {
+                _player.SendChatMessage("You need to learn the prerequisite skill first.");
+                return;
+            }
+        }
+
+        if (_player.Player.SkillGroup == 0) return;
         
-        //todo: persist data
+        if (method == ESkillLevelMethod.Point)
+        {
+            EPoints idx; // enum
+
+            switch (proto.Type)
+            {
+                case 0:
+                    idx = EPoints.SubSkill;
+                    break;
+                case 1: // warrior
+                case 2: // ninja
+                case 3: // sura
+                case 4: // shaman
+                    idx = EPoints.Skill;
+                    break;
+                case 5:
+                    idx = EPoints.HorseSkill;
+                    break;
+                default:
+                    _logger.LogWarning("Invalid skill type: {SkillType}", proto.Type);
+                    return;
+            }
+            
+            if ((int) idx == 0) return;
+            
+            if (_player.GetPoint(idx) < 1) return;
+            
+            _player.AddPoint(idx, -1);
+        }
         
+        SetLevel(proto.Id, (byte) (GetSkillLevel(proto.Id) + 1));
+
+        if (proto.Type != 0)
+        {
+            switch (skill.MasterType)
+            {
+                case ESkillMasterType.Normal:
+                    if (GetSkillLevel(proto.Id) >= 17)
+                    {
+                        //todo: check reset scroll quest flag
+                        var random = CoreRandom.GenerateInt32(1, 21 - Math.Min(20, GetSkillLevel(proto.Id)) + 1);
+                        if (random == 1)
+                        {
+                            SetLevel(proto.Id, 20);
+                        }
+                    }
+                    break;
+                case ESkillMasterType.GrandMaster:
+                    if (GetSkillLevel(proto.Id) >= 30)
+                    {
+                        var random = CoreRandom.GenerateInt32(1, 31 - Math.Min(30, GetSkillLevel(proto.Id)) + 1);
+                        if (random == 1)
+                        {
+                            SetLevel(proto.Id, 30);
+                        }
+                    }
+                    break;
+                case ESkillMasterType.PerfectMaster:
+                    if (GetSkillLevel(proto.Id) >= 40)
+                    {
+                        SetLevel(proto.Id, 40);
+                    }
+                    break;
+            }
+        }
+        
+        _logger.LogInformation("Skill up: {SkillId} ({Name}) [{Master}] -> {Level}", proto.Id, proto.Name, skill.MasterType, GetSkillLevel(proto.Id));
+        
+        _player.SendPoints();
         SendSkillLevelsPacket();
     }
 
@@ -340,15 +445,13 @@ public class PlayerSkills : IPlayerSkills
             var skillId = SkillList[_player.Player.PlayerClass, _player.Player.SkillGroup - 1, i];
             if (skillId == 0) continue;
             
-            _skills[skillId] = new PlayerSkill
+            _skills[skillId] = new Skill
             {
                 Level = 0,
                 MasterType = ESkillMasterType.Normal,
                 NextReadTime = 0,
                 SkillId = skillId,
                 PlayerId = _player.Player.Id,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
             };
         }
     }
@@ -357,15 +460,13 @@ public class PlayerSkills : IPlayerSkills
     {
         foreach (var skillId in PassiveSkillIds)
         {
-            _skills[skillId] = new PlayerSkill
+            _skills[skillId] = new Skill
             {
                 Level = 0,
                 MasterType = ESkillMasterType.Normal,
                 NextReadTime = 0,
                 SkillId = skillId,
                 PlayerId = _player.Player.Id,
-                CreatedAt = DateTime.UtcNow,
-                UpdatedAt = DateTime.UtcNow
             };
         }
     }

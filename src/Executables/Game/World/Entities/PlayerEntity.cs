@@ -11,7 +11,6 @@ using QuantumCore.Core.Utils;
 using QuantumCore.Extensions;
 using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Packets;
-using QuantumCore.Game.Packets.Skills;
 using QuantumCore.Game.Persistence;
 using QuantumCore.Game.PlayerUtils;
 using QuantumCore.Game.Skills;
@@ -134,7 +133,8 @@ namespace QuantumCore.Game.World.Entities
             QuickSlotBar = new QuickSlotBar(_cacheManager, _logger, this);
             Skills = new PlayerSkills(_scope.ServiceProvider.GetRequiredService<ILogger<PlayerSkills>>(), this,
                 _scope.ServiceProvider.GetRequiredService<IDbPlayerSkillsRepository>(),
-                _scope.ServiceProvider.GetRequiredService<ISkillManager>());
+                _scope.ServiceProvider.GetRequiredService<ISkillManager>()
+            );
             
             MovementSpeed = 150;
             EntityClass = player.PlayerClass;
@@ -857,6 +857,11 @@ namespace QuantumCore.Game.World.Entities
         {
             _logger.LogTrace("GetPremiumRemainSeconds not implemented yet");
             return 0; // todo: implement premium system
+        }
+
+        public bool IsUsableSkillMotion(int motion)
+        {
+            return true; // todo: implement skill motion system
         }
 
         public bool HasUniqueGroupItemEquipped(uint itemProtoId)

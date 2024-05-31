@@ -1,9 +1,10 @@
-﻿namespace QuantumCore.API.Game;
+﻿namespace QuantumCore.API.Game.Skills;
 
 public enum ESkillIndexes : uint
 {
     Leadership = 121,
     Combo = 122,
+    Fishing = 123,
     Mining = 124,
     
     // Fishing = 123,  todo: confirm this

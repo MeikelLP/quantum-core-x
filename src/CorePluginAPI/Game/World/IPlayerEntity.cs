@@ -57,5 +57,6 @@ namespace QuantumCore.API.Game.World
         bool HasUniqueItemEquipped(uint itemProtoId);
         bool HasUniqueGroupItemEquipped(uint itemProtoId);
         int GetPremiumRemainSeconds(EPremiumTypes type);
+        bool IsUsableSkillMotion(int motion);
     }
 }

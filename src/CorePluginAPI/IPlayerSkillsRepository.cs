@@ -4,6 +4,6 @@ namespace QuantumCore.API;
 
 public interface IPlayerSkillsRepository
 {
-    Task<IPlayerSkill?> GetPlayerSkillAsync(uint playerId, uint skillId);
-    Task<ICollection<IPlayerSkill>> GetPlayerSkillsAsync(uint playerId);
+    Task<Skill?> GetPlayerSkillAsync(uint playerId, uint skillId);
+    Task<ICollection<Skill>> GetPlayerSkillsAsync(uint playerId);
 }

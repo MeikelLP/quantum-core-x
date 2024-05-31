@@ -25,5 +25,6 @@ public enum ESkillFlag
     AttackPoison,
     Toggle,
     DisableByPointUp,
-    CrushLong
+    CrushLong,
+    None
 }
