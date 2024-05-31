@@ -335,19 +335,27 @@ public class PlayerSkills : IPlayerSkills
 
     private bool IsLearnableSkill(uint skillId)
     {
-        //todo: read skill proto information nad get specified skill information
-        
-        if (GetSkillLevel(skillId) >= SkillMaxLevel)
+        var proto = _skillManager.GetSkill(skillId);
+        if (proto == null)
         {
             return false;
         }
         
-        if (_player.Player.SkillGroup == 0)
+        if (GetSkillLevel(skillId) >= SkillMaxLevel) return false;
+
+        if (proto.Type == 0)
         {
-            return false;
+            return GetSkillLevel(skillId) < proto.MaxLevel;
         }
         
-        return true; // todo: temporary
+        if (proto.Type == 5)
+        {
+            return skillId != (int) ESkillIndexes.HorseWildAttackRange || _player.Player.PlayerClass == (int) EPlayerClass.Ninja;
+        }
+        
+        if (_player.Player.SkillGroup == 0) return false;
+        
+        return proto.Type - 1 == _player.Player.PlayerClass;
     }
 
     private int GetSkillLevel(uint skillId)

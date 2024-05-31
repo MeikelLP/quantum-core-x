@@ -1,11 +1,14 @@
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Globalization;
+using System.Text;
 using System.Text.RegularExpressions;
 using EnumsNET;
 using QuantumCore.API;
-using QuantumCore.API.Game.World;
+using QuantumCore.API.Core.Models;
+using QuantumCore.API.Game.Skills;
 using QuantumCore.Core.Utils;
+using QuantumCore.Extensions;
 using QuantumCore.Game.Drops;
 using QuantumCore.Game.Services;
 using QuantumCore.Game.World;
@@ -70,6 +73,68 @@ internal static partial class ParserUtils
         }
 
         return list.ToImmutableArray();
+    }
+    
+    public static async Task<ImmutableArray<SkillData>> GetSkillsAsync(string path, CancellationToken token = default)
+    {
+        var list = new List<SkillData>();
+        
+        await foreach(var line in File.ReadLinesAsync(path, Encoding.GetEncoding("EUC-KR"), token))
+        {
+            // parse line
+            var split = line.Split('\t');
+            
+            var data = new SkillData
+            {
+                Id = uint.Parse(split[0]),
+                Name = split[1],
+                Type = short.Parse(split[2]),
+                LevelStep = short.Parse(split[3]),
+                MaxLevel = short.Parse(split[4]),
+                LevelLimit = short.Parse(split[5]),
+                PointOn = split[6],
+                PointPoly = split[7],
+                SPCostPoly = split[8],
+                DurationPoly = split[9],
+                DurationSPCostPoly = split[10],
+                CooldownPoly = split[11],
+                MasterBonusPoly = split[12],
+                AttackGradePoly = split[13],
+                Flags = ExtractSkillFlags(split[14]),
+                AffectFlags = ExtractAffectFlags(split[15]),
+                PointOn2 = split[16],
+                PointPoly2 = split[17],
+                DurationPoly2 = split[18],
+                AffectFlags2 = ExtractAffectFlags(split[19]),
+                PrerequisiteSkillVnum = int.Parse(split[20]),
+                PrerequisiteSkillLevel = int.Parse(split[21]),
+                SkillType = Enum.TryParse<ESkillType>(split[22], true, out var result) ? result : ESkillType.Normal,
+                MaxHit = short.Parse(split[23]),
+                SplashAroundDamageAdjustPoly = split[24],
+                TargetRange = int.Parse(split[25]),
+                SplashRange = uint.Parse(split[26])
+            };
+                
+            list.Add(data);
+        }
+
+        return [..list];
+    }
+    
+    private static List<ESkillFlag> ExtractSkillFlags(string value)
+    {
+        var values = string.IsNullOrWhiteSpace(value) 
+            ? [] 
+            : value.Split(',').Select(flag => EnumExtensions.TryParseEnum<ESkillFlag>(flag, out var result) ? result : ESkillFlag.None).ToList();
+        values.RemoveAll(v => v == ESkillFlag.None);
+        return values;
+    }
+    
+    private static List<ESkillAffectFlag> ExtractAffectFlags(string value)
+    {
+        return string.IsNullOrWhiteSpace(value) 
+            ? [ESkillAffectFlag.Ymir] 
+            : value.Split(',').Select(flag => EnumExtensions.TryParseEnum<ESkillAffectFlag>(flag, out var result) ? result : ESkillAffectFlag.Ymir).ToList();
     }
 
     private static void ParseCommonDropAndAdd(ReadOnlySpan<char> line, ICollection<CommonDropEntry> list)
