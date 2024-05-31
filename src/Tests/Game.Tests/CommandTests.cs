@@ -99,7 +99,8 @@ public class CommandTests : IAsyncLifetime
             .RuleFor(x => x.Experience, _ => (uint) 0)
             .RuleFor(x => x.PositionX, _ => (int) (10 * Map.MapUnit))
             .RuleFor(x => x.PositionY, _ => (int) (26 * Map.MapUnit))
-            .RuleFor(x => x.PlayTime, _ => 0u);
+            .RuleFor(x => x.PlayTime, _ => 0u)
+            .RuleFor(x => x.SkillGroup, _ => (byte) 0);
         var monsterManagerMock = Substitute.For<IMonsterManager>();
         monsterManagerMock.GetMonster(Arg.Any<uint>()).Returns(callerInfo =>
             new AutoFaker<MonsterData>().RuleFor(x => x.Id, _ => callerInfo.Arg<uint>()).Generate());
@@ -138,6 +139,8 @@ public class CommandTests : IAsyncLifetime
                 }, ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(IPlayerRepository), _ => Substitute.For<IPlayerRepository>(),
                 ServiceLifetime.Singleton))
+            .Replace(new ServiceDescriptor(typeof(IPlayerSkillsRepository), _ => Substitute.For<IPlayerSkillsRepository>(),
+                ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(IMonsterManager), _ => monsterManagerMock, ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(IItemManager), _ => itemManagerMock, ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(ICacheManager), _ => cacheManagerMock, ServiceLifetime.Singleton))
@@ -159,6 +162,7 @@ public class CommandTests : IAsyncLifetime
                 })
                 .Build())
             .AddSingleton(Substitute.For<IDbPlayerRepository>())
+            .AddSingleton(Substitute.For<IDbPlayerSkillsRepository>())
             .AddSingleton<IGameConnection>(_ => new MockedGameConnection())
             .AddSingleton<IPlayerEntity, PlayerEntity>()
             .AddSingleton(_ => _playerDataFaker.Generate())
