@@ -308,7 +308,7 @@ public class PlayerSkills : IPlayerSkills
                         }
                     }
                     break;
-                case ESkillMasterType.GrandMaster:
+                case ESkillMasterType.Master:
                     if (GetSkillLevel(proto.Id) >= 30)
                     {
                         var random = CoreRandom.GenerateInt32(1, 31 - Math.Min(30, GetSkillLevel(proto.Id)) + 1);
@@ -318,7 +318,7 @@ public class PlayerSkills : IPlayerSkills
                         }
                     }
                     break;
-                case ESkillMasterType.PerfectMaster:
+                case ESkillMasterType.GrandMaster:
                     if (GetSkillLevel(proto.Id) >= 40)
                     {
                         SetLevel(proto.Id, 40);
@@ -416,6 +416,82 @@ public class PlayerSkills : IPlayerSkills
     public void SendAsync()
     {
         SendSkillLevelsPacket();
+    }
+
+    public bool LearnSkillByBook(uint skillId)
+    {
+        var proto = _skillManager.GetSkill(skillId);
+        if (proto == null)
+        {
+            return false;
+        }
+
+        if (!IsLearnableSkill(skillId))
+        {
+            _player.SendChatInfo("You cannot learn this skill.");
+            return false;
+        }
+
+        if (_player.GetPoint(EPoints.Experience) < SkillsConstants.SKILLBOOK_NEEDED_EXPERIENCE)
+        {
+            _player.SendChatInfo("Not enough experience.");
+            return false;
+        }
+        
+        var skill = _skills.TryGetValue(skillId, out var playerSkill) ? playerSkill : null;
+        if (skill == null)
+        {
+            _logger.LogWarning("Skill not found: {SkillId}", skillId);
+            return false;
+        }
+
+        if (proto.Type != 0)
+        {
+            if (skill.MasterType != ESkillMasterType.Master)
+            {
+                _player.SendChatInfo("You cannot learn this skill.");
+                return false;
+            }
+        }
+        
+        var currentTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+        
+        if (currentTime < skill.NextReadTime)
+        {
+            //todo: appropriate message
+            _player.SendChatInfo($"You cannot learn this skill yet. {skill.NextReadTime - currentTime} seconds to wait.");
+            return false;
+        }
+        
+        _player.AddPoint(EPoints.Experience, -SkillsConstants.SKILLBOOK_NEEDED_EXPERIENCE);
+        
+        var previousLevel = skill.Level;
+        
+        // todo: required number of books read per level (use the quest system for this)
+        var bookCount = 2;
+
+        if (CoreRandom.GenerateInt32(1, 3) == bookCount)
+        {
+            SkillUp(skillId, ESkillLevelMethod.Book);
+        }
+
+        _player.SendChatInfo(previousLevel != skill.Level
+            ? "You have learned the skill."
+            : "Failed to learn the skill.");
+
+        return true;
+    }
+    
+    public void SetSkillNextReadTime(uint skillId, int time)
+    {
+        if (skillId >= SkillMaxNum)
+        {
+            return;
+        }
+
+        if (!_skills.TryGetValue(skillId, out var skill)) return;
+
+        skill.NextReadTime = time;
     }
 
     private void SendSkillLevelsPacket()

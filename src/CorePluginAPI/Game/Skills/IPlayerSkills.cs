@@ -13,4 +13,6 @@ public interface IPlayerSkills
     void SkillUp(uint skillId, ESkillLevelMethod method = ESkillLevelMethod.Point);
     bool CanUse(uint skillId);
     void SendAsync();
+    bool LearnSkillByBook(uint skillId);
+    void SetSkillNextReadTime(uint skillId, int time);
 }

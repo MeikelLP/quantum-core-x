@@ -6,6 +6,7 @@
         Weapon,
         Armor,
         Use,
+        Skillbook = 17,
         Polymorph = 19,
     }
 }

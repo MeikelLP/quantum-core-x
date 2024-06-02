@@ -1,7 +1,9 @@
 ﻿using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.PluginTypes;
+using QuantumCore.Core.Utils;
 using QuantumCore.Game.Packets;
+using QuantumCore.Game.PlayerUtils;
 
 namespace QuantumCore.Game.PacketHandlers.Game;
 
@@ -92,6 +94,28 @@ public class ItemUseHandler : IGamePacketHandler<ItemUse>
                     player.SendItem(item);
                 }
             }
+        }
+        else if (itemProto.Type == (byte) EItemType.Skillbook)
+        {
+            int skillId = 0;
+            
+            if (itemProto.Id == SkillsConstants.GENERIC_SKILLBOOK_ID)
+            {
+                skillId = itemProto.Sockets[0];
+            }
+            else
+            {
+                skillId = itemProto.Values[0];
+            }
+            
+            if (!player.Skills.LearnSkillByBook((uint) skillId)) return;
+            
+            var currentTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            var delay = CoreRandom.GenerateInt32(SkillsConstants.SKILLBOOK_DELAY_MIN, SkillsConstants.SKILLBOOK_DELAY_MAX + 1);
+            
+            player.Skills.SetSkillNextReadTime((uint) skillId, (int) currentTime + delay);
+            player.RemoveItem(item);
+            player.SendRemoveItem(ctx.Packet.Window, ctx.Packet.Position);
         }
     }
 }
