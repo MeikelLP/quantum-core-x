@@ -44,6 +44,7 @@ public class DbPlayerSkillsRepository : IDbPlayerSkillsRepository
             existingSkill.MasterType = skill.MasterType;
             existingSkill.NextReadTime = skill.NextReadTime;
             existingSkill.UpdatedAt = DateTime.UtcNow;
+            existingSkill.ReadsRequired = skill.ReadsRequired;
             _db.PlayerSkills.Update(existingSkill);
             await _db.SaveChangesAsync();
             return;
@@ -57,6 +58,7 @@ public class DbPlayerSkillsRepository : IDbPlayerSkillsRepository
             MasterType = skill.MasterType,
             Level = skill.Level,
             NextReadTime = skill.NextReadTime,
+            ReadsRequired = skill.ReadsRequired,
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };

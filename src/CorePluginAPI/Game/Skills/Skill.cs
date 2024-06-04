@@ -7,4 +7,5 @@ public class Skill : ISKill
     public ESkillMasterType MasterType { get; set; }
     public byte Level { get; set; }
     public int NextReadTime { get; set; }
+    public uint ReadsRequired { get; set; }
 }

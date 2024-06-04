@@ -14,6 +14,7 @@ public class PlayerSkill
     
     public required uint PlayerId { get; init; }
     public required uint SkillId { get; set; }
+    public required uint ReadsRequired { get; set; } = 0;
     
     [DefaultValue(ESkillMasterType.Normal)] public required ESkillMasterType MasterType { get; set; }
     [DefaultValue(0)] public required byte Level { get; set; }

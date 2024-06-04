@@ -360,6 +360,9 @@ namespace QuantumCore.Game.Persistence.Migrations.Mysql
                     b.Property<uint>("PlayerId")
                         .HasColumnType("int unsigned");
 
+                    b.Property<uint>("ReadsRequired")
+                        .HasColumnType("int unsigned");
+
                     b.Property<uint>("SkillId")
                         .HasColumnType("int unsigned");
 

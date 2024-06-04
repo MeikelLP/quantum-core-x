@@ -194,6 +194,15 @@ public class PlayerSkills : IPlayerSkills
             >= 20 => ESkillMasterType.Master,
             _ => ESkillMasterType.Normal
         };
+        
+        // Reset reads required when new master type is learned
+        switch (skill)
+        {
+            case {Level: 20, ReadsRequired: 0, MasterType: ESkillMasterType.Master}:
+            case {Level: 30, ReadsRequired: 0, MasterType: ESkillMasterType.GrandMaster}:
+                skill.ReadsRequired = 1;
+                break;
+        }
     }
 
     public void SkillUp(uint skillId, ESkillLevelMethod method = ESkillLevelMethod.Point)
@@ -302,7 +311,7 @@ public class PlayerSkills : IPlayerSkills
                 case ESkillMasterType.Normal:
                     if (GetSkillLevel(proto.Id) >= 17)
                     {
-                        //todo: check reset scroll quest flag
+                        //todo: implement reset scroll quest flag
                         var random = CoreRandom.GenerateInt32(1, 21 - Math.Min(20, GetSkillLevel(proto.Id)) + 1);
                         if (random == 1)
                         {
@@ -460,26 +469,51 @@ public class PlayerSkills : IPlayerSkills
         
         if (currentTime < skill.NextReadTime)
         {
-            //todo: appropriate message
-            _player.SendChatInfo($"You cannot learn this skill yet. {skill.NextReadTime - currentTime} seconds to wait.");
+            _player.SendChatInfo($"You cannot read this skill book yet. {skill.NextReadTime - currentTime} seconds to wait.");
             return false;
         }
         
         _player.AddPoint(EPoints.Experience, -SkillsConstants.SKILLBOOK_NEEDED_EXPERIENCE);
         
         var previousLevel = skill.Level;
-        
-        // todo: required number of books read per level (use the quest system for this)
-        var bookCount = 2;
 
-        if (CoreRandom.GenerateInt32(1, 3) == bookCount)
+        var readSuccess = CoreRandom.GenerateInt32(1, 3) == 1;
+
+        if (readSuccess)
         {
-            SkillUp(skillId, ESkillLevelMethod.Book);
+            if (skill.ReadsRequired - 1 == 0)
+            {
+                SkillUp(skillId, ESkillLevelMethod.Book);
+                skill.ReadsRequired = skill.Level switch
+                {
+                    21 => 2,
+                    22 => 3,
+                    23 => 4,
+                    24 => 5,
+                    25 => 6,
+                    26 => 7,
+                    27 => 8,
+                    28 => 9,
+                    29 => 10,
+                    _ => 0
+                };
+            }
+            else
+            {
+                skill.ReadsRequired--;
+            }
         }
-
-        _player.SendChatInfo(previousLevel != skill.Level
-            ? "You have learned the skill."
-            : "Failed to learn the skill.");
+        
+        if (previousLevel != skill.Level)
+        {
+            _player.SendChatInfo($"You have learned the skill.");
+        }
+        else
+        {
+            _player.SendChatInfo(readSuccess
+                ? $"You have learned the skill book. {skill.ReadsRequired} books left."
+                : "Failed to read the skill book.");
+        }
 
         return true;
     }

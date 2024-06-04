@@ -112,6 +112,7 @@ namespace QuantumCore.Game.Persistence.Migrations.Mysql
                     UpdatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false, defaultValueSql: "(CAST(CURRENT_TIMESTAMP AS DATETIME(6)))"),
                     PlayerId = table.Column<uint>(type: "int unsigned", nullable: false),
                     SkillId = table.Column<uint>(type: "int unsigned", nullable: false),
+                    ReadsRequired = table.Column<uint>(type: "int unsigned", nullable: false),
                     MasterType = table.Column<byte>(type: "tinyint unsigned", nullable: false),
                     Level = table.Column<byte>(type: "tinyint unsigned", nullable: false),
                     NextReadTime = table.Column<int>(type: "int", nullable: false)
