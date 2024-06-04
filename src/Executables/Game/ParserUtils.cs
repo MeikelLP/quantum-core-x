@@ -79,6 +79,11 @@ internal static partial class ParserUtils
     {
         var list = new List<SkillData>();
         
+        if (!File.Exists(path))
+        {
+            return [..list];
+        }
+        
         await foreach(var line in File.ReadLinesAsync(path, Encoding.GetEncoding("EUC-KR"), token))
         {
             // parse line
