@@ -861,7 +861,8 @@ namespace QuantumCore.Game.World.Entities
 
         public bool IsUsableSkillMotion(int motion)
         {
-            return true; // todo: implement skill motion system
+            // todo: check if riding, mining or fishing
+            return true; 
         }
 
         public bool HasUniqueGroupItemEquipped(uint itemProtoId)

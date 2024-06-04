@@ -7,8 +7,6 @@ public enum ESkillIndexes : uint
     Fishing = 123,
     Mining = 124,
     
-    // Fishing = 123,  todo: confirm this
-    
     LanguageShinsoo = 126,
     LanguageChunjo = 127,
     LanguageJinno = 128,
