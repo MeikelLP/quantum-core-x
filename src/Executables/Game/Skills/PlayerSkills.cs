@@ -83,6 +83,8 @@ public class PlayerSkills : IPlayerSkills
         }
     }
 
+    public ISKill? this[uint skillId] => _skills.TryGetValue(skillId, out var skill) ? skill : null;
+
     public void SetSkillGroup(byte skillGroup)
     {
         if (skillGroup > 2) return;

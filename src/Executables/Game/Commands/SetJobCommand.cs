@@ -12,7 +12,6 @@ public class SetJobCommand : ICommandHandler<SetJobCommandOptions>
         var job = context.Arguments.Job;
 
         player.Skills.SetSkillGroup(job);
-        player.SendChatInfo($"[DEBUG] Your skill group has been set to {job}");
 
         return Task.CompletedTask;
     }
