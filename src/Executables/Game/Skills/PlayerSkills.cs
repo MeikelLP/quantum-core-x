@@ -4,6 +4,7 @@ using QuantumCore.API;
 using QuantumCore.API.Game.Skills;
 using QuantumCore.API.Game.Types;
 using QuantumCore.Core.Utils;
+using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Persistence;
 using QuantumCore.Game.World.Entities;
 
@@ -16,6 +17,7 @@ public class PlayerSkills : IPlayerSkills
     private readonly PlayerEntity _player;
     private readonly IDbPlayerSkillsRepository _repository;
     private readonly ISkillManager _skillManager;
+    private readonly SkillsOptions _skillsOptions;
 
     private const int SkillMaxNum = 255;
     private const int SkillMaxLevel = 40;
@@ -50,12 +52,13 @@ public class PlayerSkills : IPlayerSkills
         (uint) ESkillIndexes.PenetrationResistance
     ];
 
-    public PlayerSkills(ILogger<PlayerSkills> logger, PlayerEntity player, IDbPlayerSkillsRepository repository, ISkillManager skillManager)
+    public PlayerSkills(ILogger<PlayerSkills> logger, PlayerEntity player, IDbPlayerSkillsRepository repository, ISkillManager skillManager, SkillsOptions skillsOptions)
     {
         _logger = logger;
         _player = player;
         _repository = repository;
         _skillManager = skillManager;
+        _skillsOptions = skillsOptions;
     }
 
     public async Task LoadAsync()
@@ -443,7 +446,7 @@ public class PlayerSkills : IPlayerSkills
             return false;
         }
 
-        if (_player.GetPoint(EPoints.Experience) < SkillsConstants.SKILLBOOK_NEEDED_EXPERIENCE)
+        if (_player.GetPoint(EPoints.Experience) < _skillsOptions.SkillBookNeededExperience)
         {
             _player.SendChatInfo("Not enough experience.");
             return false;
@@ -473,7 +476,7 @@ public class PlayerSkills : IPlayerSkills
             return false;
         }
         
-        _player.AddPoint(EPoints.Experience, -SkillsConstants.SKILLBOOK_NEEDED_EXPERIENCE);
+        _player.AddPoint(EPoints.Experience, -_skillsOptions.SkillBookNeededExperience);
         
         var previousLevel = skill.Level;
 
@@ -495,12 +498,13 @@ public class PlayerSkills : IPlayerSkills
                     27 => 8,
                     28 => 9,
                     29 => 10,
+                    30 => 1,
                     _ => 0
                 };
             }
             else
             {
-                skill.ReadsRequired--;
+                skill.ReadsRequired = Math.Max(1, skill.ReadsRequired - 1);
             }
         }
         

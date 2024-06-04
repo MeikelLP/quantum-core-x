@@ -1,7 +1,9 @@
 ﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using QuantumCore.API;
 using QuantumCore.API.PluginTypes;
 using QuantumCore.Core.Utils;
+using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Packets;
 using QuantumCore.Game.PlayerUtils;
 
@@ -11,11 +13,13 @@ public class ItemUseHandler : IGamePacketHandler<ItemUse>
 {
     private readonly IItemManager _itemManager;
     private readonly ILogger<ItemUseHandler> _logger;
+    private readonly SkillsOptions _skillsOptions;
 
-    public ItemUseHandler(IItemManager itemManager, ILogger<ItemUseHandler> logger)
+    public ItemUseHandler(IItemManager itemManager, ILogger<ItemUseHandler> logger, IOptions<GameOptions> gameOptions)
     {
         _itemManager = itemManager;
         _logger = logger;
+        _skillsOptions = gameOptions.Value.Skills;
     }
 
     public async Task ExecuteAsync(GamePacketContext<ItemUse> ctx, CancellationToken token = default)
@@ -95,25 +99,28 @@ public class ItemUseHandler : IGamePacketHandler<ItemUse>
                 }
             }
         }
+        // Skills related
+        // note: Should maybe create an ItemUseHandler<ItemId> for this ? Similarly to the commands and packet handlers
         else if (itemProto.Type == (byte) EItemType.Skillbook)
         {
-            int skillId = 0;
+            var skillId = 0;
             
-            if (itemProto.Id == SkillsConstants.GENERIC_SKILLBOOK_ID)
-            {
-                skillId = itemProto.Sockets[0];
-            }
-            else
-            {
-                skillId = itemProto.Values[0];
-            }
+            skillId = itemProto.Id == _skillsOptions.GenericSkillBookId 
+                ? itemProto.Sockets[0] 
+                : itemProto.Values[0];
             
             if (!player.Skills.LearnSkillByBook((uint) skillId)) return;
             
             var currentTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
-            var delay = CoreRandom.GenerateInt32(SkillsConstants.SKILLBOOK_DELAY_MIN, SkillsConstants.SKILLBOOK_DELAY_MAX + 1);
+            var delay = CoreRandom.GenerateInt32(_skillsOptions.SkillBookDelayMin, _skillsOptions.SkillBookDelayMax + 1);
             
             player.Skills.SetSkillNextReadTime((uint) skillId, (int) currentTime + delay);
+            player.RemoveItem(item);
+            player.SendRemoveItem(ctx.Packet.Window, ctx.Packet.Position);
+        }
+        else if (itemProto.Id == _skillsOptions.SoulStoneId)
+        {
+            
             player.RemoveItem(item);
             player.SendRemoveItem(ctx.Packet.Window, ctx.Packet.Position);
         }

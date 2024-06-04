@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game.Skills;
@@ -133,7 +134,8 @@ namespace QuantumCore.Game.World.Entities
             QuickSlotBar = new QuickSlotBar(_cacheManager, _logger, this);
             Skills = new PlayerSkills(_scope.ServiceProvider.GetRequiredService<ILogger<PlayerSkills>>(), this,
                 _scope.ServiceProvider.GetRequiredService<IDbPlayerSkillsRepository>(),
-                _scope.ServiceProvider.GetRequiredService<ISkillManager>()
+                _scope.ServiceProvider.GetRequiredService<ISkillManager>(),
+                _scope.ServiceProvider.GetRequiredService<IOptions<GameOptions>>().Value.Skills
             );
             
             MovementSpeed = 150;
@@ -862,7 +864,7 @@ namespace QuantumCore.Game.World.Entities
         public bool IsUsableSkillMotion(int motion)
         {
             // todo: check if riding, mining or fishing
-            return true; 
+            return true;
         }
 
         public bool HasUniqueGroupItemEquipped(uint itemProtoId)

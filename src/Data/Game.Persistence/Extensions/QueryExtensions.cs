@@ -45,7 +45,8 @@ public static class QueryExtensions
             SkillId = x.SkillId,
             MasterType = x.MasterType,
             Level = x.Level,
-            NextReadTime = x.NextReadTime
+            NextReadTime = x.NextReadTime,
+            ReadsRequired = x.ReadsRequired
         });
     }
 

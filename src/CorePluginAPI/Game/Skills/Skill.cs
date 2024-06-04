@@ -1,5 +1,8 @@
-﻿namespace QuantumCore.API.Game.Skills;
+﻿using System.Diagnostics;
 
+namespace QuantumCore.API.Game.Skills;
+
+[DebuggerDisplay("Skill ({SkillId}) - MasterType: {MasterType}, Level: {Level}")]
 public class Skill : ISKill
 {
     public uint SkillId { get; set; }

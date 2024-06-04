@@ -1,4 +1,5 @@
 ﻿using CommandLine;
+using Microsoft.Extensions.Options;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game;
@@ -15,12 +16,14 @@ namespace QuantumCore.Game.Commands
         private readonly IItemManager _itemManager;
         private readonly ICacheManager _cacheManager;
         private readonly ISkillManager _skillManager;
+        private readonly SkillsOptions _skillsOptions;
 
-        public ItemCommand(IItemManager itemManager, ICacheManager cacheManager, ISkillManager skillManager)
+        public ItemCommand(IItemManager itemManager, ICacheManager cacheManager, ISkillManager skillManager, IOptions<GameOptions> gameOptions)
         {
             _itemManager = itemManager;
             _cacheManager = cacheManager;
             _skillManager = skillManager;
+            _skillsOptions = gameOptions.Value.Skills;
         }
 
         public async Task ExecuteAsync(CommandContext<ItemCommandOptions> context)
@@ -33,7 +36,7 @@ namespace QuantumCore.Game.Commands
             }
 
             // todo: Move to "instantiation of item" logic ?
-            if (item.Id == SkillsConstants.GENERIC_SKILLBOOK_ID)
+            if (item.Id == _skillsOptions.GenericSkillBookId)
             {
                 var skillBookId = 0U;
                 do
@@ -50,7 +53,7 @@ namespace QuantumCore.Game.Commands
 
                 } while (true);
                 
-                var bookId = SkillsConstants.SKILLBOOK_START_ID + skillBookId;
+                var bookId = _skillsOptions.SkillBookStartId + skillBookId;
                 
                 item = _itemManager.GetItem(bookId);
                 if (item == null)
