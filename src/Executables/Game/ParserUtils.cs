@@ -108,11 +108,11 @@ internal static partial class ParserUtils
                 MasterBonusPoly = split[12],
                 AttackGradePoly = split[13],
                 Flag = ExtractSkillFlags(split[14]),
-                AffectFlags = ExtractAffectFlags(split[15]),
+                AffectFlag = ExtractAffectFlags(split[15]),
                 PointOn2 = split[16],
                 PointPoly2 = split[17],
                 DurationPoly2 = split[18],
-                AffectFlags2 = ExtractAffectFlags(split[19]),
+                AffectFlag2 = ExtractAffectFlags(split[19]),
                 PrerequisiteSkillVnum = int.Parse(split[20]),
                 PrerequisiteSkillLevel = int.Parse(split[21]),
                 SkillType = Enum.TryParse<ESkillType>(split[22], true, out var result) ? result : ESkillType.Normal,
@@ -148,11 +148,24 @@ internal static partial class ParserUtils
         return result;
     }
     
-    private static List<ESkillAffectFlag> ExtractAffectFlags(string value)
+    private static ESkillAffectFlag ExtractAffectFlags(string value)
     {
-        return string.IsNullOrWhiteSpace(value) 
-            ? [ESkillAffectFlag.Ymir] 
-            : value.Split(',').Select(flag => EnumUtils.TryParseEnum<ESkillAffectFlag>(flag, out var result) ? result : ESkillAffectFlag.Ymir).ToList();
+        ESkillAffectFlag result = 0;
+        
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return result;
+        }
+
+        var flags = value.Split(',');
+
+        foreach (var flag in flags)
+        {
+            if (!EnumUtils.TryParseEnum<ESkillAffectFlag>(flag, out var parsed)) continue;
+            result |= parsed;
+        }
+        
+        return result;
     }
 
     private static void ParseCommonDropAndAdd(ReadOnlySpan<char> line, ICollection<CommonDropEntry> list)

@@ -21,11 +21,11 @@ public class SkillData
     public string MasterBonusPoly { get; set; } = "";
     public string AttackGradePoly { get; set; } = "";
     public ESkillFlag Flag { get; set; }
-    public ICollection<ESkillAffectFlag> AffectFlags { get; set; } = new List<ESkillAffectFlag>() { ESkillAffectFlag.Ymir };
+    public ESkillAffectFlag AffectFlag { get; set; } = ESkillAffectFlag.Ymir;
     public string PointOn2 { get; set; } = "None";
     public string PointPoly2 { get; set; } = "";
     public string DurationPoly2 { get; set; } = "";
-    public ICollection<ESkillAffectFlag> AffectFlags2 { get; set; } = new List<ESkillAffectFlag>() { ESkillAffectFlag.Ymir };
+    public ESkillAffectFlag AffectFlag2 { get; set; } = ESkillAffectFlag.Ymir;
     public int PrerequisiteSkillVnum { get; set; } = 0;
     public int PrerequisiteSkillLevel { get; set; } = 0;
     public ESkillType SkillType { get; set; } = ESkillType.Normal;
