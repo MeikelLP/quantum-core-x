@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
+using QuantumCore.Game.Services;
 
 namespace QuantumCore.Game;
 
@@ -11,11 +12,13 @@ namespace QuantumCore.Game;
 public class SkillManager : ISkillManager
 {
     private readonly ILogger<SkillManager> _logger;
+    private readonly IParserService _parserService;
     private ImmutableArray<SkillData> _skills = ImmutableArray<SkillData>.Empty;
     
-    public SkillManager(ILogger<SkillManager> logger)
+    public SkillManager(ILogger<SkillManager> logger, IParserService parserService)
     {
         _logger = logger;
+        _parserService = parserService;
     }
     
     public SkillData? GetSkill(uint id)
@@ -42,7 +45,7 @@ public class SkillManager : ISkillManager
             return;
         }
 
-        _skills = await ParserUtils.GetSkillsAsync("data/skilltable.txt", token);
+        _skills = await _parserService.GetSkillsAsync("data/skilltable.txt", token);
         
         _logger.LogInformation("Loaded {Count} skills", _skills.Length);
     }

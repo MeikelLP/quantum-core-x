@@ -1,10 +1,11 @@
 ﻿using QuantumCore.API.Game.World;
+using QuantumCore.Game.Services;
 
 namespace QuantumCore.Game.Extensions;
 
 internal static class ParserExtensions
 {
-    public static SpawnGroup ToSpawnGroup(this ParserUtils.DataFileGroup group)
+    public static SpawnGroup ToSpawnGroup(this ParserService.DataFileGroup group)
     {
         return new SpawnGroup
         {
@@ -18,7 +19,7 @@ internal static class ParserExtensions
         };
     }
     
-    public static SpawnGroupCollection ToSpawnGroupCollection(this ParserUtils.DataFileGroup group)
+    public static SpawnGroupCollection ToSpawnGroupCollection(this ParserService.DataFileGroup group)
     {
         return new SpawnGroupCollection
         {
