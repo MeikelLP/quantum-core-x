@@ -28,14 +28,17 @@ public class DropProvider : IDropProvider
     
     private readonly ILogger<DropProvider> _logger;
     private readonly IItemManager _itemManager;
+    private readonly IParserService _parserService;
     private static readonly Encoding FileEncoding = Encoding.GetEncoding("EUC-KR");
     private readonly DropOptions _options;
 
-    public DropProvider(ILogger<DropProvider> logger, IOptions<GameOptions> gameOptions, IItemManager itemManager)
+    public DropProvider(ILogger<DropProvider> logger, IOptions<GameOptions> gameOptions, IItemManager itemManager,
+        IParserService parserService)
     {
         _logger = logger;
         _options = gameOptions.Value.Drops;
         _itemManager = itemManager;
+        _parserService = parserService;
     }
     
     public MonsterItemGroup? GetMonsterDropsForMob(uint monsterProtoId)
@@ -72,7 +75,7 @@ public class DropProvider : IDropProvider
 
         using var sr = new StreamReader(file, FileEncoding);
 
-        CommonDrops = await ParserUtils.GetCommonDropsAsync(sr, cancellationToken);
+        CommonDrops = await _parserService.GetCommonDropsAsync(sr, cancellationToken);
 
         _logger.LogDebug("Found {Count:D} common drops", CommonDrops.Length);
     }
@@ -150,11 +153,11 @@ public class DropProvider : IDropProvider
         using var sr = new StreamReader(file, FileEncoding);
         
         var parsedGroups = new List<MonsterDropContainer>();
-        var mobGroups = await ParserUtils.ParseFileGroups(sr);
+        var mobGroups = await _parserService.ParseFileGroups(sr);
         
         foreach (var mobGroup in mobGroups)
         {
-            var container = ParserUtils.ParseMobGroup(mobGroup, _itemManager);
+            var container = _parserService.ParseMobGroup(mobGroup, _itemManager);
             if (container != null)
             {
                 parsedGroups.Add(container);
