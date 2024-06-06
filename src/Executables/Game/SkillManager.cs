@@ -42,7 +42,7 @@ public class SkillManager : ISkillManager
             return;
         }
 
-        _skills = await ParserUtils.GetSkillsAsync("data/936skilltable.txt", token);
+        _skills = await ParserUtils.GetSkillsAsync("data/skilltable.txt", token);
         
         _logger.LogInformation("Loaded {Count} skills", _skills.Length);
     }
