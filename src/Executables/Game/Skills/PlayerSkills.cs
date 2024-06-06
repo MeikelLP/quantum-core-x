@@ -361,16 +361,16 @@ public class PlayerSkills : IPlayerSkills
 
             switch (proto.Type)
             {
-                case 0:
+                case ESkillCategoryType.PassiveSkills:
                     idx = EPoints.SubSkill;
                     break;
-                case 1: // warrior
-                case 2: // ninja
-                case 3: // sura
-                case 4: // shaman
+                case ESkillCategoryType.WarriorSkills: // warrior
+                case ESkillCategoryType.NinjaSkills: // ninja
+                case ESkillCategoryType.SuraSkills: // sura
+                case ESkillCategoryType.ShamanSkills: // shaman
                     idx = EPoints.Skill;
                     break;
-                case 5:
+                case ESkillCategoryType.HorseSkills:
                     idx = EPoints.HorseSkill;
                     break;
                 default:
@@ -387,12 +387,12 @@ public class PlayerSkills : IPlayerSkills
         
         SetLevel(proto.Id, (byte) (GetSkillLevel(proto.Id) + 1));
 
-        if (proto.Type != 0)
+        if (proto.Type != ESkillCategoryType.PassiveSkills)
         {
             switch (skill.MasterType)
             {
                 case ESkillMasterType.Normal:
-                    if (GetSkillLevel(proto.Id) >= 17)
+                    if (GetSkillLevel(proto.Id) >= MinimumSkillLevelUpgrade)
                     {
                         //todo: implement reset scroll quest flag
                         var random = CoreRandom.GenerateInt32(1, 21 - Math.Min(20, GetSkillLevel(proto.Id)) + 1);
@@ -437,27 +437,24 @@ public class PlayerSkills : IPlayerSkills
         
         if (GetSkillLevel(skillId) >= SkillMaxLevel) return false;
 
-        if (proto.Type == 0)
+        if (proto.Type == ESkillCategoryType.PassiveSkills)
         {
             return GetSkillLevel(skillId) < proto.MaxLevel;
         }
         
-        if (proto.Type == 5)
+        if (proto.Type == ESkillCategoryType.HorseSkills)
         {
             return skillId != (int) ESkillIndexes.HorseWildAttackRange || _player.Player.PlayerClass == (int) EPlayerClass.Ninja;
         }
         
         if (_player.Player.SkillGroup == 0) return false;
         
-        return proto.Type - 1 == _player.Player.PlayerClass;
+        return (int) proto.Type - 1 == _player.Player.PlayerClass;
     }
 
     private int GetSkillLevel(uint skillId)
     {
-        if (skillId >= SkillMaxNum)
-        {
-            return 0;
-        }
+        if (skillId >= SkillMaxNum) return 0;
         
         return Math.Min(SkillMaxLevel, _skills.TryGetValue(skillId, out var skill) ? skill.Level : 0);
     }

@@ -95,7 +95,7 @@ internal static partial class ParserUtils
             {
                 Id = uint.Parse(split[0]),
                 Name = split[1],
-                Type = short.Parse(split[2]),
+                Type = (ESkillCategoryType) short.Parse(split[2]),
                 LevelStep = short.Parse(split[3]),
                 MaxLevel = short.Parse(split[4]),
                 LevelLimit = short.Parse(split[5]),

@@ -760,7 +760,7 @@ public class CommandTests : IAsyncLifetime
         _skillManager.GetSkill(1).Returns(new SkillData
         {
             Id = 1,
-            Type = (short) (_player.Player.PlayerClass + 1),
+            Type = (ESkillCategoryType) (_player.Player.PlayerClass + 1),
             Flag = ESkillFlag.Attack
         });
         _player.Skills.SetSkillGroup(1);
@@ -785,7 +785,7 @@ public class CommandTests : IAsyncLifetime
         _skillManager.GetSkill(skillId).Returns(new SkillData
         {
             Id = skillId,
-            Type = (short) (_player.Player.PlayerClass + 1),
+            Type = (ESkillCategoryType) (_player.Player.PlayerClass + 1),
             Flag = ESkillFlag.Attack
         });
         _player.Skills.SetSkillGroup(1);

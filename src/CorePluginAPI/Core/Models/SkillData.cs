@@ -8,7 +8,7 @@ public class SkillData
 {
     public required uint Id { get; set; }
     public string Name { get; set; }
-    public short Type { get; set; }
+    public ESkillCategoryType Type { get; set; }
     public short LevelStep { get; set; }
     public short MaxLevel { get; set; }
     public short LevelLimit { get; set; }
