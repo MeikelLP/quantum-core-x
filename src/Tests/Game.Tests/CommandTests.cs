@@ -761,7 +761,7 @@ public class CommandTests : IAsyncLifetime
         {
             Id = 1,
             Type = (short) (_player.Player.PlayerClass + 1),
-            Flags = new List<ESkillFlag>()
+            Flag = ESkillFlag.Attack
         });
         _player.Skills.SetSkillGroup(1);
         
@@ -786,7 +786,7 @@ public class CommandTests : IAsyncLifetime
         {
             Id = skillId,
             Type = (short) (_player.Player.PlayerClass + 1),
-            Flags = new List<ESkillFlag>()
+            Flag = ESkillFlag.Attack
         });
         _player.Skills.SetSkillGroup(1);
         _player.Skills[skillId].Level = 19;

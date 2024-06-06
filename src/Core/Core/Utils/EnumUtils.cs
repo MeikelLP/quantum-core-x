@@ -1,6 +1,6 @@
-﻿namespace QuantumCore.Extensions;
+﻿namespace QuantumCore.Core.Utils;
 
-public static class EnumExtensions
+public static class EnumUtils
 {
     public static bool TryParseEnum<TEnum>(string value, out TEnum result) where TEnum : struct, Enum
     {

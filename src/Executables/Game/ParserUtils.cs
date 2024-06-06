@@ -77,15 +77,17 @@ internal static partial class ParserUtils
     
     public static async Task<ImmutableArray<SkillData>> GetSkillsAsync(string path, CancellationToken token = default)
     {
-        var list = new List<SkillData>();
-        
         if (!File.Exists(path))
         {
-            return [..list];
+            return [];
         }
+        
+        var list = new List<SkillData>();
         
         await foreach(var line in File.ReadLinesAsync(path, Encoding.GetEncoding("EUC-KR"), token))
         {
+            if (string.IsNullOrWhiteSpace(line) || !StartsWithNumberRegex().IsMatch(line)) continue;
+            
             // parse line
             var split = line.Split('\t');
             
@@ -105,7 +107,7 @@ internal static partial class ParserUtils
                 CooldownPoly = split[11],
                 MasterBonusPoly = split[12],
                 AttackGradePoly = split[13],
-                Flags = ExtractSkillFlags(split[14]),
+                Flag = ExtractSkillFlags(split[14]),
                 AffectFlags = ExtractAffectFlags(split[15]),
                 PointOn2 = split[16],
                 PointPoly2 = split[17],
@@ -126,20 +128,31 @@ internal static partial class ParserUtils
         return [..list];
     }
     
-    private static List<ESkillFlag> ExtractSkillFlags(string value)
+    private static ESkillFlag ExtractSkillFlags(string value)
     {
-        var values = string.IsNullOrWhiteSpace(value) 
-            ? [] 
-            : value.Split(',').Select(flag => EnumExtensions.TryParseEnum<ESkillFlag>(flag, out var result) ? result : ESkillFlag.None).ToList();
-        values.RemoveAll(v => v == ESkillFlag.None);
-        return values;
+        ESkillFlag result = 0;
+        
+        if (string.IsNullOrWhiteSpace(value))
+        {
+            return result;
+        }
+
+        var flags = value.Split(',');
+
+        foreach (var flag in flags)
+        {
+            if (!EnumUtils.TryParseEnum<ESkillFlag>(flag, out var parsed)) continue;
+            result |= parsed;
+        }
+        
+        return result;
     }
     
     private static List<ESkillAffectFlag> ExtractAffectFlags(string value)
     {
         return string.IsNullOrWhiteSpace(value) 
             ? [ESkillAffectFlag.Ymir] 
-            : value.Split(',').Select(flag => EnumExtensions.TryParseEnum<ESkillAffectFlag>(flag, out var result) ? result : ESkillAffectFlag.Ymir).ToList();
+            : value.Split(',').Select(flag => EnumUtils.TryParseEnum<ESkillAffectFlag>(flag, out var result) ? result : ESkillAffectFlag.Ymir).ToList();
     }
 
     private static void ParseCommonDropAndAdd(ReadOnlySpan<char> line, ICollection<CommonDropEntry> list)

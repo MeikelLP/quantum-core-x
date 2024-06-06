@@ -20,7 +20,7 @@ public class SkillData
     public string CooldownPoly { get; set; } = "";
     public string MasterBonusPoly { get; set; } = "";
     public string AttackGradePoly { get; set; } = "";
-    public ICollection<ESkillFlag> Flags { get; set; }
+    public ESkillFlag Flag { get; set; }
     public ICollection<ESkillAffectFlag> AffectFlags { get; set; } = new List<ESkillAffectFlag>() { ESkillAffectFlag.Ymir };
     public string PointOn2 { get; set; } = "None";
     public string PointPoly2 { get; set; } = "";

@@ -2,15 +2,70 @@
 
 public enum ESkillIndexes : uint
 {
+    // Warrior Body
+    ThreeWayCut = 1,
+    SwordSpin = 2,
+    BerserkerFury = 3,
+    AuraOfTheSword = 4,
+    Dash = 5,
+    Life = 6,
+    // Warrior Mind
+    Shockwave = 16,
+    Bash = 17,
+    Stump = 18,
+    StrongBody = 19,
+    SwordStrike = 20,
+    SwordOrb = 21,
+    // Ninja Dagger
+    Ambush = 31,
+    FastAttack = 32,
+    RollingDagger = 33,
+    Stealth = 34,
+    PoisonousCloud = 35,
+    InsidiousPoison = 36,
+    // Ninja Bow
+    RepetitiveShot = 46,
+    ArrowShower = 47,
+    FireArrow = 48,
+    FeatherWalk = 49,
+    PoisonArrow = 50,
+    Spark = 51,
+    // Sura Weapons
+    FingerStrike = 61,
+    DragonSwirl = 62,
+    EnchantedBlade = 63,
+    Fear = 64,
+    EnchantedArmor = 65,
+    Dispel = 66,
+    // Sura Magic
+    DarkStrike = 76,
+    FlameStrike = 77,
+    FlameSpirit = 78,
+    DarkProtection = 79,
+    SpiritStrike = 80,
+    DarkOrb = 81,
+    // Shaman Dragon
+    FlyingTalisman = 91,
+    ShootingDragon = 92,
+    DragonRoar = 93,
+    Blessing = 94,
+    Reflect = 95,
+    DragonAid = 96,
+    // Shaman Lightning
+    LightningThrow = 106,
+    SummonLightning = 107,
+    LightningClaw = 108,
+    Cure = 109,
+    Swiftness = 110,
+    AttackUp = 111,
+    // Passive Skills
     Leadership = 121,
     Combo = 122,
     Fishing = 123,
     Mining = 124,
-    
     LanguageShinsoo = 126,
     LanguageChunjo = 127,
     LanguageJinno = 128,
-    
     Polymorph = 129,
     
     HorseRiding = 130,

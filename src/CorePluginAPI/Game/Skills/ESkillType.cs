@@ -1,9 +1,11 @@
-﻿namespace QuantumCore.API.Game.Skills;
+﻿using System.Runtime.Serialization;
+
+namespace QuantumCore.API.Game.Skills;
 
 public enum ESkillType
 {
-    Normal,
-    Melee,
-    Range,
-    Magic
+    [EnumMember(Value = "NORMAL")] Normal,
+    [EnumMember(Value = "MELEE")] Melee,
+    [EnumMember(Value = "RANGE")] Range,
+    [EnumMember(Value = "MAGIC")] Magic
 }
