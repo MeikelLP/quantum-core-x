@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using QuantumCore.API;
+using QuantumCore.API.Game.Skills;
 using QuantumCore.API.PluginTypes;
 using QuantumCore.Core.Utils;
 using QuantumCore.Game.Extensions;
@@ -108,13 +109,19 @@ public class ItemUseHandler : IGamePacketHandler<ItemUse>
             skillId = itemProto.Id == _skillsOptions.GenericSkillBookId 
                 ? itemProto.Sockets[0] 
                 : itemProto.Values[0];
+
+            if (!Enum.TryParse<ESkillIndexes>(skillId.ToString(), out var skill))
+            {
+                _logger.LogWarning("Skill with Id({SkillId}) not defined", skillId);
+                return;
+            }
             
-            if (!player.Skills.LearnSkillByBook((uint) skillId)) return;
+            if (!player.Skills.LearnSkillByBook(skill)) return;
             
             var currentTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             var delay = CoreRandom.GenerateInt32(_skillsOptions.SkillBookDelayMin, _skillsOptions.SkillBookDelayMax + 1);
             
-            player.Skills.SetSkillNextReadTime((uint) skillId, (int) currentTime + delay);
+            player.Skills.SetSkillNextReadTime(skill, (int) currentTime + delay);
             player.RemoveItem(item);
             player.SendRemoveItem(ctx.Packet.Window, ctx.Packet.Position);
         }

@@ -35,7 +35,7 @@ public class DbPlayerSkillsRepository : IDbPlayerSkillsRepository
     public async Task SavePlayerSkillAsync(Skill skill)
     {
         var existingSkill = await _db.PlayerSkills
-            .Where(x => x.PlayerId == skill.PlayerId && x.SkillId == skill.SkillId)
+            .Where(x => x.PlayerId == skill.PlayerId && x.SkillId == (uint) skill.SkillId)
             .FirstOrDefaultAsync();
         
         if (existingSkill != null)
@@ -54,7 +54,7 @@ public class DbPlayerSkillsRepository : IDbPlayerSkillsRepository
         {
             Id = Guid.NewGuid(),
             PlayerId = skill.PlayerId,
-            SkillId = skill.SkillId,
+            SkillId = (uint) skill.SkillId,
             MasterType = skill.MasterType,
             Level = skill.Level,
             NextReadTime = skill.NextReadTime,

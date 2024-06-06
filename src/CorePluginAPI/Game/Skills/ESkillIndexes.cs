@@ -87,4 +87,5 @@ public enum ESkillIndexes : uint
     GuildJumun = 157,
     GuildTeleport = 158,
     GuildDoor = 159,
+    SkillMax = 255
 }

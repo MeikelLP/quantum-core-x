@@ -3,6 +3,7 @@ using Microsoft.Extensions.Options;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game;
+using QuantumCore.API.Game.Skills;
 using QuantumCore.Caching;
 using QuantumCore.Core.Utils;
 using QuantumCore.Extensions;
@@ -42,8 +43,13 @@ namespace QuantumCore.Game.Commands
                 do
                 {
                     skillBookId = CoreRandom.GenerateUInt32(1, 112);
+                    
+                    if (!Enum.TryParse<ESkillIndexes>(skillBookId.ToString(), out var skillId))
+                    {
+                        continue;
+                    }
 
-                    var skill = _skillManager.GetSkill(skillBookId);
+                    var skill = _skillManager.GetSkill(skillId);
                     if (skill == null)
                     {
                         continue;

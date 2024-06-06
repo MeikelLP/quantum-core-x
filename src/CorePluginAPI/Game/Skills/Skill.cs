@@ -5,7 +5,7 @@ namespace QuantumCore.API.Game.Skills;
 [DebuggerDisplay("Skill ({SkillId}) - MasterType: {MasterType}, Level: {Level}")]
 public class Skill : ISKill
 {
-    public uint SkillId { get; set; }
+    public ESkillIndexes SkillId { get; set; }
     public uint PlayerId { get; set; }
     public ESkillMasterType MasterType { get; set; }
     public byte Level { get; set; }

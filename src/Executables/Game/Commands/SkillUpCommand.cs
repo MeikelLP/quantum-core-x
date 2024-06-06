@@ -1,4 +1,5 @@
 ﻿using CommandLine;
+using Microsoft.Extensions.Logging;
 using QuantumCore.API.Game;
 using QuantumCore.API.Game.Skills;
 
@@ -7,10 +8,22 @@ namespace QuantumCore.Game.Commands;
 [Command("skillup", "Levels up a skill")]
 public class SkillUpCommand : ICommandHandler<SkillUpCommandOptions>
 {
+    private readonly ILogger<SkillUpCommand> _logger;
+    
+    public SkillUpCommand(ILogger<SkillUpCommand> logger)
+    {
+        _logger = logger;
+    }
+    
     public Task ExecuteAsync(CommandContext<SkillUpCommandOptions> context)
     {
         var player = context.Player;
-        var skill = context.Arguments.SkillId;
+        
+        if (!Enum.TryParse<ESkillIndexes>(context.Arguments.SkillId.ToString(), out var skill))
+        {
+            _logger.LogWarning("Skill with Id({SkillId}) not defined", context.Arguments.SkillId);
+            return Task.CompletedTask;
+        }
 
         if (player.Skills.CanUse(skill))
         {
@@ -20,13 +33,13 @@ public class SkillUpCommand : ICommandHandler<SkillUpCommandOptions>
 
         switch (skill)
         {
-            case (uint) ESkillIndexes.HoseWildAttack:
-            case (uint) ESkillIndexes.HorseCharge:
-            case (uint) ESkillIndexes.HorseEscape:
-            case (uint) ESkillIndexes.HorseWildAttackRange:
+            case ESkillIndexes.HoseWildAttack:
+            case ESkillIndexes.HorseCharge:
+            case ESkillIndexes.HorseEscape:
+            case ESkillIndexes.HorseWildAttackRange:
                 
-            case (uint) ESkillIndexes.AddHp:
-            case (uint) ESkillIndexes.PenetrationResistance:
+            case ESkillIndexes.AddHp:
+            case ESkillIndexes.PenetrationResistance:
                 player.Skills.SkillUp(skill);
                 break;
         }

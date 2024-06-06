@@ -6,7 +6,7 @@ namespace QuantumCore.API.Core.Models;
 [DebuggerDisplay("{Name} ({Id})")]
 public class SkillData
 {
-    public required uint Id { get; set; }
+    public required ESkillIndexes Id { get; set; }
     public string Name { get; set; }
     public ESkillCategoryType Type { get; set; }
     public short LevelStep { get; set; }
