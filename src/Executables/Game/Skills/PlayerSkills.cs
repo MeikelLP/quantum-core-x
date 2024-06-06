@@ -24,6 +24,9 @@ public class PlayerSkills : IPlayerSkills
     private const int SkillCount = 6;
     private const int JobMaxNum = 4;
     private const int SkillGroupMaxNum = 2;
+    private const int MinimumLevel = 5;
+    private const int MinimumLevelSubSkills = 10;
+    private const int MinimumSkillLevelUpgrade = 17;
 
     #region Static Skill Data
 
@@ -167,8 +170,8 @@ public class PlayerSkills : IPlayerSkills
 
     public void SetSkillGroup(byte skillGroup)
     {
-        if (skillGroup > 2) return;
-        if (_player.GetPoint(EPoints.Level) < 5) return;
+        if (skillGroup > SkillGroupMaxNum) return;
+        if (_player.GetPoint(EPoints.Level) < MinimumLevel) return;
         
         // todo: prevent changing skill group in certain situations
         
@@ -184,9 +187,9 @@ public class PlayerSkills : IPlayerSkills
     
     public void ClearSkills()
     {
-        var points = _player.GetPoint(EPoints.Level) < 5
+        var points = _player.GetPoint(EPoints.Level) < MinimumLevel
             ? 0
-            : 4 + (_player.GetPoint(EPoints.Level) - 5) - _player.GetPoint(EPoints.Skill);
+            : (MinimumLevel - 1) + (_player.GetPoint(EPoints.Level) - MinimumLevel) - _player.GetPoint(EPoints.Skill);
         _player.SetPoint(EPoints.Skill, points);
             
         ResetSkills();
@@ -194,9 +197,9 @@ public class PlayerSkills : IPlayerSkills
     
     public void ClearSubSkills()
     {
-        var points = _player.GetPoint(EPoints.Level) < 10
+        var points = _player.GetPoint(EPoints.Level) < MinimumLevelSubSkills
             ? 0
-            : (_player.GetPoint(EPoints.Level) - 9) - _player.GetPoint(EPoints.SubSkill);
+            : (_player.GetPoint(EPoints.Level) - (MinimumLevelSubSkills - 1)) - _player.GetPoint(EPoints.SubSkill);
         
         _player.SetPoint(EPoints.SubSkill, points);
         
@@ -248,8 +251,8 @@ public class PlayerSkills : IPlayerSkills
         skill.MasterType = ESkillMasterType.Normal;
         skill.NextReadTime = 0;
         
-        if (level > 17)
-            level = 17;
+        if (level > MinimumSkillLevelUpgrade)
+            level = MinimumSkillLevelUpgrade;
         
         _player.AddPoint(EPoints.Skill, level);
 
