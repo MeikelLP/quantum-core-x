@@ -1,4 +1,5 @@
 using QuantumCore.API.Core.Models;
+using QuantumCore.API.Game.Skills;
 using QuantumCore.API.Game.Types;
 
 namespace QuantumCore.API.Game.World
@@ -13,6 +14,7 @@ namespace QuantumCore.API.Game.World
         IList<Guid> Groups { get; }
         IShop? Shop { get; set; }
         IQuickSlotBar QuickSlotBar { get; }
+        IPlayerSkills Skills { get; }
         IQuest? CurrentQuest { get; set; }
         Dictionary<string, IQuest> Quests { get; }
         EAntiFlags AntiFlagClass { get; }
@@ -57,5 +59,6 @@ namespace QuantumCore.API.Game.World
         int GetPremiumRemainSeconds(EPremiumTypes type);
         Task EquipItem(ItemInstance item, byte window, ushort position);
         Task UnequipItem(ItemInstance item, byte window, ushort position);
+        bool IsUsableSkillMotion(int motion);
     }
 }

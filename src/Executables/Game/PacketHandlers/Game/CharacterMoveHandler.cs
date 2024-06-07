@@ -9,6 +9,8 @@ namespace QuantumCore.Game.PacketHandlers.Game;
 public class CharacterMoveHandler : IGamePacketHandler<CharacterMove>
 {
     private readonly ILogger<CharacterMoveHandler> _logger;
+    
+    private const int MaskSkillMotion = 127;
 
     public CharacterMoveHandler(ILogger<CharacterMoveHandler> logger)
     {
@@ -17,8 +19,7 @@ public class CharacterMoveHandler : IGamePacketHandler<CharacterMove>
 
     public Task ExecuteAsync(GamePacketContext<CharacterMove> ctx, CancellationToken token = default)
     {
-        if (ctx.Packet.MovementType > (int) CharacterMove.CharacterMovementType.Max &&
-            ctx.Packet.MovementType != (int) CharacterMove.CharacterMovementType.Skill)
+        if (ctx.Packet.MovementType >= (int) CharacterMove.CharacterMovementType.Max && (ctx.Packet.MovementType & (byte) CharacterMove.CharacterMovementType.Skill) == 0)
         {
             _logger.LogError("Received unknown movement type ({MovementType})", ctx.Packet.MovementType);
             ctx.Connection.Close();
@@ -37,6 +38,27 @@ public class CharacterMoveHandler : IGamePacketHandler<CharacterMove>
         {
             ctx.Connection.Player.Rotation = ctx.Packet.Rotation * 5;
             ctx.Connection.Player.Goto(ctx.Packet.PositionX, ctx.Packet.PositionY);
+        }
+        else
+        {
+            if (ctx.Packet.MovementType is (int) CharacterMove.CharacterMovementType.Attack or (int) CharacterMove.CharacterMovementType.Combo)
+            {
+                // todo: cancel mining if actually mining
+                // todo: clears some affects (such as invisibility when attacking)
+            }
+            else if ((ctx.Packet.MovementType & (byte) CharacterMove.CharacterMovementType.Skill) != 0)
+            {
+                var motion = ctx.Packet.MovementType & MaskSkillMotion;
+            
+                if (!ctx.Connection.Player.IsUsableSkillMotion(motion))
+                {
+                    _logger.LogError("Player is not allowed to use skill motion {SkillMotion}", motion);
+                    ctx.Connection.Close();
+                    return Task.CompletedTask;
+                }
+                
+                // todo: cancel mining if actually mining
+            }
         }
 
         if (ctx.Packet.MovementType == (int) CharacterMove.CharacterMovementType.Wait)
