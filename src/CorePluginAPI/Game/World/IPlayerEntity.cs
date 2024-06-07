@@ -55,5 +55,7 @@ namespace QuantumCore.API.Game.World
         bool HasUniqueItemEquipped(uint itemProtoId);
         bool HasUniqueGroupItemEquipped(uint itemProtoId);
         int GetPremiumRemainSeconds(EPremiumTypes type);
+        Task EquipItem(ItemInstance item, byte window, ushort position);
+        Task UnequipItem(ItemInstance item, byte window, ushort position);
     }
 }

@@ -2,6 +2,7 @@
 using QuantumCore.API;
 using QuantumCore.API.PluginTypes;
 using QuantumCore.Game.Packets;
+using QuantumCore.Game.PlayerUtils;
 
 namespace QuantumCore.Game.PacketHandlers.Game;
 
@@ -41,57 +42,33 @@ public class ItemUseHandler : IGamePacketHandler<ItemUse>
             return;
         }
 
-        if (ctx.Packet.Window == (byte) WindowType.Inventory && ctx.Packet.Position >= player.Inventory.Size)
+        switch ((EItemType)itemProto.Type)
         {
-            player.RemoveItem(item);
-            if (await player.Inventory.PlaceItem(item))
-            {
-                player.SendRemoveItem(ctx.Packet.Window, ctx.Packet.Position);
-                player.SendItem(item);
-                player.SendCharacterUpdate();
-            }
-            else
-            {
-                player.SetItem(item, ctx.Packet.Window, ctx.Packet.Position);
-                player.SendChatInfo("Cannot unequip item if the inventory is full");
-            }
-        }
-        else if (player.IsEquippable(item))
-        {
-            var wearSlot = player.Inventory.EquipmentWindow.GetWearPosition(_itemManager, item.ItemId);
-
-            if (wearSlot <= ushort.MaxValue)
-            {
-                var item2 = player.Inventory.EquipmentWindow.GetItem((ushort)wearSlot);
-
-                if (item2 != null)
+            case EItemType.Armor:
+            case EItemType.Weapon:
+            case EItemType.Rod:
+            case EItemType.Pick:
                 {
-                    player.RemoveItem(item);
-                    player.RemoveItem(item2);
-                    if (await player.Inventory.PlaceItem(item2))
+                    if (ctx.Packet.Window == (byte)WindowType.Inventory && ctx.Packet.Position >= player.Inventory.Size)
                     {
-                        player.SendRemoveItem(ctx.Packet.Window, (ushort)wearSlot);
-                        player.SendRemoveItem(ctx.Packet.Window, ctx.Packet.Position);
-                        player.SetItem(item, ctx.Packet.Window, (ushort)wearSlot);
-                        player.SetItem(item2, ctx.Packet.Window, ctx.Packet.Position);
-                        player.SendItem(item);
-                        player.SendItem(item2);
+                        await player.UnequipItem(item, ctx.Packet.Window, ctx.Packet.Position);
                     }
-                    else
+
+                    else if (player.IsEquippable(item))
                     {
-                        player.SetItem(item, ctx.Packet.Window, ctx.Packet.Position);
-                        player.SetItem(item2, ctx.Packet.Window, (ushort)wearSlot);
-                        player.SendChatInfo("Cannot swap item if the inventory is full");
+                        await player.EquipItem(item, ctx.Packet.Window, ctx.Packet.Position);
                     }
+
+                    break;
                 }
-                else
+
+            default:
                 {
-                    player.RemoveItem(item);
-                    player.SetItem(item, (byte) WindowType.Inventory, (ushort)wearSlot);
-                    player.SendRemoveItem(ctx.Packet.Window, ctx.Packet.Position);
-                    player.SendItem(item);
+                    player.SendChatInfo($"Unknown item type {itemProto.Type}");
+                    break;
                 }
-            }
         }
+
+
     }
 }
