@@ -258,7 +258,7 @@ public class CommandTests : IAsyncLifetime
         var item = new ItemInstance {ItemId = 1, Count = 1};
         var wearSlot = _player.Inventory.EquipmentWindow.GetWearPosition(_itemManager, item.ItemId);
 
-        _player.SetItem(item, (byte) WindowType.Inventory, (ushort) wearSlot);
+        await _player.SetItem(item, (byte) WindowType.Inventory, (ushort) wearSlot);
 
         await _commandManager.Handle(_connection, "debug_damage");
         // simple calculation just for this test

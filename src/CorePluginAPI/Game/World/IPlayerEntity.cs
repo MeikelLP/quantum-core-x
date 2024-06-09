@@ -36,7 +36,7 @@ namespace QuantumCore.API.Game.World
         bool IsEquippable(ItemInstance item);
         bool DestroyItem(ItemInstance item);
         void RemoveItem(ItemInstance item);
-        void SetItem(ItemInstance item, byte window, ushort position);
+        Task SetItem(ItemInstance item, byte window, ushort position);
         void SendBasicData();
         void SendPoints();
         void SendInventory();

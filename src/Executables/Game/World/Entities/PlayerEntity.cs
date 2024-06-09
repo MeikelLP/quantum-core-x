@@ -1025,7 +1025,7 @@ namespace QuantumCore.Game.World.Entities
             }
         }
 
-        public void SetItem(ItemInstance item, byte window, ushort position)
+        public async Task SetItem(ItemInstance item, byte window, ushort position)
         {
             switch (window)
             {
@@ -1036,7 +1036,7 @@ namespace QuantumCore.Game.World.Entities
                         if (Inventory.EquipmentWindow.GetItem(position) == null)
                         {
                             Inventory.SetEquipment(item, position);
-                            item.Set(_cacheManager, Player.Id, window, position).Wait(); // TODO
+                            await item.Set(_cacheManager, Player.Id, window, position);
                             CalculateDefence();
                             SendCharacterUpdate();
                             SendPoints();
@@ -1045,7 +1045,7 @@ namespace QuantumCore.Game.World.Entities
                     else
                     {
                         // Inventory
-                        Inventory.PlaceItem(item, position);
+                        await Inventory.PlaceItem(item, position);
                     }
 
                     break;
@@ -1068,22 +1068,22 @@ namespace QuantumCore.Game.World.Entities
                     {
                         SendRemoveItem(window, (ushort)wearSlot);
                         SendRemoveItem(window, position);
-                        SetItem(item, window, (ushort)wearSlot);
-                        SetItem(item2, window, position);
+                        await SetItem(item, window, (ushort)wearSlot);
+                        await SetItem(item2, window, position);
                         SendItem(item);
                         SendItem(item2);
                     }
                     else
                     {
-                        SetItem(item, window, position);
-                        SetItem(item2, window, (ushort)wearSlot);
+                        await SetItem(item, window, position);
+                        await SetItem(item2, window, (ushort)wearSlot);
                         SendChatInfo("Cannot swap item if the inventory is full");
                     }
                 }
                 else
                 {
                     RemoveItem(item);
-                    SetItem(item, (byte)WindowType.Inventory, (ushort)wearSlot);
+                    await SetItem(item, (byte)WindowType.Inventory, (ushort)wearSlot);
                     SendRemoveItem(window, position);
                     SendItem(item);
                 }
@@ -1101,7 +1101,7 @@ namespace QuantumCore.Game.World.Entities
             }
             else
             {
-                SetItem(item, window, position);
+                await SetItem(item, window, position);
                 SendChatInfo("Cannot unequip item if the inventory is full");
             }
         }
