@@ -1106,6 +1106,24 @@ namespace QuantumCore.Game.World.Entities
             }
         }
 
+        public async Task ChangeItemQuantity(ItemInstance item, byte quantity)
+        {
+            if (quantity == 0)
+            {
+                RemoveItem(item);
+                SendRemoveItem(item.Window, (ushort)item.Position);
+                await item.Set(_cacheManager, 0, 0, 0); // TODO
+            }
+            else
+            {
+                item.Count = quantity;
+                item.Persist(_cacheManager).Wait(); // TODO
+
+                SendItem(item);
+            }
+
+        }
+
         public override void ShowEntity(IConnection connection)
         {
             SendCharacter(connection);

@@ -29,4 +29,5 @@ public interface IDropProvider
     List<ItemInstance> CalculateLevelDropItems(IPlayerEntity player, MonsterEntity monster, int delta, int range);
     List<ItemInstance> CalculateEtcDropItems(MonsterEntity monster, int delta, int range);
     List<ItemInstance> CalculateMetinDropItems(MonsterEntity monsterEntity, int delta, int range);
+    ItemInstance? CalculateSpecialItemDrop(uint specialItemProtoId);
 }

@@ -60,5 +60,6 @@ namespace QuantumCore.API.Game.World
         Task EquipItem(ItemInstance item, byte window, ushort position);
         Task UnequipItem(ItemInstance item, byte window, ushort position);
         bool IsUsableSkillMotion(int motion);
+        Task ChangeItemQuantity(ItemInstance item, byte quantity);
     }
 }
