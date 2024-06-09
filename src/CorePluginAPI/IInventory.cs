@@ -19,5 +19,4 @@ public interface IInventory
     bool IsSpaceAvailable(ItemInstance item, ushort position);
     void MoveItem(ItemInstance item, ushort fromPosition, ushort position);
     void SetEquipment(ItemInstance item, ushort position);
-    Task ChangeItemQuantity(ItemInstance item, byte newQuantity);
 }

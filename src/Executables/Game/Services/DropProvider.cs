@@ -541,7 +541,7 @@ public class DropProvider : IDropProvider
         var itemProto = _itemManager.GetItem(drop.Key);
         if (itemProto is null)
         {
-            _logger.LogWarning("Could not find item proto for {ItemProtoId}", drop.ItemProtoId);
+            _logger.LogWarning("Could not find item proto for {ItemProtoId}", drop.Key);
             return null;
         }
 
