@@ -72,7 +72,7 @@ namespace QuantumCore.Core.Networking
             {
                 await foreach (var packet in _packetReader.EnumerateAsync(_stream, stoppingToken))
                 {
-                     _logger.LogDebug(" IN: {Type} {Data}", packet.GetType(), JsonSerializer.Serialize(packet));
+                    _logger.LogDebug(" IN: {Type} {Data}", packet.GetType(), JsonSerializer.Serialize(packet));
                     await _pluginExecutor.ExecutePlugins<IPacketOperationListener>(_logger,
                         x => x.OnPrePacketReceivedAsync(packet, Array.Empty<byte>(), stoppingToken));
 
