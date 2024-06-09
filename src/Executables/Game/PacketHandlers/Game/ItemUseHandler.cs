@@ -80,7 +80,7 @@ public class ItemUseHandler : IGamePacketHandler<ItemUse>
 
                     if (drop == null)
                     {
-                        player.SendChatInfo("Cannot find frops for item.");
+                        player.SendChatInfo("Cannot find drops for item.");
                         return;
                     }
 
