@@ -100,10 +100,6 @@ public class ItemUseHandler : IGamePacketHandler<ItemUse>
 
                     break;
                 }
-            case EItemType.Hair:
-                {
-                    break;
-                }
             case EItemType.Skillbook:
                 {
                     var skillId = itemProto.Id == _skillsOptions.GenericSkillBookId
