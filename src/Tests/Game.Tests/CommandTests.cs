@@ -756,20 +756,22 @@ public class CommandTests : IAsyncLifetime
         // Prepare
         _player.SetPoint(EPoints.Level, 5);
         _player.Player.PlayerClass = 0;
+
+        var skillId = ESkillIndexes.AuraOfTheSword;
         
-        _skillManager.GetSkill(ESkillIndexes.AuraOfTheSword).Returns(new SkillData
+        _skillManager.GetSkill(skillId).Returns(new SkillData
         {
-            Id = ESkillIndexes.AuraOfTheSword,
+            Id = skillId,
             Type = (ESkillCategoryType) (_player.Player.PlayerClass + 1),
             Flag = ESkillFlag.Attack
         });
         _player.Skills.SetSkillGroup(1);
         
         // Act
-        await _commandManager.Handle(_connection, "/skillup 1");
+        await _commandManager.Handle(_connection, $"/skillup {(uint) skillId}");
 
         // Assert
-        var skill = _player.Skills[ESkillIndexes.AuraOfTheSword];
+        var skill = _player.Skills[skillId];
         skill.Should().NotBeNull();
         skill?.Level.Should().Be(1);
     }
@@ -793,7 +795,7 @@ public class CommandTests : IAsyncLifetime
         _player.Skills[skillId].MasterType = ESkillMasterType.Normal;
         
         // Act
-        await _commandManager.Handle(_connection, $"/skillup {skillId}");
+        await _commandManager.Handle(_connection, $"/skillup {(uint) skillId}");
 
         // Assert
         var skill = _player.Skills[skillId];
