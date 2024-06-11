@@ -33,6 +33,8 @@ namespace QuantumCore.API.Game.Types
         AttackBonus = 93,
         DefenceBonus = 94,
         
+        HorseSkill = 113,
+        
         MallItemBonus = 117,
         
         MagicAttackBonus = 132,

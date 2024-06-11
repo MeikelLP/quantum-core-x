@@ -3,8 +3,15 @@ using QuantumCore.Game.Extensions;
 
 namespace QuantumCore.Game.Services;
 
-internal class SpawnGroupProvider : ISpawnGroupProvider
+public class SpawnGroupProvider : ISpawnGroupProvider
 {
+    private readonly IParserService _parserService;
+
+    public SpawnGroupProvider(IParserService parserService)
+    {
+        _parserService = parserService;
+    }
+    
     public async Task<IEnumerable<SpawnGroup>> GetSpawnGroupsAsync()
     {
         const string file = "data/group.txt";
@@ -12,7 +19,7 @@ internal class SpawnGroupProvider : ISpawnGroupProvider
         
         using var sr = new StreamReader(file);
 
-        var groups = await ParserUtils.ParseFileGroups(sr);
+        var groups = await _parserService.ParseFileGroups(sr);
 
         var spawnGroups = groups.Select(g => g.ToSpawnGroup());
 
@@ -26,7 +33,7 @@ internal class SpawnGroupProvider : ISpawnGroupProvider
         
         using var sr = new StreamReader(file);
         
-        var groups = await ParserUtils.ParseFileGroups(sr);
+        var groups = await _parserService.ParseFileGroups(sr);
         
         var collections = groups.Select(x => x.ToSpawnGroupCollection());
 

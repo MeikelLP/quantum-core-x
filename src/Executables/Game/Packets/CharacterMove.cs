@@ -13,7 +13,7 @@ namespace QuantumCore.Game.Packets
             Attack = 2,
             Combo = 3,
             MobSkill = 4,
-            Max,
+            Max = 6,
             Skill = 0x80
         }
         

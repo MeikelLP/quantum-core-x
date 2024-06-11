@@ -25,6 +25,7 @@ public static class ServiceExtensions
         });
         services.AddGameDatabase();
         services.AddGameCaching();
+        services.AddGameCommands();
         services.AddOptions<AuthOptions>().BindConfiguration("Auth");
         services.AddOptions<GameOptions>().BindConfiguration("Game");
         services.AddHttpClient("", (provider, http) =>
@@ -34,6 +35,7 @@ public static class ServiceExtensions
         });
         services.AddScoped<IPlayerManager, PlayerManager>();
         services.AddSingleton<IPlayerFactory, PlayerFactory>();
+        services.AddSingleton<IParserService, ParserService>();
         services.AddSingleton<ISpawnGroupProvider, SpawnGroupProvider>();
         services.AddSingleton<ISpawnPointProvider, SpawnPointProvider>();
         services.AddSingleton<IDropProvider, DropProvider>();
@@ -43,9 +45,10 @@ public static class ServiceExtensions
         services.AddSingleton<IAtlasProvider, AtlasProvider>();
         services.AddSingleton<IAnimationManager, AnimationManager>();
         services.AddSingleton<IExperienceManager, ExperienceManager>();
-        services.AddSingleton<ICommandManager, CommandManager>();
         services.AddSingleton<IChatManager, ChatManager>();
         services.AddSingleton<IQuestManager, QuestManager>();
+        services.AddSingleton<ISkillManager, SkillManager>();
+        
         services.AddSingleton<IWorld, World.World>();
 
         return services;

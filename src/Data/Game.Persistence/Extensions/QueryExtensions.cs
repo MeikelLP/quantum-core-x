@@ -1,4 +1,5 @@
 ﻿using QuantumCore.API.Core.Models;
+using QuantumCore.API.Game.Skills;
 using QuantumCore.Game.Persistence.Entities;
 
 namespace QuantumCore.Game.Persistence.Extensions;
@@ -31,7 +32,21 @@ public static class QueryExtensions
             HairPart = x.HairPart,
             GivenStatusPoints = x.GivenStatusPoints,
             AvailableStatusPoints = x.AvailableStatusPoints,
+            AvailableSkillPoints = x.AvailableSkillPoints,
             Empire = x.Empire
+        });
+    }
+    
+    public static IQueryable<Skill> SelectPlayerSkill(this IQueryable<PlayerSkill> query)
+    {
+        return query.Select(x => new Skill
+        {
+            PlayerId = x.PlayerId,
+            SkillId = (ESkillIndexes) x.SkillId,
+            MasterType = x.MasterType,
+            Level = x.Level,
+            NextReadTime = x.NextReadTime,
+            ReadsRequired = x.ReadsRequired
         });
     }
 
