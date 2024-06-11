@@ -33,6 +33,8 @@ public class Player
     [StringLength(24)] public required string Name { get; set; }
     [DefaultValue(0)] public required uint GivenStatusPoints { get; set; }
     [DefaultValue(0)] public required uint AvailableStatusPoints { get; set; }
+    [DefaultValue(0)] public required uint AvailableSkillPoints { get; set; }
+    
 
     public static void Configure(EntityTypeBuilder<Player> builder, DatabaseFacade database)
     {
@@ -80,7 +82,8 @@ public class Player
                 BodyPart = 0,
                 HairPart = 0,
                 GivenStatusPoints = 0,
-                AvailableStatusPoints = 0
+                AvailableStatusPoints = 0,
+                AvailableSkillPoints = 99
             }
         ]);
     }

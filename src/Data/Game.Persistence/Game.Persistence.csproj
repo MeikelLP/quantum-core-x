@@ -16,14 +16,17 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.4"/>
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.4"/>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.5"/>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.5"/>
         <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.4"/>
         <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="8.0.2"/>
     </ItemGroup>
 
     <ItemGroup>
         <Folder Include="Migrations\"/>
+        <Folder Include="Migrations\Mysql\" />
+        <Folder Include="Migrations\Postgresql\" />
+        <Folder Include="Migrations\Sqlite\" />
     </ItemGroup>
 
 </Project>

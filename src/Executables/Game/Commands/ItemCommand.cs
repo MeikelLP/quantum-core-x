@@ -1,8 +1,11 @@
 ﻿using CommandLine;
+using Microsoft.Extensions.Options;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game;
+using QuantumCore.API.Game.Skills;
 using QuantumCore.Caching;
+using QuantumCore.Core.Utils;
 using QuantumCore.Extensions;
 using QuantumCore.Game.Extensions;
 
@@ -13,11 +16,15 @@ namespace QuantumCore.Game.Commands
     {
         private readonly IItemManager _itemManager;
         private readonly ICacheManager _cacheManager;
+        private readonly ISkillManager _skillManager;
+        private readonly SkillsOptions _skillsOptions;
 
-        public ItemCommand(IItemManager itemManager, ICacheManager cacheManager)
+        public ItemCommand(IItemManager itemManager, ICacheManager cacheManager, ISkillManager skillManager, IOptions<GameOptions> gameOptions)
         {
             _itemManager = itemManager;
             _cacheManager = cacheManager;
+            _skillManager = skillManager;
+            _skillsOptions = gameOptions.Value.Skills;
         }
 
         public async Task ExecuteAsync(CommandContext<ItemCommandOptions> context)
@@ -27,6 +34,39 @@ namespace QuantumCore.Game.Commands
             {
                 context.Player.SendChatInfo("Item not found");
                 return;
+            }
+
+            // todo: Move to "instantiation of item" logic ?
+            if (item.Id == _skillsOptions.GenericSkillBookId)
+            {
+                var skillBookId = 0U;
+                do
+                {
+                    skillBookId = CoreRandom.GenerateUInt32(1, 112);
+                    
+                    if (!Enum.TryParse<ESkillIndexes>(skillBookId.ToString(), out var skillId))
+                    {
+                        continue;
+                    }
+
+                    var skill = _skillManager.GetSkill(skillId);
+                    if (skill == null)
+                    {
+                        continue;
+                    }
+
+                    break;
+
+                } while (true);
+                
+                var bookId = _skillsOptions.SkillBookStartId + skillBookId;
+                
+                item = _itemManager.GetItem(bookId);
+                if (item == null)
+                {
+                    context.Player.SendChatInfo($"Skillbook ({bookId}) not found");
+                    return;
+                }
             }
 
             var instance = new ItemInstance {Id = Guid.NewGuid(), ItemId = item.Id, Count = context.Arguments.Count};

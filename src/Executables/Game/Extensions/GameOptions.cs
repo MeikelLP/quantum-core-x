@@ -16,6 +16,8 @@ public class GameOptions
     /// </summary>
     public IReadOnlyList<Point> Empire { get; set; } = new List<Point>();
 
+    public SkillsOptions Skills { get; set; } = new SkillsOptions();
+
     public DropOptions Drops { get; set; } = new DropOptions();
 }
 
@@ -44,4 +46,37 @@ public class DeltaChances
 {
     public IReadOnlyList<uint> Boss { get; set; }
     public IReadOnlyList<uint> Normal { get; set; }
+}
+
+public class SkillsOptions
+{
+    /// <summary>
+    /// Skill book id that is used when creating a specific skill book for a skill
+    /// </summary>
+    public uint GenericSkillBookId { get; set; } = 50300;
+    
+    /// <summary>
+    /// Identifier for iterating over skill book ids
+    /// </summary>
+    public uint SkillBookStartId { get; set; } = 50400;
+    
+    /// <summary>
+    /// Consumed player experience when using a skill book
+    /// </summary>
+    public int SkillBookNeededExperience { get; set; } = 20000;
+    
+    /// <summary>
+    /// Minimum delay to wait after using a skill book
+    /// </summary>
+    public int SkillBookDelayMin { get; set; } = 64800;
+    
+    /// <summary>
+    /// Maximum delay to wait after using a skill book
+    /// </summary>
+    public int SkillBookDelayMax { get; set; } = 108000;
+    
+    /// <summary>
+    /// Identifier for the soul stone item
+    /// </summary>
+    public int SoulStoneId { get; set; } = 50513;
 }

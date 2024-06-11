@@ -1,8 +1,10 @@
 using System.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
+using QuantumCore.API.Game.Skills;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.World;
 using QuantumCore.Caching;
@@ -13,6 +15,7 @@ using QuantumCore.Game.Packets;
 using QuantumCore.Game.Packets.Mall;
 using QuantumCore.Game.Persistence;
 using QuantumCore.Game.PlayerUtils;
+using QuantumCore.Game.Skills;
 
 namespace QuantumCore.Game.World.Entities
 {
@@ -29,6 +32,7 @@ namespace QuantumCore.Game.World.Entities
         public IList<Guid> Groups { get; private set; }
         public IShop? Shop { get; set; }
         public IQuickSlotBar QuickSlotBar { get; }
+        public IPlayerSkills Skills { get; private set; }
         public IQuest? CurrentQuest { get; set; }
         public Dictionary<string, IQuest> Quests { get; } = new();
 
@@ -133,7 +137,12 @@ namespace QuantumCore.Game.World.Entities
             PositionX = player.PositionX;
             PositionY = player.PositionY;
             QuickSlotBar = new QuickSlotBar(_cacheManager, _logger, this);
-
+            Skills = new PlayerSkills(_scope.ServiceProvider.GetRequiredService<ILogger<PlayerSkills>>(), this,
+                _scope.ServiceProvider.GetRequiredService<IDbPlayerSkillsRepository>(),
+                _scope.ServiceProvider.GetRequiredService<ISkillManager>(),
+                _scope.ServiceProvider.GetRequiredService<IOptions<GameOptions>>().Value.Skills
+            );
+            
             MovementSpeed = 150;
             EntityClass = player.PlayerClass;
 
@@ -172,6 +181,7 @@ namespace QuantumCore.Game.World.Entities
             Health = (int) GetPoint(EPoints.MaxHp); // todo: cache hp of player
             Mana = (int) GetPoint(EPoints.MaxSp);
             await LoadPermGroups();
+            await Skills.LoadAsync();
             _questManager.InitializePlayer(this);
 
             CalculateDefence();
@@ -389,7 +399,7 @@ namespace QuantumCore.Game.World.Entities
                 if (entity is not IPlayerEntity other) continue;
                 SendCharacterAdditional(other.Connection);
             }
-
+            
             GiveStatusPoints();
             SendPoints();
         }
@@ -587,6 +597,9 @@ namespace QuantumCore.Game.World.Entities
                 case EPoints.StatusPoints:
                     Player.AvailableStatusPoints += (uint) value;
                     break;
+                case EPoints.Skill:
+                    Player.AvailableSkillPoints += (uint) value;
+                    break;
                 case EPoints.PlayTime:
                     Player.PlayTime += (uint) value;
                     break;
@@ -625,6 +638,9 @@ namespace QuantumCore.Game.World.Entities
                     break;
                 case EPoints.PlayTime:
                     Player.PlayTime = value;
+                    break;
+                case EPoints.Skill:
+                    Player.AvailableSkillPoints = (byte) value;
                     break;
                 default:
                     _logger.LogError("Failed to set point to {Point}, unsupported", point);
@@ -696,6 +712,10 @@ namespace QuantumCore.Game.World.Entities
                     return Player.AvailableStatusPoints;
                 case EPoints.PlayTime:
                     return (uint) TimeSpan.FromMilliseconds(Player.PlayTime).TotalMinutes;
+                case EPoints.Skill:
+                    return Player.AvailableSkillPoints;
+                case EPoints.SubSkill:
+                    return 1;
                 default:
                     if (Enum.GetValues<EPoints>().Contains(point))
                     {
@@ -713,6 +733,8 @@ namespace QuantumCore.Game.World.Entities
             Player.PositionX = PositionX;
             Player.PositionY = PositionY;
 
+            await Skills.PersistAsync();
+            
             var playerManager = _scope.ServiceProvider.GetRequiredService<IPlayerManager>();
             await playerManager.SetPlayerAsync(Player);
         }
@@ -844,7 +866,13 @@ namespace QuantumCore.Game.World.Entities
             _logger.LogTrace("GetPremiumRemainSeconds not implemented yet");
             return 0; // todo: implement premium system
         }
-        
+
+        public bool IsUsableSkillMotion(int motion)
+        {
+            // todo: check if riding, mining or fishing
+            return true;
+        }
+
         public bool HasUniqueGroupItemEquipped(uint itemProtoId)
         {
             _logger.LogTrace("HasUniqueGroupItemEquipped not implemented yet");
@@ -1054,7 +1082,8 @@ namespace QuantumCore.Game.World.Entities
                 Class = Player.PlayerClass,
                 PositionX = PositionX,
                 PositionY = PositionY,
-                Empire = Empire
+                Empire = Empire,
+                SkillGroup = Player.SkillGroup
             };
             Connection.Send(details);
         }

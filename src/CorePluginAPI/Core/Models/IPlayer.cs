@@ -32,4 +32,5 @@ public class PlayerData
     public uint MaxSp { get; set; }
     public byte Empire { get; set; }
     public byte Slot { get; set; }
+    public uint AvailableSkillPoints { get; set; }
 }
