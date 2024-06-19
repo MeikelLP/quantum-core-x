@@ -12,6 +12,7 @@ using QuantumCore.Core.Utils;
 using QuantumCore.Extensions;
 using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Packets;
+using QuantumCore.Game.Packets.Mall;
 using QuantumCore.Game.Persistence;
 using QuantumCore.Game.PlayerUtils;
 using QuantumCore.Game.Skills;
@@ -26,6 +27,7 @@ namespace QuantumCore.Game.World.Entities
         public IGameConnection Connection { get; }
         public PlayerData Player { get; private set; }
         public IInventory Inventory { get; private set; }
+        public IMall Mall { get; }
         public IEntity? Target { get; set; }
         public IList<Guid> Groups { get; private set; }
         public IShop? Shop { get; set; }
@@ -122,11 +124,14 @@ namespace QuantumCore.Game.World.Entities
             _world = world;
             _logger = logger;
             _scope = serviceProvider.CreateScope();
+            var loggerFactory = _scope.ServiceProvider.GetRequiredService<ILoggerFactory>();
             var itemRepository = _scope.ServiceProvider.GetRequiredService<IItemRepository>();
-            Inventory = new Inventory(itemManager, _cacheManager, _logger, itemRepository, player.Id,
+            Inventory = new Inventory(itemManager, _cacheManager, loggerFactory.CreateLogger<Inventory>(), itemRepository, player.Id,
                 (byte) WindowType.Inventory, InventoryConstants.DEFAULT_INVENTORY_WIDTH,
                 InventoryConstants.DEFAULT_INVENTORY_HEIGHT, InventoryConstants.DEFAULT_INVENTORY_PAGES);
             Inventory.OnSlotChanged += Inventory_OnSlotChanged;
+            Mall = new Mall(loggerFactory.CreateLogger<Mall>(), connection, itemManager, cacheManager);
+            
             Player = player;
             Empire = player.Empire;
             PositionX = player.PositionX;
@@ -169,6 +174,7 @@ namespace QuantumCore.Game.World.Entities
         public async Task Load()
         {
             await Inventory.Load();
+            await Mall.Load();
             await QuickSlotBar.Load();
             Player.MaxHp = GetMaxHp(_jobManager, Player.PlayerClass, Player.Level, Player.Ht);
             Player.MaxSp = GetMaxSp(_jobManager, Player.PlayerClass, Player.Level, Player.Iq);
