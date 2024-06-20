@@ -36,7 +36,7 @@ namespace QuantumCore.API.Game.World
         bool IsEquippable(ItemInstance item);
         bool DestroyItem(ItemInstance item);
         void RemoveItem(ItemInstance item);
-        void SetItem(ItemInstance item, byte window, ushort position);
+        Task SetItem(ItemInstance item, byte window, ushort position);
         void SendBasicData();
         void SendPoints();
         void SendInventory();
@@ -57,6 +57,9 @@ namespace QuantumCore.API.Game.World
         bool HasUniqueItemEquipped(uint itemProtoId);
         bool HasUniqueGroupItemEquipped(uint itemProtoId);
         int GetPremiumRemainSeconds(EPremiumTypes type);
+        Task EquipItem(ItemInstance item, byte window, ushort position);
+        Task UnequipItem(ItemInstance item, byte window, ushort position);
         bool IsUsableSkillMotion(int motion);
+        Task ChangeItemQuantity(ItemInstance item, byte quantity);
     }
 }

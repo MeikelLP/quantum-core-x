@@ -50,7 +50,7 @@ public partial class ParserService : IParserService
             Monster = uint.Parse(splitted[10])
         };
     }
-    
+
     public async Task<ImmutableArray<CommonDropEntry>> GetCommonDropsAsync(TextReader sr, CancellationToken cancellationToken = default)
     {
         var list = new List<CommonDropEntry>();
@@ -185,6 +185,61 @@ public partial class ParserService : IParserService
         return groups;
     }
     
+    public SpecialItemGroup ParseSpecialItemGroup(DataFileGroup group, IItemManager itemManager)
+    {
+        var itemId = group.GetField<uint>("Vnum");
+        if (itemId == default)
+        {
+            throw new MissingRequiredFieldException("Vnum");
+        }
+
+        var type = group.GetField<string>("Type");
+        if (type == default)
+        {
+            throw new MissingRequiredFieldException("Type");
+        }
+
+        var entry = new SpecialItemGroup
+        {
+            SpecialItemId = itemId
+        };
+
+        foreach (var dropData in group.Data)
+        {
+            var itemProtoId = uint.TryParse(dropData[1], InvNum, out var id) ? id : 0;
+            if (itemProtoId < 1)
+            {
+                var item = itemManager.GetItemByName(dropData[1]); // Some entries are the names instead of the id
+                if (item == null)
+                {
+                    throw new MissingRequiredFieldException("ItemProtoId");
+                }
+                itemProtoId = item.Id;
+            }
+
+            var count = uint.Parse(dropData[2], InvNum);
+            if (count < 1)
+            {
+                throw new MissingRequiredFieldException("Count");
+            }
+
+            var chance = uint.TryParse(dropData[3], InvNum, out var ch) ? ch : 0;
+            if (chance <= 0)
+            {
+                throw new MissingRequiredFieldException("Chance");
+            }
+
+            entry.Drops.Add(new SpecialItemGroup.Drop
+            {
+                Amount = count,
+                Chance = chance,
+                ItemProtoId = itemProtoId
+            });
+        }
+
+        return entry;
+    }
+
     public MonsterDropContainer? ParseMobGroup(DataFileGroup group, IItemManager itemManager)
     {
         uint minKillCount = 0;
