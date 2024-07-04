@@ -144,7 +144,7 @@ namespace QuantumCore.Core.Networking
                             await _stream.WriteAsync(bytesToSend).ConfigureAwait(false);
                             await _stream.FlushAsync().ConfigureAwait(false);
                             await _pluginExecutor.ExecutePlugins<IPacketOperationListener>(_logger,
-                                    x => x.OnPostPacketReceivedAsync(obj, bytes, CancellationToken.None))
+                                    x => x.OnPostPacketSentAsync(obj, bytes, CancellationToken.None))
                                 .ConfigureAwait(false);
                         }
                         catch (Exception e)
