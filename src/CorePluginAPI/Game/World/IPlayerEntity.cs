@@ -10,6 +10,7 @@ namespace QuantumCore.API.Game.World
         IGameConnection Connection { get; }
         PlayerData Player { get; }
         IInventory Inventory { get; }
+        IMall Mall { get; }
         IEntity? Target { get; set; }
         IList<Guid> Groups { get; }
         IShop? Shop { get; set; }
