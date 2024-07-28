@@ -1,13 +1,13 @@
-﻿using CommandLine;
+using CommandLine;
 using Microsoft.Extensions.Options;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game;
 using QuantumCore.API.Game.Skills;
-using QuantumCore.Caching;
 using QuantumCore.Core.Utils;
 using QuantumCore.Extensions;
 using QuantumCore.Game.Extensions;
+using QuantumCore.Game.Persistence;
 
 namespace QuantumCore.Game.Commands
 {
@@ -15,14 +15,14 @@ namespace QuantumCore.Game.Commands
     public class ItemCommand : ICommandHandler<ItemCommandOptions>
     {
         private readonly IItemManager _itemManager;
-        private readonly ICacheManager _cacheManager;
+        private readonly IItemRepository _itemRepository;
         private readonly ISkillManager _skillManager;
         private readonly SkillsOptions _skillsOptions;
 
-        public ItemCommand(IItemManager itemManager, ICacheManager cacheManager, ISkillManager skillManager, IOptions<GameOptions> gameOptions)
+        public ItemCommand(IItemManager itemManager, IItemRepository itemRepository, ISkillManager skillManager, IOptions<GameOptions> gameOptions)
         {
             _itemManager = itemManager;
-            _cacheManager = cacheManager;
+            _itemRepository = itemRepository;
             _skillManager = skillManager;
             _skillsOptions = gameOptions.Value.Skills;
         }
@@ -69,14 +69,20 @@ namespace QuantumCore.Game.Commands
                 }
             }
 
-            var instance = new ItemInstance {Id = Guid.NewGuid(), ItemId = item.Id, Count = context.Arguments.Count};
+            var instance = new ItemInstance
+            {
+                Id = Guid.NewGuid(),
+                ItemId = item.Id,
+                Count = context.Arguments.Count,
+                PlayerId = context.Player.Player.Id,
+            };
             if (!await context.Player.Inventory.PlaceItem(instance))
             {
                 context.Player.SendChatInfo("No place in inventory");
                 return;
             }
 
-            await instance.Persist(_cacheManager);
+            await instance.Persist(_itemRepository);
             context.Player.SendItem(instance);
         }
     }

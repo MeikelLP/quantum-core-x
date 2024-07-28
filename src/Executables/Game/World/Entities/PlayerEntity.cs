@@ -105,6 +105,7 @@ namespace QuantumCore.Game.World.Entities
         private readonly IWorld _world;
         private readonly ILogger<PlayerEntity> _logger;
         private readonly IServiceScope _scope;
+        private readonly IItemRepository _itemRepository;
 
         public PlayerEntity(PlayerData player, IGameConnection connection, IItemManager itemManager,
             IJobManager jobManager,
@@ -122,8 +123,8 @@ namespace QuantumCore.Game.World.Entities
             _world = world;
             _logger = logger;
             _scope = serviceProvider.CreateScope();
-            var itemRepository = _scope.ServiceProvider.GetRequiredService<IItemRepository>();
-            Inventory = new Inventory(itemManager, _cacheManager, _logger, itemRepository, player.Id,
+            _itemRepository = _scope.ServiceProvider.GetRequiredService<IItemRepository>();
+            Inventory = new Inventory(itemManager, _cacheManager, _logger, _itemRepository, player.Id,
                 (byte) WindowType.Inventory, InventoryConstants.DEFAULT_INVENTORY_WIDTH,
                 InventoryConstants.DEFAULT_INVENTORY_HEIGHT, InventoryConstants.DEFAULT_INVENTORY_PAGES);
             Inventory.OnSlotChanged += Inventory_OnSlotChanged;
@@ -754,12 +755,12 @@ namespace QuantumCore.Game.World.Entities
             {
                 RemoveItem(item);
                 SendRemoveItem(item.Window, (ushort) item.Position);
-                item.Set(_cacheManager, 0, 0, 0).Wait(); // TODO
+                item.Set(_cacheManager, 0, 0, 0, _itemRepository).Wait(); // TODO
             }
             else
             {
                 item.Count -= count;
-                item.Persist(_cacheManager).Wait(); // TODO
+                item.Persist(_itemRepository).Wait(); // TODO
 
                 SendItem(item);
 
@@ -1037,7 +1038,7 @@ namespace QuantumCore.Game.World.Entities
                         if (Inventory.EquipmentWindow.GetItem(position) == null)
                         {
                             Inventory.SetEquipment(item, position);
-                            item.Set(_cacheManager, Player.Id, window, position).Wait(); // TODO
+                            item.Set(_cacheManager, Player.Id, window, position, _itemRepository).Wait(); // TODO
                             CalculateDefence();
                             SendCharacterUpdate();
                             SendPoints();
