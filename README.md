@@ -12,8 +12,8 @@ Metin2, and all Metin2 art, images, and lore are copyrighted by [Webzen](http://
 
 You can either
 
-* be a [**developer**](docs/getting-started/developer.md) and help develop QCX or
-* be a [**user**](docs/getting-started/user.md) and setup your own instance of QCX
+* be a [**developer**](docs/docs/Getting%20Started/developer.md) and help develop QCX or
+* be a [**user**](docs/docs/Getting%20Started/user.md) and setup your own instance of QCX
 
 ## Maintainers
 
