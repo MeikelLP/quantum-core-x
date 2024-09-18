@@ -16,6 +16,7 @@
 
     <ItemGroup>
         <PackageReference Include="CommandLineParser" Version="2.9.1"/>
+        <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="4.11.0"/>
         <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="8.0.0"/>
     </ItemGroup>
 
