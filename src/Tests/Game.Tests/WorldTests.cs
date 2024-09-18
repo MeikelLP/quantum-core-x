@@ -15,7 +15,6 @@ using QuantumCore.Caching.Extensions;
 using QuantumCore.Extensions;
 using QuantumCore.Game;
 using QuantumCore.Game.Extensions;
-using QuantumCore.Game.PlayerUtils;
 using QuantumCore.Game.Services;
 using QuantumCore.Game.World;
 using QuantumCore.Game.World.Entities;
@@ -31,7 +30,7 @@ public class WorldTests
     public WorldTests()
     {
         var config = new ConfigurationBuilder()
-            .AddInMemoryCollection(new Dictionary<string, string>
+            .AddInMemoryCollection(new Dictionary<string, string?>
             {
                 {"Hosting:IpAddress", "0.0.0.0"}
             })

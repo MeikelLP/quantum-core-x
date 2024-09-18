@@ -37,7 +37,7 @@ public class WorldUpdateBenchmark
     public void GlobalSetup()
     {
         var config = new ConfigurationBuilder()
-            .AddInMemoryCollection(new Dictionary<string, string>())
+            .AddInMemoryCollection(new Dictionary<string, string?>())
             .Build();
         var services = new ServiceCollection()
             .AddLogging()
