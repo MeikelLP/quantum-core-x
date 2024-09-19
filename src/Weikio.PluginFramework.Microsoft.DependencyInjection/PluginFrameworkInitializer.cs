@@ -9,7 +9,8 @@ public class PluginFrameworkInitializer : IHostedService
     private readonly IEnumerable<IPluginCatalog> _pluginCatalogs;
     private readonly ILogger<PluginFrameworkInitializer> _logger;
 
-    public PluginFrameworkInitializer(IEnumerable<IPluginCatalog> pluginCatalogs, ILogger<PluginFrameworkInitializer> logger)
+    public PluginFrameworkInitializer(IEnumerable<IPluginCatalog> pluginCatalogs,
+        ILogger<PluginFrameworkInitializer> logger)
     {
         _pluginCatalogs = pluginCatalogs;
         _logger = logger;
@@ -25,16 +26,16 @@ public class PluginFrameworkInitializer : IHostedService
             {
                 try
                 {
-                    _logger.LogDebug("Initializing {PluginCatalog}", pluginCatalog);
+                    _logger.LogInformation("Initializing {PluginCatalog}", pluginCatalog);
 
                     await pluginCatalog.Initialize();
 
-                    _logger.LogDebug("Initialized {PluginCatalog}", pluginCatalog);
-                    _logger.LogTrace("Found the following plugins from {PluginCatalog}:", pluginCatalog);
+                    _logger.LogInformation("Initialized {PluginCatalog}", pluginCatalog.GetType().Name);
+                    _logger.LogDebug("Found the following plugins from {PluginCatalog}:", pluginCatalog);
 
                     foreach (var plugin in pluginCatalog.GetPlugins())
                     {
-                        _logger.LogTrace(plugin.ToString());
+                        _logger.LogTrace("Plugin loaded: {PluginName}", plugin.Name);
                     }
                 }
                 catch (Exception e)
