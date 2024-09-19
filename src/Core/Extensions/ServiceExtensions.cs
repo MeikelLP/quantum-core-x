@@ -33,8 +33,9 @@ public static class ServiceExtensions
         services.AddSingleton<IPacketManager>(provider =>
         {
             var packetTypes = AppDomain.CurrentDomain.GetAssemblies()
-                .Where(x => !x.IsDynamic) // ignore Castle.Core proxies
-                .SelectMany(x => x.GetExportedTypes())
+                .Where(x => x.GetName().Name?.StartsWith("DynamicProxyGenAssembly") ==
+                            false) // ignore Castle.Core proxies
+                .SelectMany(x => x.ExportedTypes)
                 .Where(x => x.IsAssignableTo(typeof(IPacketSerializable)) &&
                             x.GetCustomAttribute<PacketAttribute>()?.Direction.HasFlag(EDirection.Incoming) == true)
                 .OrderBy(x => x.FullName)
