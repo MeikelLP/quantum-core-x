@@ -73,7 +73,7 @@ See [Client](client.md) to setup your client
 
 ### 9. Credentials
 
-By default the user `admin` with the password `admin` is created. For obvious reasons it's recommended to change this once you plan on opening it up for others.
+By default, the user `admin` with the password `admin` is created. For obvious reasons it's recommended to change this once you plan on opening it up for others.
 
 :::tip
 For more infos about account creation refer to [Account Creation](../Guides/account-creation.md)
