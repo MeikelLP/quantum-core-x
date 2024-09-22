@@ -38,23 +38,24 @@ namespace QuantumCore.Game
                     return dataItem;
                 }
             }
+
             return null;
         }
 
         /// <summary>
         /// Try to load the item_proto file
         /// </summary>
-        public Task LoadAsync(CancellationToken token = default)
+        public async Task LoadAsync(CancellationToken token = default)
         {
             _logger.LogInformation("Loading item_proto");
-            var data = ItemProto.FromFile("data/item_proto");
+            var data = await new ItemProtoLoader().LoadAsync("data/item_proto");
 
-            _items = data.Content.Data.Items.Select(proto => new ItemData
+            _items = data.Select(proto => new ItemData
             {
-                Applies = proto.Applies.Select(x => new ItemApplyData { Type = x.Type, Value = x.Value }).ToList(),
+                Applies = proto.Applies.Select(x => new ItemApplyData {Type = x.Type, Value = x.Value}).ToList(),
                 Flags = proto.Flags,
                 Id = proto.Id,
-                Limits = proto.Limits.Select(x => new ItemLimitData { Type = x.Type, Value = x.Value }).ToList(),
+                Limits = proto.Limits.Select(x => new ItemLimitData {Type = x.Type, Value = x.Value}).ToList(),
                 Name = proto.Name,
                 Size = proto.Size,
                 Sockets = proto.Sockets,
@@ -75,8 +76,6 @@ namespace QuantumCore.Game
                 WearFlags = proto.WearFlags,
                 MagicItemPercentage = proto.MagicItemPercentage
             }).ToImmutableArray();
-
-            return Task.CompletedTask;
         }
 
         /// <summary>
@@ -89,7 +88,7 @@ namespace QuantumCore.Game
         /// <returns>Item instance</returns>
         public ItemInstance CreateItem(ItemData proto, byte count = 1)
         {
-            return new ItemInstance { Id = Guid.NewGuid(), ItemId = proto.Id, Count = count };
+            return new ItemInstance {Id = Guid.NewGuid(), ItemId = proto.Id, Count = count};
         }
     }
 }
