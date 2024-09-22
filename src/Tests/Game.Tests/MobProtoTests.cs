@@ -9,10 +9,9 @@ namespace Game.Tests;
 public class MobProtoTests
 {
     [Fact]
-    public void CanRead()
+    public async Task CanRead()
     {
-        var result = MobProto.FromFile("Fixtures/mob_proto");
-        var monsters = result.Content.Data.Monsters;
+        var monsters = await new MobProtoLoader().LoadAsync("Fixtures/mob_proto");
         monsters.Should().HaveCount(1);
         // map to another type so we don't include any library properties
         new MonsterData
@@ -52,7 +51,7 @@ public class MobProtoTests
             MountCapacity = monsters[0].MountCapacity,
             OnClickType = monsters[0].OnClickType,
             Empire = monsters[0].Empire,
-            Folder = monsters[0].Folder.TrimEnd('\0'),
+            Folder = monsters[0].Folder,
             DamageMultiply = monsters[0].DamageMultiply,
             SummonId = monsters[0].SummonId,
             DrainSp = monsters[0].DrainSp,

@@ -2,7 +2,7 @@
 
 namespace QuantumCore.API.Core.Models;
 
-public class ItemDataContainerPayload
+public class MonsterDataContainerPayload
 {
     [FieldOrder(0), FieldLength(4), FieldEncoding("EUC-KR")]
     public string Header { get; set; } = "MCOZ";
