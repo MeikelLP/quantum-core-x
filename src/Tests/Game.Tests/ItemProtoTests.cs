@@ -8,10 +8,9 @@ namespace Game.Tests;
 public class ItemProtoTests
 {
     [Fact]
-    public void CanRead()
+    public async Task CanRead()
     {
-        var proto = ItemProto.FromFile("Fixtures/item_proto");
-        var items = proto.Content.Data.Items;
+        var items = await new ItemProtoLoader().LoadAsync("Fixtures/item_proto");
         items.Should().HaveCount(1);
         // map to another type so we don't include any library properties
         new ItemData
