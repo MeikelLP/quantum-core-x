@@ -13,9 +13,6 @@ using QuantumCore.Core.Event;
 using QuantumCore.Core.Networking;
 using QuantumCore.Core.Utils;
 using QuantumCore.Extensions;
-using QuantumCore.Game.Commands;
-using QuantumCore.Game.Persistence;
-using QuantumCore.Game.PlayerUtils;
 using QuantumCore.Game.Services;
 using QuantumCore.Networking;
 
@@ -118,6 +115,7 @@ namespace QuantumCore.Game
 
             // Register all default commands
             _commandManager.Register("QuantumCore.Game.Commands", Assembly.GetExecutingAssembly());
+            _commandManager.Register("QuantumCore.Game.Commands.Guild", Assembly.GetExecutingAssembly());
 
             // Put all new connections into login phase
             RegisterNewConnectionListener(connection =>
