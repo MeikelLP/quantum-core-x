@@ -32,7 +32,10 @@ public static class ServiceExtensions
         services.AddCustomLogging(configuration);
         services.AddSingleton<IPacketManager>(provider =>
         {
-            var packetTypes = AppDomain.CurrentDomain.GetAssemblies().SelectMany(x => x.ExportedTypes)
+            var packetTypes = AppDomain.CurrentDomain.GetAssemblies()
+                .Where(x => x.GetName().Name?.StartsWith("DynamicProxyGenAssembly") ==
+                            false) // ignore Castle.Core proxies
+                .SelectMany(x => x.ExportedTypes)
                 .Where(x => x.IsAssignableTo(typeof(IPacketSerializable)) &&
                             x.GetCustomAttribute<PacketAttribute>()?.Direction.HasFlag(EDirection.Incoming) == true)
                 .OrderBy(x => x.FullName)
@@ -66,7 +69,7 @@ public static class ServiceExtensions
 
         // add minimum log level for the instances
         config.MinimumLevel.Information()
-            .MinimumLevel.Override("Microsoft.EntityFrameworkCore.Query", LogEventLevel.Warning);
+            .MinimumLevel.Override("Microsoft.EntityFrameworkCore.Database.Command", LogEventLevel.Warning);
 
         // add destructuring for entities
         config.Destructure.ToMaximumDepth(4)

@@ -1,6 +1,7 @@
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Net;
+using System.Reflection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using QuantumCore.API;
@@ -13,6 +14,7 @@ using QuantumCore.Core.Networking;
 using QuantumCore.Core.Utils;
 using QuantumCore.Extensions;
 using QuantumCore.Game.Commands;
+using QuantumCore.Game.Persistence;
 using QuantumCore.Game.PlayerUtils;
 using QuantumCore.Game.Services;
 using QuantumCore.Networking;
@@ -24,7 +26,9 @@ namespace QuantumCore.Game
         private readonly HostingOptions _hostingOptions;
         private readonly ILogger<GameServer> _logger;
         private readonly PluginExecutor _pluginExecutor;
+        private readonly IServiceProvider _serviceProvider;
         private readonly IItemManager _itemManager;
+        private readonly ISkillManager _skillManager;
         private readonly IMonsterManager _monsterManager;
         private readonly IExperienceManager _experienceManager;
         private readonly IAnimationManager _animationManager;
@@ -51,12 +55,13 @@ namespace QuantumCore.Game
             IItemManager itemManager, IMonsterManager monsterManager, IExperienceManager experienceManager,
             IAnimationManager animationManager, ICommandManager commandManager, IQuestManager questManager,
             IChatManager chatManager,
-            IWorld world, IDropProvider dropProvider)
+            IWorld world, IDropProvider dropProvider, ISkillManager skillManager)
             : base(packetManager, logger, pluginExecutor, serviceProvider, "game", hostingOptions)
         {
             _hostingOptions = hostingOptions.Value;
             _logger = logger;
             _pluginExecutor = pluginExecutor;
+            _serviceProvider = serviceProvider;
             _itemManager = itemManager;
             _monsterManager = monsterManager;
             _experienceManager = experienceManager;
@@ -66,6 +71,7 @@ namespace QuantumCore.Game
             _chatManager = chatManager;
             World = world;
             _dropProvider = dropProvider;
+            _skillManager = skillManager;
             Instance = this;
         }
 
@@ -96,7 +102,8 @@ namespace QuantumCore.Game
                 _experienceManager.LoadAsync(stoppingToken),
                 _animationManager.LoadAsync(stoppingToken),
                 _commandManager.LoadAsync(stoppingToken),
-                _dropProvider.LoadAsync(stoppingToken)
+                _dropProvider.LoadAsync(stoppingToken),
+                _skillManager.LoadAsync(stoppingToken)
             );
 
             // Initialize core systems
@@ -110,7 +117,7 @@ namespace QuantumCore.Game
             await World.Load();
 
             // Register all default commands
-            _commandManager.Register("QuantumCore.Game.Commands");
+            _commandManager.Register("QuantumCore.Game.Commands", Assembly.GetExecutingAssembly());
 
             // Put all new connections into login phase
             RegisterNewConnectionListener(connection =>

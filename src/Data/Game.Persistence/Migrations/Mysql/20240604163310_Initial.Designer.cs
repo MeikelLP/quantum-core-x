@@ -2,17 +2,17 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using QuantumCore.Game.Persistence;
 
 #nullable disable
 
-namespace QuantumCore.Game.Persistence.Migrations.Postgresql
+namespace QuantumCore.Game.Persistence.Migrations.Mysql
 {
-    [DbContext(typeof(PostgresqlGameDbContext))]
-    [Migration("20240513162434_Initial")]
+    [DbContext(typeof(MySqlGameDbContext))]
+    [Migration("20240604163310_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -20,54 +20,54 @@ namespace QuantumCore.Game.Persistence.Migrations.Postgresql
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.4")
-                .HasAnnotation("Relational:MaxIdentifierLength", 63);
+                .HasAnnotation("ProductVersion", "8.0.5")
+                .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
-            NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
+            MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
 
             modelBuilder.Entity("QuantumCore.Game.Persistence.Entities.DeletedPlayer", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("char(36)");
 
                     b.Property<Guid>("AccountId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("char(36)");
 
                     b.Property<int>("BodyPart")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("current_timestamp");
+                        .HasColumnType("datetime(6)")
+                        .HasDefaultValueSql("(CAST(CURRENT_TIMESTAMP AS DATETIME(6)))");
 
                     b.Property<DateTime>("DeletedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("datetime(6)");
 
                     b.Property<byte>("Dx")
-                        .HasColumnType("smallint");
+                        .HasColumnType("tinyint unsigned");
 
                     b.Property<int>("Experience")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<byte>("Gold")
-                        .HasColumnType("smallint");
+                        .HasColumnType("tinyint unsigned");
 
                     b.Property<int>("HairPart")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<long>("Health")
                         .HasColumnType("bigint");
 
                     b.Property<byte>("Ht")
-                        .HasColumnType("smallint");
+                        .HasColumnType("tinyint unsigned");
 
                     b.Property<byte>("Iq")
-                        .HasColumnType("smallint");
+                        .HasColumnType("tinyint unsigned");
 
                     b.Property<byte>("Level")
-                        .HasColumnType("smallint");
+                        .HasColumnType("tinyint unsigned");
 
                     b.Property<long>("Mana")
                         .HasColumnType("bigint");
@@ -75,33 +75,33 @@ namespace QuantumCore.Game.Persistence.Migrations.Postgresql
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(24)
-                        .HasColumnType("character varying(24)");
+                        .HasColumnType("varchar(24)");
 
                     b.Property<int>("PlayTime")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<byte>("PlayerClass")
-                        .HasColumnType("smallint");
+                        .HasColumnType("tinyint unsigned");
 
                     b.Property<int>("PositionX")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<int>("PositionY")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<byte>("SkillGroup")
-                        .HasColumnType("smallint");
+                        .HasColumnType("tinyint unsigned");
 
                     b.Property<byte>("St")
-                        .HasColumnType("smallint");
+                        .HasColumnType("tinyint unsigned");
 
                     b.Property<long>("Stamina")
                         .HasColumnType("bigint");
 
                     b.Property<DateTime>("UpdatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("current_timestamp");
+                        .HasColumnType("datetime(6)")
+                        .HasDefaultValueSql("(CAST(CURRENT_TIMESTAMP AS DATETIME(6)))");
 
                     b.HasKey("Id");
 
@@ -112,33 +112,32 @@ namespace QuantumCore.Game.Persistence.Migrations.Postgresql
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasDefaultValueSql("gen_random_uuid()");
+                        .HasColumnType("char(36)");
 
                     b.Property<byte>("Count")
-                        .HasColumnType("smallint");
+                        .HasColumnType("tinyint unsigned");
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("current_timestamp");
+                        .HasColumnType("datetime(6)")
+                        .HasDefaultValueSql("(CAST(CURRENT_TIMESTAMP AS DATETIME(6)))");
 
-                    b.Property<long>("ItemId")
-                        .HasColumnType("bigint");
+                    b.Property<uint>("ItemId")
+                        .HasColumnType("int unsigned");
 
-                    b.Property<long>("PlayerId")
-                        .HasColumnType("bigint");
+                    b.Property<uint>("PlayerId")
+                        .HasColumnType("int unsigned");
 
-                    b.Property<long>("Position")
-                        .HasColumnType("bigint");
+                    b.Property<uint>("Position")
+                        .HasColumnType("int unsigned");
 
                     b.Property<DateTime>("UpdatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("current_timestamp");
+                        .HasColumnType("datetime(6)")
+                        .HasDefaultValueSql("(CAST(CURRENT_TIMESTAMP AS DATETIME(6)))");
 
                     b.Property<byte>("Window")
-                        .HasColumnType("smallint");
+                        .HasColumnType("tinyint unsigned");
 
                     b.HasKey("Id");
 
@@ -151,16 +150,15 @@ namespace QuantumCore.Game.Persistence.Migrations.Postgresql
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasDefaultValueSql("gen_random_uuid()");
+                        .HasColumnType("char(36)");
 
                     b.Property<string>("Command")
                         .IsRequired()
                         .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
+                        .HasColumnType("varchar(255)");
 
                     b.Property<Guid>("GroupId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("char(36)");
 
                     b.HasKey("Id");
 
@@ -173,13 +171,12 @@ namespace QuantumCore.Game.Persistence.Migrations.Postgresql
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid")
-                        .HasDefaultValueSql("gen_random_uuid()");
+                        .HasColumnType("char(36)");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(30)
-                        .HasColumnType("character varying(30)");
+                        .HasColumnType("varchar(30)");
 
                     b.HasKey("Id");
 
@@ -199,10 +196,10 @@ namespace QuantumCore.Game.Persistence.Migrations.Postgresql
             modelBuilder.Entity("QuantumCore.Game.Persistence.Entities.PermUser", b =>
                 {
                     b.Property<Guid>("GroupId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("char(36)");
 
-                    b.Property<long>("PlayerId")
-                        .HasColumnType("bigint");
+                    b.Property<uint>("PlayerId")
+                        .HasColumnType("int unsigned");
 
                     b.HasKey("GroupId", "PlayerId");
 
@@ -214,61 +211,64 @@ namespace QuantumCore.Game.Persistence.Migrations.Postgresql
                         new
                         {
                             GroupId = new Guid("45bff707-1836-42b7-956d-00b9b69e0ee0"),
-                            PlayerId = 1L
+                            PlayerId = 1u
                         });
                 });
 
             modelBuilder.Entity("QuantumCore.Game.Persistence.Entities.Player", b =>
                 {
-                    b.Property<long>("Id")
+                    b.Property<uint>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("bigint");
+                        .HasColumnType("int unsigned");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<uint>("Id"));
 
                     b.Property<Guid>("AccountId")
-                        .HasColumnType("uuid");
+                        .HasColumnType("char(36)");
 
-                    b.Property<long>("AvailableStatusPoints")
-                        .HasColumnType("bigint");
+                    b.Property<uint>("AvailableSkillPoints")
+                        .HasColumnType("int unsigned");
 
-                    b.Property<long>("BodyPart")
-                        .HasColumnType("bigint");
+                    b.Property<uint>("AvailableStatusPoints")
+                        .HasColumnType("int unsigned");
+
+                    b.Property<uint>("BodyPart")
+                        .HasColumnType("int unsigned");
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("current_timestamp");
+                        .HasColumnType("datetime(6)")
+                        .HasDefaultValueSql("(CAST(CURRENT_TIMESTAMP AS DATETIME(6)))");
 
                     b.Property<byte>("Dx")
-                        .HasColumnType("smallint");
+                        .HasColumnType("tinyint unsigned");
 
                     b.Property<byte>("Empire")
-                        .HasColumnType("smallint");
+                        .HasColumnType("tinyint unsigned");
 
-                    b.Property<long>("Experience")
-                        .HasColumnType("bigint");
+                    b.Property<uint>("Experience")
+                        .HasColumnType("int unsigned");
 
-                    b.Property<long>("GivenStatusPoints")
-                        .HasColumnType("bigint");
+                    b.Property<uint>("GivenStatusPoints")
+                        .HasColumnType("int unsigned");
 
-                    b.Property<long>("Gold")
-                        .HasColumnType("bigint");
+                    b.Property<uint>("Gold")
+                        .HasColumnType("int unsigned");
 
-                    b.Property<long>("HairPart")
-                        .HasColumnType("bigint");
+                    b.Property<uint>("HairPart")
+                        .HasColumnType("int unsigned");
 
                     b.Property<long>("Health")
                         .HasColumnType("bigint");
 
                     b.Property<byte>("Ht")
-                        .HasColumnType("smallint");
+                        .HasColumnType("tinyint unsigned");
 
                     b.Property<byte>("Iq")
-                        .HasColumnType("smallint");
+                        .HasColumnType("tinyint unsigned");
 
                     b.Property<byte>("Level")
-                        .HasColumnType("smallint");
+                        .HasColumnType("tinyint unsigned");
 
                     b.Property<long>("Mana")
                         .HasColumnType("bigint");
@@ -276,33 +276,33 @@ namespace QuantumCore.Game.Persistence.Migrations.Postgresql
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(24)
-                        .HasColumnType("character varying(24)");
+                        .HasColumnType("varchar(24)");
 
-                    b.Property<long>("PlayTime")
-                        .HasColumnType("bigint");
+                    b.Property<ulong>("PlayTime")
+                        .HasColumnType("bigint unsigned");
 
                     b.Property<byte>("PlayerClass")
-                        .HasColumnType("smallint");
+                        .HasColumnType("tinyint unsigned");
 
                     b.Property<int>("PositionX")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<int>("PositionY")
-                        .HasColumnType("integer");
+                        .HasColumnType("int");
 
                     b.Property<byte>("SkillGroup")
-                        .HasColumnType("smallint");
+                        .HasColumnType("tinyint unsigned");
 
                     b.Property<byte>("St")
-                        .HasColumnType("smallint");
+                        .HasColumnType("tinyint unsigned");
 
                     b.Property<long>("Stamina")
                         .HasColumnType("bigint");
 
                     b.Property<DateTime>("UpdatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
-                        .HasDefaultValueSql("current_timestamp");
+                        .HasColumnType("datetime(6)")
+                        .HasDefaultValueSql("(CAST(CURRENT_TIMESTAMP AS DATETIME(6)))");
 
                     b.HasKey("Id");
 
@@ -311,24 +311,25 @@ namespace QuantumCore.Game.Persistence.Migrations.Postgresql
                     b.HasData(
                         new
                         {
-                            Id = 1L,
+                            Id = 1u,
                             AccountId = new Guid("e34fd5ab-fb3b-428e-935b-7db5bd08a3e5"),
-                            AvailableStatusPoints = 0L,
-                            BodyPart = 0L,
+                            AvailableSkillPoints = 99u,
+                            AvailableStatusPoints = 0u,
+                            BodyPart = 0u,
                             CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Dx = (byte)99,
                             Empire = (byte)0,
-                            Experience = 0L,
-                            GivenStatusPoints = 0L,
-                            Gold = 2000000000L,
-                            HairPart = 0L,
+                            Experience = 0u,
+                            GivenStatusPoints = 0u,
+                            Gold = 2000000000u,
+                            HairPart = 0u,
                             Health = 99999L,
                             Ht = (byte)99,
                             Iq = (byte)99,
                             Level = (byte)99,
                             Mana = 99999L,
                             Name = "Admin",
-                            PlayTime = 0L,
+                            PlayTime = 0ul,
                             PlayerClass = (byte)0,
                             PositionX = 958870,
                             PositionY = 272788,
@@ -337,6 +338,45 @@ namespace QuantumCore.Game.Persistence.Migrations.Postgresql
                             Stamina = 0L,
                             UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         });
+                });
+
+            modelBuilder.Entity("QuantumCore.Game.Persistence.Entities.PlayerSkill", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime(6)")
+                        .HasDefaultValueSql("(CAST(CURRENT_TIMESTAMP AS DATETIME(6)))");
+
+                    b.Property<byte>("Level")
+                        .HasColumnType("tinyint unsigned");
+
+                    b.Property<byte>("MasterType")
+                        .HasColumnType("tinyint unsigned");
+
+                    b.Property<int>("NextReadTime")
+                        .HasColumnType("int");
+
+                    b.Property<uint>("PlayerId")
+                        .HasColumnType("int unsigned");
+
+                    b.Property<uint>("ReadsRequired")
+                        .HasColumnType("int unsigned");
+
+                    b.Property<uint>("SkillId")
+                        .HasColumnType("int unsigned");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime(6)")
+                        .HasDefaultValueSql("(CAST(CURRENT_TIMESTAMP AS DATETIME(6)))");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("PlayerSkills");
                 });
 
             modelBuilder.Entity("QuantumCore.Game.Persistence.Entities.Item", b =>

@@ -44,10 +44,10 @@ namespace QuantumCore.Core.Networking
             // Start server timer
             _serverTimer.Start();
 
-            var localAddr = IPAddress.Parse(hostingOptions.Value.IpAddress ?? "127.0.0.1");
+            var localAddr = IPAddress.Parse(hostingOptions.Value.IpAddress ?? "0.0.0.0");
             IpUtils.PublicIP = localAddr;
             Listener = new TcpListener(localAddr, Port);
-            
+
             _logger.LogInformation("Initialize tcp server listening on {IP}:{Port}", localAddr, Port);
         }
 
@@ -60,7 +60,7 @@ namespace QuantumCore.Core.Networking
             await _pluginExecutor.ExecutePlugins<IConnectionLifetimeListener>(_logger,
                 x => x.OnDisconnectedAsync(_stoppingToken.Token));
         }
-        
+
         public override Task StartAsync(CancellationToken token)
         {
             base.StartAsync(token);

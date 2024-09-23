@@ -6,10 +6,12 @@ namespace QuantumCore.Game.Services;
 internal class SpawnPointProvider : ISpawnPointProvider
 {
     private readonly ILogger<SpawnPointProvider> _logger;
+    private readonly IParserService _parserService;
 
-    public SpawnPointProvider(ILogger<SpawnPointProvider> logger)
+    public SpawnPointProvider(ILogger<SpawnPointProvider> logger, IParserService parserService)
     {
         _logger = logger;
+        _parserService = parserService;
     }
 
     public async Task<SpawnPoint[]> GetSpawnPointsForMap(string name)
@@ -28,7 +30,7 @@ internal class SpawnPointProvider : ISpawnPointProvider
         return list.ToArray();
     }
 
-    private static async Task AddSpawnPointsFromFile(string filePath, List<SpawnPoint> list)
+    private async Task AddSpawnPointsFromFile(string filePath, List<SpawnPoint> list)
     {
         if (!File.Exists(filePath)) return;
 
@@ -38,7 +40,7 @@ internal class SpawnPointProvider : ISpawnPointProvider
             var line = await sr.ReadLineAsync();
             if (line is null) break;
 
-            var spawn = Game.ParserUtils.GetSpawnFromLine(line);
+            var spawn = _parserService.GetSpawnFromLine(line);
             if (spawn is not null)
             {
                 list.Add(spawn);

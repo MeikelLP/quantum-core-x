@@ -1,10 +1,13 @@
-﻿using CommandLine;
+using CommandLine;
+using Microsoft.Extensions.Options;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game;
-using QuantumCore.Caching;
+using QuantumCore.API.Game.Skills;
+using QuantumCore.Core.Utils;
 using QuantumCore.Extensions;
 using QuantumCore.Game.Extensions;
+using QuantumCore.Game.Persistence;
 
 namespace QuantumCore.Game.Commands
 {
@@ -12,12 +15,16 @@ namespace QuantumCore.Game.Commands
     public class ItemCommand : ICommandHandler<ItemCommandOptions>
     {
         private readonly IItemManager _itemManager;
-        private readonly ICacheManager _cacheManager;
+        private readonly IItemRepository _itemRepository;
+        private readonly ISkillManager _skillManager;
+        private readonly SkillsOptions _skillsOptions;
 
-        public ItemCommand(IItemManager itemManager, ICacheManager cacheManager)
+        public ItemCommand(IItemManager itemManager, IItemRepository itemRepository, ISkillManager skillManager, IOptions<GameOptions> gameOptions)
         {
             _itemManager = itemManager;
-            _cacheManager = cacheManager;
+            _itemRepository = itemRepository;
+            _skillManager = skillManager;
+            _skillsOptions = gameOptions.Value.Skills;
         }
 
         public async Task ExecuteAsync(CommandContext<ItemCommandOptions> context)
@@ -29,14 +36,53 @@ namespace QuantumCore.Game.Commands
                 return;
             }
 
-            var instance = new ItemInstance {Id = Guid.NewGuid(), ItemId = item.Id, Count = context.Arguments.Count};
+            // todo: Move to "instantiation of item" logic ?
+            if (item.Id == _skillsOptions.GenericSkillBookId)
+            {
+                var skillBookId = 0U;
+                do
+                {
+                    skillBookId = CoreRandom.GenerateUInt32(1, 112);
+                    
+                    if (!Enum.TryParse<ESkillIndexes>(skillBookId.ToString(), out var skillId))
+                    {
+                        continue;
+                    }
+
+                    var skill = _skillManager.GetSkill(skillId);
+                    if (skill == null)
+                    {
+                        continue;
+                    }
+
+                    break;
+
+                } while (true);
+                
+                var bookId = _skillsOptions.SkillBookStartId + skillBookId;
+                
+                item = _itemManager.GetItem(bookId);
+                if (item == null)
+                {
+                    context.Player.SendChatInfo($"Skillbook ({bookId}) not found");
+                    return;
+                }
+            }
+
+            var instance = new ItemInstance
+            {
+                Id = Guid.NewGuid(),
+                ItemId = item.Id,
+                Count = context.Arguments.Count,
+                PlayerId = context.Player.Player.Id,
+            };
             if (!await context.Player.Inventory.PlaceItem(instance))
             {
                 context.Player.SendChatInfo("No place in inventory");
                 return;
             }
 
-            await instance.Persist(_cacheManager);
+            await instance.Persist(_itemRepository);
             context.Player.SendItem(instance);
         }
     }

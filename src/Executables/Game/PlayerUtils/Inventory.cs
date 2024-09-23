@@ -244,7 +244,7 @@ namespace QuantumCore.Game.PlayerUtils
                 var position = page.Place(item);
                 if (position != -1)
                 {
-                    await item.Set(_cacheManager, Owner, Window, (uint) (position + i * _width * _height));
+                    await item.Set(_cacheManager, Owner, Window, (uint) (position + i * _width * _height), _itemRepository);
                     _items.Add(item);
 
 
@@ -282,7 +282,7 @@ namespace QuantumCore.Game.PlayerUtils
             if (_pages[page].Place(item, position - page * pageSize))
             {
                 _items.Add(item);
-                await item.Set(_cacheManager, Owner, Window, position);
+                await item.Set(_cacheManager, Owner, Window, position, _itemRepository);
                 return true;
             }
 

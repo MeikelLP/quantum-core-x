@@ -12,6 +12,7 @@ using QuantumCore.API;
 using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game;
 using QuantumCore.API.Game.Guild;
+using QuantumCore.API.Game.Skills;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.World;
 using QuantumCore.Caching;
@@ -21,14 +22,17 @@ using QuantumCore.Game;
 using QuantumCore.Game.Commands;
 using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Packets;
+using QuantumCore.Game.Packets.Skills;
 using QuantumCore.Game.Persistence;
 using QuantumCore.Game.Persistence.Entities;
 using QuantumCore.Game.PlayerUtils;
+using QuantumCore.Game.Skills;
 using QuantumCore.Game.World;
 using QuantumCore.Game.World.Entities;
 using QuantumCore.Networking;
 using Weikio.PluginFramework.Catalogs;
 using Xunit.Abstractions;
+using PlayerSkill = QuantumCore.Game.Packets.Skills.PlayerSkill;
 
 // cannot cast MockedGameConnection to IGameConnection ???
 #pragma warning disable CS8602
@@ -41,6 +45,7 @@ internal class MockedGameConnection : IGameConnection
 {
     public readonly List<ChatOutcoming> SentMessages = new();
     public readonly List<GCPhase> SentPhases = new();
+    public readonly List<object> SentPackets = new();
     public Guid Id { get; }
     public EPhases Phase { get; set; }
     public Task ExecuteTask { get; } = null!;
@@ -60,6 +65,7 @@ internal class MockedGameConnection : IGameConnection
         {
             SentPhases.Add(phase);
         }
+        SentPackets.Add(packet);
     }
 
     public Task StartAsync(CancellationToken token = default)
@@ -87,6 +93,7 @@ public class CommandTests : IAsyncLifetime
     private readonly IItemManager _itemManager;
     private readonly Faker<PlayerData> _playerDataFaker;
     private readonly IGameServer _gameServer;
+    private readonly ISkillManager _skillManager;
 
     public CommandTests(ITestOutputHelper testOutputHelper)
     {
@@ -100,7 +107,8 @@ public class CommandTests : IAsyncLifetime
             .RuleFor(x => x.Experience, _ => (uint) 0)
             .RuleFor(x => x.PositionX, _ => (int) (10 * Map.MapUnit))
             .RuleFor(x => x.PositionY, _ => (int) (26 * Map.MapUnit))
-            .RuleFor(x => x.PlayTime, _ => 0u);
+            .RuleFor(x => x.PlayTime, _ => 0u)
+            .RuleFor(x => x.SkillGroup, _ => (byte) 0);
         var monsterManagerMock = Substitute.For<IMonsterManager>();
         monsterManagerMock.GetMonster(Arg.Any<uint>()).Returns(callerInfo =>
             new AutoFaker<MonsterData>().RuleFor(x => x.Id, _ => callerInfo.Arg<uint>()).Generate());
@@ -124,6 +132,7 @@ public class CommandTests : IAsyncLifetime
         cacheManagerMock.Keys(Arg.Any<string>()).Returns(Array.Empty<string>());
         cacheManagerMock.CreateList<Guid>(Arg.Any<string>()).Returns(redisListWrapperMock);
         cacheManagerMock.Subscribe().Returns(redisSubscriberWrapperMock);
+        _skillManager = Substitute.For<ISkillManager>();
         _services = new ServiceCollection()
             .AddCoreServices(new EmptyPluginCatalog(), new ConfigurationBuilder().Build())
             .AddGameServices()
@@ -139,6 +148,8 @@ public class CommandTests : IAsyncLifetime
                 }, ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(IPlayerRepository), _ => Substitute.For<IPlayerRepository>(),
                 ServiceLifetime.Singleton))
+            .Replace(new ServiceDescriptor(typeof(IPlayerSkillsRepository), _ => Substitute.For<IPlayerSkillsRepository>(),
+                ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(IMonsterManager), _ => monsterManagerMock, ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(IItemManager), _ => itemManagerMock, ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(ICacheManager), _ => cacheManagerMock, ServiceLifetime.Singleton))
@@ -147,6 +158,7 @@ public class CommandTests : IAsyncLifetime
                 ServiceLifetime.Scoped))
             .Replace(new ServiceDescriptor(typeof(IExperienceManager), _ => experienceManagerMock,
                 ServiceLifetime.Singleton))
+            .Replace(new ServiceDescriptor(typeof(ISkillManager), _ => _skillManager, ServiceLifetime.Singleton))
             .AddSingleton<IConfiguration>(_ => new ConfigurationBuilder()
                 .AddInMemoryCollection(new Dictionary<string, string?>
                 {
@@ -162,6 +174,7 @@ public class CommandTests : IAsyncLifetime
                 })
                 .Build())
             .AddSingleton(Substitute.For<IDbPlayerRepository>())
+            .AddSingleton(Substitute.For<IDbPlayerSkillsRepository>())
             .AddSingleton<IGameConnection>(_ => new MockedGameConnection())
             .AddSingleton<IPlayerEntity, PlayerEntity>()
             .AddSingleton(_ => _playerDataFaker.Generate())
@@ -692,5 +705,105 @@ public class CommandTests : IAsyncLifetime
         {
             Message = "You have advanced to level 5"
         }, cfg => cfg.Including(x => x.Message));
+    }
+
+    [Fact]
+    public async Task SetJobCommand_ValidLevel()
+    {
+        // Prepare
+        _player.Player.SkillGroup = 0;
+        _player.Player.PlayerClass = 0;
+        _player.SetPoint(EPoints.Level, 5);
+
+        // Act
+        await _commandManager.Handle(_connection, "/setjob 1");
+
+        // Assert
+        _player.Player.SkillGroup.Should().Be(1);
+        ((MockedGameConnection) _connection).SentPackets.Should().ContainEquivalentOf(new ChangeSkillGroup { SkillGroup = 1});
+    }
+
+    [Fact]
+    public async Task SetJobCommand_InvalidLevel()
+    {
+        // Prepare
+        _player.Player.SkillGroup = 0;
+        _player.SetPoint(EPoints.Level, 3);
+
+        // Act
+        await _commandManager.Handle(_connection, "/setjob 1");
+
+        // Assert
+        _player.Player.SkillGroup.Should().Be(0);
+        ((MockedGameConnection) _connection).SentPackets.Should().NotContainEquivalentOf(new ChangeSkillGroup { SkillGroup = 1});
+    }
+
+    [Fact]
+    public async Task SetJobCommand_InvalidJob()
+    {
+        // Prepare
+        _player.Player.SkillGroup = 0;
+        _player.SetPoint(EPoints.Level, 5);
+
+        // Act
+        await _commandManager.Handle(_connection, "/setjob 4");
+
+        // Assert
+        _player.Player.SkillGroup.Should().Be(0);
+        ((MockedGameConnection) _connection).SentPackets.Should().NotContainEquivalentOf(new ChangeSkillGroup { SkillGroup = 4});
+    }
+
+    [Fact]
+    public async Task SkillUpCommand_ValidSkill()
+    {
+        // Prepare
+        _player.SetPoint(EPoints.Level, 5);
+        _player.Player.PlayerClass = 0;
+
+        var skillId = ESkillIndexes.AuraOfTheSword;
+
+        _skillManager.GetSkill(skillId).Returns(new SkillData
+        {
+            Id = skillId,
+            Type = (ESkillCategoryType) (_player.Player.PlayerClass + 1),
+            Flag = ESkillFlag.Attack
+        });
+        _player.Skills.SetSkillGroup(1);
+
+        // Act
+        await _commandManager.Handle(_connection, $"/skillup {(uint) skillId}");
+
+        // Assert
+        var skill = _player.Skills[skillId];
+        skill.Should().NotBeNull();
+        skill?.Level.Should().Be(1);
+    }
+
+    [Fact]
+    public async Task SkillUpCommand_MasterSkill()
+    {
+        // Prepare
+        _player.SetPoint(EPoints.Level, 5);
+        _player.Player.PlayerClass = 0;
+        const ESkillIndexes skillId = ESkillIndexes.AuraOfTheSword;
+
+        _skillManager.GetSkill(skillId).Returns(new SkillData
+        {
+            Id = skillId,
+            Type = (ESkillCategoryType) (_player.Player.PlayerClass + 1),
+            Flag = ESkillFlag.Attack
+        });
+        _player.Skills.SetSkillGroup(1);
+        _player.Skills[skillId].Level = 19;
+        _player.Skills[skillId].MasterType = ESkillMasterType.Normal;
+
+        // Act
+        await _commandManager.Handle(_connection, $"/skillup {(uint) skillId}");
+
+        // Assert
+        var skill = _player.Skills[skillId];
+        skill.Should().NotBeNull();
+        skill?.Level.Should().Be(20);
+        skill?.MasterType.Should().Be(ESkillMasterType.Master);
     }
 }

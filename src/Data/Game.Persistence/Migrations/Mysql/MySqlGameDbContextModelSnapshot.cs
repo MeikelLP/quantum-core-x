@@ -17,7 +17,7 @@ namespace QuantumCore.Game.Persistence.Migrations.Mysql
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.4")
+                .HasAnnotation("ProductVersion", "8.0.5")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
@@ -316,6 +316,9 @@ namespace QuantumCore.Game.Persistence.Migrations.Mysql
                     b.Property<Guid>("AccountId")
                         .HasColumnType("char(36)");
 
+                    b.Property<uint>("AvailableSkillPoints")
+                        .HasColumnType("int unsigned");
+
                     b.Property<uint>("AvailableStatusPoints")
                         .HasColumnType("int unsigned");
 
@@ -405,6 +408,7 @@ namespace QuantumCore.Game.Persistence.Migrations.Mysql
                         {
                             Id = 1u,
                             AccountId = new Guid("e34fd5ab-fb3b-428e-935b-7db5bd08a3e5"),
+                            AvailableSkillPoints = 99u,
                             AvailableStatusPoints = 0u,
                             BodyPart = 0u,
                             CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
@@ -420,7 +424,7 @@ namespace QuantumCore.Game.Persistence.Migrations.Mysql
                             Level = (byte)99,
                             Mana = 99999L,
                             Name = "Admin",
-                            PlayTime = 0u,
+                            PlayTime = 0ul,
                             PlayerClass = (byte)0,
                             PositionX = 958870,
                             PositionY = 272788,
@@ -429,6 +433,45 @@ namespace QuantumCore.Game.Persistence.Migrations.Mysql
                             Stamina = 0L,
                             UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         });
+                });
+
+            modelBuilder.Entity("QuantumCore.Game.Persistence.Entities.PlayerSkill", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("char(36)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime(6)")
+                        .HasDefaultValueSql("(CAST(CURRENT_TIMESTAMP AS DATETIME(6)))");
+
+                    b.Property<byte>("Level")
+                        .HasColumnType("tinyint unsigned");
+
+                    b.Property<byte>("MasterType")
+                        .HasColumnType("tinyint unsigned");
+
+                    b.Property<int>("NextReadTime")
+                        .HasColumnType("int");
+
+                    b.Property<uint>("PlayerId")
+                        .HasColumnType("int unsigned");
+
+                    b.Property<uint>("ReadsRequired")
+                        .HasColumnType("int unsigned");
+
+                    b.Property<uint>("SkillId")
+                        .HasColumnType("int unsigned");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime(6)")
+                        .HasDefaultValueSql("(CAST(CURRENT_TIMESTAMP AS DATETIME(6)))");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("PlayerSkills");
                 });
 
             modelBuilder.Entity("QuantumCore.Game.Persistence.Entities.Guilds.Guild", b =>

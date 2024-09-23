@@ -2,7 +2,7 @@
 # May be used as reference for production use but this file does not contain any best practices
 # This file has no service for the game defined as it will be started from the source code
 
-version: '3'
+name: 'Quantum Core X'
 services:
 
   # authentication service
@@ -12,13 +12,15 @@ services:
     ports:
     - "11002:11002"
     environment:
-      - "Database:Host=db"
+      - "Database:ConnectionString=Server=db;Database=metin2;Uid=metin2;Pwd=metin2;"
       - "Cache:Host=cache"
     volumes:
       - ./Executables/Auth/appsettings.json:/app/appsettings.json:ro
     depends_on:
-      - db-mysql
-      - cache
+      db-mysql:
+        condition: service_healthy
+      cache:
+        condition: service_healthy
 
   # redis holds live data of the game world
   # used as distributed memory between server nodes
@@ -29,18 +31,30 @@ services:
     - cache_data:/data
     ports:
     - "6379:6379"
+    healthcheck:
+      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
 
   # persistent storage
   db-mysql:
     image: mariadb:11.3
+    hostname: db
     ports:
     - "3306:3306"
     environment:
     - MARIADB_USER=metin2
     - MARIADB_PASSWORD=metin2
+    - MARIADB_DATABASE=metin2
     - MARIADB_ROOT_PASSWORD=supersecure.123
     volumes:
     - db_data_mysql:/var/lib/mysql
+    healthcheck:
+      test: [ "CMD", "healthcheck.sh", "--connect", "--innodb_initialized" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
 
 volumes:
   cache_data:

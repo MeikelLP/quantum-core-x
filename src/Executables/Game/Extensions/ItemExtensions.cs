@@ -1,4 +1,4 @@
-﻿using QuantumCore.API;
+using QuantumCore.API;
 using QuantumCore.API.Core.Models;
 using QuantumCore.Caching;
 using QuantumCore.Game.Persistence;
@@ -172,11 +172,9 @@ public static class ItemExtensions
         return await cacheManager.Del(key) != 0;
     }
 
-    public static async Task Persist(this ItemInstance item, ICacheManager cacheManager)
+    public static Task Persist(this ItemInstance item, IItemRepository itemRepository)
     {
-        var key = "item:" + item.Id;
-
-        await cacheManager.Set(key, item);
+        return itemRepository.SaveItemAsync(item);
     }
 
     /// <summary>
@@ -188,7 +186,7 @@ public static class ItemExtensions
     /// <param name="owner">Owner the item is given to</param>
     /// <param name="window">Window the item is placed in</param>
     /// <param name="pos">Position of the item in the window</param>
-    public static async Task Set(this ItemInstance item, ICacheManager cacheManager, uint owner, byte window, uint pos)
+    public static async Task Set(this ItemInstance item, ICacheManager cacheManager, uint owner, byte window, uint pos, IItemRepository itemRepository)
     {
         if (item.PlayerId != owner || item.Window != window)
         {
@@ -210,6 +208,6 @@ public static class ItemExtensions
         }
 
         item.Position = pos;
-        await Persist(item, cacheManager);
+        await Persist(item, itemRepository);
     }
 }
