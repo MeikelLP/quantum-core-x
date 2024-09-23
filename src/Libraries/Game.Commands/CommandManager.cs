@@ -249,7 +249,8 @@ internal class CommandManager : ICommandManager
                         })!;
                     var cmdExecuteMethodInfo = typeof(ICommandHandler<>).MakeGenericType(commandCache.OptionsType)
                         .GetMethod(nameof(ICommandHandler<object>.ExecuteAsync))!;
-                    var cmd = ActivatorUtilities.CreateInstance(_serviceProvider, commandCache.Type);
+                    await using var scope = _serviceProvider.CreateAsyncScope();
+                    var cmd = ActivatorUtilities.CreateInstance(scope.ServiceProvider, commandCache.Type);
 
                     try
                     {
