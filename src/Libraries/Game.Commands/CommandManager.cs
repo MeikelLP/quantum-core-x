@@ -1,6 +1,5 @@
 using System.Linq.Expressions;
 using System.Reflection;
-using System.Text;
 using CommandLine;
 using Microsoft.CodeAnalysis;
 using Microsoft.Extensions.DependencyInjection;
@@ -19,7 +18,7 @@ internal class CommandManager : ICommandManager
 {
     private readonly ILogger<CommandManager> _logger;
     private readonly ICacheManager _cacheManager;
-    private readonly Dictionary<string, CommandDescriptor> _commandHandlers = new();
+    private readonly SortedDictionary<string, CommandDescriptor> _commandHandlers = new();
     public Dictionary<Guid, PermissionGroup> Groups { get; } = new();
 
     private readonly IServiceProvider _serviceProvider;
@@ -178,15 +177,11 @@ internal class CommandManager : ICommandManager
         {
             // special case for help
 
-            var sb = new StringBuilder("The following commands are available:\n");
+            connection.Player.SendChatMessage("The following commands are available:");
             foreach (var handler in _commandHandlers)
             {
-                sb.AppendLine($"- /{handler.Key}");
+                connection.Player.SendChatMessage($"- /{handler.Key}");
             }
-
-            var msg = sb.ToString();
-
-            connection.Player.SendChatMessage(msg);
         }
         else
         {
