@@ -4,8 +4,30 @@ using QuantumCore.Auth.Cache;
 using QuantumCore.Auth.Packets;
 using QuantumCore.Caching;
 using QuantumCore.Core.Utils;
+using System.ComponentModel;
 
 namespace QuantumCore.Auth.PacketHandlers;
+
+public enum LoginFailedBecause
+{
+    [Description("Account not found")] NoId,
+    [Description("Wrong password")] WrongPwd,
+
+    [Description("Account is already logged in another client")]
+    Already,
+
+    [Description("Server has reached its capacity")]
+    Full,
+
+    // Shutdown,
+    // Repair,
+    // Block,
+    // NotAvail,
+    // NoBill,
+    // BlkLogin,
+    // WebBlk,
+    // AgeLimit,
+}
 
 public class LoginRequestHandler : IAuthPacketHandler<LoginRequest>
 {
@@ -32,7 +54,7 @@ public class LoginRequestHandler : IAuthPacketHandler<LoginRequest>
             _logger.LogDebug("Account {Username} not found", ctx.Packet.Username);
             ctx.Connection.Send(new LoginFailed
             {
-                Status = "WRONGPWD"
+                Status = LoginFailedBecause.NoId.ToString().ToUpper()
             });
 
             return;
@@ -46,7 +68,7 @@ public class LoginRequestHandler : IAuthPacketHandler<LoginRequest>
             if (!BCrypt.Net.BCrypt.Verify(ctx.Packet.Password, account.Password))
             {
                 _logger.LogDebug("Wrong password supplied for account {Username}", ctx.Packet.Username);
-                status = "WRONGPWD";
+                status = LoginFailedBecause.WrongPwd.ToString().ToUpper();
             }
             else
             {
@@ -59,8 +81,9 @@ public class LoginRequestHandler : IAuthPacketHandler<LoginRequest>
         }
         catch (Exception e)
         {
-            _logger.LogWarning("Failed to verify password for account {Username}: {Message}", ctx.Packet.Username, e.Message);
-            status = "WRONGPWD";
+            _logger.LogWarning("Failed to verify password for account {Username}: {Message}", ctx.Packet.Username,
+                e.Message);
+            status = LoginFailedBecause.WrongPwd.ToString().ToUpper();
         }
 
         // If the status is not empty send a failed login response to the client
