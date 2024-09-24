@@ -20,5 +20,7 @@ public class GuildMember
     [Field(4)] public byte Level { get; set; }
     [Field(5)] public uint SpentExperience { get; set; }
     [Field(6)] public bool IsNameSent { get; set; }
-    [Field(7, Length = 25)] public string Name { get; set; } = "";
+
+    [Field(7, Length = PlayerConstants.PLAYER_NAME_MAX_LENGTH)]
+    public string Name { get; set; } = "";
 }
