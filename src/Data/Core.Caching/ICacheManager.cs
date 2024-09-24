@@ -13,4 +13,6 @@ public interface ICacheManager
     IRedisSubscriber Subscribe();
     ValueTask<string[]> Keys(string key);
     ValueTask<long> Persist(string key);
+    ValueTask<string> FlushAll();
+    
 }

@@ -27,4 +27,5 @@ public class CacheManager : ICacheManager
     public IRedisSubscriber Subscribe() => new RedisSubscriber(_redis.Subscribe());
     public ValueTask<string[]> Keys(string key) => _redis.Keys(key);
     public ValueTask<long> Persist(string key) => _redis.Persist(key);
+    public ValueTask<string> FlushAll() => _redis.Flushall();
 }
