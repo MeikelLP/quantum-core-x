@@ -53,11 +53,11 @@ namespace QuantumCore.Game
         public static GameServer Instance { get; private set; } = null!; // singleton
 
         public GameServer(IOptions<HostingOptions> hostingOptions, IPacketManager packetManager,
-            ICacheManager cacheManager, ILogger<GameServer> logger, PluginExecutor pluginExecutor, 
-            IServiceProvider serviceProvider, IItemManager itemManager, IMonsterManager monsterManager, 
-            IExperienceManager experienceManager, IAnimationManager animationManager,
-            ICommandManager commandManager, IQuestManager questManager, IChatManager chatManager,
-            IWorld world, IDropProvider dropProvider, ISkillManager skillManager)
+            ILogger<GameServer> logger, PluginExecutor pluginExecutor, IServiceProvider serviceProvider,
+            IItemManager itemManager, IMonsterManager monsterManager, IExperienceManager experienceManager,
+            IAnimationManager animationManager, ICommandManager commandManager, IQuestManager questManager,
+            IChatManager chatManager, IWorld world, IDropProvider dropProvider, ISkillManager skillManager,
+            ICacheManager cacheManager)
             : base(packetManager, logger, pluginExecutor, serviceProvider, "game", hostingOptions)
         {
             _hostingOptions = hostingOptions.Value;
@@ -108,7 +108,7 @@ namespace QuantumCore.Game
                 _dropProvider.LoadAsync(stoppingToken),
                 _skillManager.LoadAsync(stoppingToken)
             );
-            
+
             // Drop all pre-existing caches
             _logger.LogInformation("Drop all caches");
             await _cacheManager.FlushAll();
@@ -170,7 +170,7 @@ namespace QuantumCore.Game
             if (_accumulatedElapsedTime < _targetElapsedTime)
             {
                 var sleepTime = (_targetElapsedTime - _accumulatedElapsedTime).TotalMilliseconds;
-                await Task.Delay((int) sleepTime).ConfigureAwait(false);
+                await Task.Delay((int)sleepTime).ConfigureAwait(false);
                 return;
             }
 
