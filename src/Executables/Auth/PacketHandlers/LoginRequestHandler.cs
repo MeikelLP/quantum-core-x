@@ -5,6 +5,7 @@ using QuantumCore.Auth.Packets;
 using QuantumCore.Caching;
 using QuantumCore.Core.Utils;
 using System.ComponentModel;
+using QuantumCore.API.Core.Models;
 
 namespace QuantumCore.Auth.PacketHandlers;
 
@@ -86,6 +87,14 @@ public class LoginRequestHandler : IAuthPacketHandler<LoginRequest>
             status = LoginFailedBecause.WrongPwd.ToString().ToUpper();
         }
 
+        // Check if the account is already logged in
+        var isAlreadyLoggedIn = await CheckExistingConnectionOf(account);
+        if (isAlreadyLoggedIn)
+        {
+            status = LoginFailedBecause.Already.ToString().ToUpper();
+        }
+
+
         // If the status is not empty send a failed login response to the client
         if (status != "")
         {
@@ -109,11 +118,23 @@ public class LoginRequestHandler : IAuthPacketHandler<LoginRequest>
         // Set expiration on token
         await _cacheManager.Expire("token:" + authToken, 30);
 
+        // Relate the account ID to the token
+        await _cacheManager.Set("account:token:" + account.Id, authToken);
+        // Set expiration on account token
+        await _cacheManager.Expire("account:token:" + account.Id, 30);
+
         // Send the auth token to the client and let it connect to our game server
         ctx.Connection.Send(new LoginSuccess
         {
             Key = authToken,
             Result = 1
         });
+    }
+
+    private async Task<bool> CheckExistingConnectionOf(AccountData account)
+    {
+        var isLoggedIn = await _cacheManager.Exists("account:token:" + account.Id);
+
+        return isLoggedIn == 1;
     }
 }
