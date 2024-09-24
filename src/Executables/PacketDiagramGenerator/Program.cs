@@ -152,4 +152,5 @@ async Task WriteFile(string directory, string name, string content)
     var relativePath = Path.Combine(relativeDir, $"{name}.md");
     var filePath = Path.GetFullPath(Path.Combine(relativeDir, relativePath));
     await File.WriteAllTextAsync(filePath, content);
+    Console.WriteLine(filePath);
 }
