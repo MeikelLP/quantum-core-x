@@ -48,6 +48,15 @@ namespace QuantumCore.Game.PacketHandlers
                 ctx.Connection.Close();
                 return;
             }
+            
+            // Prevent cross client token forgery
+            var validSession = await _cacheManager.Get<uint>("account:token:"+token.AccountId);
+            if (validSession != 0 && validSession != ctx.Packet.Key)
+            {
+                _logger.LogWarning("Received invalid auth token, session does not match {TokenSession} != {PacketSession}", validSession, ctx.Packet.Key);
+                ctx.Connection.Close();
+                return;
+            }
 
             // todo verify ip address
 
@@ -55,6 +64,7 @@ namespace QuantumCore.Game.PacketHandlers
 
             // Remove TTL from token so we can use it for another game core transition
             await _cacheManager.Persist(key);
+            await _cacheManager.Expire("account:token:"+token.AccountId, 3600); // TODO: add listener to drop connection when it expires
 
             // Store the username and id for later reference
             ctx.Connection.Username = token.Username;
