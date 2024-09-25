@@ -17,7 +17,7 @@ namespace QuantumCore.Game.Persistence.Migrations.Mysql
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.5")
+                .HasAnnotation("ProductVersion", "8.0.8")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
@@ -175,6 +175,39 @@ namespace QuantumCore.Game.Persistence.Migrations.Mysql
                     b.HasIndex("GuildId", "RankId");
 
                     b.ToTable("GuildMembers");
+                });
+
+            modelBuilder.Entity("QuantumCore.Game.Persistence.Entities.Guilds.GuildNews", b =>
+                {
+                    b.Property<uint>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int unsigned");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<uint>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("datetime(6)")
+                        .HasDefaultValueSql("(CAST(CURRENT_TIMESTAMP AS DATETIME(6)))");
+
+                    b.Property<uint?>("GuildId")
+                        .HasColumnType("int unsigned");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("varchar(50)");
+
+                    b.Property<uint>("PlayerId")
+                        .HasColumnType("int unsigned");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GuildId");
+
+                    b.HasIndex("PlayerId");
+
+                    b.ToTable("GuildNews");
                 });
 
             modelBuilder.Entity("QuantumCore.Game.Persistence.Entities.Guilds.GuildRank", b =>
@@ -512,6 +545,23 @@ namespace QuantumCore.Game.Persistence.Migrations.Mysql
                     b.Navigation("Rank");
                 });
 
+            modelBuilder.Entity("QuantumCore.Game.Persistence.Entities.Guilds.GuildNews", b =>
+                {
+                    b.HasOne("QuantumCore.Game.Persistence.Entities.Guilds.Guild", "Guild")
+                        .WithMany("News")
+                        .HasForeignKey("GuildId");
+
+                    b.HasOne("QuantumCore.Game.Persistence.Entities.Player", "Player")
+                        .WithMany("WrittenGuildNews")
+                        .HasForeignKey("PlayerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Guild");
+
+                    b.Navigation("Player");
+                });
+
             modelBuilder.Entity("QuantumCore.Game.Persistence.Entities.Guilds.GuildRank", b =>
                 {
                     b.HasOne("QuantumCore.Game.Persistence.Entities.Guilds.Guild", "Guild")
@@ -577,6 +627,8 @@ namespace QuantumCore.Game.Persistence.Migrations.Mysql
                 {
                     b.Navigation("Members");
 
+                    b.Navigation("News");
+
                     b.Navigation("Ranks");
                 });
 
@@ -597,6 +649,8 @@ namespace QuantumCore.Game.Persistence.Migrations.Mysql
                     b.Navigation("Guilds");
 
                     b.Navigation("GuildsToLead");
+
+                    b.Navigation("WrittenGuildNews");
                 });
 #pragma warning restore 612, 618
         }

@@ -11,14 +11,14 @@ using QuantumCore.Game.Persistence;
 namespace QuantumCore.Game.Persistence.Migrations.Sqlite
 {
     [DbContext(typeof(SqliteGameDbContext))]
-    [Migration("20240923175829_AddGuild")]
+    [Migration("20240925204049_AddGuild")]
     partial class AddGuild
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "8.0.4");
+            modelBuilder.HasAnnotation("ProductVersion", "8.0.8");
 
             modelBuilder.Entity("QuantumCore.Game.Persistence.Entities.DeletedPlayer", b =>
                 {
@@ -173,6 +173,37 @@ namespace QuantumCore.Game.Persistence.Migrations.Sqlite
                     b.ToTable("GuildMembers");
                 });
 
+            modelBuilder.Entity("QuantumCore.Game.Persistence.Entities.Guilds.GuildNews", b =>
+                {
+                    b.Property<uint>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValueSql("current_timestamp");
+
+                    b.Property<uint?>("GuildId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("TEXT");
+
+                    b.Property<uint>("PlayerId")
+                        .HasColumnType("INTEGER");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GuildId");
+
+                    b.HasIndex("PlayerId");
+
+                    b.ToTable("GuildNews");
+                });
+
             modelBuilder.Entity("QuantumCore.Game.Persistence.Entities.Guilds.GuildRank", b =>
                 {
                     b.Property<uint>("GuildId")
@@ -310,6 +341,9 @@ namespace QuantumCore.Game.Persistence.Migrations.Sqlite
                     b.Property<Guid>("AccountId")
                         .HasColumnType("TEXT");
 
+                    b.Property<uint>("AvailableSkillPoints")
+                        .HasColumnType("INTEGER");
+
                     b.Property<uint>("AvailableStatusPoints")
                         .HasColumnType("INTEGER");
 
@@ -362,7 +396,7 @@ namespace QuantumCore.Game.Persistence.Migrations.Sqlite
                         .HasMaxLength(24)
                         .HasColumnType("TEXT");
 
-                    b.Property<uint>("PlayTime")
+                    b.Property<ulong>("PlayTime")
                         .HasColumnType("INTEGER");
 
                     b.Property<byte>("PlayerClass")
@@ -399,6 +433,7 @@ namespace QuantumCore.Game.Persistence.Migrations.Sqlite
                         {
                             Id = 1u,
                             AccountId = new Guid("e34fd5ab-fb3b-428e-935b-7db5bd08a3e5"),
+                            AvailableSkillPoints = 99u,
                             AvailableStatusPoints = 0u,
                             BodyPart = 0u,
                             CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
@@ -414,7 +449,7 @@ namespace QuantumCore.Game.Persistence.Migrations.Sqlite
                             Level = (byte)99,
                             Mana = 99999L,
                             Name = "Admin",
-                            PlayTime = 0u,
+                            PlayTime = 0ul,
                             PlayerClass = (byte)0,
                             PositionX = 958870,
                             PositionY = 272788,
@@ -423,6 +458,45 @@ namespace QuantumCore.Game.Persistence.Migrations.Sqlite
                             Stamina = 0L,
                             UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
                         });
+                });
+
+            modelBuilder.Entity("QuantumCore.Game.Persistence.Entities.PlayerSkill", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValueSql("current_timestamp");
+
+                    b.Property<byte>("Level")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<byte>("MasterType")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("NextReadTime")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<uint>("PlayerId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<uint>("ReadsRequired")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<uint>("SkillId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT")
+                        .HasDefaultValueSql("current_timestamp");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("PlayerSkills");
                 });
 
             modelBuilder.Entity("QuantumCore.Game.Persistence.Entities.Guilds.Guild", b =>
@@ -461,6 +535,23 @@ namespace QuantumCore.Game.Persistence.Migrations.Sqlite
                     b.Navigation("Player");
 
                     b.Navigation("Rank");
+                });
+
+            modelBuilder.Entity("QuantumCore.Game.Persistence.Entities.Guilds.GuildNews", b =>
+                {
+                    b.HasOne("QuantumCore.Game.Persistence.Entities.Guilds.Guild", "Guild")
+                        .WithMany("News")
+                        .HasForeignKey("GuildId");
+
+                    b.HasOne("QuantumCore.Game.Persistence.Entities.Player", "Player")
+                        .WithMany("WrittenGuildNews")
+                        .HasForeignKey("PlayerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Guild");
+
+                    b.Navigation("Player");
                 });
 
             modelBuilder.Entity("QuantumCore.Game.Persistence.Entities.Guilds.GuildRank", b =>
@@ -528,6 +619,8 @@ namespace QuantumCore.Game.Persistence.Migrations.Sqlite
                 {
                     b.Navigation("Members");
 
+                    b.Navigation("News");
+
                     b.Navigation("Ranks");
                 });
 
@@ -548,6 +641,8 @@ namespace QuantumCore.Game.Persistence.Migrations.Sqlite
                     b.Navigation("Guilds");
 
                     b.Navigation("GuildsToLead");
+
+                    b.Navigation("WrittenGuildNews");
                 });
 #pragma warning restore 612, 618
         }

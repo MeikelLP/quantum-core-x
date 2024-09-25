@@ -16,6 +16,7 @@ public abstract class GameDbContext : DbContext
     public DbSet<Guild> Guilds { get; set; }
     public DbSet<GuildRank> GuildRanks { get; set; }
     public DbSet<GuildMember> GuildMembers { get; set; }
+    public DbSet<GuildNews> GuildNews { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -30,5 +31,6 @@ public abstract class GameDbContext : DbContext
         Guild.Configure(modelBuilder.Entity<Guild>(), Database);
         GuildMember.Configure(modelBuilder.Entity<GuildMember>(), Database);
         GuildRank.Configure(modelBuilder.Entity<GuildRank>(), Database);
+        Entities.Guilds.GuildNews.Configure(modelBuilder.Entity<GuildNews>(), Database);
     }
 }

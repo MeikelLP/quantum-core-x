@@ -1,9 +1,8 @@
 ﻿#nullable disable
 
 using Microsoft.EntityFrameworkCore.Migrations;
-using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
-namespace QuantumCore.Game.Persistence.Migrations.Postgresql
+namespace QuantumCore.Game.Persistence.Migrations.Sqlite
 {
     /// <inheritdoc />
     public partial class AddGuild : Migration
@@ -11,29 +10,28 @@ namespace QuantumCore.Game.Persistence.Migrations.Postgresql
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<long>(
+            migrationBuilder.AddColumn<uint>(
                 name: "GuildId",
                 table: "Players",
-                type: "bigint",
+                type: "INTEGER",
                 nullable: true);
 
             migrationBuilder.CreateTable(
                 name: "Guilds",
                 columns: table => new
                 {
-                    Id = table.Column<long>(type: "bigint", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy",
-                            NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Name = table.Column<string>(type: "character varying(12)", maxLength: 12, nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false,
+                    Id = table.Column<uint>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    Name = table.Column<string>(type: "TEXT", maxLength: 12, nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false,
                         defaultValueSql: "current_timestamp"),
-                    UpdatedAt = table.Column<DateTime>(type: "timestamp with time zone", nullable: false,
+                    UpdatedAt = table.Column<DateTime>(type: "TEXT", nullable: false,
                         defaultValueSql: "current_timestamp"),
-                    OwnerId = table.Column<long>(type: "bigint", nullable: false),
-                    Level = table.Column<byte>(type: "smallint", nullable: false),
-                    Experience = table.Column<long>(type: "bigint", nullable: false),
-                    MaxMemberCount = table.Column<int>(type: "integer", nullable: false),
-                    Gold = table.Column<long>(type: "bigint", nullable: false)
+                    OwnerId = table.Column<uint>(type: "INTEGER", nullable: false),
+                    Level = table.Column<byte>(type: "INTEGER", nullable: false),
+                    Experience = table.Column<uint>(type: "INTEGER", nullable: false),
+                    MaxMemberCount = table.Column<ushort>(type: "INTEGER", nullable: false),
+                    Gold = table.Column<uint>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -47,13 +45,41 @@ namespace QuantumCore.Game.Persistence.Migrations.Postgresql
                 });
 
             migrationBuilder.CreateTable(
+                name: "GuildNews",
+                columns: table => new
+                {
+                    Id = table.Column<uint>(type: "INTEGER", nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
+                    PlayerId = table.Column<uint>(type: "INTEGER", nullable: false),
+                    Message = table.Column<string>(type: "TEXT", maxLength: 50, nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "TEXT", nullable: false,
+                        defaultValueSql: "current_timestamp"),
+                    GuildId = table.Column<uint>(type: "INTEGER", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_GuildNews", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_GuildNews_Guilds_GuildId",
+                        column: x => x.GuildId,
+                        principalTable: "Guilds",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_GuildNews_Players_PlayerId",
+                        column: x => x.PlayerId,
+                        principalTable: "Players",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "GuildRanks",
                 columns: table => new
                 {
-                    GuildId = table.Column<long>(type: "bigint", nullable: false),
-                    Rank = table.Column<byte>(type: "smallint", nullable: false),
-                    Name = table.Column<string>(type: "character varying(8)", maxLength: 8, nullable: false),
-                    Permissions = table.Column<byte>(type: "smallint", nullable: false)
+                    GuildId = table.Column<uint>(type: "INTEGER", nullable: false),
+                    Rank = table.Column<byte>(type: "INTEGER", nullable: false),
+                    Name = table.Column<string>(type: "TEXT", maxLength: 8, nullable: false),
+                    Permissions = table.Column<byte>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -70,11 +96,11 @@ namespace QuantumCore.Game.Persistence.Migrations.Postgresql
                 name: "GuildMembers",
                 columns: table => new
                 {
-                    GuildId = table.Column<long>(type: "bigint", nullable: false),
-                    PlayerId = table.Column<long>(type: "bigint", nullable: false),
-                    RankId = table.Column<byte>(type: "smallint", nullable: false),
-                    IsLeader = table.Column<bool>(type: "boolean", nullable: false),
-                    SpentExperience = table.Column<long>(type: "bigint", nullable: false)
+                    GuildId = table.Column<uint>(type: "INTEGER", nullable: false),
+                    PlayerId = table.Column<uint>(type: "INTEGER", nullable: false),
+                    RankId = table.Column<byte>(type: "INTEGER", nullable: false),
+                    IsLeader = table.Column<bool>(type: "INTEGER", nullable: false),
+                    SpentExperience = table.Column<uint>(type: "INTEGER", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -102,7 +128,7 @@ namespace QuantumCore.Game.Persistence.Migrations.Postgresql
             migrationBuilder.UpdateData(
                 table: "Players",
                 keyColumn: "Id",
-                keyValue: 1L,
+                keyValue: 1u,
                 column: "GuildId",
                 value: null);
 
@@ -121,6 +147,16 @@ namespace QuantumCore.Game.Persistence.Migrations.Postgresql
                 table: "GuildMembers",
                 column: "PlayerId",
                 unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_GuildNews_GuildId",
+                table: "GuildNews",
+                column: "GuildId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_GuildNews_PlayerId",
+                table: "GuildNews",
+                column: "PlayerId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Guilds_OwnerId",
@@ -144,6 +180,9 @@ namespace QuantumCore.Game.Persistence.Migrations.Postgresql
 
             migrationBuilder.DropTable(
                 name: "GuildMembers");
+
+            migrationBuilder.DropTable(
+                name: "GuildNews");
 
             migrationBuilder.DropTable(
                 name: "GuildRanks");

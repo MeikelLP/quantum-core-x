@@ -1,7 +1,7 @@
 ﻿using System.Collections.Immutable;
 using QuantumCore.API.Core.Models;
-using QuantumCore.API.Game.Skills;
 using QuantumCore.API.Game.Guild;
+using QuantumCore.API.Game.Skills;
 using QuantumCore.Game.Persistence.Entities;
 using QuantumCore.Game.Persistence.Entities.Guilds;
 
@@ -36,7 +36,8 @@ public static class QueryExtensions
             GivenStatusPoints = x.GivenStatusPoints,
             AvailableStatusPoints = x.AvailableStatusPoints,
             AvailableSkillPoints = x.AvailableSkillPoints,
-            Empire = x.Empire
+            Empire = x.Empire,
+            GuildId = x.GuildId
         });
     }
 

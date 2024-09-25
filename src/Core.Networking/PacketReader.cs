@@ -1,5 +1,6 @@
 ﻿using System.Buffers;
 using System.Runtime.CompilerServices;
+using System.Text.Json;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -88,6 +89,13 @@ public class PacketReader : IPacketReader
             try
             {
                 packet = (IPacketSerializable) await packetInfo.DeserializeFromStreamAsync(stream);
+                if (_logger.IsEnabled(LogLevel.Debug))
+                {
+                    packet.Serialize(buffer);
+                    var bytes = string.Join("", buffer[..packet.GetSize()].Select(x => x.ToString("X2")));
+                    _logger.LogDebug(" IN: {Type} => {Packet} (0x{Bytes})", packet.GetType(),
+                        JsonSerializer.Serialize<object>(packet), bytes);
+                }
             }
             catch (ArgumentOutOfRangeException e)
             {

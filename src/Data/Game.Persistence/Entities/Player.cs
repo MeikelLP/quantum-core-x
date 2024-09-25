@@ -35,7 +35,7 @@ public class Player
     [DefaultValue(0)] public required uint GivenStatusPoints { get; set; }
     [DefaultValue(0)] public required uint AvailableStatusPoints { get; set; }
     [DefaultValue(0)] public required uint AvailableSkillPoints { get; set; }
-    
+
 
     public uint? GuildId { get; set; }
     public Guild? Guild { get; set; }
@@ -46,6 +46,7 @@ public class Player
     public ICollection<Guild> GuildsToLead { get; set; } = null!;
 
     public ICollection<GuildMember> Guilds { get; set; } = null!;
+    public ICollection<GuildNews> WrittenGuildNews { get; set; } = null!;
 
     public static void Configure(EntityTypeBuilder<Player> builder, DatabaseFacade database)
     {

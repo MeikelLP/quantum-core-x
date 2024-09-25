@@ -48,6 +48,36 @@ namespace QuantumCore.Game.Persistence.Migrations.Mysql
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateTable(
+                    name: "GuildNews",
+                    columns: table => new
+                    {
+                        Id = table.Column<uint>(type: "int unsigned", nullable: false)
+                            .Annotation("MySql:ValueGenerationStrategy", MySqlValueGenerationStrategy.IdentityColumn),
+                        PlayerId = table.Column<uint>(type: "int unsigned", nullable: false),
+                        Message = table.Column<string>(type: "varchar(50)", maxLength: 50, nullable: false)
+                            .Annotation("MySql:CharSet", "utf8mb4"),
+                        CreatedAt = table.Column<DateTime>(type: "datetime(6)", nullable: false,
+                            defaultValueSql: "(CAST(CURRENT_TIMESTAMP AS DATETIME(6)))"),
+                        GuildId = table.Column<uint>(type: "int unsigned", nullable: true)
+                    },
+                    constraints: table =>
+                    {
+                        table.PrimaryKey("PK_GuildNews", x => x.Id);
+                        table.ForeignKey(
+                            name: "FK_GuildNews_Guilds_GuildId",
+                            column: x => x.GuildId,
+                            principalTable: "Guilds",
+                            principalColumn: "Id");
+                        table.ForeignKey(
+                            name: "FK_GuildNews_Players_PlayerId",
+                            column: x => x.PlayerId,
+                            principalTable: "Players",
+                            principalColumn: "Id",
+                            onDelete: ReferentialAction.Cascade);
+                    })
+                .Annotation("MySql:CharSet", "utf8mb4");
+
+            migrationBuilder.CreateTable(
                     name: "GuildRanks",
                     columns: table => new
                     {
@@ -127,6 +157,16 @@ namespace QuantumCore.Game.Persistence.Migrations.Mysql
                 unique: true);
 
             migrationBuilder.CreateIndex(
+                name: "IX_GuildNews_GuildId",
+                table: "GuildNews",
+                column: "GuildId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_GuildNews_PlayerId",
+                table: "GuildNews",
+                column: "PlayerId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Guilds_OwnerId",
                 table: "Guilds",
                 column: "OwnerId");
@@ -148,6 +188,9 @@ namespace QuantumCore.Game.Persistence.Migrations.Mysql
 
             migrationBuilder.DropTable(
                 name: "GuildMembers");
+
+            migrationBuilder.DropTable(
+                name: "GuildNews");
 
             migrationBuilder.DropTable(
                 name: "GuildRanks");

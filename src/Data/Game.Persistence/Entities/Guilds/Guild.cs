@@ -21,6 +21,7 @@ public class Guild
 
     public ICollection<GuildMember> Members { get; set; } = null!;
     public ICollection<GuildRank> Ranks { get; set; } = null!;
+    public ICollection<GuildNews> News { get; set; } = null!;
     public Player Leader { get; set; } = null!;
 
     public static void Configure(EntityTypeBuilder<Guild> builder, DatabaseFacade database)
