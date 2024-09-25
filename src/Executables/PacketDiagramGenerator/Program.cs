@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using System.Text;
+using EnumsNET;
 using QuantumCore.Game.Packets;
 using QuantumCore.Networking;
 
@@ -15,6 +16,7 @@ var packetTypes = new[] {typeof(Attack).Assembly}.Concat(AppDomain.CurrentDomain
         Type = x,
         x.Name,
         Namespace = x.Namespace!,
+        x.GetCustomAttribute<PacketAttribute>()!.Direction,
         x.GetCustomAttribute<PacketAttribute>()!.Header,
         x.GetCustomAttribute<SubPacketAttribute>()?.SubHeader,
         SubHeaderPosition = x.GetCustomAttribute<SubPacketAttribute>()?.Position
@@ -29,11 +31,14 @@ foreach (var packetInfo in packetTypes.AsParallel())
     sb.AppendLine($"""
                    # {packetInfo.Name}
 
-                   * Header: `0x{packetInfo.Header:X2}`
+                   |   |   |
+                   |---|---|
+                   |Direction|`{packetInfo.Direction.AsString()}`|
+                   |Header|`0x{packetInfo.Header:X2}`|
                    """);
     if (packetInfo.SubHeader is not null)
     {
-        sb.AppendLine($"* Sub Header: `0x{packetInfo.SubHeader:X2}`");
+        sb.AppendLine($"|Sub Header|`0x{packetInfo.SubHeader:X2}`|");
     }
 
     sb.AppendLine("""
