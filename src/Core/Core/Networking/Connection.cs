@@ -100,8 +100,24 @@ namespace QuantumCore.Core.Networking
         {
             _cts?.Cancel();
             _client?.Close();
-            _cts?.Dispose();
             OnClose(expected);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _client?.Dispose();
+                _stream?.Dispose();
+                _cts?.Dispose();
+            }
+        }
+
+        public override sealed void Dispose()
+        {
+            Dispose(true);
+            base.Dispose();
+            GC.SuppressFinalize(this);
         }
 
         public void Send<T>(T packet) where T : IPacketSerializable
