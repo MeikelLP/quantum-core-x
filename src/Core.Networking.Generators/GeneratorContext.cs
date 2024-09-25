@@ -255,15 +255,7 @@ internal class GeneratorContext
                 }
                 else if (semanticType is IArrayTypeSymbol arr)
                 {
-                    if (arrayLength is null)
-                    {
-                        // may have dynamic size
-                        return GetStaticSize(arr.ElementType);
-                    }
-                    else
-                    {
-                        return GetStaticSize(arr.ElementType);
-                    }
+                    return GetStaticSize(arr.ElementType);
                 }
                 else if (semanticType.TypeKind is TypeKind.Enum && semanticType is INamedTypeSymbol namedTypeSymbol)
                 {
