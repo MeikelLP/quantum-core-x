@@ -98,7 +98,8 @@ int GetFieldLength((string Name, Type PropertyType, FieldAttribute Attribute) fi
 
     // try custom type
     var subProps = GetProperties(propertyType);
-    return subProps.Sum(GetFieldLength) * field.Attribute.ArrayLength;
+    var multiplier = propertyType.IsArray ? field.Attribute.ArrayLength : 1;
+    return subProps.Sum(GetFieldLength) * multiplier;
 }
 
 int GetPrimitiveSize(Type type)
