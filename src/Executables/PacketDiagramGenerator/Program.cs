@@ -10,28 +10,63 @@ var packetTypes = new[] {typeof(Attack).Assembly}.Concat(AppDomain.CurrentDomain
                     x is {IsClass: true, IsAbstract: false} &&
                     x.GetCustomAttribute<PacketAttribute>() is not null))
     .OrderBy(x => x.Name)
+    .Select(x => new
+    {
+        Type = x,
+        x.Name,
+        Namespace = x.Namespace!,
+        x.GetCustomAttribute<PacketAttribute>()!.Header,
+        x.GetCustomAttribute<SubPacketAttribute>()?.SubHeader,
+        SubHeaderPosition = x.GetCustomAttribute<SubPacketAttribute>()?.Position
+    })
     .ToArray();
 
-foreach (var packetType in packetTypes)
+foreach (var packetInfo in packetTypes.AsParallel())
 {
-    var fields = GetProperties(packetType).ToList();
-    var meta = packetType.GetCustomAttribute<PacketAttribute>()!;
-    var sub = packetType.GetCustomAttribute<SubPacketAttribute>();
+    var fields = GetProperties(packetInfo.Type).ToList();
 
     var sb = new StringBuilder();
     sb.AppendLine($"""
-                   # {packetType.Name}
+                   # {packetInfo.Name}
+
+                   * Header: `0x{packetInfo.Header:X2}`
+                   """);
+    if (packetInfo.SubHeader is not null)
+    {
+        sb.AppendLine($"* Sub Header: `0x{packetInfo.SubHeader:X2}`");
+    }
+
+    sb.AppendLine("""
+
+                  ## Fields
+
+                  """);
+
+    if (fields.Count > 0)
+    {
+        foreach (var field in fields)
+        {
+            sb.AppendLine($"* {field.Name}");
+        }
+    }
+    else
+    {
+        sb.AppendLine("> _no fields - only headers_");
+    }
+
+    sb.AppendLine($"""
 
                    ```mermaid
                    ---
-                   title: "{packetType.Name}"
+                   title: "{packetInfo.Name}"
                    ---
                    packet-beta
-                     0: "0x{meta.Header:X2}"
+                     0: "0x{packetInfo.Header:X2}"
                    """);
-    if (sub is not null)
+    if (packetInfo.SubHeader is not null && packetInfo.SubHeaderPosition is not null)
     {
-        fields.Insert(sub.Position, ($"0x{sub.SubHeader:X2}", typeof(byte), new FieldAttribute(sub.Position)));
+        fields.Insert(packetInfo.SubHeaderPosition!.Value,
+            ($"0x{packetInfo.SubHeader:X2}", typeof(byte), new FieldAttribute(packetInfo.SubHeaderPosition!.Value)));
     }
 
     var position = 0;
@@ -47,12 +82,42 @@ foreach (var packetType in packetTypes)
 
     sb.AppendLine("```");
 
+    var relatedPackets = packetTypes
+        .Where(x => x.Header == packetInfo.Header)
+        .ToArray();
+    if (packetInfo.SubHeader is not null && relatedPackets.Length > 0)
+    {
+        sb.AppendLine();
+        sb.AppendLine("## Related packets");
+        sb.AppendLine();
+        foreach (var type in relatedPackets)
+        {
+            var relativePath = GetRelativePathTo(
+                type.Namespace,
+                packetInfo.Namespace
+            );
+            if (relativePath == "") relativePath = ".";
+            sb.AppendLine($"* [{type.Name}]({relativePath}/{type.Name}.md)");
+        }
+    }
+
     var mermaid = sb.ToString();
 
-    await WriteFile(packetType.Namespace!, packetType.Name, mermaid);
+    await WriteFile(packetInfo.Namespace, packetInfo.Name, mermaid);
 }
 
 return;
+
+static string GetRelativePathTo(string from, string to)
+{
+    var fromUri = new Uri(Path.GetFullPath(from));
+    var toUri = new Uri(Path.GetFullPath(to));
+
+    var relativeUri = fromUri.MakeRelativeUri(toUri);
+    var relativePath = Uri.UnescapeDataString(relativeUri.ToString());
+
+    return relativePath.Replace('/', Path.DirectorySeparatorChar);
+}
 
 (string Name, Type PropertyType, FieldAttribute Attribute)[] GetProperties(Type type)
 {
