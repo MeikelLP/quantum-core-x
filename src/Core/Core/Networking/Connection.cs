@@ -100,6 +100,7 @@ namespace QuantumCore.Core.Networking
         {
             _cts?.Cancel();
             _client?.Close();
+            _cts?.Dispose();
             OnClose(expected);
         }
 
