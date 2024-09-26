@@ -31,7 +31,7 @@ jobs:
           dotnet-version: 8.0.x
       - name: Build packet diagrams
         run: dotnet run --verbosity:quiet
-        working-directory: src/Executables/PacketDiagramGenerator
+        working-directory: src/Executables/DocsGenerator
 
       - name: Install dependencies
         run: npm ci
