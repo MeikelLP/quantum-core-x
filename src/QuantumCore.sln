@@ -54,7 +54,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Game.Commands", "Libraries\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Game.Commands.Tests", "Tests\Game.Commands.Tests\Game.Commands.Tests.csproj", "{EFF23932-7926-4DDD-8B45-9E7E2A2CA03A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PacketDiagramGenerator", "Executables\PacketDiagramGenerator\PacketDiagramGenerator.csproj", "{80D03D0B-F9FE-4553-A4BF-49EBA3AFC719}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DocsGenerator", "Executables\DocsGenerator\DocsGenerator.csproj", "{80D03D0B-F9FE-4553-A4BF-49EBA3AFC719}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
