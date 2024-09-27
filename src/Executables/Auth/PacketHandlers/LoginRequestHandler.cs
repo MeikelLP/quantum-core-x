@@ -90,7 +90,7 @@ public class LoginRequestHandler : IAuthPacketHandler<LoginRequest>
         var isAlreadyLoggedIn = await CheckExistingConnectionOf(account);
         if (isAlreadyLoggedIn)
         {
-            status = LoginFailedBecause.Already.ToString().ToUpper();
+            status = await DecideAlreadyLoggedInStatusAsync(account);
         }
 
 
@@ -109,18 +109,18 @@ public class LoginRequestHandler : IAuthPacketHandler<LoginRequest>
         var authToken = CoreRandom.GenerateUInt32();
 
         // Store auth token
-        await _cacheManager.Set("token:" + authToken, new Token
+        await _cacheManager.Server.Set($"token:{authToken}", new Token
         {
             Username = account.Username,
             AccountId = account.Id
         });
         // Set expiration on token
-        await _cacheManager.Expire("token:" + authToken, 30);
+        await _cacheManager.Server.Expire($"token:{authToken}", 30);
 
         // Relate the account ID to the token
-        await _cacheManager.Set("account:token:" + account.Id, authToken);
+        await _cacheManager.Shared.Set($"account:token:{account.Id}", authToken);
         // Set expiration on account token
-        await _cacheManager.Expire("account:token:" + account.Id, 30);
+        await _cacheManager.Shared.Expire($"account:token:{account.Id}", 30);
 
         // Send the auth token to the client and let it connect to our game server
         ctx.Connection.Send(new LoginSuccess
@@ -130,7 +130,12 @@ public class LoginRequestHandler : IAuthPacketHandler<LoginRequest>
         });
     }
 
-    private async Task<bool> CheckExistingConnectionOf(AccountData account)
+    private async Task<bool> CheckExistingConnectionOfAsync(AccountData account)
+    {
+        var isLoggedIn = await _cacheManager.Shared.Exists($"account:token:{account.Id}");
+
+        return isLoggedIn == 1;
+    }
     {
         var isLoggedIn = await _cacheManager.Exists("account:token:" + account.Id);
 
