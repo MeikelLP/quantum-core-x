@@ -39,7 +39,7 @@ namespace QuantumCore.Game.PacketHandlers.Loading
             ctx.Connection.Send(new Channel { ChannelNo = 1 }); // todo
             
             var key = $"player:{player.Player.Id}:loggedInTime";
-            await _cache.Set(key, ctx.Connection.Server.ServerTime);
+            await _cache.Server.Set(key, ctx.Connection.Server.ServerTime);
             
             player.ShowEntity(ctx.Connection);
             _world.SpawnEntity(player);

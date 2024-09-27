@@ -9,7 +9,7 @@ namespace QuantumCore.Game;
 
 public class ChatManager : IChatManager
 {
-    private readonly ICacheManager _cacheManager;
+    private readonly IRedisStore _cacheManager;
 
     private struct ChatMessage
     {
@@ -23,7 +23,7 @@ public class ChatManager : IChatManager
 
     public ChatManager(ICacheManager cacheManager)
     {
-        _cacheManager = cacheManager;
+        _cacheManager = cacheManager.Server;
     }
 
     public void Init()
