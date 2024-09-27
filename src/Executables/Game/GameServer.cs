@@ -46,6 +46,7 @@ namespace QuantumCore.Game
         private TimeSpan _maxElapsedTime = TimeSpan.FromMilliseconds(500);
         private readonly Stopwatch _serverTimer = new();
         private readonly IDropProvider _dropProvider;
+        private readonly ISessionManager _sessionManager;
 
         public new ImmutableArray<IGameConnection> Connections =>
             [..base.Connections.Values.Cast<IGameConnection>()];
@@ -57,7 +58,7 @@ namespace QuantumCore.Game
             IItemManager itemManager, IMonsterManager monsterManager, IExperienceManager experienceManager,
             IAnimationManager animationManager, ICommandManager commandManager, IQuestManager questManager,
             IChatManager chatManager, IWorld world, IDropProvider dropProvider, ISkillManager skillManager,
-            ICacheManager cacheManager)
+            ICacheManager cacheManager, ISessionManager sessionManager)
             : base(packetManager, logger, pluginExecutor, serviceProvider, "game", hostingOptions)
         {
             _hostingOptions = hostingOptions.Value;
@@ -72,6 +73,7 @@ namespace QuantumCore.Game
             _commandManager = commandManager;
             _questManager = questManager;
             _chatManager = chatManager;
+            _sessionManager = sessionManager;
             World = world;
             _dropProvider = dropProvider;
             _skillManager = skillManager;
@@ -109,9 +111,9 @@ namespace QuantumCore.Game
                 _skillManager.LoadAsync(stoppingToken)
             );
 
-            // Drop all pre-existing caches
-            _logger.LogInformation("Drop all caches");
-            await _cacheManager.FlushAll();
+            
+            // Initialize session manager
+            _sessionManager.Init(this);
 
             // Initialize core systems
             _chatManager.Init();
