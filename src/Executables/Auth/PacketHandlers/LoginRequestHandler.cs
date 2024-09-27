@@ -99,7 +99,7 @@ public class LoginRequestHandler : IAuthPacketHandler<LoginRequest>
         {
             ctx.Connection.Send(new LoginFailed
             {
-                Status = status
+                Status = status ?? "UNKNOWN"
             });
 
             return;
