@@ -43,8 +43,6 @@ namespace QuantumCore.Game
                 if (expected)
                 {
                     _world.DespawnEntity(Player);
-                    _cacheManager.Shared.DelAllAsync($"*{AccountId}");
-                    _cacheManager.Server.DelAllAsync($"player:{Player!.Player.Id}");
                 }
                 else
                 {
@@ -57,10 +55,12 @@ namespace QuantumCore.Game
                     if (Phase is EPhases.Game or EPhases.Loading or EPhases.Select)
                     {
                         await _world.DespawnPlayerAsync(Player);
-                        _cacheManager.Shared.DelAllAsync($"*{AccountId}");
-                        _cacheManager.Server.DelAllAsync($"player:{Player!.Player.Id}");
+                        
                     }
                 }
+                
+                _cacheManager.Shared.DelAllAsync($"*{AccountId}");
+                _cacheManager.Server.DelAllAsync($"player:{Player!.Player.Id}");
                 
             }
 
