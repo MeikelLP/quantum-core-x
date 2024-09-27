@@ -34,6 +34,8 @@ public class LoginRequestHandler : IAuthPacketHandler<LoginRequest>
     private readonly IAccountRepository _accountRepository;
     private readonly ILogger<LoginRequestHandler> _logger;
     private readonly ICacheManager _cacheManager;
+    
+    private const int DropConnectionAfter = 1;
 
     public LoginRequestHandler(IAccountRepository accountRepository, ILogger<LoginRequestHandler> logger, ICacheManager cacheManager)
     {
@@ -87,7 +89,7 @@ public class LoginRequestHandler : IAuthPacketHandler<LoginRequest>
         }
 
         // Check if the account is already logged in
-        var isAlreadyLoggedIn = await CheckExistingConnectionOf(account);
+        var isAlreadyLoggedIn = await CheckExistingConnectionOfAsync(account);
         if (isAlreadyLoggedIn)
         {
             status = await DecideAlreadyLoggedInStatusAsync(account);
@@ -136,9 +138,29 @@ public class LoginRequestHandler : IAuthPacketHandler<LoginRequest>
 
         return isLoggedIn == 1;
     }
+    
+    private async Task<string?> DecideAlreadyLoggedInStatusAsync(AccountData account)
     {
-        var isLoggedIn = await _cacheManager.Exists("account:token:" + account.Id);
-
-        return isLoggedIn == 1;
+        var attemptKey = $"account:attempt:success:{account.Id}";
+        var accountKey = $"account:token:{account.Id}";
+        // increment the attempts in Shared cache
+        var attempts = await _cacheManager.Shared.Incr(attemptKey);
+        // set expiration on the key
+        await _cacheManager.Shared.Expire(attemptKey, 30);
+        
+        // check if the attempts are greater than the limit
+        if (attempts > DropConnectionAfter)
+        {
+            // publish a message through redis to drop the connection
+            await _cacheManager.Publish("account:drop-connection", account.Id);
+            // delete the account key
+            await _cacheManager.Shared.Del(accountKey);
+            await _cacheManager.Shared.Del(attemptKey);
+            
+           // _logger.LogInformation("Existing player {PlayerName}", existingConnection.Player!.Name);
+            return "";
+        }
+        
+        return LoginFailedBecause.AlreadyLoggedIn.AsString(EnumFormat.EnumMemberValue);
     }
 }
