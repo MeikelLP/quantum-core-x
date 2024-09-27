@@ -157,7 +157,6 @@ public class LoginRequestHandler : IAuthPacketHandler<LoginRequest>
             await _cacheManager.Shared.Del(accountKey);
             await _cacheManager.Shared.Del(attemptKey);
             
-           // _logger.LogInformation("Existing player {PlayerName}", existingConnection.Player!.Name);
             return "";
         }
         
