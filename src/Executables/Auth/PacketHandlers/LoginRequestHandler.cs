@@ -4,30 +4,29 @@ using QuantumCore.Auth.Cache;
 using QuantumCore.Auth.Packets;
 using QuantumCore.Caching;
 using QuantumCore.Core.Utils;
-using System.ComponentModel;
+using System.Runtime.Serialization;
 using QuantumCore.API.Core.Models;
+using EnumsNET;
 
 namespace QuantumCore.Auth.PacketHandlers;
 
 public enum LoginFailedBecause
 {
-    [Description("Account not found")] NoId,
-    [Description("Wrong password")] WrongPwd,
+    /// <summary>
+    /// Invalid credentials
+    /// </summary>
+    [EnumMember(Value = "WRONGPWD")] InvalidCredentials,
 
-    [Description("Account is already logged in another client")]
-    Already,
+    /// <summary>
+    /// Account is already logged in
+    /// </summary>
+    [EnumMember(Value = "ALREADY")] AlreadyLoggedIn,
 
-    [Description("Server has reached its capacity")]
-    Full,
-
-    // Shutdown,
-    // Repair,
-    // Block,
-    // NotAvail,
-    // NoBill,
-    // BlkLogin,
-    // WebBlk,
-    // AgeLimit,
+    /// <summary>
+    /// Server has reached its maximum capacity
+    /// TODO: implement this behavior
+    /// </summary>
+    [EnumMember(Value = "FULL")] Full,
 }
 
 public class LoginRequestHandler : IAuthPacketHandler<LoginRequest>
@@ -55,7 +54,7 @@ public class LoginRequestHandler : IAuthPacketHandler<LoginRequest>
             _logger.LogDebug("Account {Username} not found", ctx.Packet.Username);
             ctx.Connection.Send(new LoginFailed
             {
-                Status = LoginFailedBecause.NoId.ToString().ToUpper()
+                Status = LoginFailedBecause.InvalidCredentials.AsString(EnumFormat.EnumMemberValue)!
             });
 
             return;
@@ -69,7 +68,7 @@ public class LoginRequestHandler : IAuthPacketHandler<LoginRequest>
             if (!BCrypt.Net.BCrypt.Verify(ctx.Packet.Password, account.Password))
             {
                 _logger.LogDebug("Wrong password supplied for account {Username}", ctx.Packet.Username);
-                status = LoginFailedBecause.WrongPwd.ToString().ToUpper();
+                status = LoginFailedBecause.InvalidCredentials.AsString(EnumFormat.EnumMemberValue);
             }
             else
             {
@@ -84,7 +83,7 @@ public class LoginRequestHandler : IAuthPacketHandler<LoginRequest>
         {
             _logger.LogWarning("Failed to verify password for account {Username}: {Message}", ctx.Packet.Username,
                 e.Message);
-            status = LoginFailedBecause.WrongPwd.ToString().ToUpper();
+            status = LoginFailedBecause.InvalidCredentials.AsString(EnumFormat.EnumMemberValue);
         }
 
         // Check if the account is already logged in
