@@ -27,7 +27,7 @@ public class CacheManager : ICacheManager
     public ValueTask<string> Set(string key, object item) => _defaultRedisStore.Set(key, item);
     public ValueTask<T> Get<T>(string key) => _defaultRedisStore.Get<T>(key);
     public ValueTask<long> Exists(string key) => _defaultRedisStore.Exists(key);
-    public ValueTask<long> Expire(string key, int seconds) => _defaultRedisStore.Expire(key, seconds);
+    public ValueTask<long> Expire(string key, TimeSpan seconds) => _defaultRedisStore.Expire(key, seconds);
     public ValueTask<bool> Ping() => _defaultRedisStore.Ping();
     public ValueTask<long> Publish(string key, object obj) => _defaultRedisStore.Publish(key, obj);
     public IRedisSubscriber Subscribe() => _defaultRedisStore.Subscribe();

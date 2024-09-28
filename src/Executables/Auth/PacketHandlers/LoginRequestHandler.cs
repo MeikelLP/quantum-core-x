@@ -117,12 +117,12 @@ public class LoginRequestHandler : IAuthPacketHandler<LoginRequest>
             AccountId = account.Id
         });
         // Set expiration on token
-        await _cacheManager.Server.Expire($"token:{authToken}", 30);
+        await _cacheManager.Server.Expire($"token:{authToken}", ExpiresIn.ThirtySeconds);
 
         // Relate the account ID to the token
         await _cacheManager.Shared.Set($"account:token:{account.Id}", authToken);
         // Set expiration on account token
-        await _cacheManager.Shared.Expire($"account:token:{account.Id}", 30);
+        await _cacheManager.Shared.Expire($"account:token:{account.Id}", ExpiresIn.ThirtySeconds);
 
         // Send the auth token to the client and let it connect to our game server
         ctx.Connection.Send(new LoginSuccess
@@ -146,7 +146,7 @@ public class LoginRequestHandler : IAuthPacketHandler<LoginRequest>
         // increment the attempts in Shared cache
         var attempts = await _cacheManager.Shared.Incr(attemptKey);
         // set expiration on the key
-        await _cacheManager.Shared.Expire(attemptKey, 30);
+        await _cacheManager.Shared.Expire(attemptKey, ExpiresIn.OneMinute);
         
         // check if the attempts are greater than the limit
         if (attempts > DropConnectionAfter)

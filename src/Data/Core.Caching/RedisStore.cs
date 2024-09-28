@@ -20,7 +20,7 @@ public class RedisStore: IRedisStore
     public ValueTask<string> Set(string key, object item) => _redis.Set(key, item);
     public ValueTask<T> Get<T>(string key) => _redis.Get<T>(key);
     public ValueTask<long> Exists(string key) => _redis.Exists(key);
-    public ValueTask<long> Expire(string key, int seconds) => _redis.Expire(key, seconds);
+    public ValueTask<long> Expire(string key, TimeSpan seconds) => _redis.Expire(key, seconds.Seconds);
     public ValueTask<bool> Ping() => _redis.Ping();
     public ValueTask<long> Publish(string key, object obj) => _redis.Publish(key, obj);
     public IRedisSubscriber Subscribe() => new RedisSubscriber(_redis.Subscribe());

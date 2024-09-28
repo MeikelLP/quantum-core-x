@@ -7,7 +7,7 @@ public interface IRedisStore
     ValueTask<string> Set(string key, object item);
     ValueTask<T> Get<T>(string key);
     ValueTask<long> Exists(string key);
-    ValueTask<long> Expire(string key, int seconds);
+    ValueTask<long> Expire(string key, TimeSpan seconds);
     ValueTask<bool> Ping();
     ValueTask<long> Publish(string key, object obj);
     IRedisSubscriber Subscribe();

@@ -65,7 +65,7 @@ namespace QuantumCore.Game.PacketHandlers
 
             // Remove TTL from token so we can use it for another game core transition
             await _cacheManager.Server.Persist(key);
-            await _cacheManager.Shared.Expire(accountTokenKey, 3600); // TODO: add listener to drop connection when it expires
+            await _cacheManager.Shared.Expire(accountTokenKey, ExpiresIn.OneDay);
 
             // Store the username and id for later reference
             ctx.Connection.Username = token.Username;
