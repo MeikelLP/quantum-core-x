@@ -30,6 +30,12 @@ public class GuildCreateCommand : ICommandHandler<GuildCreateCommandOptions>
             return;
         }
 
+        if (context.Player.Player.GuildId is not null)
+        {
+            context.Player.SendChatInfo("Player already in a guild");
+            return;
+        }
+
         var player = context.Player.Player;
         await _guildManager.CreateGuildAsync(context.Arguments.Name, player.Id);
         await context.Player.RefreshGuildAsync();

@@ -127,4 +127,43 @@ public class GuildManager : IGuildManager
             .Where(x => x.GuildId == guildId && x.Id == newsId)
             .ExecuteDeleteAsync(token) == 1;
     }
+
+    public Task<bool> IsLeaderAsync(uint playerId, CancellationToken token = default)
+    {
+        return _db.GuildMembers
+            .Where(x => x.PlayerId == playerId && x.IsLeader)
+            .AnyAsync(token);
+    }
+
+    public async Task<ImmutableArray<GuildRankData>> GetRanksAsync(uint guildId, CancellationToken token)
+    {
+        return
+        [
+            ..await _db.GuildRanks
+                .Where(x => x.GuildId == guildId)
+                .OrderBy(x => x.Position)
+                .Take(GuildConstants.RANKS_LENGTH)
+                .Select(x => new GuildRankData
+                {
+                    Name = x.Name,
+                    Permissions = x.Permissions,
+                    Position = x.Position
+                })
+                .ToArrayAsync(token)
+        ];
+    }
+
+    public async Task RenameRankAsync(uint guildId, byte position, string packetName, CancellationToken token)
+    {
+        await _db.GuildRanks
+            .Where(x => x.GuildId == guildId && x.Position == position)
+            .ExecuteUpdateAsync(x => x.SetProperty(p => p.Name, packetName), token);
+    }
+
+    public async Task RemoveGuildAsync(uint guildId, CancellationToken token = default)
+    {
+        await _db.Guilds
+            .Where(x => x.Id == guildId)
+            .ExecuteDeleteAsync(token);
+    }
 }

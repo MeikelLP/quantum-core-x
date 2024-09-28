@@ -45,7 +45,7 @@ public class Player
     /// </summary>
     public ICollection<Guild> GuildsToLead { get; set; } = null!;
 
-    public ICollection<GuildMember> Guilds { get; set; } = null!;
+    public ICollection<GuildMember> Members { get; set; } = null!;
     public ICollection<GuildNews> WrittenGuildNews { get; set; } = null!;
 
     public static void Configure(EntityTypeBuilder<Player> builder, DatabaseFacade database)
@@ -60,6 +60,13 @@ public class Player
             builder.Property(x => x.CreatedAt).HasDefaultValueSql("(CAST(CURRENT_TIMESTAMP AS DATETIME(6)))");
             builder.Property(x => x.UpdatedAt).HasDefaultValueSql("(CAST(CURRENT_TIMESTAMP AS DATETIME(6)))");
         }
+
+        builder.HasOne(x => x.Guild)
+            .WithMany()
+            .HasForeignKey(x => x.GuildId)
+            .HasPrincipalKey(x => x.Id)
+            .OnDelete(DeleteBehavior.SetNull);
+
 
         builder.HasData([
             new Player

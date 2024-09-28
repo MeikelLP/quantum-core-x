@@ -315,18 +315,7 @@ namespace QuantumCore.Game.World.Entities
                         })
                         .ToArray()
                 });
-                Connection.Send(new GuildRankPacket
-                {
-                    Ranks = Guild.Ranks
-                        .Select(rank => new GuildRankDataPacket
-                        {
-                            Rank = rank.Rank,
-                            Name = rank.Name,
-                            Permissions = rank.Permissions
-                        })
-                        .Take(GuildConstants.RANKS_LENGTH)
-                        .ToArray()
-                });
+                Connection.SendGuildRanks(Guild.Ranks);
                 Connection.Send(new GuildInfo
                 {
                     Level = Guild.Level,
@@ -351,7 +340,7 @@ namespace QuantumCore.Game.World.Entities
         {
             var guildManager = _scope.ServiceProvider.GetRequiredService<IGuildManager>();
             Guild = await guildManager.GetGuildForPlayerAsync(Player.Id);
-
+            Player.GuildId = Guild?.Id;
             SendGuildInfo();
             SendCharacterUpdate();
         }
@@ -927,11 +916,13 @@ namespace QuantumCore.Game.World.Entities
             _logger.LogTrace("GetPremiumRemainSeconds not implemented yet");
             return 0; // todo: implement premium system
         }
-public bool IsUsableSkillMotion(int motion)
+
+        public bool IsUsableSkillMotion(int motion)
         {
             // todo: check if riding, mining or fishing
             return true;
         }
+
         public bool HasUniqueGroupItemEquipped(uint itemProtoId)
         {
             _logger.LogTrace("HasUniqueGroupItemEquipped not implemented yet");

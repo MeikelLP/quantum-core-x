@@ -11,7 +11,7 @@ using QuantumCore.Game.Persistence;
 namespace QuantumCore.Game.Persistence.Migrations.Sqlite
 {
     [DbContext(typeof(SqliteGameDbContext))]
-    [Migration("20240928225219_AddGuild")]
+    [Migration("20240928233221_AddGuild")]
     partial class AddGuild
     {
         /// <inheritdoc />
@@ -519,9 +519,9 @@ namespace QuantumCore.Game.Persistence.Migrations.Sqlite
                         .IsRequired();
 
                     b.HasOne("QuantumCore.Game.Persistence.Entities.Player", "Player")
-                        .WithMany("Guilds")
+                        .WithMany("Members")
                         .HasForeignKey("PlayerId")
-                        .OnDelete(DeleteBehavior.SetNull)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("QuantumCore.Game.Persistence.Entities.Guilds.GuildRank", "Rank")
@@ -610,7 +610,8 @@ namespace QuantumCore.Game.Persistence.Migrations.Sqlite
                 {
                     b.HasOne("QuantumCore.Game.Persistence.Entities.Guilds.Guild", "Guild")
                         .WithMany()
-                        .HasForeignKey("GuildId");
+                        .HasForeignKey("GuildId")
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("Guild");
                 });
@@ -638,9 +639,9 @@ namespace QuantumCore.Game.Persistence.Migrations.Sqlite
 
             modelBuilder.Entity("QuantumCore.Game.Persistence.Entities.Player", b =>
                 {
-                    b.Navigation("Guilds");
-
                     b.Navigation("GuildsToLead");
+
+                    b.Navigation("Members");
 
                     b.Navigation("WrittenGuildNews");
                 });

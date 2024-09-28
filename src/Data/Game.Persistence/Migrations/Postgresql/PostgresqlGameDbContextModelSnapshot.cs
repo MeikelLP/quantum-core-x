@@ -530,9 +530,9 @@ namespace QuantumCore.Game.Persistence.Migrations.Postgresql
                         .IsRequired();
 
                     b.HasOne("QuantumCore.Game.Persistence.Entities.Player", "Player")
-                        .WithMany("Guilds")
+                        .WithMany("Members")
                         .HasForeignKey("PlayerId")
-                        .OnDelete(DeleteBehavior.SetNull)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("QuantumCore.Game.Persistence.Entities.Guilds.GuildRank", "Rank")
@@ -621,7 +621,8 @@ namespace QuantumCore.Game.Persistence.Migrations.Postgresql
                 {
                     b.HasOne("QuantumCore.Game.Persistence.Entities.Guilds.Guild", "Guild")
                         .WithMany()
-                        .HasForeignKey("GuildId");
+                        .HasForeignKey("GuildId")
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("Guild");
                 });
@@ -649,9 +650,9 @@ namespace QuantumCore.Game.Persistence.Migrations.Postgresql
 
             modelBuilder.Entity("QuantumCore.Game.Persistence.Entities.Player", b =>
                 {
-                    b.Navigation("Guilds");
-
                     b.Navigation("GuildsToLead");
+
+                    b.Navigation("Members");
 
                     b.Navigation("WrittenGuildNews");
                 });

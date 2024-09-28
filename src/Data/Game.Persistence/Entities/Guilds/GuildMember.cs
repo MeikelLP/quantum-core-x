@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Infrastructure;
+﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace QuantumCore.Game.Persistence.Entities.Guilds;
@@ -26,8 +27,7 @@ public class GuildMember
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasOne(x => x.Player)
-            .WithMany(x => x.Guilds)
-            .OnDelete(DeleteBehavior.SetNull);
+            .WithMany(x => x.Members);
 
         builder.HasOne(x => x.Guild)
             .WithMany(x => x.Members)

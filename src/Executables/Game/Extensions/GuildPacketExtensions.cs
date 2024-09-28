@@ -19,4 +19,20 @@ public static class GuildPacketExtensions
             }).ToArray()
         });
     }
+
+    public static void SendGuildRanks(this IConnection connection, ImmutableArray<GuildRankData> ranks)
+    {
+        connection.Send(new GuildRankPacket
+        {
+            Ranks = ranks
+                .Select(rank => new GuildRankDataPacket
+                {
+                    Rank = rank.Position,
+                    Name = rank.Name,
+                    Permissions = rank.Permissions
+                })
+                .Take(GuildConstants.RANKS_LENGTH)
+                .ToArray()
+        });
+    }
 }

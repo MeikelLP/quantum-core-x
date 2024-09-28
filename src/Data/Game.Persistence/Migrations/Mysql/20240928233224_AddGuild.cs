@@ -129,7 +129,7 @@ namespace QuantumCore.Game.Persistence.Migrations.Mysql
                             column: x => x.PlayerId,
                             principalTable: "Players",
                             principalColumn: "Id",
-                            onDelete: ReferentialAction.SetNull);
+                            onDelete: ReferentialAction.Cascade);
                     })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -176,7 +176,8 @@ namespace QuantumCore.Game.Persistence.Migrations.Mysql
                 table: "Players",
                 column: "GuildId",
                 principalTable: "Guilds",
-                principalColumn: "Id");
+                principalColumn: "Id",
+                onDelete: ReferentialAction.SetNull);
         }
 
         /// <inheritdoc />
