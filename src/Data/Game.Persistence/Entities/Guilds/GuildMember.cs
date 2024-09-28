@@ -7,7 +7,7 @@ public class GuildMember
 {
     public uint GuildId { get; set; }
     public uint PlayerId { get; set; }
-    public byte RankId { get; set; }
+    public byte RankPosition { get; set; }
     public bool IsLeader { get; set; }
     public uint SpentExperience { get; set; }
 
@@ -21,13 +21,16 @@ public class GuildMember
         builder.HasIndex(x => new {x.PlayerId}).IsUnique();
         builder.HasOne(x => x.Rank)
             .WithMany(x => x.Members)
-            .HasForeignKey(x => new {x.GuildId, x.RankId})
-            .HasPrincipalKey(x => new {x.GuildId, RankId = x.Rank});
+            .HasForeignKey(x => new {x.GuildId, x.RankPosition})
+            .HasPrincipalKey(x => new {x.GuildId, x.Position})
+            .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasOne(x => x.Player)
-            .WithMany(x => x.Guilds);
+            .WithMany(x => x.Guilds)
+            .OnDelete(DeleteBehavior.SetNull);
 
         builder.HasOne(x => x.Guild)
-            .WithMany(x => x.Members);
+            .WithMany(x => x.Members)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

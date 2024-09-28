@@ -82,14 +82,14 @@ namespace QuantumCore.Game.Persistence.Migrations.Mysql
                     columns: table => new
                     {
                         GuildId = table.Column<uint>(type: "int unsigned", nullable: false),
-                        Rank = table.Column<byte>(type: "tinyint unsigned", nullable: false),
+                        Position = table.Column<byte>(type: "tinyint unsigned", nullable: false),
                         Name = table.Column<string>(type: "varchar(8)", maxLength: 8, nullable: false)
                             .Annotation("MySql:CharSet", "utf8mb4"),
                         Permissions = table.Column<byte>(type: "tinyint unsigned", nullable: false)
                     },
                     constraints: table =>
                     {
-                        table.PrimaryKey("PK_GuildRanks", x => new {x.GuildId, x.Rank});
+                        table.PrimaryKey("PK_GuildRanks", x => new {x.GuildId, x.Position});
                         table.ForeignKey(
                             name: "FK_GuildRanks_Guilds_GuildId",
                             column: x => x.GuildId,
@@ -105,7 +105,7 @@ namespace QuantumCore.Game.Persistence.Migrations.Mysql
                     {
                         GuildId = table.Column<uint>(type: "int unsigned", nullable: false),
                         PlayerId = table.Column<uint>(type: "int unsigned", nullable: false),
-                        RankId = table.Column<byte>(type: "tinyint unsigned", nullable: false),
+                        RankPosition = table.Column<byte>(type: "tinyint unsigned", nullable: false),
                         IsLeader = table.Column<bool>(type: "tinyint(1)", nullable: false),
                         SpentExperience = table.Column<uint>(type: "int unsigned", nullable: false)
                     },
@@ -113,10 +113,10 @@ namespace QuantumCore.Game.Persistence.Migrations.Mysql
                     {
                         table.PrimaryKey("PK_GuildMembers", x => new {x.GuildId, x.PlayerId});
                         table.ForeignKey(
-                            name: "FK_GuildMembers_GuildRanks_GuildId_RankId",
-                            columns: x => new {x.GuildId, x.RankId},
+                            name: "FK_GuildMembers_GuildRanks_GuildId_RankPosition",
+                            columns: x => new {x.GuildId, x.RankPosition},
                             principalTable: "GuildRanks",
-                            principalColumns: new[] {"GuildId", "Rank"},
+                            principalColumns: new[] {"GuildId", "Position"},
                             onDelete: ReferentialAction.Cascade);
                         table.ForeignKey(
                             name: "FK_GuildMembers_Guilds_GuildId",
@@ -129,7 +129,7 @@ namespace QuantumCore.Game.Persistence.Migrations.Mysql
                             column: x => x.PlayerId,
                             principalTable: "Players",
                             principalColumn: "Id",
-                            onDelete: ReferentialAction.Cascade);
+                            onDelete: ReferentialAction.SetNull);
                     })
                 .Annotation("MySql:CharSet", "utf8mb4");
 
@@ -146,9 +146,9 @@ namespace QuantumCore.Game.Persistence.Migrations.Mysql
                 column: "GuildId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_GuildMembers_GuildId_RankId",
+                name: "IX_GuildMembers_GuildId_RankPosition",
                 table: "GuildMembers",
-                columns: new[] {"GuildId", "RankId"});
+                columns: new[] {"GuildId", "RankPosition"});
 
             migrationBuilder.CreateIndex(
                 name: "IX_GuildMembers_PlayerId",

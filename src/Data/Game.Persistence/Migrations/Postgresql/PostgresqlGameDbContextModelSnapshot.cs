@@ -161,7 +161,7 @@ namespace QuantumCore.Game.Persistence.Migrations.Postgresql
                     b.Property<bool>("IsLeader")
                         .HasColumnType("boolean");
 
-                    b.Property<byte>("RankId")
+                    b.Property<byte>("RankPosition")
                         .HasColumnType("smallint");
 
                     b.Property<long>("SpentExperience")
@@ -172,7 +172,7 @@ namespace QuantumCore.Game.Persistence.Migrations.Postgresql
                     b.HasIndex("PlayerId")
                         .IsUnique();
 
-                    b.HasIndex("GuildId", "RankId");
+                    b.HasIndex("GuildId", "RankPosition");
 
                     b.ToTable("GuildMembers");
                 });
@@ -215,7 +215,7 @@ namespace QuantumCore.Game.Persistence.Migrations.Postgresql
                     b.Property<long>("GuildId")
                         .HasColumnType("bigint");
 
-                    b.Property<byte>("Rank")
+                    b.Property<byte>("Position")
                         .HasColumnType("smallint");
 
                     b.Property<string>("Name")
@@ -226,7 +226,7 @@ namespace QuantumCore.Game.Persistence.Migrations.Postgresql
                     b.Property<byte>("Permissions")
                         .HasColumnType("smallint");
 
-                    b.HasKey("GuildId", "Rank");
+                    b.HasKey("GuildId", "Position");
 
                     b.ToTable("GuildRanks");
                 });
@@ -532,12 +532,12 @@ namespace QuantumCore.Game.Persistence.Migrations.Postgresql
                     b.HasOne("QuantumCore.Game.Persistence.Entities.Player", "Player")
                         .WithMany("Guilds")
                         .HasForeignKey("PlayerId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.SetNull)
                         .IsRequired();
 
                     b.HasOne("QuantumCore.Game.Persistence.Entities.Guilds.GuildRank", "Rank")
                         .WithMany("Members")
-                        .HasForeignKey("GuildId", "RankId")
+                        .HasForeignKey("GuildId", "RankPosition")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

@@ -38,7 +38,7 @@ public class GuildManager : IGuildManager
     {
         var leaderRank = new GuildRank
         {
-            Rank = 1,
+            Position = 1,
             Name = "Leader",
             Permissions = GuildRankPermission.All
         };
@@ -59,7 +59,7 @@ public class GuildManager : IGuildManager
             Ranks = Enumerable.Range(2, GuildConstants.RANKS_LENGTH - 1)
                 .Select(rank => new GuildRank
                 {
-                    Rank = (byte) rank,
+                    Position = (byte) rank,
                     Name = "Member"
                 })
                 .Prepend(leaderRank)

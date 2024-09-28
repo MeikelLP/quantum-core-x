@@ -12,7 +12,7 @@ using QuantumCore.Game.Persistence;
 namespace QuantumCore.Game.Persistence.Migrations.Mysql
 {
     [DbContext(typeof(MySqlGameDbContext))]
-    [Migration("20240925204052_AddGuild")]
+    [Migration("20240928225222_AddGuild")]
     partial class AddGuild
     {
         /// <inheritdoc />
@@ -164,7 +164,7 @@ namespace QuantumCore.Game.Persistence.Migrations.Mysql
                     b.Property<bool>("IsLeader")
                         .HasColumnType("tinyint(1)");
 
-                    b.Property<byte>("RankId")
+                    b.Property<byte>("RankPosition")
                         .HasColumnType("tinyint unsigned");
 
                     b.Property<uint>("SpentExperience")
@@ -175,7 +175,7 @@ namespace QuantumCore.Game.Persistence.Migrations.Mysql
                     b.HasIndex("PlayerId")
                         .IsUnique();
 
-                    b.HasIndex("GuildId", "RankId");
+                    b.HasIndex("GuildId", "RankPosition");
 
                     b.ToTable("GuildMembers");
                 });
@@ -218,7 +218,7 @@ namespace QuantumCore.Game.Persistence.Migrations.Mysql
                     b.Property<uint>("GuildId")
                         .HasColumnType("int unsigned");
 
-                    b.Property<byte>("Rank")
+                    b.Property<byte>("Position")
                         .HasColumnType("tinyint unsigned");
 
                     b.Property<string>("Name")
@@ -229,7 +229,7 @@ namespace QuantumCore.Game.Persistence.Migrations.Mysql
                     b.Property<byte>("Permissions")
                         .HasColumnType("tinyint unsigned");
 
-                    b.HasKey("GuildId", "Rank");
+                    b.HasKey("GuildId", "Position");
 
                     b.ToTable("GuildRanks");
                 });
@@ -532,12 +532,12 @@ namespace QuantumCore.Game.Persistence.Migrations.Mysql
                     b.HasOne("QuantumCore.Game.Persistence.Entities.Player", "Player")
                         .WithMany("Guilds")
                         .HasForeignKey("PlayerId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.SetNull)
                         .IsRequired();
 
                     b.HasOne("QuantumCore.Game.Persistence.Entities.Guilds.GuildRank", "Rank")
                         .WithMany("Members")
-                        .HasForeignKey("GuildId", "RankId")
+                        .HasForeignKey("GuildId", "RankPosition")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

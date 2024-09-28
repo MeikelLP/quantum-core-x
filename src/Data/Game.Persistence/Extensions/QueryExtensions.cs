@@ -72,12 +72,12 @@ public static class QueryExtensions
                 Level = member.Player.Level,
                 Class = member.Player.PlayerClass,
                 SpentExperience = member.SpentExperience,
-                Rank = member.RankId,
+                Rank = member.RankPosition,
                 IsLeader = member.IsLeader
             }).ToImmutableArray(),
             Ranks = x.Ranks.Select(rank => new GuildRankData
             {
-                Rank = rank.Rank,
+                Position = rank.Position,
                 Name = rank.Name,
                 Permissions = rank.Permissions
             }).ToImmutableArray()
