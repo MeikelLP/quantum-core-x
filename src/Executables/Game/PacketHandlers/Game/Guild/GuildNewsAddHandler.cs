@@ -1,25 +1,21 @@
-﻿using EnumsNET;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.Game.Guild;
 using QuantumCore.API.PluginTypes;
 using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Packets.Guild;
-using QuantumCore.Game.Persistence;
-using GuildNews = QuantumCore.Game.Persistence.Entities.Guilds.GuildNews;
 
 namespace QuantumCore.Game.PacketHandlers.Game.Guild;
 
 public class GuildNewsAddHandler : IGamePacketHandler<GuildNewsAddPacket>
 {
     private readonly ILogger<GuildNewsAddPacket> _logger;
-    private readonly GameDbContext _db;
+    private readonly IGuildManager _guildManager;
 
-    public GuildNewsAddHandler(ILogger<GuildNewsAddPacket> logger, GameDbContext db)
+    public GuildNewsAddHandler(ILogger<GuildNewsAddPacket> logger, IGuildManager guildManager)
     {
         _logger = logger;
-        _db = db;
+        _guildManager = guildManager;
     }
 
     public async Task ExecuteAsync(GamePacketContext<GuildNewsAddPacket> ctx, CancellationToken token = default)
@@ -32,35 +28,23 @@ public class GuildNewsAddHandler : IGamePacketHandler<GuildNewsAddPacket>
         }
 
         var player = ctx.Connection.Player!.Player;
-        if (player.GuildId is null)
+        var guildId = player.GuildId;
+        if (guildId is null)
         {
             _logger.LogWarning("Player tried to post a message when he has no guild: {Player}", player.Id);
             ctx.Connection.Close(); // equal behaviour as original implementation
             return;
         }
 
-        var perms = await _db.GuildMembers
-            .Where(x => x.PlayerId == player.Id)
-            .Select(x => x.Rank.Permissions)
-            .FirstAsync(token);
-
-        if (!perms.HasAnyFlags(GuildRankPermission.ModifyNews))
+        if (!await _guildManager.HasPermissionAsync(player.Id, GuildRankPermission.ModifyNews))
         {
             ctx.Connection.Player.SendChatInfo("You don't have permission to create guild news.");
             return;
         }
 
         _logger.LogDebug("Received new guild news: {Value}", ctx.Packet.Message);
-        var guildId = player.GuildId.Value;
-        _db.GuildNews.Add(new GuildNews
-        {
-            Message = ctx.Packet.Message,
-            PlayerId = player.Id,
-            CreatedAt = DateTime.UtcNow,
-            GuildId = guildId
-        });
-        await _db.SaveChangesAsync(token);
-
-        await ctx.Connection.SendGuildNewsAsync(_db, guildId, token);
+        await _guildManager.CreateNewsAsync(guildId.Value, ctx.Packet.Message, player.Id, token);
+        var news = await _guildManager.GetGuildNewsAsync(guildId.Value, token);
+        ctx.Connection.SendGuildNews(news);
     }
 }

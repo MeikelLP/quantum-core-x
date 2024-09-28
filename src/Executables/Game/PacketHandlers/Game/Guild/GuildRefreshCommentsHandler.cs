@@ -1,4 +1,5 @@
 ﻿using QuantumCore.API;
+using QuantumCore.API.Game.Guild;
 using QuantumCore.API.PluginTypes;
 using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Packets.Guild;
@@ -9,10 +10,12 @@ namespace QuantumCore.Game.PacketHandlers.Game.Guild;
 public class GuildRefreshCommentsHandler : IGamePacketHandler<GuildRefreshComments>
 {
     private readonly GameDbContext _db;
+    private readonly IGuildManager _guildManager;
 
-    public GuildRefreshCommentsHandler(GameDbContext db)
+    public GuildRefreshCommentsHandler(GameDbContext db, IGuildManager guildManager)
     {
         _db = db;
+        _guildManager = guildManager;
     }
 
     public async Task ExecuteAsync(GamePacketContext<GuildRefreshComments> ctx, CancellationToken token = default)
@@ -25,6 +28,7 @@ public class GuildRefreshCommentsHandler : IGamePacketHandler<GuildRefreshCommen
             return;
         }
 
-        await ctx.Connection.SendGuildNewsAsync(_db, guildId.Value, token);
+        var news = await _guildManager.GetGuildNewsAsync(guildId.Value, token);
+        ctx.Connection.SendGuildNews(news);
     }
 }

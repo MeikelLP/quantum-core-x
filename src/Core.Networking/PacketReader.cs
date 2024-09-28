@@ -73,11 +73,11 @@ public class PacketReader : IPacketReader
             if (!_packetManager.TryGetPacketInfo(header, subHeader, out var packetInfo))
             {
                 var headerString = Convert.ToString(header, 16);
-                var subHeaderString = subHeader is not null ? $"|0x{Convert.ToString(subHeader.Value, 16)}" : "";
+                var subHeaderString = subHeader is not null ? $"|0x{subHeader.Value:X2}" : "";
                 if (_env.IsDevelopment())
                 {
                     var bytes = await GetAsMuchDataAsPossibleAsync(stream);
-                    _logger.LogDebug("Received unknown header: {Header}{SubHeader}. Payload: {Payload}", header,
+                    _logger.LogDebug("Received unknown header: 0x{Header:X2}{SubHeader}. Payload: {Payload}", header,
                         subHeaderString, bytes);
                 }
 
