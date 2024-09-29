@@ -35,4 +35,14 @@ public static class GuildPacketExtensions
                 .ToArray()
         });
     }
+
+    public static void SendGuildRankPermissions(this IConnection connection, byte position,
+        GuildRankPermission permissions)
+    {
+        connection.Send(new GuildRankPermissionPacket
+        {
+            Position = position,
+            Permissions = permissions
+        });
+    }
 }

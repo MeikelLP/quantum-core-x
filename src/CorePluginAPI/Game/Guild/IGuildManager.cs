@@ -12,7 +12,10 @@ public interface IGuildManager
     Task<ImmutableArray<GuildNewsData>> GetGuildNewsAsync(uint guildId, CancellationToken token = default);
     Task<bool> DeleteNewsAsync(uint guildId, uint newsId, CancellationToken token = default);
     Task<bool> IsLeaderAsync(uint playerId, CancellationToken token = default);
-    Task<ImmutableArray<GuildRankData>> GetRanksAsync(uint guildId, CancellationToken token);
-    Task RenameRankAsync(uint guildId, byte position, string packetName, CancellationToken token);
+    Task<ImmutableArray<GuildRankData>> GetRanksAsync(uint guildId, CancellationToken token = default);
+    Task RenameRankAsync(uint guildId, byte position, string packetName, CancellationToken token = default);
     Task RemoveGuildAsync(uint guildId, CancellationToken token = default);
+
+    Task ChangePermissionAsync(uint guildId, byte position, GuildRankPermission permissions,
+        CancellationToken token = default);
 }

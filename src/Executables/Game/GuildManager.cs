@@ -166,4 +166,12 @@ public class GuildManager : IGuildManager
             .Where(x => x.Id == guildId)
             .ExecuteDeleteAsync(token);
     }
+
+    public async Task ChangePermissionAsync(uint guildId, byte position, GuildRankPermission permissions,
+        CancellationToken token = default)
+    {
+        await _db.GuildRanks
+            .Where(x => x.GuildId == guildId && x.Position == position)
+            .ExecuteUpdateAsync(x => x.SetProperty(p => p.Permissions, permissions), token);
+    }
 }
