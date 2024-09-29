@@ -1,5 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
 namespace QuantumCore.Caching;
 
@@ -12,13 +12,13 @@ public class CacheManager : ICacheManager
     
     private IRedisStore _defaultRedisStore;
 
-    public CacheManager(ILogger<CacheManager> logger, IOptions<CacheOptions> options)
+    public CacheManager(ILogger<CacheManager> logger, IServiceProvider serviceProvider)
     {
         _logger = logger;
         _logger.LogInformation("Initialize Cache Manager");
 
-        Shared = new RedisStore(CacheStoreType.Shared, logger, options.Value);
-        Server = new RedisStore(CacheStoreType.Server, logger, options.Value);
+        Shared = serviceProvider.GetRequiredKeyedService<IRedisStore>(CacheStoreType.Shared);
+        Server = serviceProvider.GetRequiredKeyedService<IRedisStore>(CacheStoreType.Server);
 
         _defaultRedisStore = Shared;
     }
