@@ -70,7 +70,7 @@ public class LoginRequestHandler : IAuthPacketHandler<LoginRequest>
             if (!BCrypt.Net.BCrypt.Verify(ctx.Packet.Password, account.Password))
             {
                 _logger.LogDebug("Wrong password supplied for account {Username}", ctx.Packet.Username);
-                status = LoginFailedBecause.InvalidCredentials.AsString(EnumFormat.EnumMemberValue);
+                status = LoginFailedBecause.InvalidCredentials.AsString(EnumFormat.EnumMemberValue)!;
             }
             else
             {
@@ -85,7 +85,7 @@ public class LoginRequestHandler : IAuthPacketHandler<LoginRequest>
         {
             _logger.LogWarning("Failed to verify password for account {Username}: {Message}", ctx.Packet.Username,
                 e.Message);
-            status = LoginFailedBecause.InvalidCredentials.AsString(EnumFormat.EnumMemberValue);
+            status = LoginFailedBecause.InvalidCredentials.AsString(EnumFormat.EnumMemberValue)!;
         }
 
         // Check if the account is already logged in
@@ -101,7 +101,7 @@ public class LoginRequestHandler : IAuthPacketHandler<LoginRequest>
         {
             ctx.Connection.Send(new LoginFailed
             {
-                Status = status ?? "UNKNOWN"
+                Status = status
             });
 
             return;
@@ -139,7 +139,7 @@ public class LoginRequestHandler : IAuthPacketHandler<LoginRequest>
         return isLoggedIn == 1;
     }
     
-    private async Task<string?> DecideAlreadyLoggedInStatusAsync(AccountData account)
+    private async Task<string> DecideAlreadyLoggedInStatusAsync(AccountData account)
     {
         var attemptKey = $"account:attempt:success:{account.Id}";
         var accountKey = $"account:token:{account.Id}";
@@ -160,6 +160,6 @@ public class LoginRequestHandler : IAuthPacketHandler<LoginRequest>
             return "";
         }
         
-        return LoginFailedBecause.AlreadyLoggedIn.AsString(EnumFormat.EnumMemberValue);
+        return LoginFailedBecause.AlreadyLoggedIn.AsString(EnumFormat.EnumMemberValue)!;
     }
 }
