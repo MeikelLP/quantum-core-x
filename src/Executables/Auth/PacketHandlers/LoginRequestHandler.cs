@@ -35,7 +35,7 @@ public class LoginRequestHandler : IAuthPacketHandler<LoginRequest>
     private readonly ILogger<LoginRequestHandler> _logger;
     private readonly ICacheManager _cacheManager;
     
-    private const int DropConnectionAfter = 1;
+    private const int DropConnectionAfterAttempts = 1;
 
     public LoginRequestHandler(IAccountRepository accountRepository, ILogger<LoginRequestHandler> logger, ICacheManager cacheManager)
     {
@@ -149,7 +149,7 @@ public class LoginRequestHandler : IAuthPacketHandler<LoginRequest>
         await _cacheManager.Shared.Expire(attemptKey, ExpiresIn.OneMinute);
         
         // check if the attempts are greater than the limit
-        if (attempts > DropConnectionAfter)
+        if (attempts > DropConnectionAfterAttempts)
         {
             // publish a message through redis to drop the connection
             await _cacheManager.Publish("account:drop-connection", account.Id);
