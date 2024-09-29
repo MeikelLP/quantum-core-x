@@ -148,18 +148,18 @@ public class LoginRequestHandler : IAuthPacketHandler<LoginRequest>
         // set expiration on the key
         await _cacheManager.Shared.Expire(attemptKey, ExpiresIn.OneMinute);
         
-        // check if the attempts are greater than the limit
-        if (attempts > DropConnectionAfterAttempts)
+        // check if the attempts are less than the limit
+        if (attempts <= DropConnectionAfterAttempts)
         {
-            // publish a message through redis to drop the connection
-            await _cacheManager.Publish("account:drop-connection", account.Id);
-            // delete the account key
-            await _cacheManager.Shared.Del(accountKey);
-            await _cacheManager.Shared.Del(attemptKey);
-            
-            return "";
+            return LoginFailedBecause.AlreadyLoggedIn.AsString(EnumFormat.EnumMemberValue)!;
         }
-        
-        return LoginFailedBecause.AlreadyLoggedIn.AsString(EnumFormat.EnumMemberValue)!;
+
+        // publish a message through redis to drop the connection
+        await _cacheManager.Publish("account:drop-connection", account.Id);
+        // delete the account key
+        await _cacheManager.Shared.Del(accountKey);
+        await _cacheManager.Shared.Del(attemptKey);
+            
+        return "";
     }
 }
