@@ -20,5 +20,4 @@ public class ExpiresIn
     public static TimeSpan ThreeMonths => TimeSpan.FromDays(90);
     public static TimeSpan SixMonths => TimeSpan.FromDays(180);
     public static TimeSpan OneYear => TimeSpan.FromDays(365);
-    
 }

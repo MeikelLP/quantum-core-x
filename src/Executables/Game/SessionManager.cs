@@ -40,7 +40,6 @@ public class SessionManager : ISessionManager
     {
         var connection = _gameServer?.Connections.FirstOrDefault(x => x.AccountId == accountId);
         
-        
         connection?.Close();
     }
 }
