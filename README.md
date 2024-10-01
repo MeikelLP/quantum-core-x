@@ -38,3 +38,6 @@ For more details see [LICENSE](LICENSE)
 QuantumCore is supported by JetBrains which provide us with free licenses for their products.
 
 [<img src="docs/images/jetbrains.png" alt="JetBrains" width=150>](https://www.jetbrains.com/?from=QuantumCore)
+                        
+## Stargazers over time
+[![Stargazers over time](https://starchart.cc/MeikelLP/quantum-core-x.svg?variant=adaptive)](https://starchart.cc/MeikelLP/quantum-core-x)
