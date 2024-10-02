@@ -121,6 +121,16 @@ public static class ItemExtensions
         return item;
     }
 
+    public static async Task DeletePlayerItemAsync(this IItemRepository repository, ICacheManager cacheManager,
+        uint playerId, uint itemId)
+    {
+        var key = "item:" + itemId;
+
+        await cacheManager.Del(key);
+
+        await repository.DeletePlayerItemAsync(playerId, itemId);
+    }
+
     public static async IAsyncEnumerable<ItemInstance> GetItems(this IItemRepository repository,
         ICacheManager cacheManager, uint player, byte window)
     {
@@ -186,7 +196,8 @@ public static class ItemExtensions
     /// <param name="owner">Owner the item is given to</param>
     /// <param name="window">Window the item is placed in</param>
     /// <param name="pos">Position of the item in the window</param>
-    public static async Task Set(this ItemInstance item, ICacheManager cacheManager, uint owner, byte window, uint pos, IItemRepository itemRepository)
+    public static async Task Set(this ItemInstance item, ICacheManager cacheManager, uint owner, byte window, uint pos,
+        IItemRepository itemRepository)
     {
         if (item.PlayerId != owner || item.Window != window)
         {
