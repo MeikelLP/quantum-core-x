@@ -29,7 +29,7 @@ All types of contributions are encouraged and valued. See the [Table of Contents
 This project and everyone participating in it is governed by the
 [Quantum Core X Code of Conduct](https://github.com/MeikelLP/quantum-core-x/blob/master/CODE_OF_CONDUCT.md).
 By participating, you are expected to uphold this code. Please report unacceptable behavior
-to .
+to [quantum-core-x-community@meikel.net](mailto:quantum-core-x-community@meikel.net).
 
 
 ## I Have a Question
