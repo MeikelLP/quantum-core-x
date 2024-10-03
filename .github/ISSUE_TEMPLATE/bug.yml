@@ -1,13 +1,13 @@
 name: Bug Report
 description: Report an issue or bug with the Quantum Core X.
-title: "[BUG] "
-labels: ["type/bug"]
+title: "bug: "
+labels: [ "type/bug" ]
 body:
   - type: markdown
     attributes:
       value: |
         Please fill out the sections below to help us diagnose and fix the issue. Before submitting a bug report, please check the [Reporting Bugs](https://github.com/MeikelLP/quantum-core-x/blob/master/CONTRIBUTING.md#reporting-bugs) section in the contributing guidelines.
-        
+
   - type: textarea
     id: what-happened
     attributes:
@@ -16,7 +16,7 @@ body:
       placeholder: Describe the bug you encountered.
     validations:
       required: true
-      
+
   - type: textarea
     id: how-to-reproduce
     attributes:
@@ -25,14 +25,14 @@ body:
       placeholder: Steps to reproduce the behavior.
     validations:
       required: true
-      
+
   - type: textarea
     id: tracebacks
     attributes:
       label: Tracebacks
       description: If applicable, paste the full traceback here.
       placeholder: Paste the full traceback here.
-        
+
   - type: dropdown
     id: os-platform
     attributes:
@@ -44,8 +44,8 @@ body:
         - Linux
         - Other (please specify)
     validations:
-        required: true
-  
+      required: true
+
   - type: textarea
     id: additional-info-and-notes
     attributes:
