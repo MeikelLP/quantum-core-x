@@ -1,0 +1,56 @@
+﻿name: Feature Request
+description: Request a Feature or Enhancement to the Project.
+title: "feature: "
+labels: [ "type/enhancement", "type/feature" ]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please fill out the sections below to help us understand and implement the feature. Before submitting a feature request, please check the [Suggesting Enhancements](https://github.com/MeikelLP/quantum-core-x/blob/master/CONTRIBUTING.md#suggesting-enhancements) section in the contributing guidelines.
+
+  - type: textarea
+    id: what-feature
+    attributes:
+      label: What feature would you like to request?
+      description: A clear and concise description of the feature you would like to request.
+      placeholder: Describe the feature you would like to request.
+
+  - type: textarea
+    id: why-feature
+    attributes:
+      label: Why do you need this feature?
+      description: A clear and concise description of why you need this feature.
+      placeholder: Describe why you need this feature, a good and understandable user story would be appreciated.
+
+  - type: dropdown
+    id: feature-priority
+    attributes:
+      label: Feature Priority
+      description: How important is this feature to you?
+      options:
+        - Low
+        - Medium
+        - High
+        - Critical
+    validations:
+      required: true
+      
+  - type: dropdown
+    id: original-behavior
+    attributes:
+      label: Original Metin2 Behavior
+      description: Does this feature exist in the original game?
+      options:
+          - Yes
+          - No
+          - I don't know
+    validations:
+      required: true
+      
+  - type: textarea
+    id: feature-screenshot
+    attributes:
+      label: Feature Screenshot / GIF
+      description: If applicable, add a screenshot of the feature you would like to request.
+    validations:
+      required: false
