@@ -124,7 +124,7 @@ public static class ItemExtensions
     public static async Task DeletePlayerItemAsync(this IItemRepository repository, ICacheManager cacheManager,
         uint playerId, uint itemId)
     {
-        var key = $"item:{itemId]";
+        var key = $"item:{itemId}";
 
         await cacheManager.Del(key);
 
