@@ -76,12 +76,7 @@ public class PlayerManagerTests : IClassFixture<RedisFixture>, IClassFixture<Dat
 
     public async Task DisposeAsync()
     {
-        var keys = await _cacheManager.Keys("*");
-        foreach (var key in keys)
-        {
-            await _cacheManager.Del(key);
-        }
-
+        await _cacheManager.FlushAll();
         await _db.Players.ExecuteDeleteAsync();
         await _scope.DisposeAsync();
     }
@@ -162,7 +157,7 @@ public class PlayerManagerTests : IClassFixture<RedisFixture>, IClassFixture<Dat
         });
         var player = await _playerManager.GetPlayer(playerId);
 
-        var keys = await _cacheManager.Keys("*");
+        var keys = await _cacheManager.Server.Keys("*");
         keys.Should().HaveCount(2);
         keys.Should().Contain($"player:{playerId}");
         keys.Should().Contain($"players:{player!.AccountId}:0");
@@ -250,7 +245,7 @@ public class PlayerManagerTests : IClassFixture<RedisFixture>, IClassFixture<Dat
         var player = await _playerManager.CreateAsync(accountId, "Testificate", 0, 1);
         await _playerManager.DeletePlayerAsync(player);
 
-        (await _cacheManager.Keys("*")).Should().BeEquivalentTo([$"temp:empire-selection:{accountId}"]);
+        (await _cacheManager.Server.Keys("*")).Should().BeEquivalentTo([$"temp:empire-selection:{accountId}"]);
         (await _dbPlayerRepository.GetPlayersAsync(accountId)).Should().BeEmpty();
     }
 }
