@@ -6,11 +6,11 @@ namespace Game.Caching;
 
 public class CachePlayerRepository : ICachePlayerRepository
 {
-    private readonly ICacheManager _cacheManager;
+    private readonly IRedisStore _cacheManager;
 
     public CachePlayerRepository(ICacheManager cacheManager)
     {
-        _cacheManager = cacheManager;
+        _cacheManager = cacheManager.Server;
     }
 
     public async Task<PlayerData?> GetPlayerAsync(uint playerId)

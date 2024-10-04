@@ -797,7 +797,7 @@ namespace QuantumCore.Game.World.Entities
             {
                 RemoveItem(item);
                 SendRemoveItem(item.Window, (ushort) item.Position);
-                item.Set(_cacheManager, 0, 0, 0, _itemRepository).Wait(); // TODO
+                _itemRepository.DeletePlayerItemAsync(_cacheManager, item.PlayerId, item.ItemId).Wait(); // TODO
             }
             else
             {
@@ -939,7 +939,7 @@ namespace QuantumCore.Game.World.Entities
         public async Task CalculatePlayedTimeAsync()
         {
             var key = $"player:{Player.Id}:loggedInTime";
-            var startSessionTime = await _cacheManager.Get<long>(key);
+            var startSessionTime = await _cacheManager.Server.Get<long>(key);
             var totalSessionTime = Connection.Server.ServerTime - startSessionTime;
             if (totalSessionTime <= 0) return;
 

@@ -50,6 +50,7 @@ public static class ServiceExtensions
         services.AddSingleton<IChatManager, ChatManager>();
         services.AddSingleton<IQuestManager, QuestManager>();
         services.AddSingleton<ISkillManager, SkillManager>();
+        services.AddSingleton<ISessionManager, SessionManager>();
         
         services.AddSingleton<IWorld, World.World>();
 
