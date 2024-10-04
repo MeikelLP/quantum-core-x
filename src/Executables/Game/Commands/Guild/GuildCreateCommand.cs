@@ -5,15 +5,14 @@ using QuantumCore.API.Game.Guild;
 namespace QuantumCore.Game.Commands.Guild;
 
 [Command("guild_create", "Create guild")]
+[CommandNoPermission]
 public class GuildCreateCommand : ICommandHandler<GuildCreateCommandOptions>
 {
     private readonly IGuildManager _guildManager;
-    private readonly IPlayerManager _playerManager;
 
-    public GuildCreateCommand(IGuildManager guildManager, IPlayerManager playerManager)
+    public GuildCreateCommand(IGuildManager guildManager)
     {
         _guildManager = guildManager;
-        _playerManager = playerManager;
     }
 
     public async Task ExecuteAsync(CommandContext<GuildCreateCommandOptions> context)
