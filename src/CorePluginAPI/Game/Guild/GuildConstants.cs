@@ -8,4 +8,7 @@ public static class GuildConstants
     public const int MAX_NEWS_LOAD = 25;
     public const byte RANK_NAME_MAX_LENGTH = 8;
     public const int LEADER_RANK_POSITION = 1;
+    public const int NAME_MAX_LENGTH = 12;
+    public const byte MEMBERS_MAX_DEFAULT = 32;
+    public const byte DEFAULT_JOIN_RANK = 15;
 }

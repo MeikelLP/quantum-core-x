@@ -182,6 +182,7 @@ namespace QuantumCore.Game.World.Entities
             await Skills.LoadAsync();
             var guildManager = _scope.ServiceProvider.GetRequiredService<IGuildManager>();
             Guild = await guildManager.GetGuildForPlayerAsync(Player.Id);
+            Player.GuildId = Guild?.Id;
             _questManager.InitializePlayer(this);
 
             CalculateDefence();
@@ -299,22 +300,8 @@ namespace QuantumCore.Game.World.Entities
         {
             if (Guild is not null)
             {
-                Connection.Send(new GuildMemberPacket
-                {
-                    Members = Guild.Members
-                        .Select(guildMember => new GuildMember
-                        {
-                            PlayerId = guildMember.Id,
-                            Class = guildMember.Class,
-                            Level = guildMember.Level,
-                            IsGeneral = guildMember.IsLeader,
-                            Name = guildMember.Name,
-                            Rank = guildMember.Rank,
-                            SpentExperience = guildMember.SpentExperience,
-                            IsNameSent = true
-                        })
-                        .ToArray()
-                });
+                var onlineMemberIds = _world.GetGuildMembers(Guild.Id).Select(x => x.Player.Id).ToArray();
+                Connection.SendGuildMembers(Guild.Members, onlineMemberIds);
                 Connection.SendGuildRanks(Guild.Ranks);
                 Connection.Send(new GuildInfo
                 {
@@ -1122,6 +1109,20 @@ namespace QuantumCore.Game.World.Entities
             {
                 Vid = Vid
             });
+            SendOfflineNotice(connection);
+        }
+
+        private void SendOfflineNotice(IConnection connection)
+        {
+            var guildId = Player.GuildId;
+            if (guildId is not null && connection is IGameConnection gameConnection &&
+                gameConnection.Player!.Player.GuildId == guildId)
+            {
+                connection.Send(new GuildMemberOfflinePacket
+                {
+                    PlayerId = Player.Id
+                });
+            }
         }
 
         public void SendBasicData()

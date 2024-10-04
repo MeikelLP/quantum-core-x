@@ -45,4 +45,32 @@ public static class GuildPacketExtensions
             Permissions = permissions
         });
     }
+
+    public static void SendGuildMembers(this IConnection connection, ImmutableArray<GuildMemberData> members,
+        uint[] onlineMemberIds)
+    {
+        connection.Send(new GuildMemberPacket
+        {
+            Members = members
+                .Select(guildMember => new GuildMember
+                {
+                    PlayerId = guildMember.Id,
+                    Class = guildMember.Class,
+                    Level = guildMember.Level,
+                    IsGeneral = guildMember.IsLeader,
+                    Name = guildMember.Name,
+                    Rank = guildMember.Rank,
+                    SpentExperience = guildMember.SpentExperience,
+                    IsNameSent = true
+                })
+                .ToArray()
+        });
+        foreach (var onlinePlayer in onlineMemberIds)
+        {
+            connection.Send(new GuildMemberOnlinePacket
+            {
+                PlayerId = onlinePlayer
+            });
+        }
+    }
 }

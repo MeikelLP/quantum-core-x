@@ -26,6 +26,14 @@ public class GuildManager : IGuildManager
             .FirstOrDefaultAsync(token);
     }
 
+    public async Task<GuildData?> GetGuildByIdAsync(uint id, CancellationToken token)
+    {
+        return await _db.Guilds
+            .Where(x => x.Id == id)
+            .SelectData()
+            .FirstOrDefaultAsync(token);
+    }
+
     public async Task<GuildData?> GetGuildForPlayerAsync(uint playerId, CancellationToken token = default)
     {
         return await _db.Guilds
@@ -63,7 +71,8 @@ public class GuildManager : IGuildManager
                     Name = "Member"
                 })
                 .Prepend(leaderRank)
-                .ToList()
+                .ToList(),
+            MaxMemberCount = GuildConstants.MEMBERS_MAX_DEFAULT
         };
         _db.Guilds.Add(guild);
         await _db.SaveChangesAsync(token);
@@ -173,5 +182,23 @@ public class GuildManager : IGuildManager
         await _db.GuildRanks
             .Where(x => x.GuildId == guildId && x.Position == position)
             .ExecuteUpdateAsync(x => x.SetProperty(p => p.Permissions, permissions), token);
+    }
+
+    public async Task AddMemberAsync(uint guildId, uint inviteeId, byte rank, CancellationToken token = default)
+    {
+        _db.GuildMembers.Add(new GuildMember
+        {
+            PlayerId = inviteeId,
+            GuildId = guildId,
+            RankPosition = rank
+        });
+        await _db.SaveChangesAsync(token);
+    }
+
+    public async Task RemoveMemberAsync(uint playerId, CancellationToken token = default)
+    {
+        await _db.GuildMembers
+            .Where(x => x.PlayerId == playerId)
+            .ExecuteDeleteAsync(token);
     }
 }
