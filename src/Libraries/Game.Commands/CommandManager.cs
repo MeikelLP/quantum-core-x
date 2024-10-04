@@ -259,7 +259,8 @@ internal class CommandManager : ICommandManager
                 }
                 else
                 {
-                    var cmd = (ICommandHandler) ActivatorUtilities.CreateInstance(_serviceProvider,
+                    await using var scope = _serviceProvider.CreateAsyncScope();
+                    var cmd = (ICommandHandler) ActivatorUtilities.CreateInstance(scope.ServiceProvider,
                         commandCache.Type);
                     await cmd.ExecuteAsync(new CommandContext(connection.Player));
                 }
