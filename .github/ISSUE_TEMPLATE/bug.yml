@@ -23,15 +23,13 @@ body:
       label: How to reproduce?
       description: Steps to reproduce the behavior.
       placeholder: Steps to reproduce the behavior.
-    validations:
-      required: true
 
   - type: textarea
-    id: tracebacks
+    id: stacktrace
     attributes:
-      label: Tracebacks
-      description: If applicable, paste the full traceback here.
-      placeholder: Paste the full traceback here.
+      label: Stacktrace
+      description: If applicable, paste the full stacktrace here.
+      placeholder: Paste the full stacktrace here.
 
   - type: dropdown
     id: os-platform
@@ -42,7 +40,7 @@ body:
         - Windows
         - macOS
         - Linux
-        - Other (please specify)
+        - Other (please specify in the additional information)
     validations:
       required: true
 
