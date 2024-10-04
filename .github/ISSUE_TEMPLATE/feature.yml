@@ -41,8 +41,8 @@ body:
       label: Original Metin2 Behavior
       description: Does this feature exist in the original game?
       options:
-          - Yes
-          - No
+          - 'Yes'
+          - 'No'
           - I don't know
     validations:
       required: true
