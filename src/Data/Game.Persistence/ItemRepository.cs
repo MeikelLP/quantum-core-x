@@ -19,12 +19,12 @@ public interface IItemRepository
 
 public class ItemRepository : IItemRepository
 {
-    private readonly ICacheManager _cacheManager;
+    private readonly IRedisStore _cacheManager;
     private readonly GameDbContext _db;
 
     public ItemRepository(ICacheManager cacheManager, GameDbContext db)
     {
-        _cacheManager = cacheManager;
+        _cacheManager = cacheManager.Server;
         _db = db;
     }
 

@@ -11,7 +11,7 @@ public class EmpireHandler : IGamePacketHandler<Empire>
 {
     private readonly ILogger<EmpireHandler> _logger;
     private readonly IPlayerManager _playerManager;
-    private readonly ICacheManager _cacheManager;
+    private readonly IRedisStore _cacheManager;
     private readonly ICachePlayerRepository _playerCache;
 
     public EmpireHandler(ILogger<EmpireHandler> logger, IPlayerManager playerManager, ICacheManager cacheManager,
@@ -19,7 +19,7 @@ public class EmpireHandler : IGamePacketHandler<Empire>
     {
         _logger = logger;
         _playerManager = playerManager;
-        _cacheManager = cacheManager;
+        _cacheManager = cacheManager.Server;
         _playerCache = playerCache;
     }
 
