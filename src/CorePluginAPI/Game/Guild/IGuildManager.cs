@@ -17,10 +17,10 @@ public interface IGuildManager
     Task RenameRankAsync(uint guildId, byte position, string packetName, CancellationToken token = default);
     Task RemoveGuildAsync(uint guildId, CancellationToken token = default);
 
-
     Task ChangePermissionAsync(uint guildId, byte position, GuildRankPermission permissions,
         CancellationToken token = default);
 
     Task AddMemberAsync(uint guildId, uint inviteeId, byte rank, CancellationToken token = default);
     Task RemoveMemberAsync(uint playerId, CancellationToken token = default);
+    Task SetLeaderAsync(uint playerId, bool toggle, CancellationToken token = default);
 }

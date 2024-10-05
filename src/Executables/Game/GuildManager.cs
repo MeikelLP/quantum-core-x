@@ -201,4 +201,10 @@ public class GuildManager : IGuildManager
             .Where(x => x.PlayerId == playerId)
             .ExecuteDeleteAsync(token);
     }
+
+    public async Task SetLeaderAsync(uint playerId, bool toggle, CancellationToken token = default)
+    {
+        await _db.GuildMembers.Where(x => x.PlayerId == playerId)
+            .ExecuteUpdateAsync(x => x.SetProperty(p => p.IsLeader, toggle), token);
+    }
 }
