@@ -303,18 +303,7 @@ namespace QuantumCore.Game.World.Entities
                 var onlineMemberIds = _world.GetGuildMembers(Guild.Id).Select(x => x.Player.Id).ToArray();
                 Connection.SendGuildMembers(Guild.Members, onlineMemberIds);
                 Connection.SendGuildRanks(Guild.Ranks);
-                Connection.Send(new GuildInfo
-                {
-                    Level = Guild.Level,
-                    Name = Guild.Name,
-                    Gold = Guild.Gold,
-                    GuildId = Guild.Id,
-                    Exp = Guild.Experience,
-                    HasLand = false,
-                    LeaderId = Guild.OwnerId,
-                    MemberCount = (ushort) Guild.Members.Length,
-                    MaxMemberCount = Guild.MaxMemberCount
-                });
+                Connection.SendGuildInfo(Guild);
                 Connection.Send(new GuildName
                 {
                     Id = Guild.Id,

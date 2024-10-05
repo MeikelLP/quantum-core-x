@@ -49,17 +49,32 @@ public class GuildInviteResponseHandler : IGamePacketHandler<GuildInviteResponse
                     return;
             }
 
-            await _guildManager.AddMemberAsync(guildId, invitee.Player.Id, GuildConstants.DEFAULT_JOIN_RANK, token);
+            const byte rank = GuildConstants.DEFAULT_JOIN_RANK;
+            await _guildManager.AddMemberAsync(guildId, invitee.Player.Id, rank, token);
+
+            invitee.Player.GuildId = guildId;
+            await invitee.RefreshGuildAsync();
+
             var guildMembers = invitee.Map!.World.GetGuildMembers(guildId);
             foreach (var player in guildMembers)
             {
-                player.Connection.Send(new GuildMemberAddPacket
+                player.Connection.SendGuildMembers([
+                    new GuildMemberData
+                    {
+                        Id = invitee.Player.Id,
+                        Name = invitee.Player.Name,
+                        Rank = rank,
+                        SpentExperience = 0,
+                        Class = invitee.Player.PlayerClass,
+                        Level = invitee.Player.Level,
+                        IsLeader = false
+                    }
+                ], [invitee.Player.Id]);
+                player.Connection.Send(new GuildMemberOnlinePacket
                 {
                     PlayerId = invitee.Player.Id
                 });
             }
-
-            await invitee.RefreshGuildAsync();
         }
         // TODO what to do when rejected?
     }

@@ -46,6 +46,22 @@ public static class GuildPacketExtensions
         });
     }
 
+    public static void SendGuildInfo(this IConnection connection, GuildData guild)
+    {
+        connection.Send(new GuildInfo
+        {
+            Level = guild.Level,
+            Name = guild.Name,
+            Gold = guild.Gold,
+            GuildId = guild.Id,
+            Exp = guild.Experience,
+            HasLand = false,
+            LeaderId = guild.OwnerId,
+            MemberCount = (ushort) guild.Members.Length,
+            MaxMemberCount = guild.MaxMemberCount
+        });
+    }
+
     public static void SendGuildMembers(this IConnection connection, ImmutableArray<GuildMemberData> members,
         uint[] onlineMemberIds)
     {
