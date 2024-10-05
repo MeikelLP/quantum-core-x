@@ -7,6 +7,6 @@ namespace QuantumCore.Game.Packets.Guild;
 [PacketGenerator]
 public partial class GuildMemberRemovePacket
 {
-    public ushort Unused { get; set; }
-    public uint PlayerId { get; set; }
+    [Field(0)] public ushort Unused { get; set; }
+    [Field(1)] public uint PlayerId { get; set; }
 }

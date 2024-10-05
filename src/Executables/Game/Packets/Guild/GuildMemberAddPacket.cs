@@ -7,6 +7,6 @@ namespace QuantumCore.Game.Packets.Guild;
 [PacketGenerator]
 public partial class GuildMemberAddPacket
 {
-    public byte Unused { get; set; }
-    public uint PlayerId { get; set; }
+    [Field(0)] public byte Unused { get; set; }
+    [Field(1)] public uint PlayerId { get; set; }
 }
