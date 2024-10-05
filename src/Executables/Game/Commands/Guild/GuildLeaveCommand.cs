@@ -43,6 +43,15 @@ public class GuildLeaveCommand : ICommandHandler
         }
 
         await _guildManager.RemoveMemberAsync(playerId);
+        foreach (var member in guild.Members)
+        {
+            // remove guild members from friend list
+            context.Player.Connection.Send(new GuildMemberRemovePacket
+            {
+                PlayerId = member.Id
+            });
+        }
+
         await context.Player.RefreshGuildAsync();
         foreach (var p in context.Player.GetNearbyPlayers())
         {
@@ -53,6 +62,8 @@ public class GuildLeaveCommand : ICommandHandler
                 {
                     PlayerId = playerId
                 });
+                // update members count
+                p.Connection.SendGuildInfo(guild);
             }
         }
     }
