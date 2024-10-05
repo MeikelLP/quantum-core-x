@@ -23,4 +23,5 @@ public interface IGuildManager
     Task AddMemberAsync(uint guildId, uint inviteeId, byte rank, CancellationToken token = default);
     Task RemoveMemberAsync(uint playerId, CancellationToken token = default);
     Task SetLeaderAsync(uint playerId, bool toggle, CancellationToken token = default);
+    Task AddExperienceAsync(uint spenderId, uint amount, CancellationToken token = default);
 }

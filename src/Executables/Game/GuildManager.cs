@@ -207,4 +207,15 @@ public class GuildManager : IGuildManager
         await _db.GuildMembers.Where(x => x.PlayerId == playerId)
             .ExecuteUpdateAsync(x => x.SetProperty(p => p.IsLeader, toggle), token);
     }
+
+    public async Task AddExperienceAsync(uint spenderId, uint amount, CancellationToken token = default)
+    {
+        var member = await _db.GuildMembers
+            .Where(x => x.PlayerId == spenderId)
+            .Include(x => x.Guild)
+            .FirstAsync(token);
+        member.SpentExperience += amount;
+        member.Guild.Experience += amount;
+        await _db.SaveChangesAsync(token);
+    }
 }

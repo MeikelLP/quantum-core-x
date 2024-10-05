@@ -54,7 +54,7 @@ public static class GuildPacketExtensions
             Name = guild.Name,
             Gold = guild.Gold,
             GuildId = guild.Id,
-            Exp = guild.Experience,
+            Exp = guild.Experience / 100, // client displays exp * 100
             HasLand = false,
             LeaderId = guild.OwnerId,
             MemberCount = (ushort) guild.Members.Length,
