@@ -897,7 +897,7 @@ namespace QuantumCore.Game.World.Entities
         public async Task CalculatePlayedTimeAsync()
         {
             var key = $"player:{Player.Id}:loggedInTime";
-            var startSessionTime = await _cacheManager.Get<long>(key);
+            var startSessionTime = await _cacheManager.Server.Get<long>(key);
             var totalSessionTime = Connection.Server.ServerTime - startSessionTime;
             if (totalSessionTime <= 0) return;
 

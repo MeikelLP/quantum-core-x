@@ -9,6 +9,7 @@ using QuantumCore.API.Game;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.World;
 using QuantumCore.API.PluginTypes;
+using QuantumCore.Caching;
 using QuantumCore.Core.Event;
 using QuantumCore.Core.Networking;
 using QuantumCore.Core.Utils;
@@ -27,6 +28,7 @@ namespace QuantumCore.Game
         private readonly ILogger<GameServer> _logger;
         private readonly PluginExecutor _pluginExecutor;
         private readonly IServiceProvider _serviceProvider;
+        private readonly ICacheManager _cacheManager;
         private readonly IItemManager _itemManager;
         private readonly ISkillManager _skillManager;
         private readonly IMonsterManager _monsterManager;
@@ -44,6 +46,7 @@ namespace QuantumCore.Game
         private TimeSpan _maxElapsedTime = TimeSpan.FromMilliseconds(500);
         private readonly Stopwatch _serverTimer = new();
         private readonly IDropProvider _dropProvider;
+        private readonly ISessionManager _sessionManager;
 
         public new ImmutableArray<IGameConnection> Connections =>
             [..base.Connections.Values.Cast<IGameConnection>()];
@@ -54,12 +57,13 @@ namespace QuantumCore.Game
             ILogger<GameServer> logger, PluginExecutor pluginExecutor, IServiceProvider serviceProvider,
             IItemManager itemManager, IMonsterManager monsterManager, IExperienceManager experienceManager,
             IAnimationManager animationManager, ICommandManager commandManager, IQuestManager questManager,
-            IChatManager chatManager,
-            IWorld world, IDropProvider dropProvider, ISkillManager skillManager)
+            IChatManager chatManager, IWorld world, IDropProvider dropProvider, ISkillManager skillManager,
+            ICacheManager cacheManager, ISessionManager sessionManager)
             : base(packetManager, logger, pluginExecutor, serviceProvider, "game", hostingOptions)
         {
             _hostingOptions = hostingOptions.Value;
             _logger = logger;
+            _cacheManager = cacheManager;
             _pluginExecutor = pluginExecutor;
             _serviceProvider = serviceProvider;
             _itemManager = itemManager;
@@ -69,6 +73,7 @@ namespace QuantumCore.Game
             _commandManager = commandManager;
             _questManager = questManager;
             _chatManager = chatManager;
+            _sessionManager = sessionManager;
             World = world;
             _dropProvider = dropProvider;
             _skillManager = skillManager;
@@ -105,6 +110,10 @@ namespace QuantumCore.Game
                 _dropProvider.LoadAsync(stoppingToken),
                 _skillManager.LoadAsync(stoppingToken)
             );
+
+            
+            // Initialize session manager
+            _sessionManager.Init(this);
 
             // Initialize core systems
             _chatManager.Init();
@@ -163,7 +172,7 @@ namespace QuantumCore.Game
             if (_accumulatedElapsedTime < _targetElapsedTime)
             {
                 var sleepTime = (_targetElapsedTime - _accumulatedElapsedTime).TotalMilliseconds;
-                await Task.Delay((int) sleepTime).ConfigureAwait(false);
+                await Task.Delay((int)sleepTime).ConfigureAwait(false);
                 return;
             }
 
