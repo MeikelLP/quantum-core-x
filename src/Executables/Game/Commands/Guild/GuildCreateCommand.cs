@@ -1,6 +1,8 @@
 ﻿using CommandLine;
 using QuantumCore.API.Game;
 using QuantumCore.API.Game.Guild;
+using QuantumCore.Game.Extensions;
+using QuantumCore.Game.Packets.Guild;
 
 namespace QuantumCore.Game.Commands.Guild;
 
@@ -36,7 +38,16 @@ public class GuildCreateCommand : ICommandHandler<GuildCreateCommandOptions>
         }
 
         var player = context.Player.Player;
-        await _guildManager.CreateGuildAsync(context.Arguments.Name, player.Id);
+        var guild = await _guildManager.CreateGuildAsync(context.Arguments.Name, player.Id);
+        foreach (var nearbyPlayer in context.Player.GetNearbyPlayers())
+        {
+            nearbyPlayer.Connection.Send(new GuildName
+            {
+                Id = guild.Id,
+                Name = guild.Name
+            });
+        }
+
         await context.Player.RefreshGuildAsync();
     }
 }
