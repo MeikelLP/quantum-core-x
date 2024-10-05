@@ -279,12 +279,12 @@ namespace QuantumCore.Game.World
             var baseY = spawnPoint.Y;
             if (spawnPoint.RangeX != 0)
             {
-                baseX += RandomNumberGenerator.GetInt32(-spawnPoint.RangeX, spawnPoint.RangeY);
+                baseX += RandomNumberGenerator.GetInt32(-spawnPoint.RangeX, spawnPoint.RangeX);
             }
 
             if (spawnPoint.RangeY != 0)
             {
-                baseY += RandomNumberGenerator.GetInt32(-spawnPoint.RangeX, spawnPoint.RangeY);
+                baseY += RandomNumberGenerator.GetInt32(-spawnPoint.RangeY, spawnPoint.RangeY);
             }
 
             var monster = new MonsterEntity(_monsterManager, _dropProvider, _animationManager, this, _logger, _itemManager,
