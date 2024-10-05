@@ -43,6 +43,7 @@ public class GuildLeaveCommand : ICommandHandler
         }
 
         await _guildManager.RemoveMemberAsync(playerId);
+        guild.Members = [..guild.Members.Except(guild.Members.Where(x => x.Id == playerId))];
         foreach (var member in guild.Members)
         {
             // remove guild members from friend list
