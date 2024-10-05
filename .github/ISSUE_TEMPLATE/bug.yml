@@ -24,6 +24,12 @@ body:
       description: Steps to reproduce the behavior.
       placeholder: Steps to reproduce the behavior.
 
+  - type: markdown
+    attributes:
+      value: |
+        > [!NOTE]
+        > You can change the minimum log level to debug in the `appsettings.json` with `"Serilog:MinimumLevel:Default": "Debug"`
+
   - type: textarea
     id: stacktrace
     attributes:
