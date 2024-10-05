@@ -287,14 +287,39 @@ namespace QuantumCore.Game.World
                 baseY += RandomNumberGenerator.GetInt32(-spawnPoint.RangeY, spawnPoint.RangeY);
             }
 
-            var monster = new MonsterEntity(_monsterManager, _dropProvider, _animationManager, this, _logger, _itemManager,
+            var monster = new MonsterEntity(_monsterManager, _dropProvider, _animationManager, this, _logger,
+                _itemManager,
                 id,
-                (int) (PositionX + (baseX + RandomNumberGenerator.GetInt32(-SPAWN_BASE_OFFSET, SPAWN_BASE_OFFSET)) *
-                    SPAWN_POSITION_MULTIPLIER),
-                (int) (PositionY + (baseY + RandomNumberGenerator.GetInt32(-SPAWN_BASE_OFFSET, SPAWN_BASE_OFFSET)) *
-                    SPAWN_POSITION_MULTIPLIER),
-                RandomNumberGenerator.GetInt32(0, 360));
-            _world.SpawnEntity(monster);
+                0,
+                0
+            );
+
+            if (((uint)EAiFlags.NoMove & monster.Proto.AiFlag) == (uint)EAiFlags.NoMove) // no_move
+            {
+                monster.PositionX = (int)(PositionX + baseX * SPAWN_POSITION_MULTIPLIER);
+                monster.PositionY = (int)(PositionY + baseY * SPAWN_POSITION_MULTIPLIER);
+                // SpawnPoint.Direction follows the compass system with counter-clockwise increments: 1 = South, 2 = South-East, 3 = East, 5 = North, etc.
+                var compassDirection = spawnPoint.Direction - 1;
+                var rotation = 45 * (compassDirection < 0 ? 8 : compassDirection);
+                monster.Rotation = rotation;
+            }
+            else
+            {
+                monster.PositionX = (int) PositionX + (baseX + RandomNumberGenerator.GetInt32(-SPAWN_BASE_OFFSET, SPAWN_BASE_OFFSET)) * SPAWN_POSITION_MULTIPLIER;
+                monster.PositionY = (int) PositionY + (baseY + RandomNumberGenerator.GetInt32(-SPAWN_BASE_OFFSET, SPAWN_BASE_OFFSET)) * SPAWN_POSITION_MULTIPLIER;
+            }
+
+            if (monster.Rotation == 0)
+            {
+                monster.Rotation = RandomNumberGenerator.GetInt32(0, 360);
+            }
+            
+            EventSystem.EnqueueEvent(() =>
+            {
+                _world.SpawnEntity(monster);
+                return 0;
+            }, spawnPoint.RespawnTime * 1000);
+            
             return monster;
         }
 
