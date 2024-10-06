@@ -90,6 +90,8 @@ namespace QuantumCore.Game.World.Entities
 
         private byte _attackSpeed = 140;
         private uint _defence;
+        private byte _minMovespeed = 20;
+        private byte _maxMovespeed = byte.MaxValue;
 
         private const int PersistInterval = 30 * 1000; // 30s
         private int _persistTime = 0;
@@ -280,12 +282,12 @@ namespace QuantumCore.Game.World.Entities
                 if (item == null) continue;
                 var proto = _itemManager.GetItem(item.ItemId);
                 if (proto?.Type != (byte)EItemType.Armor) continue;
+
+                if (proto.Applies[0].Type != (byte) EApplyType.MovSpeed) continue;
                 modifier += (byte)proto.Applies[0].Value;
             }
-            if(modifier != 0)
-            {
-                MovementSpeed = (byte) (MovementSpeed * (1+(modifier/100)));
-            }
+            
+            MovementSpeed = (byte) Math.Clamp((MovementSpeed * (1+(modifier/100))), _minMovespeed, _maxMovespeed);
             _logger.LogDebug("Calculate Movement value for {Name}, result: {MovementSpeed}", Name, MovementSpeed);
 
         }
