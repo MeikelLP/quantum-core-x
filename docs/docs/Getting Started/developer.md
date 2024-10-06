@@ -32,7 +32,7 @@ dotnet build
 
 ### 4. Create the data folder
 
-Create the directory `data` in `./Executables/Game/bin/Debug/net7.0/`
+Create the directory `data` in `./Executables/Game/bin/Debug/net8.0/`
 
 ### 5. Copying settings
 
