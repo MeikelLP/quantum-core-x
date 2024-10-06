@@ -180,6 +180,7 @@ namespace QuantumCore.Game.World.Entities
             _questManager.InitializePlayer(this);
 
             CalculateDefence();
+            CalculateMovement();
         }
 
         public async Task ReloadPermissions()
@@ -262,11 +263,31 @@ namespace QuantumCore.Game.World.Entities
                 if (proto?.Type != (byte) EItemType.Armor) continue;
 
                 _defence += (uint) proto.Values[1] + (uint) proto.Values[5] * 2;
-            }
+            } 
 
             _logger.LogDebug("Calculate defence value for {Name}, result: {Defence}", Name, _defence);
 
             // todo add defence bonus from quests
+        }
+
+        private void CalculateMovement()
+        {
+            MovementSpeed = 150;
+            float modifier = 0;
+            foreach (var slot in Enum.GetValues<EquipmentSlots>())
+            {
+                var item = Inventory.EquipmentWindow.GetItem(slot);
+                if (item == null) continue;
+                var proto = _itemManager.GetItem(item.ItemId);
+                if (proto?.Type != (byte)EItemType.Armor) continue;
+                modifier += (byte)proto.Applies[0].Value;
+            }
+            if(modifier != 0)
+            {
+                MovementSpeed = (byte) (MovementSpeed * (1+(modifier/100)));
+            }
+            _logger.LogDebug("Calculate Movement value for {Name}, result: {MovementSpeed}", Name, MovementSpeed);
+
         }
 
         public override void Die()
@@ -661,8 +682,24 @@ namespace QuantumCore.Game.World.Entities
                     }
 
                     break;
+                    }
+               /* default:
+                    if (args.ItemInstance is not null)
+                    {
+                        foreach()
+                        var item = _itemManager.GetItem(args.ItemInstance.ItemId);
+                        Player.MinWeaponDamage = item?.GetMinWeaponDamage() ?? 0;
+                        Player.MaxWeaponDamage = item?.GetMaxWeaponDamage() ?? 0;
+                    }
+                    else
+                    {
+                        Player.MinWeaponDamage = 0;
+                        Player.MaxWeaponDamage = 0;
+                    }
+
+                    break;*/
+                
             }
-        }
 
         public override uint GetPoint(EPoints point)
         {
@@ -690,6 +727,10 @@ namespace QuantumCore.Game.World.Entities
                     return Player.Dx;
                 case EPoints.Iq:
                     return Player.Iq;
+                case EPoints.AttackSpeed:
+                    return _attackSpeed;
+                case EPoints.MoveSpeed:
+                    return this.MovementSpeed;
                 case EPoints.Gold:
                     return Player.Gold;
                 case EPoints.MinWeaponDamage:
@@ -1014,6 +1055,7 @@ namespace QuantumCore.Game.World.Entities
                         // Equipment
                         Inventory.EquipmentWindow.RemoveItem(item);
                         CalculateDefence();
+                        CalculateMovement();
                         SendCharacterUpdate();
                         SendPoints();
                     }
@@ -1040,6 +1082,7 @@ namespace QuantumCore.Game.World.Entities
                             Inventory.SetEquipment(item, position);
                             item.Set(_cacheManager, Player.Id, window, position, _itemRepository).Wait(); // TODO
                             CalculateDefence();
+                            CalculateMovement();
                             SendCharacterUpdate();
                             SendPoints();
                         }
