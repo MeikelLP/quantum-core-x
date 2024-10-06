@@ -263,7 +263,7 @@ namespace QuantumCore.Game.World.Entities
                 if (proto?.Type != (byte) EItemType.Armor) continue;
 
                 _defence += (uint) proto.Values[1] + (uint) proto.Values[5] * 2;
-            } 
+            }
 
             _logger.LogDebug("Calculate defence value for {Name}, result: {Defence}", Name, _defence);
 
@@ -683,22 +683,6 @@ namespace QuantumCore.Game.World.Entities
 
                     break;
                     }
-               /* default:
-                    if (args.ItemInstance is not null)
-                    {
-                        foreach()
-                        var item = _itemManager.GetItem(args.ItemInstance.ItemId);
-                        Player.MinWeaponDamage = item?.GetMinWeaponDamage() ?? 0;
-                        Player.MaxWeaponDamage = item?.GetMaxWeaponDamage() ?? 0;
-                    }
-                    else
-                    {
-                        Player.MinWeaponDamage = 0;
-                        Player.MaxWeaponDamage = 0;
-                    }
-
-                    break;*/
-                
             }
 
         public override uint GetPoint(EPoints point)
