@@ -38,7 +38,7 @@ Create the directory `data` in `./Executables/Game/bin/Debug/net8.0/`
 
 Copy the following files into that folder
 
-* In your clients `Eternexus` folder there should be an `atlasinfo.txt`
+* In your clients `Eternexus/root` folder there should be an `atlasinfo.txt`
 * `item_proto` & `mob_proto` from step 3
 
 ### 6. Setup required services
