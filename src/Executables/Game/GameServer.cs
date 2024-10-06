@@ -44,6 +44,7 @@ namespace QuantumCore.Game
         private readonly Stopwatch _serverTimer = new();
         private readonly IDropProvider _dropProvider;
         private readonly ISessionManager _sessionManager;
+        private readonly IGuildExperienceManager _guildExperienceManager;
 
         public new ImmutableArray<IGameConnection> Connections =>
             [..base.Connections.Values.Cast<IGameConnection>()];
@@ -55,7 +56,7 @@ namespace QuantumCore.Game
             IItemManager itemManager, IMonsterManager monsterManager, IExperienceManager experienceManager,
             IAnimationManager animationManager, ICommandManager commandManager, IQuestManager questManager,
             IChatManager chatManager, IWorld world, IDropProvider dropProvider, ISkillManager skillManager,
-            ICacheManager cacheManager, ISessionManager sessionManager)
+            ICacheManager cacheManager, ISessionManager sessionManager, IGuildExperienceManager guildExperienceManager)
             : base(packetManager, logger, pluginExecutor, serviceProvider, "game", hostingOptions)
         {
             _hostingOptions = hostingOptions.Value;
@@ -71,6 +72,7 @@ namespace QuantumCore.Game
             _questManager = questManager;
             _chatManager = chatManager;
             _sessionManager = sessionManager;
+            _guildExperienceManager = guildExperienceManager;
             World = world;
             _dropProvider = dropProvider;
             _skillManager = skillManager;
@@ -101,6 +103,7 @@ namespace QuantumCore.Game
             await Task.WhenAll(
                 _itemManager.LoadAsync(stoppingToken),
                 _monsterManager.LoadAsync(stoppingToken),
+                _guildExperienceManager.LoadAsync(stoppingToken),
                 _experienceManager.LoadAsync(stoppingToken),
                 _animationManager.LoadAsync(stoppingToken),
                 _commandManager.LoadAsync(stoppingToken),
@@ -108,7 +111,7 @@ namespace QuantumCore.Game
                 _skillManager.LoadAsync(stoppingToken)
             );
 
-            
+
             // Initialize session manager
             _sessionManager.Init(this);
 
@@ -170,7 +173,7 @@ namespace QuantumCore.Game
             if (_accumulatedElapsedTime < _targetElapsedTime)
             {
                 var sleepTime = (_targetElapsedTime - _accumulatedElapsedTime).TotalMilliseconds;
-                await Task.Delay((int)sleepTime).ConfigureAwait(false);
+                await Task.Delay((int) sleepTime).ConfigureAwait(false);
                 return;
             }
 

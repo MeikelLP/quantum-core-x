@@ -2,6 +2,10 @@
 
 namespace QuantumCore.API.Game.Guild;
 
+/// <summary>
+/// This manager does not validate input or overflows. Please validate yourself and updating using this manager.
+/// Does not send any packets. Used to update the database
+/// </summary>
 public interface IGuildManager
 {
     Task<GuildData?> GetGuildByNameAsync(string name, CancellationToken token = default);
@@ -23,5 +27,10 @@ public interface IGuildManager
     Task AddMemberAsync(uint guildId, uint inviteeId, byte rank, CancellationToken token = default);
     Task RemoveMemberAsync(uint playerId, CancellationToken token = default);
     Task SetLeaderAsync(uint playerId, bool toggle, CancellationToken token = default);
-    Task AddExperienceAsync(uint spenderId, uint amount, CancellationToken token = default);
+
+    /// <summary>
+    /// Checks for level up and raises the guild level accordingly
+    /// </summary>
+    /// <returns>Simple data of the updated guild to send to the clients</returns>
+    Task<GuildData> AddExperienceAsync(uint spenderId, uint amount, CancellationToken token = default);
 }

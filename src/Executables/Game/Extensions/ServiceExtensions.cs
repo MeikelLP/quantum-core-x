@@ -36,6 +36,7 @@ public static class ServiceExtensions
         });
         services.AddScoped<IPlayerManager, PlayerManager>();
         services.AddScoped<IGuildManager, GuildManager>();
+        services.AddSingleton<IGuildExperienceManager, GuildExperienceManager>();
         services.AddSingleton<IPlayerFactory, PlayerFactory>();
         services.AddSingleton<IParserService, ParserService>();
         services.AddSingleton<ISpawnGroupProvider, SpawnGroupProvider>();
@@ -51,7 +52,7 @@ public static class ServiceExtensions
         services.AddSingleton<IQuestManager, QuestManager>();
         services.AddSingleton<ISkillManager, SkillManager>();
         services.AddSingleton<ISessionManager, SessionManager>();
-        
+
         services.AddSingleton<IWorld, World.World>();
 
         return services;

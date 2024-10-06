@@ -1,6 +1,7 @@
 ﻿using System.Collections.Immutable;
 using EnumsNET;
 using Microsoft.EntityFrameworkCore;
+using QuantumCore.API;
 using QuantumCore.API.Game.Guild;
 using QuantumCore.Game.Persistence;
 using QuantumCore.Game.Persistence.Entities.Guilds;
@@ -12,10 +13,12 @@ namespace QuantumCore.Game;
 public class GuildManager : IGuildManager
 {
     private readonly GameDbContext _db;
+    private readonly IGuildExperienceManager _experienceManager;
 
-    public GuildManager(GameDbContext db)
+    public GuildManager(GameDbContext db, IGuildExperienceManager experienceManager)
     {
         _db = db;
+        _experienceManager = experienceManager;
     }
 
     public async Task<GuildData?> GetGuildByNameAsync(string name, CancellationToken token = default)
@@ -208,14 +211,35 @@ public class GuildManager : IGuildManager
             .ExecuteUpdateAsync(x => x.SetProperty(p => p.IsLeader, toggle), token);
     }
 
-    public async Task AddExperienceAsync(uint spenderId, uint amount, CancellationToken token = default)
+    public async Task<GuildData> AddExperienceAsync(uint spenderId, uint amount, CancellationToken token = default)
     {
         var member = await _db.GuildMembers
             .Where(x => x.PlayerId == spenderId)
             .Include(x => x.Guild)
             .FirstAsync(token);
+
+        // check for level up
+        uint neededExperience;
+        var tempAmount = amount;
+        var guild = member.Guild;
+        do
+        {
+            neededExperience = _experienceManager.GetNeededExperience(guild.Level) - guild.Experience;
+            if (neededExperience <= 0) break; // reached max level
+            if (tempAmount + guild.Experience >= neededExperience)
+            {
+                guild.Level++;
+                guild.MaxMemberCount = _experienceManager.GetMaxPlayers(guild.Level);
+                guild.Experience = 0;
+                tempAmount -= neededExperience;
+            }
+        } while (tempAmount >= neededExperience);
+
         member.SpentExperience += amount;
-        member.Guild.Experience += amount;
+        guild.Experience += tempAmount;
         await _db.SaveChangesAsync(token);
+
+        // TODO improve
+        return (await GetGuildByIdAsync(member.GuildId, token))!;
     }
 }
