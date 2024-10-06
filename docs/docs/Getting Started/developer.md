@@ -46,7 +46,7 @@ Copy the following files into that folder
 Use the `docker-compose.yml` in `src/` to boot up all services.
 
 ```sh
-docker-compose up -d
+docker compose up -d
 ```
 
 This starts:
