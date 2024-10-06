@@ -1,0 +1,7 @@
+contact_links:
+  - name: "Documentation"
+    url: https://meikellp.github.io/quantum-core-x/
+    about: Check out the documentation for Quantum Core X.
+  - name: Community Discord
+    url: https://discord.gg/QAvu7Q9hmn
+    about: Join the Quantum Core X community on Discord.

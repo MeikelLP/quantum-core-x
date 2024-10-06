@@ -32,13 +32,13 @@ dotnet build
 
 ### 4. Create the data folder
 
-Create the directory `data` in `./Executables/Game/bin/Debug/net7.0/`
+Create the directory `data` in `./Executables/Game/bin/Debug/net8.0/`
 
 ### 5. Copying settings
 
 Copy the following files into that folder
 
-* In your clients `Eternexus` folder there should be an `atlasinfo.txt`
+* In your clients `Eternexus/root` folder there should be an `atlasinfo.txt`
 * `item_proto` & `mob_proto` from step 3
 
 ### 6. Setup required services
@@ -46,7 +46,7 @@ Copy the following files into that folder
 Use the `docker-compose.yml` in `src/` to boot up all services.
 
 ```sh
-docker-compose up -d
+docker compose up -d
 ```
 
 This starts:
