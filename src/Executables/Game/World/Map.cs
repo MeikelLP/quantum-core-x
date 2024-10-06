@@ -298,8 +298,7 @@ namespace QuantumCore.Game.World
             {
                 monster.PositionX = (int)(PositionX + baseX * SPAWN_POSITION_MULTIPLIER);
                 monster.PositionY = (int)(PositionY + baseY * SPAWN_POSITION_MULTIPLIER);
-                // SpawnPoint.Direction follows the compass system with counter-clockwise increments: 1 = South, 2 = South-East, 3 = East, 5 = North, etc.
-                var compassDirection = spawnPoint.Direction - 1;
+                var compassDirection = (int)spawnPoint.Direction - 1;
                 var rotation = 45 * (compassDirection < 0 ? 8 : compassDirection);
                 monster.Rotation = rotation;
             }
