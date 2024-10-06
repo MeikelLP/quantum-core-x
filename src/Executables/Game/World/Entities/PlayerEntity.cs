@@ -682,8 +682,8 @@ namespace QuantumCore.Game.World.Entities
                     }
 
                     break;
-                    }
             }
+        }
 
         public override uint GetPoint(EPoints point)
         {
