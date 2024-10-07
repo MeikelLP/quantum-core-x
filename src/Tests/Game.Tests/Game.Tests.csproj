@@ -22,4 +22,13 @@
       <ProjectReference Include="..\..\Executables\Game\Game.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+        <None Update="Fixtures\item_proto">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+        <None Update="Fixtures\mob_proto">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
+
 </Project>

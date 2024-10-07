@@ -138,7 +138,7 @@ namespace QuantumCore.Game.World.Entities
                 _scope.ServiceProvider.GetRequiredService<ISkillManager>(),
                 _scope.ServiceProvider.GetRequiredService<IOptions<GameOptions>>().Value.Skills
             );
-            
+
             MovementSpeed = 150;
             EntityClass = player.PlayerClass;
 
@@ -381,20 +381,20 @@ namespace QuantumCore.Game.World.Entities
             {
                 return;
             }
-            
+
             AddPoint(EPoints.Skill, level);
-            AddPoint(EPoints.SubSkill, level < 10 ? 0 : level - Math.Max((int)Player.Level, 9));
-            
+            AddPoint(EPoints.SubSkill, level < 10 ? 0 : level - Math.Max((int) Player.Level, 9));
+
             Player.Level = (byte) (Player.Level + level);
-            
+
             // todo: animation (I think this actually is a quest sent by the server on character login and not an actual packet at this stage)
-            
+
             foreach (var entity in NearbyEntities)
             {
                 if (entity is not IPlayerEntity other) continue;
                 SendCharacterAdditional(other.Connection);
             }
-            
+
             GiveStatusPoints();
             SendPoints();
         }
@@ -729,7 +729,7 @@ namespace QuantumCore.Game.World.Entities
             Player.PositionY = PositionY;
 
             await Skills.PersistAsync();
-            
+
             var playerManager = _scope.ServiceProvider.GetRequiredService<IPlayerManager>();
             await playerManager.SetPlayerAsync(Player);
         }
@@ -755,7 +755,7 @@ namespace QuantumCore.Game.World.Entities
             {
                 RemoveItem(item);
                 SendRemoveItem(item.Window, (ushort) item.Position);
-                item.Set(_cacheManager, 0, 0, 0, _itemRepository).Wait(); // TODO
+                _itemRepository.DeletePlayerItemAsync(_cacheManager, item.PlayerId, item.ItemId).Wait(); // TODO
             }
             else
             {
@@ -791,7 +791,7 @@ namespace QuantumCore.Game.World.Entities
 
                 return;
             }
-            
+
             if (groundItem.OwnerName != null && !string.Equals(groundItem.OwnerName, Name))
             {
                 SendChatInfo("This item is not yours");
@@ -803,7 +803,7 @@ namespace QuantumCore.Game.World.Entities
                 SendChatInfo("No inventory space left");
                 return;
             }
-            
+
             var itemName = _itemManager.GetItem(item.ItemId)?.TranslatedName ?? "Unknown";
             SendChatInfo($"You picked up {groundItem.Amount}x {itemName}");
 
@@ -897,10 +897,10 @@ namespace QuantumCore.Game.World.Entities
         public async Task CalculatePlayedTimeAsync()
         {
             var key = $"player:{Player.Id}:loggedInTime";
-            var startSessionTime = await _cacheManager.Get<long>(key);
+            var startSessionTime = await _cacheManager.Server.Get<long>(key);
             var totalSessionTime = Connection.Server.ServerTime - startSessionTime;
             if (totalSessionTime <= 0) return;
-            
+
             AddPoint(EPoints.PlayTime, (int) totalSessionTime);
         }
 

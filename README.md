@@ -1,6 +1,6 @@
 # Quantum Core X
 
-[![.NET Pipeline](https://github.com/MeikelLP/quantum-core-x/actions/workflows/dotnet-pipeline.yml/badge.svg)](https://github.com/MeikelLP/quantum-core-x/actions/workflows/dotnet-pipeline.yml)
+[![.NET Pipeline](https://github.com/MeikelLP/quantum-core-x/actions/workflows/dotnet-pipeline.yml/badge.svg)](https://github.com/MeikelLP/quantum-core-x/actions/workflows/dotnet-pipeline.yml) [![Discord](https://img.shields.io/discord/702273847386439790?logo=discord&logoColor=white&label=Discord)](https://discord.gg/QAvu7Q9hmn)
 
 **QCX** (Quantum Core X) is an open source implementation of the Metin2 server.
 
@@ -38,3 +38,6 @@ For more details see [LICENSE](LICENSE)
 QuantumCore is supported by JetBrains which provide us with free licenses for their products.
 
 [<img src="docs/images/jetbrains.png" alt="JetBrains" width=150>](https://www.jetbrains.com/?from=QuantumCore)
+                        
+## Stargazers over time
+[![Stargazers over time](https://starchart.cc/MeikelLP/quantum-core-x.svg?variant=adaptive)](https://starchart.cc/MeikelLP/quantum-core-x)

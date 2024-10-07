@@ -1,7 +1,9 @@
-﻿namespace QuantumCore.API.Core.Models;
+﻿using BinarySerialization;
+
+namespace QuantumCore.API.Core.Models;
 
 public class MonsterSkillData
 {
-    public uint Id { get; set; }
-    public byte Level { get; set; }
+    [FieldOrder(0)] public uint Id { get; set; }
+    [FieldOrder(1)] public byte Level { get; set; }
 }

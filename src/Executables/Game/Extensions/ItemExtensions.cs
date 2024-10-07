@@ -111,14 +111,24 @@ public static class ItemExtensions
     {
         var key = "item:" + id;
 
-        if (await cacheManager.Exists(key) > 0)
+        if (await cacheManager.Server.Exists(key) > 0)
         {
-            return await cacheManager.Get<ItemInstance>(key);
+            return await cacheManager.Server.Get<ItemInstance>(key);
         }
 
         var item = await repository.GetItemAsync(id);
-        await cacheManager.Set(key, item);
+        await cacheManager.Server.Set(key, item);
         return item;
+    }
+
+    public static async Task DeletePlayerItemAsync(this IItemRepository repository, ICacheManager cacheManager,
+        uint playerId, uint itemId)
+    {
+        var key = $"item:{itemId}";
+
+        await cacheManager.Del(key);
+
+        await repository.DeletePlayerItemAsync(playerId, itemId);
     }
 
     public static async IAsyncEnumerable<ItemInstance> GetItems(this IItemRepository repository,
@@ -126,10 +136,10 @@ public static class ItemExtensions
     {
         var key = "items:" + player + ":" + window;
 
-        var list = cacheManager.CreateList<Guid>(key);
+        var list = cacheManager.Server.CreateList<Guid>(key);
 
         // Check if the window list exists
-        if (await cacheManager.Exists(key) > 0)
+        if (await cacheManager.Server.Exists(key) > 0)
         {
             var itemIds = await list.Range(0, -1);
 
@@ -165,11 +175,11 @@ public static class ItemExtensions
 
         if (item.PlayerId != default)
         {
-            var oldList = cacheManager.CreateList<Guid>($"items:{item.PlayerId}:{item.Window}");
+            var oldList = cacheManager.Server.CreateList<Guid>($"items:{item.PlayerId}:{item.Window}");
             await oldList.Rem(1, item.Id);
         }
 
-        return await cacheManager.Del(key) != 0;
+        return await cacheManager.Server.Del(key) != 0;
     }
 
     public static Task Persist(this ItemInstance item, IItemRepository itemRepository)
@@ -186,20 +196,21 @@ public static class ItemExtensions
     /// <param name="owner">Owner the item is given to</param>
     /// <param name="window">Window the item is placed in</param>
     /// <param name="pos">Position of the item in the window</param>
-    public static async Task Set(this ItemInstance item, ICacheManager cacheManager, uint owner, byte window, uint pos, IItemRepository itemRepository)
+    public static async Task Set(this ItemInstance item, ICacheManager cacheManager, uint owner, byte window, uint pos,
+        IItemRepository itemRepository)
     {
         if (item.PlayerId != owner || item.Window != window)
         {
             if (item.PlayerId != default)
             {
                 // Remove from last list
-                var oldList = cacheManager.CreateList<Guid>($"items:{item.PlayerId}:{item.Window}");
+                var oldList = cacheManager.Server.CreateList<Guid>($"items:{item.PlayerId}:{item.Window}");
                 await oldList.Rem(1, item.Id);
             }
 
             if (owner != default)
             {
-                var newList = cacheManager.CreateList<Guid>($"items:{owner}:{window}");
+                var newList = cacheManager.Server.CreateList<Guid>($"items:{owner}:{window}");
                 await newList.Push(item.Id);
             }
 

@@ -14,3 +14,7 @@ MobProto.cs
 packages.lock.json
 
 appsettings.*.json
+
+docs/docs/Packets/QuantumCore.*/*.md
+docs/docs/Commands/*.md
+!docs/docs/Commands/Index.md

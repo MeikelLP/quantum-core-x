@@ -31,9 +31,9 @@ namespace QuantumCore.Game.PacketHandlers
 
         public async Task ExecuteAsync(GamePacketContext<TokenLogin> ctx, CancellationToken cancellationToken = default)
         {
-            var key = "token:" + ctx.Packet.Key;
+            var key = $"token:{ctx.Packet.Key}";
 
-            if (await _cacheManager.Exists(key) <= 0)
+            if (await _cacheManager.Server.Exists(key) <= 0)
             {
                 _logger.LogWarning("Received invalid auth token {Key} / {Username}", ctx.Packet.Key, ctx.Packet.Username);
                 ctx.Connection.Close();
@@ -41,10 +41,20 @@ namespace QuantumCore.Game.PacketHandlers
             }
 
             // Verify that the given token is for the given user
-            var token = await _cacheManager.Get<Token>(key);
+            var token = await _cacheManager.Server.Get<Token>(key);
+            var accountTokenKey = $"account:token:{token.AccountId}";
             if (!string.Equals(token.Username, ctx.Packet.Username, StringComparison.OrdinalIgnoreCase))
             {
                 _logger.LogWarning("Received invalid auth token, username does not match {TokenUsername} != {PacketUserName}", token.Username, ctx.Packet.Username);
+                ctx.Connection.Close();
+                return;
+            }
+            
+            // Prevent cross client token forgery
+            var validSession = await _cacheManager.Shared.Get<uint>(accountTokenKey);
+            if (validSession != 0 && validSession != ctx.Packet.Key)
+            {
+                _logger.LogWarning("Received invalid auth token, session does not match {TokenSession} != {PacketSession}", validSession, ctx.Packet.Key);
                 ctx.Connection.Close();
                 return;
             }
@@ -54,7 +64,8 @@ namespace QuantumCore.Game.PacketHandlers
             _logger.LogDebug("Received valid auth token");
 
             // Remove TTL from token so we can use it for another game core transition
-            await _cacheManager.Persist(key);
+            await _cacheManager.Server.Persist(key);
+            await _cacheManager.Shared.Expire(accountTokenKey, ExpiresIn.OneDay);
 
             // Store the username and id for later reference
             ctx.Connection.Username = token.Username;
@@ -74,6 +85,7 @@ namespace QuantumCore.Game.PacketHandlers
                 characters.CharacterList[i] = player.ToCharacter();
                 characters.CharacterList[i].Ip = IpUtils.ConvertIpToUInt(host.Ip);
                 characters.CharacterList[i].Port = host.Port;
+                // todo armor on character select
 
                 i++;
             }
@@ -83,7 +95,7 @@ namespace QuantumCore.Game.PacketHandlers
             if (charactersFromCacheOrDb.Length > 0)
             {
                 empire = charactersFromCacheOrDb[0].Empire;
-                await _cacheManager.Set($"account:{ctx.Connection.AccountId}:game:select:selected-player", charactersFromCacheOrDb[0].Id);
+                await _cacheManager.Server.Set($"account:{ctx.Connection.AccountId}:game:select:selected-player", charactersFromCacheOrDb[0].Id);
             }
 
             // TODO:: set player id to character?

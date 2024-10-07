@@ -1,4 +1,5 @@
-﻿using QuantumCore.API.Core.Models;
+﻿using System.Collections.Immutable;
+using QuantumCore.API.Core.Models;
 
 namespace QuantumCore.API;
 
@@ -10,5 +11,5 @@ public interface IMonsterManager
     Task LoadAsync(CancellationToken token = default);
 
     MonsterData? GetMonster(uint id);
-    List<MonsterData> GetMonsters();
+    ImmutableArray<MonsterData> GetMonsters();
 }

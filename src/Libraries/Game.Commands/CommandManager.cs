@@ -95,9 +95,9 @@ internal class CommandManager : ICommandManager
     public async Task LoadAsync(CancellationToken token = default)
     {
         _logger.LogInformation("Initialize permissions");
-        var permission_keys = await _cacheManager.Keys("perm:*");
+        var permissionKeys = await _cacheManager.Keys("perm:*");
 
-        foreach (var p in permission_keys)
+        foreach (var p in permissionKeys)
         {
             await _cacheManager.Del(p);
         }
@@ -249,7 +249,8 @@ internal class CommandManager : ICommandManager
                         })!;
                     var cmdExecuteMethodInfo = typeof(ICommandHandler<>).MakeGenericType(commandCache.OptionsType)
                         .GetMethod(nameof(ICommandHandler<object>.ExecuteAsync))!;
-                    var cmd = ActivatorUtilities.CreateInstance(_serviceProvider, commandCache.Type);
+                    await using var scope = _serviceProvider.CreateAsyncScope();
+                    var cmd = ActivatorUtilities.CreateInstance(scope.ServiceProvider, commandCache.Type);
 
                     try
                     {
