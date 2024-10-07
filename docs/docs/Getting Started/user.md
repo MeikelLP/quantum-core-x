@@ -9,7 +9,7 @@ In this guide a _User_ refers to someone who wants to host/administrate QCX.
 
 ## Quickstart
 
-1. Get the files from the sample in the [sample folder](../../samples/full-setup/)
+1. Get the files from the sample in the [sample folder](https://github.com/MeikelLP/quantum-core-x/tree/master/docs/samples/full-setup)
 
 2. execute the `Eternexus\--dump_proto--\dump_proto.exe` in the client's directory. This should create two files:
 
