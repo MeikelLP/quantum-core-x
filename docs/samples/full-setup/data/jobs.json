@@ -1,0 +1,60 @@
+{
+    "job": [
+        {
+            "id": 0,
+            "name": "warrior",
+            "st": 6,
+            "ht": 4,
+            "dx": 3,
+            "iq": 3,
+            "start_hp": 600,
+            "start_sp": 200,
+            "hp_per_ht": 40,
+            "sp_per_iq": 20,
+            "hp_per_level": 36,
+            "sp_per_level": 44
+        },
+        {
+            "id": 1,
+            "name": "assassin",
+            "st": 4,
+            "ht": 3,
+            "dx": 6,
+            "iq": 3,
+            "start_hp": 650,
+            "start_sp": 200,
+            "hp_per_ht": 40,
+            "sp_per_iq": 20,
+            "hp_per_level": 36,
+            "sp_per_level": 44
+        },
+        {
+            "id": 2,
+            "name": "sura",
+            "st": 5,
+            "ht": 3,
+            "dx": 3,
+            "iq": 5,
+            "start_hp": 650,
+            "start_sp": 200,
+            "hp_per_ht": 40,
+            "sp_per_iq": 20,
+            "hp_per_level": 36,
+            "sp_per_level": 44
+        },
+        {
+            "id": 3,
+            "name": "shamana",
+            "st": 3,
+            "ht": 4,
+            "dx": 3,
+            "iq": 6,
+            "start_hp": 700,
+            "start_sp": 200,
+            "hp_per_ht": 40,
+            "sp_per_iq": 20,
+            "hp_per_level": 36,
+            "sp_per_level": 44
+        }
+    ]
+}

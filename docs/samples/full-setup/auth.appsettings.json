@@ -1,0 +1,13 @@
+{
+    "Hosting": {
+        "Port": 11000
+    },
+    "Cache": {
+        "Host": "cache",
+        "Port": 6379
+    },
+    "Database": {
+        "Provider": "mysql",
+        "ConnectionString": "Server=db;Database=metin2;Uid=metin2;Pwd=metin2;"
+    }
+}
