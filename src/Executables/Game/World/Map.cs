@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Security.Cryptography;
+using EnumsNET;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using QuantumCore.API;
@@ -294,7 +295,7 @@ namespace QuantumCore.Game.World
                 0
             );
 
-            if (((uint)EAiFlags.NoMove & monster.Proto.AiFlag) == (uint)EAiFlags.NoMove) // no_move
+            if (((EAiFlags)monster.Proto.AiFlag).HasAnyFlags(EAiFlags.NoMove))
             {
                 monster.PositionX = (int)(PositionX + baseX * SPAWN_POSITION_MULTIPLIER);
                 monster.PositionY = (int)(PositionY + baseY * SPAWN_POSITION_MULTIPLIER);
