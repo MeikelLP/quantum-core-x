@@ -35,6 +35,7 @@
       ]
     }
   ],
+  "badgeTemplate": "[![All Contributors](https://img.shields.io/github/contributors/meikellp/quantum-core-x)](#contributors)",
   "contributorsPerLine": 7,
   "skipCi": true,
   "repoType": "github",

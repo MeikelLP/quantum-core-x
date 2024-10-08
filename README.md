@@ -1,11 +1,9 @@
 # Quantum Core X
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-2-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/github/contributors/meikellp/quantum-core-x)](#contributors)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
-
 [![.NET Pipeline](https://github.com/MeikelLP/quantum-core-x/actions/workflows/dotnet-pipeline.yml/badge.svg)](https://github.com/MeikelLP/quantum-core-x/actions/workflows/dotnet-pipeline.yml)
 [![Discord](https://img.shields.io/discord/702273847386439790?logo=discord&logoColor=white&label=Discord)](https://discord.gg/QAvu7Q9hmn)
-[![All Contributors](https://img.shields.io/github/contributors/meikellp/quantum-core-x)](#contributors)
 
 **QCX** (Quantum Core X) is an open source implementation of the Metin2 server.
 
