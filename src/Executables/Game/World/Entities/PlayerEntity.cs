@@ -283,7 +283,8 @@ namespace QuantumCore.Game.World.Entities
                 var proto = _itemManager.GetItem(item.ItemId);
                 if (proto?.Type != (byte)EItemType.Armor) continue;
 
-                if (proto.Applies[0].Type != (byte) EApplyType.MovSpeed) continue;
+                var moveSpeedFromItem = proto.Applies.FirstOrDefault(apply => apply.Type == (byte)EApplyType.MovSpeed);
+                if (moveSpeedFromItem is null) continue;
                 modifier += (byte)proto.Applies[0].Value;
             }
             
