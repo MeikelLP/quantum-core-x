@@ -1,6 +1,8 @@
 # Quantum Core X
 
-[![.NET Pipeline](https://github.com/MeikelLP/quantum-core-x/actions/workflows/dotnet-pipeline.yml/badge.svg)](https://github.com/MeikelLP/quantum-core-x/actions/workflows/dotnet-pipeline.yml) [![Discord](https://img.shields.io/discord/702273847386439790?logo=discord&logoColor=white&label=Discord)](https://discord.gg/QAvu7Q9hmn)
+[![.NET Pipeline](https://github.com/MeikelLP/quantum-core-x/actions/workflows/dotnet-pipeline.yml/badge.svg)](https://github.com/MeikelLP/quantum-core-x/actions/workflows/dotnet-pipeline.yml)
+[![Discord](https://img.shields.io/discord/702273847386439790?logo=discord&logoColor=white&label=Discord)](https://discord.gg/QAvu7Q9hmn)
+[![All Contributors](https://img.shields.io/github/contributors/meikellp/quantum-core-x)](#contributors)
 
 **QCX** (Quantum Core X) is an open source implementation of the Metin2 server.
 
@@ -21,8 +23,16 @@ This project is currently maintained by:
 
 * [MeikelLP](https://github.com/MeikelLP)
 
-## Authors & contributors
-For a full list of all authors and contributors see [AUTHORS.md](AUTHORS.md)
+## Contributors
+
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
+
+<!-- markdownlint-restore -->
+<!-- prettier-ignore-end -->
+
+<!-- ALL-CONTRIBUTORS-LIST:END -->
 
 ## Community and contributing
 To get started contributing to the project, see the [contributing guide](CONTRIBUTING.md).
