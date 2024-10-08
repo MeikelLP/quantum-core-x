@@ -1,13 +1,21 @@
 {
-  "projectName": "quantum-core-x",
-  "projectOwner": "MeikelLP",
   "files": [
     "README.md"
   ],
+  "imageSize": 100,
+  "commit": false,
   "commitType": "docs",
   "commitConvention": "angular",
-  "contributorsPerLine": 7,
   "contributors": [
+    {
+      "login": "MeikelLP",
+      "name": "Meikel Philipp",
+      "avatar_url": "https://avatars.githubusercontent.com/u/11669846?v=4",
+      "profile": "https://github.com/MeikelLP",
+      "contributions": [
+        "code"
+      ]
+    },
     {
       "login": "uutkukorkmaz",
       "name": "uutkukorkmaz",
@@ -17,5 +25,11 @@
         "code"
       ]
     }
-  ]
+  ],
+  "contributorsPerLine": 7,
+  "skipCi": true,
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "projectName": "quantum-core-x",
+  "projectOwner": "MeikelLP"
 }
