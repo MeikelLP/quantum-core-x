@@ -28,6 +28,13 @@ This project is currently maintained by:
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
 <!-- markdownlint-disable -->
+<table>
+  <tbody>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/uutkukorkmaz"><img src="https://avatars.githubusercontent.com/u/19177587?v=4?s=100" width="100px;" alt="uutkukorkmaz"/><br /><sub><b>uutkukorkmaz</b></sub></a><br /><a href="#code-uutkukorkmaz" title="Code">💻</a></td>
+    </tr>
+  </tbody>
+</table>
 
 <!-- markdownlint-restore -->
 <!-- prettier-ignore-end -->
