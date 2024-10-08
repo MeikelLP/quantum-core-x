@@ -1,4 +1,21 @@
 {
-  "projectName": "Quantum Core X",
-  "projectOwner": "MeikelLP"
+  "projectName": "quantum-core-x",
+  "projectOwner": "MeikelLP",
+  "files": [
+    "README.md"
+  ],
+  "commitType": "docs",
+  "commitConvention": "angular",
+  "contributorsPerLine": 7,
+  "contributors": [
+    {
+      "login": "uutkukorkmaz",
+      "name": "uutkukorkmaz",
+      "avatar_url": "https://avatars.githubusercontent.com/u/19177587?v=4",
+      "profile": "https://github.com/uutkukorkmaz",
+      "contributions": [
+        "code"
+      ]
+    }
+  ]
 }
