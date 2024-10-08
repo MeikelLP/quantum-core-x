@@ -1,6 +1,6 @@
 # Quantum Core X
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-2-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 [![.NET Pipeline](https://github.com/MeikelLP/quantum-core-x/actions/workflows/dotnet-pipeline.yml/badge.svg)](https://github.com/MeikelLP/quantum-core-x/actions/workflows/dotnet-pipeline.yml)
@@ -31,6 +31,14 @@ This project is currently maintained by:
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
 <!-- markdownlint-disable -->
+<table>
+  <tbody>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/MeikelLP"><img src="https://avatars.githubusercontent.com/u/11669846?v=4?s=100" width="100px;" alt="Meikel Philipp"/><br /><sub><b>Meikel Philipp</b></sub></a><br /><a href="https://github.com/MeikelLP/quantum-core-x/commits?author=MeikelLP" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/Jafah"><img src="https://avatars.githubusercontent.com/u/130060170?v=4?s=100" width="100px;" alt="Jafah"/><br /><sub><b>Jafah</b></sub></a><br /><a href="https://github.com/MeikelLP/quantum-core-x/commits?author=Jafah" title="Code">💻</a></td>
+    </tr>
+  </tbody>
+</table>
 
 <!-- markdownlint-restore -->
 <!-- prettier-ignore-end -->
