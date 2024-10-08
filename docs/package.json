@@ -30,8 +30,7 @@
     "@docusaurus/types": "^3.5.2"
   },
   "overrides": {
-    "mermaid": "$mermaid",
-    "path-to-regexp": "~>8.2.0"
+    "mermaid": "$mermaid"
   },
   "browserslist": {
     "production": [
