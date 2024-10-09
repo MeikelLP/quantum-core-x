@@ -302,7 +302,7 @@ namespace QuantumCore.Game.World
                 monster.PositionY = (int)(PositionY + baseY * SPAWN_POSITION_MULTIPLIER);
                 var compassDirection = (int)spawnPoint.Direction - 1;
                 
-                if (compassDirection < 0)
+                if (compassDirection < 0 || compassDirection > (int)Enum.GetValues<ESpawnPointDirection>().Last())
                 {
                     compassDirection = (int)ESpawnPointDirection.Random;
                 }
