@@ -42,7 +42,7 @@ public partial class ParserService : IParserService
             Y = int.Parse(splitted[2]),
             RangeX = int.Parse(splitted[3]),
             RangeY = int.Parse(splitted[4]),
-            Direction = ParseCompassDirection(splitted[6]),
+            Direction = (ESpawnPointDirection)int.Parse(splitted[6]),
             RespawnTime = ParseSecondsFromTimespanString(splitted[7].Trim()),
             Chance = short.Parse(splitted[8]),
             MaxAmount = short.Parse(splitted[9]),
@@ -490,23 +490,6 @@ public partial class ParserService : IParserService
         percentage *= 10000.0f; // because percentage here is 1 - 1000
         
         return new CommonDropEntry(minLevel, maxLevel, itemId, percentage);
-    }
-    
-    private static ESpawnPointDirection ParseCompassDirection(string value)
-    {
-        return int.Parse(value) switch
-        {
-            0 => ESpawnPointDirection.Random,
-            1 => ESpawnPointDirection.South,
-            2 => ESpawnPointDirection.SouthEast,
-            3 => ESpawnPointDirection.East,
-            4 => ESpawnPointDirection.NorthEast,
-            5 => ESpawnPointDirection.North,
-            6 => ESpawnPointDirection.NorthWest,
-            7 => ESpawnPointDirection.West,
-            8 => ESpawnPointDirection.SouthWest,
-            _ => ESpawnPointDirection.Random
-        };
     }
     
     private static bool IsEmptyOrContainsNewlineOrTab(string str)
