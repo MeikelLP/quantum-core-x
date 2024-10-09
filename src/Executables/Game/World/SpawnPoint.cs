@@ -19,7 +19,7 @@ namespace QuantumCore.Game.World
     /// <summary>
     /// Spawn point directions follows the compass rose with counter-clockwise increments.
     /// </summary>
-    public enum ESpawnPointDirection
+    public enum ESpawnPointDirection : byte
     {
         Random = 0,
         South = 1,
