@@ -1,0 +1,72 @@
+{
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": false,
+  "commitType": "docs",
+  "commitConvention": "angular",
+  "contributors": [
+    {
+      "login": "MeikelLP",
+      "name": "Meikel Philipp",
+      "avatar_url": "https://avatars.githubusercontent.com/u/11669846?v=4",
+      "profile": "https://github.com/MeikelLP",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "Jafah",
+      "name": "Jafah",
+      "avatar_url": "https://avatars.githubusercontent.com/u/130060170?v=4",
+      "profile": "https://github.com/Jafah",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "uutkukorkmaz",
+      "name": "uutkukorkmaz",
+      "avatar_url": "https://avatars.githubusercontent.com/u/19177587?v=4",
+      "profile": "https://github.com/uutkukorkmaz",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "FatalMerlin",
+      "name": "Merlin",
+      "avatar_url": "https://avatars.githubusercontent.com/u/14237330?v=4",
+      "profile": "https://www.linkedin.com/in/merlin-brandes-42328717a/",
+      "contributions": [
+        "doc"
+      ]
+    },
+    {
+      "login": "arves100",
+      "name": "Arves100",
+      "avatar_url": "https://avatars.githubusercontent.com/u/4847635?v=4",
+      "profile": "https://github.com/arves100",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "NoFr1ends",
+      "name": "Lynx",
+      "avatar_url": "https://avatars.githubusercontent.com/u/6075580?v=4",
+      "profile": "https://github.com/NoFr1ends",
+      "contributions": [
+        "code"
+      ]
+    }
+  ],
+  "badgeTemplate": "[![All Contributors](https://img.shields.io/github/contributors/meikellp/quantum-core-x)](#contributors)",
+  "contributorsPerLine": 7,
+  "skipCi": true,
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "projectName": "quantum-core-x",
+  "projectOwner": "MeikelLP"
+}
