@@ -11,7 +11,7 @@ using QuantumCore.Game.Persistence;
 
 namespace QuantumCore.Game.Commands
 {
-    [Command("item", "Puts the given item in the inventory")]
+    [Command("item", "Puts the given item in the inventory", "i")]
     public class ItemCommand : ICommandHandler<ItemCommandOptions>
     {
         private readonly IItemManager _itemManager;
@@ -84,6 +84,7 @@ namespace QuantumCore.Game.Commands
 
             await instance.Persist(_itemRepository);
             context.Player.SendItem(instance);
+            context.Player.SendChatInfo($"You received {context.Arguments.Count}x {item.TranslatedName}");
         }
     }
 
