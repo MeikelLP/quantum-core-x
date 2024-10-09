@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Security.Cryptography;
+using EnumsNET;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using QuantumCore.API;
@@ -20,6 +21,7 @@ namespace QuantumCore.Game.World
         public const uint MapUnit = 25600;
         private const int SPAWN_BASE_OFFSET = 5;
         private const int SPAWN_POSITION_MULTIPLIER = 100;
+        private const int SPAWN_ROTATION_SLICE_DEGREES = 45;
         public string Name { get; private set; }
         public uint PositionX { get; private set; }
         public uint UnitX => PositionX / MapUnit;
@@ -279,22 +281,51 @@ namespace QuantumCore.Game.World
             var baseY = spawnPoint.Y;
             if (spawnPoint.RangeX != 0)
             {
-                baseX += RandomNumberGenerator.GetInt32(-spawnPoint.RangeX, spawnPoint.RangeY);
+                baseX += RandomNumberGenerator.GetInt32(-spawnPoint.RangeX, spawnPoint.RangeX);
             }
 
             if (spawnPoint.RangeY != 0)
             {
-                baseY += RandomNumberGenerator.GetInt32(-spawnPoint.RangeX, spawnPoint.RangeY);
+                baseY += RandomNumberGenerator.GetInt32(-spawnPoint.RangeY, spawnPoint.RangeY);
             }
 
-            var monster = new MonsterEntity(_monsterManager, _dropProvider, _animationManager, this, _logger, _itemManager,
+            var monster = new MonsterEntity(_monsterManager, _dropProvider, _animationManager, this, _logger,
+                _itemManager,
                 id,
-                (int) (PositionX + (baseX + RandomNumberGenerator.GetInt32(-SPAWN_BASE_OFFSET, SPAWN_BASE_OFFSET)) *
-                    SPAWN_POSITION_MULTIPLIER),
-                (int) (PositionY + (baseY + RandomNumberGenerator.GetInt32(-SPAWN_BASE_OFFSET, SPAWN_BASE_OFFSET)) *
-                    SPAWN_POSITION_MULTIPLIER),
-                RandomNumberGenerator.GetInt32(0, 360));
-            _world.SpawnEntity(monster);
+                0,
+                0
+            );
+
+            if (monster.Proto.AiFlag.HasAnyFlags(EAiFlags.NoMove))
+            {
+                monster.PositionX = (int)(PositionX + baseX * SPAWN_POSITION_MULTIPLIER);
+                monster.PositionY = (int)(PositionY + baseY * SPAWN_POSITION_MULTIPLIER);
+                var compassDirection = (int)spawnPoint.Direction - 1;
+                
+                if (compassDirection < 0 || compassDirection > (int)Enum.GetValues<ESpawnPointDirection>().Last())
+                {
+                    compassDirection = (int)ESpawnPointDirection.Random;
+                }
+                var rotation = SPAWN_ROTATION_SLICE_DEGREES * compassDirection;
+                monster.Rotation = rotation;
+            }
+            else
+            {
+                monster.PositionX = (int) PositionX + (baseX + RandomNumberGenerator.GetInt32(-SPAWN_BASE_OFFSET, SPAWN_BASE_OFFSET)) * SPAWN_POSITION_MULTIPLIER;
+                monster.PositionY = (int) PositionY + (baseY + RandomNumberGenerator.GetInt32(-SPAWN_BASE_OFFSET, SPAWN_BASE_OFFSET)) * SPAWN_POSITION_MULTIPLIER;
+            }
+
+            if (monster.Rotation == 0)
+            {
+                monster.Rotation = RandomNumberGenerator.GetInt32(0, 360);
+            }
+            
+            EventSystem.EnqueueEvent(() =>
+            {
+                _world.SpawnEntity(monster);
+                return 0;
+            }, spawnPoint.RespawnTime * 1000);
+            
             return monster;
         }
 

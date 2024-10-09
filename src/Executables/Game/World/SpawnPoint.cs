@@ -16,6 +16,22 @@ namespace QuantumCore.Game.World
         Special
     }
 
+    /// <summary>
+    /// Spawn point directions follows the compass rose with counter-clockwise increments.
+    /// </summary>
+    public enum ESpawnPointDirection : byte
+    {
+        Random = 0,
+        South = 1,
+        SouthEast = 2,
+        East = 3,
+        NorthEast = 4,
+        North = 5,
+        NorthWest = 6,
+        West = 7,
+        SouthWest = 8
+    }
+
     public class SpawnPoint
     {
         public ESpawnPointType Type { get; set; }
@@ -24,7 +40,7 @@ namespace QuantumCore.Game.World
         public int Y { get; set; }
         public int RangeX { get; set; }
         public int RangeY { get; set; }
-        public int Direction { get; set; }
+        public ESpawnPointDirection Direction { get; set; }
         public int RespawnTime { get; set; }
         public List<int> Groups { get; } = new List<int>();
         public uint Monster { get; set; }
