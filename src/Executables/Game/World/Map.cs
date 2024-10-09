@@ -21,6 +21,7 @@ namespace QuantumCore.Game.World
         public const uint MapUnit = 25600;
         private const int SPAWN_BASE_OFFSET = 5;
         private const int SPAWN_POSITION_MULTIPLIER = 100;
+        private const int SPAWN_ROTATION_SLICE_DEGREES = 45;
         public string Name { get; private set; }
         public uint PositionX { get; private set; }
         public uint UnitX => PositionX / MapUnit;
@@ -295,12 +296,17 @@ namespace QuantumCore.Game.World
                 0
             );
 
-            if (((EAiFlags)monster.Proto.AiFlag).HasAnyFlags(EAiFlags.NoMove))
+            if (monster.Proto.AiFlag.HasAnyFlags(EAiFlags.NoMove))
             {
                 monster.PositionX = (int)(PositionX + baseX * SPAWN_POSITION_MULTIPLIER);
                 monster.PositionY = (int)(PositionY + baseY * SPAWN_POSITION_MULTIPLIER);
                 var compassDirection = (int)spawnPoint.Direction - 1;
-                var rotation = 45 * (compassDirection < 0 ? 8 : compassDirection);
+                
+                if (compassDirection < 0)
+                {
+                    compassDirection = (int)ESpawnPointDirection.Random;
+                }
+                var rotation = SPAWN_ROTATION_SLICE_DEGREES * compassDirection;
                 monster.Rotation = rotation;
             }
             else
