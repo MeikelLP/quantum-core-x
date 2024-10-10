@@ -32,91 +32,99 @@ public static class PacketDocsGenerator
 
         foreach (var packetInfo in packetTypes.AsParallel())
         {
-            var fields = GetProperties(packetInfo.Type).ToList();
-
-            var sb = new StringBuilder();
-            sb.AppendLine($"""
-                           # {packetInfo.Name}
-
-                           |   |   |
-                           |---|---|
-                           |Direction|`{packetInfo.Direction.AsString()}`|
-                           |Header|`0x{packetInfo.Header:X2}`|
-                           """);
-            if (packetInfo.SubHeader is not null)
+            try
             {
-                sb.AppendLine($"|Sub Header|`0x{packetInfo.SubHeader:X2}`|");
-            }
+                var fields = GetProperties(packetInfo.Type).ToList();
 
-            sb.AppendLine("""
+                var sb = new StringBuilder();
+                sb.AppendLine($"""
+                               # {packetInfo.Name}
 
-                          ## Fields
-
-                          """);
-
-            if (fields.Count > 0)
-            {
-                foreach (var field in fields)
+                               |   |   |
+                               |---|---|
+                               |Direction|`{packetInfo.Direction.AsString()}`|
+                               |Header|`0x{packetInfo.Header:X2}`|
+                               """);
+                if (packetInfo.SubHeader is not null)
                 {
-                    sb.AppendLine($"* {field.Name}");
+                    sb.AppendLine($"|Sub Header|`0x{packetInfo.SubHeader:X2}`|");
                 }
-            }
-            else
-            {
-                sb.AppendLine("> _no fields - only headers_");
-            }
 
-            sb.AppendLine($"""
+                sb.AppendLine("""
 
-                           ```mermaid
-                           ---
-                           title: "{packetInfo.Name}"
-                           ---
-                           packet-beta
-                             0: "0x{packetInfo.Header:X2}"
-                           """);
-            if (packetInfo.SubHeader is not null && packetInfo.SubHeaderPosition is not null)
-            {
-                fields.Insert(packetInfo.SubHeaderPosition!.Value,
-                    ($"0x{packetInfo.SubHeader:X2}", typeof(byte),
-                        new FieldAttribute(packetInfo.SubHeaderPosition!.Value)));
-            }
+                              ## Fields
 
-            var position = 0;
-            foreach (var field in fields)
-            {
-                var fieldLength = GetFieldLength(field);
+                              """);
+
+                if (fields.Count > 0)
+                {
+                    foreach (var field in fields)
+                    {
+                        sb.AppendLine($"* {field.Name}");
+                    }
+                }
+                else
+                {
+                    sb.AppendLine("> _no fields - only headers_");
+                }
 
                 sb.AppendLine($"""
-                                 {position + 1}-{position + fieldLength}: "{field.Name}"
+
+                               ```mermaid
+                               ---
+                               title: "{packetInfo.Name}"
+                               ---
+                               packet-beta
+                                 0: "0x{packetInfo.Header:X2}"
                                """);
-                position += fieldLength;
-            }
-
-            sb.AppendLine("```");
-
-            var relatedPackets = packetTypes
-                .Where(x => x.Header == packetInfo.Header)
-                .ToArray();
-            if (packetInfo.SubHeader is not null && relatedPackets.Length > 0)
-            {
-                sb.AppendLine();
-                sb.AppendLine("## Related packets");
-                sb.AppendLine();
-                foreach (var type in relatedPackets)
+                if (packetInfo.SubHeader is not null && packetInfo.SubHeaderPosition is not null)
                 {
-                    var relativePath = GetRelativePathTo(
-                        type.Namespace,
-                        packetInfo.Namespace
-                    );
-                    if (relativePath == "") relativePath = ".";
-                    sb.AppendLine($"* [{type.Name}]({relativePath}/{type.Name}.md)");
+                    fields.Insert(packetInfo.SubHeaderPosition!.Value,
+                        ($"0x{packetInfo.SubHeader:X2}", typeof(byte),
+                            new FieldAttribute(packetInfo.SubHeaderPosition!.Value)));
                 }
+
+                var position = 0;
+                foreach (var field in fields)
+                {
+                    var fieldLength = GetFieldLength(field);
+
+                    sb.AppendLine($"""
+                                     {position + 1}-{position + fieldLength}: "{field.Name}"
+                                   """);
+                    position += fieldLength;
+                }
+
+                sb.AppendLine("```");
+
+                var relatedPackets = packetTypes
+                    .Where(x => x.Header == packetInfo.Header)
+                    .ToArray();
+                if (packetInfo.SubHeader is not null && relatedPackets.Length > 0)
+                {
+                    sb.AppendLine();
+                    sb.AppendLine("## Related packets");
+                    sb.AppendLine();
+                    foreach (var type in relatedPackets)
+                    {
+                        var relativePath = GetRelativePathTo(
+                            type.Namespace,
+                            packetInfo.Namespace
+                        );
+                        if (relativePath == "") relativePath = ".";
+                        sb.AppendLine($"* [{type.Name}]({relativePath}/{type.Name}.md)");
+                    }
+                }
+
+                var mermaid = sb.ToString();
+
+                await WriteFile(targetDir, packetInfo.Namespace, packetInfo.Name, mermaid);
             }
-
-            var mermaid = sb.ToString();
-
-            await WriteFile(targetDir, packetInfo.Namespace, packetInfo.Name, mermaid);
+            catch (Exception)
+            {
+                await Console.Error.WriteLineAsync($"Failed to generate markdown docs for type {packetInfo.Name}");
+                throw;
+            }
         }
     }
 

@@ -72,7 +72,7 @@ namespace QuantumCore.Core.Networking
             {
                 await foreach (var packet in _packetReader.EnumerateAsync(_stream, stoppingToken))
                 {
-                    _logger.LogDebug(" IN: {Type} {Data}", packet.GetType(), JsonSerializer.Serialize(packet));
+                    // _logger.LogDebug(" IN: {Type} {Data}", packet.GetType(), JsonSerializer.Serialize(packet));
                     await _pluginExecutor.ExecutePlugins<IPacketOperationListener>(_logger,
                         x => x.OnPrePacketReceivedAsync(packet, Array.Empty<byte>(), stoppingToken));
 
@@ -101,6 +101,23 @@ namespace QuantumCore.Core.Networking
             _cts?.Cancel();
             _client?.Close();
             OnClose(expected);
+        }
+
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                _client?.Dispose();
+                _stream?.Dispose();
+                _cts?.Dispose();
+            }
+        }
+
+        public override sealed void Dispose()
+        {
+            Dispose(true);
+            base.Dispose();
+            GC.SuppressFinalize(this);
         }
 
         public void Send<T>(T packet) where T : IPacketSerializable
@@ -152,8 +169,10 @@ namespace QuantumCore.Core.Networking
                             _logger.LogError(e, "Failed to send packet");
                         }
 
+                        _logger.LogDebug("OUT: {Type} => {Packet} (0x{Bytes})", packet.GetType(),
+                            JsonSerializer.Serialize(obj),
+                            string.Join("", bytesToSend.ToArray().Select(x => x.ToString("X2"))));
                         ArrayPool<byte>.Shared.Return(bytes);
-                        _logger.LogDebug("OUT: {Type} => {Packet}", packet.GetType(), JsonSerializer.Serialize(obj));
                     }
                     else
                     {

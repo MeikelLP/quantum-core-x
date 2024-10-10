@@ -33,4 +33,5 @@ public class PlayerData
     public byte Empire { get; set; }
     public byte Slot { get; set; }
     public uint AvailableSkillPoints { get; set; }
+    public uint? GuildId { get; set; }
 }
