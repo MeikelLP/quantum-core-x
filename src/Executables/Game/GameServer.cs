@@ -1,5 +1,6 @@
 using System.Collections.Immutable;
 using System.Diagnostics;
+using System.Diagnostics.Metrics;
 using System.Net;
 using System.Reflection;
 using Microsoft.Extensions.Logging;
@@ -14,9 +15,6 @@ using QuantumCore.Core.Event;
 using QuantumCore.Core.Networking;
 using QuantumCore.Core.Utils;
 using QuantumCore.Extensions;
-using QuantumCore.Game.Commands;
-using QuantumCore.Game.Persistence;
-using QuantumCore.Game.PlayerUtils;
 using QuantumCore.Game.Services;
 using QuantumCore.Networking;
 
@@ -24,6 +22,8 @@ namespace QuantumCore.Game
 {
     public class GameServer : ServerBase<GameConnection>, IGame, IGameServer
     {
+        public static readonly Meter Meter = new Meter("QuantumCore:Game");
+        private readonly Histogram<double> _serverTimes = Meter.CreateHistogram<double>("TickTime", "ms");
         private readonly HostingOptions _hostingOptions;
         private readonly ILogger<GameServer> _logger;
         private readonly PluginExecutor _pluginExecutor;
@@ -78,6 +78,7 @@ namespace QuantumCore.Game
             _dropProvider = dropProvider;
             _skillManager = skillManager;
             Instance = this;
+            Meter.CreateObservableGauge("Connections", () => Connections.Length);
         }
 
         private void Update(double elapsedTime)
@@ -111,7 +112,7 @@ namespace QuantumCore.Game
                 _skillManager.LoadAsync(stoppingToken)
             );
 
-            
+
             // Initialize session manager
             _sessionManager.Init(this);
 
@@ -166,13 +167,15 @@ namespace QuantumCore.Game
         private async ValueTask Tick()
         {
             var currentTicks = _gameTime.Elapsed.Ticks;
-            _accumulatedElapsedTime += TimeSpan.FromTicks(currentTicks - _previousTicks);
+            var elapsedTime = TimeSpan.FromTicks(currentTicks - _previousTicks);
+            _serverTimes.Record(elapsedTime.TotalMilliseconds);
+            _accumulatedElapsedTime += elapsedTime;
             _previousTicks = currentTicks;
 
             if (_accumulatedElapsedTime < _targetElapsedTime)
             {
                 var sleepTime = (_targetElapsedTime - _accumulatedElapsedTime).TotalMilliseconds;
-                await Task.Delay((int)sleepTime).ConfigureAwait(false);
+                await Task.Delay((int) sleepTime).ConfigureAwait(false);
                 return;
             }
 

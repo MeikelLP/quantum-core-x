@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Diagnostics.Metrics;
 using System.Security.Cryptography;
 using EnumsNET;
 using Microsoft.Extensions.Logging;
@@ -33,6 +34,7 @@ namespace QuantumCore.Game.World
         public IWorld World => _world;
         public IReadOnlyCollection<IEntity> Entities => _entities;
 
+        private readonly ObservableGauge<int> _entityGauge;
         private readonly List<IEntity> _entities = new();
         private readonly QuadTree _quadTree;
         private readonly List<SpawnPoint> _spawnPoints = new();
@@ -70,6 +72,7 @@ namespace QuantumCore.Game.World
             Width = width;
             Height = height;
             _quadTree = new QuadTree((int) x, (int) y, (int) (width * MapUnit), (int) (height * MapUnit), 20);
+            _entityGauge = GameServer.Meter.CreateObservableGauge($"Map:{name}:EntityCount", () => Entities.Count);
         }
 
         public async Task Initialize()
@@ -83,7 +86,7 @@ namespace QuantumCore.Game.World
             _spawnPoints.AddRange(await _spawnPointProvider.GetSpawnPointsForMap(Name));
 
             _logger.LogDebug("Loaded {SpawnPointsCount} spawn points for map {MapName}", _spawnPoints.Count, Name);
-            
+
             // Populate map
             foreach (var spawnPoint in _spawnPoints)
             {
@@ -298,34 +301,39 @@ namespace QuantumCore.Game.World
 
             if (monster.Proto.AiFlag.HasAnyFlags(EAiFlags.NoMove))
             {
-                monster.PositionX = (int)(PositionX + baseX * SPAWN_POSITION_MULTIPLIER);
-                monster.PositionY = (int)(PositionY + baseY * SPAWN_POSITION_MULTIPLIER);
-                var compassDirection = (int)spawnPoint.Direction - 1;
-                
-                if (compassDirection < 0 || compassDirection > (int)Enum.GetValues<ESpawnPointDirection>().Last())
+                monster.PositionX = (int) (PositionX + baseX * SPAWN_POSITION_MULTIPLIER);
+                monster.PositionY = (int) (PositionY + baseY * SPAWN_POSITION_MULTIPLIER);
+                var compassDirection = (int) spawnPoint.Direction - 1;
+
+                if (compassDirection < 0 || compassDirection > (int) Enum.GetValues<ESpawnPointDirection>().Last())
                 {
-                    compassDirection = (int)ESpawnPointDirection.Random;
+                    compassDirection = (int) ESpawnPointDirection.Random;
                 }
+
                 var rotation = SPAWN_ROTATION_SLICE_DEGREES * compassDirection;
                 monster.Rotation = rotation;
             }
             else
             {
-                monster.PositionX = (int) PositionX + (baseX + RandomNumberGenerator.GetInt32(-SPAWN_BASE_OFFSET, SPAWN_BASE_OFFSET)) * SPAWN_POSITION_MULTIPLIER;
-                monster.PositionY = (int) PositionY + (baseY + RandomNumberGenerator.GetInt32(-SPAWN_BASE_OFFSET, SPAWN_BASE_OFFSET)) * SPAWN_POSITION_MULTIPLIER;
+                monster.PositionX = (int) PositionX +
+                                    (baseX + RandomNumberGenerator.GetInt32(-SPAWN_BASE_OFFSET, SPAWN_BASE_OFFSET)) *
+                                    SPAWN_POSITION_MULTIPLIER;
+                monster.PositionY = (int) PositionY +
+                                    (baseY + RandomNumberGenerator.GetInt32(-SPAWN_BASE_OFFSET, SPAWN_BASE_OFFSET)) *
+                                    SPAWN_POSITION_MULTIPLIER;
             }
 
             if (monster.Rotation == 0)
             {
                 monster.Rotation = RandomNumberGenerator.GetInt32(0, 360);
             }
-            
+
             EventSystem.EnqueueEvent(() =>
             {
                 _world.SpawnEntity(monster);
                 return 0;
             }, spawnPoint.RespawnTime * 1000);
-            
+
             return monster;
         }
 
@@ -362,7 +370,8 @@ namespace QuantumCore.Game.World
         /// <param name="ownerName"></param>
         public void AddGroundItem(ItemInstance item, int x, int y, uint amount = 0, string? ownerName = null)
         {
-            var groundItem = new GroundItem(_animationManager, _world.GenerateVid(), item, amount, ownerName) {
+            var groundItem = new GroundItem(_animationManager, _world.GenerateVid(), item, amount, ownerName)
+            {
                 PositionX = x,
                 PositionY = y
             };
