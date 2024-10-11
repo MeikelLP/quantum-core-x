@@ -10,12 +10,14 @@ using NSubstitute;
 using QuantumCore;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
+using QuantumCore.API.Game.Guild;
 using QuantumCore.API.Game.World;
 using QuantumCore.Caching;
 using QuantumCore.Caching.Extensions;
 using QuantumCore.Extensions;
 using QuantumCore.Game;
 using QuantumCore.Game.Extensions;
+using QuantumCore.Game.Persistence;
 using QuantumCore.Game.Services;
 using QuantumCore.Game.World;
 using QuantumCore.Game.World.Entities;
@@ -37,7 +39,11 @@ public class WorldUpdateBenchmark
     public void GlobalSetup()
     {
         var config = new ConfigurationBuilder()
-            .AddInMemoryCollection(new Dictionary<string, string?>())
+            .AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                {"Database:Provider", "sqlite"},
+                {"Database:ConnectionString", "Data Source=metin2.db;"}
+            })
             .Build();
         var services = new ServiceCollection()
             .AddLogging()
@@ -101,6 +107,36 @@ public class WorldUpdateBenchmark
                 mock.Get(1).Returns(new Job());
                 return mock;
             }, ServiceLifetime.Singleton))
+            .Replace(new ServiceDescriptor(typeof(IFriendsManager), _ =>
+            {
+                var mock = Substitute.For<IFriendsManager>();
+                mock.GetFriendshipsAsync(Arg.Any<uint>()).Returns([]);
+                return mock;
+            }, ServiceLifetime.Singleton))
+            .Replace(new ServiceDescriptor(typeof(IItemRepository), _ =>
+            {
+                var mock = Substitute.For<IItemRepository>();
+                mock.GetItemIdsForPlayerAsync(Arg.Any<uint>(), Arg.Any<byte>()).Returns([]);
+                return mock;
+            }, ServiceLifetime.Singleton))
+            .Replace(new ServiceDescriptor(typeof(ICommandPermissionRepository), _ =>
+            {
+                var mock = Substitute.For<ICommandPermissionRepository>();
+                mock.GetGroupsForPlayer(Arg.Any<uint>()).Returns([]);
+                return mock;
+            }, ServiceLifetime.Singleton))
+            .Replace(new ServiceDescriptor(typeof(IDbPlayerSkillsRepository), _ =>
+            {
+                var mock = Substitute.For<IDbPlayerSkillsRepository>();
+                mock.GetPlayerSkillsAsync(Arg.Any<uint>()).Returns([]);
+                return mock;
+            }, ServiceLifetime.Singleton))
+            .Replace(new ServiceDescriptor(typeof(IGuildManager), _ =>
+            {
+                var mock = Substitute.For<IGuildManager>();
+                mock.GetGuildForPlayerAsync(Arg.Any<uint>()).Returns(default(GuildData));
+                return mock;
+            }, ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(IMonsterManager), _ =>
             {
                 var mock = Substitute.For<IMonsterManager>();
@@ -126,6 +162,7 @@ public class WorldUpdateBenchmark
             };
             var conn = Substitute.For<IGameConnection>();
             var entity = ActivatorUtilities.CreateInstance<PlayerEntity>(services, _world, player, conn);
+            entity.Load().Wait();
             _world.SpawnEntity(entity);
         }
 
