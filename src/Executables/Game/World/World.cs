@@ -287,6 +287,7 @@ namespace QuantumCore.Game.World
 
             _pluginExecutor.ExecutePlugins<IGameEntityLifetimeListener>(_logger, x => x.OnPreCreatedAsync()).Wait();
             map.SpawnEntity(e);
+
             _pluginExecutor.ExecutePlugins<IGameEntityLifetimeListener>(_logger, x => x.OnPostCreatedAsync()).Wait();
         }
 
