@@ -88,7 +88,7 @@ namespace QuantumCore.Game.World.Entities
             }
         }
 
-        private byte _attackSpeed = 140;
+        private byte _defaultAttackSpeed = 95;
         private uint _defence;
         private byte _defaultMovespeed = 150;
         private byte _maxMovespeed = byte.MaxValue;
@@ -142,6 +142,7 @@ namespace QuantumCore.Game.World.Entities
             );
 
             MovementSpeed = _defaultMovespeed;
+            AttackSpeed = _defaultAttackSpeed;
             EntityClass = player.PlayerClass;
 
             Groups = new List<Guid>();
@@ -183,6 +184,7 @@ namespace QuantumCore.Game.World.Entities
 
             CalculateDefence();
             CalculateMovement();
+            CalculateAttackSpeed();
         }
 
         public async Task ReloadPermissions()
@@ -289,6 +291,22 @@ namespace QuantumCore.Game.World.Entities
             
             MovementSpeed = (byte) Math.Min(calculatedSpeed, _maxMovespeed);
             _logger.LogDebug("Calculate Movement value for {Name}, result: {MovementSpeed}", Name, MovementSpeed);
+        }
+
+        private void CalculateAttackSpeed()
+        {
+            AttackSpeed = _defaultAttackSpeed;
+            float modifier = 0;
+            foreach (var slot in Enum.GetValues<EquipmentSlots>())
+            {
+                var item = Inventory.EquipmentWindow.GetItem(slot);
+                if (item == null) continue;
+                var proto = _itemManager.GetItem(item.ItemId);
+                if (proto == null) continue;
+                
+                modifier += proto.GetApplyValue(EApplyType.AttackSpeed);
+            }
+            AttackSpeed = (byte) Math.Min(AttackSpeed * (1 + modifier / 100), byte.MaxValue);
         }
 
         public override void Die()
@@ -713,7 +731,7 @@ namespace QuantumCore.Game.World.Entities
                 case EPoints.Iq:
                     return Player.Iq;
                 case EPoints.AttackSpeed:
-                    return _attackSpeed;
+                    return AttackSpeed;
                 case EPoints.MoveSpeed:
                     return MovementSpeed;
                 case EPoints.Gold:
@@ -1041,6 +1059,7 @@ namespace QuantumCore.Game.World.Entities
                         Inventory.EquipmentWindow.RemoveItem(item);
                         CalculateDefence();
                         CalculateMovement();
+                        CalculateAttackSpeed();
                         SendCharacterUpdate();
                         SendPoints();
                     }
@@ -1068,6 +1087,7 @@ namespace QuantumCore.Game.World.Entities
                             item.Set(_cacheManager, Player.Id, window, position, _itemRepository).Wait(); // TODO
                             CalculateDefence();
                             CalculateMovement();
+                            CalculateAttackSpeed();
                             SendCharacterUpdate();
                             SendPoints();
                         }
@@ -1168,7 +1188,7 @@ namespace QuantumCore.Game.World.Entities
                 PositionY = PositionY,
                 Class = Player.PlayerClass,
                 MoveSpeed = MovementSpeed,
-                AttackSpeed = _attackSpeed
+                AttackSpeed = AttackSpeed
             });
         }
 
@@ -1202,7 +1222,7 @@ namespace QuantumCore.Game.World.Entities
                     (ushort) (Inventory.EquipmentWindow.Hair?.ItemId ?? 0)
                 },
                 MoveSpeed = MovementSpeed,
-                AttackSpeed = _attackSpeed
+                AttackSpeed = AttackSpeed,
             };
 
             Connection.Send(packet);
