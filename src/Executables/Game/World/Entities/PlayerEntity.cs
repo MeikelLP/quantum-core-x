@@ -88,10 +88,7 @@ namespace QuantumCore.Game.World.Entities
             }
         }
 
-        private byte _defaultAttackSpeed = 95;
         private uint _defence;
-        private byte _defaultMovespeed = 150;
-        private byte _maxMovespeed = byte.MaxValue;
 
         private const int PersistInterval = 30 * 1000; // 30s
         private int _persistTime = 0;
@@ -141,8 +138,8 @@ namespace QuantumCore.Game.World.Entities
                 _scope.ServiceProvider.GetRequiredService<IOptions<GameOptions>>().Value.Skills
             );
 
-            MovementSpeed = _defaultMovespeed;
-            AttackSpeed = _defaultAttackSpeed;
+            MovementSpeed = PlayerConstants.DEFAULT_MOVEMENT_SPEED;
+            AttackSpeed = PlayerConstants.DEFAULT_ATTACK_SPEED;
             EntityClass = player.PlayerClass;
 
             Groups = new List<Guid>();
@@ -276,7 +273,7 @@ namespace QuantumCore.Game.World.Entities
 
         private void CalculateMovement()
         {
-            MovementSpeed = _defaultMovespeed;
+            MovementSpeed = PlayerConstants.DEFAULT_MOVEMENT_SPEED;
             float modifier = 0;
             foreach (var slot in Enum.GetValues<EquipmentSlots>())
             {
@@ -289,13 +286,13 @@ namespace QuantumCore.Game.World.Entities
             }
             var calculatedSpeed = MovementSpeed * (1 + modifier / 100);
             
-            MovementSpeed = (byte) Math.Min(calculatedSpeed, _maxMovespeed);
+            MovementSpeed = (byte) Math.Min(calculatedSpeed, byte.MaxValue);
             _logger.LogDebug("Calculate Movement value for {Name}, result: {MovementSpeed}", Name, MovementSpeed);
         }
 
         private void CalculateAttackSpeed()
         {
-            AttackSpeed = _defaultAttackSpeed;
+            AttackSpeed = PlayerConstants.DEFAULT_ATTACK_SPEED;
             float modifier = 0;
             foreach (var slot in Enum.GetValues<EquipmentSlots>())
             {
