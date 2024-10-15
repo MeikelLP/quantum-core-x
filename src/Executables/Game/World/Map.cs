@@ -328,12 +328,7 @@ namespace QuantumCore.Game.World
                 monster.Rotation = RandomNumberGenerator.GetInt32(0, 360);
             }
 
-            EventSystem.EnqueueEvent(() =>
-            {
-                _world.SpawnEntity(monster);
-                return 0;
-            }, spawnPoint.RespawnTime * 1000);
-
+            _world.SpawnEntity(monster);
             return monster;
         }
 
