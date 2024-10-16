@@ -345,5 +345,10 @@ namespace QuantumCore.Game.World
         {
             return _players.Values.ToList();
         }
+
+        public IPlayerEntity? GetPlayerById(uint playerId)
+        {
+            return _players.Values.FirstOrDefault(x => x.Vid == playerId);
+        }
     }
 }
