@@ -83,12 +83,13 @@ internal class CommandManager : ICommandManager
             Type? optionsType = null;
             var intf = type.GetInterfaces().FirstOrDefault(x =>
                 x.IsGenericType && x.GetGenericTypeDefinition() == typeof(ICommandHandler<>));
+            var shorthand = cmdAttr.Shorthand;
             if (intf is not null)
             {
                 optionsType = intf.GenericTypeArguments[0];
             }
 
-            _commandHandlers.Add(cmd, new CommandDescriptor(type, cmd, desc, optionsType, bypass));
+            _commandHandlers.Add(cmd, new CommandDescriptor(type, cmd, desc, optionsType, bypass, shorthand));
         }
     }
 
@@ -178,20 +179,30 @@ internal class CommandManager : ICommandManager
         {
             // special case for help
 
-            var sb = new StringBuilder("The following commands are available:\n");
+            
             foreach (var handler in _commandHandlers)
             {
-                sb.AppendLine($"- /{handler.Key}");
+                if (CanUseCommand(connection.Player, handler.Key))
+                {
+                    connection.Player.SendChatInfo($" /{handler.Key} - {handler.Value.Description}" +
+                                                   (handler.Value.Shorthand is not null
+                                                       ? $" (shorthand: /{handler.Value.Shorthand})"
+                                                       : ""));
+                }
             }
-
-            var msg = sb.ToString();
-
-            connection.Player.SendChatMessage(msg);
         }
         else
         {
-            if (_commandHandlers.TryGetValue(command, out var commandCache))
+            _commandHandlers.TryGetValue(command, out var commandCache);
+            if(commandCache == default)
             {
+                commandCache = _commandHandlers.Values.FirstOrDefault(x => x.Shorthand == command);
+                _logger.LogDebug("Command /{Command} shorthand for /{Shorthand}", command, commandCache?.Command);
+            }
+            
+            if (commandCache != default)
+            {
+                command = commandCache.Command;
                 if (!CanUseCommand(connection.Player, command))
                 {
                     connection.Player.SendChatInfo("You don't have enough permission to use this command");

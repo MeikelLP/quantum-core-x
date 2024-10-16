@@ -5,4 +5,6 @@ internal record CommandDescriptor(
     string Command,
     string? Description = null,
     Type? OptionsType = null,
-    bool BypassPerm = false);
+    bool BypassPerm = false,
+    string? Shorthand = null
+    );

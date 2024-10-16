@@ -1,19 +1,21 @@
 ﻿using CommandLine;
+using Microsoft.Extensions.Logging;
 using QuantumCore.API.Game;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.World;
 
 namespace QuantumCore.Game.Commands;
 
-[Command("advance", "Advances the level of the current player or of another player")]
-[Command("a", "Advances the level of the current player or of another player")]
+[Command("advance", "Advances the level of the current player or of another player", "a")]
 public class AdvanceCommand : ICommandHandler<AdvanceCommandOptions>
 {
     private readonly IWorld _world;
+    private readonly ILogger<AdvanceCommand> _logger;
 
-    public AdvanceCommand(IWorld world)
+    public AdvanceCommand(IWorld world, ILogger<AdvanceCommand> logger)
     {
         _world = world;
+        _logger = logger;
     }
 
     public async Task ExecuteAsync(CommandContext<AdvanceCommandOptions> context)
@@ -34,6 +36,7 @@ public class AdvanceCommand : ICommandHandler<AdvanceCommandOptions>
             }
 
             target.AddPoint(EPoints.Level, context.Arguments.Level);
+            _logger.LogInformation("Advancing {Target} to level {Level} ({Point})", target.Name, context.Arguments.Level, target.GetPoint(EPoints.Level));
             target.SendChatInfo($"You have advanced to level {target.GetPoint(EPoints.Level)}");
         }
     }
