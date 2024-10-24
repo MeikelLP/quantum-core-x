@@ -52,15 +52,16 @@ To get started contributing to the project, see the [contributing guide](CONTRIB
 
 To get in touch with the developers, the best way is to join our [Discord server](https://discord.gg/6VhbYxX).
 
+### Recommended IDE
+
+Jetbrains Rider is free as of 2024-10-24 so we recommend is as IDE for this project.
+
+<img src="https://resources.jetbrains.com/storage/products/company/brand/logos/Rider.png" alt="Rider logo." height="100px">
+
 ## Copyright
 License: **Mozilla Public License 2.0**
 
 For more details see [LICENSE](LICENSE)
-
-## Partners & Supporters
-QuantumCore is supported by JetBrains which provide us with free licenses for their products.
-
-[<img src="docs/images/jetbrains.png" alt="JetBrains" width=150>](https://www.jetbrains.com/?from=QuantumCore)
                         
 ## Stargazers over time
 [![Stargazers over time](https://starchart.cc/MeikelLP/quantum-core-x.svg?variant=adaptive)](https://starchart.cc/MeikelLP/quantum-core-x)
