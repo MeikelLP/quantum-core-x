@@ -11,21 +11,21 @@ namespace QuantumCore.Game.PlayerUtils;
 
 public class QuickSlotBar : IQuickSlotBar
 {
-    private readonly ICacheManager _cacheManager;
+    private readonly IRedisStore _cacheManager;
     private readonly ILogger _logger;
     public IPlayerEntity Player { get; }
     public QuickSlotData?[] Slots { get; } = new QuickSlotData[8];
 
     public QuickSlotBar(ICacheManager cacheManager, ILogger logger, PlayerEntity player)
     {
-        _cacheManager = cacheManager;
+        _cacheManager = cacheManager.Server;
         _logger = logger;
         Player = player;
     }
 
     public async Task Load()
     {
-        var key = $"quickbar:{Player.Player.Id}";
+        var key = $"player:quickbar:{Player.Player.Id}";
 
         if (await _cacheManager.Exists(key) > 0)
         {
@@ -49,7 +49,7 @@ public class QuickSlotBar : IQuickSlotBar
 
     public async Task Persist()
     {
-        var key = $"quickbar:{Player.Player.Id}";
+        var key = $"player:quickbar:{Player.Player.Id}";
 
         await _cacheManager.Set(key, Slots);
     }

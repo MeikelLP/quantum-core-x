@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <RootNamespace>QuantumCore.Game.Commands</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\CorePluginAPI\CorePluginAPI.csproj"/>
+        <ProjectReference Include="..\..\Data\Game.Caching\Game.Caching.csproj"/>
+        <ProjectReference Include="..\..\Data\Game.Persistence\Game.Persistence.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <InternalsVisibleTo Include="Game.Commands.Tests"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="CommandLineParser" Version="2.9.1"/>
+        <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="4.11.0"/>
+        <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="8.0.0"/>
+    </ItemGroup>
+
+</Project>

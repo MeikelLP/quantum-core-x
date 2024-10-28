@@ -13,7 +13,14 @@ namespace QuantumCore.API.Game.World
     {
         Monster = 0,
         Npc = 1,
-        Player = 6
+        MetinStone = 2,
+        Warp = 3,
+        Door = 4,
+        Building = 5,
+        Player = 6,
+        PolymorphPlayer = 7,
+        Horse = 8,
+        Goto = 9
     }
 
     public interface IEntity

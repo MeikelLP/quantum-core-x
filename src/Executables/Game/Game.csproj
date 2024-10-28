@@ -7,24 +7,36 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="CommandLineParser" Version="2.9.1" />
-      <PackageReference Include="Enums.NET" Version="4.0.1" />
+      <PackageReference Include="Enums.NET" Version="5.0.0" />
+      <PackageReference Include="Microsoft.Extensions.Http" Version="8.0.0"/>
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\Data\Auth.Persistence\Auth.Persistence.csproj" />
-      <ProjectReference Include="..\..\Core\Core.csproj" />
-      <ProjectReference Include="..\..\Data\Game.Caching\Game.Caching.csproj" />
-      <ProjectReference Include="..\..\Data\Game.Persistence\Game.Persistence.csproj" />
-      <ProjectReference Include="..\..\Core.Networking.Generators\Core.Networking.Generators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-      <ProjectReference Include="..\..\Data\Auth.Persistence\Auth.Persistence.csproj" />
+        <InternalsVisibleTo Include="Game.Tests"/>
     </ItemGroup>
 
     <ItemGroup>
-        <InternalsVisibleTo Include="Core.Tests" />
-        <None Update="appsettings.json">
-          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-        </None>
+        <ProjectReference Include="..\..\Core\Core.csproj"/>
+        <ProjectReference Include="..\..\Data\Game.Caching\Game.Caching.csproj"/>
+        <ProjectReference Include="..\..\Data\Game.Persistence\Game.Persistence.csproj"/>
+        <ProjectReference Include="..\..\Core.Networking.Generators\Core.Networking.Generators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
+        <ProjectReference Include="..\..\Libraries\Game.Commands\Game.Commands.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+      <InternalsVisibleTo Include="Core.Tests" />
+      <None Update="appsettings.json">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="appsettings.json">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="appsettings.Development.json" Condition="Exists('appsettings.Development.json')">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="appsettings.Production.json" Condition="Exists('appsettings.Production.json')">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
     </ItemGroup>
 
 </Project>

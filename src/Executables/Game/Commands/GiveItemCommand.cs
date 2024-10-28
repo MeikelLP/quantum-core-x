@@ -3,8 +3,9 @@ using QuantumCore.API;
 using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game;
 using QuantumCore.API.Game.World;
-using QuantumCore.Caching;
 using QuantumCore.Extensions;
+using QuantumCore.Game.Extensions;
+using QuantumCore.Game.Persistence;
 
 namespace QuantumCore.Game.Commands
 {
@@ -12,13 +13,13 @@ namespace QuantumCore.Game.Commands
     public class GiveItemCommand : ICommandHandler<GiveCommandOptions>
     {
         private readonly IItemManager _itemManager;
-        private readonly ICacheManager _cacheManager;
+        private readonly IItemRepository _itemRepository;
         private readonly IWorld _world;
 
-        public GiveItemCommand(IItemManager itemManager, ICacheManager cacheManager, IWorld world)
+        public GiveItemCommand(IItemManager itemManager, IItemRepository itemRepository, IWorld world)
         {
             _itemManager = itemManager;
-            _cacheManager = cacheManager;
+            _itemRepository = itemRepository;
             _world = world;
         }
 
@@ -30,7 +31,7 @@ namespace QuantumCore.Game.Commands
 
             if (target is null)
             {
-                context.Player.SendChatMessage("Target not found");
+                context.Player.SendChatInfo("Target not found");
             }
             else
             {
@@ -41,7 +42,13 @@ namespace QuantumCore.Game.Commands
                     return;
                 }
 
-                var instance = new ItemInstance { Id = Guid.NewGuid(), ItemId = item.Id, Count = context.Arguments.Count };
+                var instance = new ItemInstance
+                {
+                    Id = Guid.NewGuid(),
+                    ItemId = item.Id,
+                    Count = context.Arguments.Count,
+                    PlayerId = context.Player.Player.Id,
+                };
                 // Add item to players inventory
                 if (!await target.Inventory.PlaceItem(instance))
                 {
@@ -49,8 +56,7 @@ namespace QuantumCore.Game.Commands
                     context.Player.SendChatInfo("No place in inventory");
                     return;
                 }
-                // Store item in cache
-                await instance.Persist(_cacheManager);
+                await instance.Persist(_itemRepository);
 
                 // Send item to client
                 target.SendItem(instance);

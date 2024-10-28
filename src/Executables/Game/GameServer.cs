@@ -1,6 +1,8 @@
+using System.Collections.Immutable;
 using System.Diagnostics;
+using System.Diagnostics.Metrics;
 using System.Net;
-using Microsoft.Extensions.DependencyInjection;
+using System.Reflection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using QuantumCore.API;
@@ -8,22 +10,27 @@ using QuantumCore.API.Game;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.World;
 using QuantumCore.API.PluginTypes;
+using QuantumCore.Caching;
 using QuantumCore.Core.Event;
 using QuantumCore.Core.Networking;
 using QuantumCore.Core.Utils;
 using QuantumCore.Extensions;
-using QuantumCore.Game.Commands;
-using QuantumCore.Game.PlayerUtils;
+using QuantumCore.Game.Services;
 using QuantumCore.Networking;
 
 namespace QuantumCore.Game
 {
     public class GameServer : ServerBase<GameConnection>, IGame, IGameServer
     {
+        public static readonly Meter Meter = new Meter("QuantumCore:Game");
+        private readonly Histogram<double> _serverTimes = Meter.CreateHistogram<double>("TickTime", "ms");
         private readonly HostingOptions _hostingOptions;
         private readonly ILogger<GameServer> _logger;
         private readonly PluginExecutor _pluginExecutor;
+        private readonly IServiceProvider _serviceProvider;
+        private readonly ICacheManager _cacheManager;
         private readonly IItemManager _itemManager;
+        private readonly ISkillManager _skillManager;
         private readonly IMonsterManager _monsterManager;
         private readonly IExperienceManager _experienceManager;
         private readonly IAnimationManager _animationManager;
@@ -38,6 +45,11 @@ namespace QuantumCore.Game
         private TimeSpan _targetElapsedTime = TimeSpan.FromTicks(100000); // 100hz
         private TimeSpan _maxElapsedTime = TimeSpan.FromMilliseconds(500);
         private readonly Stopwatch _serverTimer = new();
+        private readonly IDropProvider _dropProvider;
+        private readonly ISessionManager _sessionManager;
+
+        public new ImmutableArray<IGameConnection> Connections =>
+            [..base.Connections.Values.Cast<IGameConnection>()];
 
         public static GameServer Instance { get; private set; } = null!; // singleton
 
@@ -45,14 +57,16 @@ namespace QuantumCore.Game
             [FromKeyedServices("game")] IPacketManager packetManager, ILogger<GameServer> logger,
             PluginExecutor pluginExecutor, IServiceProvider serviceProvider,
             IItemManager itemManager, IMonsterManager monsterManager, IExperienceManager experienceManager,
-            IAnimationManager animationManager, ICommandManager commandManager,
-            IEnumerable<IPacketHandler> packetHandlers, IQuestManager questManager, IChatManager chatManager,
-            IWorld world)
-            : base(packetManager, logger, pluginExecutor, serviceProvider, packetHandlers, "game", hostingOptions)
+            IAnimationManager animationManager, ICommandManager commandManager, IQuestManager questManager,
+            IChatManager chatManager, IWorld world, IDropProvider dropProvider, ISkillManager skillManager,
+            ICacheManager cacheManager, ISessionManager sessionManager)
+            : base(packetManager, logger, pluginExecutor, serviceProvider, "game", hostingOptions)
         {
             _hostingOptions = hostingOptions.Value;
             _logger = logger;
+            _cacheManager = cacheManager;
             _pluginExecutor = pluginExecutor;
+            _serviceProvider = serviceProvider;
             _itemManager = itemManager;
             _monsterManager = monsterManager;
             _experienceManager = experienceManager;
@@ -60,8 +74,12 @@ namespace QuantumCore.Game
             _commandManager = commandManager;
             _questManager = questManager;
             _chatManager = chatManager;
+            _sessionManager = sessionManager;
             World = world;
+            _dropProvider = dropProvider;
+            _skillManager = skillManager;
             Instance = this;
+            Meter.CreateObservableGauge("Connections", () => Connections.Length);
         }
 
         private void Update(double elapsedTime)
@@ -71,14 +89,14 @@ namespace QuantumCore.Game
             World.Update(elapsedTime);
         }
 
-        protected async override Task ExecuteAsync(CancellationToken stoppingToken)
+        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             // Set public ip address
             if (_hostingOptions.IpAddress != null)
             {
                 IpUtils.PublicIP = IPAddress.Parse(_hostingOptions.IpAddress);
             }
-            else if(IpUtils.PublicIP is null)
+            else if (IpUtils.PublicIP is null)
             {
                 // Query interfaces for our best ipv4 address
                 IpUtils.SearchPublicIp();
@@ -90,8 +108,14 @@ namespace QuantumCore.Game
                 _monsterManager.LoadAsync(stoppingToken),
                 _experienceManager.LoadAsync(stoppingToken),
                 _animationManager.LoadAsync(stoppingToken),
-                _commandManager.LoadAsync(stoppingToken)
+                _commandManager.LoadAsync(stoppingToken),
+                _dropProvider.LoadAsync(stoppingToken),
+                _skillManager.LoadAsync(stoppingToken)
             );
+
+
+            // Initialize session manager
+            _sessionManager.Init(this);
 
             // Initialize core systems
             _chatManager.Init();
@@ -104,7 +128,7 @@ namespace QuantumCore.Game
             await World.Load();
 
             // Register all default commands
-            _commandManager.Register("QuantumCore.Game.Commands");
+            _commandManager.Register("QuantumCore.Game.Commands", Assembly.GetExecutingAssembly());
 
             // Put all new connections into login phase
             RegisterNewConnectionListener(connection =>
@@ -112,8 +136,6 @@ namespace QuantumCore.Game
                 connection.SetPhase(EPhases.Login);
                 return true;
             });
-
-            RegisterListeners();
 
             // Start server timer
             _serverTimer.Start();
@@ -130,9 +152,11 @@ namespace QuantumCore.Game
             {
                 try
                 {
-                    await _pluginExecutor.ExecutePlugins<IGameTickListener>(_logger, x => x.PreUpdateAsync(stoppingToken));
+                    await _pluginExecutor.ExecutePlugins<IGameTickListener>(_logger,
+                        x => x.PreUpdateAsync(stoppingToken));
                     await Tick();
-                    await _pluginExecutor.ExecutePlugins<IGameTickListener>(_logger, x => x.PostUpdateAsync(stoppingToken));
+                    await _pluginExecutor.ExecutePlugins<IGameTickListener>(_logger,
+                        x => x.PostUpdateAsync(stoppingToken));
                 }
                 catch (Exception e)
                 {
@@ -144,7 +168,9 @@ namespace QuantumCore.Game
         private async ValueTask Tick()
         {
             var currentTicks = _gameTime.Elapsed.Ticks;
-            _accumulatedElapsedTime += TimeSpan.FromTicks(currentTicks - _previousTicks);
+            var elapsedTime = TimeSpan.FromTicks(currentTicks - _previousTicks);
+            _serverTimes.Record(elapsedTime.TotalMilliseconds);
+            _accumulatedElapsedTime += elapsedTime;
             _previousTicks = currentTicks;
 
             if (_accumulatedElapsedTime < _targetElapsedTime)

@@ -1,0 +1,64 @@
+name: 'Quantum Core X'
+services:
+
+  # authentication service
+  auth:
+    image: ghcr.io/meikellp/quantum-core-x/auth
+    restart: unless-stopped
+    ports:
+    - "11000:11000"
+    volumes:
+    - ./auth.appsettings.json:/app/appsettings.json:ro
+    depends_on:
+      db-mysql:
+        condition: service_healthy
+      cache:
+        condition: service_healthy
+  # game service
+  game:
+    image: ghcr.io/meikellp/quantum-core-x/game
+    restart: unless-stopped
+    ports:
+    - 13000:13000
+    volumes:
+    - ./game.appsettings.json:/app/appsettings.json:ro
+    - ./data:/app/data:ro
+    depends_on:
+      db-mysql:
+        condition: service_healthy
+      cache:
+        condition: service_healthy
+
+  # redis holds live data of the game world
+  # used as distributed memory between server nodes
+  cache:
+    image: redis:latest
+    restart: unless-stopped
+    volumes:
+    - cache_data:/data
+    healthcheck:
+      test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # persistent storage
+  db-mysql:
+    image: mariadb:11.3
+    hostname: db
+    environment:
+    - MARIADB_USER=metin2
+    - MARIADB_PASSWORD=metin2
+    - MARIADB_DATABASE=metin2
+    - MARIADB_ROOT_PASSWORD=supersecure.123
+    volumes:
+    - db_data_mysql:/var/lib/mysql
+    healthcheck:
+      test: [ "CMD", "healthcheck.sh", "--connect", "--innodb_initialized" ]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  cache_data:
+  db_data_mysql:

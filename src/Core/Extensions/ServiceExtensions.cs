@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -17,49 +17,40 @@ public static class ServiceExtensions
                                            "{NewLine:1}{Exception:1}";
 
     /// <summary>
-    /// Used to register a packet provider per application type.
-    /// The application types might have duplicate packet definitions (by header) but they still might be handled
-    /// differently. Thus multiple packet providers may be registered if necessary with each registered as a keyed
-    /// service.
-    /// </summary>
-    /// <param name="services"></param>
-    /// <param name="mode"></param>
-    /// <typeparam name="T"></typeparam>
-    /// <returns></returns>
-    public static IServiceCollection AddPacketProvider<T>(this IServiceCollection services, string mode)
-        where T : class, IPacketLocationProvider
-    {
-        services.AddKeyedSingleton<IPacketLocationProvider, T>(mode);
-        services.AddKeyedSingleton<IPacketReader, PacketReader>(mode);
-        services.AddKeyedSingleton<IPacketManager>(mode, (provider, key) =>
-        {
-            var packetLocationProvider = provider.GetRequiredKeyedService<IPacketLocationProvider>(key);
-            var assemblies = packetLocationProvider.GetPacketAssemblies();
-            var packetTypes = assemblies.SelectMany(x => x.ExportedTypes)
-                .Where(x => x.IsAssignableTo(typeof(IPacketSerializable)) &&
-                            x.GetCustomAttribute<PacketAttribute>()?.Direction.HasFlag(EDirection.Incoming) == true)
-                .OrderBy(x => x.FullName)
-                .ToArray();
-            var handlerTypes = assemblies.SelectMany(x => x.ExportedTypes)
-                .Where(x =>
-                    x.IsAssignableTo(typeof(IPacketHandler)) &&
-                    x is { IsClass: true, IsAbstract: false, IsInterface: false })
-                .OrderBy(x => x.FullName)
-                .ToArray();
-            return ActivatorUtilities.CreateInstance<PacketManager>(provider, new object[] { (IEnumerable<Type>)packetTypes, handlerTypes });
-        });
-        return services;
-    }
-
-    /// <summary>
     /// Services required by Auth & Game
     /// </summary>
     /// <param name="services"></param>
     /// <param name="pluginCatalog"></param>
+    /// <param name="configuration"></param>
     /// <returns></returns>
-    public static IServiceCollection AddCoreServices(this IServiceCollection services, IPluginCatalog pluginCatalog, IConfiguration configuration)
+    public static IServiceCollection AddCoreServices(this IServiceCollection services, IPluginCatalog pluginCatalog,
+        IConfiguration configuration)
     {
+        services.AddOptions<HostingOptions>()
+            .BindConfiguration("Hosting")
+            .ValidateDataAnnotations();
         services.AddCustomLogging(configuration);
+        services.AddSingleton<IPacketManager>(provider =>
+        {
+            var packetTypes = AppDomain.CurrentDomain.GetAssemblies()
+                .Where(x => x.GetName().Name?.StartsWith("DynamicProxyGenAssembly") ==
+                            false) // ignore Castle.Core proxies
+                .SelectMany(x => x.ExportedTypes)
+                .Where(x => x.IsAssignableTo(typeof(IPacketSerializable)) &&
+                            x.GetCustomAttribute<PacketAttribute>()?.Direction.HasFlag(EDirection.Incoming) == true)
+                .OrderBy(x => x.FullName)
+                .ToArray();
+            var handlerTypes = AppDomain.CurrentDomain.GetAssemblies()
+                .Where(x => !x.IsDynamic)
+                .SelectMany(x => x.ExportedTypes)
+                .Where(x =>
+                    x.IsAssignableTo(typeof(IPacketHandler)) &&
+                    x is {IsClass: true, IsAbstract: false, IsInterface: false})
+                .OrderBy(x => x.FullName)
+                .ToArray();
+            return ActivatorUtilities.CreateInstance<PacketManager>(provider, [packetTypes, handlerTypes]);
+        });
+        services.AddSingleton<IPacketReader, PacketReader>();
         services.AddSingleton<PluginExecutor>();
         services.AddPluginFramework()
             .AddPluginCatalog(pluginCatalog)
@@ -77,11 +68,8 @@ public static class ServiceExtensions
         var config = new LoggerConfiguration();
 
         // add minimum log level for the instances
-#if DEBUG
-        config.MinimumLevel.Verbose();
-#else
-            config.MinimumLevel.Information();
-#endif
+        config.MinimumLevel.Information()
+            .MinimumLevel.Override("Microsoft.EntityFrameworkCore.Database.Command", LogEventLevel.Warning);
 
         // add destructuring for entities
         config.Destructure.ToMaximumDepth(4)
@@ -107,8 +95,6 @@ public static class ServiceExtensions
 
         // sink to console
         config.WriteTo.Console(outputTemplate: MessageTemplate);
-
-        config.MinimumLevel.Override("QuantumCore.Core.Networking", LogEventLevel.Warning);
 
         // sink to rolling file
         config.WriteTo.RollingFile($"{Directory.GetCurrentDirectory()}/logs/api.log",

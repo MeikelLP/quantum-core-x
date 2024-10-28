@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
@@ -11,7 +12,7 @@ namespace QuantumCore.Game
     public class ItemManager : IItemManager
     {
         private readonly ILogger<ItemManager> _logger;
-        private ItemProto? _proto;
+        private ImmutableArray<ItemData> _items;
 
         public ItemManager(ILogger<ItemManager> logger)
         {
@@ -25,35 +26,17 @@ namespace QuantumCore.Game
         /// <returns>The item definition or null if the item is not known</returns>
         public ItemData? GetItem(uint id)
         {
-            var proto = _proto?.Content.Data.Items.FirstOrDefault(item => item.Id == id);
+            return _items.FirstOrDefault(item => item.Id == id);
+        }
 
-            if (proto is not null)
+        public ItemData? GetItemByName(ReadOnlySpan<char> name)
+        {
+            foreach (var dataItem in _items)
             {
-                return new ItemData {
-                    Applies = proto.Applies.Select(x => new ItemApplyData { Type = x.Type, Value = x.Value }).ToList(),
-                    Flags = proto.Flags,
-                    Id = proto.Id,
-                    Limits = proto.Limits.Select(x => new ItemLimitData { Type = x.Type, Value = x.Value }).ToList(),
-                    Name = proto.Name,
-                    Size = proto.Size,
-                    Sockets = proto.Sockets,
-                    Specular = proto.Specular,
-                    Subtype = proto.Subtype,
-                    Type = proto.Type,
-                    Unknown = proto.Unknown,
-                    Unknown2 = proto.Unknown2,
-                    Values = proto.Values,
-                    AntiFlags = proto.AntiFlags,
-                    BuyPrice = proto.BuyPrice,
-                    ImmuneFlags = proto.ImmuneFlags,
-                    SellPrice = proto.SellPrice,
-                    SocketPercentage = proto.SocketPercentage,
-                    TranslatedName = proto.TranslatedName,
-                    UpgradeId = proto.UpgradeId,
-                    UpgradeSet = proto.UpgradeSet,
-                    WearFlags = proto.WearFlags,
-                    MagicItemPercentage = proto.MagicItemPercentage
-                };
+                if (name.Equals(dataItem.Name, StringComparison.InvariantCulture))
+                {
+                    return dataItem;
+                }
             }
 
             return null;
@@ -62,12 +45,37 @@ namespace QuantumCore.Game
         /// <summary>
         /// Try to load the item_proto file
         /// </summary>
-        public Task LoadAsync(CancellationToken token = default)
+        public async Task LoadAsync(CancellationToken token = default)
         {
             _logger.LogInformation("Loading item_proto");
-            _proto = ItemProto.FromFile("data/item_proto");
+            var data = await new ItemProtoLoader().LoadAsync("data/item_proto");
 
-            return Task.CompletedTask;
+            _items = data.Select(proto => new ItemData
+            {
+                Applies = proto.Applies.Select(x => new ItemApplyData {Type = x.Type, Value = x.Value}).ToList(),
+                Flags = proto.Flags,
+                Id = proto.Id,
+                Limits = proto.Limits.Select(x => new ItemLimitData {Type = x.Type, Value = x.Value}).ToList(),
+                Name = proto.Name,
+                Size = proto.Size,
+                Sockets = proto.Sockets,
+                Specular = proto.Specular,
+                Subtype = proto.Subtype,
+                Type = proto.Type,
+                Unknown = proto.Unknown,
+                Unknown2 = proto.Unknown2,
+                Values = proto.Values,
+                AntiFlags = proto.AntiFlags,
+                BuyPrice = proto.BuyPrice,
+                ImmuneFlags = proto.ImmuneFlags,
+                SellPrice = proto.SellPrice,
+                SocketPercentage = proto.SocketPercentage,
+                TranslatedName = proto.TranslatedName,
+                UpgradeId = proto.UpgradeId,
+                UpgradeSet = proto.UpgradeSet,
+                WearFlags = proto.WearFlags,
+                MagicItemPercentage = proto.MagicItemPercentage
+            }).ToImmutableArray();
         }
 
         /// <summary>
@@ -80,7 +88,7 @@ namespace QuantumCore.Game
         /// <returns>Item instance</returns>
         public ItemInstance CreateItem(ItemData proto, byte count = 1)
         {
-            return new ItemInstance { Id = Guid.NewGuid(), ItemId = proto.Id, Count = count };
+            return new ItemInstance {Id = Guid.NewGuid(), ItemId = proto.Id, Count = count};
         }
     }
 }

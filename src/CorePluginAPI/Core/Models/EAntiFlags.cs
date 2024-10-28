@@ -1,5 +1,3 @@
-using System;
-
 namespace QuantumCore.API.Core.Models
 {
     [Flags]

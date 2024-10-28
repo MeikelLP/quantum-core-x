@@ -31,19 +31,38 @@ public class PacketReader : IPacketReader
             {
                 await stream.ReadExactlyAsync(buffer.AsMemory(0, 1), token);
             }
+            catch (ObjectDisposedException)
+            {
+                _logger.LogDebug("Connection was disposed while waiting or reading new packages. This may be fine.");
+                break;
+            }
             catch (IOException)
             {
-                _logger.LogInformation("Connection was most likely closed while reading a packet header");
+                _logger.LogDebug("Connection was most likely closed while reading a packet. This may be fine");
                 break;
             }
             var header = buffer[0];
 
             // read sub header
             byte? subHeader = null;
-            if (_packetManager.IsSubPacketDefinition(header))
+
+            try
             {
-                await stream.ReadExactlyAsync(buffer.AsMemory(1, 1), token);
-                subHeader = buffer[1];
+                if (_packetManager.IsSubPacketDefinition(header))
+                {
+                    await stream.ReadExactlyAsync(buffer.AsMemory(1, 1), token);
+                    subHeader = buffer[1];
+                }
+            }
+            catch (ObjectDisposedException)
+            {
+                _logger.LogDebug("Connection was disposed while waiting or reading new packages. This may be fine.");
+                break;
+            }
+            catch (IOException)
+            {
+                _logger.LogDebug("Connection was most likely closed while reading a packet. This may be fine");
+                break;
             }
 
             if (!_packetManager.TryGetPacketInfo(header, subHeader, out var packetInfo))
@@ -64,18 +83,37 @@ public class PacketReader : IPacketReader
                     $"You can increase the global buffer size by adjusting {nameof(NetworkingConstants)}.{nameof(NetworkingConstants.BufferSize)}",
                     e);
             }
+            catch (ObjectDisposedException)
+            {
+                _logger.LogDebug("Connection was disposed while waiting or reading new packages. This may be fine.");
+                break;
+            }
             catch (IOException)
             {
-                _logger.LogInformation("Connection was most likely closed while reading a packet");
+                _logger.LogDebug("Connection was most likely closed while reading a packet. This may be fine");
                 break;
             }
 
             yield return packet;
 
-            if (packetInfo.HasSequence)
+            try
             {
-                // read sequence to finalize the package read process
-                await stream.ReadExactlyAsync(buffer.AsMemory(0, 1), token);
+
+                if (packetInfo.HasSequence)
+                {
+                    // read sequence to finalize the package read process
+                    await stream.ReadExactlyAsync(buffer.AsMemory(0, 1), token);
+                }
+            }
+            catch (ObjectDisposedException)
+            {
+                _logger.LogDebug("Connection was disposed while waiting or reading new packages. This may be fine.");
+                break;
+            }
+            catch (IOException)
+            {
+                _logger.LogDebug("Connection was most likely closed while reading a packet. This may be fine");
+                break;
             }
         }
         ArrayPool<byte>.Shared.Return(buffer);

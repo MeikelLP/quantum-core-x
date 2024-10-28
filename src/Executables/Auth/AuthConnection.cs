@@ -24,12 +24,12 @@ namespace QuantumCore.Auth
             _server.CallConnectionListener(this);
         }
 
-        protected async override Task OnClose()
+        protected override async Task OnClose(bool expected = true)
         {
             await _server.RemoveConnection(this);
         }
 
-        protected async override Task OnReceive(IPacketSerializable packet)
+        protected override async Task OnReceive(IPacketSerializable packet)
         {
             await _server.CallListener(this, packet);
         }

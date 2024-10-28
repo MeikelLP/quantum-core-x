@@ -1,6 +1,10 @@
 ﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using QuantumCore.API;
+using QuantumCore.API.Game.Skills;
 using QuantumCore.API.PluginTypes;
+using QuantumCore.Core.Utils;
+using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Packets;
 using QuantumCore.Game.PlayerUtils;
 
@@ -10,11 +14,13 @@ public class ItemUseHandler : IGamePacketHandler<ItemUse>
 {
     private readonly IItemManager _itemManager;
     private readonly ILogger<ItemUseHandler> _logger;
+    private readonly SkillsOptions _skillsOptions;
 
-    public ItemUseHandler(IItemManager itemManager, ILogger<ItemUseHandler> logger)
+    public ItemUseHandler(IItemManager itemManager, ILogger<ItemUseHandler> logger, IOptions<GameOptions> gameOptions)
     {
         _itemManager = itemManager;
         _logger = logger;
+        _skillsOptions = gameOptions.Value.Skills;
     }
 
     public async Task ExecuteAsync(GamePacketContext<ItemUse> ctx, CancellationToken token = default)
@@ -93,6 +99,37 @@ public class ItemUseHandler : IGamePacketHandler<ItemUse>
                     player.SendItem(item);
                 }
             }
+        }
+        // Skills related
+        // note: Should maybe create an ItemUseHandler<ItemId> for this ? Similarly to the commands and packet handlers
+        else if (itemProto.Type == (byte) EItemType.Skillbook)
+        {
+            var skillId = 0;
+            
+            skillId = itemProto.Id == _skillsOptions.GenericSkillBookId 
+                ? itemProto.Sockets[0] 
+                : itemProto.Values[0];
+
+            if (!Enum.TryParse<ESkillIndexes>(skillId.ToString(), out var skill))
+            {
+                _logger.LogWarning("Skill with Id({SkillId}) not defined", skillId);
+                return;
+            }
+            
+            if (!player.Skills.LearnSkillByBook(skill)) return;
+            
+            var currentTime = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
+            var delay = CoreRandom.GenerateInt32(_skillsOptions.SkillBookDelayMin, _skillsOptions.SkillBookDelayMax + 1);
+            
+            player.Skills.SetSkillNextReadTime(skill, (int) currentTime + delay);
+            player.RemoveItem(item);
+            player.SendRemoveItem(ctx.Packet.Window, ctx.Packet.Position);
+        }
+        else if (itemProto.Id == _skillsOptions.SoulStoneId)
+        {
+            
+            player.RemoveItem(item);
+            player.SendRemoveItem(ctx.Packet.Window, ctx.Packet.Position);
         }
     }
 }

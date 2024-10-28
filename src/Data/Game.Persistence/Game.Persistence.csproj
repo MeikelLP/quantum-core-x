@@ -6,8 +6,31 @@
     </PropertyGroup>
 
     <ItemGroup>
+        <InternalsVisibleTo Include="Game.Tests"/>
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Core.Caching\Core.Caching.csproj" />
       <ProjectReference Include="..\Core.Persistence\Core.Persistence.csproj" />
       <ProjectReference Include="..\..\CorePluginAPI\CorePluginAPI.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Workspaces" Version="4.11.0"/>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.8">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.8"/>
+        <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.4"/>
+        <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="8.0.2"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <Folder Include="Migrations\"/>
+        <Folder Include="Migrations\Mysql\" />
+        <Folder Include="Migrations\Postgresql\" />
+        <Folder Include="Migrations\Sqlite\" />
     </ItemGroup>
 
 </Project>

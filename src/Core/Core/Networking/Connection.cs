@@ -49,7 +49,7 @@ namespace QuantumCore.Core.Networking
 
         protected abstract void OnHandshakeFinished();
 
-        protected abstract Task OnClose();
+        protected abstract Task OnClose(bool expected = true);
 
         protected abstract Task OnReceive(IPacketSerializable packet);
 
@@ -73,32 +73,34 @@ namespace QuantumCore.Core.Networking
                 await foreach (var packet in _packetReader.EnumerateAsync(_stream, stoppingToken))
                 {
                     _logger.LogDebug(" IN: {Type} {Data}", packet.GetType(), JsonSerializer.Serialize(packet));
-                    await _pluginExecutor.ExecutePlugins<IPacketOperationListener>(_logger, x => x.OnPrePacketReceivedAsync(packet, Array.Empty<byte>(), stoppingToken));
+                    await _pluginExecutor.ExecutePlugins<IPacketOperationListener>(_logger,
+                        x => x.OnPrePacketReceivedAsync(packet, Array.Empty<byte>(), stoppingToken));
 
-                    await OnReceive((IPacketSerializable)packet);
+                    await OnReceive((IPacketSerializable) packet);
 
-                    await _pluginExecutor.ExecutePlugins<IPacketOperationListener>(_logger, x => x.OnPostPacketReceivedAsync(packet, Array.Empty<byte>(), stoppingToken));
+                    await _pluginExecutor.ExecutePlugins<IPacketOperationListener>(_logger,
+                        x => x.OnPostPacketReceivedAsync(packet, Array.Empty<byte>(), stoppingToken));
                 }
             }
             catch (IOException e)
             {
                 _logger.LogDebug(e, "Connection was closed. Probably by the other party");
-                Close();
+                Close(false);
             }
             catch (Exception e)
             {
                 _logger.LogError(e, "Failed to read from stream");
-                Close();
+                Close(false);
             }
 
-            Close();
+            Close(false);
         }
 
-        public void Close()
+        public void Close(bool expected = true)
         {
             _cts?.Cancel();
             _client?.Close();
-            OnClose();
+            OnClose(expected);
         }
 
         public void Send<T>(T packet) where T : IPacketSerializable
@@ -113,6 +115,7 @@ namespace QuantumCore.Core.Networking
                 _logger.LogWarning("Tried to send data to a closed connection");
                 return;
             }
+
             while (_cts?.IsCancellationRequested != true)
             {
                 try
@@ -134,10 +137,15 @@ namespace QuantumCore.Core.Networking
                                 _logger.LogCritical("Stream unexpectedly became null. This shouldn't happen");
                                 break;
                             }
-                            await _pluginExecutor.ExecutePlugins<IPacketOperationListener>(_logger, x => x.OnPrePacketSentAsync(obj, CancellationToken.None)).ConfigureAwait(false);
+
+                            await _pluginExecutor
+                                .ExecutePlugins<IPacketOperationListener>(_logger,
+                                    x => x.OnPrePacketSentAsync(obj, CancellationToken.None)).ConfigureAwait(false);
                             await _stream.WriteAsync(bytesToSend).ConfigureAwait(false);
                             await _stream.FlushAsync().ConfigureAwait(false);
-                            await _pluginExecutor.ExecutePlugins<IPacketOperationListener>(_logger, x => x.OnPostPacketReceivedAsync(obj, bytes, CancellationToken.None)).ConfigureAwait(false);
+                            await _pluginExecutor.ExecutePlugins<IPacketOperationListener>(_logger,
+                                    x => x.OnPostPacketSentAsync(obj, bytes, CancellationToken.None))
+                                .ConfigureAwait(false);
                         }
                         catch (Exception e)
                         {
@@ -145,7 +153,7 @@ namespace QuantumCore.Core.Networking
                         }
 
                         ArrayPool<byte>.Shared.Return(bytes);
-                        _logger.LogInformation("OUT: {Type} => {Packet}", packet.GetType(), JsonSerializer.Serialize(obj));
+                        _logger.LogDebug("OUT: {Type} => {Packet}", packet.GetType(), JsonSerializer.Serialize(obj));
                     }
                     else
                     {
@@ -188,7 +196,8 @@ namespace QuantumCore.Core.Networking
             if (handshake.Handshake != Handshake)
             {
                 // We received a wrong handshake
-                _logger.LogInformation("Received wrong handshake ({Handshake} != {HandshakeHandshake})", Handshake, handshake.Handshake);
+                _logger.LogInformation("Received wrong handshake ({Handshake} != {HandshakeHandshake})", Handshake,
+                    handshake.Handshake);
                 _client?.Close();
                 return false;
             }
@@ -223,7 +232,7 @@ namespace QuantumCore.Core.Networking
         {
             var time = GetServerTime();
             _lastHandshakeTime = time;
-            Send(new GCHandshake(Handshake, (uint)time, 0));
+            Send(new GCHandshake(Handshake, (uint) time, 0));
         }
 
         private void SendHandshake(uint time, uint delta)
