@@ -1,7 +1,6 @@
-using Core.Persistence.Extensions;
+﻿using Core.Persistence.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using QuantumCore.API;
 
 namespace QuantumCore.Game.Persistence.Extensions;
 
@@ -15,7 +14,7 @@ public static class ServiceExtensions
         services.AddDbContext<SqliteGameDbContext>();
         services.AddScoped<GameDbContext>(provider =>
         {
-            var options = provider.GetRequiredService<IOptionsSnapshot<DatabaseOptions>>().Value;
+            var options = provider.GetRequiredService<IOptionsSnapshot<DatabaseOptions>>().Get("game");
             return options.Provider switch
             {
                 DatabaseProvider.Mysql => provider.GetRequiredService<MySqlGameDbContext>(),

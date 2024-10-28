@@ -6,9 +6,10 @@ namespace QuantumCore.Auth.Persistence;
 
 internal class SqliteAuthDbContext : AuthDbContext
 {
-    private readonly IOptions<DatabaseOptions> _options;
+    private readonly IOptionsSnapshot<DatabaseOptions> _options;
 
-    public SqliteAuthDbContext(IOptions<DatabaseOptions> options, ILoggerFactory loggerFactory) : base(loggerFactory)
+    public SqliteAuthDbContext(IOptionsSnapshot<DatabaseOptions> options, ILoggerFactory loggerFactory) : base(
+        loggerFactory)
     {
         _options = options;
     }
@@ -16,7 +17,7 @@ internal class SqliteAuthDbContext : AuthDbContext
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         base.OnConfiguring(optionsBuilder);
-        var opts = _options.Value;
+        var opts = _options.Get("auth");
         optionsBuilder.UseSqlite(opts.ConnectionString);
     }
 }

@@ -7,10 +7,10 @@ namespace QuantumCore.Game.Persistence;
 
 internal class MySqlGameDbContext : GameDbContext
 {
-    private readonly IOptions<DatabaseOptions> _options;
+    private readonly IOptionsSnapshot<DatabaseOptions> _options;
     private readonly ILoggerFactory _loggerFactory;
 
-    public MySqlGameDbContext(IOptions<DatabaseOptions> options, ILoggerFactory loggerFactory)
+    public MySqlGameDbContext(IOptionsSnapshot<DatabaseOptions> options, ILoggerFactory loggerFactory)
     {
         _options = options;
         _loggerFactory = loggerFactory;
@@ -18,7 +18,7 @@ internal class MySqlGameDbContext : GameDbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        var opts = _options.Value;
+        var opts = _options.Get("game");
         optionsBuilder.UseLoggerFactory(_loggerFactory);
         optionsBuilder.UseMySql(opts.ConnectionString, ServerVersion.AutoDetect(opts.ConnectionString), mysql =>
         {

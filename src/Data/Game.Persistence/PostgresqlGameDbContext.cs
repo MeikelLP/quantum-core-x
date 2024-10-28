@@ -5,16 +5,16 @@ namespace QuantumCore.Game.Persistence;
 
 internal class PostgresqlGameDbContext : GameDbContext
 {
-    private readonly IOptions<DatabaseOptions> _options;
+    private readonly IOptionsSnapshot<DatabaseOptions> _options;
 
-    public PostgresqlGameDbContext(IOptions<DatabaseOptions> options)
+    public PostgresqlGameDbContext(IOptionsSnapshot<DatabaseOptions> options)
     {
         _options = options;
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder options)
     {
-        var opts = _options.Value;
+        var opts = _options.Get("game");
         options.UseNpgsql(opts.ConnectionString);
     }
 }

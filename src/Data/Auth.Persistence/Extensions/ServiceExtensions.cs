@@ -15,7 +15,7 @@ public static class ServiceExtensions
         services.AddDbContext<SqliteAuthDbContext>();
         services.AddScoped<AuthDbContext>(provider =>
         {
-            var options = provider.GetRequiredService<IOptionsSnapshot<DatabaseOptions>>().Value;
+            var options = provider.GetRequiredService<IOptionsSnapshot<DatabaseOptions>>().Get("auth");
             return options.Provider switch
             {
                 DatabaseProvider.Mysql => provider.GetRequiredService<MySqlAuthDbContext>(),

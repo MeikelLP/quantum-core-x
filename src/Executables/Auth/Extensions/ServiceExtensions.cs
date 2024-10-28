@@ -1,6 +1,7 @@
 ﻿using QuantumCore.API.PluginTypes;
 using QuantumCore.Auth.Persistence.Extensions;
 using QuantumCore.Caching.Extensions;
+using QuantumCore.Extensions;
 
 namespace QuantumCore.Auth.Extensions;
 
