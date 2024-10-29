@@ -54,7 +54,7 @@ To get in touch with the developers, the best way is to join our [Discord server
 
 ### Recommended IDE
 
-Jetbrains Rider is free as of 2024-10-24 so we recommend is as IDE for this project.
+Jetbrains Rider is free as of 2024-10-24 so we recommend it as IDE for this project.
 
 <img src="https://resources.jetbrains.com/storage/products/company/brand/logos/Rider.png" alt="Rider logo." height="100px">
 
