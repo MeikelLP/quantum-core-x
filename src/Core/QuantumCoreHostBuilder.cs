@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API.PluginTypes;
@@ -40,8 +41,21 @@ public static class QuantumCoreHostBuilder
         }
 
 
-        var host = new HostApplicationBuilder(args);
-        host.Services.Configure<ConsoleLifetimeOptions>(opts => opts.SuppressStatusMessages = true);
+        var preferredDir = Path.GetFullPath(Path.Combine(Directory.GetCurrentDirectory(), "..", "..", ".."));
+        if (!Directory.GetFiles(preferredDir).Any(x => x.EndsWith(".csproj")))
+        {
+            preferredDir = Directory.GetCurrentDirectory();
+        }
+
+        var contentRoot = Path.Combine(preferredDir, "data");
+        var host = new HostApplicationBuilder(args) {Environment = {ContentRootPath = contentRoot}};
+        if (!host.Environment.IsDevelopment())
+        {
+            host.Services.Configure<ConsoleLifetimeOptions>(opts => opts.SuppressStatusMessages = true);
+        }
+
+        host.Services.AddSingleton<IFileProvider>(provider =>
+            new PhysicalFileProvider(provider.GetRequiredService<IHostEnvironment>().ContentRootPath));
         host.Services.AddCoreServices(pluginCatalog, host.Configuration);
 
         var serviceCollectionPluginTypes = pluginCatalog.GetPlugins()
