@@ -2,7 +2,6 @@ using System.Text;
 using Core.Persistence.Extensions;
 using Game.Caching.Extensions;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -14,9 +13,6 @@ using QuantumCore.Game.Persistence;
 
 var hostBuilder = await QuantumCoreHostBuilder.CreateHostAsync(args);
 hostBuilder.Configuration.AddQuantumCoreDefaults();
-hostBuilder.Configuration.AddJsonFile("data/jobs.json", true);
-hostBuilder.Configuration.AddTomlFile("data/shops.toml", true);
-hostBuilder.Configuration.AddTomlFile("data/groups.toml", true);
 hostBuilder.Services.AddGameServices();
 hostBuilder.Services.AddQuantumCoreDatabase();
 hostBuilder.Services.AddGameCaching();
