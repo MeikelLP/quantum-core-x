@@ -4,8 +4,6 @@
         <OutputType>Exe</OutputType>
         <AssemblyName>QuantumCore.Single</AssemblyName>
         <RootNamespace>QuantumCore.Single</RootNamespace>
-        <PublishSingleFile>true</PublishSingleFile>
-        <SelfContained>true</SelfContained>
     </PropertyGroup>
 
     <ItemGroup>
@@ -21,8 +19,8 @@
     </Target>
 
     <ItemGroup>
-        <ProjectReference Include="..\Auth.Server\Auth.Server.csproj"/>
-        <ProjectReference Include="..\Game.Server\Game.Server.csproj"/>
+        <ProjectReference Include="..\..\Libraries\Auth.Server\Auth.Server.csproj"/>
+        <ProjectReference Include="..\..\Libraries\Game.Server\Game.Server.csproj"/>
     </ItemGroup>
 
     <ItemGroup>
