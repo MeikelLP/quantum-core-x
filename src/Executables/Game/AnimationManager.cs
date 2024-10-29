@@ -1,22 +1,27 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
-using QuantumCore.Core.Types;
 
 namespace QuantumCore.Game
 {
     public class AnimationManager : IAnimationManager
     {
         private readonly Dictionary<uint, Dictionary<AnimationType, Dictionary<AnimationSubType, Animation>>>
-            _animations = new Dictionary<uint, Dictionary<AnimationType, Dictionary<AnimationSubType, Animation>>>();
+            _animations = new();
 
         private readonly IMonsterManager _monsterManager;
         private readonly ILogger<AnimationManager> _logger;
+        private readonly IStructuredFileProvider _structuredFileProvider;
+        private readonly IFileProvider _fileProvider;
 
-        public AnimationManager(IMonsterManager monsterManager, ILogger<AnimationManager> logger)
+        public AnimationManager(IMonsterManager monsterManager, ILogger<AnimationManager> logger,
+            IStructuredFileProvider structuredFileProvider, IFileProvider fileProvider)
         {
             _monsterManager = monsterManager;
             _logger = logger;
+            _structuredFileProvider = structuredFileProvider;
+            _fileProvider = fileProvider;
         }
 
         /// <summary>
@@ -38,13 +43,17 @@ namespace QuantumCore.Game
             for (uint i = 0; i < characterClasses.Length; i++)
             {
                 var characterClass = characterClasses[i];
-                var pc1 = Path.Join("data", "pc", characterClass);
-                var pc2 = Path.Join("data", "pc2", characterClass);
+                var pc1 = Path.Join("pc", characterClass);
+                var pc2 = Path.Join("pc2", characterClass);
 
-                await LoadAnimation(i, AnimationType.Walk, AnimationSubType.General, Path.Join(pc1, "general", "walk.msa"));
-                await LoadAnimation(i, AnimationType.Run, AnimationSubType.General, Path.Join(pc1, "general", "run.msa"));
-                await LoadAnimation(i + 4, AnimationType.Walk, AnimationSubType.General, Path.Join(pc2, "general", "walk.msa"));
-                await LoadAnimation(i + 4, AnimationType.Run, AnimationSubType.General, Path.Join(pc2, "general", "run.msa"));
+                await LoadAnimation(i, AnimationType.Walk, AnimationSubType.General,
+                    Path.Join(pc1, "general", "walk.msa"));
+                await LoadAnimation(i, AnimationType.Run, AnimationSubType.General,
+                    Path.Join(pc1, "general", "run.msa"));
+                await LoadAnimation(i + 4, AnimationType.Walk, AnimationSubType.General,
+                    Path.Join(pc2, "general", "walk.msa"));
+                await LoadAnimation(i + 4, AnimationType.Run, AnimationSubType.General,
+                    Path.Join(pc2, "general", "run.msa"));
             }
 
             // Load monster animations
@@ -52,48 +61,55 @@ namespace QuantumCore.Game
             {
                 // The animation could be in monster or monster2
                 var folder = monster.Folder.Trim('\0');
-                if(folder.Length == 0) continue;
+                if (folder.Length == 0) continue;
 
-                var monster1 = Path.Join("data", "monster", folder);
-                var monster2 = Path.Join("data", "monster2", folder);
+                var monster1 = Path.Join("monster", folder);
+                var monster2 = Path.Join("monster2", folder);
 
                 if (Directory.Exists(monster1))
                 {
                     await LoadMonsterAnimation(monster, monster1);
-                } else if (Directory.Exists(monster2))
+                }
+                else if (Directory.Exists(monster2))
                 {
                     await LoadMonsterAnimation(monster, monster2);
                 }
                 else
                 {
                     _logger.LogWarning(
-                        "Failed to find animation folder of monster {Name}({Id}) {Folder}", monster.TranslatedName, monster.Id, monster.Folder);
+                        "Failed to find animation folder of monster {Name}({Id}) {Folder}", monster.TranslatedName,
+                        monster.Id, monster.Folder);
                 }
             }
         }
 
         private async Task LoadMonsterAnimation(MonsterData monster, string folder)
         {
-            var motlist = Path.Join(folder, "motlist.txt");
-            if (!File.Exists(motlist))
+            var file = _fileProvider.GetFileInfo(Path.Combine(folder, "motlist.txt"));
+            if (!file.Exists)
             {
                 _logger.LogWarning("No motlist.txt in monster folder {Folder}", folder);
                 return;
             }
 
-            var lines = await File.ReadAllLinesAsync(motlist);
-            foreach (var line in lines)
+            await using var fs = file.CreateReadStream();
+            using var sr = new StreamReader(fs);
+            while (!sr.EndOfStream)
             {
-                var parts = line.Split(new char[] {'\t', ' '});
-                if(parts.Length != 4) continue;
-                if(parts[0].ToLower() != "general") continue;
+                var line = await sr.ReadLineAsync();
+                var parts = line!.Split('\t', ' ');
+                if (parts.Length != 4) continue;
+                if (!parts[0].Equals("general", StringComparison.InvariantCultureIgnoreCase)) continue;
 
-                if (parts[1].ToLower() == "run")
+                if (parts[1].Equals("run", StringComparison.InvariantCultureIgnoreCase))
                 {
-                    await LoadAnimation(monster.Id, AnimationType.Run, AnimationSubType.General, Path.Join(folder, parts[2]));
-                } else if (parts[1].ToLower() == "walk")
+                    await LoadAnimation(monster.Id, AnimationType.Run, AnimationSubType.General,
+                        Path.Join(folder, parts[2]));
+                }
+                else if (parts[1].Equals("walk", StringComparison.InvariantCultureIgnoreCase))
                 {
-                    await LoadAnimation(monster.Id, AnimationType.Walk, AnimationSubType.General, Path.Join(folder, parts[2]));
+                    await LoadAnimation(monster.Id, AnimationType.Walk, AnimationSubType.General,
+                        Path.Join(folder, parts[2]));
                 }
             }
         }
@@ -107,11 +123,14 @@ namespace QuantumCore.Game
         /// <returns>The animation or null if the animation doesn't exists</returns>
         public Animation? GetAnimation(uint id, AnimationType type, AnimationSubType subType)
         {
-            if (!_animations.ContainsKey(id)) return null;
-            if (!_animations[id].ContainsKey(type)) return null;
-            if (!_animations[id][type].ContainsKey(subType)) return null;
+            if (_animations.TryGetValue(id, out var value) &&
+                value.TryGetValue(type, out var val) &&
+                val.TryGetValue(subType, out var output))
+            {
+                return output;
+            }
 
-            return _animations[id][type][subType];
+            return null;
         }
 
         /// <summary>
@@ -124,17 +143,19 @@ namespace QuantumCore.Game
         /// <returns>True if the animation was loaded successfully</returns>
         private async Task<bool> LoadAnimation(uint id, AnimationType type, AnimationSubType subType, string path)
         {
-            if (!File.Exists(path)) return false;
+            var file = _fileProvider.GetFileInfo(path);
+            if (!file.Exists) return false;
 
             _logger.LogDebug("Loading animation file {Path} ({Id} {Type} {SubType})", path, id, type, subType);
 
-            var msa = new StructuredFile();
-            await msa.ReadAsync(path);
+            var msa = await _structuredFileProvider.GetAsync(path);
 
             var scriptType = msa.GetValue("ScriptType");
             if (scriptType != "MotionData")
             {
-                _logger.LogWarning("Invalid msa file found under {Path}. Expected ScriptType 'MotionData' but got '{ScriptType}'", path, scriptType);
+                _logger.LogWarning(
+                    "Invalid msa file found under {Path}. Expected ScriptType 'MotionData' but got '{ScriptType}'",
+                    path, scriptType);
                 return false;
             }
 
@@ -162,8 +183,10 @@ namespace QuantumCore.Game
 
         private void PutAnimation(uint id, AnimationType type, AnimationSubType subType, Animation animation)
         {
-            if(!_animations.ContainsKey(id)) _animations[id] = new Dictionary<AnimationType, Dictionary<AnimationSubType, Animation>>();
-            if(!_animations[id].ContainsKey(type)) _animations[id][type] = new Dictionary<AnimationSubType, Animation>();
+            if (!_animations.ContainsKey(id))
+                _animations[id] = new Dictionary<AnimationType, Dictionary<AnimationSubType, Animation>>();
+            if (!_animations[id].ContainsKey(type))
+                _animations[id][type] = new Dictionary<AnimationSubType, Animation>();
 
             _animations[id][type][subType] = animation;
         }
