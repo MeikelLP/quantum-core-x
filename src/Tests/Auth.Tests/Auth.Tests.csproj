@@ -19,7 +19,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\Executables\Auth\Auth.csproj"/>
+        <ProjectReference Include="..\..\Executables\Auth.Server\Auth.Server.csproj"/>
     </ItemGroup>
 
 </Project>

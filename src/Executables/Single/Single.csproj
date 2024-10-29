@@ -2,25 +2,34 @@
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
-        <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
         <AssemblyName>QuantumCore.Single</AssemblyName>
         <RootNamespace>QuantumCore.Single</RootNamespace>
+        <PublishSingleFile>true</PublishSingleFile>
+        <SelfContained>true</SelfContained>
     </PropertyGroup>
 
     <ItemGroup>
         <None Update="appsettings.json">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-        </None>
-        <None Update="appsettings.json">
-          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+            <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         </None>
     </ItemGroup>
-    
+
+    <!-- Workaround: https://github.com/dotnet/sdk/issues/25294 -->
+    <Target Name="CleanupPublish" AfterTargets="Publish">
+        <Delete Files="$(PublishDir)packages.lock.json"/>
+    </Target>
+
     <ItemGroup>
-      <ProjectReference Include="..\..\Core\Core.csproj" />
-      <ProjectReference Include="..\..\Data\Game.Caching\Game.Caching.csproj" />
-      <ProjectReference Include="..\Auth\Auth.csproj" />
-      <ProjectReference Include="..\Game\Game.csproj" />
+        <ProjectReference Include="..\Auth.Server\Auth.Server.csproj"/>
+        <ProjectReference Include="..\Game.Server\Game.Server.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+        <PackageReference Include="GitVersion.MsBuild" Version="5.12.0">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
     </ItemGroup>
 
 </Project>
