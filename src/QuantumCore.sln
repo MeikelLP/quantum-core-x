@@ -14,9 +14,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core.Tests", "Tests\Core.Te
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Executables", "Executables", "{2D49C796-8A20-414E-818A-A92E7161D1B3}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Game.Server", "Executables\Game.Server\Game.Server.csproj", "{E15A13F9-7FB8-4A77-99F8-1CE05914301B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Game.Server", "Libraries\Game.Server\Game.Server.csproj", "{E15A13F9-7FB8-4A77-99F8-1CE05914301B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Auth.Server", "Executables\Auth.Server\Auth.Server.csproj", "{55740D51-1175-4786-A6F2-AC1AFF29864D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Auth.Server", "Libraries\Auth.Server\Auth.Server.csproj", "{55740D51-1175-4786-A6F2-AC1AFF29864D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Core.Networking.Generators", "Core.Networking.Generators\Core.Networking.Generators.csproj", "{5A7B4C93-5114-44BA-B94E-14BA0A9B6F07}"
 EndProject
