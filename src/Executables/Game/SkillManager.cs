@@ -10,7 +10,7 @@ namespace QuantumCore.Game;
 /// <summary>
 /// Manage all static data related to skills
 /// </summary>
-public class SkillManager : ISkillManager
+public class SkillManager : ISkillManager, ILoadable
 {
     private readonly ILogger<SkillManager> _logger;
     private readonly IParserService _parserService;

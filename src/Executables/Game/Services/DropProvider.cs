@@ -16,7 +16,7 @@ using QuantumCore.Game.World.Entities;
 
 namespace QuantumCore.Game.Services;
 
-public class DropProvider : IDropProvider
+public class DropProvider : IDropProvider, ILoadable
 {
     private readonly Dictionary<uint, MonsterItemGroup> _monsterDrops = new();
     private readonly Dictionary<uint, DropItemGroup> _itemDrops = new();

@@ -22,6 +22,10 @@ public static class ServiceExtensions
                 .AddClasses(classes => classes.AssignableTo<IPacketHandler>())
                 .AsImplementedInterfaces()
                 .WithScopedLifetime();
+            scan.FromAssemblyOf<GameServer>()
+                .AddClasses(classes => classes.AssignableTo<ILoadable>())
+                .AsSelfWithInterfaces()
+                .WithSingletonLifetime();
         });
         services.AddGameDatabase();
         services.AddGameCaching();
@@ -39,17 +43,16 @@ public static class ServiceExtensions
         services.AddSingleton<ISpawnGroupProvider, SpawnGroupProvider>();
         services.AddSingleton<ISpawnPointProvider, SpawnPointProvider>();
         services.AddSingleton<IDropProvider, DropProvider>();
-        services.AddSingleton<IItemManager, ItemManager>();
-        services.AddSingleton<IMonsterManager, MonsterManager>();
         services.AddSingleton<IJobManager, JobManager>();
         services.AddSingleton<IAtlasProvider, AtlasProvider>();
+        services.AddSingleton<IStructuredFileProvider, StructuredFileProvider>();
         services.AddSingleton<IAnimationManager, AnimationManager>();
         services.AddSingleton<IExperienceManager, ExperienceManager>();
         services.AddSingleton<IChatManager, ChatManager>();
         services.AddSingleton<IQuestManager, QuestManager>();
         services.AddSingleton<ISkillManager, SkillManager>();
         services.AddSingleton<ISessionManager, SessionManager>();
-        
+
         services.AddSingleton<IWorld, World.World>();
 
         return services;

@@ -5,7 +5,7 @@ using QuantumCore.API.Core.Models;
 
 namespace QuantumCore.Game
 {
-    public class AnimationManager : IAnimationManager
+    public class AnimationManager : IAnimationManager, ILoadable
     {
         private readonly Dictionary<uint, Dictionary<AnimationType, Dictionary<AnimationSubType, Animation>>>
             _animations = new();
