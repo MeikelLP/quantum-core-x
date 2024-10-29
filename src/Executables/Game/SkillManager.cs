@@ -15,13 +15,13 @@ public class SkillManager : ISkillManager
     private readonly ILogger<SkillManager> _logger;
     private readonly IParserService _parserService;
     private ImmutableArray<SkillData> _skills = ImmutableArray<SkillData>.Empty;
-    
+
     public SkillManager(ILogger<SkillManager> logger, IParserService parserService)
     {
         _logger = logger;
         _parserService = parserService;
     }
-    
+
     public SkillData? GetSkill(ESkillIndexes id)
     {
         return _skills.FirstOrDefault(skill => skill.Id == id);
@@ -36,6 +36,7 @@ public class SkillManager : ISkillManager
                 return dataSkill;
             }
         }
+
         return null;
     }
 
@@ -46,8 +47,8 @@ public class SkillManager : ISkillManager
             return;
         }
 
-        _skills = await _parserService.GetSkillsAsync("data/skilltable.txt", token);
-        
+        _skills = await _parserService.GetSkillsAsync("skilltable.txt", token);
+
         _logger.LogInformation("Loaded {Count} skills", _skills.Length);
     }
 
