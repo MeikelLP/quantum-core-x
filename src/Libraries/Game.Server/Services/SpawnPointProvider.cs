@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Logging;
 using QuantumCore.Game.World;
 
 namespace QuantumCore.Game.Services;
@@ -7,11 +8,14 @@ internal class SpawnPointProvider : ISpawnPointProvider
 {
     private readonly ILogger<SpawnPointProvider> _logger;
     private readonly IParserService _parserService;
+    private readonly IFileProvider _fileProvider;
 
-    public SpawnPointProvider(ILogger<SpawnPointProvider> logger, IParserService parserService)
+    public SpawnPointProvider(ILogger<SpawnPointProvider> logger, IParserService parserService,
+        IFileProvider fileProvider)
     {
         _logger = logger;
         _parserService = parserService;
+        _fileProvider = fileProvider;
     }
 
     public async Task<SpawnPoint[]> GetSpawnPointsForMap(string name)
@@ -20,10 +24,10 @@ internal class SpawnPointProvider : ISpawnPointProvider
 
         _logger.LogDebug("Loading spawn points for map {Map}", name);
 
-        await AddSpawnPointsFromFile($"data/maps/{name}/regen.txt", list);
-        await AddSpawnPointsFromFile($"data/maps/{name}/npc.txt", list);
-        await AddSpawnPointsFromFile($"data/maps/{name}/stone.txt", list);
-        await AddSpawnPointsFromFile($"data/maps/{name}/boss.txt", list);
+        await AddSpawnPointsFromFile($"maps/{name}/regen.txt", list);
+        await AddSpawnPointsFromFile($"maps/{name}/npc.txt", list);
+        await AddSpawnPointsFromFile($"maps/{name}/stone.txt", list);
+        await AddSpawnPointsFromFile($"maps/{name}/boss.txt", list);
 
         _logger.LogDebug("Found {Count:D} spawn points for map {Map}", list.Count, name);
 
@@ -32,9 +36,11 @@ internal class SpawnPointProvider : ISpawnPointProvider
 
     private async Task AddSpawnPointsFromFile(string filePath, List<SpawnPoint> list)
     {
-        if (!File.Exists(filePath)) return;
+        var file = _fileProvider.GetFileInfo(filePath);
+        if (!file.Exists) return;
 
-        using var sr = new StreamReader(filePath);
+        await using var fs = file.CreateReadStream();
+        using var sr = new StreamReader(fs);
         do
         {
             var line = await sr.ReadLineAsync();

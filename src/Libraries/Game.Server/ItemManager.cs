@@ -1,4 +1,7 @@
 using System.Collections.Immutable;
+using System.Text;
+using BinarySerialization;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
@@ -9,14 +12,21 @@ namespace QuantumCore.Game
     /// <summary>
     /// Manage all static data related to items
     /// </summary>
-    public class ItemManager : IItemManager
+    public class ItemManager : IItemManager, ILoadable
     {
         private readonly ILogger<ItemManager> _logger;
+        private readonly IFileProvider _fileProvider;
         private ImmutableArray<ItemData> _items;
 
-        public ItemManager(ILogger<ItemManager> logger)
+        static ItemManager()
+        {
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance); // register korean locale
+        }
+
+        public ItemManager(ILogger<ItemManager> logger, IFileProvider fileProvider)
         {
             _logger = logger;
+            _fileProvider = fileProvider;
         }
 
         /// <summary>
@@ -47,16 +57,27 @@ namespace QuantumCore.Game
         /// </summary>
         public async Task LoadAsync(CancellationToken token = default)
         {
-            var path = "data/item_proto";
-            if (!File.Exists(path))
+            var file = _fileProvider.GetFileInfo("item_proto");
+            if (!file.Exists)
             {
-                _logger.LogWarning("{Path} does not exist, items not loaded", path);
+                _logger.LogWarning("{Path} does not exist, items not loaded", file.PhysicalPath);
                 _items = [];
                 return;
             }
 
             _logger.LogInformation("Loading item_proto");
-            var data = await new ItemProtoLoader().LoadAsync(path);
+
+            await using var fs = file.CreateReadStream();
+            var bs = new BinarySerializer
+            {
+                Options = SerializationOptions.ThrowOnEndOfStream
+            };
+            var result = await bs.DeserializeAsync<ItemDataContainer>(fs);
+            var items = new LzoXtea(result.Payload.RealSize, result.Payload.EncryptedSize, 0x2A4A1, 0x45415AA,
+                0x185A8BE7,
+                0x1AAD6AB);
+            var itemsRaw = items.Decode(result.Payload.EncryptedPayload);
+            var data = bs.Deserialize<ItemData[]>(itemsRaw);
 
             _items = data.Select(proto => new ItemData
             {

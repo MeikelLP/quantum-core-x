@@ -20,9 +20,6 @@ public interface IDropProvider
     ImmutableArray<CommonDropEntry> CommonDrops { get; }
 
     ImmutableArray<LevelItemGroup> LevelDrops { get; }
-
-    Task LoadAsync(CancellationToken cancellationToken = default);
-
     (int deltaPercentage, int dropRange) CalculateDropPercentages(IPlayerEntity player, MonsterEntity monster);
     List<ItemInstance> CalculateCommonDropItems(IPlayerEntity player, MonsterEntity monster, int delta, int range);
     List<ItemInstance> CalculateDropItemGroupItems(MonsterEntity monster, int delta, int range);

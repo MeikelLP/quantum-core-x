@@ -5,12 +5,6 @@ namespace QuantumCore.API;
 public interface IAnimationManager
 {
     /// <summary>
-    /// Load all the animation data for all characters and monsters.
-    /// So the server can calculate movement duration.
-    /// </summary>
-    Task LoadAsync(CancellationToken token = default);
-
-    /// <summary>
     /// Get animation for specific entity type id
     /// </summary>
     /// <param name="id">Player Class or Monster ID</param>

@@ -11,12 +11,10 @@ using QuantumCore.API.Game;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.World;
 using QuantumCore.API.PluginTypes;
-using QuantumCore.Caching;
 using QuantumCore.Core.Event;
 using QuantumCore.Core.Networking;
 using QuantumCore.Core.Utils;
 using QuantumCore.Extensions;
-using QuantumCore.Game.Services;
 using QuantumCore.Networking;
 
 namespace QuantumCore.Game
@@ -28,13 +26,6 @@ namespace QuantumCore.Game
         private readonly HostingOptions _hostingOptions;
         private readonly ILogger<GameServer> _logger;
         private readonly PluginExecutor _pluginExecutor;
-        private readonly IServiceProvider _serviceProvider;
-        private readonly ICacheManager _cacheManager;
-        private readonly IItemManager _itemManager;
-        private readonly ISkillManager _skillManager;
-        private readonly IMonsterManager _monsterManager;
-        private readonly IExperienceManager _experienceManager;
-        private readonly IAnimationManager _animationManager;
         private readonly ICommandManager _commandManager;
         private readonly IQuestManager _questManager;
         private readonly IChatManager _chatManager;
@@ -46,8 +37,8 @@ namespace QuantumCore.Game
         private TimeSpan _targetElapsedTime = TimeSpan.FromTicks(100000); // 100hz
         private TimeSpan _maxElapsedTime = TimeSpan.FromMilliseconds(500);
         private readonly Stopwatch _serverTimer = new();
-        private readonly IDropProvider _dropProvider;
         private readonly ISessionManager _sessionManager;
+        private readonly IEnumerable<ILoadable> _loadables;
 
         public new ImmutableArray<IGameConnection> Connections =>
             [..base.Connections.Values.Cast<IGameConnection>()];
@@ -57,28 +48,19 @@ namespace QuantumCore.Game
         public GameServer(IOptionsSnapshot<HostingOptions> hostingOptions,
             [FromKeyedServices("game")] IPacketManager packetManager, ILogger<GameServer> logger,
             PluginExecutor pluginExecutor, IServiceProvider serviceProvider,
-            IItemManager itemManager, IMonsterManager monsterManager, IExperienceManager experienceManager,
-            IAnimationManager animationManager, ICommandManager commandManager, IQuestManager questManager,
-            IChatManager chatManager, IWorld world, IDropProvider dropProvider, ISkillManager skillManager,
-            ICacheManager cacheManager, ISessionManager sessionManager)
+            ICommandManager commandManager, IQuestManager questManager, IChatManager chatManager, IWorld world,
+            ISessionManager sessionManager, IEnumerable<ILoadable> loadables)
             : base(packetManager, logger, pluginExecutor, serviceProvider, "game", hostingOptions)
         {
             _hostingOptions = hostingOptions.Value;
             _logger = logger;
-            _cacheManager = cacheManager;
             _pluginExecutor = pluginExecutor;
-            _serviceProvider = serviceProvider;
-            _itemManager = itemManager;
-            _monsterManager = monsterManager;
-            _experienceManager = experienceManager;
-            _animationManager = animationManager;
             _commandManager = commandManager;
             _questManager = questManager;
             _chatManager = chatManager;
             _sessionManager = sessionManager;
+            _loadables = loadables;
             World = world;
-            _dropProvider = dropProvider;
-            _skillManager = skillManager;
             Instance = this;
             Meter.CreateObservableGauge("Connections", () => Connections.Length);
         }
@@ -104,16 +86,7 @@ namespace QuantumCore.Game
             }
 
             // Load game data
-            await Task.WhenAll(
-                _itemManager.LoadAsync(stoppingToken),
-                _monsterManager.LoadAsync(stoppingToken),
-                _experienceManager.LoadAsync(stoppingToken),
-                _animationManager.LoadAsync(stoppingToken),
-                _commandManager.LoadAsync(stoppingToken),
-                _dropProvider.LoadAsync(stoppingToken),
-                _skillManager.LoadAsync(stoppingToken)
-            );
-
+            await Task.WhenAll(_loadables.Select(x => x.LoadAsync(stoppingToken)));
 
             // Initialize session manager
             _sessionManager.Init(this);

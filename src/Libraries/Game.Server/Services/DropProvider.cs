@@ -1,6 +1,7 @@
 ﻿using System.Collections.Immutable;
 using System.Globalization;
 using System.Text;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using QuantumCore.API;
@@ -15,7 +16,7 @@ using QuantumCore.Game.World.Entities;
 
 namespace QuantumCore.Game.Services;
 
-public class DropProvider : IDropProvider
+public class DropProvider : IDropProvider, ILoadable
 {
     private readonly Dictionary<uint, MonsterItemGroup> _monsterDrops = new();
     private readonly Dictionary<uint, DropItemGroup> _itemDrops = new();
@@ -29,16 +30,18 @@ public class DropProvider : IDropProvider
     private readonly ILogger<DropProvider> _logger;
     private readonly IItemManager _itemManager;
     private readonly IParserService _parserService;
+    private readonly IFileProvider _fileProvider;
     private static readonly Encoding FileEncoding = Encoding.GetEncoding("EUC-KR");
     private readonly DropOptions _options;
 
     public DropProvider(ILogger<DropProvider> logger, IOptions<GameOptions> gameOptions, IItemManager itemManager,
-        IParserService parserService)
+        IParserService parserService, IFileProvider fileProvider)
     {
         _logger = logger;
         _options = gameOptions.Value.Drops;
         _itemManager = itemManager;
         _parserService = parserService;
+        _fileProvider = fileProvider;
     }
 
     public MonsterItemGroup? GetMonsterDropsForMob(uint monsterProtoId)
@@ -68,12 +71,13 @@ public class DropProvider : IDropProvider
 
     private async Task LoadCommonMobDropsAsync(CancellationToken cancellationToken)
     {
-        const string file = "data/common_drop_item.txt";
-        if (!File.Exists(file)) return;
+        var file = _fileProvider.GetFileInfo("common_drop_item.txt");
+        if (!file.Exists) return;
 
         _logger.LogDebug("Loading common drops from {FilePath}", file);
 
-        using var sr = new StreamReader(file, FileEncoding);
+        await using var fs = file.CreateReadStream();
+        using var sr = new StreamReader(fs, FileEncoding);
 
         CommonDrops = await _parserService.GetCommonDropsAsync(sr, cancellationToken);
 
@@ -85,12 +89,13 @@ public class DropProvider : IDropProvider
     /// </summary>
     private async Task LoadSimpleMobDropsAsync(CancellationToken cancellationToken)
     {
-        const string file = "data/etc_drop_item.txt";
-        if (!File.Exists(file)) return;
+        var file = _fileProvider.GetFileInfo("etc_drop_item.txt");
+        if (!file.Exists) return;
 
         _logger.LogDebug("Loading item drop modifiers from {FilePath}", file);
 
-        using var sr = new StreamReader(file, FileEncoding);
+        await using var fs = file.CreateReadStream();
+        using var sr = new StreamReader(fs, FileEncoding);
 
         var lineIndex = 0;
         // loop while line is not null
@@ -112,13 +117,13 @@ public class DropProvider : IDropProvider
         _logger.LogDebug("Found simple drops for {Count:D} items", EtcDrops.Length);
     }
 
-    private KeyValuePair<uint, float>? ParseCommonLine(ReadOnlySpan<char> line, int lineIndex, string file)
+    private KeyValuePair<uint, float>? ParseCommonLine(ReadOnlySpan<char> line, int lineIndex, IFileInfo file)
     {
         var i = line.IndexOf('\t');
 
         if (i == -1)
         {
-            _logger.LogDebug("Line {LineNumber} of the file {FilePath} is not valid", lineIndex + 1, file);
+            _logger.LogDebug("Line {LineNumber} of the file {FilePath} is not valid", lineIndex + 1, file.PhysicalPath);
             return null;
         }
 
@@ -145,13 +150,12 @@ public class DropProvider : IDropProvider
 
     private async Task LoadDropsForMonstersAsync()
     {
-        const string file = "data/mob_drop_item.txt";
-        if (!File.Exists(file)) return;
-
+        var file = _fileProvider.GetFileInfo("mob_drop_item.txt");
+        if (!file.Exists) return;
         _logger.LogDebug("Loading drops from {FilePath}", file);
 
-        using var sr = new StreamReader(file, FileEncoding);
-
+        await using var fs = file.CreateReadStream();
+        using var sr = new StreamReader(fs, FileEncoding);
         var parsedGroups = new List<MonsterDropContainer>();
         var mobGroups = await _parserService.ParseFileGroups(sr);
 

@@ -1,5 +1,7 @@
 ﻿using System.Text;
 using FluentAssertions;
+using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.FileProviders.Physical;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using QuantumCore.API;
@@ -22,7 +24,10 @@ public class ParserTests
 
     public ParserTests(ITestOutputHelper outputHelper)
     {
-        _parserService = new ParserService(Substitute.For<ILoggerFactory>());
+        var fileProvider = Substitute.For<IFileProvider>();
+        fileProvider.GetFileInfo(Arg.Any<string>())
+            .Returns(call => new PhysicalFileInfo(new FileInfo(call.Arg<string>())));
+        _parserService = new ParserService(Substitute.For<ILoggerFactory>(), fileProvider);
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
     }
 

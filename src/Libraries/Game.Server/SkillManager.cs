@@ -10,7 +10,7 @@ namespace QuantumCore.Game;
 /// <summary>
 /// Manage all static data related to skills
 /// </summary>
-public class SkillManager : ISkillManager
+public class SkillManager : ISkillManager, ILoadable
 {
     private readonly ILogger<SkillManager> _logger;
     private readonly IParserService _parserService;
@@ -47,7 +47,7 @@ public class SkillManager : ISkillManager
             return;
         }
 
-        _skills = await _parserService.GetSkillsAsync("data/skilltable.txt", token);
+        _skills = await _parserService.GetSkillsAsync("skilltable.txt", token);
     }
 
     public Task ReloadAsync(CancellationToken token = default)

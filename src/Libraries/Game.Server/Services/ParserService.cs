@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
 using EnumsNET;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
@@ -16,14 +17,16 @@ namespace QuantumCore.Game.Services;
 
 public partial class ParserService : IParserService
 {
+    private readonly IFileProvider _fileProvider;
     private static readonly NumberFormatInfo InvNum = NumberFormatInfo.InvariantInfo;
     private static readonly Encoding DefaultEncoding = Encoding.GetEncoding("EUC-KR");
     private const StringComparison INV_CUL = StringComparison.InvariantCultureIgnoreCase;
 
     private readonly ILogger<ParserService> _logger;
 
-    public ParserService(ILoggerFactory loggerFactory)
+    public ParserService(ILoggerFactory loggerFactory, IFileProvider fileProvider)
     {
+        _fileProvider = fileProvider;
         _logger = loggerFactory.CreateLogger<ParserService>();
     }
 
@@ -64,7 +67,8 @@ public partial class ParserService : IParserService
 
     public async Task<ImmutableArray<SkillData>> GetSkillsAsync(string path, CancellationToken token = default)
     {
-        if (!File.Exists(path))
+        var file = _fileProvider.GetFileInfo(path);
+        if (!file.Exists)
         {
             _logger.LogWarning("{Path} does not exist, skills information not loaded", path);
             return [];
@@ -72,8 +76,11 @@ public partial class ParserService : IParserService
 
         var list = new List<SkillData>();
 
-        await foreach (var line in File.ReadLinesAsync(path, DefaultEncoding, token))
+        await using var fs = file.CreateReadStream();
+        using var sr = new StreamReader(fs);
+        while (!sr.EndOfStream)
         {
+            var line = await sr.ReadLineAsync(token).ConfigureAwait(false);
             if (string.IsNullOrWhiteSpace(line) || !StartsWithNumberRegex().IsMatch(line)) continue;
 
             // parse line
