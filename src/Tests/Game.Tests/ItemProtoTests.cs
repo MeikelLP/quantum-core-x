@@ -23,7 +23,7 @@ public class ItemProtoTests
             {
                 var mock = Substitute.For<IFileProvider>();
                 mock.GetFileInfo(Arg.Any<string>()).ReturnsForAnyArgs(call =>
-                    new PhysicalFileInfo(new FileInfo(Path.Combine("data", call.Arg<string>()))));
+                    new PhysicalFileInfo(new FileInfo(Path.Combine("Fixtures", call.Arg<string>()))));
                 return mock;
             })
             .BuildServiceProvider()
@@ -40,6 +40,7 @@ public class ItemProtoTests
         {
             Name = "Item1",
             AntiFlags = (int) EAntiFlags.Shaman,
+            Flags = 1u,
             Applies =
             [
                 new ItemApplyData {Type = (byte) EApplyType.AttackSpeed, Value = 22},
