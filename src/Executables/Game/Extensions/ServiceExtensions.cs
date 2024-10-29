@@ -42,15 +42,11 @@ public static class ServiceExtensions
         services.AddSingleton<IParserService, ParserService>();
         services.AddSingleton<ISpawnGroupProvider, SpawnGroupProvider>();
         services.AddSingleton<ISpawnPointProvider, SpawnPointProvider>();
-        services.AddSingleton<IDropProvider, DropProvider>();
         services.AddSingleton<IJobManager, JobManager>();
         services.AddSingleton<IAtlasProvider, AtlasProvider>();
         services.AddSingleton<IStructuredFileProvider, StructuredFileProvider>();
-        services.AddSingleton<IAnimationManager, AnimationManager>();
-        services.AddSingleton<IExperienceManager, ExperienceManager>();
         services.AddSingleton<IChatManager, ChatManager>();
         services.AddSingleton<IQuestManager, QuestManager>();
-        services.AddSingleton<ISkillManager, SkillManager>();
         services.AddSingleton<ISessionManager, SessionManager>();
 
         services.AddSingleton<IWorld, World.World>();
