@@ -1,5 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using QuantumCore.API;
@@ -20,16 +21,19 @@ internal partial class AtlasProvider : IAtlasProvider
     private readonly ILogger<AtlasProvider> _logger;
     private readonly IDropProvider _dropProvider;
     private readonly IItemManager _itemManager;
+    private readonly IFileProvider _fileProvider;
 
     /// <summary>
     /// Regex for parsing lines in the atlas info
     /// </summary>
-    [GeneratedRegex(@"^([a-zA-Z0-9\/_]+)[\s]+([0-9]+)[\s]+([0-9]+)[\s]+([0-9]+)[\s]+([0-9]+)$", RegexOptions.Compiled, 100)]
+    [GeneratedRegex(@"^([a-zA-Z0-9\/_]+)[\s]+([0-9]+)[\s]+([0-9]+)[\s]+([0-9]+)[\s]+([0-9]+)$", RegexOptions.Compiled,
+        100)]
     private static partial Regex LineParser();
 
     public AtlasProvider(IConfiguration configuration, IMonsterManager monsterManager,
         IAnimationManager animationManager, ISpawnPointProvider spawnPointProvider, IOptions<HostingOptions> options,
-        ICacheManager cacheManager, ILogger<AtlasProvider> logger, IDropProvider dropProvider, IItemManager itemManager)
+        ICacheManager cacheManager, ILogger<AtlasProvider> logger, IDropProvider dropProvider, IItemManager itemManager,
+        IFileProvider fileProvider)
     {
         _configuration = configuration;
         _monsterManager = monsterManager;
@@ -40,6 +44,7 @@ internal partial class AtlasProvider : IAtlasProvider
         _logger = logger;
         _dropProvider = dropProvider;
         _itemManager = itemManager;
+        _fileProvider = fileProvider;
     }
 
     public async Task<IEnumerable<IMap>> GetAsync(IWorld world)
@@ -48,17 +53,18 @@ internal partial class AtlasProvider : IAtlasProvider
         var maxY = 0u;
 
         // Load atlasinfo.txt and initialize all maps the game core hosts
-        if (!File.Exists("data/atlasinfo.txt"))
+        var fileInfo = _fileProvider.GetFileInfo("atlasinfo.txt");
+        if (!fileInfo.Exists)
         {
-            throw new FileNotFoundException("Unable to find file data/atlasinfo.txt");
+            throw new FileNotFoundException($"Unable to find file {fileInfo.PhysicalPath}");
         }
 
-        var maps = _configuration.GetSection("maps").Get<string[]>() ?? Array.Empty<string>();
+        var maps = _configuration.GetSection("maps").Get<string[]>() ?? [];
         var returnList = new List<IMap>();
-        using var reader = new StreamReader("data/atlasinfo.txt");
-        string line;
+        await using var fs = fileInfo.CreateReadStream();
+        using var reader = new StreamReader(fs);
         var lineNo = 0;
-        while ((line = (await reader.ReadLineAsync())?.Trim()!) != null)
+        while ((await reader.ReadLineAsync())?.Trim()! is { } line)
         {
             lineNo++;
             if (string.IsNullOrWhiteSpace(line)) continue; // skip empty lines
@@ -82,7 +88,8 @@ internal partial class AtlasProvider : IAtlasProvider
                     else
                     {
                         map = new Map(_monsterManager, _animationManager, _cacheManager, world, _options, _logger,
-                            _spawnPointProvider, _dropProvider, _itemManager, mapName, positionX, positionY, width, height);
+                            _spawnPointProvider, _dropProvider, _itemManager, mapName, positionX, positionY, width,
+                            height);
                     }
 
 

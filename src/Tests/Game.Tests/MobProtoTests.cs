@@ -1,18 +1,41 @@
 ﻿using FluentAssertions;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.FileProviders.Physical;
+using NSubstitute;
+using QuantumCore.API;
 using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.World;
-using QuantumCore.Core.Types;
+using QuantumCore.Game;
 
 namespace Game.Tests;
 
 public class MobProtoTests
 {
+    private readonly IMonsterManager _monsterManager;
+
+    public MobProtoTests()
+    {
+        _monsterManager = new ServiceCollection()
+            .AddSingleton<IMonsterManager, MonsterManager>()
+            .AddLogging()
+            .AddSingleton(_ =>
+            {
+                var mock = Substitute.For<IFileProvider>();
+                mock.GetFileInfo(Arg.Any<string>()).ReturnsForAnyArgs(call =>
+                    new PhysicalFileInfo(new FileInfo(Path.Combine("Fixtures", call.Arg<string>()))));
+                return mock;
+            })
+            .BuildServiceProvider()
+            .GetRequiredService<IMonsterManager>();
+    }
+
     [Fact]
     public async Task CanRead()
     {
-        var monsters = await new MobProtoLoader().LoadAsync("Fixtures/mob_proto");
-        monsters.Should().HaveCount(1);
+        await _monsterManager.LoadAsync();
+        var monsters = _monsterManager.GetMonsters();
         // map to another type so we don't include any library properties
         new MonsterData
         {
