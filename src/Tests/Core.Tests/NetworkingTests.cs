@@ -18,12 +18,12 @@ public class NetworkingTests
             .AddSingleton<IConfiguration>(_ => new ConfigurationBuilder()
                 .AddInMemoryCollection(new Dictionary<string, string?>
                 {
-                    { "Mode", "game" },
-                    { "BufferSize", bufferSize.ToString() }
+                    {"Mode", "game"},
+                    {"BufferSize", bufferSize.ToString()}
                 })
                 .Build())
             .AddLogging()
-            .AddSingleton<IPacketManager>(provider =>
+            .AddKeyedSingleton<IPacketManager>("game", (provider, _) =>
             {
                 return new PacketManager(provider.GetRequiredService<ILogger<PacketManager>>(), new[]
                 {
@@ -33,17 +33,17 @@ public class NetworkingTests
                     typeof(ShopBuy)
                 });
             })
-            .AddSingleton<IPacketReader, PacketReader>()
+            .AddKeyedSingleton<IPacketReader, PacketReader>("game")
             .BuildServiceProvider();
-        return services.GetRequiredService<IPacketReader>();
+        return services.GetRequiredKeyedService<IPacketReader>("game");
     }
-    
+
     [Fact]
     public async Task Simple()
     {
         var obj = new Attack
         {
-            Unknown = new byte [] {0, 0},
+            Unknown = new byte[] {0, 0},
             Vid = 1_000_000,
             AttackType = 53
         };
@@ -52,12 +52,12 @@ public class NetworkingTests
         obj.Serialize(bytes);
 
         using var stream = new MemoryStream(bytes);
-        var results = await GetReader(16).EnumerateAsync(stream).ToArrayAsync(); 
+        var results = await GetReader(16).EnumerateAsync(stream).ToArrayAsync();
 
         results.Should().HaveCount(1);
         results[0].Should().BeEquivalentTo(obj);
     }
-    
+
     [Fact]
     public async Task SubPacket()
     {
@@ -71,12 +71,12 @@ public class NetworkingTests
         obj.Serialize(bytes);
 
         using var stream = new MemoryStream(bytes);
-        var results = await GetReader().EnumerateAsync(stream).ToArrayAsync(); 
+        var results = await GetReader().EnumerateAsync(stream).ToArrayAsync();
 
         results.Should().HaveCount(1);
         results[0].Should().BeEquivalentTo(obj);
     }
-    
+
     [Fact]
     public async Task MultipleWithSequence()
     {
@@ -84,7 +84,7 @@ public class NetworkingTests
         {
             Vid = 1_000_000,
             AttackType = 5,
-            Unknown = new byte[]{0,0}
+            Unknown = new byte[] {0, 0}
         };
         var size = obj.GetSize();
         var bytes = new byte[size * 2];
@@ -92,12 +92,12 @@ public class NetworkingTests
         obj.Serialize(bytes, size);
 
         using var stream = new MemoryStream(bytes);
-        var results = await GetReader().EnumerateAsync(stream).ToArrayAsync(); 
+        var results = await GetReader().EnumerateAsync(stream).ToArrayAsync();
 
         results.Should().HaveCount(2);
         results.Should().AllBeEquivalentTo(obj);
     }
-    
+
     [Fact]
     public async Task Dynamic()
     {
@@ -111,12 +111,12 @@ public class NetworkingTests
         obj.Serialize(bytes);
 
         using var stream = new MemoryStream(bytes);
-        var results = await GetReader(4096).EnumerateAsync(stream).ToArrayAsync(); 
+        var results = await GetReader(4096).EnumerateAsync(stream).ToArrayAsync();
 
         results.Should().HaveCount(1);
         results[0].Should().BeEquivalentTo(obj);
     }
-    
+
     [Fact]
     public async Task BufferToSmall()
     {
@@ -130,16 +130,17 @@ public class NetworkingTests
         obj.Serialize(bytes);
 
         using var stream = new MemoryStream(bytes);
-        
-        await Assert.ThrowsAsync<InvalidOperationException>(() => GetReader(4).EnumerateAsync(stream).ToArrayAsync().AsTask());
+
+        await Assert.ThrowsAsync<InvalidOperationException>(() =>
+            GetReader(4).EnumerateAsync(stream).ToArrayAsync().AsTask());
     }
-    
+
     [Fact]
     public async Task Multiple()
     {
         var obj = new Attack
         {
-            Unknown = new byte [] {0, 0},
+            Unknown = new byte[] {0, 0},
             Vid = 1_000_000,
             AttackType = 53
         };
@@ -149,19 +150,19 @@ public class NetworkingTests
         obj.Serialize(bytes, size);
 
         using var stream = new MemoryStream(bytes);
-        var results = await GetReader(16).EnumerateAsync(stream).ToArrayAsync(); 
+        var results = await GetReader(16).EnumerateAsync(stream).ToArrayAsync();
 
         results.Should().HaveCount(2);
         results[0].Should().BeEquivalentTo(obj);
         results[1].Should().BeEquivalentTo(obj);
     }
-    
+
     [Fact]
     public async Task MoreThanBuffer()
     {
         var obj = new Attack
         {
-            Unknown = new byte [] {0, 0},
+            Unknown = new byte[] {0, 0},
             Vid = 1_000_000,
             AttackType = 53
         };
@@ -172,14 +173,14 @@ public class NetworkingTests
         obj.Serialize(bytes, size * 2);
 
         using var stream = new MemoryStream(bytes);
-        var results = await GetReader(16).EnumerateAsync(stream).ToArrayAsync(); 
+        var results = await GetReader(16).EnumerateAsync(stream).ToArrayAsync();
 
         results.Should().HaveCount(3);
         results[0].Should().BeEquivalentTo(obj);
         results[1].Should().BeEquivalentTo(obj);
         results[2].Should().BeEquivalentTo(obj);
     }
-    
+
     [Fact]
     public async Task OddSize()
     {
@@ -195,12 +196,12 @@ public class NetworkingTests
         }
 
         using var stream = new MemoryStream(bytes);
-        var results = await GetReader(16).EnumerateAsync(stream).ToArrayAsync(); 
+        var results = await GetReader(16).EnumerateAsync(stream).ToArrayAsync();
 
         results.Should().HaveCount(10);
         results.Should().AllBeEquivalentTo(obj);
     }
-    
+
     [Fact]
     public async Task DifferentPackets()
     {
@@ -210,7 +211,7 @@ public class NetworkingTests
         };
         var attackObj = new Attack
         {
-            Unknown = new byte [] {0, 0},
+            Unknown = new byte[] {0, 0},
             Vid = 1_000_000,
             AttackType = 53
         };
@@ -221,7 +222,7 @@ public class NetworkingTests
         attackObj.Serialize(bytes, charDeadSize);
 
         using var stream = new MemoryStream(bytes);
-        var results = await GetReader(32).EnumerateAsync(stream).ToArrayAsync(); 
+        var results = await GetReader(32).EnumerateAsync(stream).ToArrayAsync();
 
         results.Should().HaveCount(2);
         results[0].Should().BeEquivalentTo(charDeadObj);

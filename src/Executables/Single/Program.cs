@@ -4,6 +4,8 @@ using Game.Caching.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Options;
 using QuantumCore;
 using QuantumCore.Auth;
 using QuantumCore.Auth.Extensions;
@@ -33,22 +35,30 @@ await Parser.Default.ParseArguments<SingleRunArgs>(args)
             typeof(InMemoryRedisStore), ServiceLifetime.Singleton));
         hostBuilder.Services.Replace(new ServiceDescriptor(typeof(IRedisStore), CacheStoreType.Server,
             typeof(InMemoryRedisStore), ServiceLifetime.Singleton));
-        hostBuilder.Services.Configure<DatabaseOptions>("game", opts =>
+        hostBuilder.Services.AddSingleton<IConfigureOptions<DatabaseOptions>>(provider =>
         {
-            opts.Provider = DatabaseProvider.Sqlite;
-            opts.ConnectionString = $"Data Source={dataDir}/database.db";
+            var fileProvider = provider.GetRequiredService<IFileProvider>();
+            var filePath = fileProvider.GetFileInfo("database.db").PhysicalPath;
+            return new ConfigureNamedOptions<DatabaseOptions>("game", opts =>
+            {
+                opts.Provider = DatabaseProvider.Sqlite;
+                opts.ConnectionString = $"Data Source={filePath}";
+            });
         });
-        hostBuilder.Services.Configure<DatabaseOptions>("auth", opts =>
+        hostBuilder.Services.AddSingleton<IConfigureOptions<DatabaseOptions>>(provider =>
         {
-            opts.Provider = DatabaseProvider.Sqlite;
-            opts.ConnectionString = $"Data Source={dataDir}/database.db";
+            var fileProvider = provider.GetRequiredService<IFileProvider>();
+            var filePath = fileProvider.GetFileInfo("database.db").PhysicalPath;
+            return new ConfigureNamedOptions<DatabaseOptions>("auth", opts =>
+            {
+                opts.Provider = DatabaseProvider.Sqlite;
+                opts.ConnectionString = $"Data Source={filePath}";
+            });
         });
         hostBuilder.Services.Configure<HostingOptions>("game", opts => { opts.Port = 13001; });
         hostBuilder.Services.Configure<HostingOptions>("auth", opts => { opts.Port = 11002; });
 
         var host = hostBuilder.Build();
-
-        if (!Directory.Exists(dataDir)) Directory.CreateDirectory(dataDir);
 
         using var serviceScope = host.Services.CreateScope();
         var gameDb = serviceScope.ServiceProvider.GetRequiredService<GameDbContext>();

@@ -44,7 +44,7 @@ public class WorldTests
             .AddGameCaching()
             .AddQuantumCoreDatabase()
             .AddGameServices()
-            .Configure<DatabaseOptions>(opts =>
+            .Configure<DatabaseOptions>("game", opts =>
             {
                 opts.ConnectionString = "Server:abc;";
                 opts.Provider = DatabaseProvider.Mysql;

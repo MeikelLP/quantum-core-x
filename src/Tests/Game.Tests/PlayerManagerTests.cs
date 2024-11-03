@@ -1,4 +1,3 @@
-using System.Drawing;
 using FluentAssertions;
 using Game.Caching;
 using Game.Tests.Fixtures;
@@ -10,7 +9,6 @@ using Microsoft.Extensions.Options;
 using QuantumCore;
 using QuantumCore.API.Core.Models;
 using QuantumCore.Caching;
-using QuantumCore.Core.Utils;
 using QuantumCore.Game;
 using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Persistence;
@@ -53,7 +51,7 @@ public class PlayerManagerTests : IClassFixture<RedisFixture>, IClassFixture<Dat
                 })
                 .Build())
             .AddGameServices()
-            .Configure<DatabaseOptions>(opts =>
+            .Configure<DatabaseOptions>("game", opts =>
             {
                 opts.ConnectionString = databaseFixture.Container.GetConnectionString();
                 opts.Provider = DatabaseProvider.Mysql;
@@ -90,7 +88,7 @@ public class PlayerManagerTests : IClassFixture<RedisFixture>, IClassFixture<Dat
         var accountId = Guid.NewGuid();
         await _cachePlayer.SetTempEmpireAsync(accountId, empire);
         var player = await _playerManager.CreateAsync(accountId, "Testificate", 0, 1);
-        
+
         player.Should().BeEquivalentTo(new PlayerData
         {
             AccountId = accountId,
