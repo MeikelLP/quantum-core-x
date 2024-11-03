@@ -55,7 +55,11 @@ public static class QuantumCoreHostBuilder
         }
 
         host.Services.AddSingleton<IFileProvider>(provider =>
-            new PhysicalFileProvider(provider.GetRequiredService<IHostEnvironment>().ContentRootPath));
+        {
+            var contentRootPath = provider.GetRequiredService<IHostEnvironment>().ContentRootPath;
+            if (!Directory.Exists(contentRootPath)) Directory.CreateDirectory(contentRootPath);
+            return new PhysicalFileProvider(contentRootPath);
+        });
         host.Services.AddCoreServices(pluginCatalog, host.Configuration);
 
         var serviceCollectionPluginTypes = pluginCatalog.GetPlugins()
