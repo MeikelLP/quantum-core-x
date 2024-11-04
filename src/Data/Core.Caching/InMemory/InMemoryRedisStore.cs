@@ -17,7 +17,7 @@ public class InMemoryRedisStore : IRedisStore
     {
         if (_dict.TryGetValue(name, out var value))
         {
-            if (value.Expiry is not null && value.Expiry > DateTime.UtcNow)
+            if (value.Expiry is not null && value.Expiry < DateTime.UtcNow)
             {
                 _dict.Remove(name);
             }
@@ -49,7 +49,7 @@ public class InMemoryRedisStore : IRedisStore
     {
         if (_dict.TryGetValue(key, out var value))
         {
-            if (value.Expiry is not null && value.Expiry > DateTime.UtcNow)
+            if (value.Expiry is not null && value.Expiry < DateTime.UtcNow)
             {
                 _dict.Remove(key);
                 return default;
@@ -65,7 +65,7 @@ public class InMemoryRedisStore : IRedisStore
     {
         if (_dict.TryGetValue(key, out var value))
         {
-            if (value.Expiry is not null && value.Expiry > DateTime.UtcNow)
+            if (value.Expiry is not null && value.Expiry < DateTime.UtcNow)
             {
                 _dict.Remove(key);
                 return ValueTask.FromResult(0L);
@@ -159,7 +159,7 @@ public class InMemoryRedisStore : IRedisStore
         }
 
         _dict[key] = ((int) tuple.Value + 1, tuple.Expiry);
-        return ValueTask.FromResult((long) _dict[key].Value);
+        return ValueTask.FromResult(Convert.ToInt64(_dict[key].Value));
     }
 
     /// <summary>
