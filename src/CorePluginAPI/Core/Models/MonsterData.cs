@@ -30,7 +30,7 @@ public class MonsterData
     [FieldOrder(12)] public byte RegenDelay { get; set; }
     [FieldOrder(13)] public byte RegenPercentage { get; set; }
     [FieldOrder(14)] public ushort Defence { get; set; }
-    [FieldOrder(15)] public uint AiFlag { get; set; }
+    [FieldOrder(15)] public EAiFlags AiFlag { get; set; }
     [FieldOrder(16)] public uint RaceFlag { get; set; }
     [FieldOrder(17)] public uint ImmuneFlag { get; set; }
     [FieldOrder(18)] public byte St { get; set; }

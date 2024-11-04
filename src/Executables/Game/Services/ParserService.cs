@@ -42,8 +42,7 @@ public partial class ParserService : IParserService
             Y = int.Parse(splitted[2]),
             RangeX = int.Parse(splitted[3]),
             RangeY = int.Parse(splitted[4]),
-            Direction = int.Parse(splitted[5]),
-            // splitted[6],
+            Direction = (ESpawnPointDirection)int.Parse(splitted[6]),
             RespawnTime = ParseSecondsFromTimespanString(splitted[7].Trim()),
             Chance = short.Parse(splitted[8]),
             MaxAmount = short.Parse(splitted[9]),
@@ -492,8 +491,6 @@ public partial class ParserService : IParserService
         
         return new CommonDropEntry(minLevel, maxLevel, itemId, percentage);
     }
-    
-    
     
     private static bool IsEmptyOrContainsNewlineOrTab(string str)
     {

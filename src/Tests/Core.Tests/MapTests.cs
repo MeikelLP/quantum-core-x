@@ -10,6 +10,7 @@ using QuantumCore.API;
 using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game.World;
 using QuantumCore.Caching;
+using QuantumCore.Core.Event;
 using QuantumCore.Game.Services;
 using QuantumCore.Game.World;
 using QuantumCore.Game.World.Entities;
@@ -135,10 +136,12 @@ public class MapTests
                 Type = ESpawnPointType.Monster,
                 Monster = 101,
                 X = 500,
-                Y = 500
+                Y = 500,
+                RespawnTime = 0,
             }
         };
         await _world.Load();
+        EventSystem.Update(0);
         _world.Update(0); // spawn entities
 
         _map.Entities.Should().HaveCount(1);
@@ -157,10 +160,12 @@ public class MapTests
                 Type = ESpawnPointType.Group,
                 Monster = 101,
                 X = 500,
-                Y = 500
+                Y = 500,
+                RespawnTime = 0,
             }
         };
         await _world.Load();
+        EventSystem.Update(0);
         _world.Update(0); // spawn entities
 
         _map.Entities.Should().HaveCount(3);
@@ -178,10 +183,12 @@ public class MapTests
                 Type = ESpawnPointType.GroupCollection,
                 Monster = 101,
                 X = 500,
-                Y = 500
+                Y = 500,
+                RespawnTime = 0,
             }
         };
         await _world.Load();
+        EventSystem.Update(0);
         _world.Update(0); // spawn entities
 
         _map.Entities.Should().HaveCount(3);

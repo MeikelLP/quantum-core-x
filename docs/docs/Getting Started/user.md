@@ -4,165 +4,96 @@ In this guide a _User_ refers to someone who wants to host/administrate QCX.
 
 ## Prerequisites
 
-* Docker (or any OCI compliant alternative)
+* Docker (or any OCI compliant alternative with docker compose feature)
 * A TMP4 compatible client (just google for "TMP4 Client")
 
 ## Quickstart
 
-### Requirements
+1. Get the files from the sample in the [sample folder](https://github.com/MeikelLP/quantum-core-x/tree/master/docs/samples/full-setup)
 
-Save the following files in a new directory
+2. execute the `Eternexus\--dump_proto--\dump_proto.exe` in the client's directory. This should create two files:
 
-* `game.appsettings.json`
+    * `item_proto`
+    * `mob_proto`
 
-  ```json
-  {
-    "Hosting": {
-      "Port": 13001
-    },
-    "Cache": {
-      "Host": "cache",
-      "Port": 6379
-    },
-    "Database": {
-      "Provider": "mysql",
-      "ConnectionString": "Server=localhost;Database=game;Uid=root;Pwd=supersecure.123;"
-    },
-    "maps": [
-      "metin2_map_a1",
-      "metin2_map_b1",
-      "metin2_map_c1"
-    ]
-  }
+3. Your folder should look like this now:
+  
+    ```txt
+    auth.appsettings.json
+    docker-compose.yml
+    game.appsettings.json
+    data/
+      atlasinfo.txt
+      exp.csv
+      item_proto
+      jobs.json
+      mob_proto
     ```
-
-* `auth.appsettings.json`
-
-  ```json
-  {
-    "Hosting": {
-      "Port": 11002
-    },
-    "Cache": {
-      "Host": "cache",
-      "Port": 6379
-    },
-    "Database": {
-      "Provider": "mysql",
-      "ConnectionString": "Server=localhost;Database=auth;Uid=root;Pwd=supersecure.123;"
-    }
-  }
-  ```
-
-* `docker-compose.yml`
-
-  ```yml
-  version: '3'
-  services:
-  
-    # authentication service
-    auth:
-      image: ghcr.io/meikellp/quantum-core-x/auth
-      restart: unless-stopped
-      ports:
-        - "11002:11002"
-      volumes:
-        - ./auth.appsettings.json:/app/Core/appsettings.Production.json:ro
-  
-    # game service
-    game:
-      image: ghcr.io/meikellp/quantum-core-x/game
-      restart: unless-stopped
-      ports:
-        - "13001:13001"
-      volumes:
-        - ./game.appsettings.json:/app/Core/appsettings.Production.json:ro
-        - ./settings.toml:/app/Core/settings.toml:ro
-        - ./data:/app/Core/data:ro
-  
-    # redis holds live data of the game world
-    # used as distributed memory between server nodes
-    cache:
-      image: redis:latest
-      restart: unless-stopped
-      volumes:
-        - cache_data:/data
-      ports:
-        - "6379:6379"
-  
-    # persistent storage for game data
-    db:
-      image: mariadb:latest
-      ports:
-        - "3306:3306"
-      environment:
-        - MARIADB_USER=metin2
-        - MARIADB_PASSWORD=metin2
-        - MARIADB_ROOT_PASSWORD=supersecure.123
-      volumes:
-        - db_data:/var/lib/mysql
-  
-  volumes:
-    cache_data:
-    db_data:
-  ```
-
-* `atlasinfo.txt`
-
-  ```tsv
-  metin2_map_a1	409600	896000	4	5
-  metin2_map_a3	307200	819200	4	4
-  metin2_map_b1	0	102400	4	5
-  ```
-
-* execute the `Eternexus\--dump_proto--\dump_proto.exe` in the client's directory. This should create two files:
-  * `item_proto`
-  * `mob_proto`
-
-* Lastly move the files to look like this:
-  
-  ```txt
-  auth.appsettings.json
-  docker-compose.yml
-  game.appsettings.json
-  data/
-    atlasinfo.txt
-    exp.csv
-    item_proto
-    jobs.json
-    mob_proto
-  ```
-
-### Create an admin account
-
-A default user `admin` with password `admin` is created for you by default.
-
-:::warning
-If you plan on opening up the server to other people you should change that admins password.
-:::
-
-:::tip
-For more infos about account creation look at [Account Creation](../Guides/account-creation.md)
-:::
 
 ### Setup client
 
- See [Client](client.md) to setup your client
+Replace the contents of the `serverinfo.py` from your client with this:
+
+```py
+SERVER_NAME			= "QuantumCoreX"
+SERVER_IP			= "localhost"
+CH1_NAME			= "CH1"
+PORT_1				= 13000
+PORT_AUTH			= 11000
+PORT_MARK			= 13000
+
+STATE_NONE = "..."
+
+STATE_DICT = {
+	0 : "....",
+	1 : "NORM",
+	2 : "BUSY",
+	3 : "FULL"
+}
+
+SERVER01_CHANNEL_DICT = {
+	1:{"key":11,"name":CH1_NAME,"ip":SERVER_IP,"tcp_port":PORT_1,"udp_port":PORT_1,"state":STATE_NONE,},
+}
+
+REGION_NAME_DICT = {
+	0 : "",		
+}
+
+REGION_AUTH_SERVER_DICT = {
+	0 : {
+		1 : { "ip":SERVER_IP, "port":PORT_AUTH, },
+
+	}		
+}
+
+REGION_DICT = {
+	0 : {
+		1 : { "name" :SERVER_NAME, "channel" : SERVER01_CHANNEL_DICT, },						
+	},
+}
+
+MARKADDR_DICT = {
+	10 : { "ip" : SERVER_IP, "tcp_port" : PORT_MARK, "mark" : "10.tga", "symbol_path" : "10", },
+}
+```
+
+For more information see [Client](client.md)
 
 ### Startup
 
-Start the db detached first because it is not available instantly but we require a valid database as soon as possible.
-
 ```sh
-docker-compose up db -d
+docker-compose up -d
 ```
 
-Finally boot up all services. Add `-d` to run them in the background
+You can now connect to the game & auth server. A default admin user will be created for you:
 
-```sh
-docker-compose up
+```txt
+username: admin
+password: admin
 ```
+
+> :warning: Be sure to change these credentials as soon as you go production!
 
 ## Next steps
 
-* [Add player +permissions](../Guides/player-permission.md)
+* [Add player permissions](../Guides/player-permission.md)

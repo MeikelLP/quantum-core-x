@@ -1,7 +1,3 @@
-# Developer compose file for required services
-# May be used as reference for production use but this file does not contain any best practices
-# This file has no service for the game defined as it will be started from the source code
-
 name: 'Quantum Core X'
 services:
 
@@ -10,12 +6,23 @@ services:
     image: ghcr.io/meikellp/quantum-core-x/auth
     restart: unless-stopped
     ports:
-    - "11002:11002"
-    environment:
-      - "Database:ConnectionString=Server=db;Database=metin2;Uid=metin2;Pwd=metin2;"
-      - "Cache:Host=cache"
+    - "11000:11000"
     volumes:
-      - ./Executables/Auth/appsettings.json:/app/appsettings.json:ro
+    - ./auth.appsettings.json:/app/appsettings.json:ro
+    depends_on:
+      db-mysql:
+        condition: service_healthy
+      cache:
+        condition: service_healthy
+  # game service
+  game:
+    image: ghcr.io/meikellp/quantum-core-x/game
+    restart: unless-stopped
+    ports:
+    - 13000:13000
+    volumes:
+    - ./game.appsettings.json:/app/appsettings.json:ro
+    - ./data:/app/data:ro
     depends_on:
       db-mysql:
         condition: service_healthy
@@ -29,8 +36,6 @@ services:
     restart: unless-stopped
     volumes:
     - cache_data:/data
-    ports:
-    - "6379:6379"
     healthcheck:
       test: [ "CMD", "redis-cli", "--raw", "incr", "ping" ]
       interval: 10s
@@ -41,8 +46,6 @@ services:
   db-mysql:
     image: mariadb:11.3
     hostname: db
-    ports:
-    - "3306:3306"
     environment:
     - MARIADB_USER=metin2
     - MARIADB_PASSWORD=metin2
