@@ -14,7 +14,7 @@ using QuantumCore.Game.Persistence.Entities;
 
 namespace QuantumCore.Game.Commands;
 
-internal class CommandManager : ICommandManager
+internal class CommandManager : ICommandManager, ILoadable
 {
     private readonly ILogger<CommandManager> _logger;
     private readonly ICacheManager _cacheManager;

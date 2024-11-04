@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Text;
 using System.Text.RegularExpressions;
 using EnumsNET;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
@@ -16,17 +17,19 @@ namespace QuantumCore.Game.Services;
 
 public partial class ParserService : IParserService
 {
+    private readonly IFileProvider _fileProvider;
     private static readonly NumberFormatInfo InvNum = NumberFormatInfo.InvariantInfo;
     private static readonly Encoding DefaultEncoding = Encoding.GetEncoding("EUC-KR");
     private const StringComparison INV_CUL = StringComparison.InvariantCultureIgnoreCase;
 
     private readonly ILogger<ParserService> _logger;
-    
-    public ParserService(ILoggerFactory loggerFactory)
+
+    public ParserService(ILoggerFactory loggerFactory, IFileProvider fileProvider)
     {
+        _fileProvider = fileProvider;
         _logger = loggerFactory.CreateLogger<ParserService>();
     }
-    
+
 
     public SpawnPoint? GetSpawnFromLine(string line)
     {
@@ -42,15 +45,16 @@ public partial class ParserService : IParserService
             Y = int.Parse(splitted[2]),
             RangeX = int.Parse(splitted[3]),
             RangeY = int.Parse(splitted[4]),
-            Direction = (ESpawnPointDirection)int.Parse(splitted[6]),
+            Direction = (ESpawnPointDirection) int.Parse(splitted[6]),
             RespawnTime = ParseSecondsFromTimespanString(splitted[7].Trim()),
             Chance = short.Parse(splitted[8]),
             MaxAmount = short.Parse(splitted[9]),
             Monster = uint.Parse(splitted[10])
         };
     }
-    
-    public async Task<ImmutableArray<CommonDropEntry>> GetCommonDropsAsync(TextReader sr, CancellationToken cancellationToken = default)
+
+    public async Task<ImmutableArray<CommonDropEntry>> GetCommonDropsAsync(TextReader sr,
+        CancellationToken cancellationToken = default)
     {
         var list = new List<CommonDropEntry>();
         while (await sr.ReadLineAsync(cancellationToken) is { } line)
@@ -60,21 +64,24 @@ public partial class ParserService : IParserService
 
         return list.ToImmutableArray();
     }
-    
+
     public async Task<ImmutableArray<SkillData>> GetSkillsAsync(string path, CancellationToken token = default)
     {
-        if (!File.Exists(path))
+        var file = _fileProvider.GetFileInfo(path);
+        if (!file.Exists)
         {
             _logger.LogWarning("{Path} does not exist, skills information not loaded", path);
             return [];
         }
-        
+
         var list = new List<SkillData>();
-        
-        await foreach(var line in File.ReadLinesAsync(path, DefaultEncoding, token))
+        await using var fs = file.CreateReadStream();
+        using var sr = new StreamReader(fs);
+        while (!sr.EndOfStream)
         {
+            var line = await sr.ReadLineAsync(token).ConfigureAwait(false);
             if (string.IsNullOrWhiteSpace(line) || !StartsWithNumberRegex().IsMatch(line)) continue;
-            
+
             // parse line
             var split = line.Split('\t');
 
@@ -85,7 +92,7 @@ public partial class ParserService : IParserService
                     _logger.LogWarning("Failed to parse Skill with Id({Id}) from line: {Line}", split[0], line);
                     continue;
                 }
-                
+
                 var data = new SkillData
                 {
                     Id = id,
@@ -116,7 +123,7 @@ public partial class ParserService : IParserService
                     TargetRange = int.Parse(split[25]),
                     SplashRange = uint.Parse(split[26])
                 };
-                
+
                 list.Add(data);
             }
             catch (Exception e)
@@ -127,18 +134,19 @@ public partial class ParserService : IParserService
 
         return [..list];
     }
-    
+
     public async Task<List<DataFileGroup>> ParseFileGroups(StreamReader sr)
     {
         var groups = new List<DataFileGroup>();
         DataFileGroup? currentGroup = null;
-        
+
         while (await sr.ReadLineAsync() is { } line && sr.EndOfStream == false)
         {
             if (line.Trim().All(c => c == '\t') || string.IsNullOrWhiteSpace(line.Trim()))
             {
                 continue;
             }
+
             if (line.StartsWith("Group", INV_CUL))
             {
                 line = line.Trim();
@@ -146,24 +154,24 @@ public partial class ParserService : IParserService
                 {
                     groups.Add(currentGroup);
                 }
-                
+
                 // remove empty or whitespace entries
                 line = SplitByWhitespaceOrTabRegex().Replace(line, " ");
-                currentGroup = new DataFileGroup { Name = line.Split()[1] };
+                currentGroup = new DataFileGroup {Name = line.Split()[1]};
             }
             else if (!string.IsNullOrWhiteSpace(line) && currentGroup != null)
             {
                 var parts = SplitByWhitespaceOrTabRegex().Split(line).ToList();
-                
+
                 parts.RemoveAll(IsEmptyOrContainsNewlineOrTab);
-                
+
                 if (parts.Count == 0) continue; // can happen due to filtering
-                
+
                 for (var i = 0; i < parts.Count; i++)
                 {
                     parts[i] = parts[i].Trim();
                 }
-                
+
                 if (!StartsWithNumberRegex().IsMatch(parts[0])) // Assuming all fields do not start with a number
                 {
                     currentGroup.Fields[parts[0].Trim()] = parts[^1].Trim();
@@ -180,21 +188,21 @@ public partial class ParserService : IParserService
         {
             groups.Add(currentGroup);
         }
-        
+
         return groups;
     }
-    
+
     public MonsterDropContainer? ParseMobGroup(DataFileGroup group, IItemManager itemManager)
     {
         uint minKillCount = 0;
         uint levelLimit = 0;
-        
+
         var type = group.GetField<string>("Type");
         if (type == default)
         {
             throw new MissingRequiredFieldException("Type");
         }
-        
+
         var monsterProtoId = group.GetField<uint>("Mob");
         if (monsterProtoId == default)
         {
@@ -209,7 +217,7 @@ public partial class ParserService : IParserService
         {
             minKillCount = 1;
         }
-        
+
         if (type.Equals("Limit", INV_CUL))
         {
             levelLimit = group.GetField<uint>("Level_limit");
@@ -246,29 +254,29 @@ public partial class ParserService : IParserService
                     {
                         throw new MissingRequiredFieldException("ItemProtoId");
                     }
+
                     itemProtoId = item.Id;
                 }
-                
+
                 var count = uint.Parse(dropData[2], InvNum);
                 if (count < 1)
                 {
                     throw new MissingRequiredFieldException("Count");
                 }
-                
+
                 var chance = uint.TryParse(dropData[3], InvNum, out var ch) ? ch : 0;
                 if (chance <= 0)
                 {
                     throw new MissingRequiredFieldException("Chance");
                 }
-                
+
                 var rareChance = int.Parse(dropData[4], InvNum);
                 rareChance = MathUtils.MinMax(0, rareChance, 100);
-                
+
                 entry.AddDrop(itemProtoId, count, chance, (uint) rareChance);
             }
-            
+
             return entry;
-            
         }
 
         if (type.Equals("Drop", INV_CUL)) // DropItemGroup
@@ -285,24 +293,24 @@ public partial class ParserService : IParserService
                 {
                     throw new MissingRequiredFieldException("ItemProtoId");
                 }
-                
+
                 var count = uint.Parse(dropData[2], InvNum);
                 if (count < 1)
                 {
                     throw new MissingRequiredFieldException("Count");
                 }
-                
+
                 var chance = float.Parse(dropData[3], InvNum);
                 if (chance <= 0)
                 {
                     throw new MissingRequiredFieldException("Chance");
                 }
-                
+
                 chance *= 10000.0f; // to make it 0-1000
-                
-                entry.Drops.Add(new DropItemGroup.Drop { ItemProtoId = itemProtoId, Amount = count, Chance = chance });
+
+                entry.Drops.Add(new DropItemGroup.Drop {ItemProtoId = itemProtoId, Amount = count, Chance = chance});
             }
-            
+
             return entry;
         }
 
@@ -312,7 +320,7 @@ public partial class ParserService : IParserService
             {
                 LevelLimit = levelLimit
             };
-            
+
             foreach (var dropData in group.Data)
             {
                 uint itemProtoId = uint.TryParse(dropData[1], InvNum, out var id) ? id : 0;
@@ -323,29 +331,30 @@ public partial class ParserService : IParserService
                     {
                         throw new MissingRequiredFieldException("ItemProtoId");
                     }
+
                     itemProtoId = item.Id;
                 }
-                
+
                 var count = uint.Parse(dropData[2], InvNum);
                 if (count < 1)
                 {
                     throw new MissingRequiredFieldException("Count");
                 }
-                
+
                 var chance = float.Parse(dropData[3], InvNum);
                 if (chance <= 0)
                 {
                     throw new MissingRequiredFieldException("Chance");
                 }
-                
+
                 chance *= 10000.0f; // to make it 0-1000
-                
-                entry.Drops.Add(new LevelItemGroup.Drop { ItemProtoId = itemProtoId, Amount = count, Chance = chance });
+
+                entry.Drops.Add(new LevelItemGroup.Drop {ItemProtoId = itemProtoId, Amount = count, Chance = chance});
             }
-            
+
             return entry;
         }
-        
+
         return null;
     }
 
@@ -369,11 +378,11 @@ public partial class ParserService : IParserService
 
         throw new ArgumentOutOfRangeException(nameof(str), $"Don't know how to parse \"{str}\" to TimeSpan");
     }
-    
+
     private static ESkillFlag ExtractSkillFlags(string value)
     {
         ESkillFlag result = 0;
-        
+
         if (string.IsNullOrWhiteSpace(value))
         {
             return result;
@@ -386,14 +395,14 @@ public partial class ParserService : IParserService
             if (!EnumUtils.TryParseEnum<ESkillFlag>(flag, out var parsed)) continue;
             result |= parsed;
         }
-        
+
         return result;
     }
-    
+
     private static ESkillAffectFlag ExtractAffectFlags(string value)
     {
         ESkillAffectFlag result = 0;
-        
+
         if (string.IsNullOrWhiteSpace(value))
         {
             return result;
@@ -406,7 +415,7 @@ public partial class ParserService : IParserService
             if (!EnumUtils.TryParseEnum<ESkillAffectFlag>(flag, out var parsed)) continue;
             result |= parsed;
         }
-        
+
         return result;
     }
 
@@ -432,12 +441,13 @@ public partial class ParserService : IParserService
     private static CommonDropEntry? ParseCommonDropFromLine(ReadOnlySpan<char> line, out int read)
     {
         //todo: each line has 4 sections (1 section for each mob rank), currently only parsing the first one
-        
+
         var startIndex = 0;
         while (line.Length > startIndex && line[startIndex] == '\t')
         {
             startIndex++;
         }
+
         int minLevelStartIndex;
         if (!line.IsEmpty && char.IsDigit(line[startIndex]))
         {
@@ -478,36 +488,39 @@ public partial class ParserService : IParserService
             read = 0;
             return null;
         }
-        
+
         var minLevel = byte.Parse(line[minLevelStartIndex..minLevelEndIndex]);
         var maxLevel = byte.Parse(line[maxLevelStartIndex..maxLevelEndIndex]);
-        var percentage = float.Parse(line[percentageStartIndex..percentageEndIndex], CultureInfo.InvariantCulture); // math percentage
+        var percentage =
+            float.Parse(line[percentageStartIndex..percentageEndIndex],
+                CultureInfo.InvariantCulture); // math percentage
         var itemId = uint.Parse(line[itemIdStartIndex..itemIdEndIndex]);
-        var outOf = uint.Parse(line[outOfStartIndex..outOfEndIndex]); // TODO: what to do with this value? Doesnt seem to be used, needs confirmation
+        var outOf = uint.Parse(
+            line[outOfStartIndex..outOfEndIndex]); // TODO: what to do with this value? Doesnt seem to be used, needs confirmation
 
         read = outOfEndIndex + 1;
-        
+
         percentage *= 10000.0f; // because percentage here is 1 - 1000
-        
+
         return new CommonDropEntry(minLevel, maxLevel, itemId, percentage);
     }
-    
+
     private static bool IsEmptyOrContainsNewlineOrTab(string str)
     {
-        return string.IsNullOrEmpty(str) 
-               || str.Contains("\n") 
-               || str.Contains("\t") 
-               || str.Contains("{") 
+        return string.IsNullOrEmpty(str)
+               || str.Contains("\n")
+               || str.Contains("\t")
+               || str.Contains("{")
                || str.Contains("}");
     }
-    
+
     [DebuggerDisplay("{Name} | {Fields.Count} - {Data.Count}")]
     public class DataFileGroup
     {
         public string Name { get; set; }
         public Dictionary<string, string> Fields { get; } = new(StringComparer.InvariantCultureIgnoreCase);
         public List<List<string>> Data { get; } = new();
-        
+
         public T? GetField<T>(string key)
         {
             var foundKey = Fields.Keys.FirstOrDefault(k => k.Equals(key, StringComparison.InvariantCultureIgnoreCase));
@@ -515,6 +528,7 @@ public partial class ParserService : IParserService
             {
                 return default;
             }
+
             var value = Fields[foundKey];
             return (T) Convert.ChangeType(value, typeof(T));
         }
@@ -526,10 +540,12 @@ public partial class ParserService : IParserService
             {
                 result += $"\t{field.Key}\t{field.Value}\n";
             }
+
             foreach (var datum in Data)
             {
                 result += $"\t{string.Join("\t", datum)}\n";
             }
+
             result += "}\n";
             return result;
         }
