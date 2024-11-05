@@ -101,6 +101,7 @@ namespace QuantumCore.Game
 
             // Register all default commands
             _commandManager.Register("QuantumCore.Game.Commands", Assembly.GetExecutingAssembly());
+            _commandManager.Register("QuantumCore.Game.Commands.Guild", Assembly.GetExecutingAssembly());
 
             // Put all new connections into login phase
             RegisterNewConnectionListener(connection =>

@@ -35,12 +35,19 @@ internal class GeneratorContext
                         GetTypeInfo(attr).GetFullName() == GeneratorConstants.FIELDATTRIBUTE_FULLNAME
                     )?.ArgumentList!.Arguments;
                 var orderStr = fieldAttrArgs?[0].Expression.ToString();
-                var lengthAttrStr = fieldAttrArgs
-                    ?.FirstOrDefault(par => par.NameEquals?.Name.Identifier.Text == "Length")?.Expression.ToString();
+                var lengthAttrExpression = fieldAttrArgs
+                    ?.FirstOrDefault(par => par.NameEquals?.Name.Identifier.Text == "Length")?.Expression;
                 int? stringLengthAttr = null;
-                if (int.TryParse(lengthAttrStr, out var lengthAttrParsed))
+                if (lengthAttrExpression is BinaryExpressionSyntax or MemberAccessExpressionSyntax)
                 {
-                    stringLengthAttr = lengthAttrParsed;
+                    stringLengthAttr = GetConstantValue(type, lengthAttrExpression);
+                }
+                else if (lengthAttrExpression is LiteralExpressionSyntax literalExpression)
+                {
+                    if (int.TryParse(literalExpression.GetText().ToString(), out var lengthAttrParsed))
+                    {
+                        stringLengthAttr = lengthAttrParsed;
+                    }
                 }
 
                 var arrayLength = GetArrayLength(x);
@@ -90,6 +97,47 @@ internal class GeneratorContext
         }
 
         return finalArr.OrderBy(x => x.Order).ToImmutableArray();
+    }
+
+    private int? GetConstantValue(TypeDeclarationSyntax type, ExpressionSyntax expression)
+    {
+        if (expression is BinaryExpressionSyntax binaryExpressionSyntax)
+        {
+            // simple a + b recursion
+            return new[]
+                {
+                    binaryExpressionSyntax.Left,
+                    binaryExpressionSyntax.Right
+                }
+                .Select(exp => GetConstantValue(type, exp))
+                .Sum();
+        }
+
+        var value = Type.SemanticModel.Compilation
+            .GetSemanticModel(type.SyntaxTree)
+            .GetConstantValue(expression);
+        int? stringLengthAttr;
+        if (value is {HasValue: true})
+        {
+            stringLengthAttr = value.Value switch
+            {
+                byte byteValue => byteValue,
+                ushort ushortValue => ushortValue,
+                short shortValue => shortValue,
+                int intValue => intValue,
+                uint uintValue => (int?) uintValue,
+                long longValue => (int) longValue,
+                ulong longValue => (int) longValue,
+                _ => null
+            };
+        }
+        else
+        {
+            throw new NotImplementedException(
+                $"Cannot get value for constant with value {value.Value}. Only integers are supported.");
+        }
+
+        return stringLengthAttr;
     }
 
     private static int? GetArrayLength(PropertyDeclarationSyntax x)
@@ -207,15 +255,7 @@ internal class GeneratorContext
                 }
                 else if (semanticType is IArrayTypeSymbol arr)
                 {
-                    if (arrayLength is null)
-                    {
-                        // may have dynamic size
-                        return GetStaticSize(arr.ElementType);
-                    }
-                    else
-                    {
-                        return GetStaticSize(arr.ElementType);
-                    }
+                    return GetStaticSize(arr.ElementType);
                 }
                 else if (semanticType.TypeKind is TypeKind.Enum && semanticType is INamedTypeSymbol namedTypeSymbol)
                 {

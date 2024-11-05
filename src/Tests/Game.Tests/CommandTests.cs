@@ -13,6 +13,7 @@ using NSubstitute;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game;
+using QuantumCore.API.Game.Guild;
 using QuantumCore.API.Game.Skills;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.World;
@@ -155,6 +156,8 @@ public class CommandTests : IAsyncLifetime
             .Replace(new ServiceDescriptor(typeof(IItemManager), _ => itemManagerMock, ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(ICacheManager), _ => cacheManagerMock, ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(IJobManager), _ => jobManagerMock, ServiceLifetime.Singleton))
+            .Replace(new ServiceDescriptor(typeof(IGuildManager), _ => Substitute.For<IGuildManager>(),
+                ServiceLifetime.Scoped))
             .Replace(new ServiceDescriptor(typeof(IExperienceManager), _ => experienceManagerMock,
                 ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(ISkillManager), _ => _skillManager, ServiceLifetime.Singleton))
@@ -409,10 +412,11 @@ public class CommandTests : IAsyncLifetime
     {
         await _commandManager.Handle(_connection, "/help");
 
-        (_connection as MockedGameConnection).SentMessages.Should().ContainEquivalentOf(new ChatOutcoming
-            {
-                Message = "The following commands are available:\n"
-            }, cfg => cfg
+        var messages = (_connection as MockedGameConnection).SentMessages;
+        messages.Should().HaveCountGreaterThan(1);
+        messages[0].Should().BeEquivalentTo(
+            new ChatOutcoming {Message = "The following commands are available", MessageType = ChatMessageTypes.Info},
+            cfg => cfg
                 .Including(x => x.Message)
                 .Using<string>(ctx => ctx.Subject.Should().StartWith(ctx.Expectation)).WhenTypeIs<string>()
         );

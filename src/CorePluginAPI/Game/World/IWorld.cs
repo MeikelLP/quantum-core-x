@@ -34,5 +34,6 @@ namespace QuantumCore.API.Game.World
         void RemovePlayer(IPlayerEntity e);
         IPlayerEntity? GetPlayer(string playerName);
         IList<IPlayerEntity> GetPlayers();
+        IPlayerEntity? GetPlayerById(uint playerId);
     }
 }
