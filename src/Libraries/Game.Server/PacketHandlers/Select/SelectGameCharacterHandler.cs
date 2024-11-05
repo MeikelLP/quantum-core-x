@@ -51,7 +51,6 @@ public class SelectGameCharacterHandler : IGamePacketHandler<SelectCharacter>
         // Send information about the player to the client
         entity.SendBasicData();
         entity.SendPoints();
-        entity.SendCharacterUpdate();
         entity.QuickSlotBar.Send();
     }
 }

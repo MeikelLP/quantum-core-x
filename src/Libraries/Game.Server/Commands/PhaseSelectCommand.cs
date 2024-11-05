@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using QuantumCore.API.Game;
+using QuantumCore.API.Game.Guild;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.World;
 using QuantumCore.Core.Utils;
@@ -39,15 +40,19 @@ namespace QuantumCore.Game.Commands
             var i = 0;
             await using var scope = _serviceProvider.CreateAsyncScope();
             var playerManager = scope.ServiceProvider.GetRequiredService<IPlayerManager>();
+            var guildManager = scope.ServiceProvider.GetRequiredService<IGuildManager>();
             var charactersFromCacheOrDb = await playerManager.GetPlayers(context.Player.Connection.AccountId.Value);
             foreach (var player in charactersFromCacheOrDb)
             {
                 var host = _world.GetMapHost(player.PositionX, player.PositionY);
+                var guild = await guildManager.GetGuildForPlayerAsync(player.Id);
 
                 // todo character slot position
                 characters.CharacterList[i] = player.ToCharacter();
                 characters.CharacterList[i].Ip = IpUtils.ConvertIpToUInt(host.Ip);
                 characters.CharacterList[i].Port = host.Port;
+                characters.GuildIds[i] = guild?.Id ?? 0;
+                characters.GuildNames[i] = guild?.Name ?? "";
 
                 i++;
             }

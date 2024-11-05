@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
+using QuantumCore.API.Game.Guild;
 using QuantumCore.API.Game.Skills;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.World;
@@ -12,6 +13,7 @@ using QuantumCore.Core.Utils;
 using QuantumCore.Extensions;
 using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Packets;
+using QuantumCore.Game.Packets.Guild;
 using QuantumCore.Game.Persistence;
 using QuantumCore.Game.PlayerUtils;
 using QuantumCore.Game.Skills;
@@ -25,6 +27,7 @@ namespace QuantumCore.Game.World.Entities
         public string Name => Player.Name;
         public IGameConnection Connection { get; }
         public PlayerData Player { get; private set; }
+        public GuildData? Guild { get; private set; }
         public IInventory Inventory { get; private set; }
         public IEntity? Target { get; set; }
         public IList<Guid> Groups { get; private set; }
@@ -179,6 +182,9 @@ namespace QuantumCore.Game.World.Entities
             Mana = (int) GetPoint(EPoints.MaxSp);
             await LoadPermGroups();
             await Skills.LoadAsync();
+            var guildManager = _scope.ServiceProvider.GetRequiredService<IGuildManager>();
+            Guild = await guildManager.GetGuildForPlayerAsync(Player.Id);
+            Player.GuildId = Guild?.Id;
             _questManager.InitializePlayer(this);
 
             CalculateDefence();
@@ -311,6 +317,31 @@ namespace QuantumCore.Game.World.Entities
             }
 
             Connection.Send(dead);
+        }
+
+        private void SendGuildInfo()
+        {
+            if (Guild is not null)
+            {
+                var onlineMemberIds = _world.GetGuildMembers(Guild.Id).Select(x => x.Player.Id).ToArray();
+                Connection.SendGuildMembers(Guild.Members, onlineMemberIds);
+                Connection.SendGuildRanks(Guild.Ranks);
+                Connection.SendGuildInfo(Guild);
+                Connection.Send(new GuildName
+                {
+                    Id = Guild.Id,
+                    Name = Guild.Name
+                });
+            }
+        }
+
+        public async Task RefreshGuildAsync()
+        {
+            var guildManager = _scope.ServiceProvider.GetRequiredService<IGuildManager>();
+            Guild = await guildManager.GetGuildForPlayerAsync(Player.Id);
+            Player.GuildId = Guild?.Id;
+            SendGuildInfo();
+            SendCharacterUpdate();
         }
 
         public void Respawn(bool town)
@@ -1085,6 +1116,7 @@ namespace QuantumCore.Game.World.Entities
 
         public override void ShowEntity(IConnection connection)
         {
+            SendGuildInfo();
             SendCharacter(connection);
             SendCharacterAdditional(connection);
         }
@@ -1095,6 +1127,20 @@ namespace QuantumCore.Game.World.Entities
             {
                 Vid = Vid
             });
+            SendOfflineNotice(connection);
+        }
+
+        private void SendOfflineNotice(IConnection connection)
+        {
+            var guildId = Player.GuildId;
+            if (guildId is not null && connection is IGameConnection gameConnection &&
+                gameConnection.Player!.Player.GuildId == guildId)
+            {
+                connection.Send(new GuildMemberOfflinePacket
+                {
+                    PlayerId = Player.Id
+                });
+            }
         }
 
         public void SendBasicData()
@@ -1181,6 +1227,7 @@ namespace QuantumCore.Game.World.Entities
                 Name = Player.Name,
                 Empire = Player.Empire,
                 Level = Player.Level,
+                GuildId = Guild?.Id ?? 0,
                 Parts = new ushort[]
                 {
                     (ushort) (Inventory.EquipmentWindow.Body?.ItemId ?? 0),
@@ -1203,7 +1250,8 @@ namespace QuantumCore.Game.World.Entities
                     (ushort) (Inventory.EquipmentWindow.Hair?.ItemId ?? 0)
                 },
                 MoveSpeed = MovementSpeed,
-                AttackSpeed = _attackSpeed
+                AttackSpeed = _attackSpeed,
+                GuildId = Guild?.Id ?? 0
             };
 
             Connection.Send(packet);

@@ -19,6 +19,7 @@ public class SpawnGroupProvider : ISpawnGroupProvider
     {
         var file = _fileProvider.GetFileInfo("group.txt");
         if (!file.Exists) return Array.Empty<SpawnGroup>();
+
         await using var fs = file.CreateReadStream();
         using var sr = new StreamReader(fs);
 
@@ -33,6 +34,7 @@ public class SpawnGroupProvider : ISpawnGroupProvider
     {
         var file = _fileProvider.GetFileInfo("group_group.txt");
         if (!file.Exists) return Array.Empty<SpawnGroupCollection>();
+
         await using var fs = file.CreateReadStream();
         using var sr = new StreamReader(fs);
         var groups = await _parserService.ParseFileGroups(sr);

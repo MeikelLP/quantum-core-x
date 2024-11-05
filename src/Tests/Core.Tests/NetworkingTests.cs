@@ -1,6 +1,8 @@
 ﻿using FluentAssertions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Hosting.Internal;
 using Microsoft.Extensions.Logging;
 using QuantumCore.Game;
 using QuantumCore.Game.Packets;
@@ -23,6 +25,7 @@ public class NetworkingTests
                 })
                 .Build())
             .AddLogging()
+            .AddSingleton<IHostEnvironment>(_ => new HostingEnvironment())
             .AddKeyedSingleton<IPacketManager>("game", (provider, _) =>
             {
                 return new PacketManager(provider.GetRequiredService<ILogger<PacketManager>>(), new[]

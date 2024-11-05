@@ -8,7 +8,9 @@ namespace QuantumCore.Game.Packets
     {
         [Field(0)] public uint Id { get; set; }
 
-        [Field(1, Length = 25)] public string Name { get; set; } = "";
+        [Field(1, Length = PlayerConstants.PLAYER_NAME_MAX_LENGTH)]
+        public string Name { get; set; } = "";
+
         [Field(2)] public byte Class { get; set; }
         [Field(3)] public byte Level { get; set; }
         [Field(4)] public uint Playtime { get; set; }

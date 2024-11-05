@@ -7,7 +7,10 @@ namespace QuantumCore.Game.Packets
     public partial class CharacterInfo
     {
         [Field(0)] public uint Vid { get; set; }
-        [Field(1, Length = 25)] public string Name { get; set; } = "";
+
+        [Field(1, Length = PlayerConstants.PLAYER_NAME_MAX_LENGTH)]
+        public string Name { get; set; } = "";
+
         [Field(2, ArrayLength = 4)] public ushort[] Parts { get; set; } = new ushort[4];
         [Field(3)] public byte Empire { get; set; }
         [Field(4)] public uint GuildId { get; set; }

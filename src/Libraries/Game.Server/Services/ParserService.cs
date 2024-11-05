@@ -75,7 +75,6 @@ public partial class ParserService : IParserService
         }
 
         var list = new List<SkillData>();
-
         await using var fs = file.CreateReadStream();
         using var sr = new StreamReader(fs);
         while (!sr.EndOfStream)

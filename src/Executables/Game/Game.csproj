@@ -7,19 +7,24 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <None Update="appsettings.json">
-            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-        </None>
-        <None Update="appsettings.Development.json" Condition="Exists('appsettings.Development.json')">
-            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-        </None>
-        <None Update="appsettings.Production.json" Condition="Exists('appsettings.Production.json')">
-            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-        </None>
+        <InternalsVisibleTo Include="Game.Tests"/>
+        <InternalsVisibleTo Include="Core.Tests"/>
     </ItemGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\..\Libraries\Game.Server\Game.Server.csproj"/>
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Update="appsettings.json">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="appsettings.Development.json" Condition="Exists('appsettings.Development.json')">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
+      <None Update="appsettings.Production.json" Condition="Exists('appsettings.Production.json')">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
     </ItemGroup>
 
 </Project>

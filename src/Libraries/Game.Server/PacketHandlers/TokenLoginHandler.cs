@@ -1,6 +1,6 @@
-using Game.Caching;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
+using QuantumCore.API.Game.Guild;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.World;
 using QuantumCore.API.PluginTypes;
@@ -19,15 +19,16 @@ namespace QuantumCore.Game.PacketHandlers
         private readonly ICacheManager _cacheManager;
         private readonly IWorld _world;
         private readonly IPlayerManager _playerManager;
-        private readonly ICachePlayerRepository _playerCache;
+        private readonly IGuildManager _guildManager;
 
         public TokenLoginHandler(ILogger<TokenLoginHandler> logger, ICacheManager cacheManager, IWorld world,
-            IPlayerManager playerManager)
+            IPlayerManager playerManager, IGuildManager guildManager)
         {
             _logger = logger;
             _cacheManager = cacheManager;
             _world = world;
             _playerManager = playerManager;
+            _guildManager = guildManager;
         }
 
         public async Task ExecuteAsync(GamePacketContext<TokenLogin> ctx, CancellationToken cancellationToken = default)
@@ -87,10 +88,13 @@ namespace QuantumCore.Game.PacketHandlers
             {
                 var host = _world.GetMapHost(player.PositionX, player.PositionY);
 
+                var guild = await _guildManager.GetGuildForPlayerAsync(player.Id);
                 // todo character slot position
                 characters.CharacterList[i] = player.ToCharacter();
                 characters.CharacterList[i].Ip = IpUtils.ConvertIpToUInt(host.Ip);
                 characters.CharacterList[i].Port = host.Port;
+                characters.GuildIds[i] = guild?.Id ?? 0;
+                characters.GuildNames[i] = guild?.Name ?? "";
                 // todo armor on character select
 
                 i++;
