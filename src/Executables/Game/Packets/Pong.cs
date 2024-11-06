@@ -6,6 +6,5 @@ namespace QuantumCore.Game.Packets
     [PacketGenerator]
     public partial class Pong
     {
-
     }
 }
