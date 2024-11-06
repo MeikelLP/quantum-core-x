@@ -45,7 +45,10 @@ namespace QuantumCore.Core.Networking
 
             // Start server timer
             _serverTimer.Start();
-            IpAddress = IPAddress.Parse(hostingOptions.IpAddress ?? "0.0.0.0");
+            var desiredIpAddress = IPAddress.TryParse(hostingOptions.IpAddress, out var ipAddress)
+                ? ipAddress
+                : IPAddress.Loopback;
+            IpAddress = desiredIpAddress;
             Listener = new TcpListener(IpAddress, Port);
         }
 
