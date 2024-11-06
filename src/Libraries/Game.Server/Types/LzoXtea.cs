@@ -26,9 +26,7 @@ namespace QuantumCore.Core.Types
                 throw new InvalidDataException("Failed to decrypt data stream");
             }
 
-            var decompressed = _lzoInstance.Decode(decrypted);
-            File.WriteAllBytes("test", decompressed);
-            return decompressed;
+            return _lzoInstance.Decode(decrypted);
         }
     }
 }
