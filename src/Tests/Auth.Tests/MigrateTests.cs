@@ -61,7 +61,7 @@ public class MigrateTests
             .AddQuantumCoreTestLogger(_testOutputHelper)
             .AddSingleton<IConfiguration>(_ => new ConfigurationBuilder().Build())
             .AddAuthDatabase()
-            .Configure<DatabaseOptions>("auth", opts =>
+            .Configure<DatabaseOptions>(HostingOptions.ModeAuth, opts =>
             {
                 opts.ConnectionString = connectionString;
                 opts.Provider = provider;

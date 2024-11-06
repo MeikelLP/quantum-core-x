@@ -14,7 +14,7 @@ internal class PostgresqlGameDbContext : GameDbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder options)
     {
-        var opts = _options.Get("game");
+        var opts = _options.Get(HostingOptions.ModeGame);
         options.UseNpgsql(opts.ConnectionString);
     }
 }

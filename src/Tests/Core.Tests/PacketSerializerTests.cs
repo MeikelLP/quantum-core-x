@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using QuantumCore;
 using QuantumCore.Networking;
 using Xunit;
 
@@ -11,22 +12,18 @@ namespace Core.Tests;
 [PacketGenerator]
 public partial class MyPacket
 {
-    [Field(0)] public uint Size => (uint)MyArray.Length;
-        
-    [Field(1)]
-    public ComplexSubType[] MyArray { get; set; } = Array.Empty<ComplexSubType>();
+    [Field(0)] public uint Size => (uint) MyArray.Length;
 
-    [Field(2)]
-    public int AnotherProperty { get; set; }
+    [Field(1)] public ComplexSubType[] MyArray { get; set; } = Array.Empty<ComplexSubType>();
+
+    [Field(2)] public int AnotherProperty { get; set; }
 }
 
 public class ComplexSubType
 {
-    [Field(0)]
-    public byte SubHeader { get; set; }
-        
-    [Field(1)]
-    public ushort Value { get; set; }
+    [Field(0)] public byte SubHeader { get; set; }
+
+    [Field(1)] public ushort Value { get; set; }
 }
 
 public class PacketSerializerTests
@@ -39,13 +36,14 @@ public class PacketSerializerTests
             .AddSingleton<IConfiguration>(_ => new ConfigurationBuilder()
                 .AddInMemoryCollection(new Dictionary<string, string?>
                 {
-                    { "Mode", "game" }
+                    {"Mode", HostingOptions.ModeGame}
                 })
                 .Build())
-            .AddSingleton<IPacketManager>(provider => new PacketManager(provider.GetRequiredService<ILogger<PacketManager>>(), new []
-            {
-                typeof(MyPacket)
-            }))
+            .AddSingleton<IPacketManager>(provider => new PacketManager(
+                provider.GetRequiredService<ILogger<PacketManager>>(), new[]
+                {
+                    typeof(MyPacket)
+                }))
             .AddSingleton<IPacketSerializer, DefaultPacketSerializer>()
             .AddLogging()
             .BuildServiceProvider();
@@ -61,8 +59,8 @@ public class PacketSerializerTests
         {
             MyArray = new[]
             {
-                new ComplexSubType{ SubHeader = 0x18, Value = 0x0675},
-                new ComplexSubType{ SubHeader = 0x43, Value = 0x306E}
+                new ComplexSubType {SubHeader = 0x18, Value = 0x0675},
+                new ComplexSubType {SubHeader = 0x43, Value = 0x306E}
             },
             AnotherProperty = 0x000004D2
         };

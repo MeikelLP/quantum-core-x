@@ -51,7 +51,7 @@ public class PlayerManagerTests : IClassFixture<RedisFixture>, IClassFixture<Dat
                 })
                 .Build())
             .AddGameServices()
-            .Configure<DatabaseOptions>("game", opts =>
+            .Configure<DatabaseOptions>(HostingOptions.ModeGame, opts =>
             {
                 opts.ConnectionString = databaseFixture.Container.GetConnectionString();
                 opts.Provider = DatabaseProvider.Mysql;

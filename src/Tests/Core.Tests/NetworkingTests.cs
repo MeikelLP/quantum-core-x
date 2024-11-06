@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Hosting.Internal;
 using Microsoft.Extensions.Logging;
+using QuantumCore;
 using QuantumCore.Game;
 using QuantumCore.Game.Packets;
 using QuantumCore.Game.Packets.Shop;
@@ -20,13 +21,13 @@ public class NetworkingTests
             .AddSingleton<IConfiguration>(_ => new ConfigurationBuilder()
                 .AddInMemoryCollection(new Dictionary<string, string?>
                 {
-                    {"Mode", "game"},
+                    {"Mode", HostingOptions.ModeGame},
                     {"BufferSize", bufferSize.ToString()}
                 })
                 .Build())
             .AddLogging()
             .AddSingleton<IHostEnvironment>(_ => new HostingEnvironment())
-            .AddKeyedSingleton<IPacketManager>("game", (provider, _) =>
+            .AddKeyedSingleton<IPacketManager>(HostingOptions.ModeGame, (provider, _) =>
             {
                 return new PacketManager(provider.GetRequiredService<ILogger<PacketManager>>(), new[]
                 {
@@ -36,9 +37,9 @@ public class NetworkingTests
                     typeof(ShopBuy)
                 });
             })
-            .AddKeyedSingleton<IPacketReader, PacketReader>("game")
+            .AddKeyedSingleton<IPacketReader, PacketReader>(HostingOptions.ModeGame)
             .BuildServiceProvider();
-        return services.GetRequiredKeyedService<IPacketReader>("game");
+        return services.GetRequiredKeyedService<IPacketReader>(HostingOptions.ModeGame);
     }
 
     [Fact]

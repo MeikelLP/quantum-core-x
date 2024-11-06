@@ -35,7 +35,7 @@ await Parser.Default.ParseArguments<SingleRunArgs>(args)
         {
             var fileProvider = provider.GetRequiredService<IFileProvider>();
             var filePath = fileProvider.GetFileInfo("database.db").PhysicalPath;
-            return new ConfigureNamedOptions<DatabaseOptions>("game", opts =>
+            return new ConfigureNamedOptions<DatabaseOptions>(HostingOptions.ModeGame, opts =>
             {
                 opts.Provider = DatabaseProvider.Sqlite;
                 opts.ConnectionString = $"Data Source={filePath}";
@@ -45,14 +45,14 @@ await Parser.Default.ParseArguments<SingleRunArgs>(args)
         {
             var fileProvider = provider.GetRequiredService<IFileProvider>();
             var filePath = fileProvider.GetFileInfo("database.db").PhysicalPath;
-            return new ConfigureNamedOptions<DatabaseOptions>("auth", opts =>
+            return new ConfigureNamedOptions<DatabaseOptions>(HostingOptions.ModeAuth, opts =>
             {
                 opts.Provider = DatabaseProvider.Sqlite;
                 opts.ConnectionString = $"Data Source={filePath}";
             });
         });
-        hostBuilder.Services.Configure<HostingOptions>("game", opts => { opts.Port = 13001; });
-        hostBuilder.Services.Configure<HostingOptions>("auth", opts => { opts.Port = 11002; });
+        hostBuilder.Services.Configure<HostingOptions>(HostingOptions.ModeGame, opts => { opts.Port = 13001; });
+        hostBuilder.Services.Configure<HostingOptions>(HostingOptions.ModeAuth, opts => { opts.Port = 11002; });
 
         var host = hostBuilder.Build();
 

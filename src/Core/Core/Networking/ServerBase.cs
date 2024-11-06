@@ -119,11 +119,11 @@ namespace QuantumCore.Core.Networking
             }
 
             object context;
-            if (_serverMode == "game")
+            if (_serverMode == HostingOptions.ModeGame)
             {
                 context = GetGameContextPacket(connection, packet, details.PacketType);
             }
-            else if (_serverMode == "auth")
+            else if (_serverMode == HostingOptions.ModeAuth)
             {
                 context = GetAuthContextPacket(connection, packet, details.PacketType);
             }

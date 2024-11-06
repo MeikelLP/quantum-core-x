@@ -17,7 +17,7 @@ public static class ServiceExtensions
 {
     public static IServiceCollection AddGameServices(this IServiceCollection services)
     {
-        services.AddPacketProvider<GamePacketLocationProvider>("game");
+        services.AddPacketProvider<GamePacketLocationProvider>(HostingOptions.ModeGame);
         services.Scan(scan =>
         {
             scan.FromAssemblyOf<GameServer>()
@@ -32,10 +32,10 @@ public static class ServiceExtensions
         services.AddGameDatabase();
         services.AddGameCaching();
         services.AddGameCommands();
-        services.AddQuantumCoreDatabase("game");
+        services.AddQuantumCoreDatabase(HostingOptions.ModeGame);
         services.AddOptions<AuthOptions>().BindConfiguration("Auth");
         services.AddOptions<GameOptions>().BindConfiguration("Game");
-        services.AddOptions<HostingOptions>("game").BindConfiguration("Hosting");
+        services.AddOptions<HostingOptions>(HostingOptions.ModeGame).BindConfiguration("Hosting");
         services.AddHttpClient("", (provider, http) =>
         {
             var options = provider.GetRequiredService<IOptions<AuthOptions>>().Value;

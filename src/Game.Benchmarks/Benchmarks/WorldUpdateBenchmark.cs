@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
+using QuantumCore;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game.World;
@@ -43,7 +44,7 @@ public class WorldUpdateBenchmark
             .AddCoreServices(new EmptyPluginCatalog(), config)
             .AddQuantumCoreCaching()
             .AddGameCaching()
-            .AddQuantumCoreDatabase("game")
+            .AddQuantumCoreDatabase(HostingOptions.ModeGame)
             .AddGameServices()
             .Replace(new ServiceDescriptor(typeof(IAtlasProvider), provider =>
             {

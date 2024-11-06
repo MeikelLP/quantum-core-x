@@ -17,7 +17,7 @@ internal class SqliteAuthDbContext : AuthDbContext
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         base.OnConfiguring(optionsBuilder);
-        var opts = _options.Get("auth");
+        var opts = _options.Get(HostingOptions.ModeAuth);
         optionsBuilder.UseSqlite(opts.ConnectionString);
     }
 }

@@ -8,13 +8,13 @@ public static class ServiceExtensions
 {
     public static IServiceCollection AddGameDatabase(this IServiceCollection services)
     {
-        services.AddQuantumCoreDatabase("game");
+        services.AddQuantumCoreDatabase(HostingOptions.ModeGame);
         services.AddDbContext<MySqlGameDbContext>();
         services.AddDbContext<PostgresqlGameDbContext>();
         services.AddDbContext<SqliteGameDbContext>();
         services.AddScoped<GameDbContext>(provider =>
         {
-            var options = provider.GetRequiredService<IOptionsSnapshot<DatabaseOptions>>().Get("game");
+            var options = provider.GetRequiredService<IOptionsSnapshot<DatabaseOptions>>().Get(HostingOptions.ModeGame);
             return options.Provider switch
             {
                 DatabaseProvider.Mysql => provider.GetRequiredService<MySqlGameDbContext>(),

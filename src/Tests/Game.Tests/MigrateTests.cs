@@ -69,7 +69,7 @@ public class MigrateTests
             })
             .AddSingleton<IConfiguration>(_ => new ConfigurationBuilder().Build())
             .AddGameDatabase()
-            .Configure<DatabaseOptions>("game", opts =>
+            .Configure<DatabaseOptions>(HostingOptions.ModeGame, opts =>
             {
                 opts.ConnectionString = connectionString;
                 opts.Provider = provider;

@@ -41,10 +41,10 @@ public class WorldTests
             .AddCoreServices(new EmptyPluginCatalog(), config)
             .AddQuantumCoreCaching()
             .AddGameCaching()
-            .AddQuantumCoreDatabase("game")
+            .AddQuantumCoreDatabase(HostingOptions.ModeGame)
             .AddGameServices()
             .AddSingleton(Substitute.For<IServerBase>())
-            .Configure<DatabaseOptions>("game", opts =>
+            .Configure<DatabaseOptions>(HostingOptions.ModeGame, opts =>
             {
                 opts.ConnectionString = "Server:abc;";
                 opts.Provider = DatabaseProvider.Mysql;

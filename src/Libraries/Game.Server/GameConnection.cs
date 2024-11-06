@@ -22,7 +22,8 @@ namespace QuantumCore.Game
 
 
         public GameConnection(IServerBase server, TcpClient client, ILogger<GameConnection> logger,
-            PluginExecutor pluginExecutor, IWorld world, [FromKeyedServices("game")] IPacketReader packetReader,
+            PluginExecutor pluginExecutor, IWorld world,
+            [FromKeyedServices(HostingOptions.ModeGame)] IPacketReader packetReader,
             ICacheManager cacheManager)
             : base(logger, pluginExecutor, packetReader)
         {

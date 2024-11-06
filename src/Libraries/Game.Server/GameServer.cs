@@ -37,10 +37,11 @@ namespace QuantumCore.Game
         public static GameServer Instance { get; private set; } = null!; // singleton
 
         public GameServer(
-            [FromKeyedServices("game")] IPacketManager packetManager, ILogger<GameServer> logger,
+            [FromKeyedServices(HostingOptions.ModeGame)]
+            IPacketManager packetManager, ILogger<GameServer> logger,
             PluginExecutor pluginExecutor, IServiceProvider serviceProvider,
             ICommandManager commandManager)
-            : base(packetManager, logger, pluginExecutor, serviceProvider, "game")
+            : base(packetManager, logger, pluginExecutor, serviceProvider, HostingOptions.ModeGame)
         {
             _logger = logger;
             _pluginExecutor = pluginExecutor;

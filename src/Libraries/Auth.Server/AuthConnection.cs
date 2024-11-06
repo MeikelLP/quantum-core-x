@@ -10,7 +10,7 @@ namespace QuantumCore.Auth
         private readonly IServerBase _server;
 
         public AuthConnection(IServerBase server, TcpClient client, ILogger<AuthConnection> logger,
-            PluginExecutor pluginExecutor, [FromKeyedServices("auth")] IPacketReader packetReader)
+            PluginExecutor pluginExecutor, [FromKeyedServices(HostingOptions.ModeAuth)] IPacketReader packetReader)
             : base(logger, pluginExecutor, packetReader)
         {
             _server = server;

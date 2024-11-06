@@ -12,9 +12,10 @@ namespace QuantumCore.Auth
         private readonly ILogger<AuthServer> _logger;
         private readonly ICacheManager _cacheManager;
 
-        public AuthServer([FromKeyedServices("auth")] IPacketManager packetManager, ILogger<AuthServer> logger,
+        public AuthServer([FromKeyedServices(HostingOptions.ModeAuth)] IPacketManager packetManager,
+            ILogger<AuthServer> logger,
             PluginExecutor pluginExecutor, IServiceProvider serviceProvider, ICacheManager cacheManager)
-            : base(packetManager, logger, pluginExecutor, serviceProvider, "auth")
+            : base(packetManager, logger, pluginExecutor, serviceProvider, HostingOptions.ModeAuth)
         {
             _logger = logger;
             _cacheManager = cacheManager;

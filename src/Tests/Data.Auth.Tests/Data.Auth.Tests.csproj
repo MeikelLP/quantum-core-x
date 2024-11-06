@@ -25,6 +25,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\..\Core\Core.csproj"/>
         <ProjectReference Include="..\..\Data\Auth.Persistence\Auth.Persistence.csproj"/>
       <ProjectReference Include="..\..\Data\Core.Caching\Core.Caching.csproj" />
     </ItemGroup>
