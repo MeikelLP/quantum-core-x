@@ -8,7 +8,7 @@ using QuantumCore.Game.World.Entities;
 
 namespace QuantumCore.Game.Quest;
 
-public class QuestManager : IQuestManager
+public class QuestManager : IQuestManager, ILoadable
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<QuestManager> _logger;
@@ -20,19 +20,21 @@ public class QuestManager : IQuestManager
         _logger = logger;
     }
 
-    public void Init()
+    public Task LoadAsync(CancellationToken token = default)
     {
         // Scan for all available quests
         var assembly = Assembly.GetAssembly(typeof(QuestManager));
         if (assembly == null)
         {
-            return;
+            return Task.CompletedTask;
         }
 
         foreach (var questType in assembly.GetTypes().Where(type => type.GetCustomAttribute<QuestAttribute>() != null))
         {
             RegisterQuest(questType);
         }
+
+        return Task.CompletedTask;
     }
 
     public void InitializePlayer(IPlayerEntity player)

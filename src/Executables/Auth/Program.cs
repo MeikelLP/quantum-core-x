@@ -12,12 +12,16 @@ using QuantumCore.Auth.Persistence.Extensions;
 using QuantumCore.Extensions;
 using Weikio.PluginFramework.Catalogs;
 
+inFramework.Catalogs;
+
 var hostBuilder = WebApplication.CreateBuilder(args);
 
 hostBuilder.Services.Configure<ConsoleLifetimeOptions>(opts => opts.SuppressStatusMessages = true);
 hostBuilder.Services.AddCoreServices(new EmptyPluginCatalog(), hostBuilder.Configuration);
 hostBuilder.Services.AddAuthServices();
 hostBuilder.Services.AddHostedService<AuthServer>();
+hostBuilder.Services.AddSingleton<IServerBase>(provider =>
+    provider.GetServices<IHostedService>().OfType<AuthServer>().Single());
 
 var host = hostBuilder.Build();
 

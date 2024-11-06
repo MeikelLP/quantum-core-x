@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Net;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
@@ -12,7 +13,7 @@ using QuantumCore.Game.Services;
 
 namespace QuantumCore.Game.World
 {
-    public class World : IWorld
+    public class World : IWorld, ILoadable
     {
         private readonly ILogger<World> _logger;
         private readonly PluginExecutor _pluginExecutor;
@@ -30,11 +31,11 @@ namespace QuantumCore.Game.World
         private readonly ICacheManager _cacheManager;
         private readonly IConfiguration _configuration;
         private readonly ISpawnGroupProvider _spawnGroupProvider;
-        private readonly IAtlasProvider _atlasProvider;
+        private readonly IServiceProvider _serviceProvider;
 
         public World(ILogger<World> logger, PluginExecutor pluginExecutor, IItemManager itemManager,
             ICacheManager cacheManager, IConfiguration configuration, ISpawnGroupProvider spawnGroupProvider,
-            IAtlasProvider atlasProvider)
+            IServiceProvider serviceProvider)
         {
             _logger = logger;
             _pluginExecutor = pluginExecutor;
@@ -42,11 +43,11 @@ namespace QuantumCore.Game.World
             _cacheManager = cacheManager;
             _configuration = configuration;
             _spawnGroupProvider = spawnGroupProvider;
-            _atlasProvider = atlasProvider;
+            _serviceProvider = serviceProvider;
             _vid = 0;
         }
 
-        public async Task Load()
+        public async Task LoadAsync(CancellationToken token = default)
         {
             LoadShops();
             var groups = await _spawnGroupProvider.GetSpawnGroupsAsync();
@@ -61,7 +62,9 @@ namespace QuantumCore.Game.World
                 _groupCollections[g.Id] = g;
             }
 
-            var maps = await _atlasProvider.GetAsync(this);
+            await using var scope = _serviceProvider.CreateAsyncScope();
+            var atlasProvider = scope.ServiceProvider.GetRequiredService<IAtlasProvider>();
+            var maps = await atlasProvider.GetAsync(this);
             foreach (var map in maps)
             {
                 _maps[map.Name] = map;
@@ -84,8 +87,14 @@ namespace QuantumCore.Game.World
             }
 
             await LoadRemoteMaps();
+        }
 
-            // Initialize maps, spawn monsters etc
+        /// <summary>
+        /// Initialize maps, spawn monsters etc
+        /// Must be loaded via <see cref="LoadAsync"/> first
+        /// </summary>
+        public async Task InitAsync()
+        {
             foreach (var map in _maps.Values)
             {
                 if (map is Map m)
@@ -237,7 +246,7 @@ namespace QuantumCore.Game.World
 
             return new CoreHost
             {
-                Ip = IpUtils.PublicIP!, // should be set by now
+                Ip = _serviceProvider.GetRequiredService<IServerBase>().IpAddress, // lazy because of dependency loop
                 Port = (ushort) GameServer.Instance.Port
             };
         }

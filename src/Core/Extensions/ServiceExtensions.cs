@@ -82,7 +82,6 @@ public static class ServiceExtensions
                 .ToArray();
             return ActivatorUtilities.CreateInstance<PacketManager>(provider, [packetTypes, handlerTypes]);
         });
-        services.AddSingleton<IPacketReader, PacketReader>();
         services.AddSingleton<PluginExecutor>();
         services.AddPluginFramework()
             .AddPluginCatalog(pluginCatalog)

@@ -1,4 +1,3 @@
-using Microsoft.Extensions.Options;
 using QuantumCore.API;
 using QuantumCore.API.Game.Types;
 using QuantumCore.Caching;
@@ -13,11 +12,9 @@ namespace QuantumCore.Auth
         private readonly ILogger<AuthServer> _logger;
         private readonly ICacheManager _cacheManager;
 
-        public AuthServer(IOptionsSnapshot<HostingOptions> hostingOptions,
-            [FromKeyedServices("auth")] IPacketManager packetManager,
-            ILogger<AuthServer> logger,
+        public AuthServer([FromKeyedServices("auth")] IPacketManager packetManager, ILogger<AuthServer> logger,
             PluginExecutor pluginExecutor, IServiceProvider serviceProvider, ICacheManager cacheManager)
-            : base(packetManager, logger, pluginExecutor, serviceProvider, "auth", hostingOptions)
+            : base(packetManager, logger, pluginExecutor, serviceProvider, "auth")
         {
             _logger = logger;
             _cacheManager = cacheManager;

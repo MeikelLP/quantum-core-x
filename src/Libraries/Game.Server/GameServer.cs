@@ -1,35 +1,28 @@
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Diagnostics.Metrics;
-using System.Net;
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using QuantumCore.API;
-using QuantumCore.API.Game;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.World;
 using QuantumCore.API.PluginTypes;
 using QuantumCore.Core.Event;
 using QuantumCore.Core.Networking;
-using QuantumCore.Core.Utils;
 using QuantumCore.Extensions;
 using QuantumCore.Networking;
 
 namespace QuantumCore.Game
 {
-    public class GameServer : ServerBase<GameConnection>, IGame, IGameServer
+    public class GameServer : ServerBase<GameConnection>, IGameServer
     {
         public static readonly Meter Meter = new Meter("QuantumCore:Game");
         private readonly Histogram<double> _serverTimes = Meter.CreateHistogram<double>("TickTime", "ms");
-        private readonly HostingOptions _hostingOptions;
         private readonly ILogger<GameServer> _logger;
         private readonly PluginExecutor _pluginExecutor;
         private readonly ICommandManager _commandManager;
-        private readonly IQuestManager _questManager;
-        private readonly IChatManager _chatManager;
-        public IWorld World { get; }
+        private readonly IWorld _world;
 
         private readonly Stopwatch _gameTime = new Stopwatch();
         private long _previousTicks = 0;
@@ -37,31 +30,23 @@ namespace QuantumCore.Game
         private TimeSpan _targetElapsedTime = TimeSpan.FromTicks(100000); // 100hz
         private TimeSpan _maxElapsedTime = TimeSpan.FromMilliseconds(500);
         private readonly Stopwatch _serverTimer = new();
-        private readonly ISessionManager _sessionManager;
-        private readonly IEnumerable<ILoadable> _loadables;
 
         public new ImmutableArray<IGameConnection> Connections =>
             [..base.Connections.Values.Cast<IGameConnection>()];
 
         public static GameServer Instance { get; private set; } = null!; // singleton
 
-        public GameServer(IOptionsSnapshot<HostingOptions> hostingOptions,
+        public GameServer(
             [FromKeyedServices("game")] IPacketManager packetManager, ILogger<GameServer> logger,
             PluginExecutor pluginExecutor, IServiceProvider serviceProvider,
-            ICommandManager commandManager, IQuestManager questManager, IChatManager chatManager, IWorld world,
-            ISessionManager sessionManager, IEnumerable<ILoadable> loadables)
-            : base(packetManager, logger, pluginExecutor, serviceProvider, "game", hostingOptions)
+            ICommandManager commandManager)
+            : base(packetManager, logger, pluginExecutor, serviceProvider, "game")
         {
-            _hostingOptions = hostingOptions.Value;
             _logger = logger;
             _pluginExecutor = pluginExecutor;
             _commandManager = commandManager;
-            _questManager = questManager;
-            _chatManager = chatManager;
-            _sessionManager = sessionManager;
-            _loadables = loadables;
-            World = world;
             Instance = this;
+            _world = Scope.ServiceProvider.GetRequiredService<IWorld>();
             Meter.CreateObservableGauge("Connections", () => Connections.Length);
         }
 
@@ -69,37 +54,15 @@ namespace QuantumCore.Game
         {
             EventSystem.Update(elapsedTime);
 
-            World.Update(elapsedTime);
+            _world.Update(elapsedTime);
         }
 
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            // Set public ip address
-            if (_hostingOptions.IpAddress != null)
-            {
-                IpUtils.PublicIP = IPAddress.Parse(_hostingOptions.IpAddress);
-            }
-            else if (IpUtils.PublicIP is null)
-            {
-                // Query interfaces for our best ipv4 address
-                IpUtils.SearchPublicIp();
-            }
-
             // Load game data
-            await Task.WhenAll(_loadables.Select(x => x.LoadAsync(stoppingToken)));
+            await Task.WhenAll(Scope.ServiceProvider.GetServices<ILoadable>().Select(x => x.LoadAsync(stoppingToken)));
 
-            // Initialize session manager
-            _sessionManager.Init(this);
-
-            // Initialize core systems
-            _chatManager.Init();
-
-            // Load all quests
-            _questManager.Init();
-
-            // Load game world
-            _logger.LogInformation("Initialize world");
-            await World.Load();
+            await _world.InitAsync();
 
             // Register all default commands
             _commandManager.Register("QuantumCore.Game.Commands", Assembly.GetExecutingAssembly());

@@ -3,7 +3,6 @@ using QuantumCore.API.Game;
 using QuantumCore.API.Game.Guild;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.World;
-using QuantumCore.Core.Utils;
 using QuantumCore.Extensions;
 using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Packets;
@@ -49,7 +48,7 @@ namespace QuantumCore.Game.Commands
 
                 // todo character slot position
                 characters.CharacterList[i] = player.ToCharacter();
-                characters.CharacterList[i].Ip = IpUtils.ConvertIpToUInt(host.Ip);
+                characters.CharacterList[i].Ip = BitConverter.ToInt32(host.Ip.GetAddressBytes());
                 characters.CharacterList[i].Port = host.Port;
                 characters.GuildIds[i] = guild?.Id ?? 0;
                 characters.GuildNames[i] = guild?.Name ?? "";

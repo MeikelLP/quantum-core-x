@@ -6,7 +6,6 @@ using QuantumCore.API.Game.World;
 using QuantumCore.API.PluginTypes;
 using QuantumCore.Auth.Cache;
 using QuantumCore.Caching;
-using QuantumCore.Core.Utils;
 using QuantumCore.Extensions;
 using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Packets;
@@ -88,10 +87,10 @@ namespace QuantumCore.Game.PacketHandlers
             {
                 var host = _world.GetMapHost(player.PositionX, player.PositionY);
 
-                var guild = await _guildManager.GetGuildForPlayerAsync(player.Id);
+                var guild = await _guildManager.GetGuildForPlayerAsync(player.Id, cancellationToken);
                 // todo character slot position
                 characters.CharacterList[i] = player.ToCharacter();
-                characters.CharacterList[i].Ip = IpUtils.ConvertIpToUInt(host.Ip);
+                characters.CharacterList[i].Ip = BitConverter.ToInt32(host.Ip.GetAddressBytes());
                 characters.CharacterList[i].Port = host.Port;
                 characters.GuildIds[i] = guild?.Id ?? 0;
                 characters.GuildNames[i] = guild?.Name ?? "";

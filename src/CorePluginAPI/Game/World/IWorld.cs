@@ -4,7 +4,7 @@ namespace QuantumCore.API.Game.World
 {
     public interface IWorld
     {
-        Task Load();
+        Task InitAsync();
         void Update(double elapsedTime);
 #nullable enable
         IMap? GetMapAt(uint x, uint y);

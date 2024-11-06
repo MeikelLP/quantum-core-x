@@ -7,7 +7,7 @@ using QuantumCore.Game.World.Entities;
 
 namespace QuantumCore.Game;
 
-public class ChatManager : IChatManager
+public class ChatManager : IChatManager, ILoadable
 {
     private readonly IRedisStore _cacheManager;
 
@@ -26,13 +26,17 @@ public class ChatManager : IChatManager
         _cacheManager = cacheManager.Server;
     }
 
-    public void Init()
+
+    public Task LoadAsync(CancellationToken token = default)
     {
         _id = Guid.NewGuid();
 
         _subscriber = _cacheManager.Subscribe();
         _subscriber.Register<ChatMessage>("chat", OnChatMessage);
         _subscriber.Listen();
+
+
+        return Task.CompletedTask;
     }
 
     private void OnChatMessage(ChatMessage message)

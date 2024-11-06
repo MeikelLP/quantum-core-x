@@ -2,7 +2,6 @@ using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.Game.World;
 using QuantumCore.API.PluginTypes;
-using QuantumCore.Core.Utils;
 using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Packets;
 
@@ -48,7 +47,7 @@ public class CreateCharacterHandler : IGamePacketHandler<CreateCharacter>
 
         // Send success response
         var character = player.ToCharacter();
-        character.Ip = IpUtils.ConvertIpToUInt(host.Ip);
+        character.Ip = BitConverter.ToInt32(host.Ip.GetAddressBytes());
         character.Port = host.Port;
         ctx.Connection.Send(new CreateCharacterSuccess
         {

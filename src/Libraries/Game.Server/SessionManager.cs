@@ -4,22 +4,29 @@ using QuantumCore.Caching;
 
 namespace QuantumCore.Game;
 
-public class SessionManager : ISessionManager
+public class SessionManager : ILoadable
 {
     private readonly ILogger _logger;
     private readonly ICacheManager _cacheManager;
-    private IGameServer? _gameServer;
+    private readonly IGameServer _server;
 
-    public SessionManager(ILogger<SessionManager> logger, ICacheManager cacheManager)
+    public SessionManager(ILogger<SessionManager> logger, ICacheManager cacheManager, IGameServer server)
     {
         _logger = logger;
         _cacheManager = cacheManager;
+        _server = server;
     }
 
-    public void Init(IGameServer gameServer)
+    private void OnAuthDropAsync(Guid accountId)
+    {
+        var connection = _server.Connections.FirstOrDefault(x => x.AccountId == accountId);
+
+        connection?.Close();
+    }
+
+    public Task LoadAsync(CancellationToken token = default)
     {
         _logger.LogInformation("Initialize session manager");
-        _gameServer = gameServer;
         var sharedSubscriber = _cacheManager.Shared.Subscribe();
         var serverSubscriber = _cacheManager.Server.Subscribe();
 
@@ -34,12 +41,7 @@ public class SessionManager : ISessionManager
         // Listen for session messages
         sharedSubscriber.Listen();
         serverSubscriber.Listen();
-    }
 
-    private void OnAuthDropAsync(Guid accountId)
-    {
-        var connection = _gameServer?.Connections.FirstOrDefault(x => x.AccountId == accountId);
-
-        connection?.Close();
+        return Task.CompletedTask;
     }
 }

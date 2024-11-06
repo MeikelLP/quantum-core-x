@@ -1,6 +1,4 @@
 ﻿using CommandLine;
-using Core.Persistence.Extensions;
-using Game.Caching.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -25,8 +23,6 @@ await Parser.Default.ParseArguments<SingleRunArgs>(args)
         hostBuilder.Configuration.AddQuantumCoreDefaults();
         hostBuilder.Services.AddGameServices();
         hostBuilder.Services.AddAuthServices();
-        hostBuilder.Services.AddQuantumCoreDatabase();
-        hostBuilder.Services.AddGameCaching();
         hostBuilder.Services.AddHostedService<GameServer>();
         hostBuilder.Services.AddHostedService<AuthServer>();
 

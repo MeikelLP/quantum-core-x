@@ -9,7 +9,6 @@ using QuantumCore.API.Game.Skills;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.World;
 using QuantumCore.Caching;
-using QuantumCore.Core.Utils;
 using QuantumCore.Extensions;
 using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Packets;
@@ -235,7 +234,7 @@ namespace QuantumCore.Game.World.Entities
             {
                 PositionX = PositionX,
                 PositionY = PositionY,
-                ServerAddress = IpUtils.ConvertIpToUInt(host.Ip),
+                ServerAddress = BitConverter.ToInt32(host.Ip.GetAddressBytes()),
                 ServerPort = host.Port
             };
             Connection.Send(packet);

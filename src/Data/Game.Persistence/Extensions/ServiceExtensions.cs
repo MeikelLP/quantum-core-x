@@ -8,7 +8,7 @@ public static class ServiceExtensions
 {
     public static IServiceCollection AddGameDatabase(this IServiceCollection services)
     {
-        services.AddQuantumCoreDatabase();
+        services.AddQuantumCoreDatabase("game");
         services.AddDbContext<MySqlGameDbContext>();
         services.AddDbContext<PostgresqlGameDbContext>();
         services.AddDbContext<SqliteGameDbContext>();

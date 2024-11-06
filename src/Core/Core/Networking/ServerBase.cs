@@ -8,7 +8,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using QuantumCore.API;
 using QuantumCore.API.PluginTypes;
-using QuantumCore.Core.Utils;
 using QuantumCore.Networking;
 
 namespace QuantumCore.Core.Networking
@@ -27,28 +26,27 @@ namespace QuantumCore.Core.Networking
         private readonly PluginExecutor _pluginExecutor;
         private readonly IServiceProvider _serviceProvider;
         private readonly string _serverMode;
+        protected IServiceScope Scope { get; }
 
-        public int Port { get; }
+        public ushort Port { get; }
+        public IPAddress IpAddress { get; }
 
         public ServerBase(IPacketManager packetManager, ILogger logger, PluginExecutor pluginExecutor,
-            IServiceProvider serviceProvider, string mode,
-            IOptionsSnapshot<HostingOptions> hostingOptions)
+            IServiceProvider serviceProvider, string mode)
         {
             _logger = logger;
             _pluginExecutor = pluginExecutor;
             _serviceProvider = serviceProvider;
             _serverMode = mode;
             PacketManager = packetManager;
-            Port = hostingOptions.Get(mode).Port;
+            Scope = serviceProvider.CreateScope();
+            var hostingOptions = Scope.ServiceProvider.GetRequiredService<IOptionsSnapshot<HostingOptions>>().Get(mode);
+            Port = hostingOptions.Port;
 
             // Start server timer
             _serverTimer.Start();
-
-            var localAddr = IPAddress.Parse(hostingOptions.Get(mode).IpAddress ?? "0.0.0.0");
-            IpUtils.PublicIP = localAddr;
-            Listener = new TcpListener(localAddr, Port);
-
-            _logger.LogInformation("Initialize {Mode} tcp server listening on {IP}:{Port}", mode, localAddr, Port);
+            IpAddress = IPAddress.Parse(hostingOptions.IpAddress ?? "0.0.0.0");
+            Listener = new TcpListener(IpAddress, Port);
         }
 
         public long ServerTime => _serverTimer.ElapsedMilliseconds;
@@ -64,10 +62,12 @@ namespace QuantumCore.Core.Networking
         public override Task StartAsync(CancellationToken token)
         {
             base.StartAsync(token);
-            _logger.LogInformation("Start listening for connections...");
 
             Listener.Start();
             Listener.BeginAcceptTcpClient(OnClientAccepted, Listener);
+
+            _logger.LogInformation("Start listening for connections on {IP}:{Port} ({Mode})", IpAddress, Port,
+                _serverMode);
 
             return Task.CompletedTask;
         }
@@ -188,6 +188,7 @@ namespace QuantumCore.Core.Networking
             await _stoppingToken.CancelAsync();
             await base.StopAsync(cancellationToken);
             _stoppingToken.Dispose();
+            Scope.Dispose();
         }
     }
 }

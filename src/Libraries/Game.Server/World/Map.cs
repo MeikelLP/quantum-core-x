@@ -3,7 +3,6 @@ using System.Diagnostics.Metrics;
 using System.Security.Cryptography;
 using EnumsNET;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game.World;
@@ -52,10 +51,12 @@ namespace QuantumCore.Game.World
         private readonly HostingOptions _options;
         private readonly IDropProvider _dropProvider;
         private readonly IItemManager _itemManager;
+        private readonly IServerBase _server;
 
         public Map(IMonsterManager monsterManager, IAnimationManager animationManager, ICacheManager cacheManager,
-            IWorld world, IOptions<HostingOptions> options, ILogger logger, ISpawnPointProvider spawnPointProvider,
-            IDropProvider dropProvider, IItemManager itemManager, string name, uint x, uint y, uint width, uint height)
+            IWorld world, ILogger logger, ISpawnPointProvider spawnPointProvider,
+            IDropProvider dropProvider, IItemManager itemManager, IServerBase server, string name, uint x, uint y,
+            uint width, uint height)
         {
             _monsterManager = monsterManager;
             _animationManager = animationManager;
@@ -65,7 +66,7 @@ namespace QuantumCore.Game.World
             _spawnPointProvider = spawnPointProvider;
             _dropProvider = dropProvider;
             _itemManager = itemManager;
-            _options = options.Value;
+            _server = server;
             Name = name;
             PositionX = x;
             PositionY = y;
@@ -80,8 +81,8 @@ namespace QuantumCore.Game.World
             _logger.LogDebug("Load map {Name} at {PositionX}|{PositionY} (size {Width}x{Height})", Name, PositionX,
                 PositionY, Width, Height);
 
-            await _cacheManager.Set($"maps:{Name}", $"{IpUtils.PublicIP}:{_options.Port}");
-            await _cacheManager.Publish("maps", $"{Name} {IpUtils.PublicIP}:{_options.Port}");
+            await _cacheManager.Set($"maps:{Name}", $"{_server.IpAddress}:{_server.Port}");
+            await _cacheManager.Publish("maps", $"{Name} {_server.IpAddress}:{_server.Port}");
 
             _spawnPoints.AddRange(await _spawnPointProvider.GetSpawnPointsForMap(Name));
 

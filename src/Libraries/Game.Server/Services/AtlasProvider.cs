@@ -2,7 +2,6 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using QuantumCore.API;
 using QuantumCore.API.Game.World;
 using QuantumCore.Caching;
@@ -16,12 +15,12 @@ internal partial class AtlasProvider : IAtlasProvider
     private readonly IMonsterManager _monsterManager;
     private readonly IAnimationManager _animationManager;
     private readonly ISpawnPointProvider _spawnPointProvider;
-    private readonly IOptions<HostingOptions> _options;
     private readonly ICacheManager _cacheManager;
     private readonly ILogger<AtlasProvider> _logger;
     private readonly IDropProvider _dropProvider;
     private readonly IItemManager _itemManager;
     private readonly IFileProvider _fileProvider;
+    private readonly IServerBase _server;
 
     /// <summary>
     /// Regex for parsing lines in the atlas info
@@ -31,20 +30,20 @@ internal partial class AtlasProvider : IAtlasProvider
     private static partial Regex LineParser();
 
     public AtlasProvider(IConfiguration configuration, IMonsterManager monsterManager,
-        IAnimationManager animationManager, ISpawnPointProvider spawnPointProvider, IOptions<HostingOptions> options,
+        IAnimationManager animationManager, ISpawnPointProvider spawnPointProvider,
         ICacheManager cacheManager, ILogger<AtlasProvider> logger, IDropProvider dropProvider, IItemManager itemManager,
-        IFileProvider fileProvider)
+        IFileProvider fileProvider, IServerBase server)
     {
         _configuration = configuration;
         _monsterManager = monsterManager;
         _animationManager = animationManager;
         _spawnPointProvider = spawnPointProvider;
-        _options = options;
         _cacheManager = cacheManager;
         _logger = logger;
         _dropProvider = dropProvider;
         _itemManager = itemManager;
         _fileProvider = fileProvider;
+        _server = server;
     }
 
     public async Task<IEnumerable<IMap>> GetAsync(IWorld world)
@@ -87,8 +86,9 @@ internal partial class AtlasProvider : IAtlasProvider
                     }
                     else
                     {
-                        map = new Map(_monsterManager, _animationManager, _cacheManager, world, _options, _logger,
-                            _spawnPointProvider, _dropProvider, _itemManager, mapName, positionX, positionY, width,
+                        map = new Map(_monsterManager, _animationManager, _cacheManager, world, _logger,
+                            _spawnPointProvider, _dropProvider, _itemManager, _server, mapName, positionX, positionY,
+                            width,
                             height);
                     }
 
