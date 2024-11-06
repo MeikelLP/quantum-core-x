@@ -1604,7 +1604,7 @@ namespace QuantumCore.Core.Packets {
             }
         }
     }
-}");
+}", cfg => cfg.IgnoringNewlineStyle());
     }
 
     [Fact]
@@ -1710,7 +1710,7 @@ namespace QuantumCore.Core.Packets {
             }
         }
     }
-}");
+}", cfg => cfg.IgnoringNewlineStyle());
     }
 
     [Fact]
@@ -1811,7 +1811,7 @@ namespace QuantumCore.Core.Packets {
             }
         }
     }
-}");
+}", cfg => cfg.IgnoringNewlineStyle());
     }
 
     [Fact]

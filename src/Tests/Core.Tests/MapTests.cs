@@ -3,7 +3,6 @@ using FluentAssertions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using NSubstitute;
 using QuantumCore;
 using QuantumCore.API;
@@ -38,7 +37,7 @@ public class MapTests
                 });
                 return mock;
             })
-            .AddSingleton<IAnimationManager>(_ => Substitute.For<IAnimationManager>())
+            .AddSingleton(Substitute.For<IAnimationManager>())
             .AddSingleton<ICacheManager>(_ =>
             {
                 var mock = Substitute.For<ICacheManager>();
@@ -46,9 +45,10 @@ public class MapTests
                 mock.Keys(Arg.Any<string>()).Returns(_ => Array.Empty<string>());
                 return mock;
             })
+            .AddSingleton(Substitute.For<IServerBase>())
+            .AddSingleton(Substitute.For<IItemManager>())
+            .AddSingleton(Substitute.For<IDropProvider>())
             .AddSingleton<PluginExecutor>()
-            .AddSingleton<IItemManager>(_ => Substitute.For<IItemManager>())
-            .AddSingleton<IDropProvider>(_ => Substitute.For<IDropProvider>())
             .AddSingleton<IAtlasProvider>(_ =>
             {
                 var mock = Substitute.For<IAtlasProvider>();
@@ -119,10 +119,11 @@ public class MapTests
         var spawnPointProvider = provider.GetRequiredService<ISpawnPointProvider>();
         var dropProvider = provider.GetRequiredService<IDropProvider>();
         var itemManager = provider.GetRequiredService<IItemManager>();
-        var options = provider.GetRequiredService<IOptions<HostingOptions>>();
+        var server = provider.GetRequiredService<IServerBase>();
         var logger = provider.GetRequiredService<ILogger<MapTests>>();
         _world = provider.GetRequiredService<IWorld>();
-        _map = new Map(monsterManager, animationManager, cacheManager, _world, options, logger, spawnPointProvider, dropProvider, itemManager,
+        _map = new Map(monsterManager, animationManager, cacheManager, _world, logger, spawnPointProvider, dropProvider,
+            itemManager, server,
             "Test", 0, 0, 4096, 4096);
     }
 
@@ -140,7 +141,8 @@ public class MapTests
                 RespawnTime = 0,
             }
         };
-        await _world.Load();
+        await _world.LoadAsync();
+        await _world.InitAsync();
         EventSystem.Update(0);
         _world.Update(0); // spawn entities
 
@@ -164,7 +166,8 @@ public class MapTests
                 RespawnTime = 0,
             }
         };
-        await _world.Load();
+        await _world.LoadAsync();
+        await _world.InitAsync();
         EventSystem.Update(0);
         _world.Update(0); // spawn entities
 
@@ -187,7 +190,8 @@ public class MapTests
                 RespawnTime = 0,
             }
         };
-        await _world.Load();
+        await _world.LoadAsync();
+        await _world.InitAsync();
         EventSystem.Update(0);
         _world.Update(0); // spawn entities
 

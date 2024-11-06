@@ -109,7 +109,7 @@ public class GuildTests
     private static async Task<IGuildManager> SetupGuild()
     {
         var serviceCollection = new ServiceCollection();
-        serviceCollection.AddOptions<DatabaseOptions>().Configure(x =>
+        serviceCollection.AddOptions<DatabaseOptions>("game").Configure(x =>
         {
             x.Provider = DatabaseProvider.Sqlite;
             x.ConnectionString = "Data Source=test.db";

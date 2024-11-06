@@ -2,7 +2,7 @@
 
 namespace QuantumCore.API.Game.World
 {
-    public interface IWorld
+    public interface IWorld : ILoadable
     {
         Task InitAsync();
         void Update(double elapsedTime);
