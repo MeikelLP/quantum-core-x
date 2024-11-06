@@ -34,8 +34,4 @@
     <ProjectReference Include="..\Weikio.PluginFramework.Microsoft.DependencyInjection\Weikio.PluginFramework.Microsoft.DependencyInjection.csproj" />
   </ItemGroup>
 
-    <ItemGroup>
-        <Compile Remove="Core\Utils\IpUtils.cs"/>
-    </ItemGroup>
-
 </Project>
