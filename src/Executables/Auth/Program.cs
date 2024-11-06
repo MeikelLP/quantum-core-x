@@ -5,14 +5,13 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using QuantumCore;
+using QuantumCore.API;
 using QuantumCore.Auth;
 using QuantumCore.Auth.Extensions;
 using QuantumCore.Auth.Persistence;
 using QuantumCore.Auth.Persistence.Extensions;
 using QuantumCore.Extensions;
 using Weikio.PluginFramework.Catalogs;
-
-inFramework.Catalogs;
 
 var hostBuilder = WebApplication.CreateBuilder(args);
 

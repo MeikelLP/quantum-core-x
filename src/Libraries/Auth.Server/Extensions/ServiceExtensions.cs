@@ -10,6 +10,7 @@ public static class ServiceExtensions
     public static IServiceCollection AddAuthServices(this IServiceCollection services)
     {
         services.AddPacketProvider<AuthPacketLocationProvider>("auth");
+        services.AddOptions<HostingOptions>("auth").BindConfiguration("Hosting");
         services.AddAuthDatabase();
         services.AddQuantumCoreCaching();
         services.Scan(scan =>
