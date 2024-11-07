@@ -37,9 +37,10 @@ namespace QuantumCore.Game
         {
             GameServer.Instance.CallConnectionListener(this);
             var pingInterval = NetworkingConstants.PingIntervalInSeconds * 1000;
+            var ping = new Ping();
             EventSystem.EnqueueEvent(() =>
             {
-                Send(new Ping());
+                Send(ping);
                 return pingInterval;
             }, pingInterval);
         }
