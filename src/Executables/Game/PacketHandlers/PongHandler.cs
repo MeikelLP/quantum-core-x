@@ -2,9 +2,7 @@
 using QuantumCore.API;
 using QuantumCore.API.PluginTypes;
 using QuantumCore.Caching;
-using QuantumCore.Core.Event;
 using QuantumCore.Game.Packets;
-using Ack = QuantumCore.Game.Packets.Ping;
 using QuantumCore.Networking;
 
 namespace QuantumCore.Game.PacketHandlers;
@@ -31,7 +29,8 @@ public class PongHandler : IGamePacketHandler<Pong>
         _cacheManager.Server.Expire($"account:{ctx.Connection.AccountId}:game:select:selected-player", expiration);
         _cacheManager.Server.Expire($"token:{activeToken}", expiration);
         
-        ctx.Connection.Send(new Ack());
+        // Send a Ping packet to acknowledge the Pong. This won't be responded to with a Pong by the client
+        ctx.Connection.Send(new Ping());
         
         return Task.CompletedTask;
     }
