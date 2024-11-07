@@ -18,6 +18,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: '0'
 
       # setup .NET
       - name: Setup .NET Core SDK 8
