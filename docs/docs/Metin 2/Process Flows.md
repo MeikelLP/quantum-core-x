@@ -49,7 +49,7 @@ sequenceDiagram
     participant S as Game Server
     participant C as Client
     S->>+C: Sends Ping (0x2C) packet after handshake
-    C->>+S: Sends Pong (0x2F) packet in response
+    C->>+S: Sends Pong (0xFE) packet in response
     S-->>-C: Acknowledges with Ping (0x2C) packet
     Note over S, C: Repeat this sequence every 5 seconds
 ```
