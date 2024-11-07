@@ -36,12 +36,12 @@ namespace QuantumCore.Game
         protected override void OnHandshakeFinished()
         {
             GameServer.Instance.CallConnectionListener(this);
-            
+            var pingInterval = NetworkingConstants.PingIntervalInSeconds * 1000;
             EventSystem.EnqueueEvent(() =>
             {
                 Send(new Ping());
-                return NetworkingConstants.PingIntervalInSeconds * 1000;
-            }, NetworkingConstants.PingIntervalInSeconds * 1000);
+                return pingInterval;
+            }, pingInterval);
         }
 
         protected override async Task OnClose(bool expected = true)
