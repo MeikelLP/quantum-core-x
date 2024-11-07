@@ -4,7 +4,9 @@ using QuantumCore.API;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.World;
 using QuantumCore.Caching;
+using QuantumCore.Core.Event;
 using QuantumCore.Core.Networking;
+using QuantumCore.Game.Packets;
 using QuantumCore.Networking;
 
 namespace QuantumCore.Game
@@ -34,6 +36,13 @@ namespace QuantumCore.Game
         protected override void OnHandshakeFinished()
         {
             GameServer.Instance.CallConnectionListener(this);
+            var pingInterval = NetworkingConstants.PingIntervalInSeconds * 1000;
+            var ping = new Ping();
+            EventSystem.EnqueueEvent(() =>
+            {
+                Send(ping);
+                return pingInterval;
+            }, pingInterval);
         }
 
         protected override async Task OnClose(bool expected = true)
@@ -59,9 +68,8 @@ namespace QuantumCore.Game
                     }
                 }
                 
-                _cacheManager.Shared.DelAllAsync($"*{AccountId}");
-                _cacheManager.Server.DelAllAsync($"player:{Player!.Player.Id}");
                 
+                _cacheManager.Server.DelAllAsync($"player:{Player!.Player.Id}");
             }
 
             await Server.RemoveConnection(this);
