@@ -50,7 +50,7 @@ jobs:
         with:
           dotnet-version: 8.0.x
       - name: Build
-        run: dotnet publish -r ${{ matrix.os }} --verbosity minimal -p DebugType=None -p DebugSymbols=false src/Executables/Single/
+        run: dotnet publish -r ${{ matrix.os }} --verbosity minimal -p DebugType=None -p DebugSymbols=false -p PublishSingleFile=true --self-contained  src/Executables/Single/
       - name: Archive code coverage results
         uses: actions/upload-artifact@v4
         with:

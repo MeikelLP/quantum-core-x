@@ -1,9 +1,10 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
         <AssemblyName>QuantumCore.Single</AssemblyName>
         <RootNamespace>QuantumCore.Single</RootNamespace>
+        <ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles> <!-- Workaround: https://github.com/dotnet/sdk/issues/25294 -->
     </PropertyGroup>
 
     <ItemGroup>
