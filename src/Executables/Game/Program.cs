@@ -1,5 +1,4 @@
 using System.Text;
-using Game.Caching.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -13,7 +12,6 @@ using QuantumCore.Game.Persistence;
 var hostBuilder = await QuantumCoreHostBuilder.CreateHostAsync(args);
 hostBuilder.Configuration.AddQuantumCoreDefaults();
 hostBuilder.Services.AddGameServices();
-hostBuilder.Services.AddGameCaching();
 hostBuilder.Services.AddHostedService<GameServer>();
 hostBuilder.Services.AddSingleton<IGameServer>(provider =>
     provider.GetServices<IHostedService>().OfType<GameServer>().Single());

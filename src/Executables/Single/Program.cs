@@ -1,10 +1,10 @@
 ﻿using CommandLine;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Options;
 using QuantumCore;
+using QuantumCore.API;
 using QuantumCore.Auth;
 using QuantumCore.Auth.Extensions;
 using QuantumCore.Auth.Persistence;
@@ -25,6 +25,10 @@ await Parser.Default.ParseArguments<SingleRunArgs>(args)
         hostBuilder.Services.AddAuthServices();
         hostBuilder.Services.AddHostedService<GameServer>();
         hostBuilder.Services.AddHostedService<AuthServer>();
+        hostBuilder.Services.AddSingleton<IGameServer>(provider =>
+            provider.GetServices<IHostedService>().OfType<GameServer>().Single());
+        hostBuilder.Services.AddSingleton<IServerBase>(provider =>
+            provider.GetServices<IHostedService>().OfType<GameServer>().Single());
 
         // overrides
         hostBuilder.Services.Replace(new ServiceDescriptor(typeof(IRedisStore), CacheStoreType.Shared,
