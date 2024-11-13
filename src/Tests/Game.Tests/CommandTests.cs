@@ -6,6 +6,8 @@ using Game.Tests.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.FileProviders.Physical;
 using Microsoft.Extensions.Options;
 using NSubstitute;
 using QuantumCore.API;
@@ -179,6 +181,13 @@ public class CommandTests : IAsyncLifetime
             .AddSingleton<IPlayerEntity, PlayerEntity>()
             .AddSingleton(_ => _playerDataFaker.Generate())
             .AddSingleton(Substitute.For<IGameServer>())
+            .AddSingleton(_ =>
+            {
+                var mock = Substitute.For<IFileProvider>();
+                mock.GetFileInfo(Arg.Any<string>()).Returns(call =>
+                    new PhysicalFileInfo(new FileInfo(Path.Combine("data", call.Arg<string>()))));
+                return mock;
+            })
             .BuildServiceProvider();
         _itemManager = _services.GetRequiredService<IItemManager>();
         _commandManager = _services.GetRequiredService<ICommandManager>();

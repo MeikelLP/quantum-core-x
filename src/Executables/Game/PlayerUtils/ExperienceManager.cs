@@ -1,12 +1,14 @@
 ﻿using System.Diagnostics;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 
 namespace QuantumCore.Game.PlayerUtils;
 
-public class ExperienceManager : IExperienceManager
+public class ExperienceManager : IExperienceManager, ILoadable
 {
     private readonly ILogger<ExperienceManager> _logger;
+    private readonly IFileProvider _fileProvider;
     private readonly List<uint> _experienceTable = new();
 
     public byte MaxLevel => (byte) _experienceTable.Count;
@@ -17,25 +19,28 @@ public class ExperienceManager : IExperienceManager
         return level > MaxLevel ? 0 : _experienceTable[level - 1];
     }
 
-    public ExperienceManager(ILogger<ExperienceManager> logger)
+    public ExperienceManager(ILogger<ExperienceManager> logger, IFileProvider fileProvider)
     {
         _logger = logger;
+        _fileProvider = fileProvider;
     }
 
     public async Task LoadAsync(CancellationToken token = default)
     {
         _logger.LogInformation("Loading exp.csv");
-        var path = Path.Join("data", "exp.csv");
-        if (!File.Exists(path))
+        var file = _fileProvider.GetFileInfo("exp.csv");
+        if (!file.Exists)
         {
             _logger.LogError("No experience table found!");
             return;
         }
 
-        var lines = await File.ReadAllLinesAsync(path, token);
-        for (var i = 0; i < lines.Length; i++)
+        await using var fs = file.CreateReadStream();
+        using var sr = new StreamReader(fs);
+        var i = 0;
+        while (!sr.EndOfStream)
         {
-            var line = lines[i];
+            var line = await sr.ReadLineAsync(token).ConfigureAwait(false);
             if (string.IsNullOrWhiteSpace(line))
             {
                 break;
@@ -50,6 +55,7 @@ public class ExperienceManager : IExperienceManager
             }
 
             _experienceTable.Add(experience);
+            i++;
         }
     }
 }

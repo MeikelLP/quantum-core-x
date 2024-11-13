@@ -4,42 +4,11 @@ namespace QuantumCore.Core.Types
 {
     public class StructuredFile
     {
-        private readonly Dictionary<string, string> _values = new Dictionary<string, string>();
+        private readonly Dictionary<string, string> _values;
 
-        /// <summary>
-        /// Parses the given file
-        /// </summary>
-        /// <param name="path">Path to file</param>
-        /// <exception cref="FileNotFoundException">Thrown if the given file wasn't found</exception>
-        public async Task ReadAsync(string path)
+        public StructuredFile(Dictionary<string, string> values)
         {
-            if (!File.Exists(path)) throw new FileNotFoundException("Structured file not found", path);
-
-            using var reader = new StreamReader(path);
-            string? line;
-            while ((line = await reader.ReadLineAsync()) != null)
-            {
-                line = line.Trim();
-                if(string.IsNullOrWhiteSpace(line)) continue;
-
-                var i = line.IndexOfAny(new[] {' ', '\t'});
-                if(i < 0) continue;
-
-                var keyword = line.Substring(0, i);
-                var startIndex = line.IndexOf(' ');
-                if (startIndex == -1)
-                {
-                    startIndex = line.IndexOf('\t');
-                }
-
-                if (startIndex == -1)
-                {
-                    throw new InvalidOperationException("Line does not contain ' ' or '\t' char. One of those are required");
-                }
-                var value = line.Substring(startIndex).Split(new []{' ', '\t'}).Select(s => s.Trim())
-                    .Where(s => !string.IsNullOrWhiteSpace(s)).ToArray();
-                _values[keyword] = string.Join(' ', value);
-            }
+            _values = values;
         }
 
         /// <summary>
@@ -80,7 +49,8 @@ namespace QuantumCore.Core.Types
             var values = value.Split(' ');
             if (position >= values.Length) return null;
 
-            if (!float.TryParse(values[position], NumberStyles.Float, NumberFormatInfo.InvariantInfo, out var f)) return null;
+            if (!float.TryParse(values[position], NumberStyles.Float, NumberFormatInfo.InvariantInfo, out var f))
+                return null;
 
             return f;
         }

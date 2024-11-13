@@ -1,46 +1,46 @@
 ﻿using FluentAssertions;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.FileProviders.Physical;
+using NSubstitute;
+using QuantumCore.API;
 using QuantumCore.API.Core.Models;
-using QuantumCore.Core.Types;
+using QuantumCore.Game;
 using QuantumCore.Game.PlayerUtils;
 
 namespace Game.Tests;
 
 public class ItemProtoTests
 {
+    private readonly IItemManager _itemManager;
+
+    public ItemProtoTests()
+    {
+        _itemManager = new ServiceCollection()
+            .AddSingleton<IItemManager, ItemManager>()
+            .AddLogging()
+            .AddSingleton(_ =>
+            {
+                var mock = Substitute.For<IFileProvider>();
+                mock.GetFileInfo(Arg.Any<string>()).ReturnsForAnyArgs(call =>
+                    new PhysicalFileInfo(new FileInfo(Path.Combine("Fixtures", call.Arg<string>()))));
+                return mock;
+            })
+            .BuildServiceProvider()
+            .GetRequiredService<IItemManager>();
+    }
+
     [Fact]
     public async Task CanRead()
     {
-        var items = await new ItemProtoLoader().LoadAsync("Fixtures/item_proto");
-        items.Should().HaveCount(1);
+        await _itemManager.LoadAsync();
+        var item = _itemManager.GetItem(10);
         // map to another type so we don't include any library properties
-        new ItemData
-        {
-            Name = items[0].Name,
-            AntiFlags = items[0].AntiFlags,
-            Applies = items[0].Applies.Select(x => new ItemApplyData {Type = x.Type, Value = x.Value}).ToList(),
-            Id = items[0].Id,
-            Limits = items[0].Limits.Select(x => new ItemLimitData {Type = x.Type, Value = x.Value}).ToList(),
-            Size = items[0].Size,
-            Sockets = items[0].Sockets,
-            Specular = items[0].Specular,
-            Subtype = items[0].Subtype,
-            Type = items[0].Type,
-            Unknown = items[0].Unknown,
-            Unknown2 = items[0].Unknown2,
-            Values = items[0].Values,
-            BuyPrice = items[0].BuyPrice,
-            ImmuneFlags = items[0].ImmuneFlags,
-            SellPrice = items[0].SellPrice,
-            SocketPercentage = items[0].SocketPercentage,
-            TranslatedName = items[0].TranslatedName,
-            UpgradeId = items[0].UpgradeId,
-            UpgradeSet = items[0].UpgradeSet,
-            WearFlags = items[0].WearFlags,
-            MagicItemPercentage = items[0].MagicItemPercentage
-        }.Should().BeEquivalentTo(new ItemData
+        item.Should().BeEquivalentTo(new ItemData
         {
             Name = "Item1",
             AntiFlags = (int) EAntiFlags.Shaman,
+            Flags = 1u,
             Applies =
             [
                 new ItemApplyData {Type = (byte) EApplyType.AttackSpeed, Value = 22},

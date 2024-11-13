@@ -88,8 +88,8 @@ public class GuildManager : IGuildManager
         {
             Id = guild.Id,
             Name = name,
-            Level = 1,
-            MaxMemberCount = 10,
+            Level = guild.Level,
+            MaxMemberCount = guild.MaxMemberCount,
             OwnerId = leaderId
         };
     }
