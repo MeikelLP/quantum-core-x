@@ -8,11 +8,11 @@
 
     <ItemGroup>
       <PackageReference Include="Enums.NET" Version="5.0.0" />
-        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.8" Condition="'$(Configuration)' != 'Release'">
+        <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.0" Condition="'$(Configuration)' != 'Release'">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
-      <PackageReference Include="Microsoft.Extensions.Http" Version="8.0.0"/>
+        <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.0"/>
     </ItemGroup>
 
     <ItemGroup>
