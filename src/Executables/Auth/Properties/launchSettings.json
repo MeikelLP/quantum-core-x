@@ -1,8 +1,8 @@
 {
-    "$schema": "http://json.schemastore.org/launchsettings.json",
-    "profiles": {
-        "Auth": {
-            "commandName": "Project"
-        }
+  "$schema": "http://json.schemastore.org/launchsettings.json",
+  "profiles": {
+    "Auth": {
+      "commandName": "Project"
     }
+  }
 }

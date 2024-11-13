@@ -6,9 +6,9 @@ namespace QuantumCore.Auth.Persistence;
 
 internal class PostgresqlAuthDbContext : AuthDbContext
 {
-    private readonly IOptions<DatabaseOptions> _options;
+    private readonly IOptionsSnapshot<DatabaseOptions> _options;
 
-    public PostgresqlAuthDbContext(IOptions<DatabaseOptions> options, ILoggerFactory loggerFactory) : base(
+    public PostgresqlAuthDbContext(IOptionsSnapshot<DatabaseOptions> options, ILoggerFactory loggerFactory) : base(
         loggerFactory)
     {
         _options = options;
@@ -17,7 +17,7 @@ internal class PostgresqlAuthDbContext : AuthDbContext
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         base.OnConfiguring(optionsBuilder);
-        var opts = _options.Value;
+        var opts = _options.Get(HostingOptions.ModeAuth);
         optionsBuilder.UseNpgsql(opts.ConnectionString);
     }
 }

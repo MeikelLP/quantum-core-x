@@ -5,7 +5,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using NSubstitute;
 using QuantumCore;
 using QuantumCore.API;
@@ -51,7 +50,7 @@ public class WorldUpdateBenchmark
             .AddCoreServices(new EmptyPluginCatalog(), config)
             .AddQuantumCoreCaching()
             .AddGameCaching()
-            .AddQuantumCoreDatabase()
+            .AddQuantumCoreDatabase(HostingOptions.ModeGame)
             .AddGameServices()
             .Replace(new ServiceDescriptor(typeof(IAtlasProvider), provider =>
             {
@@ -62,11 +61,11 @@ public class WorldUpdateBenchmark
                         new Map(provider.GetRequiredService<IMonsterManager>(),
                             provider.GetRequiredService<IAnimationManager>(),
                             provider.GetRequiredService<ICacheManager>(), callInfo.Arg<IWorld>(),
-                            provider.GetRequiredService<IOptions<HostingOptions>>(),
                             provider.GetRequiredService<ILogger<Map>>(),
                             provider.GetRequiredService<ISpawnPointProvider>(),
                             provider.GetRequiredService<IDropProvider>(),
                             provider.GetRequiredService<IItemManager>(),
+                            provider.GetRequiredService<IServerBase>(),
                             "test_map", 0, 0, 1024, 1024
                         )
                     });
@@ -149,7 +148,7 @@ public class WorldUpdateBenchmark
             .BuildServiceProvider();
         _world = ActivatorUtilities.CreateInstance<World>(services);
         ActivatorUtilities.CreateInstance<GameServer>(services); // for setting the singleton GameServer.Instance
-        _world.Load().Wait();
+        _world.LoadAsync().Wait();
 
         foreach (var i in Enumerable.Range(0, PlayerAmount))
         {

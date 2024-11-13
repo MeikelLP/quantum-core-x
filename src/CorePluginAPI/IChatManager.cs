@@ -4,7 +4,6 @@ namespace QuantumCore.API;
 
 public interface IChatManager
 {
-    void Init();
     void Talk(IEntity entity, string message);
     Task Shout(string message);
 }
