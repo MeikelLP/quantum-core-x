@@ -79,9 +79,11 @@ public class InMemoryRedisStore : IRedisStore
 
     public ValueTask<long> Expire(string key, TimeSpan seconds)
     {
-        var tuple = _dict[key];
-        tuple.Expiry = DateTime.UtcNow + seconds;
-        _dict[key] = tuple;
+        if (_dict.TryGetValue(key, out var tuple))
+        {
+            tuple.Expiry = DateTime.UtcNow + seconds;
+            _dict[key] = tuple;
+        }
 
         return ValueTask.FromResult(1L);
     }
