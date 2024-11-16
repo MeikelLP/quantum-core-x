@@ -7,9 +7,10 @@ namespace QuantumCore.Auth.Persistence;
 
 internal class MySqlAuthDbContext : AuthDbContext
 {
-    private readonly IOptions<DatabaseOptions> _options;
+    private readonly IOptionsSnapshot<DatabaseOptions> _options;
 
-    public MySqlAuthDbContext(IOptions<DatabaseOptions> options, ILoggerFactory loggerFactory) : base(loggerFactory)
+    public MySqlAuthDbContext(IOptionsSnapshot<DatabaseOptions> options, ILoggerFactory loggerFactory) : base(
+        loggerFactory)
     {
         _options = options;
     }
@@ -17,7 +18,7 @@ internal class MySqlAuthDbContext : AuthDbContext
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         base.OnConfiguring(optionsBuilder);
-        var opts = _options.Value;
+        var opts = _options.Get(HostingOptions.ModeAuth);
         optionsBuilder.UseMySql(opts.ConnectionString, ServerVersion.AutoDetect(opts.ConnectionString), mysql =>
         {
             // because MySQL does not support schemas: https://github.com/PomeloFoundation/Pomelo.EntityFrameworkCore.MySql/issues/1100
