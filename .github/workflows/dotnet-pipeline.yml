@@ -37,7 +37,7 @@ jobs:
       - test
     runs-on: ubuntu-latest
     # only deploy if on master or tag
-    #if: startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' # TODO
+    if: startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master'
     strategy:
       matrix:
         os: [ win-x64, osx-x64, linux-x64, linux-musl-x64 ]
