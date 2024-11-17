@@ -31,7 +31,7 @@ public class Shop : IShop
 
     public List<IPlayerEntity> Visitors { get; } = new();
 
-    private Grid<ShopItem> _grid = new(4, 5);
+    private Grid<ShopItem> _grid = new(5, 8);
     private readonly List<ShopItem> _items = new();
     private readonly IItemManager _itemManager;
     private readonly ILogger _logger;
