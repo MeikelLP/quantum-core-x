@@ -1,4 +1,5 @@
 using System.Collections.Immutable;
+using System.Diagnostics.CodeAnalysis;
 using System.Text;
 using BinarySerialization;
 using Microsoft.Extensions.FileProviders;
@@ -37,6 +38,12 @@ namespace QuantumCore.Game
         public ItemData? GetItem(uint id)
         {
             return _items.FirstOrDefault(item => item.Id == id);
+        }
+
+        public bool TryGetItem(uint id, [NotNullWhen(true)] out ItemData? data)
+        {
+            data = _items.FirstOrDefault(item => item.Id == id);
+            return data is not null;
         }
 
         public ItemData? GetItemByName(ReadOnlySpan<char> name)
