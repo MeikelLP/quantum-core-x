@@ -2,9 +2,9 @@
 
 namespace QuantumCore.API.Game.World
 {
-    public interface IWorld
+    public interface IWorld : ILoadable
     {
-        Task Load();
+        Task InitAsync();
         void Update(double elapsedTime);
 #nullable enable
         IMap? GetMapAt(uint x, uint y);
@@ -34,5 +34,6 @@ namespace QuantumCore.API.Game.World
         void RemovePlayer(IPlayerEntity e);
         IPlayerEntity? GetPlayer(string playerName);
         IList<IPlayerEntity> GetPlayers();
+        IPlayerEntity? GetPlayerById(uint playerId);
     }
 }

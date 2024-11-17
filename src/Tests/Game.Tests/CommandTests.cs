@@ -6,11 +6,14 @@ using Game.Tests.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.FileProviders.Physical;
 using Microsoft.Extensions.Options;
 using NSubstitute;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game;
+using QuantumCore.API.Game.Guild;
 using QuantumCore.API.Game.Skills;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.World;
@@ -25,13 +28,11 @@ using QuantumCore.Game.Packets.Skills;
 using QuantumCore.Game.Persistence;
 using QuantumCore.Game.Persistence.Entities;
 using QuantumCore.Game.PlayerUtils;
-using QuantumCore.Game.Skills;
 using QuantumCore.Game.World;
 using QuantumCore.Game.World.Entities;
 using QuantumCore.Networking;
 using Weikio.PluginFramework.Catalogs;
 using Xunit.Abstractions;
-using PlayerSkill = QuantumCore.Game.Packets.Skills.PlayerSkill;
 
 // cannot cast MockedGameConnection to IGameConnection ???
 #pragma warning disable CS8602
@@ -64,6 +65,7 @@ internal class MockedGameConnection : IGameConnection
         {
             SentPhases.Add(phase);
         }
+
         SentPackets.Add(packet);
     }
 
@@ -135,6 +137,7 @@ public class CommandTests : IAsyncLifetime
         _services = new ServiceCollection()
             .AddCoreServices(new EmptyPluginCatalog(), new ConfigurationBuilder().Build())
             .AddGameServices()
+            .AddSingleton(Substitute.For<IServerBase>())
             .AddQuantumCoreTestLogger(testOutputHelper)
             .Replace(new ServiceDescriptor(typeof(IItemRepository), _ => Substitute.For<IItemRepository>(),
                 ServiceLifetime.Singleton))
@@ -147,12 +150,15 @@ public class CommandTests : IAsyncLifetime
                 }, ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(IPlayerRepository), _ => Substitute.For<IPlayerRepository>(),
                 ServiceLifetime.Singleton))
-            .Replace(new ServiceDescriptor(typeof(IPlayerSkillsRepository), _ => Substitute.For<IPlayerSkillsRepository>(),
+            .Replace(new ServiceDescriptor(typeof(IPlayerSkillsRepository),
+                _ => Substitute.For<IPlayerSkillsRepository>(),
                 ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(IMonsterManager), _ => monsterManagerMock, ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(IItemManager), _ => itemManagerMock, ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(ICacheManager), _ => cacheManagerMock, ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(IJobManager), _ => jobManagerMock, ServiceLifetime.Singleton))
+            .Replace(new ServiceDescriptor(typeof(IGuildManager), _ => Substitute.For<IGuildManager>(),
+                ServiceLifetime.Scoped))
             .Replace(new ServiceDescriptor(typeof(IExperienceManager), _ => experienceManagerMock,
                 ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(ISkillManager), _ => _skillManager, ServiceLifetime.Singleton))
@@ -176,6 +182,13 @@ public class CommandTests : IAsyncLifetime
             .AddSingleton<IPlayerEntity, PlayerEntity>()
             .AddSingleton(_ => _playerDataFaker.Generate())
             .AddSingleton(Substitute.For<IGameServer>())
+            .AddSingleton(_ =>
+            {
+                var mock = Substitute.For<IFileProvider>();
+                mock.GetFileInfo(Arg.Any<string>()).Returns(call =>
+                    new PhysicalFileInfo(new FileInfo(Path.Combine("data", call.Arg<string>()))));
+                return mock;
+            })
             .BuildServiceProvider();
         _itemManager = _services.GetRequiredService<IItemManager>();
         _commandManager = _services.GetRequiredService<ICommandManager>();
@@ -269,8 +282,9 @@ public class CommandTests : IAsyncLifetime
         sentMessages.Should().ContainEquivalentOf(new ChatOutcoming {Message = $"Weapon Damage: 10-16"}, Config);
         sentMessages.Should()
             .ContainEquivalentOf(new ChatOutcoming {Message = $"Attack Damage: {minAttack}-{maxAttack}"}, Config);
+        return;
 
-        EquivalencyAssertionOptions<ChatOutcoming> Config(EquivalencyAssertionOptions<ChatOutcoming> cfg) =>
+        EquivalencyOptions<ChatOutcoming> Config(EquivalencyOptions<ChatOutcoming> cfg) =>
             cfg.Including(x => x.Message);
     }
 
@@ -400,10 +414,11 @@ public class CommandTests : IAsyncLifetime
     {
         await _commandManager.Handle(_connection, "/help");
 
-        (_connection as MockedGameConnection).SentMessages.Should().ContainEquivalentOf(new ChatOutcoming
-            {
-                Message = "The following commands are available:\n"
-            }, cfg => cfg
+        var messages = (_connection as MockedGameConnection).SentMessages;
+        messages.Should().HaveCountGreaterThan(1);
+        messages[0].Should().BeEquivalentTo(
+            new ChatOutcoming {Message = "The following commands are available", MessageType = ChatMessageTypes.Info},
+            cfg => cfg
                 .Including(x => x.Message)
                 .Using<string>(ctx => ctx.Subject.Should().StartWith(ctx.Expectation)).WhenTypeIs<string>()
         );
@@ -575,7 +590,8 @@ public class CommandTests : IAsyncLifetime
         await File.WriteAllTextAsync("data/atlasinfo.txt", $"map_a2	{Map.MapUnit * 10}	{Map.MapUnit * 26}	6	6\n" +
                                                            $"map_b2	{Map.MapUnit * 10}	{Map.MapUnit * 26}	6	6");
         var world = _services.GetRequiredService<IWorld>();
-        await world.Load();
+        await world.LoadAsync();
+        await world.InitAsync();
         return world;
     }
 
@@ -703,7 +719,7 @@ public class CommandTests : IAsyncLifetime
             Message = "You have advanced to level 5"
         }, cfg => cfg.Including(x => x.Message));
     }
-    
+
     [Fact]
     public async Task SetJobCommand_ValidLevel()
     {
@@ -711,45 +727,48 @@ public class CommandTests : IAsyncLifetime
         _player.Player.SkillGroup = 0;
         _player.Player.PlayerClass = 0;
         _player.SetPoint(EPoints.Level, 5);
-        
+
         // Act
         await _commandManager.Handle(_connection, "/setjob 1");
 
         // Assert
         _player.Player.SkillGroup.Should().Be(1);
-        ((MockedGameConnection) _connection).SentPackets.Should().ContainEquivalentOf(new ChangeSkillGroup { SkillGroup = 1});
+        ((MockedGameConnection) _connection).SentPackets.Should()
+            .ContainEquivalentOf(new ChangeSkillGroup {SkillGroup = 1});
     }
-    
+
     [Fact]
     public async Task SetJobCommand_InvalidLevel()
     {
         // Prepare
         _player.Player.SkillGroup = 0;
         _player.SetPoint(EPoints.Level, 3);
-        
+
         // Act
         await _commandManager.Handle(_connection, "/setjob 1");
 
         // Assert
         _player.Player.SkillGroup.Should().Be(0);
-        ((MockedGameConnection) _connection).SentPackets.Should().NotContainEquivalentOf(new ChangeSkillGroup { SkillGroup = 1});
+        ((MockedGameConnection) _connection).SentPackets.Should()
+            .NotContainEquivalentOf(new ChangeSkillGroup {SkillGroup = 1});
     }
-    
+
     [Fact]
     public async Task SetJobCommand_InvalidJob()
     {
         // Prepare
         _player.Player.SkillGroup = 0;
         _player.SetPoint(EPoints.Level, 5);
-        
+
         // Act
         await _commandManager.Handle(_connection, "/setjob 4");
 
         // Assert
         _player.Player.SkillGroup.Should().Be(0);
-        ((MockedGameConnection) _connection).SentPackets.Should().NotContainEquivalentOf(new ChangeSkillGroup { SkillGroup = 4});
+        ((MockedGameConnection) _connection).SentPackets.Should()
+            .NotContainEquivalentOf(new ChangeSkillGroup {SkillGroup = 4});
     }
-    
+
     [Fact]
     public async Task SkillUpCommand_ValidSkill()
     {
@@ -758,7 +777,7 @@ public class CommandTests : IAsyncLifetime
         _player.Player.PlayerClass = 0;
 
         var skillId = ESkillIndexes.AuraOfTheSword;
-        
+
         _skillManager.GetSkill(skillId).Returns(new SkillData
         {
             Id = skillId,
@@ -766,7 +785,7 @@ public class CommandTests : IAsyncLifetime
             Flag = ESkillFlag.Attack
         });
         _player.Skills.SetSkillGroup(1);
-        
+
         // Act
         await _commandManager.Handle(_connection, $"/skillup {(uint) skillId}");
 
@@ -775,7 +794,7 @@ public class CommandTests : IAsyncLifetime
         skill.Should().NotBeNull();
         skill?.Level.Should().Be(1);
     }
-    
+
     [Fact]
     public async Task SkillUpCommand_MasterSkill()
     {
@@ -783,7 +802,7 @@ public class CommandTests : IAsyncLifetime
         _player.SetPoint(EPoints.Level, 5);
         _player.Player.PlayerClass = 0;
         const ESkillIndexes skillId = ESkillIndexes.AuraOfTheSword;
-        
+
         _skillManager.GetSkill(skillId).Returns(new SkillData
         {
             Id = skillId,
@@ -793,7 +812,7 @@ public class CommandTests : IAsyncLifetime
         _player.Skills.SetSkillGroup(1);
         _player.Skills[skillId].Level = 19;
         _player.Skills[skillId].MasterType = ESkillMasterType.Normal;
-        
+
         // Act
         await _commandManager.Handle(_connection, $"/skillup {(uint) skillId}");
 

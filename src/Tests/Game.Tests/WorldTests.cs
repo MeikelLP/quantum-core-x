@@ -3,8 +3,8 @@ using Game.Caching.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using NSubstitute;
 using QuantumCore;
 using QuantumCore.API;
@@ -41,9 +41,10 @@ public class WorldTests
             .AddCoreServices(new EmptyPluginCatalog(), config)
             .AddQuantumCoreCaching()
             .AddGameCaching()
-            .AddQuantumCoreDatabase()
+            .AddQuantumCoreDatabase(HostingOptions.ModeGame)
             .AddGameServices()
-            .Configure<DatabaseOptions>(opts =>
+            .AddSingleton(Substitute.For<IServerBase>())
+            .Configure<DatabaseOptions>(HostingOptions.ModeGame, opts =>
             {
                 opts.ConnectionString = "Server:abc;";
                 opts.Provider = DatabaseProvider.Mysql;
@@ -56,11 +57,11 @@ public class WorldTests
                     new Map(provider.GetRequiredService<IMonsterManager>(),
                         provider.GetRequiredService<IAnimationManager>(),
                         provider.GetRequiredService<ICacheManager>(), info.Arg<IWorld>(),
-                        provider.GetRequiredService<IOptions<HostingOptions>>(),
                         provider.GetRequiredService<ILogger<Map>>(),
                         provider.GetRequiredService<ISpawnPointProvider>(),
                         provider.GetRequiredService<IDropProvider>(),
                         provider.GetRequiredService<IItemManager>(),
+                        provider.GetRequiredService<IServerBase>(),
                         "test_map", 0, 0, 1024, 1024)
                 });
                 return mock;
@@ -108,10 +109,12 @@ public class WorldTests
                 });
                 return mock;
             }, ServiceLifetime.Singleton))
+            .AddSingleton(Substitute.For<IFileProvider>())
             .BuildServiceProvider();
         _world = ActivatorUtilities.CreateInstance<World>(services);
         ActivatorUtilities.CreateInstance<GameServer>(services); // for setting the singleton GameServer.Instance
-        _world.Load().Wait();
+        _world.LoadAsync().Wait();
+        _world.InitAsync().Wait();
 
         var conn = Substitute.For<IGameConnection>();
         var playerData = new PlayerData
