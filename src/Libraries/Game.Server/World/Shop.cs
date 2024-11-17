@@ -88,6 +88,21 @@ public class Shop : IShop
             };
         }
 
+        // fill null values
+        for (var i = 0; i < shopStart.Items.Length; i++)
+        {
+            // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+            if (shopStart.Items[i] is null)
+            {
+                shopStart.Items[i] = new Packets.Shop.ShopItem();
+            }
+
+            for (var ii = 0; ii < shopStart.Items[i].Bonuses.Length; ii++)
+            {
+                shopStart.Items[i].Bonuses[ii] = new ItemBonus();
+            }
+        }
+
         p.Connection.Send(shopStart);
     }
 
