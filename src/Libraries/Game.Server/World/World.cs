@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics;
 using System.Net;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
@@ -24,32 +23,31 @@ namespace QuantumCore.Game.World
         private readonly Dictionary<uint, SpawnGroup> _groups = new();
         private readonly Dictionary<uint, SpawnGroupCollection> _groupCollections = new();
 
-        private readonly Dictionary<int, Shop> _staticShops = new();
+        private readonly Dictionary<uint, Shop> _staticShops = new();
 
         private IRedisSubscriber? _mapSubscriber;
         private readonly IItemManager _itemManager;
         private readonly ICacheManager _cacheManager;
-        private readonly IConfiguration _configuration;
+        private readonly INpcShopProvider _shopProvider;
         private readonly ISpawnGroupProvider _spawnGroupProvider;
         private readonly IServiceProvider _serviceProvider;
 
         public World(ILogger<World> logger, PluginExecutor pluginExecutor, IItemManager itemManager,
-            ICacheManager cacheManager, IConfiguration configuration, ISpawnGroupProvider spawnGroupProvider,
-            IServiceProvider serviceProvider)
+            ICacheManager cacheManager, ISpawnGroupProvider spawnGroupProvider,
+            IServiceProvider serviceProvider, INpcShopProvider shopProvider)
         {
             _logger = logger;
             _pluginExecutor = pluginExecutor;
             _itemManager = itemManager;
             _cacheManager = cacheManager;
-            _configuration = configuration;
             _spawnGroupProvider = spawnGroupProvider;
             _serviceProvider = serviceProvider;
+            _shopProvider = shopProvider;
             _vid = 0;
         }
 
         public async Task LoadAsync(CancellationToken token = default)
         {
-            LoadShops();
             var groups = await _spawnGroupProvider.GetSpawnGroupsAsync();
             foreach (var g in groups)
             {
@@ -102,26 +100,34 @@ namespace QuantumCore.Game.World
                     await m.Initialize();
                 }
             }
+
+            LoadShops();
         }
 
         private void LoadShops()
         {
-            var shops = _configuration.GetSection("shops").Get<ShopDefinition[]>();
-            if (shops is null) return;
-            foreach (var shopDef in shops)
+            foreach (var shopDef in _shopProvider.Shops)
             {
                 var shop = new Shop(_itemManager, _logger);
 
-                _staticShops[shopDef.Id] = shop;
+                _staticShops[shopDef.Monster] = shop;
 
-                if (shopDef.Npc.HasValue)
+                foreach (var item in shopDef.Items)
                 {
-                    GameEventManager.RegisterNpcClickEvent(shop.Name, shopDef.Npc.Value, player =>
+                    if (!_itemManager.TryGetItem(item.Item, out var itemData))
                     {
-                        shop.Open(player);
-                        return Task.CompletedTask;
-                    });
+                        _logger.LogWarning("Failed to load item info for item with ID {Id}", item.Item);
+                        continue;
+                    }
+
+                    shop.AddItem(item.Item, item.Amount, itemData.BuyPrice);
                 }
+
+                GameEventManager.RegisterNpcClickEvent(shop.Name, shopDef.Monster, player =>
+                {
+                    shop.Open(player);
+                    return Task.CompletedTask;
+                });
             }
         }
 

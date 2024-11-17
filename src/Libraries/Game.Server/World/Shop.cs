@@ -3,17 +3,12 @@ using QuantumCore.API;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.World;
 using QuantumCore.Core.Utils;
+using QuantumCore.Game.Packets.General;
 using QuantumCore.Game.Packets.Shop;
 using QuantumCore.Game.World.Entities;
 using ShopItem = QuantumCore.API.Core.Models.ShopItem;
 
 namespace QuantumCore.Game.World;
-
-public class ShopDefinition
-{
-    public int Id { get; set; }
-    public uint? Npc { get; set; }
-}
 
 public class Shop : IShop
 {
