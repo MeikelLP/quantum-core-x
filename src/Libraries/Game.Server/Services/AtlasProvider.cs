@@ -11,6 +11,15 @@ namespace QuantumCore.Game.Services;
 
 internal partial class AtlasProvider : IAtlasProvider
 {
+    private record AtlasValue(string MapName, uint X, uint Y, uint Width, uint Height);
+
+    private static readonly AtlasValue[] DefaultAtlasValues =
+    [
+        new("metin2_map_a1", 409600, 896000, 4, 5),
+        new("metin2_map_b1", 0, 102400, 4, 5),
+        new("metin2_map_a1", 921600, 204800, 4, 5),
+    ];
+
     private readonly IConfiguration _configuration;
     private readonly IMonsterManager _monsterManager;
     private readonly IAnimationManager _animationManager;
@@ -51,65 +60,72 @@ internal partial class AtlasProvider : IAtlasProvider
         var maxX = 0u;
         var maxY = 0u;
 
-        // Load atlasinfo.txt and initialize all maps the game core hosts
+        var atlasValues = new List<AtlasValue>();
         var fileInfo = _fileProvider.GetFileInfo("atlasinfo.txt");
         if (!fileInfo.Exists)
         {
-            throw new FileNotFoundException($"Unable to find file {fileInfo.PhysicalPath}");
+            atlasValues = [..DefaultAtlasValues];
+            _logger.LogWarning("Not atlasinfo.txt found. Using default values.");
+        }
+        else
+        {
+            // Load atlasinfo.txt and initialize all maps the game core hosts
+            await using var fs = fileInfo.CreateReadStream();
+            using var reader = new StreamReader(fs);
+            var lineNo = 0;
+            while ((await reader.ReadLineAsync())?.Trim()! is { } line)
+            {
+                lineNo++;
+                if (string.IsNullOrWhiteSpace(line)) continue; // skip empty lines
+
+                var match = LineParser().Match(line);
+                if (match.Success)
+                {
+                    try
+                    {
+                        var mapName = match.Groups[1].Value;
+                        var positionX = uint.Parse(match.Groups[2].Value);
+                        var positionY = uint.Parse(match.Groups[3].Value);
+                        var width = uint.Parse(match.Groups[4].Value);
+                        var height = uint.Parse(match.Groups[5].Value);
+                        atlasValues.Add(new AtlasValue(mapName, positionX, positionY, width, height));
+                    }
+                    catch (FormatException)
+                    {
+                        throw new InvalidDataException(
+                            $"Failed to parse atlasinfo.txt:line {lineNo} - Failed to parse number");
+                    }
+                }
+                else
+                {
+                    throw new InvalidDataException(
+                        $"Failed to parse atlasinfo.txt:line {lineNo} - Failed to parse line");
+                }
+            }
         }
 
         var maps = _configuration.GetSection("maps").Get<string[]>() ?? [];
-        var returnList = new List<IMap>();
-        await using var fs = fileInfo.CreateReadStream();
-        using var reader = new StreamReader(fs);
-        var lineNo = 0;
-        while ((await reader.ReadLineAsync())?.Trim()! is { } line)
+        return atlasValues.Select(val =>
         {
-            lineNo++;
-            if (string.IsNullOrWhiteSpace(line)) continue; // skip empty lines
+            var (mapName, positionX, positionY, width, height) = val;
 
-            var match = LineParser().Match(line);
-            if (match.Success)
+            IMap map;
+            if (!maps.Contains(mapName))
             {
-                try
-                {
-                    var mapName = match.Groups[1].Value;
-                    var positionX = uint.Parse(match.Groups[2].Value);
-                    var positionY = uint.Parse(match.Groups[3].Value);
-                    var width = uint.Parse(match.Groups[4].Value);
-                    var height = uint.Parse(match.Groups[5].Value);
-
-                    IMap map;
-                    if (!maps.Contains(mapName))
-                    {
-                        map = new RemoteMap(world, mapName, positionX, positionY, width, height);
-                    }
-                    else
-                    {
-                        map = new Map(_monsterManager, _animationManager, _cacheManager, world, _logger,
-                            _spawnPointProvider, _dropProvider, _itemManager, _server, mapName, positionX, positionY,
-                            width,
-                            height);
-                    }
-
-
-                    returnList.Add(map);
-
-                    if (positionX + width * Map.MapUnit > maxX) maxX = positionX + width * Map.MapUnit;
-                    if (positionY + height * Map.MapUnit > maxY) maxY = positionY + height * Map.MapUnit;
-                }
-                catch (FormatException)
-                {
-                    throw new InvalidDataException(
-                        $"Failed to parse atlasinfo.txt:line {lineNo} - Failed to parse number");
-                }
+                map = new RemoteMap(world, mapName, positionX, positionY, width, height);
             }
             else
             {
-                throw new InvalidDataException($"Failed to parse atlasinfo.txt:line {lineNo} - Failed to parse line");
+                map = new Map(_monsterManager, _animationManager, _cacheManager, world, _logger,
+                    _spawnPointProvider, _dropProvider, _itemManager, _server, mapName, positionX, positionY,
+                    width,
+                    height);
             }
-        }
 
-        return returnList;
+            if (positionX + width * Map.MapUnit > maxX) maxX = positionX + width * Map.MapUnit;
+            if (positionY + height * Map.MapUnit > maxY) maxY = positionY + height * Map.MapUnit;
+
+            return map;
+        });
     }
 }
