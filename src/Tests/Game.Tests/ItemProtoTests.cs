@@ -6,6 +6,7 @@ using NSubstitute;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
 using QuantumCore.Game;
+using QuantumCore.Game.Extensions;
 using QuantumCore.Game.PlayerUtils;
 
 namespace Game.Tests;
@@ -71,5 +72,14 @@ public class ItemProtoTests
             WearFlags = (uint) EWearFlags.Weapon,
             MagicItemPercentage = 15
         });
+    }
+    
+    [Fact]
+    public async Task CanGetApplyValue()
+    {
+        await _itemManager.LoadAsync();
+        var item = _itemManager.GetItem(10);
+        var value = item.GetApplyValue(EApplyType.AttackSpeed);
+        value.Should().Be(22);
     }
 }
