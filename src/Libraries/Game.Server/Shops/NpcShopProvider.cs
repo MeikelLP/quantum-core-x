@@ -25,6 +25,7 @@ internal class NpcShopProvider : INpcShopProvider, ILoadable
         if (!file.Exists)
         {
             _logger.LogWarning("{Path} does not exist, shops not loaded", file.PhysicalPath);
+            Shops = [];
             return;
         }
 

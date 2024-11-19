@@ -113,6 +113,7 @@ public class CommandTests : IAsyncLifetime
         var monsterManagerMock = Substitute.For<IMonsterManager>();
         monsterManagerMock.GetMonster(Arg.Any<uint>()).Returns(callerInfo =>
             new AutoFaker<MonsterData>().RuleFor(x => x.Id, _ => callerInfo.Arg<uint>()).Generate());
+        monsterManagerMock.GetMonsters().Returns([]);
         var experienceManagerMock = Substitute.For<IExperienceManager>();
         experienceManagerMock.GetNeededExperience(Arg.Any<byte>()).Returns(1000u);
         experienceManagerMock.MaxLevel.Returns((byte) 100);
@@ -589,6 +590,7 @@ public class CommandTests : IAsyncLifetime
         if (!Directory.Exists("data")) Directory.CreateDirectory("data");
         await File.WriteAllTextAsync("data/atlasinfo.txt", $"map_a2	{Map.MapUnit * 10}	{Map.MapUnit * 26}	6	6\n" +
                                                            $"map_b2	{Map.MapUnit * 10}	{Map.MapUnit * 26}	6	6");
+        await Task.WhenAll(_services.GetServices<ILoadable>().Select(x => x.LoadAsync()));
         var world = _services.GetRequiredService<IWorld>();
         await world.LoadAsync();
         await world.InitAsync();
