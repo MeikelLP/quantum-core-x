@@ -4,7 +4,7 @@
 
 * Windows for the client. This tutorial can be run on any OS but the client has to connect from Windows
 * [Docker Desktop](https://www.docker.com/products/docker-desktop/) or equivalent
-* [.NET SDK 8](https://dotnet.microsoft.com/en-us/download)
+* [.NET SDK 9](https://dotnet.microsoft.com/en-us/download)
 * [Visual Studio](https://visualstudio.com), [Jetbrains Rider](https://www.jetbrains.com/rider/), or any IDE you are comfortable with
 * A TMP4 compatible client (just google for "TMP4 Client")
 
@@ -32,7 +32,7 @@ dotnet build
 
 ### 4. Create the data folder
 
-Create the directory `data` in `./Executables/Game/bin/Debug/net8.0/`
+Create the directory `data` in `./Executables/Game/bin/Debug/net9.0/`
 
 ### 5. Copying settings
 

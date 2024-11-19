@@ -26,10 +26,10 @@ jobs:
           cache: npm
           cache-dependency-path: docs
       # setup .NET to build markdown files
-      - name: Setup .NET Core SDK 8
+      - name: Setup .NET Core SDK 9
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: 8.0.x
+          dotnet-version: 9.0.x
       - name: Build packet diagrams
         run: dotnet run --verbosity:quiet
         working-directory: src/Executables/DocsGenerator
