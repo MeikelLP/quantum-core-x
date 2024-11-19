@@ -10,7 +10,7 @@
     <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
     <PackageReference Include="lzo.net" Version="0.0.6" />
     <PackageReference Include="McMaster.NETCore.Plugins" Version="1.4.0" />
-    <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.1" />
     <PackageReference Include="Scrutor" Version="4.2.2" />
     <PackageReference Include="Serilog" Version="4.0.1"/>
     <PackageReference Include="Serilog.Enrichers.AssemblyName" Version="2.0.0" />
