@@ -39,7 +39,7 @@ public class DatabaseFixture : IAsyncLifetime
                     .WriteTo.TestOutput(_messageSink)
                     .CreateLogger());
             })
-            .Configure<DatabaseOptions>(opts =>
+            .Configure<DatabaseOptions>(HostingOptions.ModeGame, opts =>
             {
                 opts.ConnectionString = connectionString;
                 opts.Provider = DatabaseProvider.Mysql;

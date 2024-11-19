@@ -17,18 +17,50 @@ public static class ServiceExtensions
                                            "{NewLine:1}{Exception:1}";
 
     /// <summary>
+    /// Used to register a packet provider per application type.
+    /// The application types might have duplicate packet definitions (by header) but they still might be handled
+    /// differently. Thus multiple packet providers may be registered if necessary with each registered as a keyed
+    /// service.
+    /// </summary>
+    /// <param name="services"></param>
+    /// <param name="mode"></param>
+    /// <typeparam name="T"></typeparam>
+    /// <returns></returns>
+    public static IServiceCollection AddPacketProvider<T>(this IServiceCollection services, string mode)
+        where T : class, IPacketLocationProvider
+    {
+        services.AddKeyedSingleton<IPacketLocationProvider, T>(mode);
+        services.AddKeyedSingleton<IPacketReader, PacketReader>(mode);
+        services.AddKeyedSingleton<IPacketManager>(mode, (provider, key) =>
+        {
+            var packetLocationProvider = provider.GetRequiredKeyedService<IPacketLocationProvider>(key);
+            var assemblies = packetLocationProvider.GetPacketAssemblies();
+            var packetTypes = assemblies.SelectMany(x => x.ExportedTypes)
+                .Where(x => x.IsAssignableTo(typeof(IPacketSerializable)) &&
+                            x.GetCustomAttribute<PacketAttribute>()?.Direction.HasFlag(EDirection.Incoming) == true)
+                .OrderBy(x => x.FullName)
+                .ToArray();
+            var handlerTypes = assemblies.SelectMany(x => x.ExportedTypes)
+                .Where(x =>
+                    x.IsAssignableTo(typeof(IPacketHandler)) &&
+                    x is {IsClass: true, IsAbstract: false, IsInterface: false})
+                .OrderBy(x => x.FullName)
+                .ToArray();
+            return ActivatorUtilities.CreateInstance<PacketManager>(provider,
+                new object[] {(IEnumerable<Type>) packetTypes, handlerTypes});
+        });
+        return services;
+    }
+
+    /// <summary>
     /// Services required by Auth & Game
     /// </summary>
     /// <param name="services"></param>
     /// <param name="pluginCatalog"></param>
-    /// <param name="configuration"></param>
     /// <returns></returns>
     public static IServiceCollection AddCoreServices(this IServiceCollection services, IPluginCatalog pluginCatalog,
         IConfiguration configuration)
     {
-        services.AddOptions<HostingOptions>()
-            .BindConfiguration("Hosting")
-            .ValidateDataAnnotations();
         services.AddCustomLogging(configuration);
         services.AddSingleton<IPacketManager>(provider =>
         {
@@ -50,7 +82,6 @@ public static class ServiceExtensions
                 .ToArray();
             return ActivatorUtilities.CreateInstance<PacketManager>(provider, [packetTypes, handlerTypes]);
         });
-        services.AddSingleton<IPacketReader, PacketReader>();
         services.AddSingleton<PluginExecutor>();
         services.AddPluginFramework()
             .AddPluginCatalog(pluginCatalog)

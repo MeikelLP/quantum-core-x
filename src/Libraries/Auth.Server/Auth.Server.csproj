@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <OutputType>Library</OutputType>
+        <AssemblyName>QuantumCore.Auth.Server</AssemblyName>
+        <RootNamespace>QuantumCore.Auth</RootNamespace>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\..\Data\Auth.Persistence\Auth.Persistence.csproj"/>
+        <ProjectReference Include="..\..\Core\Core.csproj"/>
+        <ProjectReference Include="..\..\Core.Networking.Generators\Core.Networking.Generators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
+        <ProjectReference Include="..\..\Data\Core.Caching\Core.Caching.csproj"/>
+    </ItemGroup>
+
+</Project>
