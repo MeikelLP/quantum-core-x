@@ -9,13 +9,13 @@ public static class ServiceExtensions
 {
     public static IServiceCollection AddAuthDatabase(this IServiceCollection services)
     {
-        services.AddQuantumCoreDatabase();
+        services.AddQuantumCoreDatabase(HostingOptions.ModeAuth);
         services.AddDbContext<MySqlAuthDbContext>();
         services.AddDbContext<PostgresqlAuthDbContext>();
         services.AddDbContext<SqliteAuthDbContext>();
         services.AddScoped<AuthDbContext>(provider =>
         {
-            var options = provider.GetRequiredService<IOptionsSnapshot<DatabaseOptions>>().Value;
+            var options = provider.GetRequiredService<IOptionsSnapshot<DatabaseOptions>>().Get(HostingOptions.ModeAuth);
             return options.Provider switch
             {
                 DatabaseProvider.Mysql => provider.GetRequiredService<MySqlAuthDbContext>(),

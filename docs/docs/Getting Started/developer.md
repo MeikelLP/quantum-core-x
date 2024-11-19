@@ -4,7 +4,7 @@
 
 * Windows for the client. This tutorial can be run on any OS but the client has to connect from Windows
 * [Docker Desktop](https://www.docker.com/products/docker-desktop/) or equivalent
-* [.NET SDK 8](https://dotnet.microsoft.com/en-us/download)
+* [.NET SDK 9](https://dotnet.microsoft.com/en-us/download)
 * [Visual Studio](https://visualstudio.com), [Jetbrains Rider](https://www.jetbrains.com/rider/), or any IDE you are comfortable with
 * A TMP4 compatible client (just google for "TMP4 Client")
 
@@ -18,7 +18,7 @@ git clone https://github.com/MeikelLP/quantum-core-x.git
 
 ### 2. Generate a `mob_proto` and `item_proto`
 
-In the client directory there should be a folder called `Eternexus` with an folder `--dump_proto--`. Just execute the `dump_proto.exe`. It should generate you 2 files:
+In the (TMP4) client directory there should be a folder called `Eternexus` with an folder `--dump_proto--`. Just execute the `dump_proto.exe`. It should generate you 2 files:
 
 * `item_proto`
 * `mob_proto`
@@ -32,7 +32,7 @@ dotnet build
 
 ### 4. Create the data folder
 
-Create the directory `data` in `./Executables/Game/bin/Debug/net8.0/`
+Create the directory `data` in `./Executables/Game/bin/Debug/net9.0/`
 
 ### 5. Copying settings
 

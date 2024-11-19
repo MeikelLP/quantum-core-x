@@ -1,5 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using QuantumCore;
+using QuantumCore.API;
 using QuantumCore.Auth;
 using QuantumCore.Auth.Extensions;
 using QuantumCore.Auth.Persistence;
@@ -13,6 +19,8 @@ hostBuilder.Services.Configure<ConsoleLifetimeOptions>(opts => opts.SuppressStat
 hostBuilder.Services.AddCoreServices(new EmptyPluginCatalog(), hostBuilder.Configuration);
 hostBuilder.Services.AddAuthServices();
 hostBuilder.Services.AddHostedService<AuthServer>();
+hostBuilder.Services.AddSingleton<IServerBase>(provider =>
+    provider.GetServices<IHostedService>().OfType<AuthServer>().Single());
 
 var host = hostBuilder.Build();
 
