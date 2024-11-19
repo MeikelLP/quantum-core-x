@@ -2,6 +2,7 @@
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 
@@ -14,11 +15,11 @@ public class PacketReader : IPacketReader
     private readonly IHostEnvironment _env;
     private readonly int _bufferSize;
 
-    public PacketReader(ILogger<PacketReader> logger, IPacketManager packetManager, IConfiguration configuration,
-        IHostEnvironment env)
+    public PacketReader([ServiceKey] string serviceKey, ILogger<PacketReader> logger, IConfiguration configuration,
+        IServiceProvider serviceProvider, IHostEnvironment env)
     {
         _logger = logger;
-        _packetManager = packetManager;
+        _packetManager = serviceProvider.GetRequiredKeyedService<IPacketManager>(serviceKey);
         _env = env;
         _bufferSize = configuration.GetValue<int?>("BufferSize") ?? 4096;
         _logger.LogDebug("Using buffer size {BufferSize}", _bufferSize);
@@ -42,7 +43,7 @@ public class PacketReader : IPacketReader
             }
             catch (IOException)
             {
-                _logger.LogDebug("Connection was most likely closed while reading a packet. This may be fine");
+                _logger.LogDebug("Connection was closed while reading a packet header. This may be fine");
                 break;
             }
 
@@ -66,7 +67,7 @@ public class PacketReader : IPacketReader
             }
             catch (IOException)
             {
-                _logger.LogDebug("Connection was most likely closed while reading a packet. This may be fine");
+                _logger.LogDebug("Connection was closed while reading a packet sub header. This may be fine");
                 break;
             }
 
@@ -111,7 +112,7 @@ public class PacketReader : IPacketReader
             }
             catch (IOException)
             {
-                _logger.LogDebug("Connection was most likely closed while reading a packet. This may be fine");
+                _logger.LogDebug("Connection was closed while reading a packet body. This may be fine");
                 break;
             }
 
@@ -132,7 +133,7 @@ public class PacketReader : IPacketReader
             }
             catch (IOException)
             {
-                _logger.LogDebug("Connection was most likely closed while reading a packet. This may be fine");
+                _logger.LogDebug("Connection was closed while reading a packet sequence. This may be fine");
                 break;
             }
         }

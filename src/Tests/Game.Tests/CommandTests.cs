@@ -137,6 +137,7 @@ public class CommandTests : IAsyncLifetime
         _services = new ServiceCollection()
             .AddCoreServices(new EmptyPluginCatalog(), new ConfigurationBuilder().Build())
             .AddGameServices()
+            .AddSingleton(Substitute.For<IServerBase>())
             .AddQuantumCoreTestLogger(testOutputHelper)
             .Replace(new ServiceDescriptor(typeof(IItemRepository), _ => Substitute.For<IItemRepository>(),
                 ServiceLifetime.Singleton))
@@ -281,8 +282,9 @@ public class CommandTests : IAsyncLifetime
         sentMessages.Should().ContainEquivalentOf(new ChatOutcoming {Message = $"Weapon Damage: 10-16"}, Config);
         sentMessages.Should()
             .ContainEquivalentOf(new ChatOutcoming {Message = $"Attack Damage: {minAttack}-{maxAttack}"}, Config);
+        return;
 
-        EquivalencyAssertionOptions<ChatOutcoming> Config(EquivalencyAssertionOptions<ChatOutcoming> cfg) =>
+        EquivalencyOptions<ChatOutcoming> Config(EquivalencyOptions<ChatOutcoming> cfg) =>
             cfg.Including(x => x.Message);
     }
 
@@ -588,7 +590,8 @@ public class CommandTests : IAsyncLifetime
         await File.WriteAllTextAsync("data/atlasinfo.txt", $"map_a2	{Map.MapUnit * 10}	{Map.MapUnit * 26}	6	6\n" +
                                                            $"map_b2	{Map.MapUnit * 10}	{Map.MapUnit * 26}	6	6");
         var world = _services.GetRequiredService<IWorld>();
-        await world.Load();
+        await world.LoadAsync();
+        await world.InitAsync();
         return world;
     }
 

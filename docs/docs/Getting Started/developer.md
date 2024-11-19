@@ -18,7 +18,7 @@ git clone https://github.com/MeikelLP/quantum-core-x.git
 
 ### 2. Generate a `mob_proto` and `item_proto`
 
-In the client directory there should be a folder called `Eternexus` with an folder `--dump_proto--`. Just execute the `dump_proto.exe`. It should generate you 2 files:
+In the (TMP4) client directory there should be a folder called `Eternexus` with an folder `--dump_proto--`. Just execute the `dump_proto.exe`. It should generate you 2 files:
 
 * `item_proto`
 * `mob_proto`

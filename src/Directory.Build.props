@@ -7,5 +7,6 @@
         <Nullable>enable</Nullable>
         <ImplicitUsings>enable</ImplicitUsings>
         <IsPackable>false</IsPackable>
+        <Authors>MeikelLP</Authors>
     </PropertyGroup>
 </Project>

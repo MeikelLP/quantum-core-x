@@ -5,16 +5,16 @@ namespace QuantumCore.Game.Persistence;
 
 internal class SqliteGameDbContext : GameDbContext
 {
-    private readonly IOptions<DatabaseOptions> _options;
+    private readonly IOptionsSnapshot<DatabaseOptions> _options;
 
-    public SqliteGameDbContext(IOptions<DatabaseOptions> options)
+    public SqliteGameDbContext(IOptionsSnapshot<DatabaseOptions> options)
     {
         _options = options;
     }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        var opts = _options.Value;
+        var opts = _options.Get(HostingOptions.ModeGame);
         optionsBuilder.UseSqlite(opts.ConnectionString);
     }
 }
