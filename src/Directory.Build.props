@@ -11,8 +11,8 @@
     <NuGetAudit>true</NuGetAudit>
     <NuGetAuditMode>all</NuGetAuditMode>
     <NuGetAuditLevel>low</NuGetAuditLevel>
-    <WarningsAsErrors Condition="$(ContinuousIntegrationBuild) == 'true' OR '$(Configuration)' == 'Release'">
-      (WarningsAsErrors);NU1900;NU1901;NU1902;NU1903;NU1904
+    <WarningsAsErrors>
+      (WarningsAsErrors);NU1900;NU1901;NU1902;NU1903;NU1904;NU1202;NU1604
     </WarningsAsErrors>
   </PropertyGroup>
 </Project>
