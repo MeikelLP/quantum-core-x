@@ -12,6 +12,8 @@
       <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions"/>
       <PackageReference Include="Microsoft.Extensions.Options.DataAnnotations"/>
       <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions"/>
+      <PackageReference Include="MessagePack"/>
+      <PackageReference Include="Newtonsoft.Json"/>
     </ItemGroup>
 
 </Project>

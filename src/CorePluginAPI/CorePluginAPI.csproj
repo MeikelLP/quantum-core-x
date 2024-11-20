@@ -5,6 +5,8 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <PackageReference Include="System.Net.Http"/>
+      <PackageReference Include="System.Text.RegularExpressions"/>
       <PackageReference Include="BinarySerializer"/>
       <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions"/>
     </ItemGroup>

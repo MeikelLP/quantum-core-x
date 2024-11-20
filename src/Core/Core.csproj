@@ -21,7 +21,6 @@
     <PackageReference Include="Serilog.Settings.Configuration"/>
     <PackageReference Include="Serilog.Sinks.File"/>
     <PackageReference Include="Serilog.Sinks.Console"/>
-    <PackageReference Include="Serilog.Sinks.RollingFile"/>
     <PackageReference Include="System.Linq.Async"/>
     <PackageReference Include="Testcontainers.Redis"/>
   </ItemGroup>

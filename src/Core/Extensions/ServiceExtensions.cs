@@ -128,7 +128,7 @@ public static class ServiceExtensions
         config.WriteTo.Console(outputTemplate: MessageTemplate);
 
         // sink to rolling file
-        config.WriteTo.RollingFile($"{Directory.GetCurrentDirectory()}/logs/api.log",
+        config.WriteTo.File($"{Directory.GetCurrentDirectory()}/logs/api.log",
             fileSizeLimitBytes: 10 * 1024 * 1024,
             buffered: true,
             outputTemplate: MessageTemplate);
