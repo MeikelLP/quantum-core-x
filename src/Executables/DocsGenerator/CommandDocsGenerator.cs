@@ -55,6 +55,9 @@ public static class CommandDocsGenerator
             var path = Path.GetFullPath(Path.Combine(commandsDir, $"{type.Name}.md"));
             var content = new StringBuilder();
             content.AppendLine($"""
+                                ---
+                                title: /{type.Commands.First().Name}
+                                ---
                                 # {type.Name}
 
                                 ## Command
