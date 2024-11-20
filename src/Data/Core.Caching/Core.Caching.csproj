@@ -6,12 +6,12 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="BeetleX.Redis" Version="1.4.24.425" />
-        <PackageReference Include="Enums.NET" Version="5.0.0" />
-      <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="9.0.0"/>
-      <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.0"/>
-      <PackageReference Include="Microsoft.Extensions.Options.DataAnnotations" Version="9.0.0"/>
-      <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="9.0.0"/>
+      <PackageReference Include="BeetleX.Redis"/>
+      <PackageReference Include="Enums.NET"/>
+      <PackageReference Include="Microsoft.Extensions.Logging.Abstractions"/>
+      <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions"/>
+      <PackageReference Include="Microsoft.Extensions.Options.DataAnnotations"/>
+      <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions"/>
     </ItemGroup>
 
 </Project>
