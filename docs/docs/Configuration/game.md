@@ -21,6 +21,14 @@ Section: `Game`
 |---|---|---|---|---|---|
 |`Game:InGameShop`|`string`|`https://example.com/`|`false`|`https://example.com/`|URL that will be opened when the client clicks on the item shop|
 
+## Commands
+
+Section: `Game:Commands`
+
+| Key          | Type   | Default | Required | Examples | Notes                                                                                                                                   |
+|--------------|--------|---------|----------|----------|-----------------------------------------------------------------------------------------------------------------------------------------|
+| `StrictMode` | `bool` | `false` | `false`  | `true`   | Will throw exceptions (and maybe disconnect the player) when commands fail. Used for testing. Otherwise sends chat messages in response |
+
 ### Skills
 
 Section: `Game:Skills`
