@@ -38,6 +38,9 @@ jobs:
     runs-on: ubuntu-latest
     # only deploy if on master or tag
     if: startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master'
+    permissions:
+      contents: read
+      packages: write
     strategy:
       matrix:
         os: [ win-x64, osx-x64, linux-x64, linux-musl-x64 ]
