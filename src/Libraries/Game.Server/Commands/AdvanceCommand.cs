@@ -42,5 +42,5 @@ public class AdvanceCommand : ICommandHandler<AdvanceCommandOptions>
 public class AdvanceCommandOptions
 {
     [Value(0)] public string Target { get; set; } = "$self";
-    [Value(1, Required = true)] public int Level { get; set; }
+    [Value(1)] public int Level { get; set; } = 1;
 }
