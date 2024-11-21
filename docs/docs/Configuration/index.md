@@ -70,6 +70,7 @@ The following files are location in `data/` next to the executable
 * [atlasinfo.txt](atlasinfo.md)
 * [exp.csv](exp.md)
 * [exp_guild.csv](exp_guild.md)
+* [shops.json](shops.md)
 * `group.txt`
 * `group_group.txt`
 * `item_proto`

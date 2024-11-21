@@ -506,8 +506,8 @@ public class OutgoingPacketTests
                 {
                     0x26
                 }
-                .Append((byte) 0x00)
                 .Concat(BitConverter.GetBytes(obj.GetSize()))
+                .Append((byte) 0x00)
                 .Concat(BitConverter.GetBytes(obj.Vid))
                 .Concat(obj.Items.SelectMany(item => Array.Empty<byte>()
                     .Concat(BitConverter.GetBytes(item.ItemId))
