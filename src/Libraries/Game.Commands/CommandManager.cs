@@ -27,6 +27,7 @@ internal class CommandManager : ICommandManager, ILoadable
     private static readonly Parser ParserInstance = new Parser(settings =>
         {
             settings.CaseInsensitiveEnumValues = true;
+            settings.HelpWriter = null;
         }
     );
 
@@ -205,7 +206,31 @@ internal class CommandManager : ICommandManager, ILoadable
                     // invokes the command
                     // this may be improved in the future (caching)
 
-                    var parserResult = parserMethod.Invoke(ParserInstance, new object[] {argsWithoutCommand})!;
+                    var parserResult = parserMethod.Invoke(ParserInstance, [argsWithoutCommand])!;
+
+                    if (parserResult.GetType().IsGenericType &&
+                        parserResult.GetType().GetGenericTypeDefinition() == typeof(NotParsed<>))
+                    {
+                        var resultType = typeof(ParserResult<>).MakeGenericType(commandCache.OptionsType);
+                        var errors =
+                            (IEnumerable<Error>)resultType.GetProperty(nameof(ParserResult<object>.Errors))!.GetValue(
+                                parserResult)!;
+
+                        if (_options.Value.StrictMode)
+                        {
+                            throw new CommandValidationException(command)
+                            {
+                                Errors = [..errors.Select(e => e.GetType().Name)]
+                            };
+                        }
+                        else
+                        {
+                            connection.Player.SendChatInfo(
+                                $"Comannd validation failed: {string.Join(", ", errors.Select(x => x.GetType().Name))}");
+                            return;
+                        }
+                    }
+
                     var methodInfo = typeof(ParserResultExtensions).GetMethods().Single(x =>
                     {
                         var nameMatches = x.Name == nameof(ParserResultExtensions.MapResult);
@@ -237,11 +262,7 @@ internal class CommandManager : ICommandManager, ILoadable
 
                     var ctx = Activator.CreateInstance(
                         typeof(CommandContext<>).MakeGenericType(commandCache.OptionsType),
-                        new object[]
-                        {
-                            connection.Player,
-                            options
-                        })!;
+                        new object[] {connection.Player, options})!;
                     var cmdExecuteMethodInfo = typeof(ICommandHandler<>).MakeGenericType(commandCache.OptionsType)
                         .GetMethod(nameof(ICommandHandler<object>.ExecuteAsync))!;
                     await using var scope = _serviceProvider.CreateAsyncScope();
@@ -249,7 +270,7 @@ internal class CommandManager : ICommandManager, ILoadable
 
                     try
                     {
-                        await (Task) cmdExecuteMethodInfo.Invoke(cmd, new object[] {ctx})!;
+                        await (Task)cmdExecuteMethodInfo.Invoke(cmd, new object[] {ctx})!;
                     }
                     catch (Exception e)
                     {
@@ -260,7 +281,7 @@ internal class CommandManager : ICommandManager, ILoadable
                 else
                 {
                     await using var scope = _serviceProvider.CreateAsyncScope();
-                    var cmd = (ICommandHandler) ActivatorUtilities.CreateInstance(scope.ServiceProvider,
+                    var cmd = (ICommandHandler)ActivatorUtilities.CreateInstance(scope.ServiceProvider,
                         commandCache.Type);
                     await cmd.ExecuteAsync(new CommandContext(connection.Player));
                 }
