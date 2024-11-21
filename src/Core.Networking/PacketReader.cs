@@ -73,7 +73,7 @@ public class PacketReader : IPacketReader
 
             if (!_packetManager.TryGetPacketInfo(header, subHeader, out var packetInfo))
             {
-                var headerString = Convert.ToString(header, 16);
+                var headerString = header.ToString("X2");
                 var subHeaderString = subHeader is not null ? $"|0x{subHeader.Value:X2}" : "";
                 if (_env.IsDevelopment())
                 {
@@ -89,7 +89,7 @@ public class PacketReader : IPacketReader
             IPacketSerializable packet;
             try
             {
-                packet = (IPacketSerializable) await packetInfo.DeserializeFromStreamAsync(stream);
+                packet = (IPacketSerializable)await packetInfo.DeserializeFromStreamAsync(stream);
                 if (_logger.IsEnabled(LogLevel.Debug))
                 {
                     packet.Serialize(buffer);
