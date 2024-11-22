@@ -1,5 +1,3 @@
-using Core.Persistence.Extensions;
-using Game.Caching.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -11,7 +9,6 @@ using QuantumCore.API;
 using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game.World;
 using QuantumCore.Caching;
-using QuantumCore.Caching.Extensions;
 using QuantumCore.Extensions;
 using QuantumCore.Game;
 using QuantumCore.Game.Extensions;
@@ -39,11 +36,9 @@ public class WorldTests
             .AddLogging()
             .AddSingleton<IConfiguration>(_ => config)
             .AddCoreServices(new EmptyPluginCatalog(), config)
-            .AddQuantumCoreCaching()
-            .AddGameCaching()
-            .AddQuantumCoreDatabase(HostingOptions.ModeGame)
             .AddGameServices()
             .AddSingleton(Substitute.For<IServerBase>())
+            .AddSingleton(Substitute.For<IGameServer>())
             .Configure<DatabaseOptions>(HostingOptions.ModeGame, opts =>
             {
                 opts.ConnectionString = "Server:abc;";
@@ -107,13 +102,19 @@ public class WorldTests
                 {
                     Type = (byte) EEntityType.Monster
                 });
+                mock.GetMonsters().Returns([
+                    new MonsterData
+                    {
+                        Type = (byte) EEntityType.Monster
+                    }
+                ]);
                 return mock;
             }, ServiceLifetime.Singleton))
             .AddSingleton(Substitute.For<IFileProvider>())
             .BuildServiceProvider();
         _world = ActivatorUtilities.CreateInstance<World>(services);
         ActivatorUtilities.CreateInstance<GameServer>(services); // for setting the singleton GameServer.Instance
-        _world.LoadAsync().Wait();
+        Task.WhenAll(services.GetServices<ILoadable>().Select(x => x.LoadAsync())).Wait();
         _world.InitAsync().Wait();
 
         var conn = Substitute.For<IGameConnection>();

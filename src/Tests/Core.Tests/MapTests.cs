@@ -26,6 +26,8 @@ public class MapTests
 
     public MapTests(ITestOutputHelper testOutputHelper)
     {
+        var npcShopProvider = Substitute.For<INpcShopProvider>();
+        npcShopProvider.Shops.Returns([]);
         var provider = new ServiceCollection()
             .AddSingleton<IMonsterManager>(_ =>
             {
@@ -45,6 +47,7 @@ public class MapTests
                 mock.Keys(Arg.Any<string>()).Returns(_ => Array.Empty<string>());
                 return mock;
             })
+            .AddSingleton(npcShopProvider)
             .AddSingleton(Substitute.For<IServerBase>())
             .AddSingleton(Substitute.For<IItemManager>())
             .AddSingleton(Substitute.For<IDropProvider>())

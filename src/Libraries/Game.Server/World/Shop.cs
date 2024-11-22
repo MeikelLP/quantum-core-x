@@ -3,17 +3,12 @@ using QuantumCore.API;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.World;
 using QuantumCore.Core.Utils;
+using QuantumCore.Game.Packets.General;
 using QuantumCore.Game.Packets.Shop;
 using QuantumCore.Game.World.Entities;
 using ShopItem = QuantumCore.API.Core.Models.ShopItem;
 
 namespace QuantumCore.Game.World;
-
-public class ShopDefinition
-{
-    public int Id { get; set; }
-    public uint? Npc { get; set; }
-}
 
 public class Shop : IShop
 {
@@ -31,7 +26,7 @@ public class Shop : IShop
 
     public List<IPlayerEntity> Visitors { get; } = new();
 
-    private Grid<ShopItem> _grid = new(4, 5);
+    private Grid<ShopItem> _grid = new(5, 8);
     private readonly List<ShopItem> _items = new();
     private readonly IItemManager _itemManager;
     private readonly ILogger _logger;
@@ -86,6 +81,21 @@ public class Shop : IShop
                 Count = item.Count,
                 Price = item.Price
             };
+        }
+
+        // fill null values
+        for (var i = 0; i < shopStart.Items.Length; i++)
+        {
+            // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+            if (shopStart.Items[i] is null)
+            {
+                shopStart.Items[i] = new Packets.Shop.ShopItem();
+            }
+
+            for (var ii = 0; ii < shopStart.Items[i].Bonuses.Length; ii++)
+            {
+                shopStart.Items[i].Bonuses[ii] = new ItemBonus();
+            }
         }
 
         p.Connection.Send(shopStart);

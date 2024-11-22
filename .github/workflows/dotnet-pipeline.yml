@@ -62,6 +62,9 @@ jobs:
   deploy:
     needs:
       - test
+    permissions:
+      contents: read
+      packages: write
     runs-on: ubuntu-latest
     # only deploy if on master or tag
     if: startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master'
