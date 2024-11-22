@@ -27,6 +27,13 @@ public static class ItemExtensions
     {
         return (uint) item.Values[2];
     }
+    
+    public static int GetApplyValue(this ItemData item, EApplyType type)
+    {
+        var apply = item.Applies.FirstOrDefault(x => (EApplyType)x.Type == type);
+     
+        return (int)(apply?.Value ?? 0);
+    }
 
     /// <summary>
     /// Weapon damage added additionally to the base damage
