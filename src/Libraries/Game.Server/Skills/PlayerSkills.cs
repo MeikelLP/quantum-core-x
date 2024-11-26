@@ -2,6 +2,7 @@
 using System.Collections.Immutable;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
+using QuantumCore.API.Extensions;
 using QuantumCore.API.Game.Skills;
 using QuantumCore.API.Game.Types;
 using QuantumCore.Core.Utils;
@@ -419,12 +420,12 @@ public class PlayerSkills : IPlayerSkills
         if (proto.Type == ESkillCategoryType.HorseSkills)
         {
             return skillId != ESkillIndexes.HorseWildAttackRange ||
-                   _player.Player.PlayerClass == (int)EPlayerClass.Ninja;
+                   _player.Player.PlayerClass.GetClass() == EPlayerClass.Ninja;
         }
 
         if (_player.Player.SkillGroup == 0) return false;
 
-        return (int)proto.Type - 1 == _player.Player.PlayerClass;
+        return (int)proto.Type - 1 == (byte)_player.Player.PlayerClass;
     }
 
     private int GetSkillLevel(ESkillIndexes skillId)
@@ -444,7 +445,7 @@ public class PlayerSkills : IPlayerSkills
         {
             for (var i = 0; i < SkillCount; i++)
             {
-                if (SkillList[_player.Player.PlayerClass, skillGroup - 1, i] == skillId)
+                if (SkillList[(int)_player.Player.PlayerClass, skillGroup - 1, i] == skillId)
                 {
                     return true;
                 }
@@ -614,7 +615,7 @@ public class PlayerSkills : IPlayerSkills
     {
         for (var i = 0; i < SkillCount; i++)
         {
-            var skill = SkillList[_player.Player.PlayerClass, _player.Player.SkillGroup - 1, i];
+            var skill = SkillList[(int)_player.Player.PlayerClass, _player.Player.SkillGroup - 1, i];
             if (skill == 0) continue;
 
             _skills[skill] = new Skill

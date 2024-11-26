@@ -35,7 +35,7 @@ public class PlayerManager : IPlayerManager
             for (var i = 0; i < players.Length; i++)
             {
                 var player = players[i];
-                player.Slot = (byte) i;
+                player.Slot = (byte)i;
 
                 if (i == slot)
                 {
@@ -93,7 +93,8 @@ public class PlayerManager : IPlayerManager
         return _dbPlayerRepository.IsNameInUseAsync(name);
     }
 
-    public async Task<PlayerData> CreateAsync(Guid accountId, string playerName, byte @class, byte appearance)
+    public async Task<PlayerData> CreateAsync(Guid accountId, string playerName, EPlayerClassGendered @class,
+        byte appearance)
     {
         var job = _jobManager.Get(@class);
 
@@ -138,7 +139,7 @@ public class PlayerManager : IPlayerManager
             Health = job.StartHp,
             Mana = job.StartSp,
             Empire = empire,
-            Slot = (byte) existingPlayers.Length
+            Slot = (byte)existingPlayers.Length
         };
 
 

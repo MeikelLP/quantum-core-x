@@ -1,4 +1,5 @@
 ﻿using System.Collections.Immutable;
+using QuantumCore.API;
 using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game.Guild;
 using QuantumCore.API.Game.Skills;
@@ -16,7 +17,7 @@ public static class QueryExtensions
             Id = x.Id,
             AccountId = x.AccountId,
             Name = x.Name,
-            PlayerClass = x.PlayerClass,
+            PlayerClass = (EPlayerClassGendered)x.PlayerClass,
             SkillGroup = x.SkillGroup,
             PlayTime = x.PlayTime,
             Level = x.Level,
@@ -46,7 +47,7 @@ public static class QueryExtensions
         return query.Select(x => new Skill
         {
             PlayerId = x.PlayerId,
-            SkillId = (ESkillIndexes) x.SkillId,
+            SkillId = (ESkillIndexes)x.SkillId,
             MasterType = x.MasterType,
             Level = x.Level,
             NextReadTime = x.NextReadTime,
@@ -70,16 +71,14 @@ public static class QueryExtensions
                 Id = member.Player.Id,
                 Name = member.Player.Name,
                 Level = member.Player.Level,
-                Class = member.Player.PlayerClass,
+                Class = (EPlayerClassGendered)member.Player.PlayerClass,
                 SpentExperience = member.SpentExperience,
                 Rank = member.RankPosition,
                 IsLeader = member.IsLeader
             }).ToImmutableArray(),
             Ranks = x.Ranks.Select(rank => new GuildRankData
             {
-                Position = rank.Position,
-                Name = rank.Name,
-                Permissions = rank.Permissions
+                Position = rank.Position, Name = rank.Name, Permissions = rank.Permissions
             }).ToImmutableArray()
         });
     }
