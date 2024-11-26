@@ -39,77 +39,46 @@ public class PlayerSkills : IPlayerSkills
         // Warrior
         {
             {
-                ESkillIndexes.ThreeWayCut,
-                ESkillIndexes.SwordSpin,
-                ESkillIndexes.BerserkerFury,
-                ESkillIndexes.AuraOfTheSword,
-                ESkillIndexes.Dash,
-                ESkillIndexes.Life
+                ESkillIndexes.ThreeWayCut, ESkillIndexes.SwordSpin, ESkillIndexes.BerserkerFury,
+                ESkillIndexes.AuraOfTheSword, ESkillIndexes.Dash, ESkillIndexes.Life
             },
             {
-                ESkillIndexes.Shockwave,
-                ESkillIndexes.Bash,
-                ESkillIndexes.Stump,
-                ESkillIndexes.StrongBody,
-                ESkillIndexes.SwordStrike,
-                ESkillIndexes.SwordOrb
+                ESkillIndexes.Shockwave, ESkillIndexes.Bash, ESkillIndexes.Stump, ESkillIndexes.StrongBody,
+                ESkillIndexes.SwordStrike, ESkillIndexes.SwordOrb
             }
         },
         // Ninja
         {
             {
-                ESkillIndexes.Ambush,
-                ESkillIndexes.FastAttack,
-                ESkillIndexes.RollingDagger,
-                ESkillIndexes.Stealth,
-                ESkillIndexes.PoisonousCloud,
-                ESkillIndexes.InsidiousPoison
+                ESkillIndexes.Ambush, ESkillIndexes.FastAttack, ESkillIndexes.RollingDagger, ESkillIndexes.Stealth,
+                ESkillIndexes.PoisonousCloud, ESkillIndexes.InsidiousPoison
             },
             {
-                ESkillIndexes.RepetitiveShot,
-                ESkillIndexes.ArrowShower,
-                ESkillIndexes.FireArrow,
+                ESkillIndexes.RepetitiveShot, ESkillIndexes.ArrowShower, ESkillIndexes.FireArrow,
                 ESkillIndexes.FeatherWalk,
-                ESkillIndexes.PoisonArrow,
-                ESkillIndexes.Spark
+                ESkillIndexes.PoisonArrow, ESkillIndexes.Spark
             }
         },
         // Sura
         {
             {
-                ESkillIndexes.FingerStrike,
-                ESkillIndexes.DragonSwirl,
-                ESkillIndexes.EnchantedBlade,
-                ESkillIndexes.Fear,
-                ESkillIndexes.EnchantedArmor,
-                ESkillIndexes.Dispel
+                ESkillIndexes.FingerStrike, ESkillIndexes.DragonSwirl, ESkillIndexes.EnchantedBlade, ESkillIndexes.Fear,
+                ESkillIndexes.EnchantedArmor, ESkillIndexes.Dispel
             },
             {
-                ESkillIndexes.DarkStrike,
-                ESkillIndexes.FlameStrike,
-                ESkillIndexes.FlameSpirit,
-                ESkillIndexes.DarkProtection,
-                ESkillIndexes.SpiritStrike,
-                ESkillIndexes.DarkOrb
+                ESkillIndexes.DarkStrike, ESkillIndexes.FlameStrike, ESkillIndexes.FlameSpirit,
+                ESkillIndexes.DarkProtection, ESkillIndexes.SpiritStrike, ESkillIndexes.DarkOrb
             }
         },
         // Shaman
         {
             {
-                ESkillIndexes.FlyingTalisman,
-                ESkillIndexes.ShootingDragon,
-                ESkillIndexes.DragonRoar,
-                ESkillIndexes.Blessing,
-                ESkillIndexes.Reflect,
-                ESkillIndexes.DragonAid
+                ESkillIndexes.FlyingTalisman, ESkillIndexes.ShootingDragon, ESkillIndexes.DragonRoar,
+                ESkillIndexes.Blessing, ESkillIndexes.Reflect, ESkillIndexes.DragonAid
             },
             {
-                ESkillIndexes.LightningThrow,
-                ESkillIndexes.SummonLightning,
-                ESkillIndexes.LightningClaw,
-                ESkillIndexes.Cure,
-                ESkillIndexes.Swiftness,
-                ESkillIndexes.AttackUp
+                ESkillIndexes.LightningThrow, ESkillIndexes.SummonLightning, ESkillIndexes.LightningClaw,
+                ESkillIndexes.Cure, ESkillIndexes.Swiftness, ESkillIndexes.AttackUp
             }
         }
     };
@@ -183,10 +152,7 @@ public class PlayerSkills : IPlayerSkills
 
         AssignDefaultActiveSkills();
 
-        _player.Connection.Send(new ChangeSkillGroup
-        {
-            SkillGroup = skillGroup
-        });
+        _player.Connection.Send(new ChangeSkillGroup {SkillGroup = skillGroup});
     }
 
     public void ClearSkills()
@@ -272,7 +238,7 @@ public class PlayerSkills : IPlayerSkills
 
         if (!_skills.TryGetValue(skillId, out var skill)) return;
 
-        skill.Level = Math.Min((byte) 40, level);
+        skill.Level = Math.Min((byte)40, level);
 
         skill.MasterType = level switch
         {
@@ -382,14 +348,14 @@ public class PlayerSkills : IPlayerSkills
                     return;
             }
 
-            if ((int) idx == 0) return;
+            if ((int)idx == 0) return;
 
             if (_player.GetPoint(idx) < 1) return;
 
             _player.AddPoint(idx, -1);
         }
 
-        SetLevel(proto.Id, (byte) (GetSkillLevel(proto.Id) + 1));
+        SetLevel(proto.Id, (byte)(GetSkillLevel(proto.Id) + 1));
 
         if (proto.Type != ESkillCategoryType.PassiveSkills)
         {
@@ -453,12 +419,12 @@ public class PlayerSkills : IPlayerSkills
         if (proto.Type == ESkillCategoryType.HorseSkills)
         {
             return skillId != ESkillIndexes.HorseWildAttackRange ||
-                   _player.Player.PlayerClass == (int) EPlayerClass.Ninja;
+                   _player.Player.PlayerClass == (int)EPlayerClass.Ninja;
         }
 
         if (_player.Player.SkillGroup == 0) return false;
 
-        return (int) proto.Type - 1 == _player.Player.PlayerClass;
+        return (int)proto.Type - 1 == _player.Player.PlayerClass;
     }
 
     private int GetSkillLevel(ESkillIndexes skillId)
@@ -513,7 +479,7 @@ public class PlayerSkills : IPlayerSkills
         return false;
     }
 
-    public void SendAsync()
+    public void Send()
     {
         SendSkillLevelsPacket();
     }
@@ -626,19 +592,14 @@ public class PlayerSkills : IPlayerSkills
         var levels = new SkillLevels();
         for (var i = 0; i < SkillMaxNum; i++)
         {
-            levels.Skills[i] = new PlayerSkill
-            {
-                Level = 0,
-                MasterType = ESkillMasterType.Normal,
-                NextReadTime = 0
-            };
+            levels.Skills[i] = new PlayerSkill {Level = 0, MasterType = ESkillMasterType.Normal, NextReadTime = 0};
         }
 
         for (var i = 0; i < _skills.Count; i++)
         {
             var skill = _skills.ElementAt(i);
 
-            levels.Skills[(uint) skill.Key] = new PlayerSkill
+            levels.Skills[(uint)skill.Key] = new PlayerSkill
             {
                 Level = skill.Value.Level,
                 MasterType = skill.Value.MasterType,
