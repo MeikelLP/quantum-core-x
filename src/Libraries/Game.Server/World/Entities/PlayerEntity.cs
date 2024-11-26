@@ -392,7 +392,7 @@ namespace QuantumCore.Game.World.Entities
             SendPoints();
         }
 
-        private void GiveStatusPoints()
+        public void RecalculateStatusPoints()
         {
             var shouldHavePoints = (uint)((Player.Level - 1) * 3);
             var steps = (byte)Math.Floor(
@@ -436,7 +436,7 @@ namespace QuantumCore.Game.World.Entities
                 return true;
             }
 
-            GiveStatusPoints();
+            RecalculateStatusPoints();
             return false;
         }
 
@@ -460,7 +460,7 @@ namespace QuantumCore.Game.World.Entities
                 SendCharacterAdditional(other.Connection);
             }
 
-            GiveStatusPoints();
+            RecalculateStatusPoints();
             SendPoints();
         }
 
@@ -599,7 +599,7 @@ namespace QuantumCore.Game.World.Entities
                             Mana = Player.MaxSp;
                             for (var i = 0; i < partialLevelUps; i++)
                             {
-                                GiveStatusPoints();
+                                RecalculateStatusPoints();
                             }
                         }
 
