@@ -69,8 +69,8 @@ namespace QuantumCore.Game.World.Entities
         public int TargetPositionY { get; private set; }
         public int StartPositionY { get; private set; }
         public uint MovementDuration { get; private set; }
-        public byte MovementSpeed { get; protected set; }
-        public byte AttackSpeed { get; protected set; }
+        public byte MovementSpeed { get; set; }
+        public byte AttackSpeed { get; set; }
 
         public IReadOnlyCollection<IEntity> NearbyEntities => _nearbyEntities;
         private readonly List<IEntity> _nearbyEntities = new();
@@ -100,11 +100,11 @@ namespace QuantumCore.Game.World.Entities
             if (State == EEntityState.Moving)
             {
                 var elapsed = GameServer.Instance.ServerTime - MovementStart;
-                var rate = MovementDuration == 0 ? 1 : elapsed / (float) MovementDuration;
+                var rate = MovementDuration == 0 ? 1 : elapsed / (float)MovementDuration;
                 if (rate > 1) rate = 1;
 
-                var x = (int) ((TargetPositionX - StartPositionX) * rate + StartPositionX);
-                var y = (int) ((TargetPositionY - StartPositionY) * rate + StartPositionY);
+                var x = (int)((TargetPositionX - StartPositionX) * rate + StartPositionX);
+                var y = (int)((TargetPositionY - StartPositionY) * rate + StartPositionY);
 
                 PositionX = x;
                 PositionY = y;
@@ -162,8 +162,8 @@ namespace QuantumCore.Game.World.Entities
                     i = 100;
                 }
 
-                var duration = (int) ((distance / animationSpeed) * 1000) * i / 100;
-                MovementDuration = (uint) duration;
+                var duration = (int)((distance / animationSpeed) * 1000) * i / 100;
+                MovementDuration = (uint)duration;
             }
         }
 
@@ -231,19 +231,19 @@ namespace QuantumCore.Game.World.Entities
 
             var damage = CoreRandom.GenerateInt32(minDamage, maxDamage + 1) * 2;
             SendDebugDamage(victim, $"{this}->{victim} Base Attack value: {damage}");
-            var attack = (int) (GetPoint(EPoints.AttackGrade) + damage - GetPoint(EPoints.Level) * 2);
-            attack = (int) Math.Floor(attack * attackRating);
-            attack += (int) GetPoint(EPoints.Level) * 2 + GetBonusDamage() * 2;
-            attack *= (int) ((100 + GetPoint(EPoints.AttackBonus) + GetPoint(EPoints.MagicAttackBonus)) / 100);
+            var attack = (int)(GetPoint(EPoints.AttackGrade) + damage - GetPoint(EPoints.Level) * 2);
+            attack = (int)Math.Floor(attack * attackRating);
+            attack += (int)GetPoint(EPoints.Level) * 2 + GetBonusDamage() * 2;
+            attack *= (int)((100 + GetPoint(EPoints.AttackBonus) + GetPoint(EPoints.MagicAttackBonus)) / 100);
             attack = CalculateAttackBonus(victim, attack);
             SendDebugDamage(victim, $"{this}->{victim} With bonus and level {attack}");
 
-            var defence = (int) (victim.GetPoint(EPoints.DefenceGrade) * (100 + victim.GetPoint(EPoints.DefenceBonus)) /
-                                 100);
+            var defence = (int)(victim.GetPoint(EPoints.DefenceGrade) * (100 + victim.GetPoint(EPoints.DefenceBonus)) /
+                                100);
             SendDebugDamage(victim, $"{this}->{victim} Base defence: {defence}");
             if (this is MonsterEntity thisMonster)
             {
-                attack = (int) Math.Floor(attack * thisMonster.Proto.DamageMultiply);
+                attack = (int)Math.Floor(attack * thisMonster.Proto.DamageMultiply);
             }
 
             damage = Math.Max(0, attack - defence);
@@ -281,7 +281,7 @@ namespace QuantumCore.Game.World.Entities
 
             var percentage = ExperienceConstants.GetExperiencePercentageByLevelDifference(playerLevel, entityLevel);
 
-            return (int) (baseExp * percentage);
+            return (int)(baseExp * percentage);
         }
 
         private void SendDebugDamage(IEntity other, string text)
@@ -337,7 +337,7 @@ namespace QuantumCore.Game.World.Entities
                 if (CoreRandom.PercentageCheck(penetratePercentage))
                 {
                     isPenetrate = true;
-                    damage += (int) (GetPoint(EPoints.DefenceGrade) * (100 + GetPoint(EPoints.DefenceBonus)) / 100);
+                    damage += (int)(GetPoint(EPoints.DefenceGrade) * (100 + GetPoint(EPoints.DefenceBonus)) / 100);
                     SendDebugDamage(attacker,
                         $"{attacker}->{this} Penetrate hit -> {damage} (percentage was {penetratePercentage})");
                 }
