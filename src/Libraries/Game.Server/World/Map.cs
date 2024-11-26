@@ -28,6 +28,7 @@ namespace QuantumCore.Game.World
         public uint UnitY => Position.Y / MapUnit;
         public uint Width { get; private set; }
         public uint Height { get; private set; }
+        public TownCoordinates? TownCoordinates { get; private set; }
 
         public IWorld World => _world;
         public IReadOnlyCollection<IEntity> Entities => _entities;
