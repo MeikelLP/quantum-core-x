@@ -13,6 +13,7 @@ namespace QuantumCore.API.Game.World
         public IWorld World { get; }
 
         public IReadOnlyCollection<IEntity> Entities { get; }
+        TownCoordinates? TownCoordinates { get; }
 
         public IEntity? GetEntity(uint vid);
 

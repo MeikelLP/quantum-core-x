@@ -105,6 +105,8 @@ internal partial class AtlasProvider : IAtlasProvider
         }
 
         var maps = _configuration.GetSection("maps").Get<string[]>() ?? [];
+        var townCoords = await Task.WhenAll(maps.Select(GetTownCordsAsync));
+        var townCoordsDict = maps.Zip(townCoords).ToDictionary(x => x.First, x => x.Second);
         return atlasValues.Select(val =>
         {
             var (mapName, position, width, height) = val;
@@ -116,11 +118,11 @@ internal partial class AtlasProvider : IAtlasProvider
             }
             else
             {
+                townCoordsDict.TryGetValue(mapName, out var coords);
+
                 map = new Map(_monsterManager, _animationManager, _cacheManager, world, _logger,
-                    _spawnPointProvider, _dropProvider, _itemManager, _server, mapName, positionX, positionY,
-                    width,
-                    height);
                     _spawnPointProvider, _dropProvider, _itemManager, _server, mapName, position,
+                    width, height, coords);
             }
 
             if (position.X + width * Map.MapUnit > maxX) maxX = position.X + width * Map.MapUnit;
@@ -128,5 +130,48 @@ internal partial class AtlasProvider : IAtlasProvider
 
             return map;
         });
+    }
+
+    /// <summary>
+    /// Town.txt must contain 1 or 4 lines
+    /// </summary>
+    private async Task<TownCoordinates?> GetTownCordsAsync(string mapName)
+    {
+        var fileInfo = _fileProvider.GetFileInfo($"maps/{mapName}/Town.txt");
+        var list = new List<Coordinates>();
+        if (fileInfo.Exists)
+        {
+            await using var stream = fileInfo.CreateReadStream();
+            using var sr = new StreamReader(stream);
+            var i = 0;
+            try
+            {
+                while (!sr.EndOfStream)
+                {
+                    var line = await sr.ReadLineAsync();
+
+                    var splitted = line.Split(' ');
+                    list.Add(new Coordinates(uint.Parse(splitted[0]), uint.Parse(splitted[1])));
+                    i++;
+                }
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Failed to parse line {LineNumber} of town.txt for map {MapName}", i + 1, mapName);
+            }
+        }
+
+        if (list.Count >= 4)
+        {
+            return new TownCoordinates {Jinno = list[0], Shinsoo = list[1], Chunjo = list[2], Common = list[3]};
+        }
+        else if (list.Count == 1)
+        {
+            return new TownCoordinates {Jinno = list[0], Shinsoo = list[0], Chunjo = list[0], Common = list[0]};
+        }
+        else
+        {
+            return null;
+        }
     }
 }

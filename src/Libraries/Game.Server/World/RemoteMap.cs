@@ -15,6 +15,7 @@ public class RemoteMap : IMap
     public uint Height { get; }
     public IWorld World { get; }
     public IReadOnlyCollection<IEntity> Entities => throw new NotImplementedException();
+    public TownCoordinates? TownCoordinates => throw new NotImplementedException();
 
     public IPAddress? Host { get; set; }
     public ushort Port { get; set; }

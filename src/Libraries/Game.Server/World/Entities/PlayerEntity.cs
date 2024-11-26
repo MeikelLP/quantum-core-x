@@ -370,7 +370,22 @@ namespace QuantumCore.Game.World.Entities
 
             Dead = false;
 
-            // todo implement respawn in town
+            if (town)
+            {
+                var townCoordinates = Map!.TownCoordinates;
+                if (townCoordinates is not null)
+                {
+                    Move(Player.Empire switch
+                    {
+                        EEmpire.Chunjo => townCoordinates.Chunjo,
+                        EEmpire.Jinno => townCoordinates.Jinno,
+                        EEmpire.Shinsoo => townCoordinates.Shinsoo,
+                        _ => throw new ArgumentOutOfRangeException(nameof(Player.Empire),
+                            $"Can't get empire coordinates for empire {Player.Empire}")
+                    });
+                }
+            }
+
             // todo spawn with invisible affect
 
             SendChatCommand("CloseRestartWindow");

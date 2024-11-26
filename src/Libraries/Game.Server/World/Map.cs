@@ -55,9 +55,8 @@ namespace QuantumCore.Game.World
 
         public Map(IMonsterManager monsterManager, IAnimationManager animationManager, ICacheManager cacheManager,
             IWorld world, ILogger logger, ISpawnPointProvider spawnPointProvider,
-            IDropProvider dropProvider, IItemManager itemManager, IServerBase server, string name, uint x, uint y,
-            uint width, uint height)
             IDropProvider dropProvider, IItemManager itemManager, IServerBase server, string name, Coordinates position,
+            uint width, uint height, TownCoordinates? townCoordinates)
         {
             _monsterManager = monsterManager;
             _animationManager = animationManager;
@@ -72,7 +71,16 @@ namespace QuantumCore.Game.World
             Position = position;
             Width = width;
             Height = height;
-            TownCoordinates = townCoordinates;
+
+            TownCoordinates = townCoordinates is not null
+                ? new TownCoordinates
+                {
+                    Jinno = Position + townCoordinates.Jinno * SPAWN_POSITION_MULTIPLIER,
+                    Chunjo = Position + townCoordinates.Chunjo * SPAWN_POSITION_MULTIPLIER,
+                    Shinsoo = Position + townCoordinates.Shinsoo * SPAWN_POSITION_MULTIPLIER,
+                    Common = Position + townCoordinates.Common * SPAWN_POSITION_MULTIPLIER
+                }
+                : null;
             _quadTree = new QuadTree((int)position.X, (int)position.Y, (int)(width * MapUnit), (int)(height * MapUnit),
                 20);
             _entityGauge = GameServer.Meter.CreateObservableGauge($"Map:{name}:EntityCount", () => Entities.Count);
@@ -238,25 +246,25 @@ namespace QuantumCore.Game.World
 
                     break;
                 case ESpawnPointType.Group:
-                {
-                    var group = _world.GetGroup(spawnPoint.Monster);
-                    if (group != null)
                     {
-                        SpawnGroup(groupInstance, spawnPoint, group);
+                        var group = _world.GetGroup(spawnPoint.Monster);
+                        if (group != null)
+                        {
+                            SpawnGroup(groupInstance, spawnPoint, group);
+                        }
+
+                        break;
                     }
-
-                    break;
-                }
                 case ESpawnPointType.Monster:
-                {
-                    var monster = SpawnMonster(spawnPoint.Monster, spawnPoint);
+                    {
+                        var monster = SpawnMonster(spawnPoint.Monster, spawnPoint);
 
-                    spawnPoint.CurrentGroup = groupInstance;
-                    groupInstance.Monsters.Add(monster);
-                    monster.Group = groupInstance;
+                        spawnPoint.CurrentGroup = groupInstance;
+                        groupInstance.Monsters.Add(monster);
+                        monster.Group = groupInstance;
 
-                    break;
-                }
+                        break;
+                    }
                 default:
                     _logger.LogWarning("Unknown spawn point type: {SpawnPointType}", spawnPoint.Type);
                     break;
@@ -307,9 +315,9 @@ namespace QuantumCore.Game.World
                 monster.PositionY = (int)(Position.Y + baseY * SPAWN_POSITION_MULTIPLIER);
                 var compassDirection = (int)spawnPoint.Direction - 1;
 
-                if (compassDirection < 0 || compassDirection > (int) Enum.GetValues<ESpawnPointDirection>().Last())
+                if (compassDirection < 0 || compassDirection > (int)Enum.GetValues<ESpawnPointDirection>().Last())
                 {
-                    compassDirection = (int) ESpawnPointDirection.Random;
+                    compassDirection = (int)ESpawnPointDirection.Random;
                 }
 
                 var rotation = SPAWN_ROTATION_SLICE_DEGREES * compassDirection;
@@ -369,8 +377,7 @@ namespace QuantumCore.Game.World
         {
             var groundItem = new GroundItem(_animationManager, _world.GenerateVid(), item, amount, ownerName)
             {
-                PositionX = x,
-                PositionY = y
+                PositionX = x, PositionY = y
             };
 
             SpawnEntity(groundItem);
