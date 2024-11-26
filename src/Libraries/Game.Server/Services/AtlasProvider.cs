@@ -11,13 +11,13 @@ namespace QuantumCore.Game.Services;
 
 internal partial class AtlasProvider : IAtlasProvider
 {
-    private record AtlasValue(string MapName, uint X, uint Y, uint Width, uint Height);
+    private record AtlasValue(string MapName, Coordinates Position, uint Width, uint Height);
 
     private static readonly AtlasValue[] DefaultAtlasValues =
     [
-        new("metin2_map_a1", 409600, 896000, 4, 5),
-        new("metin2_map_b1", 0, 102400, 4, 5),
-        new("metin2_map_a1", 921600, 204800, 4, 5),
+        new("metin2_map_a1", new Coordinates(409600, 896000), 4, 5),
+        new("metin2_map_b1", new Coordinates(0, 102400), 4, 5),
+        new("metin2_map_a1", new Coordinates(921600, 204800), 4, 5),
     ];
 
     private readonly IConfiguration _configuration;
@@ -88,7 +88,7 @@ internal partial class AtlasProvider : IAtlasProvider
                         var positionY = uint.Parse(match.Groups[3].Value);
                         var width = uint.Parse(match.Groups[4].Value);
                         var height = uint.Parse(match.Groups[5].Value);
-                        atlasValues.Add(new AtlasValue(mapName, positionX, positionY, width, height));
+                        atlasValues.Add(new AtlasValue(mapName, new Coordinates(positionX, positionY), width, height));
                     }
                     catch (FormatException)
                     {
@@ -107,12 +107,12 @@ internal partial class AtlasProvider : IAtlasProvider
         var maps = _configuration.GetSection("maps").Get<string[]>() ?? [];
         return atlasValues.Select(val =>
         {
-            var (mapName, positionX, positionY, width, height) = val;
+            var (mapName, position, width, height) = val;
 
             IMap map;
             if (!maps.Contains(mapName))
             {
-                map = new RemoteMap(world, mapName, positionX, positionY, width, height);
+                map = new RemoteMap(world, mapName, position, width, height);
             }
             else
             {
@@ -120,10 +120,11 @@ internal partial class AtlasProvider : IAtlasProvider
                     _spawnPointProvider, _dropProvider, _itemManager, _server, mapName, positionX, positionY,
                     width,
                     height);
+                    _spawnPointProvider, _dropProvider, _itemManager, _server, mapName, position,
             }
 
-            if (positionX + width * Map.MapUnit > maxX) maxX = positionX + width * Map.MapUnit;
-            if (positionY + height * Map.MapUnit > maxY) maxY = positionY + height * Map.MapUnit;
+            if (position.X + width * Map.MapUnit > maxX) maxX = position.X + width * Map.MapUnit;
+            if (position.Y + height * Map.MapUnit > maxY) maxY = position.Y + height * Map.MapUnit;
 
             return map;
         });
