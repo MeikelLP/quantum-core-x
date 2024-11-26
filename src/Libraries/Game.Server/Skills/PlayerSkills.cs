@@ -23,14 +23,14 @@ public class PlayerSkills : IPlayerSkills
     private readonly ISkillManager _skillManager;
     private readonly SkillsOptions _skillsOptions;
 
-    private const int SkillMaxNum = 255;
-    private const int SkillMaxLevel = 40;
-    private const int SkillCount = 6;
-    private const int JobMaxNum = 4;
-    private const int SkillGroupMaxNum = 2;
-    private const int MinimumLevel = 5;
-    private const int MinimumLevelSubSkills = 10;
-    private const int MinimumSkillLevelUpgrade = 17;
+    public const int SkillMaxNum = 255;
+    public const int SkillMaxLevel = 40;
+    public const int SkillCount = 6;
+    public const int JobMaxNum = 4;
+    public const int SkillGroupMaxNum = 2;
+    public const int MinimumLevel = 5;
+    public const int MinimumLevelSubSkills = 10;
+    public const int MinimumSkillLevelUpgrade = 17;
 
     #region Static Skill Data
 
@@ -238,11 +238,11 @@ public class PlayerSkills : IPlayerSkills
 
         if (!_skills.TryGetValue(skillId, out var skill)) return;
 
-        skill.Level = Math.Min((byte)40, level);
+        skill.Level = Math.Min((byte)SkillMaxLevel, level);
 
         skill.MasterType = level switch
         {
-            >= 40 => ESkillMasterType.PerfectMaster,
+            >= SkillMaxLevel => ESkillMasterType.PerfectMaster,
             >= 30 => ESkillMasterType.GrandMaster,
             >= 20 => ESkillMasterType.Master,
             _ => ESkillMasterType.Normal
@@ -385,9 +385,9 @@ public class PlayerSkills : IPlayerSkills
 
                     break;
                 case ESkillMasterType.GrandMaster:
-                    if (GetSkillLevel(proto.Id) >= 40)
+                    if (GetSkillLevel(proto.Id) >= SkillMaxLevel)
                     {
-                        SetLevel(proto.Id, 40);
+                        SetLevel(proto.Id, SkillMaxLevel);
                     }
 
                     break;
