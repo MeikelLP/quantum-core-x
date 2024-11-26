@@ -28,6 +28,7 @@ namespace QuantumCore.API.Game.World
         public uint Vid { get; }
         public uint EntityClass { get; }
         byte Empire { get; }
+        long Health { get; set; }
         public EEntityType Type { get; }
         public EEntityState State { get; }
         public bool PositionChanged { get; set; }
