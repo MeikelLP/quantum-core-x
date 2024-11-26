@@ -6,6 +6,7 @@ namespace QuantumCore.API.Game.World
 {
     public interface IPlayerEntity : IEntity
     {
+        long Mana { get; set; }
         string Name { get; }
         IGameConnection Connection { get; }
         PlayerData Player { get; }
