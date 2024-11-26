@@ -219,6 +219,8 @@ namespace QuantumCore.Game.World.Entities
             return (T)Quests[id];
         }
 
+        private void Warp(Coordinates position) => Warp((int)position.X, (int)position.Y);
+
         private void Warp(int x, int y)
         {
             _world.DespawnEntity(this);
@@ -238,6 +240,8 @@ namespace QuantumCore.Game.World.Entities
             };
             Connection.Send(packet);
         }
+
+        public void Move(Coordinates position) => Move((int)position.X, (int)position.Y);
 
         public override void Move(int x, int y)
         {
