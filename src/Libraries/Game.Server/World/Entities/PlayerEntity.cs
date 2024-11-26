@@ -126,7 +126,7 @@ namespace QuantumCore.Game.World.Entities
             _scope = serviceProvider.CreateScope();
             _itemRepository = _scope.ServiceProvider.GetRequiredService<IItemRepository>();
             Inventory = new Inventory(itemManager, _cacheManager, _logger, _itemRepository, player.Id,
-                (byte) WindowType.Inventory, InventoryConstants.DEFAULT_INVENTORY_WIDTH,
+                (byte)WindowType.Inventory, InventoryConstants.DEFAULT_INVENTORY_WIDTH,
                 InventoryConstants.DEFAULT_INVENTORY_HEIGHT, InventoryConstants.DEFAULT_INVENTORY_PAGES);
             Inventory.OnSlotChanged += Inventory_OnSlotChanged;
             Player = player;
@@ -175,8 +175,8 @@ namespace QuantumCore.Game.World.Entities
             await QuickSlotBar.Load();
             Player.MaxHp = GetMaxHp(_jobManager, Player.PlayerClass, Player.Level, Player.Ht);
             Player.MaxSp = GetMaxSp(_jobManager, Player.PlayerClass, Player.Level, Player.Iq);
-            Health = (int) GetPoint(EPoints.MaxHp); // todo: cache hp of player
-            Mana = (int) GetPoint(EPoints.MaxSp);
+            Health = (int)GetPoint(EPoints.MaxHp); // todo: cache hp of player
+            Mana = (int)GetPoint(EPoints.MaxSp);
             await LoadPermGroups();
             await Skills.LoadAsync();
             var guildManager = _scope.ServiceProvider.GetRequiredService<IGuildManager>();
@@ -216,7 +216,7 @@ namespace QuantumCore.Game.World.Entities
                 return default;
             }
 
-            return (T) Quests[id];
+            return (T)Quests[id];
         }
 
         private void Warp(int x, int y)
@@ -259,16 +259,16 @@ namespace QuantumCore.Game.World.Entities
 
         private void CalculateDefence()
         {
-            _defence = GetPoint(EPoints.Level) + (uint) Math.Floor(0.8 * GetPoint(EPoints.Ht));
+            _defence = GetPoint(EPoints.Level) + (uint)Math.Floor(0.8 * GetPoint(EPoints.Ht));
 
             foreach (var slot in Enum.GetValues<EquipmentSlots>())
             {
                 var item = Inventory.EquipmentWindow.GetItem(slot);
                 if (item == null) continue;
                 var proto = _itemManager.GetItem(item.ItemId);
-                if (proto?.Type != (byte) EItemType.Armor) continue;
+                if (proto?.Type != (byte)EItemType.Armor) continue;
 
-                _defence += (uint) proto.Values[1] + (uint) proto.Values[5] * 2;
+                _defence += (uint)proto.Values[1] + (uint)proto.Values[5] * 2;
             }
 
             _logger.LogDebug("Calculate defence value for {Name}, result: {Defence}", Name, _defence);
@@ -285,13 +285,14 @@ namespace QuantumCore.Game.World.Entities
                 var item = Inventory.EquipmentWindow.GetItem(slot);
                 if (item == null) continue;
                 var proto = _itemManager.GetItem(item.ItemId);
-                if (proto?.Type != (byte) EItemType.Armor) continue;
+                if (proto?.Type != (byte)EItemType.Armor) continue;
 
                 modifier += proto.GetApplyValue(EApplyType.MovSpeed);
             }
+
             var calculatedSpeed = MovementSpeed * (1 + modifier / 100);
-            
-            MovementSpeed = (byte) Math.Min(calculatedSpeed, byte.MaxValue);
+
+            MovementSpeed = (byte)Math.Min(calculatedSpeed, byte.MaxValue);
             _logger.LogDebug("Calculate Movement value for {Name}, result: {MovementSpeed}", Name, MovementSpeed);
         }
 
@@ -305,10 +306,11 @@ namespace QuantumCore.Game.World.Entities
                 if (item == null) continue;
                 var proto = _itemManager.GetItem(item.ItemId);
                 if (proto == null) continue;
-                
+
                 modifier += proto.GetApplyValue(EApplyType.AttackSpeed);
             }
-            AttackSpeed = (byte) Math.Min(AttackSpeed * (1 + modifier / 100), byte.MaxValue);
+
+            AttackSpeed = (byte)Math.Min(AttackSpeed * (1 + modifier / 100), byte.MaxValue);
         }
 
         public override void Die()
@@ -340,11 +342,7 @@ namespace QuantumCore.Game.World.Entities
                 Connection.SendGuildMembers(Guild.Members, onlineMemberIds);
                 Connection.SendGuildRanks(Guild.Ranks);
                 Connection.SendGuildInfo(Guild);
-                Connection.Send(new GuildName
-                {
-                    Id = Guild.Id,
-                    Name = Guild.Name
-                });
+                Connection.Send(new GuildName {Id = Guild.Id, Name = Guild.Name});
             }
         }
 
@@ -396,9 +394,9 @@ namespace QuantumCore.Game.World.Entities
 
         private void GiveStatusPoints()
         {
-            var shouldHavePoints = (uint) ((Player.Level - 1) * 3);
-            var steps = (byte) Math.Floor(
-                GetPoint(EPoints.Experience) / (double) GetPoint(EPoints.NeededExperience) * 4);
+            var shouldHavePoints = (uint)((Player.Level - 1) * 3);
+            var steps = (byte)Math.Floor(
+                GetPoint(EPoints.Experience) / (double)GetPoint(EPoints.NeededExperience) * 4);
             shouldHavePoints += steps;
 
             if (shouldHavePoints <= Player.GivenStatusPoints)
@@ -450,9 +448,9 @@ namespace QuantumCore.Game.World.Entities
             }
 
             AddPoint(EPoints.Skill, level);
-            AddPoint(EPoints.SubSkill, level < 10 ? 0 : level - Math.Max((int) Player.Level, 9));
+            AddPoint(EPoints.SubSkill, level < 10 ? 0 : level - Math.Max((int)Player.Level, 9));
 
-            Player.Level = (byte) (Player.Level + level);
+            Player.Level = (byte)(Player.Level + level);
 
             // todo: animation (I think this actually is a quest sent by the server on character login and not an actual packet at this stage)
 
@@ -495,13 +493,13 @@ namespace QuantumCore.Game.World.Entities
             base.Update(elapsedTime);
 
             var maxHp = GetPoint(EPoints.MaxHp);
-            if (Health < maxHp)
+            if (Health < maxHp && !Dead)
             {
                 _healthRegenTime -= elapsedTime;
                 if (_healthRegenTime <= 0)
                 {
                     var factor = State == EEntityState.Idle ? 0.05 : 0.01;
-                    Health = Math.Min((int) maxHp, Health + 15 + (int) (maxHp * factor));
+                    Health = Math.Min((int)maxHp, Health + 15 + (int)(maxHp * factor));
                     SendPoints();
 
                     _healthRegenTime += HealthRegenInterval;
@@ -509,20 +507,20 @@ namespace QuantumCore.Game.World.Entities
             }
 
             var maxSp = GetPoint(EPoints.MaxSp);
-            if (Mana < maxSp)
+            if (Mana < maxSp && !Dead)
             {
                 _manaRegenTime -= elapsedTime;
                 if (_manaRegenTime <= 0)
                 {
                     var factor = State == EEntityState.Idle ? 0.05 : 0.01;
-                    Mana = Math.Min((int) maxSp, Mana + 15 + (int) (maxSp * factor));
+                    Mana = Math.Min((int)maxSp, Mana + 15 + (int)(maxSp * factor));
                     SendPoints();
 
                     _manaRegenTime += ManaRegenInterval;
                 }
             }
 
-            _persistTime += (int) elapsedTime;
+            _persistTime += (int)elapsedTime;
             if (_persistTime > PersistInterval)
             {
                 Persist().Wait(); // TODO
@@ -575,7 +573,7 @@ namespace QuantumCore.Game.World.Entities
                     LevelUp(value);
                     break;
                 case EPoints.Experience:
-                    if (_experienceManager.GetNeededExperience((byte) GetPoint(EPoints.Level)) == 0)
+                    if (_experienceManager.GetNeededExperience((byte)GetPoint(EPoints.Level)) == 0)
                     {
                         // we cannot add experience if no level up is possible
                         return;
@@ -588,7 +586,7 @@ namespace QuantumCore.Game.World.Entities
                     }
                     else
                     {
-                        Player.Experience = (uint) (Player.Experience + value);
+                        Player.Experience = (uint)(Player.Experience + value);
                     }
 
                     if (value > 0)
@@ -611,19 +609,19 @@ namespace QuantumCore.Game.World.Entities
                     break;
                 case EPoints.Gold:
                     var gold = Player.Gold + value;
-                    Player.Gold = (uint) Math.Min(uint.MaxValue, Math.Max(0, gold));
+                    Player.Gold = (uint)Math.Min(uint.MaxValue, Math.Max(0, gold));
                     break;
                 case EPoints.St:
-                    Player.St += (byte) value;
+                    Player.St += (byte)value;
                     break;
                 case EPoints.Dx:
-                    Player.Dx += (byte) value;
+                    Player.Dx += (byte)value;
                     break;
                 case EPoints.Ht:
-                    Player.Ht += (byte) value;
+                    Player.Ht += (byte)value;
                     break;
                 case EPoints.Iq:
-                    Player.Iq += (byte) value;
+                    Player.Iq += (byte)value;
                     break;
                 case EPoints.Hp:
                     if (value <= 0)
@@ -657,13 +655,13 @@ namespace QuantumCore.Game.World.Entities
 
                     break;
                 case EPoints.StatusPoints:
-                    Player.AvailableStatusPoints += (uint) value;
+                    Player.AvailableStatusPoints += (uint)value;
                     break;
                 case EPoints.Skill:
-                    Player.AvailableSkillPoints += (uint) value;
+                    Player.AvailableSkillPoints += (uint)value;
                     break;
                 case EPoints.PlayTime:
-                    Player.PlayTime += (uint) value;
+                    Player.PlayTime += (uint)value;
                     break;
                 default:
                     _logger.LogError("Failed to add point to {Point}, unsupported", point);
@@ -677,8 +675,8 @@ namespace QuantumCore.Game.World.Entities
 
             const int CHUNK_AMOUNT = 4;
             var chunk = requiredForNextLevel / CHUNK_AMOUNT;
-            var beforeChunk = (int) (before / (float) chunk);
-            var afterChunk = (int) (after / (float) chunk);
+            var beforeChunk = (int)(before / (float)chunk);
+            var afterChunk = (int)(after / (float)chunk);
 
             return afterChunk - beforeChunk;
         }
@@ -689,7 +687,7 @@ namespace QuantumCore.Game.World.Entities
             {
                 case EPoints.Level:
                     var currentLevel = GetPoint(EPoints.Level);
-                    LevelUp((int) (value - currentLevel));
+                    LevelUp((int)(value - currentLevel));
                     break;
                 case EPoints.Experience:
                     Player.Experience = value;
@@ -702,7 +700,7 @@ namespace QuantumCore.Game.World.Entities
                     Player.PlayTime = value;
                     break;
                 case EPoints.Skill:
-                    Player.AvailableSkillPoints = (byte) value;
+                    Player.AvailableSkillPoints = (byte)value;
                     break;
                 default:
                     _logger.LogError("Failed to set point to {Point}, unsupported", point);
@@ -742,9 +740,9 @@ namespace QuantumCore.Game.World.Entities
                 case EPoints.NeededExperience:
                     return _experienceManager.GetNeededExperience(Player.Level);
                 case EPoints.Hp:
-                    return (uint) Health;
+                    return (uint)Health;
                 case EPoints.Sp:
-                    return (uint) Mana;
+                    return (uint)Mana;
                 case EPoints.MaxHp:
                     return Player.MaxHp;
                 case EPoints.MaxSp:
@@ -777,7 +775,7 @@ namespace QuantumCore.Game.World.Entities
                 case EPoints.StatusPoints:
                     return Player.AvailableStatusPoints;
                 case EPoints.PlayTime:
-                    return (uint) TimeSpan.FromMilliseconds(Player.PlayTime).TotalMinutes;
+                    return (uint)TimeSpan.FromMilliseconds(Player.PlayTime).TotalMinutes;
                 case EPoints.Skill:
                     return Player.AvailableSkillPoints;
                 case EPoints.SubSkill:
@@ -825,7 +823,7 @@ namespace QuantumCore.Game.World.Entities
             if (item.Count == count)
             {
                 RemoveItem(item);
-                SendRemoveItem(item.Window, (ushort) item.Position);
+                SendRemoveItem(item.Window, (ushort)item.Position);
                 _itemRepository.DeletePlayerItemAsync(_cacheManager, item.PlayerId, item.ItemId).Wait(); // TODO
             }
             else
@@ -856,7 +854,7 @@ namespace QuantumCore.Game.World.Entities
             var item = groundItem.Item;
             if (item.ItemId == 1)
             {
-                AddPoint(EPoints.Gold, (int) groundItem.Amount);
+                AddPoint(EPoints.Gold, (int)groundItem.Amount);
                 SendPoints();
                 Map.DespawnEntity(groundItem);
 
@@ -899,7 +897,7 @@ namespace QuantumCore.Game.World.Entities
                 return; // We can't drop more gold than we have ^^
             }
 
-            AddPoint(EPoints.Gold, -(int) amount);
+            AddPoint(EPoints.Gold, -(int)amount);
             SendPoints();
 
             var item = _itemManager.CreateItem(proto, 1); // count will be overwritten as it's gold
@@ -972,14 +970,14 @@ namespace QuantumCore.Game.World.Entities
             var totalSessionTime = Connection.Server.ServerTime - startSessionTime;
             if (totalSessionTime <= 0) return;
 
-            AddPoint(EPoints.PlayTime, (int) totalSessionTime);
+            AddPoint(EPoints.PlayTime, (int)totalSessionTime);
         }
 
         public ItemInstance? GetItem(byte window, ushort position)
         {
             switch (window)
             {
-                case (byte) WindowType.Inventory:
+                case (byte)WindowType.Inventory:
                     if (position >= Inventory.Size)
                     {
                         // Equipment
@@ -999,7 +997,7 @@ namespace QuantumCore.Game.World.Entities
         {
             switch (window)
             {
-                case (byte) WindowType.Inventory:
+                case (byte)WindowType.Inventory:
                     if (position >= Inventory.Size)
                     {
                         // Equipment
@@ -1037,7 +1035,7 @@ namespace QuantumCore.Game.World.Entities
             }
 
             // Check anti flags
-            var antiFlags = (EAntiFlags) proto.AntiFlags;
+            var antiFlags = (EAntiFlags)proto.AntiFlags;
             if (antiFlags.HasFlag(AntiFlagClass))
             {
                 return false;
@@ -1051,7 +1049,7 @@ namespace QuantumCore.Game.World.Entities
             // Check limits (level)
             foreach (var limit in proto.Limits)
             {
-                if (limit.Type == (byte) ELimitType.Level)
+                if (limit.Type == (byte)ELimitType.Level)
                 {
                     if (Player.Level < limit.Value)
                     {
@@ -1071,7 +1069,7 @@ namespace QuantumCore.Game.World.Entities
                 return false;
             }
 
-            SendRemoveItem(item.Window, (ushort) item.Position);
+            SendRemoveItem(item.Window, (ushort)item.Position);
             return true;
         }
 
@@ -1079,7 +1077,7 @@ namespace QuantumCore.Game.World.Entities
         {
             switch (item.Window)
             {
-                case (byte) WindowType.Inventory:
+                case (byte)WindowType.Inventory:
                     if (item.Position >= Inventory.Size)
                     {
                         // Equipment
@@ -1104,7 +1102,7 @@ namespace QuantumCore.Game.World.Entities
         {
             switch (window)
             {
-                case (byte) WindowType.Inventory:
+                case (byte)WindowType.Inventory:
                     if (position >= Inventory.Size)
                     {
                         // Equipment
@@ -1138,10 +1136,7 @@ namespace QuantumCore.Game.World.Entities
 
         public override void HideEntity(IConnection connection)
         {
-            connection.Send(new RemoveCharacter
-            {
-                Vid = Vid
-            });
+            connection.Send(new RemoveCharacter {Vid = Vid});
             SendOfflineNotice(connection);
         }
 
@@ -1151,10 +1146,7 @@ namespace QuantumCore.Game.World.Entities
             if (guildId is not null && connection is IGameConnection gameConnection &&
                 gameConnection.Player!.Player.GuildId == guildId)
             {
-                connection.Send(new GuildMemberOfflinePacket
-                {
-                    PlayerId = Player.Id
-                });
+                connection.Send(new GuildMemberOfflinePacket {PlayerId = Player.Id});
             }
         }
 
@@ -1178,7 +1170,7 @@ namespace QuantumCore.Game.World.Entities
             var points = new CharacterPoints();
             for (var i = 0; i < points.Points.Length; i++)
             {
-                points.Points[i] = GetPoint((EPoints) i);
+                points.Points[i] = GetPoint((EPoints)i);
             }
 
             Connection.Send(points);
@@ -1200,23 +1192,14 @@ namespace QuantumCore.Game.World.Entities
 
             var p = new SetItem
             {
-                Window = item.Window,
-                Position = (ushort) item.Position,
-                ItemId = item.ItemId,
-                Count = item.Count
+                Window = item.Window, Position = (ushort)item.Position, ItemId = item.ItemId, Count = item.Count
             };
             Connection.Send(p);
         }
 
         public void SendRemoveItem(byte window, ushort position)
         {
-            Connection.Send(new SetItem
-            {
-                Window = window,
-                Position = position,
-                ItemId = 0,
-                Count = 0
-            });
+            Connection.Send(new SetItem {Window = window, Position = position, ItemId = 0, Count = 0});
         }
 
         public void SendCharacter(IConnection connection)
@@ -1224,7 +1207,7 @@ namespace QuantumCore.Game.World.Entities
             connection.Send(new SpawnCharacter
             {
                 Vid = Vid,
-                CharacterType = (byte) EEntityType.Player,
+                CharacterType = (byte)EEntityType.Player,
                 Angle = 0,
                 PositionX = PositionX,
                 PositionY = PositionY,
@@ -1245,10 +1228,9 @@ namespace QuantumCore.Game.World.Entities
                 GuildId = Guild?.Id ?? 0,
                 Parts = new ushort[]
                 {
-                    (ushort) (Inventory.EquipmentWindow.Body?.ItemId ?? 0),
-                    (ushort) (Inventory.EquipmentWindow.Weapon?.ItemId ?? 0),
-                    0,
-                    (ushort) (Inventory.EquipmentWindow.Hair?.ItemId ?? 0)
+                    (ushort)(Inventory.EquipmentWindow.Body?.ItemId ?? 0),
+                    (ushort)(Inventory.EquipmentWindow.Weapon?.ItemId ?? 0), 0,
+                    (ushort)(Inventory.EquipmentWindow.Hair?.ItemId ?? 0)
                 }
             });
         }
@@ -1260,9 +1242,9 @@ namespace QuantumCore.Game.World.Entities
                 Vid = Vid,
                 Parts = new ushort[]
                 {
-                    (ushort) (Inventory.EquipmentWindow.Body?.ItemId ?? 0),
-                    (ushort) (Inventory.EquipmentWindow.Weapon?.ItemId ?? 0), 0,
-                    (ushort) (Inventory.EquipmentWindow.Hair?.ItemId ?? 0)
+                    (ushort)(Inventory.EquipmentWindow.Body?.ItemId ?? 0),
+                    (ushort)(Inventory.EquipmentWindow.Weapon?.ItemId ?? 0), 0,
+                    (ushort)(Inventory.EquipmentWindow.Hair?.ItemId ?? 0)
                 },
                 MoveSpeed = MovementSpeed,
                 AttackSpeed = AttackSpeed,
@@ -1284,10 +1266,7 @@ namespace QuantumCore.Game.World.Entities
         {
             var chat = new ChatOutcoming
             {
-                MessageType = ChatMessageTypes.Normal,
-                Vid = Vid,
-                Empire = Empire,
-                Message = message
+                MessageType = ChatMessageTypes.Normal, Vid = Vid, Empire = Empire, Message = message
             };
             Connection.Send(chat);
         }
@@ -1296,10 +1275,7 @@ namespace QuantumCore.Game.World.Entities
         {
             var chat = new ChatOutcoming
             {
-                MessageType = ChatMessageTypes.Command,
-                Vid = 0,
-                Empire = Empire,
-                Message = message
+                MessageType = ChatMessageTypes.Command, Vid = 0, Empire = Empire, Message = message
             };
             Connection.Send(chat);
         }
@@ -1308,10 +1284,7 @@ namespace QuantumCore.Game.World.Entities
         {
             var chat = new ChatOutcoming
             {
-                MessageType = ChatMessageTypes.Info,
-                Vid = 0,
-                Empire = Empire,
-                Message = message
+                MessageType = ChatMessageTypes.Info, Vid = 0, Empire = Empire, Message = message
             };
             Connection.Send(chat);
         }
