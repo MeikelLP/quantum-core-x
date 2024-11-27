@@ -20,7 +20,7 @@ namespace QuantumCore.Game.World
     {
         public const uint MapUnit = 25600;
         private const int SPAWN_BASE_OFFSET = 5;
-        private const int SPAWN_POSITION_MULTIPLIER = 100;
+        public const int SPAWN_POSITION_MULTIPLIER = 100;
         private const int SPAWN_ROTATION_SLICE_DEGREES = 45;
         public string Name { get; private set; }
         public Coordinates Position { get; private set; }
