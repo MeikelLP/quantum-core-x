@@ -406,8 +406,8 @@ namespace QuantumCore.Game.World.Entities
                 entity.ShowEntity(Connection);
             }
 
-            Health = 50;
-            Mana = 50;
+            Health = PlayerConstants.RESPAWN_HEALTH;
+            Mana = PlayerConstants.RESPAWN_MANA;
             SendPoints();
         }
 
