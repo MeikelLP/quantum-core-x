@@ -3,9 +3,8 @@ using QuantumCore.Game.World.Entities;
 
 namespace QuantumCore.Game.Commands;
 
-[Command("pull_monster", "Triggers all monsters around you to be aggro and target you")]
-[Command("pull", "Triggers all monsters around you to be aggro and target you")]
-public class PullCommand : ICommandHandler
+[Command("aggregate", "Triggers all monsters around you to be aggro and target you")]
+public class AggregateCommand : ICommandHandler
 {
     public Task ExecuteAsync(CommandContext context)
     {
