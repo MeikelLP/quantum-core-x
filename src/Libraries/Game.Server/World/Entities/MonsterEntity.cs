@@ -16,8 +16,23 @@ namespace QuantumCore.Game.World.Entities
         private readonly IDropProvider _dropProvider;
         private readonly ILogger _logger;
         public override EEntityType Type => EEntityType.Monster;
-        public bool IsStone => _proto.Type == (byte) EEntityType.MetinStone;
-        public EMonsterLevel Rank => (EMonsterLevel) _proto.Rank;
+        public bool IsStone => _proto.Type == (byte)EEntityType.MetinStone;
+        public EMonsterLevel Rank => (EMonsterLevel)_proto.Rank;
+
+        public override IEntity? Target
+        {
+            get
+            {
+                return (_behaviour as SimpleBehaviour)?.Target;
+            }
+            set
+            {
+                if (_behaviour is SimpleBehaviour sb)
+                {
+                    sb.Target = value;
+                }
+            }
+        }
 
         public IBehaviour? Behaviour
         {
@@ -31,7 +46,7 @@ namespace QuantumCore.Game.World.Entities
 
         public override byte HealthPercentage
         {
-            get { return (byte) (Math.Min(Math.Max(Health / (double) _proto.Hp, 0), 1) * 100); }
+            get { return (byte)(Math.Min(Math.Max(Health / (double)_proto.Hp, 0), 1) * 100); }
         }
 
         public MonsterData Proto
@@ -70,21 +85,21 @@ namespace QuantumCore.Game.World.Entities
             PositionY = y;
             Rotation = rotation;
 
-            MovementSpeed = (byte) _proto.MoveSpeed;
+            MovementSpeed = (byte)_proto.MoveSpeed;
 
             Health = _proto.Hp;
             EntityClass = id;
 
-            if (_proto.Type == (byte) EEntityType.Monster)
+            if (_proto.Type == (byte)EEntityType.Monster)
             {
                 // it's a monster
                 _behaviour = new SimpleBehaviour(monsterManager);
             }
-            else if (_proto.Type == (byte) EEntityType.Npc)
+            else if (_proto.Type == (byte)EEntityType.Npc)
             {
                 // npc
             }
-            else if (_proto.Type == (byte) EEntityType.MetinStone)
+            else if (_proto.Type == (byte)EEntityType.MetinStone)
             {
                 // metin stone
                 //todo: metin stone behaviour ?
@@ -119,18 +134,18 @@ namespace QuantumCore.Game.World.Entities
 
         public override void Goto(int x, int y)
         {
-            Rotation = (float) MathUtils.Rotation(x - PositionX, y - PositionY);
+            Rotation = (float)MathUtils.Rotation(x - PositionX, y - PositionY);
 
             base.Goto(x, y);
             // Send movement to nearby players
             var movement = new CharacterMoveOut
             {
                 Vid = Vid,
-                Rotation = (byte) (Rotation / 5),
-                Argument = (byte) CharacterMove.CharacterMovementType.Wait,
+                Rotation = (byte)(Rotation / 5),
+                Argument = (byte)CharacterMove.CharacterMovementType.Wait,
                 PositionX = TargetPositionX,
                 PositionY = TargetPositionY,
-                Time = (uint) GameServer.Instance.ServerTime,
+                Time = (uint)GameServer.Instance.ServerTime,
                 Duration = MovementDuration
             };
 
@@ -150,12 +165,12 @@ namespace QuantumCore.Game.World.Entities
 
         public override int GetMinDamage()
         {
-            return (int) _proto.DamageRange[0];
+            return (int)_proto.DamageRange[0];
         }
 
         public override int GetMaxDamage()
         {
-            return (int) _proto.DamageRange[1];
+            return (int)_proto.DamageRange[1];
         }
 
         public override int GetBonusDamage()
@@ -169,7 +184,7 @@ namespace QuantumCore.Game.World.Entities
 
             if (damage >= 0)
             {
-                Behaviour?.TookDamage(attacker, (uint) damage);
+                Behaviour?.TookDamage(attacker, (uint)damage);
                 Group?.TriggerAll(attacker, this);
             }
 
@@ -198,9 +213,9 @@ namespace QuantumCore.Game.World.Entities
                 case EPoints.Dx:
                     return _proto.Dx;
                 case EPoints.AttackGrade:
-                    return (uint) (_proto.Level * 2 + _proto.St * 2);
+                    return (uint)(_proto.Level * 2 + _proto.St * 2);
                 case EPoints.DefenceGrade:
-                    return (uint) (_proto.Level + _proto.Ht + _proto.Defence);
+                    return (uint)(_proto.Level + _proto.Ht + _proto.Defence);
                 case EPoints.DefenceBonus:
                     return 0;
                 case EPoints.Experience:
@@ -310,36 +325,30 @@ namespace QuantumCore.Game.World.Entities
                 Angle = Rotation,
                 PositionX = PositionX,
                 PositionY = PositionY,
-                Class = (ushort) _proto.Id,
-                MoveSpeed = (byte) _proto.MoveSpeed,
-                AttackSpeed = (byte) _proto.AttackSpeed
+                Class = (ushort)_proto.Id,
+                MoveSpeed = (byte)_proto.MoveSpeed,
+                AttackSpeed = (byte)_proto.AttackSpeed
             });
 
-            if (_proto.Type == (byte) EEntityType.Npc)
+            if (_proto.Type == (byte)EEntityType.Npc)
             {
                 // NPCs need additional information too to show up for some reason
                 connection.Send(new CharacterInfo
                 {
-                    Vid = Vid,
-                    Empire = _proto.Empire,
-                    Level = 0,
-                    Name = _proto.TranslatedName
+                    Vid = Vid, Empire = _proto.Empire, Level = 0, Name = _proto.TranslatedName
                 });
             }
         }
 
         public override void HideEntity(IConnection connection)
         {
-            connection.Send(new RemoveCharacter
-            {
-                Vid = Vid
-            });
+            connection.Send(new RemoveCharacter {Vid = Vid});
         }
 
 
         public override string ToString()
         {
-            return $"{_proto.TranslatedName?.Trim((char) 0x00)} ({_proto.Id})";
+            return $"{_proto.TranslatedName?.Trim((char)0x00)} ({_proto.Id})";
         }
     }
 }
