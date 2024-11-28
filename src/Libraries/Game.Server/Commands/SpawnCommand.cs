@@ -9,6 +9,8 @@ using QuantumCore.Game.World.Entities;
 
 namespace QuantumCore.Game.Commands
 {
+    [Command("m", "Spawn a monster or npc")]
+    [Command("mob", "Spawn a monster or npc")]
     [Command("spawn", "Spawn a monster or npc")]
     public class SpawnCommand : ICommandHandler<SpawnCommandOptions>
     {
@@ -45,7 +47,7 @@ namespace QuantumCore.Game.Commands
                 var x = context.Player.PositionX + RandomNumberGenerator.GetInt32(-1500, 1501);
                 var y = context.Player.PositionY + RandomNumberGenerator.GetInt32(-1500, 1501);
 
-                var map = _world.GetMapAt((uint) x, (uint) y);
+                var map = _world.GetMapAt((uint)x, (uint)y);
 
                 if (map is null)
                 {
