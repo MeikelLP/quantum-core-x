@@ -12,18 +12,20 @@ using Xunit.Abstractions;
 
 namespace Game.Commands.Tests;
 
-public class CommandManagerTests
+public class StrictCommandManagerTests
 {
     private readonly ICommandManager _commandManager;
     private readonly IGameConnection _connection;
+    private readonly List<string> _chatInfos = new();
 
-    public CommandManagerTests(ITestOutputHelper outputHelper)
+    public StrictCommandManagerTests(ITestOutputHelper outputHelper)
     {
         var services = new ServiceCollection()
             .AddSingleton(_ =>
             {
                 var player = Substitute.For<IPlayerEntity>();
                 player.Groups.Returns([PermGroup.OperatorGroup]);
+                player.When(x => x.SendChatInfo(Arg.Any<string>())).Do(info => _chatInfos.Add(info.Arg<string>()));
                 var conn = Substitute.For<IGameConnection>();
                 conn.Player.Returns(player);
                 return conn;
