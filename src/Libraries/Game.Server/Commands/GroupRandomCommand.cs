@@ -1,5 +1,4 @@
-using System.Security.Cryptography;
-using CommandLine;
+﻿using System.Security.Cryptography;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.Game;
@@ -9,20 +8,18 @@ using QuantumCore.Game.World.Entities;
 
 namespace QuantumCore.Game.Commands;
 
-[Command("m", "Spawn a monster or npc")]
-[Command("mob", "Spawn a monster or npc")]
-[Command("spawn", "Spawn a monster or npc")]
-public class SpawnCommand : ICommandHandler<SpawnCommandOptions>
+[Command("grrandom", "Spawn a monster group")]
+public class GroupRandomCommand : ICommandHandler
 {
     private readonly IMonsterManager _monsterManager;
     private readonly IAnimationManager _animationManager;
     private readonly IWorld _world;
-    private readonly ILogger<SpawnCommand> _logger;
+    private readonly ILogger<GroupRandomCommand> _logger;
     private readonly IItemManager _itemManager;
     private readonly IDropProvider _dropProvider;
 
-    public SpawnCommand(IMonsterManager monsterManager, IAnimationManager animationManager, IWorld world,
-        ILogger<SpawnCommand> logger, IItemManager itemManager, IDropProvider dropProvider)
+    public GroupRandomCommand(IMonsterManager monsterManager, IAnimationManager animationManager, IWorld world,
+        ILogger<GroupRandomCommand> logger, IItemManager itemManager, IDropProvider dropProvider)
     {
         _monsterManager = monsterManager;
         _animationManager = animationManager;
@@ -32,17 +29,20 @@ public class SpawnCommand : ICommandHandler<SpawnCommandOptions>
         _dropProvider = dropProvider;
     }
 
-    public Task ExecuteAsync(CommandContext<SpawnCommandOptions> context)
+    public Task ExecuteAsync(CommandContext context)
     {
-        var proto = _monsterManager.GetMonster(context.Arguments.MonsterId);
-        if (proto == null)
-        {
-            context.Player.SendChatInfo("No monster found with the specified id");
-            return Task.CompletedTask;
-        }
+        var group = _world.GetRandomGroup();
 
-        for (var i = 0; i < context.Arguments.Count; i++)
+        foreach (var monsterId in group.Members.Select(x => x.Id).Prepend(group.Leader))
         {
+            var proto = _monsterManager.GetMonster(monsterId);
+            if (proto is null)
+            {
+                _logger.LogWarning("Tried to spawn monster {MonsterId} in group {GroupId} but it does not exist",
+                    monsterId, group.Id);
+                continue;
+            }
+
             // Calculate random spawn position close by the player
             var x = context.Player.PositionX + RandomNumberGenerator.GetInt32(-1500, 1501);
             var y = context.Player.PositionY + RandomNumberGenerator.GetInt32(-1500, 1501);
@@ -57,17 +57,10 @@ public class SpawnCommand : ICommandHandler<SpawnCommandOptions>
 
             // Create entity instance
             var monster = new MonsterEntity(_monsterManager, _dropProvider, _animationManager, map, _logger,
-                _itemManager, context.Arguments.MonsterId, x, y);
+                _itemManager, monsterId, x, y);
             _world.SpawnEntity(monster);
         }
 
         return Task.CompletedTask;
     }
-}
-
-public class SpawnCommandOptions
-{
-    [Value(0, Required = true)] public uint MonsterId { get; set; }
-
-    [Value(1)] public uint Count { get; set; } = 1;
 }
