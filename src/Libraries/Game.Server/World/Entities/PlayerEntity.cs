@@ -414,7 +414,7 @@ namespace QuantumCore.Game.World.Entities
             var exp = GetPoint(EPoints.Experience);
             var needed = GetPoint(EPoints.NeededExperience);
 
-            if (exp >= needed)
+            if (needed > 0 && exp >= needed)
             {
                 SetPoint(EPoints.Experience, exp - needed);
                 LevelUp();
