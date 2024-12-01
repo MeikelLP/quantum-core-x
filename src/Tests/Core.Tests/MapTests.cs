@@ -127,7 +127,7 @@ public class MapTests
         _world = provider.GetRequiredService<IWorld>();
         _map = new Map(monsterManager, animationManager, cacheManager, _world, logger, spawnPointProvider, dropProvider,
             itemManager, server,
-            "Test", 0, 0, 4096, 4096);
+            "Test", 0, 0, 4096, 4096, provider);
     }
 
     [Fact]

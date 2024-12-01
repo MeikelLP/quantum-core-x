@@ -60,7 +60,7 @@ public class WorldUpdateBenchmark
                             provider.GetRequiredService<IDropProvider>(),
                             provider.GetRequiredService<IItemManager>(),
                             provider.GetRequiredService<IServerBase>(),
-                            "test_map", 0, 0, 1024, 1024
+                            "test_map", 0, 0, 1024, 1024, provider
                         )
                     });
 
