@@ -48,15 +48,15 @@ namespace QuantumCore.Game.World
         private readonly IWorld _world;
         private readonly ILogger _logger;
         private readonly ISpawnPointProvider _spawnPointProvider;
-        private readonly HostingOptions _options;
         private readonly IDropProvider _dropProvider;
         private readonly IItemManager _itemManager;
         private readonly IServerBase _server;
+        private readonly IServiceProvider _serviceProvider;
 
         public Map(IMonsterManager monsterManager, IAnimationManager animationManager, ICacheManager cacheManager,
             IWorld world, ILogger logger, ISpawnPointProvider spawnPointProvider,
             IDropProvider dropProvider, IItemManager itemManager, IServerBase server, string name, uint x, uint y,
-            uint width, uint height)
+            uint width, uint height, IServiceProvider serviceProvider)
         {
             _monsterManager = monsterManager;
             _animationManager = animationManager;
@@ -72,6 +72,7 @@ namespace QuantumCore.Game.World
             PositionY = y;
             Width = width;
             Height = height;
+            _serviceProvider = serviceProvider;
             _quadTree = new QuadTree((int) x, (int) y, (int) (width * MapUnit), (int) (height * MapUnit), 20);
             _entityGauge = GameServer.Meter.CreateObservableGauge($"Map:{name}:EntityCount", () => Entities.Count);
         }
@@ -293,7 +294,7 @@ namespace QuantumCore.Game.World
                 baseY += RandomNumberGenerator.GetInt32(-spawnPoint.RangeY, spawnPoint.RangeY);
             }
 
-            var monster = new MonsterEntity(_monsterManager, _dropProvider, _animationManager, this, _logger,
+            var monster = new MonsterEntity(_monsterManager, _dropProvider, _animationManager, _serviceProvider, this, _logger,
                 _itemManager,
                 id,
                 0,

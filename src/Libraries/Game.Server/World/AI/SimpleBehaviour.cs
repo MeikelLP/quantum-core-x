@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Security.Cryptography;
+using EnumsNET;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game.World;
@@ -27,6 +28,8 @@ namespace QuantumCore.Game.World.AI
         public IEntity? Target { get; set; }
         private readonly Dictionary<uint, uint> _damageMap = new();
 
+        public bool IsAggressive { get; set; }
+
         private const int MoveRadius = 1000;
 
         public SimpleBehaviour(IMonsterManager monsterManager)
@@ -44,6 +47,7 @@ namespace QuantumCore.Game.World.AI
 
             _spawnX = entity.PositionX;
             _spawnY = entity.PositionY;
+            IsAggressive = entity is MonsterEntity mob && mob.Proto.AiFlag.HasAnyFlags(EAiFlags.Aggressive);
         }
 
         private void CalculateNextMovement()
@@ -234,7 +238,11 @@ namespace QuantumCore.Game.World.AI
 
         public void OnNewNearbyEntity(IEntity entity)
         {
-            // todo implement aggressive flag
+            if (IsAggressive && entity is IPlayerEntity && Target is null)
+            {
+                Target = entity;
+                // TODO stop following at some point
+            }
         }
     }
 }
