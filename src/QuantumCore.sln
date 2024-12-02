@@ -64,6 +64,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Game", "Executables\Game\Ga
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Auth", "Executables\Auth\Auth.csproj", "{13B6BEFF-A4DF-4F7B-B889-2967101FDC15}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Benchmarks", "Benchmarks\Benchmarks.csproj", "{D7757992-2228-4EE4-B184-D4A8D86573AA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -182,6 +184,10 @@ Global
 		{13B6BEFF-A4DF-4F7B-B889-2967101FDC15}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{13B6BEFF-A4DF-4F7B-B889-2967101FDC15}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{13B6BEFF-A4DF-4F7B-B889-2967101FDC15}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D7757992-2228-4EE4-B184-D4A8D86573AA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D7757992-2228-4EE4-B184-D4A8D86573AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D7757992-2228-4EE4-B184-D4A8D86573AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D7757992-2228-4EE4-B184-D4A8D86573AA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{930E5131-B018-4255-BC08-ACE8F2C1BAC5} = {6D101418-9A2D-41CB-BEA9-47F915395CE8}
