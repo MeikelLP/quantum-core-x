@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Net;
+using System.Security.Cryptography;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
@@ -227,7 +228,7 @@ namespace QuantumCore.Game.World
 
         public CoreHost GetMapHost(int x, int y)
         {
-            var map = GetMapAt((uint) x, (uint) y);
+            var map = GetMapAt((uint)x, (uint)y);
             if (map == null)
             {
                 _logger.LogWarning("No available host for map at {X}|{Y}", x, y);
@@ -243,17 +244,13 @@ namespace QuantumCore.Game.World
                     throw new InvalidOperationException("Cannot handle this situation. See logs.");
                 }
 
-                return new CoreHost
-                {
-                    Ip = remoteMap.Host,
-                    Port = remoteMap.Port
-                };
+                return new CoreHost {Ip = remoteMap.Host, Port = remoteMap.Port};
             }
 
             return new CoreHost
             {
                 Ip = _serviceProvider.GetRequiredService<IServerBase>().IpAddress, // lazy because of dependency loop
-                Port = (ushort) GameServer.Instance.Port
+                Port = (ushort)GameServer.Instance.Port
             };
         }
 
@@ -265,6 +262,14 @@ namespace QuantumCore.Game.World
             }
 
             return _groups[id];
+        }
+
+        public SpawnGroup GetRandomGroup()
+        {
+            var span = new Span<uint>([0], 0, 1);
+            RandomNumberGenerator.GetItems([.._groups.Keys], span);
+
+            return _groups[span[0]];
         }
 
         public SpawnGroupCollection? GetGroupCollection(uint id)
@@ -279,7 +284,7 @@ namespace QuantumCore.Game.World
 
         public void SpawnEntity(IEntity e)
         {
-            var map = GetMapAt((uint) e.PositionX, (uint) e.PositionY);
+            var map = GetMapAt((uint)e.PositionX, (uint)e.PositionY);
             if (map == null)
             {
                 _logger.LogWarning("Could not spawn entity at ({X};{Y}) No Map found for this coordinate", e.PositionX,

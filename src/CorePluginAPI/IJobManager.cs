@@ -2,6 +2,5 @@
 
 public interface IJobManager
 {
-    byte GetJobFromClass(byte playerClass);
-    Job? Get(byte playerClass);
+    Job? Get(EPlayerClassGendered playerClass);
 }

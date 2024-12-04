@@ -62,6 +62,8 @@ namespace QuantumCore.API.Game.World
         public void ShowEntity(IConnection connection);
         public void HideEntity(IConnection connection);
         IReadOnlyCollection<IEntity> NearbyEntities { get; }
+        byte MovementSpeed { get; set; }
+        byte AttackSpeed { get; set; }
 
         public uint GetPoint(EPoints point);
         public int GetMinDamage();
