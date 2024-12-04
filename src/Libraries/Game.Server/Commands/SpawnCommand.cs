@@ -18,9 +18,10 @@ namespace QuantumCore.Game.Commands
         private readonly ILogger<SpawnCommand> _logger;
         private readonly IItemManager _itemManager;
         private readonly IDropProvider _dropProvider;
+        private readonly IServiceProvider _serviceProvider;
 
         public SpawnCommand(IMonsterManager monsterManager, IAnimationManager animationManager, IWorld world,
-            ILogger<SpawnCommand> logger, IItemManager itemManager, IDropProvider dropProvider)
+            ILogger<SpawnCommand> logger, IItemManager itemManager, IDropProvider dropProvider, IServiceProvider serviceProvider)
         {
             _monsterManager = monsterManager;
             _animationManager = animationManager;
@@ -28,6 +29,7 @@ namespace QuantumCore.Game.Commands
             _logger = logger;
             _itemManager = itemManager;
             _dropProvider = dropProvider;
+            _serviceProvider = serviceProvider;
         }
 
         public Task ExecuteAsync(CommandContext<SpawnCommandOptions> context)
@@ -54,7 +56,7 @@ namespace QuantumCore.Game.Commands
                 }
 
                 // Create entity instance
-                var monster = new MonsterEntity(_monsterManager, _dropProvider, _animationManager, map, _logger,
+                var monster = new MonsterEntity(_monsterManager, _dropProvider, _animationManager, _serviceProvider, map, _logger,
                     _itemManager, context.Arguments.MonsterId, x, y);
                 _world.SpawnEntity(monster);
             }

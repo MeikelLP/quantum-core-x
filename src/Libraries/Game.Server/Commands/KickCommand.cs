@@ -5,6 +5,7 @@ using QuantumCore.API.Game.World;
 namespace QuantumCore.Game.Commands
 {
     [Command("kick", "Kick a player from the Server")]
+    [Command("dc", "Kick a player from the Server")]
     public class KickCommand : ICommandHandler<KickCommandOptions>
     {
         private readonly IWorld _world;

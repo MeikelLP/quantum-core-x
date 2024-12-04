@@ -28,7 +28,6 @@ namespace QuantumCore.Game.World.Entities
         public PlayerData Player { get; private set; }
         public GuildData? Guild { get; private set; }
         public IInventory Inventory { get; private set; }
-        public IEntity? Target { get; set; }
         public IList<Guid> Groups { get; private set; }
         public IShop? Shop { get; set; }
         public IQuickSlotBar QuickSlotBar { get; }
