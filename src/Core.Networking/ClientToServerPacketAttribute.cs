@@ -16,6 +16,5 @@ public class ClientToServerPacketAttribute : Attribute
 
     public byte Header { get; init; }
     public byte? SubHeader { get; init; }
-    public bool IsDynamic { get; init; }
     public bool HasSequence { get; init; }
 }

@@ -23,6 +23,17 @@ public class PacketSerializerGenerator2 : IIncrementalGenerator
 
         context.RegisterSourceOutput(combined, (spc, types) =>
         {
+            var diagnostics = types.Left.Concat(types.Right).SelectMany(x => x.Diagnostics).ToArray();
+            if (diagnostics.Length > 0)
+            {
+                foreach (var diagnostic in diagnostics)
+                {
+                    spc.ReportDiagnostic(diagnostic);
+                }
+            }
+
+            if (diagnostics.Any(x => x.Severity == DiagnosticSeverity.Error)) return;
+
             // only for validating the build type info in tests
             PacketTypes.AddRange(types.Left);
             PacketTypes.AddRange(types.Right);
