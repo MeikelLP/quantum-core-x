@@ -4,7 +4,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 namespace QuantumCore.Networking;
 
 [Generator(LanguageNames.CSharp)]
-public class PacketSerializerGenerator2 : IIncrementalGenerator
+public class PacketSerializerGenerator2PacketTypeInfo : IIncrementalGenerator
 {
     public List<PacketTypeInfo> PacketTypes { get; } = new();
 
@@ -37,6 +37,12 @@ public class PacketSerializerGenerator2 : IIncrementalGenerator
             // only for validating the build type info in tests
             PacketTypes.AddRange(types.Left);
             PacketTypes.AddRange(types.Right);
+
+            var allTypes = types.Left.Concat(types.Right);
+            foreach (var type in allTypes)
+            {
+                spc.AddSource($"{type.Name}.g.cs", PacketSourceGenerator.Generate(type));
+            }
         });
     }
 

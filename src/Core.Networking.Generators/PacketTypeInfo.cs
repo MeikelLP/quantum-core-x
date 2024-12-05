@@ -14,9 +14,9 @@ public class PacketTypeInfo
     public bool IsServerToClient { get; set; }
     public string Namespace { get; set; }
     public string Name { get; set; }
-    public PacketFieldInfo? DynamicSizeField { get; set; }
-    public PacketFieldInfo? DynamicField { get; set; }
-    public ImmutableArray<PacketFieldInfo> Fields { get; set; }
+    public PacketFieldInfo2? DynamicSizeField { get; set; }
+    public PacketFieldInfo2? DynamicField { get; set; }
+    public ImmutableArray<PacketFieldInfo2> Fields { get; set; }
     public List<Diagnostic> Diagnostics { get; set; } = [];
 
 
@@ -49,20 +49,23 @@ public class PacketTypeInfo
         Header = (byte)packetAttribute.ConstructorArguments[0].Value!;
         SubHeader = (byte?)packetAttribute.ConstructorArguments.ElementAtOrDefault(1).Value;
 
-        var recordParams = node.DescendantNodes().OfType<ParameterSyntax>().ToList();
-        Fields = GetFields(semanticModel, symbol.GetMembers().OfType<IFieldSymbol>(), recordParams);
+        Fields = GetFields(symbol, SubHeader);
         DynamicSizeField = GetDynamicSizeField(symbol);
         DynamicField = Fields.FirstOrDefault(x => x.HasDynamicLength);
         FixedSize = Fields.Any(x => x.HasDynamicLength) ? null : Fields.Sum(x => x.FieldSize);
         FixedSize++; // Header
-        if (SubHeader is not null)
-        {
-            FixedSize++;
-        }
 
+        ReportDiagnostics(node);
+    }
+
+    private void ReportDiagnostics(SyntaxNode node)
+    {
+        var fieldNodes = GetFieldNodes(node);
         if (FixedSize is null && DynamicSizeField == null)
         {
-            Diagnostics.Add(CreateDiagnostic(node, GeneratorCodes.DYNAMIC_REQUIRES_SIZE_FIELD, GeneratorCodes.DYNAMIC_REQUIRES_SIZE_FIELD_MESSAGE));
+            var field = Fields.First(x => x.HasDynamicLength);
+            var location = fieldNodes[field.Name];
+            Diagnostics.Add(CreateDiagnostic(location, GeneratorCodes.DYNAMIC_REQUIRES_SIZE_FIELD, GeneratorCodes.DYNAMIC_REQUIRES_SIZE_FIELD_MESSAGE));
         }
 
         if (FixedSize is null && 
@@ -70,16 +73,39 @@ public class PacketTypeInfo
             DynamicField is not null &&
             Fields.IndexOf(DynamicSizeField) > Fields.IndexOf(DynamicField))
         {
-            Diagnostics.Add(CreateDiagnostic(node, GeneratorCodes.DYNAMIC_SIZE_FIELD_BEFORE_DYNAMIC_FIELD, GeneratorCodes.DYNAMIC_SIZE_FIELD_BEFORE_DYNAMIC_FIELD_MESSAGE));
+            var location = fieldNodes[DynamicSizeField.Name];
+            Diagnostics.Add(CreateDiagnostic(location, GeneratorCodes.DYNAMIC_SIZE_FIELD_BEFORE_DYNAMIC_FIELD, GeneratorCodes.DYNAMIC_SIZE_FIELD_BEFORE_DYNAMIC_FIELD_MESSAGE));
         }
 
-        if (Fields.Count(x => x.HasDynamicLength) > 1)
+        var exceedingDynamicFields = Fields.Where((_, i) => i > 1);
+        foreach (var field in exceedingDynamicFields)
         {
-            Diagnostics.Add(CreateDiagnostic(node, GeneratorCodes.DYNAMIC_FIELDS_MAX_ONCE, GeneratorCodes.DYNAMIC_FIELDS_MAX_ONCE_MESSAGE));
+            var location = fieldNodes[field.Name];
+            Diagnostics.Add(CreateDiagnostic(location, GeneratorCodes.DYNAMIC_FIELDS_MAX_ONCE, GeneratorCodes.DYNAMIC_FIELDS_MAX_ONCE_MESSAGE));
+        }
+
+        foreach (var field in Fields.Where(x => x.IsReadonly))
+        {
+            var location = fieldNodes[field.Name];
+            Diagnostics.Add(CreateDiagnostic(location, GeneratorCodes.READONLY_NOT_SUPPORTED, GeneratorCodes.READONLY_NOT_SUPPORTED_MESSAGE));
+        }
+
+        foreach (var field in Fields.Where(x => x.TypeFullName == $"{Namespace}.{Name}"))
+        {
+            var location = fieldNodes[field.Name];
+            Diagnostics.Add(CreateDiagnostic(location, GeneratorCodes.SELF_REFERENCE_LOOP, GeneratorCodes.SELF_REFERENCE_LOOP_MESSAGE));
         }
     }
 
-    private static Diagnostic CreateDiagnostic(SyntaxNode node, string id, string message)
+    private static Dictionary<string, Location> GetFieldNodes(SyntaxNode node)
+    {
+        return node.DescendantNodes()
+            .Where(x => x is FieldDeclarationSyntax)
+            .Select(x =>x.DescendantNodes().OfType<VariableDeclarationSyntax>().First().Variables.First().Identifier)
+            .ToDictionary(x => x.ValueText, x => x.GetLocation());
+    }
+
+    private static Diagnostic CreateDiagnostic(Location location, string id, string message)
     {
         return Diagnostic.Create(new DiagnosticDescriptor(
                 id,
@@ -88,10 +114,10 @@ public class PacketTypeInfo
                 "generators",
                 DiagnosticSeverity.Error,
                 true),
-            node.GetLocation());
+            location);
     }
 
-    private PacketFieldInfo? GetDynamicSizeField(INamedTypeSymbol symbol)
+    private PacketFieldInfo2? GetDynamicSizeField(INamedTypeSymbol symbol)
     {
         if (FixedSize is not null) return null;
         var fieldByConvention = Fields.FirstOrDefault(x =>
@@ -103,12 +129,34 @@ public class PacketTypeInfo
         return fieldByAttribute ?? fieldByConvention;
     }
 
-    private static ImmutableArray<PacketFieldInfo> GetFields(SemanticModel model, IEnumerable<IFieldSymbol> fields,
-        IEnumerable<ParameterSyntax> recordParams)
+    private ImmutableArray<PacketFieldInfo2> GetFields(ITypeSymbol symbol, byte? subHeader)
     {
-        var list = new List<PacketFieldInfo>();
+        var fields = symbol.GetMembers().OfType<IFieldSymbol>();
+        var fieldNodes = GetFieldNodes(symbol.DeclaringSyntaxReferences.First().GetSyntax());
+        var list = new List<PacketFieldInfo2>();
+        if (subHeader is not null)
+        {
+            list.Add(new PacketFieldInfo2
+            {
+                Name = GeneratorConstants.SUBHEADER_RESERVED_NAME,
+                ElementSize = 1,
+                TypeFullName = typeof(byte).FullName!,
+                ConstantValue = subHeader
+            });
+        }
         foreach (var field in fields)
         {
+            if (SymbolEqualityComparer.Default.Equals(field.Type, symbol))
+            {
+                Diagnostics.Add(CreateDiagnostic(fieldNodes[field.Name], GeneratorCodes.SELF_REFERENCE_LOOP, GeneratorCodes.SELF_REFERENCE_LOOP_MESSAGE));
+                continue;
+            }
+            if (field.Name == GeneratorConstants.SUBHEADER_RESERVED_NAME)
+            {
+                Diagnostics.Add(CreateDiagnostic(fieldNodes[field.Name], GeneratorCodes.SUBHEADER_NAME_RESERVED, GeneratorCodes.SUBHEADER_NAME_RESERVED_MESSAGE));
+                continue;
+            }
+            
             var fixedSizeArrayAttribute = field!.GetAttributes().FirstOrDefault(x =>
                 x.AttributeClass.GetFullName() == GeneratorConstants.FIXED_SIZE_ARRAY_ATTRIBUTE);
             var fixedSizeStringAttribute = field!.GetAttributes().FirstOrDefault(x =>
@@ -123,58 +171,32 @@ public class PacketTypeInfo
             var stringLength = (int?)fixedSizeStringAttribute?.ConstructorArguments.First().Value;
             var isCustomType = IsCustomType(field.Type);
             var isEnum = field.Type.BaseType.GetFullName() == typeof(Enum).FullName;
+            var elementType = true switch
+            {
+                true when isArray => ((IArrayTypeSymbol)field.Type).ElementType,
+                true when isEnum => ((INamedTypeSymbol)field.Type).EnumUnderlyingType,
+                _ => null
+            };
+            var subFields = isCustomType ? GetFields(field.Type, null) : [];
             var elementSize = field.Type.GetFullName() == typeof(string).FullName && stringLength is not null
                 ? stringLength.Value
-                : GetStaticSize(field.Type);
-            var info = new PacketFieldInfo
+                : isCustomType
+                    ? subFields.Sum(x => x.FieldSize)
+                    : GetStaticSize(field.Type);
+            var elementTypeFullName = elementType.GetFullName()!;
+            var info = new PacketFieldInfo2
             {
                 Name = field.Name,
                 Order = order,
                 IsArray = isArray,
                 ArrayLength = arrayLength,
                 IsCustom = isCustomType,
-                TypeFullName = isArray ? "System.Array" : field.Type.GetFullName()!,
+                TypeFullName = isArray ? typeof(Array).FullName! : field.Type.GetFullName()!,
+                ElementTypeFullName = elementTypeFullName,
                 IsEnum = isEnum,
                 ElementSize = elementSize,
                 IsReadonly = field.IsReadOnly,
-                IsRecordParameter = false
-            };
-            if (order.HasValue)
-            {
-                list.Insert(order.Value, info);
-            }
-            else
-            {
-                list.Add(info);
-            }
-        }
-
-        foreach (var param in recordParams)
-        {
-            var field = model.GetDeclaredSymbol(param);
-            var fixedSizeArrayAttribute = field!.GetAttributes().FirstOrDefault(x =>
-                x.AttributeClass.GetFullName() == GeneratorConstants.FIXED_SIZE_ARRAY_ATTRIBUTE);
-            var orderAttribute = field.GetAttributes().FirstOrDefault(x =>
-                x.AttributeClass.GetFullName() == GeneratorConstants.FIELD_POSITION_ATTRIBUTE);
-            var order = (int?)orderAttribute?.ConstructorArguments.First().Value;
-            var isArray = field.Type.BaseType.GetFullName() == typeof(Array).FullName;
-            var arrayLength = !isArray
-                ? null
-                : (int?)fixedSizeArrayAttribute?.ConstructorArguments.First().Value;
-            var isCustomType = IsCustomType(field.Type);
-            var isEnum = field.Type.BaseType.GetFullName() == typeof(Enum).FullName;
-            var info = new PacketFieldInfo
-            {
-                Name = field.Name,
-                Order = order,
-                IsArray = isArray,
-                ArrayLength = arrayLength,
-                IsCustom = isCustomType,
-                TypeFullName = isArray ? "System.Array" : field.Type.GetFullName()!,
-                IsEnum = isEnum,
-                ElementSize = GetStaticSize(field.Type),
-                IsReadonly = false,
-                IsRecordParameter = false
+                Fields = subFields
             };
             if (order.HasValue)
             {
@@ -243,13 +265,9 @@ public class PacketTypeInfo
 
     private static bool IsCustomType(ITypeSymbol fieldType)
     {
-        return fieldType.GetFullNamespace() != "System" && !fieldType.GetFullNamespace()!.StartsWith("System.") &&
-               fieldType.TypeKind is not TypeKind.Enum and not TypeKind.Array;
-    }
-
-    private static bool IsCustomType(string typeFullName)
-    {
-        return !typeFullName.StartsWith("System.");
+        return (fieldType.GetFullNamespace() != "System" && !fieldType.GetFullNamespace()!.StartsWith("System.") &&
+               fieldType.TypeKind is not TypeKind.Enum and not TypeKind.Array) || 
+               (fieldType.Kind is SymbolKind.ArrayType && IsCustomType(((IArrayTypeSymbol)fieldType).ElementType));
     }
 
     private static TypeDeclarationSyntax GetTypeDeclaration(ITypeSymbol semanticType)

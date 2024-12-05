@@ -21,6 +21,7 @@ internal static class GeneratorConstants
     public const string FIELD_POSITION_ATTRIBUTE = "QuantumCore.Networking.FieldOrderAttribute";
     public const string SERVER_TO_CLIENT_ATTRIBUTE_FULLNAME = "QuantumCore.Networking.ServerToClientPacketAttribute";
     public const string CLIENT_TO_SERVER_ATTRIBUTE_FULLNAME = "QuantumCore.Networking.ClientToServerPacketAttribute";
+    public const string SUBHEADER_RESERVED_NAME = "SubHeader";
 }
 
 internal static class GeneratorCodes
@@ -31,4 +32,10 @@ internal static class GeneratorCodes
     public const string DYNAMIC_SIZE_FIELD_BEFORE_DYNAMIC_FIELD_MESSAGE = "The dynamic size field must be ordered before the field with dynamic size";
     public const string DYNAMIC_FIELDS_MAX_ONCE = "QCX000008";
     public const string DYNAMIC_FIELDS_MAX_ONCE_MESSAGE = "Only one dynamic field is supported";
+    public const string READONLY_NOT_SUPPORTED = "QCX000009";
+    public const string READONLY_NOT_SUPPORTED_MESSAGE = "Readonly fields are not supported";
+    public const string SELF_REFERENCE_LOOP = "QCX000010";
+    public const string SELF_REFERENCE_LOOP_MESSAGE = "It's not possible to define a field of the same type as the declaring type in a packet";
+    public const string SUBHEADER_NAME_RESERVED = "QCX000011";
+    public const string SUBHEADER_NAME_RESERVED_MESSAGE = "The name \"SubHeader\" is reserved and may not be used";
 }

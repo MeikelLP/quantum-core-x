@@ -1,5 +1,15 @@
 ﻿namespace QuantumCore.Networking;
 
+public interface IServerToClientPacket
+{
+    void Write(Stream stream);
+}
+
+public interface IClientToServerPacket
+{
+    void Read(Stream stream);
+}
+
 public interface IPacketSerializable
 {
     /// <summary>
