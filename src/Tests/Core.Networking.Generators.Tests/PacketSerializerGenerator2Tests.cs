@@ -112,6 +112,7 @@ public class PacketSerializerGenerator2Tests
                            """;
 
         var diagnostics = CompileAndGetDiagnostics(src);
+        diagnostics.Should().HaveCount(1);
         diagnostics[0].Id.Should().BeEquivalentTo(GeneratorCodes.DYNAMIC_REQUIRES_SIZE_FIELD);
     }
 
@@ -142,6 +143,7 @@ public class PacketSerializerGenerator2Tests
                 ],
                 Header = 0x44,
                 IsServerToClient = true,
+                DynamicField = new PacketFieldInfo{Name = "Data", TypeFullName = "System.Array", ElementSize = 1, IsArray = true},
                 DynamicSizeField = new PacketFieldInfo{Name = "Size", TypeFullName = typeof(ushort).FullName!, ElementSize = 2}
             }
         ], EqualityComparer);
@@ -394,8 +396,8 @@ public class PacketSerializerGenerator2Tests
                            [ServerToClientPacket(0x44)]
                            public partial struct TestPacket
                            {
-                               public byte[] Data;
                                [DynamicSizeFieldAttribute] public ushort CustomSize;
+                               public byte[] Data;
                            }
                            """;
 
@@ -404,17 +406,127 @@ public class PacketSerializerGenerator2Tests
             {
                 Fields =
                 [
-                    new PacketFieldInfo {Name = "Data", TypeFullName = "System.Array", ElementSize = 1, IsArray = true},
-                    new PacketFieldInfo {Name = "CustomSize", TypeFullName = typeof(ushort).FullName!, ElementSize = 2}
+                    new PacketFieldInfo {Name = "CustomSize", TypeFullName = typeof(ushort).FullName!, ElementSize = 2},
+                    new PacketFieldInfo {Name = "Data", TypeFullName = "System.Array", ElementSize = 1, IsArray = true}
                 ],
                 Header = 0x44,
                 IsServerToClient = true,
+                DynamicField = new PacketFieldInfo {Name = "Data", TypeFullName = "System.Array", ElementSize = 1, IsArray = true},
                 DynamicSizeField = new PacketFieldInfo
                 {
                     Name = "CustomSize", TypeFullName = typeof(ushort).FullName!, ElementSize = 2
                 }
             }
         ], EqualityComparer);
+    }
+
+    [Fact]
+    public void String_Dynamic()
+    {
+        const string src = """
+                           using QuantumCore.Networking;
+
+                           namespace Quantum.Core.Networking;
+
+                           [ServerToClientPacket(0x44)]
+                           public partial struct TestPacket
+                           {
+                               public ushort Size;
+                               public string Message;
+                           }
+                           """;
+
+        Compile(src).PacketTypes.Should().BeEquivalentTo([
+            new PacketTypeInfo("Quantum.Core.Networking", "TestPacket")
+            {
+                Fields =
+                [
+                    new PacketFieldInfo {Name = "Size", TypeFullName = typeof(ushort).FullName!, ElementSize = 2},
+                    new PacketFieldInfo {Name = "Message", TypeFullName = typeof(string).FullName!, ElementSize = 0}
+                ],
+                Header = 0x44,
+                IsServerToClient = true,
+                DynamicField = new PacketFieldInfo {Name = "Message", TypeFullName = typeof(string).FullName!, ElementSize = 0},
+                DynamicSizeField = new PacketFieldInfo
+                {
+                    Name = "Size", TypeFullName = typeof(ushort).FullName!, ElementSize = 2
+                }
+            }
+        ], EqualityComparer);
+    }
+
+    [Fact]
+    public void String_Fixed()
+    {
+        const string src = """
+                           using QuantumCore.Networking;
+
+                           namespace Quantum.Core.Networking;
+
+                           [ServerToClientPacket(0x44)]
+                           public partial struct TestPacket
+                           {
+                               [FixedSizeStringAttribute(4)] public string Message;
+                           }
+                           """;
+
+        Compile(src).PacketTypes.Should().BeEquivalentTo([
+            new PacketTypeInfo("Quantum.Core.Networking", "TestPacket")
+            {
+                Fields =
+                [
+                    new PacketFieldInfo {Name = "Message", TypeFullName = typeof(string).FullName!, ElementSize = 4}
+                ],
+                FixedSize = 5,
+                Header = 0x44,
+                IsServerToClient = true,
+            }
+        ], EqualityComparer);
+    }
+
+    [Fact]
+    public void Dynamic_SizeFieldAfterDynamicField()
+    {
+        const string src = """
+                           using QuantumCore.Networking;
+
+                           namespace Quantum.Core.Networking;
+
+                           [ServerToClientPacket(0x44)]
+                           public partial struct TestPacket
+                           {
+                               public byte[] Data;
+                               [DynamicSizeFieldAttribute] public ushort CustomSize;
+                           }
+                           """;
+
+        var diagnostics = CompileAndGetDiagnostics(src);
+
+        diagnostics.Should().HaveCount(1);
+        diagnostics[0].Id.Should().BeEquivalentTo(GeneratorCodes.DYNAMIC_SIZE_FIELD_BEFORE_DYNAMIC_FIELD);
+    }
+
+    [Fact]
+    public void Dynamic_Multiple()
+    {
+        const string src = """
+                           using QuantumCore.Networking;
+
+                           namespace Quantum.Core.Networking;
+
+                           [ServerToClientPacket(0x44)]
+                           public partial struct TestPacket
+                           {
+                               public ushort Size;
+                               public byte[] Data1;
+                               public byte[] Data2;
+                           }
+                           """;
+
+        var diagnostics = CompileAndGetDiagnostics(src);
+
+        diagnostics.Should().HaveCount(1);
+        diagnostics[0].Id.Should().BeEquivalentTo(GeneratorCodes.DYNAMIC_FIELDS_MAX_ONCE);
     }
 
     [Fact]

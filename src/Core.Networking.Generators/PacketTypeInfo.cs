@@ -15,8 +15,10 @@ public class PacketTypeInfo
     public string Namespace { get; set; }
     public string Name { get; set; }
     public PacketFieldInfo? DynamicSizeField { get; set; }
+    public PacketFieldInfo? DynamicField { get; set; }
     public ImmutableArray<PacketFieldInfo> Fields { get; set; }
     public List<Diagnostic> Diagnostics { get; set; } = [];
+
 
     internal PacketTypeInfo(string ns, string name)
     {
@@ -50,6 +52,7 @@ public class PacketTypeInfo
         var recordParams = node.DescendantNodes().OfType<ParameterSyntax>().ToList();
         Fields = GetFields(semanticModel, symbol.GetMembers().OfType<IFieldSymbol>(), recordParams);
         DynamicSizeField = GetDynamicSizeField(symbol);
+        DynamicField = Fields.FirstOrDefault(x => x.HasDynamicLength);
         FixedSize = Fields.Any(x => x.HasDynamicLength) ? null : Fields.Sum(x => x.FieldSize);
         FixedSize++; // Header
         if (SubHeader is not null)
@@ -59,15 +62,33 @@ public class PacketTypeInfo
 
         if (FixedSize is null && DynamicSizeField == null)
         {
-            Diagnostics.Add(Diagnostic.Create(new DiagnosticDescriptor(
-                GeneratorCodes.DYNAMIC_REQUIRES_SIZE_FIELD,
+            Diagnostics.Add(CreateDiagnostic(node, GeneratorCodes.DYNAMIC_REQUIRES_SIZE_FIELD, GeneratorCodes.DYNAMIC_REQUIRES_SIZE_FIELD_MESSAGE));
+        }
+
+        if (FixedSize is null && 
+            DynamicSizeField is not null && 
+            DynamicField is not null &&
+            Fields.IndexOf(DynamicSizeField) > Fields.IndexOf(DynamicField))
+        {
+            Diagnostics.Add(CreateDiagnostic(node, GeneratorCodes.DYNAMIC_SIZE_FIELD_BEFORE_DYNAMIC_FIELD, GeneratorCodes.DYNAMIC_SIZE_FIELD_BEFORE_DYNAMIC_FIELD_MESSAGE));
+        }
+
+        if (Fields.Count(x => x.HasDynamicLength) > 1)
+        {
+            Diagnostics.Add(CreateDiagnostic(node, GeneratorCodes.DYNAMIC_FIELDS_MAX_ONCE, GeneratorCodes.DYNAMIC_FIELDS_MAX_ONCE_MESSAGE));
+        }
+    }
+
+    private static Diagnostic CreateDiagnostic(SyntaxNode node, string id, string message)
+    {
+        return Diagnostic.Create(new DiagnosticDescriptor(
+                id,
                 "Failed to collect data about packet type",
-                GeneratorCodes.DYNAMIC_REQUIRES_SIZE_FIELD_MESSAGE,
+                message,
                 "generators",
                 DiagnosticSeverity.Error,
                 true),
-                node.GetLocation()));
-        }
+            node.GetLocation());
     }
 
     private PacketFieldInfo? GetDynamicSizeField(INamedTypeSymbol symbol)
@@ -90,6 +111,8 @@ public class PacketTypeInfo
         {
             var fixedSizeArrayAttribute = field!.GetAttributes().FirstOrDefault(x =>
                 x.AttributeClass.GetFullName() == GeneratorConstants.FIXED_SIZE_ARRAY_ATTRIBUTE);
+            var fixedSizeStringAttribute = field!.GetAttributes().FirstOrDefault(x =>
+                x.AttributeClass.GetFullName() == GeneratorConstants.FIXED_SIZE_STRING_ATTRIBUTE);
             var orderAttribute = field.GetAttributes().FirstOrDefault(x =>
                 x.AttributeClass.GetFullName() == GeneratorConstants.FIELD_POSITION_ATTRIBUTE);
             var order = (int?)orderAttribute?.ConstructorArguments.First().Value;
@@ -97,8 +120,12 @@ public class PacketTypeInfo
             var arrayLength = !isArray
                 ? null
                 : (int?)fixedSizeArrayAttribute?.ConstructorArguments.First().Value;
+            var stringLength = (int?)fixedSizeStringAttribute?.ConstructorArguments.First().Value;
             var isCustomType = IsCustomType(field.Type);
             var isEnum = field.Type.BaseType.GetFullName() == typeof(Enum).FullName;
+            var elementSize = field.Type.GetFullName() == typeof(string).FullName && stringLength is not null
+                ? stringLength.Value
+                : GetStaticSize(field.Type);
             var info = new PacketFieldInfo
             {
                 Name = field.Name,
@@ -108,7 +135,7 @@ public class PacketTypeInfo
                 IsCustom = isCustomType,
                 TypeFullName = isArray ? "System.Array" : field.Type.GetFullName()!,
                 IsEnum = isEnum,
-                ElementSize = GetStaticSize(field.Type),
+                ElementSize = elementSize,
                 IsReadonly = field.IsReadOnly,
                 IsRecordParameter = false
             };

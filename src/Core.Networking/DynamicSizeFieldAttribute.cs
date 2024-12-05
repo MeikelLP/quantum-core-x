@@ -13,6 +13,16 @@ public class FixedSizeArrayAttribute : Attribute
         Length = length;
     }
 }
+[AttributeUsage(AttributeTargets.Field)]
+public class FixedSizeStringAttribute : Attribute
+{
+    public int Length { get; }
+
+    public FixedSizeStringAttribute(int length)
+    {
+        Length = length;
+    }
+}
 
 [AttributeUsage(AttributeTargets.Field)]
 public class FieldOrderAttribute : Attribute

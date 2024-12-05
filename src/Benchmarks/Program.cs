@@ -58,44 +58,6 @@ public static class Helpers
     }
 }
 
-public class PacketCharacterInfoClass
-{
-    private static readonly BinarySerializer bs = new BinarySerializer();
-
-    [FieldOrder(0)] public uint Vid;
-
-    [FieldLength(PlayerConstants.PLAYER_NAME_MAX_LENGTH)] [FieldOrder(1)]
-    public string Name;
-
-    [FieldOrder(2)] [FieldLength(4)] public ushort[] Parts;
-    [FieldOrder(3)] public byte Empire;
-    [FieldOrder(4)] public uint GuildId;
-    [FieldOrder(5)] public uint Level;
-    [FieldOrder(6)] public short RankPoints;
-    [FieldOrder(7)] public byte PkMode;
-    [FieldOrder(8)] public uint MountVnum;
-
-    public static PacketCharacterInfo Read_BinarySerializer(Stream stream)
-    {
-        return bs.Deserialize<PacketCharacterInfo>(stream);
-    }
-
-    public static Task<PacketCharacterInfo> Read_BinarySerializerAsync(Stream stream)
-    {
-        return bs.DeserializeAsync<PacketCharacterInfo>(stream);
-    }
-
-    public void Write_BinarySerializer(Stream stream)
-    {
-        bs.Serialize(stream, this);
-    }
-
-    public Task Write_BinarySerializerAsync(Stream stream)
-    {
-        return bs.SerializeAsync(stream, this);
-    }
-}
-
 public struct PacketCharacterInfo
 {
     private static readonly BinarySerializer bs = new BinarySerializer();
@@ -256,9 +218,6 @@ public class NetworkBenchmarks
     private readonly PacketCharacterInfo _newPacket =
         new PacketCharacterInfo {Vid = 1234, Name = "Meikel", Parts = [1234, 1234, 1234, 1234]};
 
-    private readonly PacketCharacterInfoClass _newPacketClass =
-        new PacketCharacterInfoClass {Vid = 1234, Name = "Meikel", Parts = [1234, 1234, 1234, 1234]};
-
     private readonly byte[] _buffer = new byte[4096];
 
     public NetworkBenchmarks()
@@ -298,20 +257,6 @@ public class NetworkBenchmarks
         _ms.Position = 0;
     }
 
-    [BenchmarkCategory("ClientToServer"), Benchmark]
-    public void ClientToServer_BinarySerializer()
-    {
-        _ = PacketCharacterInfoClass.Read_BinarySerializer(_ms);
-        _ms.Position = 0;
-    }
-
-    [BenchmarkCategory("ClientToServer"), Benchmark]
-    public async Task ClientToServer_BinarySerializerAsync()
-    {
-        _ = await PacketCharacterInfoClass.Read_BinarySerializerAsync(_ms);
-        _ms.Position = 0;
-    }
-
     [BenchmarkCategory("ServerToClient"), Benchmark(Baseline = true)]
     public void ServerToClient_Old()
     {
@@ -330,20 +275,6 @@ public class NetworkBenchmarks
     public void ServerToClient_NewBinary()
     {
         _newPacket.Write(_bw);
-        _ms.Position = 0;
-    }
-
-    [BenchmarkCategory("ServerToClient"), Benchmark]
-    public void ServerToClient_BinarySerializer()
-    {
-        _newPacketClass.Write_BinarySerializer(_ms);
-        _ms.Position = 0;
-    }
-
-    [BenchmarkCategory("ServerToClient"), Benchmark]
-    public async Task ServerToClient_BinarySerializerAsync()
-    {
-        await _newPacketClass.Write_BinarySerializerAsync(_ms);
         _ms.Position = 0;
     }
 }
