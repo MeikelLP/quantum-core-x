@@ -4,7 +4,7 @@ namespace QuantumCore.Game.Extensions;
 
 public static class ConfigurationExtensions
 {
-    public static void AddQuantumCoreDefaults(this IConfigurationBuilder config)
+    public static IConfigurationBuilder AddQuantumCoreDefaults(this IConfigurationBuilder config)
     {
         // Empire Start Locations
         config.AddInMemoryCollection(new Dictionary<string, string?>
@@ -34,7 +34,6 @@ public static class ConfigurationExtensions
             {"job:0:SpPerIq", "20"},
             {"job:0:HpPerLevel", "36"},
             {"job:0:SpPerLevel", "44"},
-
             {"job:1:Id", "1"},
             {"job:1:Name", "assassin"},
             {"job:1:St", "4"},
@@ -47,7 +46,6 @@ public static class ConfigurationExtensions
             {"job:1:SpPerIq", "20"},
             {"job:1:HpPerLevel", "36"},
             {"job:1:SpPerLevel", "44"},
-
             {"job:2:Id", "2"},
             {"job:2:Name", "sura"},
             {"job:2:St", "5"},
@@ -60,7 +58,6 @@ public static class ConfigurationExtensions
             {"job:2:SpPerIq", "20"},
             {"job:2:HpPerLevel", "36"},
             {"job:2:SpPerLevel", "44"},
-
             {"job:3:Id", "3"},
             {"job:3:Name", "shamana"},
             {"job:3:St", "3"},
@@ -73,7 +70,6 @@ public static class ConfigurationExtensions
             {"job:3:SpPerIq", "20"},
             {"job:3:HpPerLevel", "36"},
             {"job:3:SpPerLevel", "44"},
-
             {"job:4:Id", "4"},
             {"job:4:Name", "warrior"},
             {"job:4:St", "6"},
@@ -86,7 +82,6 @@ public static class ConfigurationExtensions
             {"job:4:SpPerIq", "20"},
             {"job:4:HpPerLevel", "36"},
             {"job:4:SpPerLevel", "44"},
-
             {"job:5:Id", "5"},
             {"job:5:Name", "assassin"},
             {"job:5:St", "4"},
@@ -99,7 +94,6 @@ public static class ConfigurationExtensions
             {"job:5:SpPerIq", "20"},
             {"job:5:HpPerLevel", "36"},
             {"job:5:SpPerLevel", "44"},
-
             {"job:6:Id", "6"},
             {"job:6:Name", "sura"},
             {"job:6:St", "5"},
@@ -112,7 +106,6 @@ public static class ConfigurationExtensions
             {"job:6:SpPerIq", "20"},
             {"job:6:HpPerLevel", "36"},
             {"job:6:SpPerLevel", "44"},
-
             {"job:7:Id", "7"},
             {"job:7:Name", "shamana"},
             {"job:7:St", "3"},
@@ -298,5 +291,7 @@ public static class ConfigurationExtensions
             {"game:drops:spiritstones:12", "28042"},
             {"game:drops:spiritstones:13", "28043"},
         });
+
+        return config;
     }
 }

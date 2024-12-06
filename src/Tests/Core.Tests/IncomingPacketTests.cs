@@ -43,11 +43,7 @@ public class IncomingPacketTests
     public void Attack()
     {
         var expected = new AutoFaker<Attack>()
-            .RuleFor(x => x.Unknown, faker => new[]
-            {
-                faker.Random.Byte(),
-                faker.Random.Byte()
-            })
+            .RuleFor(x => x.Unknown, faker => new[] {faker.Random.Byte(), faker.Random.Byte()})
             .Generate();
         var bytes = Array.Empty<byte>()
             .Append(expected.AttackType)
@@ -65,11 +61,11 @@ public class IncomingPacketTests
     {
         var expected = new AutoFaker<ChatIncoming>().Generate();
         var bytes = Array.Empty<byte>()
-            .Concat(BitConverter.GetBytes((ushort) (expected.Size + 1 +
-                                                    3))) // size includes all package size + 0 terminating byte at end of string
-            .Append((byte) expected.MessageType)
+            .Concat(BitConverter.GetBytes((ushort)(expected.Size + 1 +
+                                                   3))) // size includes all package size + 0 terminating byte at end of string
+            .Append((byte)expected.MessageType)
             .Concat(Encoding.ASCII.GetBytes(expected.Message))
-            .Append((byte) 0) // null byte for end of message
+            .Append((byte)0) // null byte for end of message
             .ToArray();
 
         var result = _serializer.Deserialize<ChatIncoming>(bytes);
@@ -84,13 +80,8 @@ public class IncomingPacketTests
     {
         var expected = new AutoFaker<CreateCharacter>()
             .RuleFor(x => x.Name, faker => faker.Lorem.Letter(25))
-            .RuleFor(x => x.Unknown, faker => new[]
-            {
-                faker.Random.Byte(),
-                faker.Random.Byte(),
-                faker.Random.Byte(),
-                faker.Random.Byte()
-            })
+            .RuleFor(x => x.Unknown,
+                faker => new[] {faker.Random.Byte(), faker.Random.Byte(), faker.Random.Byte(), faker.Random.Byte()})
             .Generate();
         var bytes = Array.Empty<byte>()
             .Append(expected.Slot)
@@ -286,7 +277,7 @@ public class IncomingPacketTests
     {
         // var expected = new AutoFaker<ShopClose>().Generate();
         var bytes = Array.Empty<byte>()
-            .Append((byte) 0x00)
+            .Append((byte)0x00)
             .ToArray();
         var result = _serializer.Deserialize<ShopClose>(bytes);
 
@@ -354,7 +345,7 @@ public class IncomingPacketTests
     {
         var expected = new AutoFaker<Empire>().Generate();
         var bytes = Array.Empty<byte>()
-            .Append(expected.EmpireId)
+            .Append((byte)expected.EmpireId)
             .ToArray();
         var result = _serializer.Deserialize<Empire>(bytes);
 
@@ -366,13 +357,8 @@ public class IncomingPacketTests
     {
         var expected = new AutoFaker<TokenLogin>()
             .RuleFor(x => x.Username, faker => faker.Lorem.Letter(31))
-            .RuleFor(x => x.Xteakeys, faker => new[]
-            {
-                faker.Random.UInt(),
-                faker.Random.UInt(),
-                faker.Random.UInt(),
-                faker.Random.UInt()
-            })
+            .RuleFor(x => x.Xteakeys,
+                faker => new[] {faker.Random.UInt(), faker.Random.UInt(), faker.Random.UInt(), faker.Random.UInt()})
             .Generate();
         var bytes = Array.Empty<byte>()
             .Concat(Encoding.ASCII.GetBytes(expected.Username))

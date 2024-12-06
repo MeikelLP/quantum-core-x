@@ -43,8 +43,8 @@ namespace QuantumCore.Game.Commands
                 // todo read goto position from map instead of using center
 
                 var targetMap = maps[0];
-                var x = (int) (targetMap.PositionX + targetMap.Width * Map.MapUnit / 2);
-                var y = (int) (targetMap.PositionY + targetMap.Height * Map.MapUnit / 2);
+                var x = (int)(targetMap.Position.X + targetMap.Width * Map.MapUnit / 2);
+                var y = (int)(targetMap.Position.Y + targetMap.Height * Map.MapUnit / 2);
                 context.Player.Move(x, y);
             }
             else
@@ -60,8 +60,8 @@ namespace QuantumCore.Game.Commands
                     context.Player.SendChatInfo("The X and Y position must be positive");
                 else
                 {
-                    var x = (int) context.Player.Map.PositionX + (context.Arguments.X * 100);
-                    var y = (int) context.Player.Map.PositionY + (context.Arguments.Y * 100);
+                    var x = (int)context.Player.Map.Position.X + (context.Arguments.X * 100);
+                    var y = (int)context.Player.Map.Position.Y + (context.Arguments.Y * 100);
                     context.Player.Move(x, y);
                 }
             }

@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using QuantumCore.API;
 using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game.World;
 
@@ -7,24 +8,23 @@ namespace QuantumCore.Game.World;
 public class RemoteMap : IMap
 {
     public string Name { get; }
-    public uint PositionX { get; }
-    public uint UnitX => PositionX / Map.MapUnit;
-    public uint PositionY { get; }
-    public uint UnitY => PositionY / Map.MapUnit;
+    public uint UnitX => Position.X / Map.MapUnit;
+    public Coordinates Position { get; }
+    public uint UnitY => Position.Y / Map.MapUnit;
     public uint Width { get; }
     public uint Height { get; }
     public IWorld World { get; }
     public IReadOnlyCollection<IEntity> Entities => throw new NotImplementedException();
+    public TownCoordinates? TownCoordinates => throw new NotImplementedException();
 
     public IPAddress? Host { get; set; }
     public ushort Port { get; set; }
 
-    public RemoteMap(IWorld world, string name, uint x, uint y, uint width, uint height)
+    public RemoteMap(IWorld world, string name, Coordinates position, uint width, uint height)
     {
         World = world;
         Name = name;
-        PositionX = x;
-        PositionY = y;
+        Position = position;
         Width = width;
         Height = height;
     }
@@ -51,8 +51,8 @@ public class RemoteMap : IMap
 
     public bool IsPositionInside(int x, int y)
     {
-        return x >= PositionX && x < PositionX + Width * Map.MapUnit && y >= PositionY &&
-               y < PositionY + Height * Map.MapUnit;
+        return x >= Position.X && x < Position.X + Width * Map.MapUnit && y >= Position.Y &&
+               y < Position.Y + Height * Map.MapUnit;
     }
 
     public void Update(double elapsedTime)

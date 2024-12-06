@@ -1,4 +1,5 @@
-﻿using Game.Caching;
+﻿using EnumsNET;
+using Game.Caching;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.PluginTypes;
@@ -25,7 +26,7 @@ public class EmpireHandler : IGamePacketHandler<Empire>
 
     public async Task ExecuteAsync(GamePacketContext<Empire> ctx, CancellationToken token = default)
     {
-        if (ctx.Packet.EmpireId is > 0 and < 4)
+        if (ctx.Packet.EmpireId.IsDefined())
         {
             _logger.LogInformation("Empire selected: {Empire}", ctx.Packet.EmpireId);
             var cacheKey = $"account:{ctx.Connection.AccountId}:game:select:selected-player";

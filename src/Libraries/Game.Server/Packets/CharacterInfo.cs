@@ -1,4 +1,5 @@
-﻿using QuantumCore.Networking;
+﻿using QuantumCore.API.Game.Types;
+using QuantumCore.Networking;
 
 namespace QuantumCore.Game.Packets
 {
@@ -12,7 +13,7 @@ namespace QuantumCore.Game.Packets
         public string Name { get; set; } = "";
 
         [Field(2, ArrayLength = 4)] public ushort[] Parts { get; set; } = new ushort[4];
-        [Field(3)] public byte Empire { get; set; }
+        [Field(3)] public EEmpire Empire { get; set; }
         [Field(4)] public uint GuildId { get; set; }
         [Field(5)] public uint Level { get; set; }
         [Field(6)] public short RankPoints { get; set; }

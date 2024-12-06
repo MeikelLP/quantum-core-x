@@ -8,6 +8,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using QuantumCore;
 using QuantumCore.API.Core.Models;
+using QuantumCore.API.Game.Types;
 using QuantumCore.Caching;
 using QuantumCore.Game;
 using QuantumCore.Game.Extensions;
@@ -80,25 +81,26 @@ public class PlayerManagerTests : IClassFixture<RedisFixture>, IClassFixture<Dat
     }
 
     [Theory]
-    [InlineData(1)]
-    [InlineData(2)]
-    [InlineData(3)]
-    public async Task CreateCharacter(byte empire)
+    [InlineData(EEmpire.Shinsoo)]
+    [InlineData(EEmpire.Chunjo)]
+    [InlineData(EEmpire.Jinno)]
+    public async Task CreateCharacter(EEmpire empire)
     {
         var accountId = Guid.NewGuid();
         await _cachePlayer.SetTempEmpireAsync(accountId, empire);
         var player = await _playerManager.CreateAsync(accountId, "Testificate", 0, 1);
 
-        player.Should().BeEquivalentTo(new PlayerData
-        {
-            AccountId = accountId,
-            Name = "Testificate",
-            PlayerClass = 0,
-            Empire = empire,
-            Ht = 4,
-            PositionX = _gameOptions.Empire[empire].X,
-            PositionY = _gameOptions.Empire[empire].Y
-        }, cfg => cfg.Excluding(x => x.Id));
+        player.Should().BeEquivalentTo(
+            new PlayerData
+            {
+                AccountId = accountId,
+                Name = "Testificate",
+                PlayerClass = 0,
+                Empire = empire,
+                Ht = 4,
+                PositionX = (int)_gameOptions.Empire[empire].X,
+                PositionY = (int)_gameOptions.Empire[empire].Y
+            }, cfg => cfg.Excluding(x => x.Id));
         player.Id.Should().NotBe(0);
 
         var dbPlayer = await _dbPlayerRepository.GetPlayerAsync(player.Id);
@@ -117,7 +119,7 @@ public class PlayerManagerTests : IClassFixture<RedisFixture>, IClassFixture<Dat
     public async Task IsNameInUseOtherAccount()
     {
         var accountId = Guid.NewGuid();
-        await _cachePlayer.SetTempEmpireAsync(accountId, 2);
+        await _cachePlayer.SetTempEmpireAsync(accountId, EEmpire.Chunjo);
         await _playerManager.CreateAsync(accountId, "Testificate", 0, 1);
 
         var resultCaseSensitive = await _playerManager.IsNameInUseAsync("Testificate");
@@ -130,12 +132,8 @@ public class PlayerManagerTests : IClassFixture<RedisFixture>, IClassFixture<Dat
     [Fact]
     public async Task GetPlayerById()
     {
-        var playerId = (uint) Random.Shared.Next();
-        var input = new PlayerData
-        {
-            Id = playerId,
-            Name = "1234"
-        };
+        var playerId = (uint)Random.Shared.Next();
+        var input = new PlayerData {Id = playerId, Name = "1234"};
         await _cacheManager.Server.Set($"player:{playerId}", input);
 
         var output = await _playerManager.GetPlayer(playerId);
@@ -146,12 +144,10 @@ public class PlayerManagerTests : IClassFixture<RedisFixture>, IClassFixture<Dat
     [Fact]
     public async Task GetPlayer_OnlyInDb_CreatesCache()
     {
-        var playerId = (uint) Random.Shared.Next();
+        var playerId = (uint)Random.Shared.Next();
         await _dbPlayerRepository.CreateAsync(new PlayerData
         {
-            Id = playerId,
-            Name = "1234",
-            AccountId = new Guid("AB79A4E3-21E3-4A7A-AB84-C9A94C3DC041")
+            Id = playerId, Name = "1234", AccountId = new Guid("AB79A4E3-21E3-4A7A-AB84-C9A94C3DC041")
         });
         var player = await _playerManager.GetPlayer(playerId);
 
@@ -164,14 +160,14 @@ public class PlayerManagerTests : IClassFixture<RedisFixture>, IClassFixture<Dat
     [Fact]
     public async Task GetPlayerByAccountIdAndSlot()
     {
-        byte empire = 3;
+        var empire = EEmpire.Jinno;
         var accountId = Guid.NewGuid();
         var input1 = new PlayerData
         {
             Name = "1234",
             AccountId = accountId,
-            PositionX = _gameOptions.Empire[empire].X,
-            PositionY = _gameOptions.Empire[empire].Y,
+            PositionX = (int)_gameOptions.Empire[empire].X,
+            PositionY = (int)_gameOptions.Empire[empire].Y,
             Ht = 4,
             Empire = empire
         };
@@ -179,8 +175,8 @@ public class PlayerManagerTests : IClassFixture<RedisFixture>, IClassFixture<Dat
         {
             Name = "12345",
             AccountId = accountId,
-            PositionX = _gameOptions.Empire[empire].X,
-            PositionY = _gameOptions.Empire[empire].Y,
+            PositionX = (int)_gameOptions.Empire[empire].X,
+            PositionY = (int)_gameOptions.Empire[empire].Y,
             Ht = 4,
             Empire = empire,
             Slot = 1
@@ -201,14 +197,9 @@ public class PlayerManagerTests : IClassFixture<RedisFixture>, IClassFixture<Dat
     [Fact]
     public async Task GetPlayerByAccountIdAndSlot_OnlyInDb_CreatesCache()
     {
-        var playerId = (uint) Random.Shared.Next();
+        var playerId = (uint)Random.Shared.Next();
         var accountId = Guid.NewGuid();
-        await _dbPlayerRepository.CreateAsync(new PlayerData
-        {
-            AccountId = accountId,
-            Id = playerId,
-            Name = "1234"
-        });
+        await _dbPlayerRepository.CreateAsync(new PlayerData {AccountId = accountId, Id = playerId, Name = "1234"});
         var player = await _playerManager.GetPlayer(accountId, 0);
 
         player.Should().NotBeNull();
@@ -222,7 +213,7 @@ public class PlayerManagerTests : IClassFixture<RedisFixture>, IClassFixture<Dat
     [Fact]
     public async Task GetPlayerById_NotFound()
     {
-        var output = await _playerManager.GetPlayer((uint) Random.Shared.Next());
+        var output = await _playerManager.GetPlayer((uint)Random.Shared.Next());
 
         output.Should().BeNull();
     }
@@ -239,7 +230,7 @@ public class PlayerManagerTests : IClassFixture<RedisFixture>, IClassFixture<Dat
     public async Task DeleteCharacter()
     {
         var accountId = Guid.NewGuid();
-        await _cachePlayer.SetTempEmpireAsync(accountId, 2);
+        await _cachePlayer.SetTempEmpireAsync(accountId, EEmpire.Chunjo);
         var player = await _playerManager.CreateAsync(accountId, "Testificate", 0, 1);
         await _playerManager.DeletePlayerAsync(player);
 

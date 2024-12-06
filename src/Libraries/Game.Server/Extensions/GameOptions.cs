@@ -1,4 +1,5 @@
-﻿using System.Drawing;
+﻿using QuantumCore.API;
+using QuantumCore.API.Game.Types;
 using QuantumCore.Game.Drops;
 
 namespace QuantumCore.Game.Extensions;
@@ -14,7 +15,7 @@ public class GameOptions
     /// Contains the starting locations for each empire.
     /// <remarks>Index 0 will always contain a invalid empire coordinates</remarks>
     /// </summary>
-    public IReadOnlyList<Point> Empire { get; set; } = new List<Point>();
+    public Dictionary<EEmpire, Coordinates> Empire { get; set; } = new();
 
     public SkillsOptions Skills { get; set; } = new SkillsOptions();
 

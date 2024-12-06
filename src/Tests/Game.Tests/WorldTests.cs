@@ -27,10 +27,7 @@ public class WorldTests
     public WorldTests()
     {
         var config = new ConfigurationBuilder()
-            .AddInMemoryCollection(new Dictionary<string, string?>
-            {
-                {"Hosting:IpAddress", "0.0.0.0"}
-            })
+            .AddInMemoryCollection(new Dictionary<string, string?> {{"Hosting:IpAddress", "0.0.0.0"}})
             .Build();
         var services = new ServiceCollection()
             .AddLogging()
@@ -57,7 +54,7 @@ public class WorldTests
                         provider.GetRequiredService<IDropProvider>(),
                         provider.GetRequiredService<IItemManager>(),
                         provider.GetRequiredService<IServerBase>(),
-                        "test_map", 0, 0, 1024, 1024)
+                        "test_map", new Coordinates(), 1024, 1024, null)
                 });
                 return mock;
             }, ServiceLifetime.Singleton))
@@ -98,15 +95,9 @@ public class WorldTests
             .Replace(new ServiceDescriptor(typeof(IMonsterManager), _ =>
             {
                 var mock = Substitute.For<IMonsterManager>();
-                mock.GetMonster(42).Returns(new MonsterData
-                {
-                    Type = (byte) EEntityType.Monster
-                });
+                mock.GetMonster(42).Returns(new MonsterData {Type = (byte)EEntityType.Monster});
                 mock.GetMonsters().Returns([
-                    new MonsterData
-                    {
-                        Type = (byte) EEntityType.Monster
-                    }
+                    new MonsterData {Type = (byte)EEntityType.Monster}
                 ]);
                 return mock;
             }, ServiceLifetime.Singleton))
@@ -118,13 +109,7 @@ public class WorldTests
         _world.InitAsync().Wait();
 
         var conn = Substitute.For<IGameConnection>();
-        var playerData = new PlayerData
-        {
-            Name = "TestPlayer",
-            PlayerClass = 1,
-            PositionX = 1,
-            PositionY = 1
-        };
+        var playerData = new PlayerData {Name = "TestPlayer", PlayerClass = 1, PositionX = 1, PositionY = 1};
         _playerEntity = ActivatorUtilities.CreateInstance<PlayerEntity>(services, _world, playerData, conn);
         _world.SpawnEntity(_playerEntity);
         _world.Update(0.2); // spawn all entities

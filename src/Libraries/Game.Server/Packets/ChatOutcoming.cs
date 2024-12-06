@@ -1,4 +1,5 @@
-﻿using QuantumCore.Networking;
+﻿using QuantumCore.API.Game.Types;
+using QuantumCore.Networking;
 
 namespace QuantumCore.Game.Packets;
 
@@ -6,13 +7,13 @@ namespace QuantumCore.Game.Packets;
 [PacketGenerator]
 public partial class ChatOutcoming
 {
-    [Field(0)] public ushort Size => (ushort) Message.Length;
+    [Field(0)] public ushort Size => (ushort)Message.Length;
 
     [Field(1)] public ChatMessageTypes MessageType { get; set; }
 
     [Field(2)] public uint Vid { get; set; }
 
-    [Field(3)] public byte Empire { get; set; }
+    [Field(3)] public EEmpire Empire { get; set; }
 
     public string Message { get; set; } = "";
 
