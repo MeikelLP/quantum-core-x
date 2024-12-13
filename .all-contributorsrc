@@ -60,6 +60,15 @@
       "contributions": [
         "code"
       ]
+    },
+    {
+      "login": "Arichikurumo",
+      "name": "Arichikurumo",
+      "avatar_url": "https://avatars.githubusercontent.com/u/59138066?v=4",
+      "profile": "https://brixxhub.com/",
+      "contributions": [
+        "test"
+      ]
     }
   ],
   "badgeTemplate": "[![All Contributors](https://img.shields.io/github/contributors/meikellp/quantum-core-x)](#contributors)",

@@ -1,36 +1,42 @@
 ﻿# User Guide
 
+> :warning: This setup is currently only designed for testing!
+
 In this guide a _User_ refers to someone who wants to host/administrate QCX.
 
 ## Prerequisites
 
-* Docker (or any OCI compliant alternative with docker compose feature)
 * A TMP4 compatible client (just google for "TMP4 Client")
+* A Quantum Core X executable:
+    * [Build it yourself](./developer.md)
+    * [Github Releases](https://github.com/MeikelLP/quantum-core-x/releases) (stable) - available from 0.1 forward
+    * Directly from
+      the [build pipelines](https://nightly.link/MeikelLP/quantum-core-x/workflows/dotnet-pipeline/master) (unstable).
 
 ## Quickstart
 
-1. Get the files from the sample in the [sample folder](https://github.com/MeikelLP/quantum-core-x/tree/master/docs/samples/full-setup)
-
-2. execute the `Eternexus\--dump_proto--\dump_proto.exe` in the client's directory. This should create two files:
+1. execute the `Eternexus\--dump_proto--\dump_proto.exe` in the (TMP4) client's directory. This should create two files
+   directly next to the `dump_proto.exe`:
 
     * `item_proto`
     * `mob_proto`
 
-3. Your folder should look like this now:
+   Put these files into the data folder
+
+2. Your folder should look like this now:
   
     ```txt
-    auth.appsettings.json
-    docker-compose.yml
-    game.appsettings.json
+    appsettings.json
+    QuantumCore.Single.exe
     data/
-      atlasinfo.txt
-      exp.csv
       item_proto
-      jobs.json
       mob_proto
+    [...some other files]
     ```
 
 ### Setup client
+
+> Note that the ports differ in the Single setup than in the docker setup
 
 Replace the contents of the `serverinfo.py` from your client with this:
 
@@ -38,8 +44,8 @@ Replace the contents of the `serverinfo.py` from your client with this:
 SERVER_NAME			= "QuantumCoreX"
 SERVER_IP			= "localhost"
 CH1_NAME			= "CH1"
-PORT_1				= 13000
-PORT_AUTH			= 11000
+PORT_1				= 13001
+PORT_AUTH			= 11002
 PORT_MARK			= 13000
 
 STATE_NONE = "..."
@@ -82,18 +88,25 @@ For more information see [Client](client.md)
 ### Startup
 
 ```sh
-docker-compose up -d
+./QuantumCore.Single.exe
 ```
 
-You can now connect to the game & auth server. A default admin user will be created for you:
+Once you see
+
+```
+Start listening for connections on 127.0.0.1:13001 (game) 
+Start listening for connections on 127.0.0.1:11002 (auth) 
+Start listening for connections... 
+```
+
+you can connect to the game & auth server. A default admin user will be created for you:
 
 ```txt
 username: admin
 password: admin
 ```
 
-> :warning: Be sure to change these credentials as soon as you go production!
-
 ## Next steps
 
-* [Add player permissions](../Guides/player-permission.md)
+By default, the server will start fine but many configurations may be missing. Please add them to add additional
+features / data: [Configurations](../Configuration/index.md)
