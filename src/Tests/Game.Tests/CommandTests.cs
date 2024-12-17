@@ -3,7 +3,6 @@ using Bogus;
 using FluentAssertions;
 using FluentAssertions.Equivalency;
 using Game.Tests.Extensions;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -179,7 +178,7 @@ public class CommandTests : IAsyncLifetime
                 .AddInMemoryCollection(new Dictionary<string, string?>
                 {
                     {"Database:Provider", "sqlite"},
-                    {"Database:ConnectionString", "Data Source=test.db"},
+                    {"Database:ConnectionString", "Data Source=commands.db"},
                     {"Game:Commands:StrictMode", "true"},
                     {"maps:0", "map_a2"},
                     {"maps:1", "map_b2"},
@@ -220,7 +219,7 @@ public class CommandTests : IAsyncLifetime
     public async Task InitializeAsync()
     {
         await _db.Database.EnsureDeletedAsync();
-        await _db.Database.MigrateAsync();
+        await _db.Database.EnsureCreatedAsync();
         await _player.Load();
     }
 
