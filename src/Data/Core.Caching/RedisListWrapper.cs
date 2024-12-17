@@ -23,4 +23,5 @@ public class RedisListWrapper<T> : IRedisListWrapper<T>
     public ValueTask<long> Push(params T[] arr) => _list.Push(arr);
 
     public ValueTask<long> Rem(int count, T obj) => _list.Rem(count, obj);
+    public ValueTask<long> Len() => _list.Len();
 }

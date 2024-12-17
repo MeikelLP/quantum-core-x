@@ -17,7 +17,7 @@ namespace QuantumCore.Game.Persistence.Migrations.Mysql
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.8")
+                .HasAnnotation("ProductVersion", "8.0.11")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
@@ -468,6 +468,25 @@ namespace QuantumCore.Game.Persistence.Migrations.Mysql
                         });
                 });
 
+            modelBuilder.Entity("QuantumCore.Game.Persistence.Entities.PlayerQuickSlot", b =>
+                {
+                    b.Property<uint>("PlayerId")
+                        .HasColumnType("int unsigned");
+
+                    b.Property<byte>("Slot")
+                        .HasColumnType("tinyint unsigned");
+
+                    b.Property<byte>("Type")
+                        .HasColumnType("tinyint unsigned");
+
+                    b.Property<uint>("Value")
+                        .HasColumnType("int unsigned");
+
+                    b.HasKey("PlayerId", "Slot");
+
+                    b.ToTable("PlayerQuickSlots");
+                });
+
             modelBuilder.Entity("QuantumCore.Game.Persistence.Entities.PlayerSkill", b =>
                 {
                     b.Property<Guid>("Id")
@@ -624,6 +643,17 @@ namespace QuantumCore.Game.Persistence.Migrations.Mysql
                     b.Navigation("Guild");
                 });
 
+            modelBuilder.Entity("QuantumCore.Game.Persistence.Entities.PlayerQuickSlot", b =>
+                {
+                    b.HasOne("QuantumCore.Game.Persistence.Entities.Player", "Player")
+                        .WithMany("QuickSlots")
+                        .HasForeignKey("PlayerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Player");
+                });
+
             modelBuilder.Entity("QuantumCore.Game.Persistence.Entities.Guilds.Guild", b =>
                 {
                     b.Navigation("Members");
@@ -650,6 +680,8 @@ namespace QuantumCore.Game.Persistence.Migrations.Mysql
                     b.Navigation("GuildsToLead");
 
                     b.Navigation("Members");
+
+                    b.Navigation("QuickSlots");
 
                     b.Navigation("WrittenGuildNews");
                 });

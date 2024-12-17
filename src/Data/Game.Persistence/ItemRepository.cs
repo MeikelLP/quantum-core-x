@@ -56,20 +56,35 @@ public class ItemRepository : IItemRepository
 
     public async Task SaveItemAsync(ItemInstance item)
     {
-        _db.Items.Add(new Item
+        if (item.Id != Guid.Empty)
         {
-            Id = Guid.NewGuid(),
-            PlayerId = item.PlayerId,
-            ItemId = item.ItemId,
-            Window = item.Window,
-            Position = item.Position,
-            Count = item.Count,
-            CreatedAt = DateTime.UtcNow,
-            UpdatedAt = DateTime.UtcNow,
-        });
-        await _db.SaveChangesAsync();
+            await _db.Items.Where(x => x.Id == item.Id)
+                .ExecuteUpdateAsync(p => p
+                    .SetProperty(x => x.PlayerId, x => item.PlayerId)
+                    .SetProperty(x => x.Count, x => item.Count)
+                    .SetProperty(x => x.Window, x => item.Window)
+                    .SetProperty(x => x.Position, x => item.Position)
+                );
+        }
+        else
+        {
+            var dbItem = new Item
+            {
+                Id = Guid.NewGuid(),
+                PlayerId = item.PlayerId,
+                ItemId = item.ItemId,
+                Window = item.Window,
+                Position = item.Position,
+                Count = item.Count,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow,
+            };
+            _db.Items.Add(dbItem);
+            await _db.SaveChangesAsync();
+            item.Id = dbItem.Id;
+        }
 
-        string key = $"item:{item.Id}";
+        var key = $"item:{item.Id}";
         await _cacheManager.Set(key, item);
     }
 }

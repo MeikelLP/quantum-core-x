@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using QuantumCore.Game.Persistence;
 
@@ -10,9 +11,11 @@ using QuantumCore.Game.Persistence;
 namespace QuantumCore.Game.Persistence.Migrations.Sqlite
 {
     [DbContext(typeof(SqliteGameDbContext))]
-    partial class SqliteGameDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241217145900_AddPlayerQuickslots")]
+    partial class AddPlayerQuickslots
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.11");

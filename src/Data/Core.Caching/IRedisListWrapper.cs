@@ -1,6 +1,11 @@
 ﻿namespace QuantumCore.Caching;
 
-public interface IRedisListWrapper<T>
+public interface IRedisListWrapper
+{
+    ValueTask<long> Len();
+}
+
+public interface IRedisListWrapper<T> : IRedisListWrapper
 {
     ValueTask<T> Index(int slot);
     ValueTask<T[]> Range(int start, int stop);

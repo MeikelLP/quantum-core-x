@@ -17,7 +17,7 @@ namespace QuantumCore.Game.Persistence.Migrations.Postgresql
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.8")
+                .HasAnnotation("ProductVersion", "8.0.11")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -471,6 +471,25 @@ namespace QuantumCore.Game.Persistence.Migrations.Postgresql
                         });
                 });
 
+            modelBuilder.Entity("QuantumCore.Game.Persistence.Entities.PlayerQuickSlot", b =>
+                {
+                    b.Property<long>("PlayerId")
+                        .HasColumnType("bigint");
+
+                    b.Property<byte>("Slot")
+                        .HasColumnType("smallint");
+
+                    b.Property<byte>("Type")
+                        .HasColumnType("smallint");
+
+                    b.Property<long>("Value")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("PlayerId", "Slot");
+
+                    b.ToTable("PlayerQuickSlots");
+                });
+
             modelBuilder.Entity("QuantumCore.Game.Persistence.Entities.PlayerSkill", b =>
                 {
                     b.Property<Guid>("Id")
@@ -627,6 +646,17 @@ namespace QuantumCore.Game.Persistence.Migrations.Postgresql
                     b.Navigation("Guild");
                 });
 
+            modelBuilder.Entity("QuantumCore.Game.Persistence.Entities.PlayerQuickSlot", b =>
+                {
+                    b.HasOne("QuantumCore.Game.Persistence.Entities.Player", "Player")
+                        .WithMany("QuickSlots")
+                        .HasForeignKey("PlayerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Player");
+                });
+
             modelBuilder.Entity("QuantumCore.Game.Persistence.Entities.Guilds.Guild", b =>
                 {
                     b.Navigation("Members");
@@ -653,6 +683,8 @@ namespace QuantumCore.Game.Persistence.Migrations.Postgresql
                     b.Navigation("GuildsToLead");
 
                     b.Navigation("Members");
+
+                    b.Navigation("QuickSlots");
 
                     b.Navigation("WrittenGuildNews");
                 });

@@ -16,11 +16,8 @@ public class QuickBarAddHandler : IGamePacketHandler<QuickBarAdd>
             return Task.CompletedTask;
         }
 
-        player.QuickSlotBar.Add(ctx.Packet.Position, new QuickSlotData
-        {
-            Position = ctx.Packet.Slot.Position,
-            Type = ctx.Packet.Slot.Position
-        });
+        player.QuickSlotBar.Add(ctx.Packet.Position,
+            new QuickSlotData {Position = ctx.Packet.Slot.Position, Type = ctx.Packet.Slot.Type});
         return Task.CompletedTask;
     }
 }

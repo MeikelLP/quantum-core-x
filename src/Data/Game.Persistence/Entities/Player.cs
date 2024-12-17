@@ -47,6 +47,7 @@ public class Player
 
     public ICollection<GuildMember> Members { get; set; } = null!;
     public ICollection<GuildNews> WrittenGuildNews { get; set; } = null!;
+    public ICollection<PlayerQuickSlot> QuickSlots { get; set; } = null!;
 
     public static void Configure(EntityTypeBuilder<Player> builder, DatabaseFacade database)
     {
