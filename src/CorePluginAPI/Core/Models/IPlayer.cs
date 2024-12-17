@@ -5,7 +5,7 @@ public class PlayerData
     public uint Id { get; set; }
     public Guid AccountId { get; set; }
     public string Name { get; set; } = "";
-    public byte PlayerClass { get; set; }
+    public EPlayerClassGendered PlayerClass { get; set; }
     public byte SkillGroup { get; set; }
     public ulong PlayTime { get; set; }
     public byte Level { get; set; } = 1;

@@ -35,7 +35,7 @@ public class OutgoingPacketTests
     [Fact]
     public void NullReturnsArrayWithDefaultValues()
     {
-        Assert.Throws<NullReferenceException>(() => _serializer.Serialize((ServerStatusPacket) null!));
+        Assert.Throws<NullReferenceException>(() => _serializer.Serialize((ServerStatusPacket)null!));
     }
 
     [Fact]
@@ -49,19 +49,12 @@ public class OutgoingPacketTests
     public void SpawnCharacter()
     {
         var obj = new AutoFaker<SpawnCharacter>()
-            .RuleFor(x => x.Affects, faker => new[]
-            {
-                faker.Random.UInt(),
-                faker.Random.UInt()
-            })
+            .RuleFor(x => x.Affects, faker => new[] {faker.Random.UInt(), faker.Random.UInt()})
             .Generate();
         var bytes = _serializer.Serialize(obj);
 
         bytes.Should().Equal(
-            new byte[]
-                {
-                    0x01
-                }
+            new byte[] {0x01}
                 .Concat(BitConverter.GetBytes(obj.Vid))
                 .Concat(BitConverter.GetBytes(obj.Angle))
                 .Concat(BitConverter.GetBytes(obj.PositionX))
@@ -83,10 +76,7 @@ public class OutgoingPacketTests
         var bytes = _serializer.Serialize(obj);
 
         bytes.Should().Equal(
-            new byte[]
-                {
-                    0x02
-                }
+            new byte[] {0x02}
                 .Concat(BitConverter.GetBytes(obj.Vid))
         );
     }
@@ -98,10 +88,7 @@ public class OutgoingPacketTests
         var bytes = _serializer.Serialize(obj);
 
         bytes.Should().Equal(
-            new byte[]
-                {
-                    0x03
-                }
+            new byte[] {0x03}
                 .Append(obj.MovementType)
                 .Append(obj.Argument)
                 .Append(obj.Rotation)
@@ -110,7 +97,7 @@ public class OutgoingPacketTests
                 .Concat(BitConverter.GetBytes(obj.PositionY))
                 .Concat(BitConverter.GetBytes(obj.Time))
                 .Concat(BitConverter.GetBytes(obj.Duration))
-                .Append((byte) 0x00)
+                .Append((byte)0x00)
         );
     }
 
@@ -121,16 +108,13 @@ public class OutgoingPacketTests
         var bytes = _serializer.Serialize(obj);
 
         bytes.Should().Equal(
-            new byte[]
-                {
-                    0x04
-                }
-                .Concat(BitConverter.GetBytes((short) obj.GetSize()))
-                .Append((byte) obj.MessageType)
+            new byte[] {0x04}
+                .Concat(BitConverter.GetBytes((short)obj.GetSize()))
+                .Append((byte)obj.MessageType)
                 .Concat(BitConverter.GetBytes(obj.Vid))
                 .Append(obj.Empire)
                 .Concat(Encoding.ASCII.GetBytes(obj.Message))
-                .Append((byte) 0)
+                .Append((byte)0)
         );
     }
 
@@ -145,14 +129,11 @@ public class OutgoingPacketTests
         var bytes = _serializer.Serialize(obj);
 
         bytes.Should().Equal(
-            new byte[]
-                {
-                    0x08
-                }
+            new byte[] {0x08}
                 .Append(obj.Slot)
                 .Concat(BitConverter.GetBytes(obj.Character.Id))
                 .Concat(Encoding.ASCII.GetBytes(obj.Character.Name))
-                .Append((byte) 0) // null byte for end of string
+                .Append((byte)0) // null byte for end of string
                 .Append(obj.Character.Level)
                 .Concat(BitConverter.GetBytes(obj.Character.Playtime))
                 .Append(obj.Character.St)
@@ -178,10 +159,7 @@ public class OutgoingPacketTests
         var bytes = _serializer.Serialize(obj);
 
         bytes.Should().Equal(
-            new byte[]
-                {
-                    0x09
-                }
+            new byte[] {0x09}
                 .Append(obj.Error)
         );
     }
@@ -193,10 +171,7 @@ public class OutgoingPacketTests
         var bytes = _serializer.Serialize(obj);
 
         bytes.Should().Equal(
-            new byte[]
-                {
-                    0x0A
-                }
+            new byte[] {0x0A}
                 .Append(obj.Slot)
         );
     }
@@ -208,10 +183,7 @@ public class OutgoingPacketTests
         var bytes = _serializer.Serialize(obj);
 
         bytes.Should().Equal(
-            new byte[]
-            {
-                0x0B
-            }
+            new byte[] {0x0B}
         );
     }
 
@@ -222,10 +194,7 @@ public class OutgoingPacketTests
         var bytes = _serializer.Serialize(obj);
 
         bytes.Should().Equal(
-            new byte[]
-                {
-                    0x0e
-                }
+            new byte[] {0x0e}
                 .Concat(BitConverter.GetBytes(obj.Vid)));
     }
 
@@ -239,10 +208,7 @@ public class OutgoingPacketTests
         var bytes = _serializer.Serialize(obj);
 
         bytes.Should().Equal(
-            new byte[]
-                {
-                    0x10
-                }
+            new byte[] {0x10}
                 .Concat(obj.Points.SelectMany(BitConverter.GetBytes))
         );
     }
@@ -251,26 +217,17 @@ public class OutgoingPacketTests
     public void CharacterUpdate()
     {
         var obj = new AutoFaker<CharacterUpdate>()
-            .RuleFor(x => x.Parts, faker => new[]
-            {
-                faker.Random.UShort(),
-                faker.Random.UShort(),
-                faker.Random.UShort(),
-                faker.Random.UShort()
-            })
-            .RuleFor(x => x.Affects, faker => new[]
-            {
-                faker.Random.UInt(),
-                faker.Random.UInt()
-            })
+            .RuleFor(x => x.Parts,
+                faker => new[]
+                {
+                    faker.Random.UShort(), faker.Random.UShort(), faker.Random.UShort(), faker.Random.UShort()
+                })
+            .RuleFor(x => x.Affects, faker => new[] {faker.Random.UInt(), faker.Random.UInt()})
             .Generate();
         var bytes = _serializer.Serialize(obj);
 
         bytes.Should().Equal(
-            new byte[]
-                {
-                    0x13
-                }
+            new byte[] {0x13}
                 .Concat(BitConverter.GetBytes(obj.Vid))
                 .Concat(obj.Parts.SelectMany(BitConverter.GetBytes))
                 .Append(obj.MoveSpeed)
@@ -290,30 +247,19 @@ public class OutgoingPacketTests
     {
         var itemBonusFaker = new AutoFaker<ItemBonus>();
         var obj = new AutoFaker<SetItem>()
-            .RuleFor(x => x.Sockets, faker => new[]
-            {
-                faker.Random.UInt(),
-                faker.Random.UInt(),
-                faker.Random.UInt()
-            })
-            .RuleFor(x => x.Bonuses, _ => new[]
-            {
-                itemBonusFaker.Generate(),
-                itemBonusFaker.Generate(),
-                itemBonusFaker.Generate(),
-                itemBonusFaker.Generate(),
-                itemBonusFaker.Generate(),
-                itemBonusFaker.Generate(),
-                itemBonusFaker.Generate(),
-            })
+            .RuleFor(x => x.Sockets, faker => new[] {faker.Random.UInt(), faker.Random.UInt(), faker.Random.UInt()})
+            .RuleFor(x => x.Bonuses,
+                _ => new[]
+                {
+                    itemBonusFaker.Generate(), itemBonusFaker.Generate(), itemBonusFaker.Generate(),
+                    itemBonusFaker.Generate(), itemBonusFaker.Generate(), itemBonusFaker.Generate(),
+                    itemBonusFaker.Generate(),
+                })
             .Generate();
         var bytes = _serializer.Serialize(obj);
 
         bytes.Should().Equal(
-            new byte[]
-                {
-                    0x15
-                }
+            new byte[] {0x15}
                 .Append(obj.Window)
                 .Concat(BitConverter.GetBytes(obj.Position))
                 .Concat(BitConverter.GetBytes(obj.ItemId))
@@ -336,10 +282,7 @@ public class OutgoingPacketTests
         var bytes = _serializer.Serialize(obj);
 
         bytes.Should().Equal(
-            new byte[]
-                {
-                    0x1A
-                }
+            new byte[] {0x1A}
                 .Concat(BitConverter.GetBytes(obj.PositionX))
                 .Concat(BitConverter.GetBytes(obj.PositionY))
                 .Concat(BitConverter.GetBytes(obj.PositionZ))
@@ -355,10 +298,7 @@ public class OutgoingPacketTests
         var bytes = _serializer.Serialize(obj);
 
         bytes.Should().Equal(
-            new byte[]
-                {
-                    0x1B
-                }
+            new byte[] {0x1B}
                 .Concat(BitConverter.GetBytes(obj.Vid))
         );
     }
@@ -370,10 +310,7 @@ public class OutgoingPacketTests
         var bytes = _serializer.Serialize(obj);
 
         bytes.Should().Equal(
-            new byte[]
-                {
-                    0x1C
-                }
+            new byte[] {0x1C}
                 .Append(obj.Position)
                 .Append(obj.Slot.Type)
                 .Append(obj.Slot.Position)
@@ -387,10 +324,7 @@ public class OutgoingPacketTests
         var bytes = _serializer.Serialize(obj);
 
         bytes.Should().Equal(
-            new byte[]
-                {
-                    0x1D
-                }
+            new byte[] {0x1D}
                 .Append(obj.Position)
         );
     }
@@ -402,10 +336,7 @@ public class OutgoingPacketTests
         var bytes = _serializer.Serialize(obj);
 
         bytes.Should().Equal(
-            new byte[]
-                {
-                    0x1E
-                }
+            new byte[] {0x1E}
                 .Append(obj.Position1)
                 .Append(obj.Position2)
         );
@@ -417,27 +348,19 @@ public class OutgoingPacketTests
         var characterFaker = new AutoFaker<Character>()
             .RuleFor(x => x.Name, faker => faker.Lorem.Letter(24) + '\0');
         var obj = new AutoFaker<Characters>()
-            .RuleFor(x => x.GuildIds, faker => new[]
-            {
-                faker.Random.UInt(),
-                faker.Random.UInt(),
-                faker.Random.UInt(),
-                faker.Random.UInt()
-            })
-            .RuleFor(x => x.GuildNames, faker => new[]
-            {
-                faker.Lorem.Letter(12) + '\0',
-                faker.Lorem.Letter(12) + '\0',
-                faker.Lorem.Letter(12) + '\0',
-                faker.Lorem.Letter(12) + '\0'
-            })
+            .RuleFor(x => x.GuildIds,
+                faker => new[] {faker.Random.UInt(), faker.Random.UInt(), faker.Random.UInt(), faker.Random.UInt()})
+            .RuleFor(x => x.GuildNames,
+                faker => new[]
+                {
+                    faker.Lorem.Letter(12) + '\0', faker.Lorem.Letter(12) + '\0', faker.Lorem.Letter(12) + '\0',
+                    faker.Lorem.Letter(12) + '\0'
+                })
             .RuleFor(x => x.CharacterList, _ =>
             {
                 return new[]
                 {
-                    characterFaker.Generate(),
-                    characterFaker.Generate(),
-                    characterFaker.Generate(),
+                    characterFaker.Generate(), characterFaker.Generate(), characterFaker.Generate(),
                     characterFaker.Generate()
                 };
             })
@@ -445,14 +368,11 @@ public class OutgoingPacketTests
         var bytes = _serializer.Serialize(obj);
 
         bytes.Should().Equal(
-            new byte[]
-                {
-                    0x20
-                }
+            new byte[] {0x20}
                 .Concat(obj.CharacterList.SelectMany(c => Array.Empty<byte>()
                     .Concat(BitConverter.GetBytes(c.Id))
                     .Concat(Encoding.ASCII.GetBytes(c.Name))
-                    .Append(c.Class)
+                    .Append((byte)c.Class)
                     .Append(c.Level)
                     .Concat(BitConverter.GetBytes(c.Playtime))
                     .Append(c.St)
@@ -480,34 +400,23 @@ public class OutgoingPacketTests
     {
         var itemBonusFaker = new AutoFaker<ItemBonus>();
         var shopItemFaker = new AutoFaker<ShopItem>()
-            .RuleFor(x => x.Sockets, faker => new[]
-            {
-                faker.Random.UInt(),
-                faker.Random.UInt(),
-                faker.Random.UInt()
-            })
-            .RuleFor(x => x.Bonuses, _ => new[]
-            {
-                itemBonusFaker.Generate(),
-                itemBonusFaker.Generate(),
-                itemBonusFaker.Generate(),
-                itemBonusFaker.Generate(),
-                itemBonusFaker.Generate(),
-                itemBonusFaker.Generate(),
-                itemBonusFaker.Generate()
-            });
+            .RuleFor(x => x.Sockets, faker => new[] {faker.Random.UInt(), faker.Random.UInt(), faker.Random.UInt()})
+            .RuleFor(x => x.Bonuses,
+                _ => new[]
+                {
+                    itemBonusFaker.Generate(), itemBonusFaker.Generate(), itemBonusFaker.Generate(),
+                    itemBonusFaker.Generate(), itemBonusFaker.Generate(), itemBonusFaker.Generate(),
+                    itemBonusFaker.Generate()
+                });
         var obj = new AutoFaker<ShopOpen>()
             .RuleFor(x => x.Items, _ => Enumerable.Range(0, 40).Select(_ => shopItemFaker.Generate()).ToArray())
             .Generate();
         var bytes = _serializer.Serialize(obj);
 
         bytes.Should().Equal(
-            new byte[]
-                {
-                    0x26
-                }
+            new byte[] {0x26}
                 .Concat(BitConverter.GetBytes(obj.GetSize()))
-                .Append((byte) 0x00)
+                .Append((byte)0x00)
                 .Concat(BitConverter.GetBytes(obj.Vid))
                 .Concat(obj.Items.SelectMany(item => Array.Empty<byte>()
                     .Concat(BitConverter.GetBytes(item.ItemId))
@@ -529,11 +438,8 @@ public class OutgoingPacketTests
         var bytes = _serializer.Serialize(obj);
 
         bytes.Should().Equal(
-            new byte[]
-                {
-                    0x26
-                }
-                .Append((byte) 0x05)
+            new byte[] {0x26}
+                .Append((byte)0x05)
                 .Concat(BitConverter.GetBytes(obj.Size))
         );
     }
@@ -545,11 +451,8 @@ public class OutgoingPacketTests
         var bytes = _serializer.Serialize(obj);
 
         bytes.Should().Equal(
-            new byte[]
-                {
-                    0x26
-                }
-                .Append((byte) 0x07)
+            new byte[] {0x26}
+                .Append((byte)0x07)
         );
     }
 
@@ -560,15 +463,12 @@ public class OutgoingPacketTests
         var bytes = _serializer.Serialize(obj);
 
         bytes.Should().Equal(
-            new byte[]
-                {
-                    0x2D
-                }
+            new byte[] {0x2D}
                 .Concat(BitConverter.GetBytes(obj.GetSize()))
                 .Append(obj.Skin)
                 .Concat(BitConverter.GetBytes(obj.SourceSize))
                 .Concat(Encoding.ASCII.GetBytes(obj.Source))
-                .Append((byte) 0) // null byte for end of string
+                .Append((byte)0) // null byte for end of string
         );
     }
 
@@ -579,10 +479,7 @@ public class OutgoingPacketTests
         var bytes = _serializer.Serialize(obj);
 
         bytes.Should().Equal(
-            new byte[]
-                {
-                    0x3f
-                }
+            new byte[] {0x3f}
                 .Concat(BitConverter.GetBytes(obj.TargetVid))
                 .Append(obj.Percentage)
         );
@@ -595,10 +492,7 @@ public class OutgoingPacketTests
         var bytes = _serializer.Serialize(obj);
 
         bytes.Should().Equal(
-            new byte[]
-                {
-                    0x41
-                }
+            new byte[] {0x41}
                 .Concat(BitConverter.GetBytes(obj.PositionX))
                 .Concat(BitConverter.GetBytes(obj.PositionY))
                 .Concat(BitConverter.GetBytes(obj.ServerAddress))
@@ -613,10 +507,7 @@ public class OutgoingPacketTests
         var bytes = _serializer.Serialize(obj);
 
         bytes.Should().Equal(
-            new byte[]
-                {
-                    0x6a
-                }
+            new byte[] {0x6a}
                 .Concat(BitConverter.GetBytes(obj.Time))
         );
     }
@@ -630,10 +521,7 @@ public class OutgoingPacketTests
         var bytes = _serializer.Serialize(obj);
 
         bytes.Should().Equal(
-            new byte[]
-                {
-                    0x71
-                }
+            new byte[] {0x71}
                 .Concat(BitConverter.GetBytes(obj.Vid))
                 .Concat(BitConverter.GetBytes(obj.Class))
                 .Concat(Encoding.ASCII.GetBytes(obj.Name))
@@ -652,10 +540,7 @@ public class OutgoingPacketTests
         var bytes = _serializer.Serialize(obj);
 
         bytes.Should().Equal(
-            new byte[]
-                {
-                    0x79
-                }
+            new byte[] {0x79}
                 .Append(obj.ChannelNo)
         );
     }
@@ -667,10 +552,7 @@ public class OutgoingPacketTests
         var bytes = _serializer.Serialize(obj);
 
         bytes.Should().Equal(
-            new byte[]
-                {
-                    0x87
-                }
+            new byte[] {0x87}
                 .Concat(BitConverter.GetBytes(obj.Vid))
                 .Append(obj.DamageFlags)
                 .Concat(BitConverter.GetBytes(obj.Damage))
@@ -682,21 +564,16 @@ public class OutgoingPacketTests
     {
         var obj = new AutoFaker<CharacterInfo>()
             .RuleFor(x => x.Name, faker => faker.Lorem.Letter(24) + '\0')
-            .RuleFor(x => x.Parts, faker => new[]
-            {
-                faker.Random.UShort(),
-                faker.Random.UShort(),
-                faker.Random.UShort(),
-                faker.Random.UShort()
-            })
+            .RuleFor(x => x.Parts,
+                faker => new[]
+                {
+                    faker.Random.UShort(), faker.Random.UShort(), faker.Random.UShort(), faker.Random.UShort()
+                })
             .Generate();
         var bytes = _serializer.Serialize(obj);
 
         bytes.Should().Equal(
-            new byte[]
-                {
-                    0x88
-                }
+            new byte[] {0x88}
                 .Concat(BitConverter.GetBytes(obj.Vid))
                 .Concat(Encoding.ASCII.GetBytes(obj.Name))
                 .Concat(obj.Parts.SelectMany(BitConverter.GetBytes))

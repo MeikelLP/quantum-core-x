@@ -40,7 +40,8 @@ public class CreateCharacterHandler : IGamePacketHandler<CreateCharacter>
         }
 
 
-        var player = await _playerManager.CreateAsync(accountId.Value, ctx.Packet.Name, (byte) ctx.Packet.Class,
+        var player = await _playerManager.CreateAsync(accountId.Value, ctx.Packet.Name,
+            (EPlayerClassGendered)ctx.Packet.Class,
             ctx.Packet.Appearance);
         // Query responsible host for the map
         var host = _world.GetMapHost(player.PositionX, player.PositionY);
@@ -49,10 +50,6 @@ public class CreateCharacterHandler : IGamePacketHandler<CreateCharacter>
         var character = player.ToCharacter();
         character.Ip = BitConverter.ToInt32(host.Ip.GetAddressBytes());
         character.Port = host.Port;
-        ctx.Connection.Send(new CreateCharacterSuccess
-        {
-            Slot = player.Slot,
-            Character = character
-        });
+        ctx.Connection.Send(new CreateCharacterSuccess {Slot = player.Slot, Character = character});
     }
 }

@@ -35,7 +35,7 @@ public class DbPlayerRepository : IDbPlayerRepository
             Id = player.Id,
             AccountId = player.AccountId,
             Name = player.Name,
-            PlayerClass = player.PlayerClass,
+            PlayerClass = (byte)player.PlayerClass,
             SkillGroup = player.SkillGroup,
             PlayTime = player.PlayTime,
             Level = player.Level,
@@ -82,7 +82,7 @@ public class DbPlayerRepository : IDbPlayerRepository
         if (entity is null) return;
 
         entity.Empire = data.Empire;
-        entity.PlayerClass = data.PlayerClass;
+        entity.PlayerClass = (byte)data.PlayerClass;
         entity.SkillGroup = data.SkillGroup;
         entity.PlayTime = data.PlayTime;
         entity.Level = data.Level;
