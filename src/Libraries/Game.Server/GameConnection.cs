@@ -25,7 +25,8 @@ namespace QuantumCore.Game
 
         public GameConnection(IServerBase server, TcpClient client, ILogger<GameConnection> logger,
             PluginExecutor pluginExecutor, IWorld world,
-            [FromKeyedServices(HostingOptions.ModeGame)] IPacketReader packetReader,
+            [FromKeyedServices(HostingOptions.ModeGame)]
+            IPacketReader packetReader,
             ICacheManager cacheManager)
             : base(logger, pluginExecutor, packetReader)
         {
@@ -72,6 +73,7 @@ namespace QuantumCore.Game
 
 
                 _cacheManager.Server.DelAllAsync($"player:{Player!.Player.Id}");
+                await _cacheManager.Del($"account:token:{Player.Player.AccountId}");
             }
 
             await Server.RemoveConnection(this);
