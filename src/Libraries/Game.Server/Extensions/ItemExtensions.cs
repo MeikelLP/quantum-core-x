@@ -10,28 +10,28 @@ public static class ItemExtensions
 {
     public static uint GetMinWeaponBaseDamage(this ItemData item)
     {
-        return (uint) item.Values[3];
+        return (uint)item.Values[3];
     }
 
     public static uint GetMaxWeaponBaseDamage(this ItemData item)
     {
-        return (uint) item.Values[4];
+        return (uint)item.Values[4];
     }
 
     public static uint GetMinMagicWeaponBaseDamage(this ItemData item)
     {
-        return (uint) item.Values[1];
+        return (uint)item.Values[1];
     }
 
     public static uint GetMaxMagicWeaponBaseDamage(this ItemData item)
     {
-        return (uint) item.Values[2];
+        return (uint)item.Values[2];
     }
-    
+
     public static int GetApplyValue(this ItemData item, EApplyType type)
     {
         var apply = item.Applies.FirstOrDefault(x => (EApplyType)x.Type == type);
-     
+
         return (int)(apply?.Value ?? 0);
     }
 
@@ -42,7 +42,7 @@ public static class ItemExtensions
     /// <returns></returns>
     public static uint GetAdditionalWeaponDamage(this ItemData item)
     {
-        return (uint) item.Values[5];
+        return (uint)item.Values[5];
     }
 
     public static uint GetMinWeaponDamage(this ItemData item)
@@ -73,7 +73,7 @@ public static class ItemExtensions
             return null;
         }
 
-        var wearFlags = (EWearFlags) proto.WearFlags;
+        var wearFlags = (EWearFlags)proto.WearFlags;
 
         if (wearFlags.HasFlag(EWearFlags.Head))
         {
@@ -206,7 +206,15 @@ public static class ItemExtensions
     public static async Task Set(this ItemInstance item, ICacheManager cacheManager, uint owner, byte window, uint pos,
         IItemRepository itemRepository)
     {
-        if (item.PlayerId != owner || item.Window != window)
+        var isPlayerDifferent = item.PlayerId != owner;
+        var isWindowDifferent = item.Window != window;
+
+        item.PlayerId = owner;
+        item.Window = window;
+        item.Position = pos;
+        await Persist(item, itemRepository);
+
+        if (isPlayerDifferent || isWindowDifferent)
         {
             if (item.PlayerId != default)
             {
@@ -220,12 +228,6 @@ public static class ItemExtensions
                 var newList = cacheManager.Server.CreateList<Guid>($"items:{owner}:{window}");
                 await newList.Push(item.Id);
             }
-
-            item.PlayerId = owner;
-            item.Window = window;
         }
-
-        item.Position = pos;
-        await Persist(item, itemRepository);
     }
 }

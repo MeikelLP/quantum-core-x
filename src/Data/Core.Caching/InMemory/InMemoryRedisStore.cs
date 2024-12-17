@@ -24,7 +24,7 @@ public class InMemoryRedisStore : IRedisStore
             else
             {
                 Debug.Assert(value.Value.GetType().IsAssignableTo(typeof(IRedisListWrapper<T>)), "type mismatch");
-                return (IRedisListWrapper<T>) value.Value;
+                return (IRedisListWrapper<T>)value.Value;
             }
         }
 
@@ -55,26 +55,32 @@ public class InMemoryRedisStore : IRedisStore
                 return default;
             }
 
-            return ValueTask.FromResult((T) value.Value);
+            return ValueTask.FromResult((T)value.Value);
         }
 
         return default;
     }
 
-    public ValueTask<long> Exists(string key)
+    public async ValueTask<long> Exists(string key)
     {
         if (_dict.TryGetValue(key, out var value))
         {
             if (value.Expiry is not null && value.Expiry < DateTime.UtcNow)
             {
                 _dict.Remove(key);
-                return ValueTask.FromResult(0L);
+                return 0;
             }
 
-            return ValueTask.FromResult(1L);
+            if (value.Value is IRedisListWrapper enumerable && await enumerable.Len() == 0)
+            {
+                // empty list equals no result
+                return 0;
+            }
+
+            return 1;
         }
 
-        return ValueTask.FromResult(0L);
+        return 0;
     }
 
     public ValueTask<long> Expire(string key, TimeSpan seconds)
@@ -105,13 +111,13 @@ public class InMemoryRedisStore : IRedisStore
             var actionType = typeof(Action<>).MakeGenericType(obj.GetType());
             var methodInfo = actionType.GetMethod(nameof(Action<object>.Invoke))!;
 
-            foreach (var action in (IEnumerable) callback)
+            foreach (var action in (IEnumerable)callback)
             {
                 methodInfo.Invoke(action, [obj]);
             }
         }
 
-        return ValueTask.FromResult((long) callbacks.Length);
+        return ValueTask.FromResult((long)callbacks.Length);
     }
 
     public IRedisSubscriber Subscribe()
@@ -160,7 +166,7 @@ public class InMemoryRedisStore : IRedisStore
             tuple = (0, null);
         }
 
-        _dict[key] = ((int) tuple.Value + 1, tuple.Expiry);
+        _dict[key] = ((int)tuple.Value + 1, tuple.Expiry);
         return ValueTask.FromResult(Convert.ToInt64(_dict[key].Value));
     }
 
