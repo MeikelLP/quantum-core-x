@@ -28,7 +28,6 @@ namespace QuantumCore.Game.World.Entities
         public PlayerData Player { get; private set; }
         public GuildData? Guild { get; private set; }
         public IInventory Inventory { get; private set; }
-        public IEntity? Target { get; set; }
         public IList<Guid> Groups { get; private set; }
         public IShop? Shop { get; set; }
         public IQuickSlotBar QuickSlotBar { get; }
@@ -547,9 +546,9 @@ namespace QuantumCore.Game.World.Entities
             }
         }
 
-        public override byte GetBattleType()
+        public override EBattleType GetBattleType()
         {
-            return 0;
+            return EBattleType.Melee;
         }
 
         public override int GetMinDamage()
@@ -941,7 +940,7 @@ namespace QuantumCore.Game.World.Entities
             // todo: implement server rates, and premium server rates
             if (GetPremiumRemainSeconds(EPremiumTypes.Item) > 0)
                 return 100;
-            return 100;
+            return 100_000_000;
         }
 
         public int GetPremiumRemainSeconds(EPremiumTypes type)
