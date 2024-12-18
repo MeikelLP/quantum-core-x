@@ -19,6 +19,21 @@ namespace QuantumCore.Game.World.Entities
         public bool IsStone => _proto.Type == (byte)EEntityType.MetinStone;
         public EMonsterLevel Rank => (EMonsterLevel)_proto.Rank;
 
+        public override IEntity? Target
+        {
+            get
+            {
+                return (_behaviour as SimpleBehaviour)?.Target;
+            }
+            set
+            {
+                if (_behaviour is SimpleBehaviour sb)
+                {
+                    sb.Target = value;
+                }
+            }
+        }
+
         public IBehaviour? Behaviour
         {
             get { return _behaviour; }

@@ -17,6 +17,7 @@ namespace QuantumCore.Game.World.Entities
         public abstract EEntityType Type { get; }
         public uint EntityClass { get; protected set; }
         public EEntityState State { get; protected set; }
+        public virtual IEntity? Target { get; set; }
 
         public int PositionX
         {

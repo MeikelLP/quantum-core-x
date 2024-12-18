@@ -24,7 +24,7 @@ public class InMemoryRedisStore : IRedisStore
             else
             {
                 Debug.Assert(value.Value.GetType().IsAssignableTo(typeof(IRedisListWrapper<T>)), "type mismatch");
-                return (IRedisListWrapper<T>) value.Value;
+                return (IRedisListWrapper<T>)value.Value;
             }
         }
 
@@ -55,7 +55,7 @@ public class InMemoryRedisStore : IRedisStore
                 return default;
             }
 
-            return ValueTask.FromResult((T) value.Value);
+            return ValueTask.FromResult((T)value.Value);
         }
 
         return default;
@@ -105,13 +105,13 @@ public class InMemoryRedisStore : IRedisStore
             var actionType = typeof(Action<>).MakeGenericType(obj.GetType());
             var methodInfo = actionType.GetMethod(nameof(Action<object>.Invoke))!;
 
-            foreach (var action in (IEnumerable) callback)
+            foreach (var action in (IEnumerable)callback)
             {
                 methodInfo.Invoke(action, [obj]);
             }
         }
 
-        return ValueTask.FromResult((long) callbacks.Length);
+        return ValueTask.FromResult((long)callbacks.Length);
     }
 
     public IRedisSubscriber Subscribe()
@@ -154,13 +154,13 @@ public class InMemoryRedisStore : IRedisStore
 
     public ValueTask<long> Incr(string key)
     {
-        if (!_dict.TryGetValue(key, out var tuple) || tuple.Expiry is not null && tuple.Expiry > DateTime.UtcNow)
+        if (!_dict.TryGetValue(key, out var tuple) || tuple.Expiry is not null && tuple.Expiry < DateTime.UtcNow)
         {
             // according to redis docs the value is set to 0 if it does not exist before incrementing
             tuple = (0, null);
         }
 
-        _dict[key] = ((int) tuple.Value + 1, tuple.Expiry);
+        _dict[key] = ((int)tuple.Value + 1, tuple.Expiry);
         return ValueTask.FromResult(Convert.ToInt64(_dict[key].Value));
     }
 
