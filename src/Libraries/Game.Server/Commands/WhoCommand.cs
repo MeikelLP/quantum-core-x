@@ -1,5 +1,6 @@
 ﻿using QuantumCore.API;
 using QuantumCore.API.Game;
+using QuantumCore.API.Game.Types;
 
 namespace QuantumCore.Game.Commands;
 
@@ -17,9 +18,9 @@ public class WhoCommand : ICommandHandler
     {
         var players = context.Player.Map!.World.GetPlayers();
         var allPlayers = players.Count;
-        var empire1Count = players.Count(x => x.Empire == 1);
-        var empire2Count = players.Count(x => x.Empire == 2);
-        var empire3Count = players.Count(x => x.Empire == 3);
+        var empire1Count = players.Count(x => x.Empire == EEmpire.Shinsoo);
+        var empire2Count = players.Count(x => x.Empire == EEmpire.Chunjo);
+        var empire3Count = players.Count(x => x.Empire == EEmpire.Jinno);
         var iLocal = _server.Connections.Length;
 
         context.Player.SendChatInfo(
