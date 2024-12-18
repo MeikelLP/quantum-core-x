@@ -1,4 +1,5 @@
-﻿using QuantumCore.Networking;
+﻿using QuantumCore.API.Game.Types;
+using QuantumCore.Networking;
 
 namespace QuantumCore.Game.Packets
 {
@@ -15,7 +16,7 @@ namespace QuantumCore.Game.Packets
         [Field(3)] public int PositionX { get; set; }
         [Field(4)] public int PositionY { get; set; }
         [Field(5)] public int PositionZ { get; set; }
-        [Field(6)] public byte Empire { get; set; }
+        [Field(6)] public EEmpire Empire { get; set; }
         [Field(7)] public byte SkillGroup { get; set; }
     }
 }

@@ -20,15 +20,15 @@ namespace QuantumCore.Game.World
     {
         public const uint MapUnit = 25600;
         private const int SPAWN_BASE_OFFSET = 5;
-        private const int SPAWN_POSITION_MULTIPLIER = 100;
+        public const int SPAWN_POSITION_MULTIPLIER = 100;
         private const int SPAWN_ROTATION_SLICE_DEGREES = 45;
         public string Name { get; private set; }
-        public uint PositionX { get; private set; }
-        public uint UnitX => PositionX / MapUnit;
-        public uint PositionY { get; private set; }
-        public uint UnitY => PositionY / MapUnit;
+        public Coordinates Position { get; private set; }
+        public uint UnitX => Position.X / MapUnit;
+        public uint UnitY => Position.Y / MapUnit;
         public uint Width { get; private set; }
         public uint Height { get; private set; }
+        public TownCoordinates? TownCoordinates { get; private set; }
 
         public IWorld World => _world;
         public IReadOnlyCollection<IEntity> Entities => _entities;
@@ -55,8 +55,8 @@ namespace QuantumCore.Game.World
 
         public Map(IMonsterManager monsterManager, IAnimationManager animationManager, ICacheManager cacheManager,
             IWorld world, ILogger logger, ISpawnPointProvider spawnPointProvider,
-            IDropProvider dropProvider, IItemManager itemManager, IServerBase server, string name, uint x, uint y,
-            uint width, uint height)
+            IDropProvider dropProvider, IItemManager itemManager, IServerBase server, string name, Coordinates position,
+            uint width, uint height, TownCoordinates? townCoordinates)
         {
             _monsterManager = monsterManager;
             _animationManager = animationManager;
@@ -68,18 +68,27 @@ namespace QuantumCore.Game.World
             _itemManager = itemManager;
             _server = server;
             Name = name;
-            PositionX = x;
-            PositionY = y;
+            Position = position;
             Width = width;
             Height = height;
-            _quadTree = new QuadTree((int) x, (int) y, (int) (width * MapUnit), (int) (height * MapUnit), 20);
+
+            TownCoordinates = townCoordinates is not null
+                ? new TownCoordinates
+                {
+                    Jinno = Position + townCoordinates.Jinno * SPAWN_POSITION_MULTIPLIER,
+                    Chunjo = Position + townCoordinates.Chunjo * SPAWN_POSITION_MULTIPLIER,
+                    Shinsoo = Position + townCoordinates.Shinsoo * SPAWN_POSITION_MULTIPLIER,
+                    Common = Position + townCoordinates.Common * SPAWN_POSITION_MULTIPLIER
+                }
+                : null;
+            _quadTree = new QuadTree((int)position.X, (int)position.Y, (int)(width * MapUnit), (int)(height * MapUnit),
+                20);
             _entityGauge = GameServer.Meter.CreateObservableGauge($"Map:{name}:EntityCount", () => Entities.Count);
         }
 
         public async Task Initialize()
         {
-            _logger.LogDebug("Load map {Name} at {PositionX}|{PositionY} (size {Width}x{Height})", Name, PositionX,
-                PositionY, Width, Height);
+            _logger.LogDebug("Load map {Name} at {Position} (size {Width}x{Height})", Name, Position, Width, Height);
 
             await _cacheManager.Set($"maps:{Name}", $"{_server.IpAddress}:{_server.Port}");
             await _cacheManager.Publish("maps", $"{Name} {_server.IpAddress}:{_server.Port}");
@@ -237,25 +246,25 @@ namespace QuantumCore.Game.World
 
                     break;
                 case ESpawnPointType.Group:
-                {
-                    var group = _world.GetGroup(spawnPoint.Monster);
-                    if (group != null)
                     {
-                        SpawnGroup(groupInstance, spawnPoint, group);
+                        var group = _world.GetGroup(spawnPoint.Monster);
+                        if (group != null)
+                        {
+                            SpawnGroup(groupInstance, spawnPoint, group);
+                        }
+
+                        break;
                     }
-
-                    break;
-                }
                 case ESpawnPointType.Monster:
-                {
-                    var monster = SpawnMonster(spawnPoint.Monster, spawnPoint);
+                    {
+                        var monster = SpawnMonster(spawnPoint.Monster, spawnPoint);
 
-                    spawnPoint.CurrentGroup = groupInstance;
-                    groupInstance.Monsters.Add(monster);
-                    monster.Group = groupInstance;
+                        spawnPoint.CurrentGroup = groupInstance;
+                        groupInstance.Monsters.Add(monster);
+                        monster.Group = groupInstance;
 
-                    break;
-                }
+                        break;
+                    }
                 default:
                     _logger.LogWarning("Unknown spawn point type: {SpawnPointType}", spawnPoint.Type);
                     break;
@@ -302,13 +311,13 @@ namespace QuantumCore.Game.World
 
             if (monster.Proto.AiFlag.HasAnyFlags(EAiFlags.NoMove))
             {
-                monster.PositionX = (int) (PositionX + baseX * SPAWN_POSITION_MULTIPLIER);
-                monster.PositionY = (int) (PositionY + baseY * SPAWN_POSITION_MULTIPLIER);
-                var compassDirection = (int) spawnPoint.Direction - 1;
+                monster.PositionX = (int)(Position.X + baseX * SPAWN_POSITION_MULTIPLIER);
+                monster.PositionY = (int)(Position.Y + baseY * SPAWN_POSITION_MULTIPLIER);
+                var compassDirection = (int)spawnPoint.Direction - 1;
 
-                if (compassDirection < 0 || compassDirection > (int) Enum.GetValues<ESpawnPointDirection>().Last())
+                if (compassDirection < 0 || compassDirection > (int)Enum.GetValues<ESpawnPointDirection>().Last())
                 {
-                    compassDirection = (int) ESpawnPointDirection.Random;
+                    compassDirection = (int)ESpawnPointDirection.Random;
                 }
 
                 var rotation = SPAWN_ROTATION_SLICE_DEGREES * compassDirection;
@@ -316,10 +325,10 @@ namespace QuantumCore.Game.World
             }
             else
             {
-                monster.PositionX = (int) PositionX +
+                monster.PositionX = (int)Position.X +
                                     (baseX + RandomNumberGenerator.GetInt32(-SPAWN_BASE_OFFSET, SPAWN_BASE_OFFSET)) *
                                     SPAWN_POSITION_MULTIPLIER;
-                monster.PositionY = (int) PositionY +
+                monster.PositionY = (int)Position.Y +
                                     (baseY + RandomNumberGenerator.GetInt32(-SPAWN_BASE_OFFSET, SPAWN_BASE_OFFSET)) *
                                     SPAWN_POSITION_MULTIPLIER;
             }
@@ -347,8 +356,8 @@ namespace QuantumCore.Game.World
 
         public bool IsPositionInside(int x, int y)
         {
-            return x >= PositionX && x < PositionX + Width * MapUnit && y >= PositionY &&
-                   y < PositionY + Height * MapUnit;
+            return x >= Position.X && x < Position.X + Width * MapUnit && y >= Position.Y &&
+                   y < Position.Y + Height * MapUnit;
         }
 
         public void SpawnEntity(IEntity entity)
@@ -368,8 +377,7 @@ namespace QuantumCore.Game.World
         {
             var groundItem = new GroundItem(_animationManager, _world.GenerateVid(), item, amount, ownerName)
             {
-                PositionX = x,
-                PositionY = y
+                PositionX = x, PositionY = y
             };
 
             SpawnEntity(groundItem);
