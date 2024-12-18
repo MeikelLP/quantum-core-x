@@ -546,9 +546,9 @@ namespace QuantumCore.Game.World.Entities
             }
         }
 
-        public override byte GetBattleType()
+        public override EBattleType GetBattleType()
         {
-            return 0;
+            return EBattleType.Melee;
         }
 
         public override int GetMinDamage()
@@ -940,7 +940,7 @@ namespace QuantumCore.Game.World.Entities
             // todo: implement server rates, and premium server rates
             if (GetPremiumRemainSeconds(EPremiumTypes.Item) > 0)
                 return 100;
-            return 100;
+            return 100_000_000;
         }
 
         public int GetPremiumRemainSeconds(EPremiumTypes type)

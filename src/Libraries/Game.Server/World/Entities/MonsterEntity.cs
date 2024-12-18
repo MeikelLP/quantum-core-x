@@ -158,7 +158,7 @@ namespace QuantumCore.Game.World.Entities
             }
         }
 
-        public override byte GetBattleType()
+        public override EBattleType GetBattleType()
         {
             return _proto.BattleType;
         }
