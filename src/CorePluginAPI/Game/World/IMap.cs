@@ -5,15 +5,15 @@ namespace QuantumCore.API.Game.World
     public interface IMap
     {
         public string Name { get; }
-        public uint PositionX { get; }
+        public Coordinates Position { get; }
         public uint UnitX { get; }
-        public uint PositionY { get; }
         public uint UnitY { get; }
         public uint Width { get; }
         public uint Height { get; }
         public IWorld World { get; }
 
         public IReadOnlyCollection<IEntity> Entities { get; }
+        TownCoordinates? TownCoordinates { get; }
 
         public IEntity? GetEntity(uint vid);
 

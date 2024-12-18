@@ -34,8 +34,7 @@ public class MapTests
                 var mock = Substitute.For<IMonsterManager>();
                 mock.GetMonster(Arg.Any<uint>()).Returns(call => new MonsterData
                 {
-                    Id = call.Arg<uint>(),
-                    TranslatedName = "TestMonster"
+                    Id = call.Arg<uint>(), TranslatedName = "TestMonster"
                 });
                 return mock;
             })
@@ -69,11 +68,7 @@ public class MapTests
                         Id = 101,
                         Name = "TestGroup1",
                         Leader = 101,
-                        Members =
-                        {
-                            new SpawnMember {Id = 101},
-                            new SpawnMember {Id = 101}
-                        }
+                        Members = {new SpawnMember {Id = 101}, new SpawnMember {Id = 101}}
                     }
                 });
                 mock.GetSpawnGroupCollectionsAsync().Returns(_ => new[]
@@ -83,25 +78,13 @@ public class MapTests
                     {
                         Id = 101,
                         Name = "TestGroupCollection",
-                        Groups =
-                        {
-                            new SpawnGroupCollectionMember
-                            {
-                                Id = 101, Amount = 1
-                            }
-                        }
+                        Groups = {new SpawnGroupCollectionMember {Id = 101, Probability = 1}}
                     },
                     new SpawnGroupCollection
                     {
                         Id = 101,
                         Name = "TestGroupCollection",
-                        Groups =
-                        {
-                            new SpawnGroupCollectionMember
-                            {
-                                Id = 101, Amount = 1
-                            }
-                        }
+                        Groups = {new SpawnGroupCollectionMember {Id = 101, Probability = 1}}
                     }
                 });
                 return mock;
@@ -127,7 +110,7 @@ public class MapTests
         _world = provider.GetRequiredService<IWorld>();
         _map = new Map(monsterManager, animationManager, cacheManager, _world, logger, spawnPointProvider, dropProvider,
             itemManager, server,
-            "Test", 0, 0, 4096, 4096);
+            "Test", new Coordinates(), 4096, 4096, null);
     }
 
     [Fact]
