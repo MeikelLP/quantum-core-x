@@ -11,10 +11,7 @@ internal static class ParserExtensions
         {
             Id = group.GetField<uint>("Vnum"),
             Leader = group.GetField<uint>("Leader"),
-            Members = group.Data.Select(data => new SpawnMember
-            {
-                Id = uint.Parse(data.LastOrDefault()!)
-            }).ToList(),
+            Members = group.Data.Select(data => new SpawnMember {Id = uint.Parse(data.LastOrDefault()!)}).ToList(),
             Name = group.Name
         };
     }
@@ -25,10 +22,12 @@ internal static class ParserExtensions
         {
             Id = group.GetField<uint>("Vnum"),
             Name = group.Name,
-            Groups = group.Data.Select(data => new SpawnGroupCollectionMember
+            Groups = group.Data.Select(data =>
             {
-                Id = uint.Parse(data[1]),
-                Amount = byte.TryParse(data.ElementAtOrDefault(2), out var amount) ? amount : (byte) 1
+                var p = byte.TryParse(data.ElementAtOrDefault(2), out var probability) && probability > 1
+                    ? (float)(probability / 100m)
+                    : 1;
+                return new SpawnGroupCollectionMember {Id = uint.Parse(data[1]), Probability = p};
             }).ToList()
         };
     }
