@@ -218,6 +218,8 @@ namespace QuantumCore.Game.World.Entities
             return (T)Quests[id];
         }
 
+        private void Warp(Coordinates position) => Warp((int)position.X, (int)position.Y);
+
         private void Warp(int x, int y)
         {
             _world.DespawnEntity(this);
@@ -237,6 +239,8 @@ namespace QuantumCore.Game.World.Entities
             };
             Connection.Send(packet);
         }
+
+        public void Move(Coordinates position) => Move((int)position.X, (int)position.Y);
 
         public override void Move(int x, int y)
         {
@@ -365,7 +369,22 @@ namespace QuantumCore.Game.World.Entities
 
             Dead = false;
 
-            // todo implement respawn in town
+            if (town)
+            {
+                var townCoordinates = Map!.TownCoordinates;
+                if (townCoordinates is not null)
+                {
+                    Move(Player.Empire switch
+                    {
+                        EEmpire.Chunjo => townCoordinates.Chunjo,
+                        EEmpire.Jinno => townCoordinates.Jinno,
+                        EEmpire.Shinsoo => townCoordinates.Shinsoo,
+                        _ => throw new ArgumentOutOfRangeException(nameof(Player.Empire),
+                            $"Can't get empire coordinates for empire {Player.Empire}")
+                    });
+                }
+            }
+
             // todo spawn with invisible affect
 
             SendChatCommand("CloseRestartWindow");
@@ -386,8 +405,8 @@ namespace QuantumCore.Game.World.Entities
                 entity.ShowEntity(Connection);
             }
 
-            Health = 50;
-            Mana = 50;
+            Health = PlayerConstants.RESPAWN_HEALTH;
+            Mana = PlayerConstants.RESPAWN_MANA;
             SendPoints();
         }
 

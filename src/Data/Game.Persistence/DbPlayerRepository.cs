@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using QuantumCore.API.Core.Models;
+using QuantumCore.API.Game.Types;
 using QuantumCore.Game.Persistence.Entities;
 using QuantumCore.Game.Persistence.Extensions;
 
@@ -69,7 +70,7 @@ public class DbPlayerRepository : IDbPlayerRepository
         await _db.Players.Where(x => x.Id == player.Id).ExecuteDeleteAsync();
     }
 
-    public async Task UpdateEmpireAsync(Guid accountId, uint playerId, byte empire)
+    public async Task UpdateEmpireAsync(Guid accountId, uint playerId, EEmpire empire)
     {
         await _db.Players
             .Where(x => x.AccountId == accountId && x.Id == playerId)
