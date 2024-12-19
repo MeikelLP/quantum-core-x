@@ -17,6 +17,7 @@ namespace QuantumCore.Game.PlayerUtils
         public ItemInstance? Earrings { get; private set; }
         public ItemInstance? Costume { get; private set; }
         public ItemInstance? Hair { get; private set; }
+        public ItemInstance? Shield { get; private set; }
 
         private long _offset;
 
@@ -62,6 +63,9 @@ namespace QuantumCore.Game.PlayerUtils
                 case EquipmentSlots.Hair:
                     Hair = item;
                     return true;
+                case EquipmentSlots.Shield:
+                    Shield = item;
+                    return true;
             }
 
             return false;
@@ -89,6 +93,8 @@ namespace QuantumCore.Game.PlayerUtils
                     return Costume;
                 case EquipmentSlots.Hair:
                     return Hair;
+                case EquipmentSlots.Shield:
+                    return Shield;
             }
 
             return null;
@@ -129,6 +135,9 @@ namespace QuantumCore.Game.PlayerUtils
                     return true;
                 case EquipmentSlots.Hair:
                     Hair = null;
+                    return true;
+                case EquipmentSlots.Shield:
+                    Shield = null;
                     return true;
             }
 
@@ -181,6 +190,11 @@ namespace QuantumCore.Game.PlayerUtils
             {
                 player.SendItem(Hair);
             }
+
+            if (Shield != null)
+            {
+                player.SendItem(Shield);
+            }
         }
 
         public bool IsSuitable(IItemManager itemManager, ItemInstance item, ushort position)
@@ -213,6 +227,8 @@ namespace QuantumCore.Game.PlayerUtils
                     return false; // todo
                 case EquipmentSlots.Hair:
                     return false; // todo
+                case EquipmentSlots.Shield:
+                    return wearFlags.HasFlag(EWearFlags.Shield);
                 default:
                     return false;
             }
