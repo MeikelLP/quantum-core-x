@@ -35,7 +35,7 @@ namespace QuantumCore.Game.PacketHandlers.Loading
             // Enable game phase
             ctx.Connection.SetPhase(EPhases.Game);
 
-            ctx.Connection.Send(new GameTime {Time = (uint) ctx.Connection.Server.ServerTime});
+            ctx.Connection.Send(new GameTime {Time = (uint)ctx.Connection.Server.ServerTime});
             ctx.Connection.Send(new Channel {ChannelNo = 1}); // todo
 
             var key = $"player:{player.Player.Id}:loggedInTime";
@@ -45,7 +45,7 @@ namespace QuantumCore.Game.PacketHandlers.Loading
             _world.SpawnEntity(player);
 
             player.SendInventory();
-            player.Skills.SendAsync();
+            player.Skills.Send();
         }
     }
 }

@@ -14,6 +14,7 @@ namespace QuantumCore.API.Game.World
         CoreHost GetMapHost(int x, int y);
 #nullable enable
         SpawnGroup? GetGroup(uint id);
+        SpawnGroup GetRandomGroup();
         SpawnGroupCollection? GetGroupCollection(uint id);
 #nullable restore
         void SpawnEntity(IEntity e);

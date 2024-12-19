@@ -372,7 +372,7 @@ public class OutgoingPacketTests
                 .Concat(obj.CharacterList.SelectMany(c => Array.Empty<byte>()
                     .Concat(BitConverter.GetBytes(c.Id))
                     .Concat(Encoding.ASCII.GetBytes(c.Name))
-                    .Append(c.Class)
+                    .Append((byte)c.Class)
                     .Append(c.Level)
                     .Concat(BitConverter.GetBytes(c.Playtime))
                     .Append(c.St)

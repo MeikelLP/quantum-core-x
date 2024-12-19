@@ -4,9 +4,9 @@ public interface IPlayerSkills
 {
     Task LoadAsync();
     Task PersistAsync();
-    
+
     ISKill? this[ESkillIndexes skillId] { get; }
-    
+
     void SetSkillGroup(byte skillGroup);
     void ClearSkills();
     void ClearSubSkills();
@@ -14,7 +14,12 @@ public interface IPlayerSkills
     void SetLevel(ESkillIndexes skillId, byte level);
     void SkillUp(ESkillIndexes skillId, ESkillLevelMethod method = ESkillLevelMethod.Point);
     bool CanUse(ESkillIndexes skillId);
-    void SendAsync();
+
+    /// <summary>
+    /// Send skill info to client
+    /// </summary>
+    void Send();
+
     bool LearnSkillByBook(ESkillIndexes skillId);
     void SetSkillNextReadTime(ESkillIndexes skillId, int time);
 }

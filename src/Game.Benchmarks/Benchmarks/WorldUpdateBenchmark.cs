@@ -97,7 +97,7 @@ public class WorldUpdateBenchmark
             .Replace(new ServiceDescriptor(typeof(IJobManager), _ =>
             {
                 var mock = Substitute.For<IJobManager>();
-                mock.Get(1).Returns(new Job());
+                mock.Get(EPlayerClassGendered.NinjaFemale).Returns(new Job());
                 return mock;
             }, ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(IMonsterManager), _ =>
@@ -113,7 +113,10 @@ public class WorldUpdateBenchmark
 
         foreach (var i in Enumerable.Range(0, PlayerAmount))
         {
-            var player = new PlayerData {Name = i.ToString(), PlayerClass = 1, PositionX = 1, PositionY = 1};
+            var player = new PlayerData
+            {
+                Name = i.ToString(), PlayerClass = EPlayerClassGendered.NinjaFemale, PositionX = 1, PositionY = 1
+            };
             var conn = Substitute.For<IGameConnection>();
             var entity = ActivatorUtilities.CreateInstance<PlayerEntity>(services, _world, player, conn);
             _world.SpawnEntity(entity);

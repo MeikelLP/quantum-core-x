@@ -60,5 +60,6 @@ namespace QuantumCore.API.Game.World
         int GetPremiumRemainSeconds(EPremiumTypes type);
         bool IsUsableSkillMotion(int motion);
         Task RefreshGuildAsync();
+        void RecalculateStatusPoints();
     }
 }
