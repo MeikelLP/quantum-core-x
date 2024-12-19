@@ -162,7 +162,7 @@ namespace QuantumCore.Game.World.AI
             monster.Rotation =
                 (float)MathUtils.Rotation(victim.PositionX - monster.PositionX, victim.PositionY - monster.PositionY);
 
-            monster.Attack(victim, monster.Proto.BattleType);
+            monster.Attack(victim);
 
             // Send attack packet
             var packet = new CharacterMoveOut
