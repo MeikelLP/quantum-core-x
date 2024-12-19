@@ -67,6 +67,7 @@ namespace QuantumCore.Game.World
             _dropProvider = dropProvider;
             _itemManager = itemManager;
             _server = server;
+            _serviceProvider = serviceProvider;
             Name = name;
             Position = position;
             Width = width;
@@ -79,7 +80,9 @@ namespace QuantumCore.Game.World
                     Shinsoo = Position + townCoordinates.Shinsoo * SPAWN_POSITION_MULTIPLIER,
                     Common = Position + townCoordinates.Common * SPAWN_POSITION_MULTIPLIER
                 }
-                : null;            _quadTree = new QuadTree((int)position.X, (int)position.Y, (int)(width * MapUnit), (int)(height * MapUnit), 20);
+                : null;
+            _quadTree = new QuadTree((int)position.X, (int)position.Y, (int)(width * MapUnit), (int)(height * MapUnit),
+                20);
             _entityGauge = GameServer.Meter.CreateObservableGauge($"Map:{name}:EntityCount", () => Entities.Count);
         }
 
@@ -307,7 +310,8 @@ namespace QuantumCore.Game.World
                 baseY += RandomNumberGenerator.GetInt32(-spawnPoint.RangeY, spawnPoint.RangeY);
             }
 
-            var monster = new MonsterEntity(_monsterManager, _dropProvider, _animationManager, _serviceProvider, this, _logger,
+            var monster = new MonsterEntity(_monsterManager, _dropProvider, _animationManager, _serviceProvider, this,
+                _logger,
                 _itemManager,
                 id,
                 0,
