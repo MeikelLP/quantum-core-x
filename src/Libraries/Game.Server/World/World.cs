@@ -71,8 +71,8 @@ namespace QuantumCore.Game.World
 
 
             // Initialize world grid and place maps on it
-            var maxX = _maps.Max(x => x.Value.PositionX + x.Value.Width * Map.MapUnit);
-            var maxY = _maps.Max(x => x.Value.PositionY + x.Value.Height * Map.MapUnit);
+            var maxX = _maps.Max(x => x.Value.Position.X + x.Value.Width * Map.MapUnit);
+            var maxY = _maps.Max(x => x.Value.Position.Y + x.Value.Height * Map.MapUnit);
             _world.Resize(maxX / Map.MapUnit, maxY / Map.MapUnit);
             foreach (var map in _maps.Values)
             {

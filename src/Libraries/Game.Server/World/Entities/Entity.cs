@@ -13,7 +13,7 @@ namespace QuantumCore.Game.World.Entities
     {
         private readonly IAnimationManager _animationManager;
         public uint Vid { get; }
-        public byte Empire { get; private protected set; }
+        public EEmpire Empire { get; private protected set; }
         public abstract EEntityType Type { get; }
         public uint EntityClass { get; protected set; }
         public EEntityState State { get; protected set; }
@@ -124,6 +124,8 @@ namespace QuantumCore.Game.World.Entities
             PositionY = y;
             PositionChanged = true;
         }
+
+        public void Goto(Coordinates position) => Goto((int)position.X, (int)position.Y);
 
         public virtual void Goto(int x, int y)
         {

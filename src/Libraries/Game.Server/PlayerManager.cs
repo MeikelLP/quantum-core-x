@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
+using QuantumCore.API.Game.Types;
 using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Persistence;
 
@@ -105,7 +106,7 @@ public class PlayerManager : IPlayerManager
             throw new InvalidOperationException("Already have max allowed players for this account");
         }
 
-        byte empire;
+        EEmpire empire;
         if (existingPlayers.Length > 0)
         {
             // reuse empire from first character
@@ -130,8 +131,8 @@ public class PlayerManager : IPlayerManager
             AccountId = accountId,
             Name = playerName,
             PlayerClass = @class,
-            PositionX = _gameOptions.Empire[empire].X,
-            PositionY = _gameOptions.Empire[empire].Y,
+            PositionX = (int)_gameOptions.Empire[empire].X,
+            PositionY = (int)_gameOptions.Empire[empire].Y,
             St = job.St,
             Iq = job.Iq,
             Dx = job.Dx,
@@ -155,7 +156,7 @@ public class PlayerManager : IPlayerManager
         await _cachePlayerRepository.DeletePlayerAsync(player);
     }
 
-    public async Task SetPlayerEmpireAsync(Guid accountId, uint playerId, byte empire)
+    public async Task SetPlayerEmpireAsync(Guid accountId, uint playerId, EEmpire empire)
     {
         await _dbPlayerRepository.UpdateEmpireAsync(accountId, playerId, empire);
     }

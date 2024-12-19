@@ -30,8 +30,8 @@ public class StateCommand : ICommandHandler
 
         var globalX = p.PositionX;
         var globalY = p.PositionX;
-        var localX = (uint)((p.PositionX - p.Map!.PositionX) / (float)Map.SPAWN_POSITION_MULTIPLIER);
-        var localY = (uint)((p.PositionY - p.Map!.PositionY) / (float)Map.SPAWN_POSITION_MULTIPLIER);
+        var localX = (uint)((p.PositionX - p.Map!.Position.X) / (float)Map.SPAWN_POSITION_MULTIPLIER);
+        var localY = (uint)((p.PositionY - p.Map!.Position.Y) / (float)Map.SPAWN_POSITION_MULTIPLIER);
         sb.Append($"Coordinate {globalX}x{globalY} ({localX}x{localY}) Map {p.Map.Name}");
 
         context.Player.SendChatInfo(sb.ToString());

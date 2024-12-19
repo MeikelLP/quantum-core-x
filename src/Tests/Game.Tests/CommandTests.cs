@@ -1,3 +1,4 @@
+using System.Text;
 using AutoBogus;
 using Bogus;
 using FluentAssertions;
@@ -7,7 +8,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.FileProviders;
-using Microsoft.Extensions.FileProviders.Physical;
 using Microsoft.Extensions.Options;
 using NSubstitute;
 using QuantumCore.API;
@@ -101,15 +101,20 @@ public class CommandTests : IAsyncLifetime
         _playerDataFaker = new AutoFaker<PlayerData>()
             .RuleFor(x => x.Name, r => r.Name.FirstName()) // Mostly due to command param handling
             .RuleFor(x => x.Level, _ => (byte)1)
+            .RuleFor(x => x.Iq, _ => (byte)1)
             .RuleFor(x => x.St, _ => (byte)1)
             .RuleFor(x => x.Ht, _ => (byte)1)
             .RuleFor(x => x.Dx, _ => (byte)1)
             .RuleFor(x => x.Gold, _ => (uint)0)
+            .RuleFor(x => x.Empire, _ => EEmpire.Chunjo)
             .RuleFor(x => x.Experience, _ => (uint)0)
             .RuleFor(x => x.PositionX, _ => (int)(10 * Map.MapUnit))
             .RuleFor(x => x.PositionY, _ => (int)(26 * Map.MapUnit))
             .RuleFor(x => x.PlayTime, _ => 0u)
-            .RuleFor(x => x.SkillGroup, _ => (byte)0);
+            .RuleFor(x => x.SkillGroup, _ => (byte)0)
+            .RuleFor(x => x.PlayerClass, _ => EPlayerClassGendered.WarriorMale)
+            .Ignore(x => x.Health)
+            .Ignore(x => x.Mana);
         var monsterManagerMock = Substitute.For<IMonsterManager>();
         monsterManagerMock.GetMonster(Arg.Any<uint>()).Returns(callerInfo =>
             new AutoFaker<MonsterData>().RuleFor(x => x.Id, _ => callerInfo.Arg<uint>()).Generate());
@@ -143,6 +148,23 @@ public class CommandTests : IAsyncLifetime
         cacheManagerMock.CreateList<Guid>(Arg.Any<string>()).Returns(redisListWrapperMock);
         cacheManagerMock.Subscribe().Returns(redisSubscriberWrapperMock);
         _skillManager = Substitute.For<ISkillManager>();
+        var fileProvider = Substitute.For<IFileProvider>();
+        fileProvider.GetFileInfo("maps/map_b2/Town.txt").Returns(_ =>
+        {
+            var fileInfo = Substitute.For<IFileInfo>();
+            fileInfo.Exists.Returns(true);
+            fileInfo.CreateReadStream().Returns(new MemoryStream("675 1413"u8.ToArray()));
+            return fileInfo;
+        });
+        fileProvider.GetFileInfo("atlasinfo.txt").Returns(_ =>
+        {
+            var fileInfo = Substitute.For<IFileInfo>();
+            fileInfo.Exists.Returns(true);
+            fileInfo.CreateReadStream().Returns(new MemoryStream(Encoding.UTF8.GetBytes(
+                $"map_a2	{Map.MapUnit * 10}	{Map.MapUnit * 26}	6	6\n" +
+                $"map_b2	{Map.MapUnit * 10}	{Map.MapUnit * 26}	6	6")));
+            return fileInfo;
+        });
         _services = new ServiceCollection()
             .AddCoreServices(new EmptyPluginCatalog(), new ConfigurationBuilder().Build())
             .AddGameServices()
@@ -165,24 +187,17 @@ public class CommandTests : IAsyncLifetime
             .Replace(new ServiceDescriptor(typeof(IMonsterManager), _ => monsterManagerMock, ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(IItemManager), _ => itemManagerMock, ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(ICacheManager), _ => cacheManagerMock, ServiceLifetime.Singleton))
-            .Replace(new ServiceDescriptor(typeof(IJobManager), _ => jobManagerMock, ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(IGuildManager), _ => Substitute.For<IGuildManager>(),
                 ServiceLifetime.Scoped))
             .Replace(new ServiceDescriptor(typeof(IExperienceManager), _ => experienceManagerMock,
                 ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(ISkillManager), _ => _skillManager, ServiceLifetime.Singleton))
+            .Replace(new ServiceDescriptor(typeof(IFileProvider), _ => fileProvider, ServiceLifetime.Singleton))
             .AddSingleton<IConfiguration>(_ => new ConfigurationBuilder()
+                .AddQuantumCoreDefaults()
                 .AddInMemoryCollection(new Dictionary<string, string?>
                 {
-                    {"Game:Commands:StrictMode", "true"},
-                    {"maps:0", "map_a2"},
-                    {"maps:1", "map_b2"},
-                    {"empire:0:x", "10"},
-                    {"empire:0:y", "15"},
-                    {"empire:1:x", "20"},
-                    {"empire:1:y", "25"},
-                    {"empire:2:x", "30"},
-                    {"empire:2:y", "35"},
+                    {"Game:Commands:StrictMode", "true"}, {"maps:0", "map_a2"}, {"maps:1", "map_b2"},
                 })
                 .Build())
             .AddSingleton(Substitute.For<IDbPlayerRepository>())
@@ -191,13 +206,6 @@ public class CommandTests : IAsyncLifetime
             .AddSingleton<IPlayerEntity, PlayerEntity>()
             .AddSingleton(_ => _playerDataFaker.Generate())
             .AddSingleton(Substitute.For<IGameServer>())
-            .AddSingleton(_ =>
-            {
-                var mock = Substitute.For<IFileProvider>();
-                mock.GetFileInfo(Arg.Any<string>()).Returns(call =>
-                    new PhysicalFileInfo(new FileInfo(Path.Combine("data", call.Arg<string>()))));
-                return mock;
-            })
             .BuildServiceProvider();
         _itemManager = _services.GetRequiredService<IItemManager>();
         _commandManager = _services.GetRequiredService<ICommandManager>();
@@ -384,8 +392,8 @@ public class CommandTests : IAsyncLifetime
 
         await _commandManager.Handle(_connection, $"/goto {11} {27}");
 
-        Assert.Equal((int)(_player.Map.PositionX + 11 * 100), _player.PositionX);
-        Assert.Equal((int)(_player.Map.PositionY + 27 * 100), _player.PositionY);
+        Assert.Equal((int)(_player.Map.Position.X + 11 * 100), _player.PositionX);
+        Assert.Equal((int)(_player.Map.Position.Y + 27 * 100), _player.PositionY);
     }
 
     [Fact]
@@ -522,15 +530,46 @@ public class CommandTests : IAsyncLifetime
     }
 
     [Fact]
-    public void RestartHereCommand()
+    public async Task RestartHereCommand()
     {
-        // TODO
+        var world = await PrepareWorldAsync();
+        world.SpawnEntity(_player);
+
+        _player.Health.Should().Be(676L);
+        _player.Mana.Should().Be(264L);
+        _player.PositionX.Should().Be(256000);
+        _player.PositionY.Should().Be(665600);
+        _player.Die();
+
+        await _commandManager.Handle(_connection, "/restart_here");
+
+        _player.Health.Should().Be(PlayerConstants.RESPAWN_HEALTH);
+        _player.Mana.Should().Be(PlayerConstants.RESPAWN_MANA);
+        _player.PositionX.Should().Be(256000);
+        _player.PositionY.Should().Be(665600);
     }
 
     [Fact]
-    public void RestartTownCommand()
+    public async Task RestartTownCommand()
     {
-        // TODO
+        var world = await PrepareWorldAsync();
+        world.SpawnEntity(_player);
+        world.Update(0.1);
+        _player.Map.Should().NotBeNull();
+
+        _player.Health.Should().Be(676L);
+        _player.Mana.Should().Be(264L);
+        _player.PositionX.Should().Be(256000);
+        _player.PositionY.Should().Be(665600);
+        _player.Die();
+
+        await _commandManager.Handle(_connection, "/restart_town");
+
+        _player.Health.Should().Be(PlayerConstants.RESPAWN_HEALTH);
+        _player.Mana.Should().Be(PlayerConstants.RESPAWN_MANA);
+
+        _player.PositionX.Should().Be((int)(_player.Map.Position.X + 675 * Map.SPAWN_POSITION_MULTIPLIER));
+        _player.PositionY.Should().Be((int)(_player.Map.Position.Y + 1413 * Map.SPAWN_POSITION_MULTIPLIER));
     }
 
     [Fact]
@@ -579,8 +618,6 @@ public class CommandTests : IAsyncLifetime
     private async Task<IWorld> PrepareWorldAsync()
     {
         if (!Directory.Exists("data")) Directory.CreateDirectory("data");
-        await File.WriteAllTextAsync("data/atlasinfo.txt", $"map_a2	{Map.MapUnit * 10}	{Map.MapUnit * 26}	6	6\n" +
-                                                           $"map_b2	{Map.MapUnit * 10}	{Map.MapUnit * 26}	6	6");
         await Task.WhenAll(_services.GetServices<ILoadable>().Select(x => x.LoadAsync()));
         var world = _services.GetRequiredService<IWorld>();
         await world.LoadAsync();

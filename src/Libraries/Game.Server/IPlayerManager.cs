@@ -1,5 +1,6 @@
-﻿using QuantumCore.API;
+using QuantumCore.API;
 using QuantumCore.API.Core.Models;
+using QuantumCore.API.Game.Types;
 
 namespace QuantumCore.Game;
 
@@ -33,6 +34,6 @@ public interface IPlayerManager
     Task<PlayerData> CreateAsync(Guid accountId, string playerName, EPlayerClassGendered @class, byte appearance);
 
     Task DeletePlayerAsync(PlayerData player);
-    Task SetPlayerEmpireAsync(Guid accountId, uint playerId, byte empire);
+    Task SetPlayerEmpireAsync(Guid accountId, uint playerId, EEmpire empire);
     Task SetPlayerAsync(PlayerData data);
 }

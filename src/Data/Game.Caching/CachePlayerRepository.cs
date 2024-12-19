@@ -1,5 +1,6 @@
 ﻿using QuantumCore.API;
 using QuantumCore.API.Core.Models;
+using QuantumCore.API.Game.Types;
 using QuantumCore.Caching;
 
 namespace Game.Caching;
@@ -64,17 +65,17 @@ public class CachePlayerRepository : ICachePlayerRepository
         }
 
         // TODO delete items from players inventory
-        key = $"items:{player.Id}:{(byte) WindowType.Inventory}";
+        key = $"items:{player.Id}:{(byte)WindowType.Inventory}";
         await _cacheManager.Del(key);
     }
 
-    public async Task<byte?> GetTempEmpireAsync(Guid accountId)
+    public async Task<EEmpire?> GetTempEmpireAsync(Guid accountId)
     {
         var empireRedisKey = $"temp:empire-selection:{accountId}";
-        return await _cacheManager.Get<byte?>(empireRedisKey);
+        return await _cacheManager.Get<EEmpire?>(empireRedisKey);
     }
 
-    public async Task SetTempEmpireAsync(Guid accountId, byte empire)
+    public async Task SetTempEmpireAsync(Guid accountId, EEmpire empire)
     {
         await _cacheManager.Set($"temp:empire-selection:{accountId}", empire);
     }

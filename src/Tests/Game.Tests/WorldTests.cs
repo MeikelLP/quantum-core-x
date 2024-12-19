@@ -54,7 +54,7 @@ public class WorldTests
                         provider.GetRequiredService<IDropProvider>(),
                         provider.GetRequiredService<IItemManager>(),
                         provider.GetRequiredService<IServerBase>(),
-                        "test_map", 0, 0, 1024, 1024)
+                        "test_map", new Coordinates(), 1024, 1024, null)
                 });
                 return mock;
             }, ServiceLifetime.Singleton))
