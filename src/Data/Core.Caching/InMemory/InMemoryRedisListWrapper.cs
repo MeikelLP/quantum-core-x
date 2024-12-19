@@ -29,4 +29,9 @@ public class InMemoryRedisListWrapper<T> : IRedisListWrapper<T>
         _list.Remove(obj);
         return ValueTask.FromResult<long>(count);
     }
+
+    public ValueTask<long> Len()
+    {
+        return ValueTask.FromResult<long>(_list.Count);
+    }
 }

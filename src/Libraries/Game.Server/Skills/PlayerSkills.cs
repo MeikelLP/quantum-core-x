@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Collections.Immutable;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using QuantumCore.API;
 using QuantumCore.API.Extensions;
 using QuantumCore.API.Game.Skills;
@@ -106,13 +107,13 @@ public class PlayerSkills : IPlayerSkills
     #endregion
 
     public PlayerSkills(ILogger<PlayerSkills> logger, PlayerEntity player, IDbPlayerSkillsRepository repository,
-        ISkillManager skillManager, SkillsOptions skillsOptions)
+        ISkillManager skillManager, IOptions<SkillsOptions> skillsOptions)
     {
         _logger = logger;
         _player = player;
         _repository = repository;
         _skillManager = skillManager;
-        _skillsOptions = skillsOptions;
+        _skillsOptions = skillsOptions.Value;
     }
 
     public async Task LoadAsync()
@@ -420,7 +421,7 @@ public class PlayerSkills : IPlayerSkills
         if (proto.Type == ESkillCategoryType.HorseSkills)
         {
             return skillId != ESkillIndexes.HorseWildAttackRange ||
-                   _player.Player.PlayerClass.GetClass() == EPlayerClass.Ninja;
+                   _player.Player.PlayerClass.GetClass()== EPlayerClass.Ninja;
         }
 
         if (_player.Player.SkillGroup == 0) return false;
