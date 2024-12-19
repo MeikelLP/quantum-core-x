@@ -67,6 +67,7 @@ namespace QuantumCore.Game.World
             _dropProvider = dropProvider;
             _itemManager = itemManager;
             _server = server;
+            _serviceProvider = serviceProvider;
             Name = name;
             Position = position;
             Width = width;
@@ -303,7 +304,8 @@ namespace QuantumCore.Game.World
                 baseY += RandomNumberGenerator.GetInt32(-spawnPoint.RangeY, spawnPoint.RangeY);
             }
 
-            var monster = new MonsterEntity(_monsterManager, _dropProvider, _animationManager, _serviceProvider, this, _logger,
+            var monster = new MonsterEntity(_monsterManager, _dropProvider, _animationManager, _serviceProvider, this,
+                _logger,
                 _itemManager,
                 id,
                 0,
