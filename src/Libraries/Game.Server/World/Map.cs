@@ -79,8 +79,7 @@ namespace QuantumCore.Game.World
                     Shinsoo = Position + townCoordinates.Shinsoo * SPAWN_POSITION_MULTIPLIER,
                     Common = Position + townCoordinates.Common * SPAWN_POSITION_MULTIPLIER
                 }
-                : null;
-            _quadTree = new QuadTree((int)position.X, (int)position.Y, (int)(width * MapUnit), (int)(height * MapUnit), 20);
+                : null;            _quadTree = new QuadTree((int)position.X, (int)position.Y, (int)(width * MapUnit), (int)(height * MapUnit), 20);
             _entityGauge = GameServer.Meter.CreateObservableGauge($"Map:{name}:EntityCount", () => Entities.Count);
         }
 
@@ -235,7 +234,15 @@ namespace QuantumCore.Game.World
                         var group = _world.GetGroup(collectionGroup.Id);
                         if (group != null)
                         {
-                            for (var i = 0; i < collectionGroup.Amount; i++)
+                            if (collectionGroup.Probability < 1)
+                            {
+                                var rand = Random.Shared.NextSingle();
+                                if (rand > collectionGroup.Probability)
+                                {
+                                    SpawnGroup(groupInstance, spawnPoint, group);
+                                }
+                            }
+                            else
                             {
                                 SpawnGroup(groupInstance, spawnPoint, group);
                             }
