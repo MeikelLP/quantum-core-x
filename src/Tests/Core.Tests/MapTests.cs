@@ -110,7 +110,7 @@ public class MapTests
         _world = provider.GetRequiredService<IWorld>();
         _map = new Map(monsterManager, animationManager, cacheManager, _world, logger, spawnPointProvider, dropProvider,
             itemManager, server,
-            "Test", new Coordinates(), 4096, 4096, null);
+            "Test", new Coordinates(), 4096, 4096, null, provider);
     }
 
     [Fact]

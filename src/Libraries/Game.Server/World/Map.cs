@@ -48,15 +48,15 @@ namespace QuantumCore.Game.World
         private readonly IWorld _world;
         private readonly ILogger _logger;
         private readonly ISpawnPointProvider _spawnPointProvider;
-        private readonly HostingOptions _options;
         private readonly IDropProvider _dropProvider;
         private readonly IItemManager _itemManager;
         private readonly IServerBase _server;
+        private readonly IServiceProvider _serviceProvider;
 
         public Map(IMonsterManager monsterManager, IAnimationManager animationManager, ICacheManager cacheManager,
             IWorld world, ILogger logger, ISpawnPointProvider spawnPointProvider,
             IDropProvider dropProvider, IItemManager itemManager, IServerBase server, string name, Coordinates position,
-            uint width, uint height, TownCoordinates? townCoordinates)
+            uint width, uint height, TownCoordinates? townCoordinates, IServiceProvider serviceProvider)
         {
             _monsterManager = monsterManager;
             _animationManager = animationManager;
@@ -71,7 +71,6 @@ namespace QuantumCore.Game.World
             Position = position;
             Width = width;
             Height = height;
-
             TownCoordinates = townCoordinates is not null
                 ? new TownCoordinates
                 {
@@ -80,7 +79,8 @@ namespace QuantumCore.Game.World
                     Shinsoo = Position + townCoordinates.Shinsoo * SPAWN_POSITION_MULTIPLIER,
                     Common = Position + townCoordinates.Common * SPAWN_POSITION_MULTIPLIER
                 }
-                : null;            _quadTree = new QuadTree((int)position.X, (int)position.Y, (int)(width * MapUnit), (int)(height * MapUnit), 20);
+                : null;
+            _quadTree = new QuadTree((int)position.X, (int)position.Y, (int)(width * MapUnit), (int)(height * MapUnit), 20);
             _entityGauge = GameServer.Meter.CreateObservableGauge($"Map:{name}:EntityCount", () => Entities.Count);
         }
 
@@ -300,7 +300,7 @@ namespace QuantumCore.Game.World
                 baseY += RandomNumberGenerator.GetInt32(-spawnPoint.RangeY, spawnPoint.RangeY);
             }
 
-            var monster = new MonsterEntity(_monsterManager, _dropProvider, _animationManager, this, _logger,
+            var monster = new MonsterEntity(_monsterManager, _dropProvider, _animationManager, _serviceProvider, this, _logger,
                 _itemManager,
                 id,
                 0,

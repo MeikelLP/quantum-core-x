@@ -1,3 +1,4 @@
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
@@ -16,8 +17,8 @@ namespace QuantumCore.Game.World.Entities
         private readonly IDropProvider _dropProvider;
         private readonly ILogger _logger;
         public override EEntityType Type => EEntityType.Monster;
-        public bool IsStone => _proto.Type == (byte)EEntityType.MetinStone;
-        public EMonsterLevel Rank => (EMonsterLevel)_proto.Rank;
+        public bool IsStone => Proto.Type == (byte)EEntityType.MetinStone;
+        public EMonsterLevel Rank => (EMonsterLevel)Proto.Rank;
 
         public override IEntity? Target
         {
@@ -46,25 +47,23 @@ namespace QuantumCore.Game.World.Entities
 
         public override byte HealthPercentage
         {
-            get { return (byte)(Math.Min(Math.Max(Health / (double)_proto.Hp, 0), 1) * 100); }
+            get { return (byte)(Math.Min(Math.Max(Health / (double)Proto.Hp, 0), 1) * 100); }
         }
 
-        public MonsterData Proto
-        {
-            get { return _proto; }
-        }
+        public MonsterData Proto { get; private set; }
 
         public MonsterGroup? Group { get; set; }
 
-        private readonly MonsterData _proto;
         private IBehaviour? _behaviour;
         private bool _behaviourInitialized;
         private double _deadTime = 5000;
         private readonly IMap _map;
         private readonly IItemManager _itemManager;
+        private IServiceProvider _serviceProvider;
 
         public MonsterEntity(IMonsterManager monsterManager, IDropProvider dropProvider,
             IAnimationManager animationManager,
+            IServiceProvider serviceProvider,
             IMap map, ILogger logger, IItemManager itemManager, uint id, int x, int y, float rotation = 0)
             : base(animationManager, map.World.GenerateVid())
         {
@@ -78,31 +77,31 @@ namespace QuantumCore.Game.World.Entities
 
             _map = map;
             _dropProvider = dropProvider;
+            _serviceProvider = serviceProvider;
             _logger = logger;
             _itemManager = itemManager;
-            _proto = proto;
+            Proto = proto;
             PositionX = x;
             PositionY = y;
             Rotation = rotation;
 
-            MovementSpeed = (byte)_proto.MoveSpeed;
+            MovementSpeed = (byte)Proto.MoveSpeed;
 
-            Health = _proto.Hp;
+            Health = Proto.Hp;
             EntityClass = id;
 
-            if (_proto.Type == (byte)EEntityType.Monster)
+            if (Proto.Type == (byte)EEntityType.Monster)
             {
                 // it's a monster
                 _behaviour = new SimpleBehaviour(monsterManager);
             }
-            else if (_proto.Type == (byte)EEntityType.Npc)
+            else if (Proto.Type == (byte)EEntityType.Npc)
             {
                 // npc
             }
-            else if (_proto.Type == (byte)EEntityType.MetinStone)
+            else if (Proto.Type == (byte)EEntityType.MetinStone)
             {
-                // metin stone
-                //todo: metin stone behaviour ?
+                _behaviour = ActivatorUtilities.CreateInstance<StoneBehaviour>(_serviceProvider);
             }
         }
 
@@ -160,17 +159,17 @@ namespace QuantumCore.Game.World.Entities
 
         public override byte GetBattleType()
         {
-            return _proto.BattleType;
+            return Proto.BattleType;
         }
 
         public override int GetMinDamage()
         {
-            return (int)_proto.DamageRange[0];
+            return (int)Proto.DamageRange[0];
         }
 
         public override int GetMaxDamage()
         {
-            return (int)_proto.DamageRange[1];
+            return (int)Proto.DamageRange[1];
         }
 
         public override int GetBonusDamage()
@@ -209,17 +208,17 @@ namespace QuantumCore.Game.World.Entities
             switch (point)
             {
                 case EPoints.Level:
-                    return _proto.Level;
+                    return Proto.Level;
                 case EPoints.Dx:
-                    return _proto.Dx;
+                    return Proto.Dx;
                 case EPoints.AttackGrade:
-                    return (uint)(_proto.Level * 2 + _proto.St * 2);
+                    return (uint)(Proto.Level * 2 + Proto.St * 2);
                 case EPoints.DefenceGrade:
-                    return (uint)(_proto.Level + _proto.Ht + _proto.Defence);
+                    return (uint)(Proto.Level + Proto.Ht + Proto.Defence);
                 case EPoints.DefenceBonus:
                     return 0;
                 case EPoints.Experience:
-                    return _proto.Experience;
+                    return Proto.Experience;
             }
 
             _logger.LogWarning("Point {Point} is not implemented on monster", point);
@@ -321,21 +320,21 @@ namespace QuantumCore.Game.World.Entities
             connection.Send(new SpawnCharacter
             {
                 Vid = Vid,
-                CharacterType = _proto.Type,
+                CharacterType = Proto.Type,
                 Angle = Rotation,
                 PositionX = PositionX,
                 PositionY = PositionY,
-                Class = (ushort)_proto.Id,
-                MoveSpeed = (byte)_proto.MoveSpeed,
-                AttackSpeed = (byte)_proto.AttackSpeed
+                Class = (ushort)Proto.Id,
+                MoveSpeed = (byte)Proto.MoveSpeed,
+                AttackSpeed = (byte)Proto.AttackSpeed
             });
 
-            if (_proto.Type == (byte)EEntityType.Npc)
+            if (Proto.Type == (byte)EEntityType.Npc)
             {
                 // NPCs need additional information too to show up for some reason
                 connection.Send(new CharacterInfo
                 {
-                    Vid = Vid, Empire = (EEmpire)_proto.Empire, Level = 0, Name = _proto.TranslatedName
+                    Vid = Vid, Empire = (EEmpire)Proto.Empire, Level = 0, Name = Proto.TranslatedName
                 });
             }
         }
@@ -348,7 +347,7 @@ namespace QuantumCore.Game.World.Entities
 
         public override string ToString()
         {
-            return $"{_proto.TranslatedName?.Trim((char)0x00)} ({_proto.Id})";
+            return $"{Proto.TranslatedName?.Trim((char)0x00)} ({Proto.Id})";
         }
     }
 }

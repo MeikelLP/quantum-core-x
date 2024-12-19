@@ -17,9 +17,11 @@ public class GroupRandomCommand : ICommandHandler
     private readonly ILogger<GroupRandomCommand> _logger;
     private readonly IItemManager _itemManager;
     private readonly IDropProvider _dropProvider;
+    private readonly IServiceProvider _serviceProvider;
 
     public GroupRandomCommand(IMonsterManager monsterManager, IAnimationManager animationManager, IWorld world,
-        ILogger<GroupRandomCommand> logger, IItemManager itemManager, IDropProvider dropProvider)
+        ILogger<GroupRandomCommand> logger, IItemManager itemManager, IDropProvider dropProvider,
+        IServiceProvider serviceProvider)
     {
         _monsterManager = monsterManager;
         _animationManager = animationManager;
@@ -27,6 +29,7 @@ public class GroupRandomCommand : ICommandHandler
         _logger = logger;
         _itemManager = itemManager;
         _dropProvider = dropProvider;
+        _serviceProvider = serviceProvider;
     }
 
     public Task ExecuteAsync(CommandContext context)
@@ -56,7 +59,8 @@ public class GroupRandomCommand : ICommandHandler
             }
 
             // Create entity instance
-            var monster = new MonsterEntity(_monsterManager, _dropProvider, _animationManager, map, _logger,
+            var monster = new MonsterEntity(_monsterManager, _dropProvider, _animationManager, _serviceProvider, map,
+                _logger,
                 _itemManager, monsterId, x, y);
             _world.SpawnEntity(monster);
         }

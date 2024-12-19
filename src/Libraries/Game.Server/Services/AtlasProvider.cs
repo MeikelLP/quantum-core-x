@@ -1,5 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
@@ -26,10 +27,10 @@ internal partial class AtlasProvider : IAtlasProvider
     private readonly ISpawnPointProvider _spawnPointProvider;
     private readonly ICacheManager _cacheManager;
     private readonly ILogger<AtlasProvider> _logger;
-    private readonly IDropProvider _dropProvider;
     private readonly IItemManager _itemManager;
     private readonly IFileProvider _fileProvider;
     private readonly IServerBase _server;
+    private readonly IServiceProvider _serviceProvider;
 
     /// <summary>
     /// Regex for parsing lines in the atlas info
@@ -40,8 +41,8 @@ internal partial class AtlasProvider : IAtlasProvider
 
     public AtlasProvider(IConfiguration configuration, IMonsterManager monsterManager,
         IAnimationManager animationManager, ISpawnPointProvider spawnPointProvider,
-        ICacheManager cacheManager, ILogger<AtlasProvider> logger, IDropProvider dropProvider, IItemManager itemManager,
-        IFileProvider fileProvider, IServerBase server)
+        ICacheManager cacheManager, ILogger<AtlasProvider> logger, IItemManager itemManager,
+        IFileProvider fileProvider, IServerBase server, IServiceProvider serviceProvider)
     {
         _configuration = configuration;
         _monsterManager = monsterManager;
@@ -49,10 +50,10 @@ internal partial class AtlasProvider : IAtlasProvider
         _spawnPointProvider = spawnPointProvider;
         _cacheManager = cacheManager;
         _logger = logger;
-        _dropProvider = dropProvider;
         _itemManager = itemManager;
         _fileProvider = fileProvider;
         _server = server;
+        _serviceProvider = serviceProvider;
     }
 
     public async Task<IEnumerable<IMap>> GetAsync(IWorld world)
@@ -121,8 +122,9 @@ internal partial class AtlasProvider : IAtlasProvider
                 townCoordsDict.TryGetValue(mapName, out var coords);
 
                 map = new Map(_monsterManager, _animationManager, _cacheManager, world, _logger,
-                    _spawnPointProvider, _dropProvider, _itemManager, _server, mapName, position,
-                    width, height, coords);
+                    _spawnPointProvider, _serviceProvider.GetRequiredService<IDropProvider>(), _itemManager, _server,
+                    mapName, position,
+                    width, height, coords, _serviceProvider);
             }
 
             if (position.X + width * Map.MapUnit > maxX) maxX = position.X + width * Map.MapUnit;
