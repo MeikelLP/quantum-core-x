@@ -18,8 +18,13 @@ namespace QuantumCore.Game.Services;
 
 public class DropProvider : IDropProvider, ILoadable
 {
+    private static readonly Encoding FileEncoding = Encoding.GetEncoding("EUC-KR");
     private readonly Dictionary<uint, MonsterItemGroup> _monsterDrops = new();
     private readonly Dictionary<uint, DropItemGroup> _itemDrops = new();
+
+    private const string CommonDropItemFile = "common_drop_item.txt";
+    private const string EtcDropItemFile = "etc_drop_item.txt";
+    private const string MobDropItemFile = "mob_drop_item.txt";
 
 #if DEBUG
     private const bool DropDebug = true;
@@ -31,7 +36,6 @@ public class DropProvider : IDropProvider, ILoadable
     private readonly IItemManager _itemManager;
     private readonly IParserService _parserService;
     private readonly IFileProvider _fileProvider;
-    private static readonly Encoding FileEncoding = Encoding.GetEncoding("EUC-KR");
     private readonly DropOptions _options;
 
     public DropProvider(ILogger<DropProvider> logger, IOptions<GameOptions> gameOptions, IItemManager itemManager,
@@ -61,17 +65,19 @@ public class DropProvider : IDropProvider, ILoadable
 
     public async Task LoadAsync(CancellationToken cancellationToken = default)
     {
-        // TODO: Task.AwaitAll
-        await LoadCommonMobDropsAsync(cancellationToken);
-        await LoadSimpleMobDropsAsync(cancellationToken);
-        await LoadDropsForMonstersAsync();
+        await _itemManager.LoadAsync(cancellationToken); // ensure _itemManager ready
+        await Task.WhenAll(
+            LoadCommonMobDropsAsync(cancellationToken),
+            LoadSimpleMobDropsAsync(cancellationToken),
+            LoadDropsForMonstersAsync(cancellationToken)
+        );
     }
 
     #region Loading
 
     private async Task LoadCommonMobDropsAsync(CancellationToken cancellationToken)
     {
-        var file = _fileProvider.GetFileInfo("common_drop_item.txt");
+        var file = _fileProvider.GetFileInfo(CommonDropItemFile);
         if (!file.Exists) return;
 
         _logger.LogDebug("Loading common drops from {FilePath}", file);
@@ -89,7 +95,7 @@ public class DropProvider : IDropProvider, ILoadable
     /// </summary>
     private async Task LoadSimpleMobDropsAsync(CancellationToken cancellationToken)
     {
-        var file = _fileProvider.GetFileInfo("etc_drop_item.txt");
+        var file = _fileProvider.GetFileInfo(EtcDropItemFile);
         if (!file.Exists) return;
 
         _logger.LogDebug("Loading item drop modifiers from {FilePath}", file);
@@ -148,16 +154,16 @@ public class DropProvider : IDropProvider, ILoadable
         return new KeyValuePair<uint, float>(item.Id, multiplierValue * 10000.0f); // 1 to 1000
     }
 
-    private async Task LoadDropsForMonstersAsync()
+    private async Task LoadDropsForMonstersAsync(CancellationToken token)
     {
-        var file = _fileProvider.GetFileInfo("mob_drop_item.txt");
+        var file = _fileProvider.GetFileInfo(MobDropItemFile);
         if (!file.Exists) return;
         _logger.LogDebug("Loading drops from {FilePath}", file);
 
         await using var fs = file.CreateReadStream();
         using var sr = new StreamReader(fs, FileEncoding);
         var parsedGroups = new List<MonsterDropContainer>();
-        var mobGroups = await _parserService.ParseFileGroups(sr);
+        var mobGroups = await _parserService.ParseFileGroups(sr, token);
 
         foreach (var mobGroup in mobGroups)
         {
@@ -176,21 +182,18 @@ public class DropProvider : IDropProvider, ILoadable
         var monsters = parsedGroups.OfType<MonsterItemGroup>();
         foreach (var monster in monsters)
         {
-            if (_monsterDrops.ContainsKey(monster.MonsterProtoId))
+            if (!_monsterDrops.TryAdd(monster.MonsterProtoId, monster))
             {
                 _logger.LogWarning("Duplicate monster drop entry for {MonsterProtoId}", monster.MonsterProtoId);
-                continue;
             }
-
-            _monsterDrops[monster.MonsterProtoId] = monster;
         }
 
         var dropItems = parsedGroups.OfType<DropItemGroup>();
         foreach (var dropItem in dropItems)
         {
-            if (_itemDrops.ContainsKey(dropItem.MonsterProtoId))
+            if (_itemDrops.TryGetValue(dropItem.MonsterProtoId, out var drop))
             {
-                _itemDrops[dropItem.MonsterProtoId].Drops.AddRange(dropItem.Drops);
+                drop.Drops.AddRange(dropItem.Drops);
                 continue;
             }
 
@@ -209,11 +212,11 @@ public class DropProvider : IDropProvider, ILoadable
         var deltaPercentage = 0;
         var dropRange = 0;
 
-        var levelDropDelta = (int) (monster.GetPoint(EPoints.Level) + 15 - player.GetPoint(EPoints.Level));
+        var levelDropDelta = (int)(monster.GetPoint(EPoints.Level) + 15 - player.GetPoint(EPoints.Level));
 
         deltaPercentage = monster is {IsStone: false, Rank: >= EMonsterLevel.Boss}
-            ? (int) _options.Delta.Boss[MathUtils.MinMax(0, levelDropDelta, _options.Delta.Boss.Count - 1)]
-            : (int) _options.Delta.Normal[MathUtils.MinMax(0, levelDropDelta, _options.Delta.Normal.Count - 1)];
+            ? (int)_options.Delta.Boss[MathUtils.MinMax(0, levelDropDelta, _options.Delta.Boss.Count - 1)]
+            : (int)_options.Delta.Normal[MathUtils.MinMax(0, levelDropDelta, _options.Delta.Normal.Count - 1)];
 
         if (1 == CoreRandom.GenerateInt32(1, 50001))
             deltaPercentage += 1000;
@@ -227,7 +230,7 @@ public class DropProvider : IDropProvider, ILoadable
 
         if (player.GetPoint(EPoints.MallItemBonus) > 0)
         {
-            deltaPercentage += (int) (deltaPercentage * player.GetPoint(EPoints.MallItemBonus) / 100);
+            deltaPercentage += (int)(deltaPercentage * player.GetPoint(EPoints.MallItemBonus) / 100);
         }
 
         const int UNIQUE_GROUP_DOUBLE_ITEM = 10002; // todo: magic numbers
@@ -258,7 +261,7 @@ public class DropProvider : IDropProvider, ILoadable
             _logger.LogDebug("Player has irremovable gloves OR removeable gloves and mall item bonus");
         }
 
-        var itemDropBonus = (int) Math.Min(100, player.GetPoint(EPoints.ItemDropBonus));
+        var itemDropBonus = (int)Math.Min(100, player.GetPoint(EPoints.ItemDropBonus));
 
         var empireBonusDrop = 0; // todo: implement server / empire rates
 
@@ -302,7 +305,7 @@ public class DropProvider : IDropProvider, ILoadable
 
                 var itemInstance = _itemManager.CreateItem(itemProto);
 
-                if ((EItemType) itemProto.Type == EItemType.Polymorph)
+                if ((EItemType)itemProto.Type == EItemType.Polymorph)
                 {
                     if (monster.Proto.PolymorphItemId == itemProto.Id)
                     {
@@ -348,7 +351,7 @@ public class DropProvider : IDropProvider, ILoadable
                     _logger.LogDebug("Monster {Name} ({MobProtoId}) dropped an item group ({Item})",
                         monster.Proto.TranslatedName, monster.Proto.Id, itemProto.TranslatedName);
 
-                    if ((EItemType) itemProto.Type == EItemType.Polymorph)
+                    if ((EItemType)itemProto.Type == EItemType.Polymorph)
                     {
                         if (monster.Proto.PolymorphItemId == itemProto.Id)
                         {
@@ -356,7 +359,7 @@ public class DropProvider : IDropProvider, ILoadable
                         }
                     }
 
-                    var itemInstance = _itemManager.CreateItem(itemProto, (byte) drop.Amount);
+                    var itemInstance = _itemManager.CreateItem(itemProto, (byte)drop.Amount);
                     items.Add(itemInstance);
                 }
             }
@@ -378,7 +381,7 @@ public class DropProvider : IDropProvider, ILoadable
 
         if (DropDebug)
         {
-            var realPercent = (float) percent / range * 100;
+            var realPercent = (float)percent / range * 100;
             _logger.LogTrace("Drop chance for {Name} ({MobProtoId}) is {RealPercent}%",
                 monster.Proto.TranslatedName, monster.Proto.Id, realPercent);
         }
@@ -391,7 +394,7 @@ public class DropProvider : IDropProvider, ILoadable
             {
                 _logger.LogDebug("Monster {Name} ({MobProtoId}) dropped an item group ({Item})",
                     monster.Proto.TranslatedName, monster.Proto.Id, itemProto.TranslatedName);
-                var itemInstance = _itemManager.CreateItem(itemProto, (byte) randomDrop!.Amount);
+                var itemInstance = _itemManager.CreateItem(itemProto, (byte)randomDrop!.Amount);
                 items.Add(itemInstance);
             }
             else
@@ -435,7 +438,7 @@ public class DropProvider : IDropProvider, ILoadable
                     _logger.LogDebug("Monster {Name} ({MobProtoId}) dropped an item group ({Item})",
                         monster.Proto.TranslatedName, monster.Proto.Id, itemProto.TranslatedName);
 
-                    var itemInstance = _itemManager.CreateItem(itemProto, (byte) drop.Amount);
+                    var itemInstance = _itemManager.CreateItem(itemProto, (byte)drop.Amount);
                     items.Add(itemInstance);
                 }
             }
@@ -482,7 +485,7 @@ public class DropProvider : IDropProvider, ILoadable
 
     private (int SpiritStoneId, int Chance) DetermineDropMetinStone(MonsterEntity monster)
     {
-        var metinStoneId = (int) monster.Proto.Id;
+        var metinStoneId = (int)monster.Proto.Id;
 
         // calculate the lower bound
         var index = 0;
@@ -508,7 +511,7 @@ public class DropProvider : IDropProvider, ILoadable
         var stoneInfo = _options.MetinStones[index];
 
         // ItemProtoId of the spirit stone
-        var spiritStoneId = (int) _options.SpiritStones[CoreRandom.GenerateInt32(0, _options.SpiritStones.Count)];
+        var spiritStoneId = (int)_options.SpiritStones[CoreRandom.GenerateInt32(0, _options.SpiritStones.Count)];
         var rank = CoreRandom.GenerateInt32(0, 101);
 
         // determine the rank (+0, +1, +2...)
@@ -546,7 +549,7 @@ public class DropProvider : IDropProvider, ILoadable
 
         if (percent >= target)
         {
-            var itemProto = _itemManager.GetItem((uint) spiritStoneId);
+            var itemProto = _itemManager.GetItem((uint)spiritStoneId);
             if (itemProto is null)
             {
                 _logger.LogWarning("Could not find item proto for {ItemProtoId}", spiritStoneId);

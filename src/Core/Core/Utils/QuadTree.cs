@@ -1,11 +1,14 @@
+using System.Diagnostics;
 using System.Drawing;
 using QuantumCore.API.Core.Utils;
 using QuantumCore.API.Game.World;
 
 namespace QuantumCore.Core.Utils
 {
+    [DebuggerDisplay("{Bounds}")]
     public class QuadTree : IQuadTree
     {
+        private const int MinQuadSize = 16;
         public int X { get; private set; }
         public int Y { get; private set; }
         public int Width { get; private set; }
@@ -47,8 +50,17 @@ namespace QuantumCore.Core.Utils
 
             if (!Subdivided)
             {
-                // No place left but we aren't subdivded yet
-                Subdivide();
+                if (Width > MinQuadSize && Height > MinQuadSize)
+                {
+                    // No place left but we aren't subdivded yet
+                    Subdivide();
+                }
+                else
+                {
+                    // quad is too small to subdivide - increase capacity
+                    Capacity++;
+                    return Insert(obj);
+                }
             }
 
             // Add the object to one of our quadrants
@@ -117,6 +129,7 @@ namespace QuantumCore.Core.Utils
             {
                 return false;
             }
+
             if (xDist <= halfWidth || yDist <= halfHeight)
             {
                 return true;
@@ -127,22 +140,46 @@ namespace QuantumCore.Core.Utils
 
         private void Subdivide()
         {
-            var halfWidth = Width / 2;
-            var halfHeight = Height / 2;
+            var halfWidth1 = Width / 2;
+            var halfHeight1 = Height / 2;
 
-            _nw = new QuadTree(X, Y, halfWidth, halfHeight, Capacity);
-            _ne = new QuadTree(X, Y + halfHeight, halfWidth, halfHeight, Capacity);
-            _sw = new QuadTree(X + halfWidth, Y, halfWidth, halfHeight, Capacity);
-            _se = new QuadTree(X + halfWidth, Y + halfHeight, halfWidth, halfHeight, Capacity);
+            // when we have a none dividable number we have to make one quadrant bigger than the other to avoid gaps
+            var halfWidth2 = Width > 2 && Width % 2 > 0 ? Width / 2 + Width % 2 : halfWidth1;
+            var halfHeight2 = Height > 2 && Height % 2 > 0 ? Height / 2 + Height % 2 : halfHeight1;
+
+            _nw = new QuadTree(X, Y, halfWidth1, halfHeight1, Capacity);
+            _ne = new QuadTree(X, Y + halfHeight1, halfWidth1, halfHeight2, Capacity);
+            _sw = new QuadTree(X + halfWidth1, Y, halfWidth2, halfHeight1, Capacity);
+            _se = new QuadTree(X + halfWidth1, Y + halfHeight1, halfWidth2, halfHeight2, Capacity);
             Subdivided = true;
 
             // Move our own objects to our children
             foreach (var entity in Objects)
             {
-                if (_nw.Insert(entity) || _ne.Insert(entity) || _sw.Insert(entity) || _se.Insert(entity))
+                entity.LastQuadTree = null;
+                var addedOnNw = false;
+                var addedOnNe = false;
+                var addedOnSw = false;
+                var addedOnSe = false;
+                addedOnNw = _nw.Insert(entity);
+                if (!addedOnNw)
                 {
+                    addedOnNe = _ne.Insert(entity);
                 }
+
+                if (!addedOnNe)
+                {
+                    addedOnSw = _sw.Insert(entity);
+                }
+
+                if (!addedOnSw)
+                {
+                    addedOnSe = _se.Insert(entity);
+                }
+
+                Debug.Assert(addedOnNw || addedOnNe || addedOnSw || addedOnSe, "Entity must be added to any quadrant");
             }
+
             Objects.Clear();
         }
 
