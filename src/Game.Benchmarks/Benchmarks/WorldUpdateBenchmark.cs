@@ -60,7 +60,7 @@ public class WorldUpdateBenchmark
                             provider.GetRequiredService<IDropProvider>(),
                             provider.GetRequiredService<IItemManager>(),
                             provider.GetRequiredService<IServerBase>(),
-                            "test_map", 0, 0, 1024, 1024, provider
+                            "test_map", new Coordinates(), 1024, 1024, null, provider
                         )
                     });
 
@@ -103,10 +103,7 @@ public class WorldUpdateBenchmark
             .Replace(new ServiceDescriptor(typeof(IMonsterManager), _ =>
             {
                 var mock = Substitute.For<IMonsterManager>();
-                mock.GetMonster(42).Returns(new MonsterData
-                {
-                    Type = (byte) EEntityType.Monster
-                });
+                mock.GetMonster(42).Returns(new MonsterData {Type = (byte)EEntityType.Monster});
                 return mock;
             }, ServiceLifetime.Singleton))
             .BuildServiceProvider();
@@ -116,13 +113,7 @@ public class WorldUpdateBenchmark
 
         foreach (var i in Enumerable.Range(0, PlayerAmount))
         {
-            var player = new PlayerData
-            {
-                Name = i.ToString(),
-                PlayerClass = 1,
-                PositionX = 1,
-                PositionY = 1
-            };
+            var player = new PlayerData {Name = i.ToString(), PlayerClass = 1, PositionX = 1, PositionY = 1};
             var conn = Substitute.For<IGameConnection>();
             var entity = ActivatorUtilities.CreateInstance<PlayerEntity>(services, _world, player, conn);
             _world.SpawnEntity(entity);

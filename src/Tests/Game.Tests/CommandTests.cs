@@ -1,3 +1,4 @@
+using System.Text;
 using AutoBogus;
 using Bogus;
 using FluentAssertions;
@@ -7,7 +8,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.FileProviders;
-using Microsoft.Extensions.FileProviders.Physical;
 using Microsoft.Extensions.Options;
 using NSubstitute;
 using QuantumCore.API;
@@ -100,31 +100,42 @@ public class CommandTests : IAsyncLifetime
     {
         _playerDataFaker = new AutoFaker<PlayerData>()
             .RuleFor(x => x.Name, r => r.Name.FirstName()) // Mostly due to command param handling
-            .RuleFor(x => x.Level, _ => (byte) 1)
-            .RuleFor(x => x.St, _ => (byte) 1)
-            .RuleFor(x => x.Ht, _ => (byte) 1)
-            .RuleFor(x => x.Dx, _ => (byte) 1)
-            .RuleFor(x => x.Gold, _ => (uint) 0)
-            .RuleFor(x => x.Experience, _ => (uint) 0)
-            .RuleFor(x => x.PositionX, _ => (int) (10 * Map.MapUnit))
-            .RuleFor(x => x.PositionY, _ => (int) (26 * Map.MapUnit))
+            .RuleFor(x => x.Level, _ => (byte)1)
+            .RuleFor(x => x.Iq, _ => (byte)1)
+            .RuleFor(x => x.St, _ => (byte)1)
+            .RuleFor(x => x.Ht, _ => (byte)1)
+            .RuleFor(x => x.Dx, _ => (byte)1)
+            .RuleFor(x => x.Gold, _ => (uint)0)
+            .RuleFor(x => x.Empire, _ => EEmpire.Chunjo)
+            .RuleFor(x => x.Experience, _ => (uint)0)
+            .RuleFor(x => x.PositionX, _ => (int)(10 * Map.MapUnit))
+            .RuleFor(x => x.PositionY, _ => (int)(26 * Map.MapUnit))
             .RuleFor(x => x.PlayTime, _ => 0u)
-            .RuleFor(x => x.SkillGroup, _ => (byte) 0);
+            .RuleFor(x => x.SkillGroup, _ => (byte)0)
+            .RuleFor(x => x.PlayerClass, _ => (byte)0)
+            .Ignore(x => x.Health)
+            .Ignore(x => x.Mana);
         var monsterManagerMock = Substitute.For<IMonsterManager>();
         monsterManagerMock.GetMonster(Arg.Any<uint>()).Returns(callerInfo =>
             new AutoFaker<MonsterData>().RuleFor(x => x.Id, _ => callerInfo.Arg<uint>()).Generate());
         monsterManagerMock.GetMonsters().Returns([]);
         var experienceManagerMock = Substitute.For<IExperienceManager>();
         experienceManagerMock.GetNeededExperience(Arg.Any<byte>()).Returns(1000u);
-        experienceManagerMock.MaxLevel.Returns((byte) 100);
-        var jobManagerMock = Substitute.For<IJobManager>();
-        jobManagerMock.Get(Arg.Any<byte>()).Returns(new Job());
+        experienceManagerMock.MaxLevel.Returns((byte)100);
         var itemManagerMock = Substitute.For<IItemManager>();
         itemManagerMock.GetItem(Arg.Any<uint>()).Returns(call => new AutoFaker<ItemData>()
             .RuleFor(x => x.Id, _ => call.Arg<uint>())
-            .RuleFor(x => x.Size, _ => (byte) 1)
-            .RuleFor(x => x.WearFlags, _ => (byte) EWearFlags.Weapon)
-            .RuleFor(x => x.Values, _ => new List<int> {0, 0, 0, 10, 16, 0})
+            .RuleFor(x => x.Size, _ => (byte)1)
+            .RuleFor(x => x.WearFlags, _ => (byte)EWearFlags.Weapon)
+            .RuleFor(x => x.Values, _ => new List<int>
+            {
+                0,
+                0,
+                0,
+                10,
+                16,
+                0
+            })
             .Generate());
         var cacheManagerMock = Substitute.For<ICacheManager>();
         var redisListWrapperMock = Substitute.For<IRedisListWrapper<Guid>>();
@@ -135,6 +146,23 @@ public class CommandTests : IAsyncLifetime
         cacheManagerMock.CreateList<Guid>(Arg.Any<string>()).Returns(redisListWrapperMock);
         cacheManagerMock.Subscribe().Returns(redisSubscriberWrapperMock);
         _skillManager = Substitute.For<ISkillManager>();
+        var fileProvider = Substitute.For<IFileProvider>();
+        fileProvider.GetFileInfo("maps/map_b2/Town.txt").Returns(_ =>
+        {
+            var fileInfo = Substitute.For<IFileInfo>();
+            fileInfo.Exists.Returns(true);
+            fileInfo.CreateReadStream().Returns(new MemoryStream("675 1413"u8.ToArray()));
+            return fileInfo;
+        });
+        fileProvider.GetFileInfo("atlasinfo.txt").Returns(_ =>
+        {
+            var fileInfo = Substitute.For<IFileInfo>();
+            fileInfo.Exists.Returns(true);
+            fileInfo.CreateReadStream().Returns(new MemoryStream(Encoding.UTF8.GetBytes(
+                $"map_a2	{Map.MapUnit * 10}	{Map.MapUnit * 26}	6	6\n" +
+                $"map_b2	{Map.MapUnit * 10}	{Map.MapUnit * 26}	6	6")));
+            return fileInfo;
+        });
         _services = new ServiceCollection()
             .AddCoreServices(new EmptyPluginCatalog(), new ConfigurationBuilder().Build())
             .AddGameServices()
@@ -157,24 +185,17 @@ public class CommandTests : IAsyncLifetime
             .Replace(new ServiceDescriptor(typeof(IMonsterManager), _ => monsterManagerMock, ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(IItemManager), _ => itemManagerMock, ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(ICacheManager), _ => cacheManagerMock, ServiceLifetime.Singleton))
-            .Replace(new ServiceDescriptor(typeof(IJobManager), _ => jobManagerMock, ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(IGuildManager), _ => Substitute.For<IGuildManager>(),
                 ServiceLifetime.Scoped))
             .Replace(new ServiceDescriptor(typeof(IExperienceManager), _ => experienceManagerMock,
                 ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(ISkillManager), _ => _skillManager, ServiceLifetime.Singleton))
+            .Replace(new ServiceDescriptor(typeof(IFileProvider), _ => fileProvider, ServiceLifetime.Singleton))
             .AddSingleton<IConfiguration>(_ => new ConfigurationBuilder()
+                .AddQuantumCoreDefaults()
                 .AddInMemoryCollection(new Dictionary<string, string?>
                 {
-                    {"Game:Commands:StrictMode", "true"},
-                    {"maps:0", "map_a2"},
-                    {"maps:1", "map_b2"},
-                    {"empire:0:x", "10"},
-                    {"empire:0:y", "15"},
-                    {"empire:1:x", "20"},
-                    {"empire:1:y", "25"},
-                    {"empire:2:x", "30"},
-                    {"empire:2:y", "35"},
+                    {"Game:Commands:StrictMode", "true"}, {"maps:0", "map_a2"}, {"maps:1", "map_b2"},
                 })
                 .Build())
             .AddSingleton(Substitute.For<IDbPlayerRepository>())
@@ -183,13 +204,6 @@ public class CommandTests : IAsyncLifetime
             .AddSingleton<IPlayerEntity, PlayerEntity>()
             .AddSingleton(_ => _playerDataFaker.Generate())
             .AddSingleton(Substitute.For<IGameServer>())
-            .AddSingleton(_ =>
-            {
-                var mock = Substitute.For<IFileProvider>();
-                mock.GetFileInfo(Arg.Any<string>()).Returns(call =>
-                    new PhysicalFileInfo(new FileInfo(Path.Combine("data", call.Arg<string>()))));
-                return mock;
-            })
             .BuildServiceProvider();
         _itemManager = _services.GetRequiredService<IItemManager>();
         _commandManager = _services.GetRequiredService<ICommandManager>();
@@ -214,12 +228,7 @@ public class CommandTests : IAsyncLifetime
     [Fact]
     public async Task ClearInventoryCommand()
     {
-        await _player.Inventory.PlaceItem(new ItemInstance
-        {
-            Id = Guid.NewGuid(),
-            Count = 1,
-            ItemId = 1
-        });
+        await _player.Inventory.PlaceItem(new ItemInstance {Id = Guid.NewGuid(), Count = 1, ItemId = 1});
 
         Assert.NotEmpty(_player.Inventory.Items);
         await _commandManager.Handle(_connection, "/ip");
@@ -235,15 +244,15 @@ public class CommandTests : IAsyncLifetime
         world.SpawnEntity(_player);
         world.SpawnEntity(player2);
         world.Update(0); // spawn entities
-        player2.Move((int) (11 * Map.MapUnit), (int) (27 * Map.MapUnit));
+        player2.Move((int)(11 * Map.MapUnit), (int)(27 * Map.MapUnit));
 
-        Assert.Equal((int) (10 * Map.MapUnit), _player.PositionX);
-        Assert.Equal((int) (26 * Map.MapUnit), _player.PositionY);
+        Assert.Equal((int)(10 * Map.MapUnit), _player.PositionX);
+        Assert.Equal((int)(26 * Map.MapUnit), _player.PositionY);
 
         await _commandManager.Handle(_connection, $"/tp \"{player2.Name}\"");
 
-        Assert.Equal((int) (11 * Map.MapUnit), _player.PositionX);
-        Assert.Equal((int) (27 * Map.MapUnit), _player.PositionY);
+        Assert.Equal((int)(11 * Map.MapUnit), _player.PositionX);
+        Assert.Equal((int)(27 * Map.MapUnit), _player.PositionY);
     }
 
     [Fact]
@@ -254,16 +263,16 @@ public class CommandTests : IAsyncLifetime
         world.SpawnEntity(_player);
         world.SpawnEntity(player2);
         world.Update(0); // spawn entities
-        player2.Move((int) (11 * Map.MapUnit), (int) (27 * Map.MapUnit));
+        player2.Move((int)(11 * Map.MapUnit), (int)(27 * Map.MapUnit));
 
 
-        Assert.Equal((int) (11 * Map.MapUnit), player2.PositionX);
-        Assert.Equal((int) (27 * Map.MapUnit), player2.PositionY);
+        Assert.Equal((int)(11 * Map.MapUnit), player2.PositionX);
+        Assert.Equal((int)(27 * Map.MapUnit), player2.PositionY);
 
         await _commandManager.Handle(_connection, $"/tphere \"{player2.Name}\"");
 
-        Assert.Equal((int) (10 * Map.MapUnit), player2.PositionX);
-        Assert.Equal((int) (26 * Map.MapUnit), player2.PositionY);
+        Assert.Equal((int)(10 * Map.MapUnit), player2.PositionX);
+        Assert.Equal((int)(26 * Map.MapUnit), player2.PositionY);
     }
 
     [Fact]
@@ -272,7 +281,7 @@ public class CommandTests : IAsyncLifetime
         var item = new ItemInstance {ItemId = 1, Count = 1};
         var wearSlot = _player.Inventory.EquipmentWindow.GetWearPosition(_itemManager, item.ItemId);
 
-        _player.SetItem(item, (byte) WindowType.Inventory, (ushort) wearSlot);
+        _player.SetItem(item, (byte)WindowType.Inventory, (ushort)wearSlot);
 
         await _commandManager.Handle(_connection, "debug_damage");
         // simple calculation just for this test
@@ -316,11 +325,8 @@ public class CommandTests : IAsyncLifetime
         await _commandManager.Handle(_connection, "/give $self 1 10");
 
         _player.Inventory.Items.Should().NotBeEmpty();
-        _player.Inventory.Items.Should().ContainEquivalentOf(new ItemInstance
-        {
-            ItemId = 1,
-            Count = 10
-        }, cfg => cfg.Including(x => x.ItemId).Including(x => x.Count));
+        _player.Inventory.Items.Should().ContainEquivalentOf(new ItemInstance {ItemId = 1, Count = 10},
+            cfg => cfg.Including(x => x.ItemId).Including(x => x.Count));
     }
 
     [Fact]
@@ -334,11 +340,8 @@ public class CommandTests : IAsyncLifetime
         await _commandManager.Handle(_connection, $"/give \"{player2.Name}\" 1 10");
 
         player2.Inventory.Items.Should().NotBeEmpty();
-        player2.Inventory.Items.Should().ContainEquivalentOf(new ItemInstance
-        {
-            ItemId = 1,
-            Count = 10
-        }, cfg => cfg.Including(x => x.ItemId).Including(x => x.Count));
+        player2.Inventory.Items.Should().ContainEquivalentOf(new ItemInstance {ItemId = 1, Count = 10},
+            cfg => cfg.Including(x => x.ItemId).Including(x => x.Count));
     }
 
     [Fact]
@@ -346,10 +349,9 @@ public class CommandTests : IAsyncLifetime
     {
         await _commandManager.Handle(_connection, "/give missing 1 10");
 
-        ((MockedGameConnection) _connection).SentMessages.Should().ContainEquivalentOf(new ChatOutcoming
-        {
-            Message = "Target not found"
-        }, cfg => cfg.Including(x => x.Message));
+        ((MockedGameConnection)_connection).SentMessages.Should()
+            .ContainEquivalentOf(new ChatOutcoming {Message = "Target not found"},
+                cfg => cfg.Including(x => x.Message));
     }
 
     [Fact]
@@ -381,15 +383,15 @@ public class CommandTests : IAsyncLifetime
         world.SpawnEntity(_player);
         world.Update(0); // spawn entities
 
-        _player.Move((int) (Map.MapUnit * 10), (int) (Map.MapUnit * 26));
+        _player.Move((int)(Map.MapUnit * 10), (int)(Map.MapUnit * 26));
 
-        Assert.Equal((int) (10 * Map.MapUnit), _player.PositionX);
-        Assert.Equal((int) (26 * Map.MapUnit), _player.PositionY);
+        Assert.Equal((int)(10 * Map.MapUnit), _player.PositionX);
+        Assert.Equal((int)(26 * Map.MapUnit), _player.PositionY);
 
         await _commandManager.Handle(_connection, $"/goto {11} {27}");
 
-        Assert.Equal((int) (_player.Map.PositionX + 11 * 100), _player.PositionX);
-        Assert.Equal((int) (_player.Map.PositionY + 27 * 100), _player.PositionY);
+        Assert.Equal((int)(_player.Map.Position.X + 11 * 100), _player.PositionX);
+        Assert.Equal((int)(_player.Map.Position.Y + 27 * 100), _player.PositionY);
     }
 
     [Fact]
@@ -400,14 +402,14 @@ public class CommandTests : IAsyncLifetime
         world.Update(0); // spawn entities
 
 
-        Assert.Equal((int) (10 * Map.MapUnit), _player.PositionX);
-        Assert.Equal((int) (26 * Map.MapUnit), _player.PositionY);
+        Assert.Equal((int)(10 * Map.MapUnit), _player.PositionX);
+        Assert.Equal((int)(26 * Map.MapUnit), _player.PositionY);
 
         await _commandManager.Handle(_connection, "/goto --map map_b2");
 
         // target position is half of X & Y
-        Assert.Equal((int) (13 * Map.MapUnit), _player.PositionX);
-        Assert.Equal((int) (29 * Map.MapUnit), _player.PositionY);
+        Assert.Equal((int)(13 * Map.MapUnit), _player.PositionX);
+        Assert.Equal((int)(29 * Map.MapUnit), _player.PositionY);
     }
 
     [Fact]
@@ -443,10 +445,9 @@ public class CommandTests : IAsyncLifetime
     {
         await _commandManager.Handle(_connection, "/kick something");
 
-        (_connection as MockedGameConnection).SentMessages.Should().ContainEquivalentOf(new ChatOutcoming
-        {
-            Message = "Target not found"
-        }, cfg => cfg.Including(x => x.Message));
+        (_connection as MockedGameConnection).SentMessages.Should()
+            .ContainEquivalentOf(new ChatOutcoming {Message = "Target not found"},
+                cfg => cfg.Including(x => x.Message));
     }
 
     [Fact]
@@ -498,10 +499,8 @@ public class CommandTests : IAsyncLifetime
         world.SpawnEntity(_player);
 
         world.GetPlayer(_player.Name).Should().NotBeNull();
-        (_connection as MockedGameConnection).SentPhases.Should().NotContainEquivalentOf(new GCPhase
-        {
-            Phase = EPhases.Select
-        });
+        (_connection as MockedGameConnection).SentPhases.Should()
+            .NotContainEquivalentOf(new GCPhase {Phase = EPhases.Select});
 
         _player.Player.PlayTime = 0;
         _connection.Server.ServerTime.Returns(60000);
@@ -510,10 +509,8 @@ public class CommandTests : IAsyncLifetime
 
         _player.GetPoint(EPoints.PlayTime).Should().Be(1);
         _player.Connection.Phase.Should().Be(EPhases.Select);
-        (_connection as MockedGameConnection).SentPhases.Should().ContainEquivalentOf(new GCPhase
-        {
-            Phase = EPhases.Select
-        });
+        (_connection as MockedGameConnection).SentPhases.Should()
+            .ContainEquivalentOf(new GCPhase {Phase = EPhases.Select});
         world.GetPlayer(_player.Name).Should().BeNull();
     }
 
@@ -531,15 +528,46 @@ public class CommandTests : IAsyncLifetime
     }
 
     [Fact]
-    public void RestartHereCommand()
+    public async Task RestartHereCommand()
     {
-        // TODO
+        var world = await PrepareWorldAsync();
+        world.SpawnEntity(_player);
+
+        _player.Health.Should().Be(676L);
+        _player.Mana.Should().Be(264L);
+        _player.PositionX.Should().Be(256000);
+        _player.PositionY.Should().Be(665600);
+        _player.Die();
+
+        await _commandManager.Handle(_connection, "/restart_here");
+
+        _player.Health.Should().Be(PlayerConstants.RESPAWN_HEALTH);
+        _player.Mana.Should().Be(PlayerConstants.RESPAWN_MANA);
+        _player.PositionX.Should().Be(256000);
+        _player.PositionY.Should().Be(665600);
     }
 
     [Fact]
-    public void RestartTownCommand()
+    public async Task RestartTownCommand()
     {
-        // TODO
+        var world = await PrepareWorldAsync();
+        world.SpawnEntity(_player);
+        world.Update(0.1);
+        _player.Map.Should().NotBeNull();
+
+        _player.Health.Should().Be(676L);
+        _player.Mana.Should().Be(264L);
+        _player.PositionX.Should().Be(256000);
+        _player.PositionY.Should().Be(665600);
+        _player.Die();
+
+        await _commandManager.Handle(_connection, "/restart_town");
+
+        _player.Health.Should().Be(PlayerConstants.RESPAWN_HEALTH);
+        _player.Mana.Should().Be(PlayerConstants.RESPAWN_MANA);
+
+        _player.PositionX.Should().Be((int)(_player.Map.Position.X + 675 * Map.SPAWN_POSITION_MULTIPLIER));
+        _player.PositionY.Should().Be((int)(_player.Map.Position.Y + 1413 * Map.SPAWN_POSITION_MULTIPLIER));
     }
 
     [Fact]
@@ -548,7 +576,7 @@ public class CommandTests : IAsyncLifetime
         var world = await PrepareWorldAsync();
         world.SpawnEntity(_player);
         world.Update(0); // spawn entities
-        _player.Move((int) (Map.MapUnit * 13), (int) (Map.MapUnit * 29)); // center of the map
+        _player.Move((int)(Map.MapUnit * 13), (int)(Map.MapUnit * 29)); // center of the map
         await File.WriteAllTextAsync("settings.toml", @"maps = [""map_a2"", ""map_b2""]");
         _player.Map.Entities.Count.Should().Be(1);
 
@@ -564,7 +592,7 @@ public class CommandTests : IAsyncLifetime
         var world = await PrepareWorldAsync();
         world.SpawnEntity(_player);
         world.Update(0); // spawn entities
-        _player.Move((int) (Map.MapUnit * 13), (int) (Map.MapUnit * 29)); // center of the map
+        _player.Move((int)(Map.MapUnit * 13), (int)(Map.MapUnit * 29)); // center of the map
         await File.WriteAllTextAsync("settings.toml", @"maps = [""map_a2"", ""map_b2""]");
         _player.Map.Entities.Count.Should().Be(1);
 
@@ -588,8 +616,6 @@ public class CommandTests : IAsyncLifetime
     private async Task<IWorld> PrepareWorldAsync()
     {
         if (!Directory.Exists("data")) Directory.CreateDirectory("data");
-        await File.WriteAllTextAsync("data/atlasinfo.txt", $"map_a2	{Map.MapUnit * 10}	{Map.MapUnit * 26}	6	6\n" +
-                                                           $"map_b2	{Map.MapUnit * 10}	{Map.MapUnit * 26}	6	6");
         await Task.WhenAll(_services.GetServices<ILoadable>().Select(x => x.LoadAsync()));
         var world = _services.GetRequiredService<IWorld>();
         await world.LoadAsync();
@@ -609,12 +635,7 @@ public class CommandTests : IAsyncLifetime
         var commandRepo = _services.GetRequiredService<ICommandPermissionRepository>();
         commandRepo.GetPermissionsForGroupAsync(Arg.Any<Guid>()).Returns(newPermissions);
         commandRepo.GetGroupsAsync().Returns([
-            new PermissionGroup
-            {
-                Id = updatedGroup,
-                Name = groupName,
-                Permissions = newPermissions
-            }
+            new PermissionGroup {Id = updatedGroup, Name = groupName, Permissions = newPermissions}
         ]);
 
         cacheManager.CreateList<Guid>(Arg.Any<string>())
@@ -627,19 +648,15 @@ public class CommandTests : IAsyncLifetime
         _commandManager.Groups.Keys.Should().Contain(updatedGroup);
         _commandManager.Groups.Values.Should().ContainEquivalentOf(new PermissionGroup
         {
-            Id = updatedGroup,
-            Name = groupName,
-            Permissions = newPermissions
+            Id = updatedGroup, Name = groupName, Permissions = newPermissions
         });
 
         await _commandManager.ReloadAsync();
 
         await _player.ReloadPermissions();
 
-        ((MockedGameConnection) _connection).SentMessages.Should().ContainEquivalentOf(new ChatOutcoming
-        {
-            Message = "Permissions reloaded"
-        }, cfg => cfg.Including(x => x.Message));
+        ((MockedGameConnection)_connection).SentMessages.Should().ContainEquivalentOf(
+            new ChatOutcoming {Message = "Permissions reloaded"}, cfg => cfg.Including(x => x.Message));
     }
 
     [Fact]
@@ -652,11 +669,9 @@ public class CommandTests : IAsyncLifetime
         await _commandManager.Handle(_connection, "/in_game_mall");
 
         // Assert
-        ((MockedGameConnection) _connection).SentMessages.Should().ContainEquivalentOf(new ChatOutcoming
-        {
-            Message = "mall test",
-            MessageType = ChatMessageTypes.Command
-        }, cfg => cfg.Including(x => x.Message));
+        ((MockedGameConnection)_connection).SentMessages.Should().ContainEquivalentOf(
+            new ChatOutcoming {Message = "mall test", MessageType = ChatMessageTypes.Command},
+            cfg => cfg.Including(x => x.Message));
     }
 
     [Fact]
@@ -666,11 +681,11 @@ public class CommandTests : IAsyncLifetime
 
         await _commandManager.Handle(_connection, "/user");
 
-        ((MockedGameConnection) _connection).SentMessages.Should().ContainEquivalentOf(new ChatOutcoming
-        {
-            Message = $"Lv{_player.GetPoint(EPoints.Level)} {_player.Name}",
-            MessageType = ChatMessageTypes.Info
-        }, cfg => cfg.Including(x => x.Message));
+        ((MockedGameConnection)_connection).SentMessages.Should().ContainEquivalentOf(
+            new ChatOutcoming
+            {
+                Message = $"Lv{_player.GetPoint(EPoints.Level)} {_player.Name}", MessageType = ChatMessageTypes.Info
+            }, cfg => cfg.Including(x => x.Message));
     }
 
     [Fact]
@@ -682,10 +697,8 @@ public class CommandTests : IAsyncLifetime
 
         _player.GetPoint(EPoints.Level).Should().Be(2);
 
-        ((MockedGameConnection) _connection).SentMessages.Should().ContainEquivalentOf(new ChatOutcoming
-        {
-            Message = "You have advanced to level 2"
-        }, cfg => cfg.Including(x => x.Message));
+        ((MockedGameConnection)_connection).SentMessages.Should().ContainEquivalentOf(
+            new ChatOutcoming {Message = "You have advanced to level 2"}, cfg => cfg.Including(x => x.Message));
     }
 
     [Fact]
@@ -697,10 +710,8 @@ public class CommandTests : IAsyncLifetime
 
         _player.GetPoint(EPoints.Level).Should().Be(11);
 
-        ((MockedGameConnection) _connection).SentMessages.Should().ContainEquivalentOf(new ChatOutcoming
-        {
-            Message = "You have advanced to level 11"
-        }, cfg => cfg.Including(x => x.Message));
+        ((MockedGameConnection)_connection).SentMessages.Should().ContainEquivalentOf(
+            new ChatOutcoming {Message = "You have advanced to level 11"}, cfg => cfg.Including(x => x.Message));
     }
 
     [Fact]
@@ -716,10 +727,8 @@ public class CommandTests : IAsyncLifetime
 
         player2.GetPoint(EPoints.Level).Should().Be(5);
 
-        ((MockedGameConnection) _connection).SentMessages.Should().ContainEquivalentOf(new ChatOutcoming
-        {
-            Message = "You have advanced to level 5"
-        }, cfg => cfg.Including(x => x.Message));
+        ((MockedGameConnection)_connection).SentMessages.Should().ContainEquivalentOf(
+            new ChatOutcoming {Message = "You have advanced to level 5"}, cfg => cfg.Including(x => x.Message));
     }
 
     [Fact]
@@ -735,7 +744,7 @@ public class CommandTests : IAsyncLifetime
 
         // Assert
         _player.Player.SkillGroup.Should().Be(1);
-        ((MockedGameConnection) _connection).SentPackets.Should()
+        ((MockedGameConnection)_connection).SentPackets.Should()
             .ContainEquivalentOf(new ChangeSkillGroup {SkillGroup = 1});
     }
 
@@ -751,7 +760,7 @@ public class CommandTests : IAsyncLifetime
 
         // Assert
         _player.Player.SkillGroup.Should().Be(0);
-        ((MockedGameConnection) _connection).SentPackets.Should()
+        ((MockedGameConnection)_connection).SentPackets.Should()
             .NotContainEquivalentOf(new ChangeSkillGroup {SkillGroup = 1});
     }
 
@@ -767,7 +776,7 @@ public class CommandTests : IAsyncLifetime
 
         // Assert
         _player.Player.SkillGroup.Should().Be(0);
-        ((MockedGameConnection) _connection).SentPackets.Should()
+        ((MockedGameConnection)_connection).SentPackets.Should()
             .NotContainEquivalentOf(new ChangeSkillGroup {SkillGroup = 4});
     }
 
@@ -782,14 +791,12 @@ public class CommandTests : IAsyncLifetime
 
         _skillManager.GetSkill(skillId).Returns(new SkillData
         {
-            Id = skillId,
-            Type = (ESkillCategoryType) (_player.Player.PlayerClass + 1),
-            Flag = ESkillFlag.Attack
+            Id = skillId, Type = (ESkillCategoryType)(_player.Player.PlayerClass + 1), Flag = ESkillFlag.Attack
         });
         _player.Skills.SetSkillGroup(1);
 
         // Act
-        await _commandManager.Handle(_connection, $"/skillup {(uint) skillId}");
+        await _commandManager.Handle(_connection, $"/skillup {(uint)skillId}");
 
         // Assert
         var skill = _player.Skills[skillId];
@@ -807,16 +814,14 @@ public class CommandTests : IAsyncLifetime
 
         _skillManager.GetSkill(skillId).Returns(new SkillData
         {
-            Id = skillId,
-            Type = (ESkillCategoryType) (_player.Player.PlayerClass + 1),
-            Flag = ESkillFlag.Attack
+            Id = skillId, Type = (ESkillCategoryType)(_player.Player.PlayerClass + 1), Flag = ESkillFlag.Attack
         });
         _player.Skills.SetSkillGroup(1);
         _player.Skills[skillId].Level = 19;
         _player.Skills[skillId].MasterType = ESkillMasterType.Normal;
 
         // Act
-        await _commandManager.Handle(_connection, $"/skillup {(uint) skillId}");
+        await _commandManager.Handle(_connection, $"/skillup {(uint)skillId}");
 
         // Assert
         var skill = _player.Skills[skillId];
