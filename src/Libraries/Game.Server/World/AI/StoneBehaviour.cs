@@ -10,7 +10,7 @@ using QuantumCore.Game.World.Entities;
 
 namespace QuantumCore.Game.World.AI;
 
-public class StoneBehaviour: IBehaviour
+public class StoneBehaviour : IBehaviour
 {
     private readonly IWorld _world;
     private IEntity _entity;
@@ -51,7 +51,18 @@ public class StoneBehaviour: IBehaviour
 
         var groupsFrom = mob.Proto.AttackSpeed;
         var groupsTo = mob.Proto.MoveSpeed;
-        _groups = [..Enumerable.Range(groupsFrom, groupsTo - groupsFrom).Select(x => _world.GetGroup((uint)x)).Cast<SpawnGroup>()];
+        _groups =
+        [
+            ..Enumerable.Range(groupsFrom, groupsTo - groupsFrom)
+                .Select(x => _world.GetGroup((uint)x))
+                .Where(x => x is not null)
+                .Cast<SpawnGroup>()
+        ];
+        if (_groups.IsEmpty)
+        {
+            _logger.LogWarning("Stone has no groups. You are probably missing the group.txt or group_group.txt");
+        }
+
         _chunkSize = (uint)(mob.Proto.Hp / (float)HealthChunkCount);
         _lastChunk = HealthChunkCount;
     }
@@ -78,6 +89,7 @@ public class StoneBehaviour: IBehaviour
                     spawnedEntity.Die();
                 }
             }
+
             _spawnedEntities.Clear();
         }
     }
@@ -92,7 +104,8 @@ public class StoneBehaviour: IBehaviour
                 var y = _entity.PositionY + RandomNumberGenerator.GetInt32(-1500, 1501);
 
                 // Create entity instance
-                var monster = new MonsterEntity(_monsterManager, _dropProvider, _animationManager, _serviceProvider, _entity.Map!, _logger,
+                var monster = new MonsterEntity(_monsterManager, _dropProvider, _animationManager, _serviceProvider,
+                    _entity.Map!, _logger,
                     _itemManager, member, x, y);
                 _world.SpawnEntity(monster);
                 _spawnedEntities.Add(monster);
