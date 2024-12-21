@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Security.Cryptography;
+using EnumsNET;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game.World;
@@ -24,8 +25,10 @@ namespace QuantumCore.Game.World.AI
         private int _lastAttackX;
         private int _lastAttackY;
 
-        private IEntity? _targetEntity;
+        public IEntity? Target { get; set; }
         private readonly Dictionary<uint, uint> _damageMap = new();
+
+        public bool IsAggressive { get; set; }
 
         private const int MoveRadius = 1000;
 
@@ -44,6 +47,7 @@ namespace QuantumCore.Game.World.AI
 
             _spawnX = entity.PositionX;
             _spawnY = entity.PositionY;
+            IsAggressive = entity is MonsterEntity mob && mob.Proto.AiFlag.HasAnyFlags(EAiFlags.Aggressive);
         }
 
         private void CalculateNextMovement()
@@ -82,7 +86,7 @@ namespace QuantumCore.Game.World.AI
             var targetPositionX = target.PositionX + directionX * _proto.AttackRange * 0.75;
             var targetPositionY = target.PositionY + directionY * _proto.AttackRange * 0.75;
 
-            _entity.Goto((int) targetPositionX, (int) targetPositionY);
+            _entity.Goto((int)targetPositionX, (int)targetPositionY);
         }
 
         public void Update(double elapsedTime)
@@ -92,42 +96,42 @@ namespace QuantumCore.Game.World.AI
                 return;
             }
 
-            if (_targetEntity != null)
+            if (Target != null)
             {
-                if (_targetEntity.Dead || _targetEntity.Map != _entity.Map)
+                if (Target.Dead || Target.Map != _entity.Map)
                 {
                     // Switch to next target if available
-                    _damageMap.Remove(_targetEntity.Vid);
-                    _targetEntity = NextTarget();
+                    _damageMap.Remove(Target.Vid);
+                    Target = NextTarget();
                 }
 
-                if (_targetEntity != null)
+                if (Target != null)
                 {
                     if (_entity.State == EEntityState.Moving)
                     {
                         // Check if current movement goal is in attack range of our target
                         var movementDistance = MathUtils.Distance(_entity.TargetPositionX, _entity.TargetPositionY,
-                            _targetEntity.PositionX, _targetEntity.PositionY);
+                            Target.PositionX, Target.PositionY);
                         if (movementDistance > _proto.AttackRange)
                         {
-                            MoveTo(_targetEntity);
+                            MoveTo(Target);
                         }
                     }
                     else
                     {
                         // Check if we can potentially attack or not
-                        var distance = MathUtils.Distance(_entity.PositionX, _entity.PositionY, _targetEntity.PositionX,
-                            _targetEntity.PositionY);
+                        var distance = MathUtils.Distance(_entity.PositionX, _entity.PositionY, Target.PositionX,
+                            Target.PositionY);
                         if (distance > _proto.AttackRange)
                         {
-                            MoveTo(_targetEntity);
+                            MoveTo(Target);
                         }
                         else
                         {
                             _attackCooldown -= elapsedTime;
                             if (_attackCooldown <= 0)
                             {
-                                Attack(_targetEntity);
+                                Attack(Target);
                                 _attackCooldown += 2000; // todo use attack speed
                             }
                         }
@@ -137,7 +141,7 @@ namespace QuantumCore.Game.World.AI
 
             if (_entity.State == EEntityState.Idle)
             {
-                _nextMovementIn -= (int) elapsedTime;
+                _nextMovementIn -= (int)elapsedTime;
 
                 if (_nextMovementIn <= 0)
                 {
@@ -156,19 +160,19 @@ namespace QuantumCore.Game.World.AI
             }
 
             monster.Rotation =
-                (float) MathUtils.Rotation(victim.PositionX - monster.PositionX, victim.PositionY - monster.PositionY);
+                (float)MathUtils.Rotation(victim.PositionX - monster.PositionX, victim.PositionY - monster.PositionY);
 
             monster.Attack(victim, monster.Proto.BattleType);
 
             // Send attack packet
             var packet = new CharacterMoveOut
             {
-                MovementType = (byte) CharacterMove.CharacterMovementType.Attack,
-                Rotation = (byte) (monster.Rotation / 5),
+                MovementType = (byte)CharacterMove.CharacterMovementType.Attack,
+                Rotation = (byte)(monster.Rotation / 5),
                 Vid = monster.Vid,
                 PositionX = monster.PositionX,
                 PositionY = monster.PositionY,
-                Time = (uint) GameServer.Instance.ServerTime
+                Time = (uint)GameServer.Instance.ServerTime
             };
             foreach (var entity in monster.NearbyEntities)
             {
@@ -214,27 +218,31 @@ namespace QuantumCore.Game.World.AI
             }
 
             // Check if target has to be changed
-            if (_targetEntity?.Map != _entity.Map)
+            if (Target?.Map != _entity.Map)
             {
-                _targetEntity = attacker;
+                Target = attacker;
                 return;
             }
 
-            if (_targetEntity is null) return;
-            if (_targetEntity.Vid == attacker.Vid)
+            if (Target is null) return;
+            if (Target.Vid == attacker.Vid)
             {
                 return;
             }
 
-            if (_damageMap[_targetEntity.Vid] < _damageMap[attacker.Vid])
+            if (_damageMap[Target.Vid] < _damageMap[attacker.Vid])
             {
-                _targetEntity = attacker;
+                Target = attacker;
             }
         }
 
         public void OnNewNearbyEntity(IEntity entity)
         {
-            // todo implement aggressive flag
+            if (IsAggressive && entity is IPlayerEntity && Target is null)
+            {
+                Target = entity;
+                // TODO stop following at some point
+            }
         }
     }
 }
