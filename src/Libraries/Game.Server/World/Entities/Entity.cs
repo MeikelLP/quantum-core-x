@@ -183,7 +183,7 @@ namespace QuantumCore.Game.World.Entities
             MovementDuration = 0;
         }
 
-        public abstract byte GetBattleType();
+        public abstract EBattleType GetBattleType();
         public abstract int GetMinDamage();
         public abstract int GetMaxDamage();
         public abstract int GetBonusDamage();
@@ -191,32 +191,25 @@ namespace QuantumCore.Game.World.Entities
         public abstract void SetPoint(EPoints point, uint value);
         public abstract uint GetPoint(EPoints point);
 
-        public void Attack(IEntity victim, byte type)
+        public void Attack(IEntity victim)
         {
-            if (type == 0)
+            switch (GetBattleType())
             {
-                var battleType = GetBattleType();
-                switch (battleType)
-                {
-                    case 0:
-                    case 4:
-                    case 5:
-                    case 6:
-                    case 7:
-                        // melee sort attack
-                        MeleeAttack(victim);
-                        break;
-                    case 1:
-                        // todo range attack
-                        break;
-                    case 2:
-                        // todo magic attack
-                        break;
-                }
-            }
-            else
-            {
-                // todo implement skills
+                case EBattleType.Melee:
+                case EBattleType.Power:
+                case EBattleType.Tanker:
+                case EBattleType.SuperPower:
+                case EBattleType.SuperTanker:
+                    // melee sort attack
+                    MeleeAttack(victim);
+                    break;
+                case EBattleType.Range:
+
+                    RangeAttack(victim);
+                    break;
+                case EBattleType.Magic:
+                    // todo magic attack
+                    break;
             }
         }
 
@@ -261,6 +254,51 @@ namespace QuantumCore.Game.World.Entities
             victim.Damage(this, EDamageType.Normal, damage);
         }
 
+        private void RangeAttack(IEntity victim)
+        {
+            // todo verify victim is in range
+
+            var attackerRating = Math.Min(90, (GetPoint(EPoints.Dx) * 4 + GetPoint(EPoints.Level) * 2) / 6);
+            var victimRating = Math.Min(90, (victim.GetPoint(EPoints.Dx) * 4 + victim.GetPoint(EPoints.Level) * 2) / 6);
+            var attackRating = (attackerRating + 210.0) / 300.0 -
+                               (victimRating * 2 + 5) / (victimRating + 95) * 3.0 / 10.0;
+
+            var minDamage = GetMinDamage();
+            var maxDamage = GetMaxDamage();
+
+            var damage = CoreRandom.GenerateInt32(minDamage, maxDamage + 1) * 2;
+            var attack = (int)(GetPoint(EPoints.AttackGrade) + damage - GetPoint(EPoints.Level) * 2);
+            attack = (int)Math.Floor(attack * attackRating);
+            attack += (int)GetPoint(EPoints.Level) * 2 + GetBonusDamage() * 2;
+            attack *= (int)((100 + GetPoint(EPoints.AttackBonus) + GetPoint(EPoints.MagicAttackBonus)) / 100);
+            attack = CalculateAttackBonus(victim, attack);
+
+            var defence = (int)(victim.GetPoint(EPoints.DefenceGrade) * (100 + victim.GetPoint(EPoints.DefenceBonus)) /
+                                100);
+            if (this is MonsterEntity thisMonster)
+            {
+                attack = (int)Math.Floor(attack * thisMonster.Proto.DamageMultiply);
+            }
+
+            damage = Math.Max(0, attack - defence);
+            if (damage < 3)
+            {
+                damage = CoreRandom.GenerateInt32(1, 6);
+            }
+
+            // todo reduce damage by weapon type resist
+
+            foreach (var player in NearbyEntities.Where(x => x is IPlayerEntity).Cast<IPlayerEntity>())
+            {
+                player.Connection.Send(new ProjectilePacket
+                {
+                    TargetX = victim.PositionX, TargetY = victim.PositionY, Target = victim.Vid, Shooter = Vid
+                });
+            }
+
+            victim.Damage(this, EDamageType.NormalRange, damage);
+        }
+
         /// <summary>
         /// Adds bonus to the attack value for race bonus etc
         /// </summary>
@@ -302,7 +340,7 @@ namespace QuantumCore.Game.World.Entities
 
         public virtual int Damage(IEntity attacker, EDamageType damageType, int damage)
         {
-            if (damageType != EDamageType.Normal)
+            if (damageType is not EDamageType.Normal and not EDamageType.NormalRange)
             {
                 throw new NotImplementedException();
             }

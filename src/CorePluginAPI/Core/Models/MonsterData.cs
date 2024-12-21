@@ -21,7 +21,7 @@ public class MonsterData
 
     [FieldOrder(3)] public byte Type { get; set; }
     [FieldOrder(4)] public byte Rank { get; set; }
-    [FieldOrder(5)] public byte BattleType { get; set; }
+    [FieldOrder(5)] public EBattleType BattleType { get; set; }
     [FieldOrder(6)] public byte Level { get; set; }
     [FieldOrder(7)] public byte Size { get; set; }
     [FieldOrder(8)] public uint MinGold { get; set; }
