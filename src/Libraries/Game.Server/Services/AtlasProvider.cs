@@ -124,7 +124,8 @@ internal partial class AtlasProvider : IAtlasProvider
                 map = new Map(_monsterManager, _animationManager, _cacheManager, world, _logger,
                     _spawnPointProvider, _serviceProvider.GetRequiredService<IDropProvider>(), _itemManager, _server,
                     mapName, position,
-                    width, height, coords, _serviceProvider);
+                    width,
+                    height, coords, _serviceProvider);
             }
 
             if (position.X + width * Map.MapUnit > maxX) maxX = position.X + width * Map.MapUnit;

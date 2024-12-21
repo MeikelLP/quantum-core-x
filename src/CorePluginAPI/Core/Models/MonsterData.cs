@@ -50,7 +50,7 @@ public class MonsterData
     [FieldOrder(31)] public uint DropItemId { get; set; }
     [FieldOrder(32)] public byte MountCapacity { get; set; }
     [FieldOrder(33)] public byte OnClickType { get; set; }
-    [FieldOrder(34)] public byte Empire { get; set; }
+    [FieldOrder(34)] public EEmpire Empire { get; set; }
 
     [FieldOrder(35)]
     [FieldLength(65), FieldEncoding("ASCII")]

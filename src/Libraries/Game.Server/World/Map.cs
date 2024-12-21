@@ -81,6 +81,7 @@ namespace QuantumCore.Game.World
                     Common = Position + townCoordinates.Common * SPAWN_POSITION_MULTIPLIER
                 }
                 : null;
+            _serviceProvider = serviceProvider;
             _quadTree = new QuadTree((int)position.X, (int)position.Y, (int)(width * MapUnit), (int)(height * MapUnit),
                 20);
             _entityGauge = GameServer.Meter.CreateObservableGauge($"Map:{name}:EntityCount", () => Entities.Count);
