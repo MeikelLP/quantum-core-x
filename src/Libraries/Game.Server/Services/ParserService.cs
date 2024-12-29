@@ -45,7 +45,7 @@ public partial class ParserService : IParserService
             Y = int.Parse(splitted[2]),
             RangeX = int.Parse(splitted[3]),
             RangeY = int.Parse(splitted[4]),
-            Direction = (ESpawnPointDirection) int.Parse(splitted[6]),
+            Direction = (ESpawnPointDirection)int.Parse(splitted[6]),
             RespawnTime = ParseSecondsFromTimespanString(splitted[7].Trim()),
             Chance = short.Parse(splitted[8]),
             MaxAmount = short.Parse(splitted[9]),
@@ -97,7 +97,7 @@ public partial class ParserService : IParserService
                 {
                     Id = id,
                     Name = split[1],
-                    Type = (ESkillCategoryType) short.Parse(split[2]),
+                    Type = (ESkillCategoryType)short.Parse(split[2]),
                     LevelStep = short.Parse(split[3]),
                     MaxLevel = short.Parse(split[4]),
                     LevelLimit = short.Parse(split[5]),
@@ -117,7 +117,8 @@ public partial class ParserService : IParserService
                     AffectFlag2 = ExtractAffectFlags(split[19]),
                     PrerequisiteSkillVnum = int.Parse(split[20]),
                     PrerequisiteSkillLevel = int.Parse(split[21]),
-                    SkillType = Enum.TryParse<ESkillType>(split[22], true, out var result) ? result : ESkillType.Normal,
+                    SkillType =
+                        Enum.TryParse<ESkillType>(split[22], true, out var result) ? result : ESkillType.Normal,
                     MaxHit = short.Parse(split[23]),
                     SplashAroundDamageAdjustPoly = split[24],
                     TargetRange = int.Parse(split[25]),
@@ -137,12 +138,12 @@ public partial class ParserService : IParserService
         return [..list];
     }
 
-    public async Task<List<DataFileGroup>> ParseFileGroups(StreamReader sr)
+    public async Task<List<DataFileGroup>> ParseFileGroups(StreamReader sr, CancellationToken token = default)
     {
         var groups = new List<DataFileGroup>();
         DataFileGroup? currentGroup = null;
 
-        while (await sr.ReadLineAsync() is { } line && sr.EndOfStream == false)
+        while (await sr.ReadLineAsync(token) is { } line && sr.EndOfStream == false)
         {
             if (line.Trim().All(c => c == '\t') || string.IsNullOrWhiteSpace(line.Trim()))
             {
@@ -240,11 +241,7 @@ public partial class ParserService : IParserService
 
         if (type.Equals("Kill", INV_CUL)) // MobItemGroup
         {
-            var entry = new MonsterItemGroup
-            {
-                MonsterProtoId = monsterProtoId,
-                MinKillCount = minKillCount,
-            };
+            var entry = new MonsterItemGroup {MonsterProtoId = monsterProtoId, MinKillCount = minKillCount,};
 
             foreach (var dropData in group.Data)
             {
@@ -275,7 +272,7 @@ public partial class ParserService : IParserService
                 var rareChance = int.Parse(dropData[4], InvNum);
                 rareChance = MathUtils.MinMax(0, rareChance, 100);
 
-                entry.AddDrop(itemProtoId, count, chance, (uint) rareChance);
+                entry.AddDrop(itemProtoId, count, chance, (uint)rareChance);
             }
 
             return entry;
@@ -283,10 +280,7 @@ public partial class ParserService : IParserService
 
         if (type.Equals("Drop", INV_CUL)) // DropItemGroup
         {
-            var entry = new DropItemGroup
-            {
-                MonsterProtoId = monsterProtoId,
-            };
+            var entry = new DropItemGroup {MonsterProtoId = monsterProtoId,};
 
             foreach (var dropData in group.Data)
             {
@@ -318,10 +312,7 @@ public partial class ParserService : IParserService
 
         if (type.Equals("Limit", INV_CUL)) // LevelItemGroup
         {
-            var entry = new LevelItemGroup
-            {
-                LevelLimit = levelLimit
-            };
+            var entry = new LevelItemGroup {LevelLimit = levelLimit};
 
             foreach (var dropData in group.Data)
             {
@@ -532,7 +523,7 @@ public partial class ParserService : IParserService
             }
 
             var value = Fields[foundKey];
-            return (T) Convert.ChangeType(value, typeof(T));
+            return (T)Convert.ChangeType(value, typeof(T));
         }
 
         public override string ToString()
