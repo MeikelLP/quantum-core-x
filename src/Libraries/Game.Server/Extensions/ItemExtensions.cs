@@ -214,7 +214,15 @@ public static class ItemExtensions
     public static async Task Set(this ItemInstance item, ICacheManager cacheManager, uint owner, byte window, uint pos,
         IItemRepository itemRepository)
     {
-        if (item.PlayerId != owner || item.Window != window)
+        var isPlayerDifferent = item.PlayerId != owner;
+        var isWindowDifferent = item.Window != window;
+
+        item.PlayerId = owner;
+        item.Window = window;
+        item.Position = pos;
+        await Persist(item, itemRepository);
+
+        if (isPlayerDifferent || isWindowDifferent)
         {
             if (item.PlayerId != default)
             {
@@ -228,12 +236,6 @@ public static class ItemExtensions
                 var newList = cacheManager.Server.CreateList<Guid>($"items:{owner}:{window}");
                 await newList.Push(item.Id);
             }
-
-            item.PlayerId = owner;
-            item.Window = window;
         }
-
-        item.Position = pos;
-        await Persist(item, itemRepository);
     }
 }

@@ -61,8 +61,7 @@ namespace QuantumCore.Game.World
                 _groupCollections[g.Id] = g;
             }
 
-            await using var scope = _serviceProvider.CreateAsyncScope();
-            var atlasProvider = scope.ServiceProvider.GetRequiredService<IAtlasProvider>();
+            var atlasProvider = _serviceProvider.GetRequiredService<IAtlasProvider>();
             var maps = await atlasProvider.GetAsync(this);
             foreach (var map in maps)
             {

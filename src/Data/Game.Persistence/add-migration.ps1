@@ -9,7 +9,7 @@ $providers = 'Sqlite', 'Mysql', 'Postgresql'
 dotnet build $PSScriptRoot/../../Executables/Game > $null
 
 $providers | foreach {
-    dotnet ef migrations add $migrationName `
+  dotnet dotnet-ef migrations add $migrationName `
         --no-build `
         --context "$( $_ )GameDbContext" `
         --output-dir "$PSScriptRoot/Migrations/$_" `

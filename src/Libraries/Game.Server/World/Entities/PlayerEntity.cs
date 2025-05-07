@@ -1,7 +1,6 @@
 using System.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
 using QuantumCore.API.Extensions;
@@ -29,7 +28,6 @@ namespace QuantumCore.Game.World.Entities
         public PlayerData Player { get; private set; }
         public GuildData? Guild { get; private set; }
         public IInventory Inventory { get; private set; }
-        public IEntity? Target { get; set; }
         public IList<Guid> Groups { get; private set; }
         public IShop? Shop { get; set; }
         public IQuickSlotBar QuickSlotBar { get; }
@@ -124,12 +122,8 @@ namespace QuantumCore.Game.World.Entities
             Empire = player.Empire;
             PositionX = player.PositionX;
             PositionY = player.PositionY;
-            QuickSlotBar = new QuickSlotBar(_cacheManager, _logger, this);
-            Skills = new PlayerSkills(_scope.ServiceProvider.GetRequiredService<ILogger<PlayerSkills>>(), this,
-                _scope.ServiceProvider.GetRequiredService<IDbPlayerSkillsRepository>(),
-                _scope.ServiceProvider.GetRequiredService<ISkillManager>(),
-                _scope.ServiceProvider.GetRequiredService<IOptions<GameOptions>>().Value.Skills
-            );
+            QuickSlotBar = ActivatorUtilities.CreateInstance<QuickSlotBar>(_scope.ServiceProvider, this);
+            Skills = ActivatorUtilities.CreateInstance<PlayerSkills>(_scope.ServiceProvider, this);
 
             MovementSpeed = PlayerConstants.DEFAULT_MOVEMENT_SPEED;
             AttackSpeed = PlayerConstants.DEFAULT_ATTACK_SPEED;

@@ -37,6 +37,7 @@ namespace QuantumCore.API.Game.World
         public float Rotation { get; set; }
         public IMap? Map { get; set; }
         public byte HealthPercentage { get; }
+        public IEntity? Target { get; set; }
         public List<IPlayerEntity> TargetedBy { get; }
         public bool Dead { get; }
 

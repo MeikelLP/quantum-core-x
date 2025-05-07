@@ -10,7 +10,7 @@ dotnet build $PSScriptRoot/../../Executables/Game > $null
 
 foreach ($provider in $providers.GetEnumerator())
 {
-    dotnet ef migrations remove `
+  dotnet dotnet-ef migrations remove `
         --no-build `
         --context "$( $provider.Name )GameDbContext" `
         --startup-project $PSScriptRoot/../../Executables/Game/ `

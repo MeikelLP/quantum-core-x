@@ -70,10 +70,7 @@ namespace QuantumCore.Game.Commands
 
             var instance = new ItemInstance
             {
-                Id = Guid.NewGuid(),
-                ItemId = item.Id,
-                Count = context.Arguments.Count,
-                PlayerId = context.Player.Player.Id,
+                ItemId = item.Id, Count = context.Arguments.Count, PlayerId = context.Player.Player.Id,
             };
             if (!await context.Player.Inventory.PlaceItem(instance))
             {
