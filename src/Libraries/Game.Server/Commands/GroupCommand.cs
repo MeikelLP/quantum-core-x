@@ -18,9 +18,11 @@ public class GroupCommand : ICommandHandler<GroupCommandOptions>
     private readonly ILogger<GroupCommand> _logger;
     private readonly IItemManager _itemManager;
     private readonly IDropProvider _dropProvider;
+    private readonly IServiceProvider _serviceProvider;
 
     public GroupCommand(IMonsterManager monsterManager, IAnimationManager animationManager, IWorld world,
-        ILogger<GroupCommand> logger, IItemManager itemManager, IDropProvider dropProvider)
+        ILogger<GroupCommand> logger, IItemManager itemManager, IDropProvider dropProvider,
+        IServiceProvider serviceProvider)
     {
         _monsterManager = monsterManager;
         _animationManager = animationManager;
@@ -28,6 +30,7 @@ public class GroupCommand : ICommandHandler<GroupCommandOptions>
         _logger = logger;
         _itemManager = itemManager;
         _dropProvider = dropProvider;
+        _serviceProvider = serviceProvider;
     }
 
     public Task ExecuteAsync(CommandContext<GroupCommandOptions> context)
@@ -63,8 +66,8 @@ public class GroupCommand : ICommandHandler<GroupCommandOptions>
             }
 
             // Create entity instance
-            var monster = new MonsterEntity(_monsterManager, _dropProvider, _animationManager, map, _logger,
-                _itemManager, monsterId, x, y);
+            var monster = new MonsterEntity(_monsterManager, _dropProvider, _animationManager, _serviceProvider, map,
+                _logger, _itemManager, monsterId, x, y);
             _world.SpawnEntity(monster);
         }
 

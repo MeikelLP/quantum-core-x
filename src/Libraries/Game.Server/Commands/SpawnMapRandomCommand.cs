@@ -18,9 +18,11 @@ public class SpawnMapRandomCommand : ICommandHandler<SpawnMapRandomCommandOption
     private readonly ILogger<SpawnMapRandomCommand> _logger;
     private readonly IItemManager _itemManager;
     private readonly IDropProvider _dropProvider;
+    private readonly IServiceProvider _serviceProvider;
 
     public SpawnMapRandomCommand(IMonsterManager monsterManager, IAnimationManager animationManager, IWorld world,
-        ILogger<SpawnMapRandomCommand> logger, IItemManager itemManager, IDropProvider dropProvider)
+        ILogger<SpawnMapRandomCommand> logger, IItemManager itemManager, IDropProvider dropProvider,
+        IServiceProvider serviceProvider)
     {
         _monsterManager = monsterManager;
         _animationManager = animationManager;
@@ -28,6 +30,7 @@ public class SpawnMapRandomCommand : ICommandHandler<SpawnMapRandomCommandOption
         _logger = logger;
         _itemManager = itemManager;
         _dropProvider = dropProvider;
+        _serviceProvider = serviceProvider;
     }
 
     public Task ExecuteAsync(CommandContext<SpawnMapRandomCommandOptions> context)
@@ -44,8 +47,8 @@ public class SpawnMapRandomCommand : ICommandHandler<SpawnMapRandomCommandOption
         var y = Random.Shared.Next((int)map.Position.Y, (int)(map.Position.Y + (map.Height * Map.MapUnit) + 1));
 
         // Create entity instance
-        var monster = new MonsterEntity(_monsterManager, _dropProvider, _animationManager, map, _logger,
-            _itemManager, context.Arguments.MonsterId, x, y);
+        var monster = new MonsterEntity(_monsterManager, _dropProvider, _animationManager, _serviceProvider, map,
+            _logger, _itemManager, context.Arguments.MonsterId, x, y);
         _world.SpawnEntity(monster);
 
         var localX = (uint)((x - map.Position.X) / (float)Map.SPAWN_POSITION_MULTIPLIER);
