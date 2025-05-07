@@ -17,7 +17,7 @@ namespace QuantumCore.Game.Persistence.Migrations.Mysql
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.11")
+                .HasAnnotation("ProductVersion", "9.0.4")
                 .HasAnnotation("Relational:MaxIdentifierLength", 64);
 
             MySqlModelBuilderExtensions.AutoIncrementColumns(modelBuilder);
@@ -479,8 +479,8 @@ namespace QuantumCore.Game.Persistence.Migrations.Mysql
                     b.Property<byte>("Type")
                         .HasColumnType("tinyint unsigned");
 
-                    b.Property<uint>("Value")
-                        .HasColumnType("int unsigned");
+                    b.Property<byte>("Value")
+                        .HasColumnType("tinyint unsigned");
 
                     b.HasKey("PlayerId", "Slot");
 
