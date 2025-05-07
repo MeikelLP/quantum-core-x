@@ -75,10 +75,7 @@ namespace QuantumCore.Game
             _logger.LogInformation("Loading item_proto");
 
             await using var fs = file.CreateReadStream();
-            var bs = new BinarySerializer
-            {
-                Options = SerializationOptions.ThrowOnEndOfStream
-            };
+            var bs = new BinarySerializer {Options = SerializationOptions.ThrowOnEndOfStream};
             var result = await bs.DeserializeAsync<ItemDataContainer>(fs);
             var items = new LzoXtea(result.Payload.RealSize, result.Payload.EncryptedSize, 0x2A4A1, 0x45415AA,
                 0x185A8BE7,
@@ -124,7 +121,7 @@ namespace QuantumCore.Game
         /// <returns>Item instance</returns>
         public ItemInstance CreateItem(ItemData proto, byte count = 1)
         {
-            return new ItemInstance {Id = Guid.NewGuid(), ItemId = proto.Id, Count = count};
+            return new ItemInstance {ItemId = proto.Id, Count = count};
         }
     }
 }

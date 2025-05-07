@@ -14,6 +14,6 @@ public interface IParserService
         CancellationToken cancellationToken = default);
 
     Task<ImmutableArray<SkillData>> GetSkillsAsync(string path, CancellationToken token = default);
-    Task<List<ParserService.DataFileGroup>> ParseFileGroups(StreamReader sr);
+    Task<List<ParserService.DataFileGroup>> ParseFileGroups(StreamReader sr, CancellationToken token = default);
     MonsterDropContainer? ParseMobGroup(ParserService.DataFileGroup group, IItemManager itemManager);
 }

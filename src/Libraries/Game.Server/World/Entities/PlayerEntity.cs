@@ -1,7 +1,6 @@
 using System.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game.Guild;
@@ -28,7 +27,6 @@ namespace QuantumCore.Game.World.Entities
         public PlayerData Player { get; private set; }
         public GuildData? Guild { get; private set; }
         public IInventory Inventory { get; private set; }
-        public IEntity? Target { get; set; }
         public IList<Guid> Groups { get; private set; }
         public IShop? Shop { get; set; }
         public IQuickSlotBar QuickSlotBar { get; }
@@ -133,12 +131,8 @@ namespace QuantumCore.Game.World.Entities
             Empire = player.Empire;
             PositionX = player.PositionX;
             PositionY = player.PositionY;
-            QuickSlotBar = new QuickSlotBar(_cacheManager, _logger, this);
-            Skills = new PlayerSkills(_scope.ServiceProvider.GetRequiredService<ILogger<PlayerSkills>>(), this,
-                _scope.ServiceProvider.GetRequiredService<IDbPlayerSkillsRepository>(),
-                _scope.ServiceProvider.GetRequiredService<ISkillManager>(),
-                _scope.ServiceProvider.GetRequiredService<IOptions<GameOptions>>().Value.Skills
-            );
+            QuickSlotBar = ActivatorUtilities.CreateInstance<QuickSlotBar>(_scope.ServiceProvider, this);
+            Skills = ActivatorUtilities.CreateInstance<PlayerSkills>(_scope.ServiceProvider, this);
 
             MovementSpeed = PlayerConstants.DEFAULT_MOVEMENT_SPEED;
             AttackSpeed = PlayerConstants.DEFAULT_ATTACK_SPEED;
@@ -219,6 +213,8 @@ namespace QuantumCore.Game.World.Entities
             return (T)Quests[id];
         }
 
+        private void Warp(Coordinates position) => Warp((int)position.X, (int)position.Y);
+
         private void Warp(int x, int y)
         {
             _world.DespawnEntity(this);
@@ -238,6 +234,8 @@ namespace QuantumCore.Game.World.Entities
             };
             Connection.Send(packet);
         }
+
+        public void Move(Coordinates position) => Move((int)position.X, (int)position.Y);
 
         public override void Move(int x, int y)
         {
@@ -366,7 +364,22 @@ namespace QuantumCore.Game.World.Entities
 
             Dead = false;
 
-            // todo implement respawn in town
+            if (town)
+            {
+                var townCoordinates = Map!.TownCoordinates;
+                if (townCoordinates is not null)
+                {
+                    Move(Player.Empire switch
+                    {
+                        EEmpire.Chunjo => townCoordinates.Chunjo,
+                        EEmpire.Jinno => townCoordinates.Jinno,
+                        EEmpire.Shinsoo => townCoordinates.Shinsoo,
+                        _ => throw new ArgumentOutOfRangeException(nameof(Player.Empire),
+                            $"Can't get empire coordinates for empire {Player.Empire}")
+                    });
+                }
+            }
+
             // todo spawn with invisible affect
 
             SendChatCommand("CloseRestartWindow");
@@ -387,8 +400,8 @@ namespace QuantumCore.Game.World.Entities
                 entity.ShowEntity(Connection);
             }
 
-            Health = 50;
-            Mana = 50;
+            Health = PlayerConstants.RESPAWN_HEALTH;
+            Mana = PlayerConstants.RESPAWN_MANA;
             SendPoints();
         }
 

@@ -27,7 +27,7 @@ namespace QuantumCore.API.Game.World
     {
         public uint Vid { get; }
         public uint EntityClass { get; }
-        byte Empire { get; }
+        EEmpire Empire { get; }
         long Health { get; set; }
         public EEntityType Type { get; }
         public EEntityState State { get; }
@@ -37,6 +37,7 @@ namespace QuantumCore.API.Game.World
         public float Rotation { get; set; }
         public IMap? Map { get; set; }
         public byte HealthPercentage { get; }
+        public IEntity? Target { get; set; }
         public List<IPlayerEntity> TargetedBy { get; }
         public bool Dead { get; }
 

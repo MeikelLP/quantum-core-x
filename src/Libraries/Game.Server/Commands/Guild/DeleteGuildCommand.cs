@@ -5,7 +5,7 @@ using QuantumCore.API.Game.Guild;
 
 namespace QuantumCore.Game.Commands.Guild;
 
-[Command("guild_delete", "Delete guild")]
+[Command("deleteguild", "Delete guild")]
 public class GuildDeleteCommand : ICommandHandler<GuildDeleteCommandOptions>
 {
     private readonly IGuildManager _guildManager;
