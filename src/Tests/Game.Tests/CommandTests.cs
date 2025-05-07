@@ -200,7 +200,9 @@ public class CommandTests : IAsyncLifetime
                 {
                     {"Database:Provider", "sqlite"},
                     {"Database:ConnectionString", "Data Source=commands.db"},
-                    {"Game:Commands:StrictMode", "true"}, {"maps:0", "map_a2"}, {"maps:1", "map_b2"},
+                    {"Game:Commands:StrictMode", "true"},
+                    {"maps:0", "map_a2"},
+                    {"maps:1", "map_b2"},
                 })
                 .Build())
             .AddSingleton(Substitute.For<IDbPlayerRepository>())
