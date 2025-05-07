@@ -25,7 +25,7 @@ public static class ServiceExtensions
                 .AsImplementedInterfaces()
                 .WithScopedLifetime();
             scan.FromAssemblyOf<GameServer>()
-                .AddClasses(classes => classes.AssignableTo<ILoadable>())
+                .AddClasses(classes => classes.AssignableTo<ILoadable>(), false)
                 .AsSelfWithInterfaces()
                 .WithSingletonLifetime();
         });

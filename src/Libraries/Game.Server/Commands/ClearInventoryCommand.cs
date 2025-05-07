@@ -6,6 +6,7 @@ using QuantumCore.Game.Extensions;
 namespace QuantumCore.Game.Commands
 {
     [Command("ip", "Clears inventory and equipped items")]
+    [Command("ipurge", "Clears inventory and equipped items")]
     public class ClearInventoryCommand : ICommandHandler
     {
         private readonly ICacheManager _cacheManager;
@@ -33,7 +34,7 @@ namespace QuantumCore.Game.Commands
             foreach (var item in items)
             {
                 ctx.Player.RemoveItem(item);
-                ctx.Player.SendRemoveItem(item.Window, (ushort) item.Position);
+                ctx.Player.SendRemoveItem(item.Window, (ushort)item.Position);
                 await item.Destroy(_cacheManager);
             }
 

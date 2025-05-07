@@ -60,8 +60,7 @@ namespace QuantumCore.Game.World
                 _groupCollections[g.Id] = g;
             }
 
-            await using var scope = _serviceProvider.CreateAsyncScope();
-            var atlasProvider = scope.ServiceProvider.GetRequiredService<IAtlasProvider>();
+            var atlasProvider = _serviceProvider.GetRequiredService<IAtlasProvider>();
             var maps = await atlasProvider.GetAsync(this);
             foreach (var map in maps)
             {
@@ -70,8 +69,8 @@ namespace QuantumCore.Game.World
 
 
             // Initialize world grid and place maps on it
-            var maxX = _maps.Max(x => x.Value.PositionX + x.Value.Width * Map.MapUnit);
-            var maxY = _maps.Max(x => x.Value.PositionY + x.Value.Height * Map.MapUnit);
+            var maxX = _maps.Max(x => x.Value.Position.X + x.Value.Width * Map.MapUnit);
+            var maxY = _maps.Max(x => x.Value.Position.Y + x.Value.Height * Map.MapUnit);
             _world.Resize(maxX / Map.MapUnit, maxY / Map.MapUnit);
             foreach (var map in _maps.Values)
             {
@@ -227,7 +226,7 @@ namespace QuantumCore.Game.World
 
         public CoreHost GetMapHost(int x, int y)
         {
-            var map = GetMapAt((uint) x, (uint) y);
+            var map = GetMapAt((uint)x, (uint)y);
             if (map == null)
             {
                 _logger.LogWarning("No available host for map at {X}|{Y}", x, y);
@@ -243,17 +242,13 @@ namespace QuantumCore.Game.World
                     throw new InvalidOperationException("Cannot handle this situation. See logs.");
                 }
 
-                return new CoreHost
-                {
-                    Ip = remoteMap.Host,
-                    Port = remoteMap.Port
-                };
+                return new CoreHost {Ip = remoteMap.Host, Port = remoteMap.Port};
             }
 
             return new CoreHost
             {
                 Ip = _serviceProvider.GetRequiredService<IServerBase>().IpAddress, // lazy because of dependency loop
-                Port = (ushort) GameServer.Instance.Port
+                Port = (ushort)GameServer.Instance.Port
             };
         }
 
@@ -279,7 +274,7 @@ namespace QuantumCore.Game.World
 
         public void SpawnEntity(IEntity e)
         {
-            var map = GetMapAt((uint) e.PositionX, (uint) e.PositionY);
+            var map = GetMapAt((uint)e.PositionX, (uint)e.PositionY);
             if (map == null)
             {
                 _logger.LogWarning("Could not spawn entity at ({X};{Y}) No Map found for this coordinate", e.PositionX,

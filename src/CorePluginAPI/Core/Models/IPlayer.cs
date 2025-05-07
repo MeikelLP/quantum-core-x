@@ -1,4 +1,6 @@
-﻿namespace QuantumCore.API.Core.Models;
+﻿using QuantumCore.API.Game.Types;
+
+namespace QuantumCore.API.Core.Models;
 
 public class PlayerData
 {
@@ -30,7 +32,7 @@ public class PlayerData
     public uint MaxAttackDamage { get; set; }
     public uint MaxHp { get; set; }
     public uint MaxSp { get; set; }
-    public byte Empire { get; set; }
+    public EEmpire Empire { get; set; }
     public byte Slot { get; set; }
     public uint AvailableSkillPoints { get; set; }
     public uint? GuildId { get; set; }

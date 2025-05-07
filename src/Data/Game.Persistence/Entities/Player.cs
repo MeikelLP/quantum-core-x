@@ -3,6 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using QuantumCore.API.Game.Types;
 using QuantumCore.Game.Persistence.Entities.Guilds;
 
 namespace QuantumCore.Game.Persistence.Entities;
@@ -13,7 +14,7 @@ public class Player
     public required Guid AccountId { get; set; }
     public required DateTime CreatedAt { get; set; }
     public required DateTime UpdatedAt { get; set; }
-    public required byte Empire { get; set; }
+    public required EEmpire Empire { get; set; }
     public required byte PlayerClass { get; set; }
     public required byte SkillGroup { get; set; }
     [DefaultValue(0)] public required ulong PlayTime { get; set; }
@@ -47,6 +48,7 @@ public class Player
 
     public ICollection<GuildMember> Members { get; set; } = null!;
     public ICollection<GuildNews> WrittenGuildNews { get; set; } = null!;
+    public ICollection<PlayerQuickSlot> QuickSlots { get; set; } = null!;
 
     public static void Configure(EntityTypeBuilder<Player> builder, DatabaseFacade database)
     {
