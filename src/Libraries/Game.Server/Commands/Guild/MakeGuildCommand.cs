@@ -6,7 +6,7 @@ using QuantumCore.Game.Packets.Guild;
 
 namespace QuantumCore.Game.Commands.Guild;
 
-[Command("guild_create", "Create guild")]
+[Command("makeguild", "Create guild")]
 [CommandNoPermission]
 public class GuildCreateCommand : ICommandHandler<GuildCreateCommandOptions>
 {
@@ -41,11 +41,7 @@ public class GuildCreateCommand : ICommandHandler<GuildCreateCommandOptions>
         var guild = await _guildManager.CreateGuildAsync(context.Arguments.Name, player.Id);
         foreach (var nearbyPlayer in context.Player.GetNearbyPlayers())
         {
-            nearbyPlayer.Connection.Send(new GuildName
-            {
-                Id = guild.Id,
-                Name = guild.Name
-            });
+            nearbyPlayer.Connection.Send(new GuildName {Id = guild.Id, Name = guild.Name});
         }
 
         await context.Player.RefreshGuildAsync();

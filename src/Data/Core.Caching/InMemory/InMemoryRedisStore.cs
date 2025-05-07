@@ -160,7 +160,7 @@ public class InMemoryRedisStore : IRedisStore
 
     public ValueTask<long> Incr(string key)
     {
-        if (!_dict.TryGetValue(key, out var tuple) || tuple.Expiry is not null && tuple.Expiry > DateTime.UtcNow)
+        if (!_dict.TryGetValue(key, out var tuple) || tuple.Expiry is not null && tuple.Expiry < DateTime.UtcNow)
         {
             // according to redis docs the value is set to 0 if it does not exist before incrementing
             tuple = (0, null);
