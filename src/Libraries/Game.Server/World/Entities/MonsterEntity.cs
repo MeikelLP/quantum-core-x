@@ -334,10 +334,7 @@ namespace QuantumCore.Game.World.Entities
                 // NPCs need additional information too to show up for some reason
                 connection.Send(new CharacterInfo
                 {
-                    Vid = Vid,
-                    Empire = Proto.Empire,
-                    Level = 0,
-                    Name = Proto.TranslatedName
+                    Vid = Vid, Empire = Proto.Empire, Level = 0, Name = Proto.TranslatedName
                 });
             }
         }
