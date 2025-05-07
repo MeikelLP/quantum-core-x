@@ -95,12 +95,15 @@ public class CommandTests : IAsyncLifetime
     private readonly Faker<PlayerData> _playerDataFaker;
     private readonly IGameServer _gameServer;
     private readonly ISkillManager _skillManager;
+    private readonly AsyncServiceScope _scope;
+    private readonly GameDbContext _db;
 
     public CommandTests(ITestOutputHelper testOutputHelper)
     {
         _playerDataFaker = new AutoFaker<PlayerData>()
             .RuleFor(x => x.Name, r => r.Name.FirstName()) // Mostly due to command param handling
             .RuleFor(x => x.Level, _ => (byte)1)
+            .RuleFor(x => x.Id, _ => 1u)
             .RuleFor(x => x.Iq, _ => (byte)1)
             .RuleFor(x => x.St, _ => (byte)1)
             .RuleFor(x => x.Ht, _ => (byte)1)
@@ -195,6 +198,8 @@ public class CommandTests : IAsyncLifetime
                 .AddQuantumCoreDefaults()
                 .AddInMemoryCollection(new Dictionary<string, string?>
                 {
+                    {"Database:Provider", "sqlite"},
+                    {"Database:ConnectionString", "Data Source=commands.db"},
                     {"Game:Commands:StrictMode", "true"}, {"maps:0", "map_a2"}, {"maps:1", "map_b2"},
                 })
                 .Build())
@@ -213,22 +218,26 @@ public class CommandTests : IAsyncLifetime
         _player.Player.PlayTime = 0;
         _connection.Player = _player;
         _gameServer = _services.GetRequiredService<IGameServer>();
+        _scope = _services.CreateAsyncScope();
+        _db = _scope.ServiceProvider.GetRequiredService<GameDbContext>();
     }
 
     public async Task InitializeAsync()
     {
+        await _db.Database.EnsureDeletedAsync();
+        await _db.Database.EnsureCreatedAsync();
         await _player.Load();
     }
 
-    public Task DisposeAsync()
+    public async Task DisposeAsync()
     {
-        return Task.CompletedTask;
+        await _scope.DisposeAsync();
     }
 
     [Fact]
     public async Task ClearInventoryCommand()
     {
-        await _player.Inventory.PlaceItem(new ItemInstance {Id = Guid.NewGuid(), Count = 1, ItemId = 1});
+        await _player.Inventory.PlaceItem(new ItemInstance {Count = 1, ItemId = 1});
 
         Assert.NotEmpty(_player.Inventory.Items);
         await _commandManager.Handle(_connection, "/ip");

@@ -61,20 +61,26 @@ public class InMemoryRedisStore : IRedisStore
         return default;
     }
 
-    public ValueTask<long> Exists(string key)
+    public async ValueTask<long> Exists(string key)
     {
         if (_dict.TryGetValue(key, out var value))
         {
             if (value.Expiry is not null && value.Expiry < DateTime.UtcNow)
             {
                 _dict.Remove(key);
-                return ValueTask.FromResult(0L);
+                return 0;
             }
 
-            return ValueTask.FromResult(1L);
+            if (value.Value is IRedisListWrapper enumerable && await enumerable.Len() == 0)
+            {
+                // empty list equals no result
+                return 0;
+            }
+
+            return 1;
         }
 
-        return ValueTask.FromResult(0L);
+        return 0;
     }
 
     public ValueTask<long> Expire(string key, TimeSpan seconds)
