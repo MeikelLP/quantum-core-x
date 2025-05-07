@@ -35,21 +35,6 @@ namespace QuantumCore.Game.World.Entities
             }
         }
 
-        public override IEntity? Target
-        {
-            get
-            {
-                return (_behaviour as SimpleBehaviour)?.Target;
-            }
-            set
-            {
-                if (_behaviour is SimpleBehaviour sb)
-                {
-                    sb.Target = value;
-                }
-            }
-        }
-
         public IBehaviour? Behaviour
         {
             get { return _behaviour; }
@@ -349,10 +334,7 @@ namespace QuantumCore.Game.World.Entities
                 // NPCs need additional information too to show up for some reason
                 connection.Send(new CharacterInfo
                 {
-                    Vid = Vid,
-                    Empire = Proto.Empire,
-                    Level = 0,
-                    Name = Proto.TranslatedName
+                    Vid = Vid, Empire = Proto.Empire, Level = 0, Name = Proto.TranslatedName
                 });
             }
         }
