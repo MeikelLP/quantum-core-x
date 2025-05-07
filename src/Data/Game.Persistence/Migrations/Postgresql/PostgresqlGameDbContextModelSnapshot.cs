@@ -17,7 +17,7 @@ namespace QuantumCore.Game.Persistence.Migrations.Postgresql
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.11")
+                .HasAnnotation("ProductVersion", "9.0.4")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -482,8 +482,8 @@ namespace QuantumCore.Game.Persistence.Migrations.Postgresql
                     b.Property<byte>("Type")
                         .HasColumnType("smallint");
 
-                    b.Property<long>("Value")
-                        .HasColumnType("bigint");
+                    b.Property<byte>("Value")
+                        .HasColumnType("smallint");
 
                     b.HasKey("PlayerId", "Slot");
 
