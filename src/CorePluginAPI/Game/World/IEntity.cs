@@ -74,8 +74,7 @@ namespace QuantumCore.API.Game.World
         public void Goto(int x, int y);
         public void Wait(int x, int y);
 
-        public byte GetBattleType();
-        public void Attack(IEntity victim, byte type);
+        public void Attack(IEntity victim);
         public int Damage(IEntity attacker, EDamageType damageType, int damage);
 
         public void Move(int x, int y);

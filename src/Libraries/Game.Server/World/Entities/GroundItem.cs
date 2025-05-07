@@ -44,24 +44,14 @@ public class GroundItem : Entity, IGroundItem
     {
         connection.Send(new GroundItemAdd
         {
-            PositionX = PositionX,
-            PositionY = PositionY,
-            Vid = Vid,
-            ItemId = _item.ItemId
+            PositionX = PositionX, PositionY = PositionY, Vid = Vid, ItemId = _item.ItemId
         });
-        connection.Send(new ItemOwnership
-        {
-            Vid = Vid,
-            Player = OwnerName ?? ""
-        });
+        connection.Send(new ItemOwnership {Vid = Vid, Player = OwnerName ?? ""});
     }
 
     public override void HideEntity(IConnection connection)
     {
-        connection.Send(new GroundItemRemove
-        {
-            Vid = Vid
-        });
+        connection.Send(new GroundItemRemove {Vid = Vid});
     }
 
     public override uint GetPoint(EPoints point)
@@ -69,7 +59,7 @@ public class GroundItem : Entity, IGroundItem
         throw new NotImplementedException();
     }
 
-    public override byte GetBattleType()
+    public override EBattleType GetBattleType()
     {
         throw new NotImplementedException();
     }
