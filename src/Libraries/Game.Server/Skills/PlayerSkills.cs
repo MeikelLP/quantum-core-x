@@ -28,7 +28,7 @@ public class PlayerSkills : IPlayerSkills
     private const int SkillMaxLevel = 40;
     private const int SkillCount = 6;
     private const int JobMaxNum = 4;
-    private const int SkillGroupMaxNum = 2;
+    public const int SkillGroupMaxNum = 2;
     private const int MinimumLevel = 5;
     private const int MinimumLevelSubSkills = 10;
     private const int MinimumSkillLevelUpgrade = 17;

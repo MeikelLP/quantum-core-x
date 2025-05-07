@@ -181,7 +181,7 @@ internal class CommandManager : ICommandManager, ILoadable
             connection.Player.SendChatMessage("The following commands are available:");
             foreach (var handler in _commandHandlers)
             {
-                connection.Player.SendChatMessage($"- /{handler.Key}");
+                connection.Player.SendChatInfo($"- /{handler.Key}");
             }
         }
         else
