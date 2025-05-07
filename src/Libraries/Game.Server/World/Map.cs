@@ -236,7 +236,15 @@ namespace QuantumCore.Game.World
                         var group = _world.GetGroup(collectionGroup.Id);
                         if (group != null)
                         {
-                            for (var i = 0; i < collectionGroup.Amount; i++)
+                            if (collectionGroup.Probability < 1)
+                            {
+                                var rand = Random.Shared.NextSingle();
+                                if (rand > collectionGroup.Probability)
+                                {
+                                    SpawnGroup(groupInstance, spawnPoint, group);
+                                }
+                            }
+                            else
                             {
                                 SpawnGroup(groupInstance, spawnPoint, group);
                             }

@@ -4,10 +4,15 @@ namespace QuantumCore.API.Game.World
     {
         public uint Id { get; init; }
     }
+
     public class SpawnGroupCollectionMember
     {
         public uint Id { get; init; }
-        public byte Amount { get; init; }
+
+        /// <summary>
+        /// 0 to 1 probability of spawning
+        /// </summary>
+        public float Probability { get; set; }
     }
 
     public class SpawnGroup

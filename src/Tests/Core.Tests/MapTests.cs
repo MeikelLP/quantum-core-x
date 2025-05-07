@@ -78,13 +78,13 @@ public class MapTests
                     {
                         Id = 101,
                         Name = "TestGroupCollection",
-                        Groups = {new SpawnGroupCollectionMember {Id = 101, Amount = 1}}
+                        Groups = {new SpawnGroupCollectionMember {Id = 101, Probability = 1}}
                     },
                     new SpawnGroupCollection
                     {
                         Id = 101,
                         Name = "TestGroupCollection",
-                        Groups = {new SpawnGroupCollectionMember {Id = 101, Amount = 1}}
+                        Groups = {new SpawnGroupCollectionMember {Id = 101, Probability = 1}}
                     }
                 });
                 return mock;
