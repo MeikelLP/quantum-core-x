@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Net;
+using System.Security.Cryptography;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
@@ -260,6 +261,14 @@ namespace QuantumCore.Game.World
             }
 
             return _groups[id];
+        }
+
+        public SpawnGroup GetRandomGroup()
+        {
+            var span = new Span<uint>([0], 0, 1);
+            RandomNumberGenerator.GetItems([.._groups.Keys], span);
+
+            return _groups[span[0]];
         }
 
         public SpawnGroupCollection? GetGroupCollection(uint id)

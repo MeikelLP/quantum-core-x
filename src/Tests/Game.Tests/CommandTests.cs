@@ -115,7 +115,7 @@ public class CommandTests : IAsyncLifetime
             .RuleFor(x => x.PositionY, _ => (int)(26 * Map.MapUnit))
             .RuleFor(x => x.PlayTime, _ => 0u)
             .RuleFor(x => x.SkillGroup, _ => (byte)0)
-            .RuleFor(x => x.PlayerClass, _ => (byte)0)
+            .RuleFor(x => x.PlayerClass, _ => EPlayerClassGendered.WarriorMale)
             .Ignore(x => x.Health)
             .Ignore(x => x.Mana);
         var monsterManagerMock = Substitute.For<IMonsterManager>();
@@ -125,6 +125,8 @@ public class CommandTests : IAsyncLifetime
         var experienceManagerMock = Substitute.For<IExperienceManager>();
         experienceManagerMock.GetNeededExperience(Arg.Any<byte>()).Returns(1000u);
         experienceManagerMock.MaxLevel.Returns((byte)100);
+        var jobManagerMock = Substitute.For<IJobManager>();
+        jobManagerMock.Get(Arg.Any<EPlayerClassGendered>()).Returns(new Job());
         var itemManagerMock = Substitute.For<IItemManager>();
         itemManagerMock.GetItem(Arg.Any<uint>()).Returns(call => new AutoFaker<ItemData>()
             .RuleFor(x => x.Id, _ => call.Arg<uint>())

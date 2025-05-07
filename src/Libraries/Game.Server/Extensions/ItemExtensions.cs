@@ -73,8 +73,11 @@ public static class ItemExtensions
             return null;
         }
 
-        var wearFlags = (EWearFlags)proto.WearFlags;
+        return ((EWearFlags)proto.WearFlags).GetWearSlot();
+    }
 
+    public static EquipmentSlots? GetWearSlot(this EWearFlags wearFlags)
+    {
         if (wearFlags.HasFlag(EWearFlags.Head))
         {
             return EquipmentSlots.Head;
@@ -110,7 +113,12 @@ public static class ItemExtensions
             return EquipmentSlots.Body;
         }
 
-        return null;
+        if (wearFlags.HasFlag(EWearFlags.Shield))
+        {
+            return EquipmentSlots.Shield;
+        }
+
+        throw new NotImplementedException($"No equipment slot for wear flags: {wearFlags}");
     }
 
     public static async Task<ItemInstance?> GetItem(this IItemRepository repository, ICacheManager cacheManager,

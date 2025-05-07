@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
+using QuantumCore.API.Extensions;
 using QuantumCore.API.Game.Guild;
 using QuantumCore.API.Game.Skills;
 using QuantumCore.API.Game.Types;
@@ -46,19 +47,15 @@ namespace QuantumCore.Game.World.Entities
         {
             get
             {
-                switch (Player.PlayerClass)
+                switch (Player.PlayerClass.GetClass())
                 {
-                    case 0:
-                    case 4:
+                    case EPlayerClass.Warrior:
                         return EAntiFlags.Warrior;
-                    case 1:
-                    case 5:
+                    case EPlayerClass.Ninja:
                         return EAntiFlags.Assassin;
-                    case 2:
-                    case 6:
+                    case EPlayerClass.Sura:
                         return EAntiFlags.Sura;
-                    case 3:
-                    case 7:
+                    case EPlayerClass.Shaman:
                         return EAntiFlags.Shaman;
                     default:
                         return 0;
@@ -70,17 +67,11 @@ namespace QuantumCore.Game.World.Entities
         {
             get
             {
-                switch (Player.PlayerClass)
+                switch (Player.PlayerClass.GetGender())
                 {
-                    case 0:
-                    case 2:
-                    case 5:
-                    case 7:
+                    case EPlayerGender.Male:
                         return EAntiFlags.Male;
-                    case 1:
-                    case 3:
-                    case 4:
-                    case 6:
+                    case EPlayerGender.Female:
                         return EAntiFlags.Female;
                     default:
                         return 0;
@@ -136,12 +127,12 @@ namespace QuantumCore.Game.World.Entities
 
             MovementSpeed = PlayerConstants.DEFAULT_MOVEMENT_SPEED;
             AttackSpeed = PlayerConstants.DEFAULT_ATTACK_SPEED;
-            EntityClass = player.PlayerClass;
+            EntityClass = (uint)player.PlayerClass;
 
             Groups = new List<Guid>();
         }
 
-        private static uint GetMaxSp(IJobManager jobManager, byte playerClass, byte level, uint point)
+        private static uint GetMaxSp(IJobManager jobManager, EPlayerClassGendered playerClass, byte level, uint point)
         {
             var info = jobManager.Get(playerClass);
             if (info == null)
@@ -152,7 +143,7 @@ namespace QuantumCore.Game.World.Entities
             return info.StartSp + info.SpPerIq * point + info.SpPerLevel * level;
         }
 
-        private static uint GetMaxHp(IJobManager jobManager, byte playerClass, byte level, uint point)
+        private static uint GetMaxHp(IJobManager jobManager, EPlayerClassGendered playerClass, byte level, uint point)
         {
             var info = jobManager.Get(playerClass);
             if (info == null)
@@ -405,7 +396,7 @@ namespace QuantumCore.Game.World.Entities
             SendPoints();
         }
 
-        private void GiveStatusPoints()
+        public void RecalculateStatusPoints()
         {
             var shouldHavePoints = (uint)((Player.Level - 1) * 3);
             var steps = (byte)Math.Floor(
@@ -436,7 +427,7 @@ namespace QuantumCore.Game.World.Entities
             var exp = GetPoint(EPoints.Experience);
             var needed = GetPoint(EPoints.NeededExperience);
 
-            if (exp >= needed)
+            if (needed > 0 && exp >= needed)
             {
                 SetPoint(EPoints.Experience, exp - needed);
                 LevelUp();
@@ -449,7 +440,7 @@ namespace QuantumCore.Game.World.Entities
                 return true;
             }
 
-            GiveStatusPoints();
+            RecalculateStatusPoints();
             return false;
         }
 
@@ -473,7 +464,7 @@ namespace QuantumCore.Game.World.Entities
                 SendCharacterAdditional(other.Connection);
             }
 
-            GiveStatusPoints();
+            RecalculateStatusPoints();
             SendPoints();
         }
 
@@ -612,7 +603,7 @@ namespace QuantumCore.Game.World.Entities
                             Mana = Player.MaxSp;
                             for (var i = 0; i < partialLevelUps; i++)
                             {
-                                GiveStatusPoints();
+                                RecalculateStatusPoints();
                             }
                         }
 
@@ -1169,7 +1160,7 @@ namespace QuantumCore.Game.World.Entities
             {
                 Vid = Vid,
                 Name = Player.Name,
-                Class = Player.PlayerClass,
+                Class = (ushort)Player.PlayerClass,
                 PositionX = PositionX,
                 PositionY = PositionY,
                 Empire = Empire,
@@ -1224,7 +1215,7 @@ namespace QuantumCore.Game.World.Entities
                 Angle = 0,
                 PositionX = PositionX,
                 PositionY = PositionY,
-                Class = Player.PlayerClass,
+                Class = (ushort)Player.PlayerClass,
                 MoveSpeed = MovementSpeed,
                 AttackSpeed = AttackSpeed
             });

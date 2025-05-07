@@ -1,6 +1,7 @@
 using System.Linq.Expressions;
 using System.Reflection;
 using CommandLine;
+using CommandLine.Text;
 using Microsoft.CodeAnalysis;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -225,8 +226,31 @@ internal class CommandManager : ICommandManager, ILoadable
                         }
                         else
                         {
-                            connection.Player.SendChatInfo(
-                                $"Comannd validation failed: {string.Join(", ", errors.Select(x => x.GetType().Name))}");
+                            Func<HelpText, HelpText> helpTextFunc = h =>
+                            {
+                                h.Copyright = "";
+                                h.AutoVersion = false;
+                                h.AutoHelp = false;
+                                h.Heading = "";
+                                return h;
+                            };
+                            Func<Example, Example> exampleFunc = example => example;
+                            var verbsIndex = false;
+                            var maxDisplayWidth = 80;
+                            var helpTextMethod = typeof(HelpText)
+                                .GetMethods(BindingFlags.Static | BindingFlags.Public)
+                                .First(x => x.Name == nameof(HelpText.AutoBuild) && x.GetParameters().Length == 5)!
+                                .MakeGenericMethod(commandCache.OptionsType);
+                            var help = (HelpText)helpTextMethod.Invoke(null,
+                                [parserResult, helpTextFunc, exampleFunc, verbsIndex, maxDisplayWidth])!;
+                            var messages = help.ToString().Split(Environment.NewLine)
+                                .Where(x => !string.IsNullOrWhiteSpace(x));
+                            connection.Player.SendChatInfo("Comannd validation failed:");
+                            foreach (var message in messages)
+                            {
+                                connection.Player.SendChatInfo(message);
+                            }
+
                             return;
                         }
                     }

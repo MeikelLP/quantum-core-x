@@ -1,5 +1,6 @@
 ﻿#nullable enable
 
+using QuantumCore.API;
 using QuantumCore.Networking;
 
 namespace QuantumCore.Game.Packets
@@ -11,7 +12,7 @@ namespace QuantumCore.Game.Packets
         [Field(1, Length = PlayerConstants.PLAYER_NAME_MAX_LENGTH)]
         public string Name { get; set; } = "";
 
-        [Field(2)] public byte Class { get; set; }
+        [Field(2)] public EPlayerClassGendered Class { get; set; }
         [Field(3)] public byte Level { get; set; }
         [Field(4)] public uint Playtime { get; set; }
         [Field(5)] public byte St { get; set; }

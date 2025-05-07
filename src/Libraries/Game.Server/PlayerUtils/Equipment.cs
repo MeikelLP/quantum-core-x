@@ -1,6 +1,7 @@
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game.World;
+using QuantumCore.Game.Extensions;
 
 namespace QuantumCore.Game.PlayerUtils
 {
@@ -27,12 +28,12 @@ namespace QuantumCore.Game.PlayerUtils
 
         public bool SetItem(ItemInstance item)
         {
-            return SetItem(item, (ushort) item.Position);
+            return SetItem(item, (ushort)item.Position);
         }
 
         public bool SetItem(ItemInstance item, ushort position)
         {
-            switch ((EquipmentSlots) (position - _offset))
+            switch ((EquipmentSlots)(position - _offset))
             {
                 case EquipmentSlots.Body:
                     Body = item;
@@ -95,12 +96,12 @@ namespace QuantumCore.Game.PlayerUtils
 
         public ItemInstance? GetItem(ushort position)
         {
-            return GetItem((EquipmentSlots) (position - _offset));
+            return GetItem((EquipmentSlots)(position - _offset));
         }
 
         public bool RemoveItem(ItemInstance item)
         {
-            switch ((EquipmentSlots) (item.Position - _offset))
+            switch ((EquipmentSlots)(item.Position - _offset))
             {
                 case EquipmentSlots.Body:
                     Body = null;
@@ -190,9 +191,9 @@ namespace QuantumCore.Game.PlayerUtils
                 return false;
             }
 
-            var wearFlags = (EWearFlags) proto.WearFlags;
+            var wearFlags = (EWearFlags)proto.WearFlags;
 
-            switch ((EquipmentSlots) (position - _offset))
+            switch ((EquipmentSlots)(position - _offset))
             {
                 case EquipmentSlots.Body:
                     return wearFlags.HasFlag(EWearFlags.Body);
@@ -222,25 +223,11 @@ namespace QuantumCore.Game.PlayerUtils
             var proto = itemManager.GetItem(itemId);
             if (proto == null)
             {
-                return _offset + (ushort) EquipmentSlots.Body;
+                return _offset + (ushort)EquipmentSlots.Body;
             }
 
-            var wearFlags = (EWearFlags) proto.WearFlags;
-
-            if (wearFlags.HasFlag(EWearFlags.Head))
-                return _offset + (ushort) EquipmentSlots.Head;
-            else if (wearFlags.HasFlag(EWearFlags.Shoes))
-                return _offset + (ushort) EquipmentSlots.Shoes;
-            else if (wearFlags.HasFlag(EWearFlags.Bracelet))
-                return _offset + (ushort) EquipmentSlots.Bracelet;
-            else if (wearFlags.HasFlag(EWearFlags.Weapon))
-                return _offset + (ushort) EquipmentSlots.Weapon;
-            else if (wearFlags.HasFlag(EWearFlags.Necklace))
-                return _offset + (ushort) EquipmentSlots.Necklace;
-            else if (wearFlags.HasFlag(EWearFlags.Earrings))
-                return _offset + (ushort) EquipmentSlots.Earring;
-
-            return _offset + (ushort) EquipmentSlots.Body;
+            var slot = ((EWearFlags)proto.WearFlags).GetWearSlot()!;
+            return (long)slot + _offset;
         }
     }
 }

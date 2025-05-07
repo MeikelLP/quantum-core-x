@@ -1,4 +1,5 @@
-﻿using QuantumCore.API.Core.Models;
+using QuantumCore.API;
+using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game.Types;
 
 namespace QuantumCore.Game;
@@ -30,7 +31,7 @@ public interface IPlayerManager
     /// Creates a new player and persists it in the database and the cache
     /// </summary>
     /// <returns>The slot of the newly created player</returns>
-    Task<PlayerData> CreateAsync(Guid accountId, string playerName, byte @class, byte appearance);
+    Task<PlayerData> CreateAsync(Guid accountId, string playerName, EPlayerClassGendered @class, byte appearance);
 
     Task DeletePlayerAsync(PlayerData player);
     Task SetPlayerEmpireAsync(Guid accountId, uint playerId, EEmpire empire);

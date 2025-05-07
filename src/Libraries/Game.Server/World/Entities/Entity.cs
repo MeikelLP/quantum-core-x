@@ -70,8 +70,8 @@ namespace QuantumCore.Game.World.Entities
         public int TargetPositionY { get; private set; }
         public int StartPositionY { get; private set; }
         public uint MovementDuration { get; private set; }
-        public byte MovementSpeed { get; protected set; }
-        public byte AttackSpeed { get; protected set; }
+        public byte MovementSpeed { get; set; }
+        public byte AttackSpeed { get; set; }
 
         public IReadOnlyCollection<IEntity> NearbyEntities => _nearbyEntities;
         private readonly List<IEntity> _nearbyEntities = new();

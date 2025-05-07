@@ -89,7 +89,7 @@ public class WorldTests
             .Replace(new ServiceDescriptor(typeof(IJobManager), _ =>
             {
                 var mock = Substitute.For<IJobManager>();
-                mock.Get(1).Returns(new Job());
+                mock.Get(EPlayerClassGendered.NinjaFemale).Returns(new Job());
                 return mock;
             }, ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(IMonsterManager), _ =>
@@ -109,7 +109,10 @@ public class WorldTests
         _world.InitAsync().Wait();
 
         var conn = Substitute.For<IGameConnection>();
-        var playerData = new PlayerData {Name = "TestPlayer", PlayerClass = 1, PositionX = 1, PositionY = 1};
+        var playerData = new PlayerData
+        {
+            Name = "TestPlayer", PlayerClass = EPlayerClassGendered.NinjaFemale, PositionX = 1, PositionY = 1
+        };
         _playerEntity = ActivatorUtilities.CreateInstance<PlayerEntity>(services, _world, playerData, conn);
         _world.SpawnEntity(_playerEntity);
         _world.Update(0.2); // spawn all entities

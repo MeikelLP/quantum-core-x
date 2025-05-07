@@ -3,6 +3,7 @@ using System.Collections.Immutable;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using QuantumCore.API;
+using QuantumCore.API.Extensions;
 using QuantumCore.API.Game.Skills;
 using QuantumCore.API.Game.Types;
 using QuantumCore.Core.Utils;
@@ -24,14 +25,14 @@ public class PlayerSkills : IPlayerSkills
     private readonly ISkillManager _skillManager;
     private readonly SkillsOptions _skillsOptions;
 
-    private const int SkillMaxNum = 255;
-    private const int SkillMaxLevel = 40;
-    private const int SkillCount = 6;
-    private const int JobMaxNum = 4;
+    public const int SkillMaxNum = 255;
+    public const int SkillMaxLevel = 40;
+    public const int SkillCount = 6;
+    public const int JobMaxNum = 4;
     public const int SkillGroupMaxNum = 2;
-    private const int MinimumLevel = 5;
-    private const int MinimumLevelSubSkills = 10;
-    private const int MinimumSkillLevelUpgrade = 17;
+    public const int MinimumLevel = 5;
+    public const int MinimumLevelSubSkills = 10;
+    public const int MinimumSkillLevelUpgrade = 17;
 
     #region Static Skill Data
 
@@ -239,11 +240,11 @@ public class PlayerSkills : IPlayerSkills
 
         if (!_skills.TryGetValue(skillId, out var skill)) return;
 
-        skill.Level = Math.Min((byte)40, level);
+        skill.Level = Math.Min((byte)SkillMaxLevel, level);
 
         skill.MasterType = level switch
         {
-            >= 40 => ESkillMasterType.PerfectMaster,
+            >= SkillMaxLevel => ESkillMasterType.PerfectMaster,
             >= 30 => ESkillMasterType.GrandMaster,
             >= 20 => ESkillMasterType.Master,
             _ => ESkillMasterType.Normal
@@ -386,9 +387,9 @@ public class PlayerSkills : IPlayerSkills
 
                     break;
                 case ESkillMasterType.GrandMaster:
-                    if (GetSkillLevel(proto.Id) >= 40)
+                    if (GetSkillLevel(proto.Id) >= SkillMaxLevel)
                     {
-                        SetLevel(proto.Id, 40);
+                        SetLevel(proto.Id, SkillMaxLevel);
                     }
 
                     break;
@@ -420,12 +421,12 @@ public class PlayerSkills : IPlayerSkills
         if (proto.Type == ESkillCategoryType.HorseSkills)
         {
             return skillId != ESkillIndexes.HorseWildAttackRange ||
-                   _player.Player.PlayerClass == (int)EPlayerClass.Ninja;
+                   _player.Player.PlayerClass.GetClass()== EPlayerClass.Ninja;
         }
 
         if (_player.Player.SkillGroup == 0) return false;
 
-        return (int)proto.Type - 1 == _player.Player.PlayerClass;
+        return (int)proto.Type - 1 == (byte)_player.Player.PlayerClass;
     }
 
     private int GetSkillLevel(ESkillIndexes skillId)
@@ -445,7 +446,7 @@ public class PlayerSkills : IPlayerSkills
         {
             for (var i = 0; i < SkillCount; i++)
             {
-                if (SkillList[_player.Player.PlayerClass, skillGroup - 1, i] == skillId)
+                if (SkillList[(int)_player.Player.PlayerClass, skillGroup - 1, i] == skillId)
                 {
                     return true;
                 }
@@ -480,7 +481,7 @@ public class PlayerSkills : IPlayerSkills
         return false;
     }
 
-    public void SendAsync()
+    public void Send()
     {
         SendSkillLevelsPacket();
     }
@@ -615,7 +616,7 @@ public class PlayerSkills : IPlayerSkills
     {
         for (var i = 0; i < SkillCount; i++)
         {
-            var skill = SkillList[_player.Player.PlayerClass, _player.Player.SkillGroup - 1, i];
+            var skill = SkillList[(int)_player.Player.PlayerClass, _player.Player.SkillGroup - 1, i];
             if (skill == 0) continue;
 
             _skills[skill] = new Skill

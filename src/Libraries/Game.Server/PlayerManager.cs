@@ -94,7 +94,8 @@ public class PlayerManager : IPlayerManager
         return _dbPlayerRepository.IsNameInUseAsync(name);
     }
 
-    public async Task<PlayerData> CreateAsync(Guid accountId, string playerName, byte @class, byte appearance)
+    public async Task<PlayerData> CreateAsync(Guid accountId, string playerName, EPlayerClassGendered @class,
+        byte appearance)
     {
         var job = _jobManager.Get(@class);
 
