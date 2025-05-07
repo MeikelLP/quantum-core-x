@@ -35,21 +35,6 @@ namespace QuantumCore.Game.World.Entities
             }
         }
 
-        public override IEntity? Target
-        {
-            get
-            {
-                return (_behaviour as SimpleBehaviour)?.Target;
-            }
-            set
-            {
-                if (_behaviour is SimpleBehaviour sb)
-                {
-                    sb.Target = value;
-                }
-            }
-        }
-
         public IBehaviour? Behaviour
         {
             get { return _behaviour; }
