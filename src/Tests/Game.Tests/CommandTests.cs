@@ -1,8 +1,8 @@
 using System.Text;
 using AutoBogus;
+using AwesomeAssertions;
+using AwesomeAssertions.Equivalency;
 using Bogus;
-using FluentAssertions;
-using FluentAssertions.Equivalency;
 using Game.Tests.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -146,7 +146,7 @@ public class CommandTests : IAsyncLifetime
         var redisListWrapperMock = Substitute.For<IRedisListWrapper<Guid>>();
         var redisSubscriberWrapperMock = Substitute.For<IRedisSubscriber>();
         redisListWrapperMock.Range(Arg.Any<int>(), Arg.Any<int>())
-            .Returns(new[] {PermGroup.OperatorGroup});
+            .Returns(new[] { PermGroup.OperatorGroup });
         cacheManagerMock.Keys(Arg.Any<string>()).Returns(Array.Empty<string>());
         cacheManagerMock.CreateList<Guid>(Arg.Any<string>()).Returns(redisListWrapperMock);
         cacheManagerMock.Subscribe().Returns(redisSubscriberWrapperMock);
@@ -200,11 +200,11 @@ public class CommandTests : IAsyncLifetime
                 .AddQuantumCoreDefaults()
                 .AddInMemoryCollection(new Dictionary<string, string?>
                 {
-                    {"Database:Provider", "sqlite"},
-                    {"Database:ConnectionString", "Data Source=commands.db"},
-                    {"Game:Commands:StrictMode", "true"},
-                    {"maps:0", "map_a2"},
-                    {"maps:1", "map_b2"},
+                    { "Database:Provider", "sqlite" },
+                    { "Database:ConnectionString", "Data Source=commands.db" },
+                    { "Game:Commands:StrictMode", "true" },
+                    { "maps:0", "map_a2" },
+                    { "maps:1", "map_b2" },
                 })
                 .Build())
             .AddSingleton(Substitute.For<IDbPlayerRepository>())
@@ -241,7 +241,7 @@ public class CommandTests : IAsyncLifetime
     [Fact]
     public async Task ClearInventoryCommand()
     {
-        await _player.Inventory.PlaceItem(new ItemInstance {Count = 1, ItemId = 1});
+        await _player.Inventory.PlaceItem(new ItemInstance { Count = 1, ItemId = 1 });
 
         Assert.NotEmpty(_player.Inventory.Items);
         await _commandManager.Handle(_connection, "/ip");
@@ -291,7 +291,7 @@ public class CommandTests : IAsyncLifetime
     [Fact]
     public async Task DebugCommand()
     {
-        var item = new ItemInstance {ItemId = 1, Count = 1};
+        var item = new ItemInstance { ItemId = 1, Count = 1 };
         var wearSlot = _player.Inventory.EquipmentWindow.GetWearPosition(_itemManager, item.ItemId);
 
         _player.SetItem(item, (byte)WindowType.Inventory, (ushort)wearSlot);
@@ -302,9 +302,9 @@ public class CommandTests : IAsyncLifetime
         var maxAttack = _player.GetPoint(EPoints.MaxAttackDamage);
         var sentMessages = (_connection as MockedGameConnection).SentMessages;
 
-        sentMessages.Should().ContainEquivalentOf(new ChatOutcoming {Message = $"Weapon Damage: 10-16"}, Config);
+        sentMessages.Should().ContainEquivalentOf(new ChatOutcoming { Message = $"Weapon Damage: 10-16" }, Config);
         sentMessages.Should()
-            .ContainEquivalentOf(new ChatOutcoming {Message = $"Attack Damage: {minAttack}-{maxAttack}"}, Config);
+            .ContainEquivalentOf(new ChatOutcoming { Message = $"Attack Damage: {minAttack}-{maxAttack}" }, Config);
         return;
 
         EquivalencyOptions<ChatOutcoming> Config(EquivalencyOptions<ChatOutcoming> cfg) =>
@@ -338,7 +338,7 @@ public class CommandTests : IAsyncLifetime
         await _commandManager.Handle(_connection, "/give $self 1 10");
 
         _player.Inventory.Items.Should().NotBeEmpty();
-        _player.Inventory.Items.Should().ContainEquivalentOf(new ItemInstance {ItemId = 1, Count = 10},
+        _player.Inventory.Items.Should().ContainEquivalentOf(new ItemInstance { ItemId = 1, Count = 10 },
             cfg => cfg.Including(x => x.ItemId).Including(x => x.Count));
     }
 
@@ -353,7 +353,7 @@ public class CommandTests : IAsyncLifetime
         await _commandManager.Handle(_connection, $"/give \"{player2.Name}\" 1 10");
 
         player2.Inventory.Items.Should().NotBeEmpty();
-        player2.Inventory.Items.Should().ContainEquivalentOf(new ItemInstance {ItemId = 1, Count = 10},
+        player2.Inventory.Items.Should().ContainEquivalentOf(new ItemInstance { ItemId = 1, Count = 10 },
             cfg => cfg.Including(x => x.ItemId).Including(x => x.Count));
     }
 
@@ -363,7 +363,7 @@ public class CommandTests : IAsyncLifetime
         await _commandManager.Handle(_connection, "/give missing 1 10");
 
         ((MockedGameConnection)_connection).SentMessages.Should()
-            .ContainEquivalentOf(new ChatOutcoming {Message = "Target not found"},
+            .ContainEquivalentOf(new ChatOutcoming { Message = "Target not found" },
                 cfg => cfg.Including(x => x.Message));
     }
 
@@ -433,7 +433,7 @@ public class CommandTests : IAsyncLifetime
         var messages = (_connection as MockedGameConnection).SentMessages;
         messages.Should().HaveCountGreaterThan(1);
         messages[0].Should().BeEquivalentTo(
-            new ChatOutcoming {Message = "The following commands are available", MessageType = ChatMessageTypes.Info},
+            new ChatOutcoming { Message = "The following commands are available", MessageType = ChatMessageTypes.Info },
             cfg => cfg
                 .Including(x => x.Message)
                 .Using<string>(ctx => ctx.Subject.Should().StartWith(ctx.Expectation)).WhenTypeIs<string>()
@@ -459,7 +459,7 @@ public class CommandTests : IAsyncLifetime
         await _commandManager.Handle(_connection, "/kick something");
 
         (_connection as MockedGameConnection).SentMessages.Should()
-            .ContainEquivalentOf(new ChatOutcoming {Message = "Target not found"},
+            .ContainEquivalentOf(new ChatOutcoming { Message = "Target not found" },
                 cfg => cfg.Including(x => x.Message));
     }
 
@@ -513,7 +513,7 @@ public class CommandTests : IAsyncLifetime
 
         world.GetPlayer(_player.Name).Should().NotBeNull();
         (_connection as MockedGameConnection).SentPhases.Should()
-            .NotContainEquivalentOf(new GCPhase {Phase = EPhases.Select});
+            .NotContainEquivalentOf(new GCPhase { Phase = EPhases.Select });
 
         _player.Player.PlayTime = 0;
         _connection.Server.ServerTime.Returns(60000);
@@ -523,7 +523,7 @@ public class CommandTests : IAsyncLifetime
         _player.GetPoint(EPoints.PlayTime).Should().Be(1);
         _player.Connection.Phase.Should().Be(EPhases.Select);
         (_connection as MockedGameConnection).SentPhases.Should()
-            .ContainEquivalentOf(new GCPhase {Phase = EPhases.Select});
+            .ContainEquivalentOf(new GCPhase { Phase = EPhases.Select });
         world.GetPlayer(_player.Name).Should().BeNull();
     }
 
@@ -641,16 +641,16 @@ public class CommandTests : IAsyncLifetime
         var updatedGroup = Guid.NewGuid();
         var groupName = "test";
 
-        var newPermissions = new[] {"reload_perms", "goto"};
+        var newPermissions = new[] { "reload_perms", "goto" };
         var cacheManager = _services.GetRequiredService<ICacheManager>();
         var commandRepo = _services.GetRequiredService<ICommandPermissionRepository>();
         commandRepo.GetPermissionsForGroupAsync(Arg.Any<Guid>()).Returns(newPermissions);
         commandRepo.GetGroupsAsync().Returns([
-            new PermissionGroup {Id = updatedGroup, Name = groupName, Permissions = newPermissions}
+            new PermissionGroup { Id = updatedGroup, Name = groupName, Permissions = newPermissions }
         ]);
 
         cacheManager.CreateList<Guid>(Arg.Any<string>())
-            .Range(0, 0).Returns(new[] {updatedGroup});
+            .Range(0, 0).Returns(new[] { updatedGroup });
 
         // Act
         await _commandManager.Handle(_connection, "/reload_perms");
@@ -667,7 +667,7 @@ public class CommandTests : IAsyncLifetime
         await _player.ReloadPermissions();
 
         ((MockedGameConnection)_connection).SentMessages.Should().ContainEquivalentOf(
-            new ChatOutcoming {Message = "Permissions reloaded"}, cfg => cfg.Including(x => x.Message));
+            new ChatOutcoming { Message = "Permissions reloaded" }, cfg => cfg.Including(x => x.Message));
     }
 
     [Fact]
@@ -681,7 +681,7 @@ public class CommandTests : IAsyncLifetime
 
         // Assert
         ((MockedGameConnection)_connection).SentMessages.Should().ContainEquivalentOf(
-            new ChatOutcoming {Message = "mall test", MessageType = ChatMessageTypes.Command},
+            new ChatOutcoming { Message = "mall test", MessageType = ChatMessageTypes.Command },
             cfg => cfg.Including(x => x.Message));
     }
 
@@ -709,7 +709,7 @@ public class CommandTests : IAsyncLifetime
         _player.GetPoint(EPoints.Level).Should().Be(2);
 
         ((MockedGameConnection)_connection).SentMessages.Should().ContainEquivalentOf(
-            new ChatOutcoming {Message = "You have advanced to level 2"}, cfg => cfg.Including(x => x.Message));
+            new ChatOutcoming { Message = "You have advanced to level 2" }, cfg => cfg.Including(x => x.Message));
     }
 
     [Fact]
@@ -722,7 +722,7 @@ public class CommandTests : IAsyncLifetime
         _player.GetPoint(EPoints.Level).Should().Be(11);
 
         ((MockedGameConnection)_connection).SentMessages.Should().ContainEquivalentOf(
-            new ChatOutcoming {Message = "You have advanced to level 11"}, cfg => cfg.Including(x => x.Message));
+            new ChatOutcoming { Message = "You have advanced to level 11" }, cfg => cfg.Including(x => x.Message));
     }
 
     [Fact]
@@ -739,7 +739,7 @@ public class CommandTests : IAsyncLifetime
         player2.GetPoint(EPoints.Level).Should().Be(5);
 
         ((MockedGameConnection)_connection).SentMessages.Should().ContainEquivalentOf(
-            new ChatOutcoming {Message = "You have advanced to level 5"}, cfg => cfg.Including(x => x.Message));
+            new ChatOutcoming { Message = "You have advanced to level 5" }, cfg => cfg.Including(x => x.Message));
     }
 
     [Fact]
@@ -756,7 +756,7 @@ public class CommandTests : IAsyncLifetime
         // Assert
         _player.Player.SkillGroup.Should().Be(1);
         ((MockedGameConnection)_connection).SentPackets.Should()
-            .ContainEquivalentOf(new ChangeSkillGroup {SkillGroup = 1});
+            .ContainEquivalentOf(new ChangeSkillGroup { SkillGroup = 1 });
     }
 
     [Fact]
@@ -772,7 +772,7 @@ public class CommandTests : IAsyncLifetime
         // Assert
         _player.Player.SkillGroup.Should().Be(0);
         ((MockedGameConnection)_connection).SentPackets.Should()
-            .NotContainEquivalentOf(new ChangeSkillGroup {SkillGroup = 1});
+            .NotContainEquivalentOf(new ChangeSkillGroup { SkillGroup = 1 });
     }
 
     [Fact]
@@ -788,7 +788,7 @@ public class CommandTests : IAsyncLifetime
         // Assert
         _player.Player.SkillGroup.Should().Be(0);
         ((MockedGameConnection)_connection).SentPackets.Should()
-            .NotContainEquivalentOf(new ChangeSkillGroup {SkillGroup = 4});
+            .NotContainEquivalentOf(new ChangeSkillGroup { SkillGroup = 4 });
     }
 
     [Fact]

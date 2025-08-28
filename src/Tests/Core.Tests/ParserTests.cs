@@ -1,5 +1,5 @@
 ﻿using System.Text;
-using FluentAssertions;
+using AwesomeAssertions;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.FileProviders.Physical;
 using Microsoft.Extensions.Logging;
@@ -110,7 +110,7 @@ public class ParserTests
             Name = "Test",
             Id = 101,
             Leader = 101,
-            Members = {new SpawnMember {Id = 101}, new SpawnMember {Id = 101}}
+            Members = { new SpawnMember { Id = 101 }, new SpawnMember { Id = 101 } }
         });
     }
 
@@ -142,12 +142,12 @@ public class ParserTests
             Leader = 2493,
             Members =
             {
-                new SpawnMember {Id = 2492},
-                new SpawnMember {Id = 2414},
-                new SpawnMember {Id = 2414},
-                new SpawnMember {Id = 2411},
-                new SpawnMember {Id = 2411},
-                new SpawnMember {Id = 2411}
+                new SpawnMember { Id = 2492 },
+                new SpawnMember { Id = 2414 },
+                new SpawnMember { Id = 2414 },
+                new SpawnMember { Id = 2411 },
+                new SpawnMember { Id = 2411 },
+                new SpawnMember { Id = 2411 }
             }
         });
     }
@@ -175,7 +175,10 @@ public class ParserTests
             Name = "GroupName",
             Id = 2430,
             Leader = 2493,
-            Members = {new SpawnMember {Id = 2447}, new SpawnMember {Id = 2447}, new SpawnMember {Id = 2513}}
+            Members =
+            {
+                new SpawnMember { Id = 2447 }, new SpawnMember { Id = 2447 }, new SpawnMember { Id = 2513 }
+            }
         });
     }
 
@@ -201,8 +204,8 @@ public class ParserTests
             Id = 101,
             Groups =
             {
-                new SpawnGroupCollectionMember {Id = 101, Probability = 1},
-                new SpawnGroupCollectionMember {Id = 171, Probability = 1}
+                new SpawnGroupCollectionMember { Id = 101, Probability = 1 },
+                new SpawnGroupCollectionMember { Id = 171, Probability = 1 }
             }
         });
     }
@@ -236,8 +239,8 @@ public class ParserTests
             Id = 101,
             Groups =
             {
-                new SpawnGroupCollectionMember {Id = 101, Probability = 1},
-                new SpawnGroupCollectionMember {Id = 171, Probability = 1}
+                new SpawnGroupCollectionMember { Id = 101, Probability = 1 },
+                new SpawnGroupCollectionMember { Id = 171, Probability = 1 }
             }
         });
     }
@@ -266,8 +269,8 @@ public class ParserTests
             Id = 101,
             Groups =
             {
-                new SpawnGroupCollectionMember {Id = 101, Probability = 1},
-                new SpawnGroupCollectionMember {Id = 171, Probability = 1}
+                new SpawnGroupCollectionMember { Id = 101, Probability = 1 },
+                new SpawnGroupCollectionMember { Id = 171, Probability = 1 }
             }
         });
     }
@@ -295,8 +298,8 @@ public class ParserTests
             Id = 105,
             Groups =
             {
-                new SpawnGroupCollectionMember {Id = 112, Probability = 1},
-                new SpawnGroupCollectionMember {Id = 113, Probability = 1}
+                new SpawnGroupCollectionMember { Id = 112, Probability = 1 },
+                new SpawnGroupCollectionMember { Id = 113, Probability = 1 }
             }
         });
     }
@@ -318,7 +321,7 @@ public class ParserTests
 
         result.Should().BeEquivalentTo(new SpawnGroupCollection
         {
-            Name = "a1_05", Id = 105, Groups = {new SpawnGroupCollectionMember {Id = 112, Probability = 1}}
+            Name = "a1_05", Id = 105, Groups = { new SpawnGroupCollectionMember { Id = 112, Probability = 1 } }
         });
     }
 
@@ -363,15 +366,18 @@ public class ParserTests
         groups[0].Should().BeEquivalentTo(new ParserService.DataFileGroup
         {
             Name = "Abc",
-            Fields = {{"Mob", "101"}, {"Type", "drop"}},
-            Data = {new List<string>() {"1", "10", "1", "0.09"}}
+            Fields = { { "Mob", "101" }, { "Type", "drop" } },
+            Data = { new List<string>() { "1", "10", "1", "0.09" } }
         });
         mobDrops.Should().HaveCount(1);
         mobDrops[0].Should().NotBeNull();
         mobDrops[0].Should().BeEquivalentTo(new DropItemGroup
         {
             MonsterProtoId = 101,
-            Drops = new List<DropItemGroup.Drop> {new() {ItemProtoId = 10, Amount = 1, Chance = 0.09f * 10000.0f}}
+            Drops = new List<DropItemGroup.Drop>
+            {
+                new() { ItemProtoId = 10, Amount = 1, Chance = 0.09f * 10000.0f }
+            }
         });
     }
 
@@ -403,14 +409,14 @@ public class ParserTests
         groups[0].Should().BeEquivalentTo(new ParserService.DataFileGroup
         {
             Name = "Abc",
-            Fields = {{"Mob", "101"}, {"Type", "drop"}},
-            Data = {new List<string>() {"1", "10", "1", "0.09"}}
+            Fields = { { "Mob", "101" }, { "Type", "drop" } },
+            Data = { new List<string>() { "1", "10", "1", "0.09" } }
         });
         groups[1].Should().BeEquivalentTo(new ParserService.DataFileGroup
         {
             Name = "Def",
-            Fields = {{"Mob", "102"}, {"Type", "drop"}},
-            Data = {new List<string>() {"1", "11", "2", "0.05"}}
+            Fields = { { "Mob", "102" }, { "Type", "drop" } },
+            Data = { new List<string>() { "1", "11", "2", "0.05" } }
         });
 
         mobDrops.Should().HaveCount(2);
@@ -418,13 +424,19 @@ public class ParserTests
         mobDrops[0].Should().BeEquivalentTo(new DropItemGroup
         {
             MonsterProtoId = 101,
-            Drops = new List<DropItemGroup.Drop> {new() {ItemProtoId = 10, Amount = 1, Chance = 0.09f * 10000.0f}}
+            Drops = new List<DropItemGroup.Drop>
+            {
+                new() { ItemProtoId = 10, Amount = 1, Chance = 0.09f * 10000.0f }
+            }
         });
         mobDrops[1].Should().NotBeNull();
         mobDrops[1].Should().BeEquivalentTo(new DropItemGroup
         {
             MonsterProtoId = 102,
-            Drops = new List<DropItemGroup.Drop> {new() {ItemProtoId = 11, Amount = 2, Chance = 0.05f * 10000.0f}}
+            Drops = new List<DropItemGroup.Drop>
+            {
+                new() { ItemProtoId = 11, Amount = 2, Chance = 0.05f * 10000.0f }
+            }
         });
     }
 
@@ -451,8 +463,8 @@ public class ParserTests
         groups[0].Should().BeEquivalentTo(new ParserService.DataFileGroup
         {
             Name = "Abc",
-            Fields = {{"Mob", "101"}, {"Type", "drop"}},
-            Data = {new List<string>() {"1", "10", "1", "0.09"}, new List<string>() {"2", "11", "2", "1"}}
+            Fields = { { "Mob", "101" }, { "Type", "drop" } },
+            Data = { new List<string>() { "1", "10", "1", "0.09" }, new List<string>() { "2", "11", "2", "1" } }
         });
         mobDrops.Should().HaveCount(1);
         mobDrops[0].Should().NotBeNull();
@@ -461,8 +473,8 @@ public class ParserTests
             MonsterProtoId = 101,
             Drops = new List<DropItemGroup.Drop>
             {
-                new() {ItemProtoId = 10, Amount = 1, Chance = 0.09f * 10000.0f},
-                new() {ItemProtoId = 11, Amount = 2, Chance = 1.0f * 10000.0f}
+                new() { ItemProtoId = 10, Amount = 1, Chance = 0.09f * 10000.0f },
+                new() { ItemProtoId = 11, Amount = 2, Chance = 1.0f * 10000.0f }
             }
         });
     }
@@ -497,14 +509,14 @@ public class ParserTests
         groups[0].Should().BeEquivalentTo(new ParserService.DataFileGroup
         {
             Name = "Abc",
-            Fields = {{"Mob", "101"}, {"Type", "drop"}},
-            Data = {new List<string>() {"1", "10", "1", "0.09"}, new List<string>() {"2", "11", "2", "0.05"}}
+            Fields = { { "Mob", "101" }, { "Type", "drop" } },
+            Data = { new List<string>() { "1", "10", "1", "0.09" }, new List<string>() { "2", "11", "2", "0.05" } }
         });
         groups[1].Should().BeEquivalentTo(new ParserService.DataFileGroup
         {
             Name = "Def",
-            Fields = {{"Mob", "102"}, {"Type", "drop"}},
-            Data = {new List<string>() {"1", "11", "2", "0.05"}, new List<string>() {"2", "10", "1", "0.09"}}
+            Fields = { { "Mob", "102" }, { "Type", "drop" } },
+            Data = { new List<string>() { "1", "11", "2", "0.05" }, new List<string>() { "2", "10", "1", "0.09" } }
         });
 
         mobDrops.Should().HaveCount(2);
@@ -514,8 +526,8 @@ public class ParserTests
             MonsterProtoId = 101,
             Drops = new List<DropItemGroup.Drop>
             {
-                new() {ItemProtoId = 10, Amount = 1, Chance = 0.09f * 10000.0f},
-                new() {ItemProtoId = 11, Amount = 2, Chance = 0.05f * 10000.0f}
+                new() { ItemProtoId = 10, Amount = 1, Chance = 0.09f * 10000.0f },
+                new() { ItemProtoId = 11, Amount = 2, Chance = 0.05f * 10000.0f }
             }
         });
         mobDrops[1].Should().NotBeNull();
@@ -524,8 +536,8 @@ public class ParserTests
             MonsterProtoId = 102,
             Drops = new List<DropItemGroup.Drop>
             {
-                new() {ItemProtoId = 11, Amount = 2, Chance = 0.05f * 10000.0f},
-                new() {ItemProtoId = 10, Amount = 1, Chance = 0.09f * 10000.0f}
+                new() { ItemProtoId = 11, Amount = 2, Chance = 0.05f * 10000.0f },
+                new() { ItemProtoId = 10, Amount = 1, Chance = 0.09f * 10000.0f }
             }
         });
     }
@@ -553,15 +565,18 @@ public class ParserTests
         groups[0].Should().BeEquivalentTo(new ParserService.DataFileGroup
         {
             Name = "Abc",
-            Fields = {{"Level_limit", "75"}, {"Mob", "101"}, {"Type", "limit"}},
-            Data = {new List<string>() {"1", "10", "1", "0.09"}}
+            Fields = { { "Level_limit", "75" }, { "Mob", "101" }, { "Type", "limit" } },
+            Data = { new List<string>() { "1", "10", "1", "0.09" } }
         });
         mobDrops.Should().HaveCount(1);
         mobDrops[0].Should().NotBeNull();
         mobDrops[0].Should().BeEquivalentTo(new LevelItemGroup
         {
             LevelLimit = 75,
-            Drops = new List<LevelItemGroup.Drop> {new() {ItemProtoId = 10, Amount = 1, Chance = 0.09f * 10000.0f}}
+            Drops = new List<LevelItemGroup.Drop>
+            {
+                new() { ItemProtoId = 10, Amount = 1, Chance = 0.09f * 10000.0f }
+            }
         });
     }
 
@@ -595,27 +610,33 @@ public class ParserTests
         groups[0].Should().BeEquivalentTo(new ParserService.DataFileGroup
         {
             Name = "Abc",
-            Fields = {{"Level_limit", "75"}, {"Mob", "101"}, {"Type", "limit"}},
-            Data = {new List<string>() {"1", "10", "1", "0.09"}}
+            Fields = { { "Level_limit", "75" }, { "Mob", "101" }, { "Type", "limit" } },
+            Data = { new List<string>() { "1", "10", "1", "0.09" } }
         });
         groups[1].Should().BeEquivalentTo(new ParserService.DataFileGroup
         {
             Name = "Def",
-            Fields = {{"Level_limit", "75"}, {"Mob", "102"}, {"Type", "limit"}},
-            Data = {new List<string>() {"1", "11", "2", "0.05"}}
+            Fields = { { "Level_limit", "75" }, { "Mob", "102" }, { "Type", "limit" } },
+            Data = { new List<string>() { "1", "11", "2", "0.05" } }
         });
         mobDrops.Should().HaveCount(2);
         mobDrops[0].Should().NotBeNull();
         mobDrops[0].Should().BeEquivalentTo(new LevelItemGroup
         {
             LevelLimit = 75,
-            Drops = new List<LevelItemGroup.Drop> {new() {ItemProtoId = 10, Amount = 1, Chance = 0.09f * 10000.0f}}
+            Drops = new List<LevelItemGroup.Drop>
+            {
+                new() { ItemProtoId = 10, Amount = 1, Chance = 0.09f * 10000.0f }
+            }
         });
         mobDrops[1].Should().NotBeNull();
         mobDrops[1].Should().BeEquivalentTo(new LevelItemGroup
         {
             LevelLimit = 75,
-            Drops = new List<LevelItemGroup.Drop> {new() {ItemProtoId = 11, Amount = 2, Chance = 0.05f * 10000.0f}}
+            Drops = new List<LevelItemGroup.Drop>
+            {
+                new() { ItemProtoId = 11, Amount = 2, Chance = 0.05f * 10000.0f }
+            }
         });
     }
 
@@ -643,8 +664,8 @@ public class ParserTests
         groups[0].Should().BeEquivalentTo(new ParserService.DataFileGroup
         {
             Name = "Abc",
-            Fields = {{"Level_limit", "75"}, {"Mob", "101"}, {"Type", "limit"}},
-            Data = {new List<string>() {"1", "10", "1", "0.09"}, new List<string>() {"2", "11", "2", "1"}}
+            Fields = { { "Level_limit", "75" }, { "Mob", "101" }, { "Type", "limit" } },
+            Data = { new List<string>() { "1", "10", "1", "0.09" }, new List<string>() { "2", "11", "2", "1" } }
         });
         mobDrops.Should().HaveCount(1);
         mobDrops[0].Should().NotBeNull();
@@ -653,8 +674,8 @@ public class ParserTests
             LevelLimit = 75,
             Drops = new List<LevelItemGroup.Drop>
             {
-                new() {ItemProtoId = 10, Amount = 1, Chance = 0.09f * 10000.0f},
-                new() {ItemProtoId = 11, Amount = 2, Chance = 1.0f * 10000.0f}
+                new() { ItemProtoId = 10, Amount = 1, Chance = 0.09f * 10000.0f },
+                new() { ItemProtoId = 11, Amount = 2, Chance = 1.0f * 10000.0f }
             }
         });
     }
@@ -691,14 +712,14 @@ public class ParserTests
         groups[0].Should().BeEquivalentTo(new ParserService.DataFileGroup
         {
             Name = "Abc",
-            Fields = {{"Level_limit", "75"}, {"Mob", "101"}, {"Type", "limit"}},
-            Data = {new List<string>() {"1", "10", "1", "0.09"}, new List<string>() {"2", "11", "2", "1"}}
+            Fields = { { "Level_limit", "75" }, { "Mob", "101" }, { "Type", "limit" } },
+            Data = { new List<string>() { "1", "10", "1", "0.09" }, new List<string>() { "2", "11", "2", "1" } }
         });
         groups[1].Should().BeEquivalentTo(new ParserService.DataFileGroup
         {
             Name = "Def",
-            Fields = {{"Level_limit", "75"}, {"Mob", "102"}, {"Type", "limit"}},
-            Data = {new List<string>() {"1", "11", "2", "0.05"}, new List<string>() {"2", "10", "1", "0.09"}}
+            Fields = { { "Level_limit", "75" }, { "Mob", "102" }, { "Type", "limit" } },
+            Data = { new List<string>() { "1", "11", "2", "0.05" }, new List<string>() { "2", "10", "1", "0.09" } }
         });
         mobDrops.Should().HaveCount(2);
         mobDrops[0].Should().NotBeNull();
@@ -707,8 +728,8 @@ public class ParserTests
             LevelLimit = 75,
             Drops = new List<LevelItemGroup.Drop>
             {
-                new() {ItemProtoId = 10, Amount = 1, Chance = 0.09f * 10000.0f},
-                new() {ItemProtoId = 11, Amount = 2, Chance = 1.0f * 10000.0f}
+                new() { ItemProtoId = 10, Amount = 1, Chance = 0.09f * 10000.0f },
+                new() { ItemProtoId = 11, Amount = 2, Chance = 1.0f * 10000.0f }
             }
         });
         mobDrops[1].Should().NotBeNull();
@@ -717,8 +738,8 @@ public class ParserTests
             LevelLimit = 75,
             Drops = new List<LevelItemGroup.Drop>
             {
-                new() {ItemProtoId = 11, Amount = 2, Chance = 0.05f * 10000.0f},
-                new() {ItemProtoId = 10, Amount = 1, Chance = 0.09f * 10000.0f}
+                new() { ItemProtoId = 11, Amount = 2, Chance = 0.05f * 10000.0f },
+                new() { ItemProtoId = 10, Amount = 1, Chance = 0.09f * 10000.0f }
             }
         });
     }
@@ -746,7 +767,7 @@ public class ParserTests
         groups[0].Should().BeEquivalentTo(new ParserService.DataFileGroup
         {
             Name = "Abc",
-            Fields = {{"Kill_drop", "75"}, {"Mob", "101"}, {"Type", "kill"}},
+            Fields = { { "Kill_drop", "75" }, { "Mob", "101" }, { "Type", "kill" } },
             Data =
             {
                 new List<string>()
@@ -765,8 +786,8 @@ public class ParserTests
         {
             MonsterProtoId = 101,
             MinKillCount = 75,
-            Probabilities = new List<uint>() {20},
-            Drops = new List<MonsterItemGroup.Drop> {new() {ItemProtoId = 10, Amount = 1, Chance = 30}}
+            Probabilities = new List<uint>() { 20 },
+            Drops = new List<MonsterItemGroup.Drop> { new() { ItemProtoId = 10, Amount = 1, Chance = 30 } }
         });
     }
 
@@ -800,7 +821,7 @@ public class ParserTests
         groups[0].Should().BeEquivalentTo(new ParserService.DataFileGroup
         {
             Name = "Abc",
-            Fields = {{"Kill_drop", "75"}, {"Mob", "101"}, {"Type", "kill"}},
+            Fields = { { "Kill_drop", "75" }, { "Mob", "101" }, { "Type", "kill" } },
             Data =
             {
                 new List<string>()
@@ -816,7 +837,7 @@ public class ParserTests
         groups[1].Should().BeEquivalentTo(new ParserService.DataFileGroup
         {
             Name = "Def",
-            Fields = {{"Kill_drop", "75"}, {"Mob", "102"}, {"Type", "kill"}},
+            Fields = { { "Kill_drop", "75" }, { "Mob", "102" }, { "Type", "kill" } },
             Data =
             {
                 new List<string>()
@@ -835,16 +856,16 @@ public class ParserTests
         {
             MonsterProtoId = 101,
             MinKillCount = 75,
-            Probabilities = new List<uint>() {20},
-            Drops = new List<MonsterItemGroup.Drop> {new() {ItemProtoId = 10, Amount = 1, Chance = 30}}
+            Probabilities = new List<uint>() { 20 },
+            Drops = new List<MonsterItemGroup.Drop> { new() { ItemProtoId = 10, Amount = 1, Chance = 30 } }
         });
         mobDrops[1].Should().NotBeNull();
         mobDrops[1].Should().BeEquivalentTo(new MonsterItemGroup()
         {
             MonsterProtoId = 102,
             MinKillCount = 75,
-            Probabilities = new List<uint>() {20},
-            Drops = new List<MonsterItemGroup.Drop> {new() {ItemProtoId = 11, Amount = 2, Chance = 30}}
+            Probabilities = new List<uint>() { 20 },
+            Drops = new List<MonsterItemGroup.Drop> { new() { ItemProtoId = 11, Amount = 2, Chance = 30 } }
         });
     }
 
@@ -872,7 +893,7 @@ public class ParserTests
         groups[0].Should().BeEquivalentTo(new ParserService.DataFileGroup
         {
             Name = "Abc",
-            Fields = {{"Kill_drop", "75"}, {"Mob", "101"}, {"Type", "kill"}},
+            Fields = { { "Kill_drop", "75" }, { "Mob", "101" }, { "Type", "kill" } },
             Data =
             {
                 new List<string>()
@@ -899,11 +920,11 @@ public class ParserTests
         {
             MonsterProtoId = 101,
             MinKillCount = 75,
-            Probabilities = new List<uint>() {20, 25},
+            Probabilities = new List<uint>() { 20, 25 },
             Drops = new List<MonsterItemGroup.Drop>
             {
-                new() {ItemProtoId = 10, Amount = 1, Chance = 30},
-                new() {ItemProtoId = 11, Amount = 2, Chance = 35}
+                new() { ItemProtoId = 10, Amount = 1, Chance = 30 },
+                new() { ItemProtoId = 11, Amount = 2, Chance = 35 }
             }
         });
     }
@@ -940,7 +961,7 @@ public class ParserTests
         groups[0].Should().BeEquivalentTo(new ParserService.DataFileGroup
         {
             Name = "Abc",
-            Fields = {{"Kill_drop", "75"}, {"Mob", "101"}, {"Type", "kill"}},
+            Fields = { { "Kill_drop", "75" }, { "Mob", "101" }, { "Type", "kill" } },
             Data =
             {
                 new List<string>()
@@ -964,7 +985,7 @@ public class ParserTests
         groups[1].Should().BeEquivalentTo(new ParserService.DataFileGroup
         {
             Name = "Def",
-            Fields = {{"Kill_drop", "75"}, {"Mob", "102"}, {"Type", "kill"}},
+            Fields = { { "Kill_drop", "75" }, { "Mob", "102" }, { "Type", "kill" } },
             Data =
             {
                 new List<string>()
@@ -991,11 +1012,11 @@ public class ParserTests
         {
             MonsterProtoId = 101,
             MinKillCount = 75,
-            Probabilities = new List<uint>() {20, 25},
+            Probabilities = new List<uint>() { 20, 25 },
             Drops = new List<MonsterItemGroup.Drop>
             {
-                new() {ItemProtoId = 10, Amount = 1, Chance = 30},
-                new() {ItemProtoId = 11, Amount = 2, Chance = 35}
+                new() { ItemProtoId = 10, Amount = 1, Chance = 30 },
+                new() { ItemProtoId = 11, Amount = 2, Chance = 35 }
             }
         });
         mobDrops[1].Should().NotBeNull();
@@ -1003,11 +1024,11 @@ public class ParserTests
         {
             MonsterProtoId = 102,
             MinKillCount = 75,
-            Probabilities = new List<uint>() {20, 25},
+            Probabilities = new List<uint>() { 20, 25 },
             Drops = new List<MonsterItemGroup.Drop>
             {
-                new() {ItemProtoId = 11, Amount = 2, Chance = 30},
-                new() {ItemProtoId = 11, Amount = 2, Chance = 35}
+                new() { ItemProtoId = 11, Amount = 2, Chance = 30 },
+                new() { ItemProtoId = 11, Amount = 2, Chance = 35 }
             }
         });
     }
@@ -1018,8 +1039,8 @@ public class ParserTests
         var input = new ParserService.DataFileGroup
         {
             Name = "Abc",
-            Fields = {{"Mob", "101"}, {"Type", "Kill"}, {"Kill_drop", "0"}},
-            Data = {new List<string>() {"1", "10", "1", "0.09"}, new List<string>() {"2", "11", "2", "0.05"}}
+            Fields = { { "Mob", "101" }, { "Type", "Kill" }, { "Kill_drop", "0" } },
+            Data = { new List<string>() { "1", "10", "1", "0.09" }, new List<string>() { "2", "11", "2", "0.05" } }
         };
         var itemManager = Substitute.For<IItemManager>();
 
@@ -1034,8 +1055,8 @@ public class ParserTests
         var input = new ParserService.DataFileGroup
         {
             Name = "Abc",
-            Fields = {{"Mob", "101"}, {"Type", "Kill"},},
-            Data = {new List<string>() {"1", "10", "1", "0.09"}, new List<string>() {"2", "11", "2", "0.05"}}
+            Fields = { { "Mob", "101" }, { "Type", "Kill" }, },
+            Data = { new List<string>() { "1", "10", "1", "0.09" }, new List<string>() { "2", "11", "2", "0.05" } }
         };
         var itemManager = Substitute.For<IItemManager>();
 
@@ -1050,8 +1071,8 @@ public class ParserTests
         var input = new ParserService.DataFileGroup
         {
             Name = "Abc",
-            Fields = {{"Type", "Kill"}, {"Kill_drop", "10"}},
-            Data = {new List<string>() {"1", "10", "1", "0.09"}, new List<string>() {"2", "11", "2", "0.05"}}
+            Fields = { { "Type", "Kill" }, { "Kill_drop", "10" } },
+            Data = { new List<string>() { "1", "10", "1", "0.09" }, new List<string>() { "2", "11", "2", "0.05" } }
         };
         var itemManager = Substitute.For<IItemManager>();
 
@@ -1066,8 +1087,8 @@ public class ParserTests
         var input = new ParserService.DataFileGroup
         {
             Name = "Abc",
-            Fields = {{"Mob", "101"}, {"Type", "Limit"},},
-            Data = {new List<string>() {"1", "10", "1", "0.09"}, new List<string>() {"2", "11", "2", "0.05"}}
+            Fields = { { "Mob", "101" }, { "Type", "Limit" }, },
+            Data = { new List<string>() { "1", "10", "1", "0.09" }, new List<string>() { "2", "11", "2", "0.05" } }
         };
         var itemManager = Substitute.For<IItemManager>();
 
@@ -1082,8 +1103,8 @@ public class ParserTests
         var input = new ParserService.DataFileGroup
         {
             Name = "Abc",
-            Fields = {{"Mob", "101"}, {"Kill_drop", "10"}},
-            Data = {new List<string>() {"1", "10", "1", "0.09"}, new List<string>() {"2", "11", "2", "0.05"}}
+            Fields = { { "Mob", "101" }, { "Kill_drop", "10" } },
+            Data = { new List<string>() { "1", "10", "1", "0.09" }, new List<string>() { "2", "11", "2", "0.05" } }
         };
         var itemManager = Substitute.For<IItemManager>();
 

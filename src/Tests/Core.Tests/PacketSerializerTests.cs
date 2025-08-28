@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+﻿using AwesomeAssertions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -12,7 +12,7 @@ namespace Core.Tests;
 [PacketGenerator]
 public partial class MyPacket
 {
-    [Field(0)] public uint Size => (uint) MyArray.Length;
+    [Field(0)] public uint Size => (uint)MyArray.Length;
 
     [Field(1)] public ComplexSubType[] MyArray { get; set; } = Array.Empty<ComplexSubType>();
 
@@ -34,16 +34,10 @@ public class PacketSerializerTests
     {
         var services = new ServiceCollection()
             .AddSingleton<IConfiguration>(_ => new ConfigurationBuilder()
-                .AddInMemoryCollection(new Dictionary<string, string?>
-                {
-                    {"Mode", HostingOptions.ModeGame}
-                })
+                .AddInMemoryCollection(new Dictionary<string, string?> { { "Mode", HostingOptions.ModeGame } })
                 .Build())
             .AddSingleton<IPacketManager>(provider => new PacketManager(
-                provider.GetRequiredService<ILogger<PacketManager>>(), new[]
-                {
-                    typeof(MyPacket)
-                }))
+                provider.GetRequiredService<ILogger<PacketManager>>(), new[] { typeof(MyPacket) }))
             .AddSingleton<IPacketSerializer, DefaultPacketSerializer>()
             .AddLogging()
             .BuildServiceProvider();
@@ -59,8 +53,8 @@ public class PacketSerializerTests
         {
             MyArray = new[]
             {
-                new ComplexSubType {SubHeader = 0x18, Value = 0x0675},
-                new ComplexSubType {SubHeader = 0x43, Value = 0x306E}
+                new ComplexSubType { SubHeader = 0x18, Value = 0x0675 },
+                new ComplexSubType { SubHeader = 0x43, Value = 0x306E }
             },
             AnotherProperty = 0x000004D2
         };
