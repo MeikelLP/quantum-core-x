@@ -46,11 +46,11 @@ const config = {
         docs: {
           routeBasePath: '/',
           sidebarPath: './sidebars.js',
-          editUrl: 'https://github.com/MeikelLP/quantum-core-x/tree/master/docs',
+          editUrl: 'https://github.com/MeikelLP/quantum-core-x/tree/main/docs',
         },
         blog: {
           showReadingTime: true,
-          editUrl: 'https://github.com/MeikelLP/quantum-core-x/tree/master/docs',
+          editUrl: 'https://github.com/MeikelLP/quantum-core-x/tree/main/docs',
         }
       }),
     ],

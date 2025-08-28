@@ -11,7 +11,7 @@ In this guide a _User_ refers to someone who wants to host/administrate QCX.
     * [Build it yourself](./developer.md)
     * [Github Releases](https://github.com/MeikelLP/quantum-core-x/releases) (stable) - available from 0.1 forward
     * Directly from
-      the [build pipelines](https://nightly.link/MeikelLP/quantum-core-x/workflows/dotnet-pipeline/master) (unstable).
+      the [build pipelines](https://nightly.link/MeikelLP/quantum-core-x/workflows/dotnet-pipeline/main) (unstable).
 
 ## Quickstart
 

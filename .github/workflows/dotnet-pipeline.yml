@@ -3,7 +3,7 @@
 on:
   push:
     branches:
-      - master
+      - main
   pull_request:
     types: [opened, synchronize, reopened]
 
@@ -36,8 +36,8 @@ jobs:
     needs:
       - test
     runs-on: ubuntu-latest
-    # only deploy if on master or tag
-    if: startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master'
+    # only deploy if on main or tag
+    if: startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/main'
     permissions:
       contents: read
       packages: write
@@ -66,8 +66,8 @@ jobs:
       contents: read
       packages: write
     runs-on: ubuntu-latest
-    # only deploy if on master or tag
-    if: startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master'
+    # only deploy if on main or tag
+    if: startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v3
       - name: Login to Docker Registry
@@ -87,7 +87,7 @@ jobs:
             type=schedule
             type=ref,event=branch
             type=ref,event=tag
-            type=raw,latest,enable=${{ github.ref == format('refs/heads/{0}', 'master') }}
+            type=raw,latest,enable=${{ github.ref == format('refs/heads/{0}', 'main') }}
       - name: Build and push game image
         uses: docker/build-push-action@v4.1.1
         with:
@@ -107,7 +107,7 @@ jobs:
             type=schedule
             type=ref,event=branch
             type=ref,event=tag
-            type=raw,latest,enable=${{ github.ref == format('refs/heads/{0}', 'master') }}
+            type=raw,latest,enable=${{ github.ref == format('refs/heads/{0}', 'main') }}
       - name: Build and push auth image
         uses: docker/build-push-action@v4.1.1
         with:

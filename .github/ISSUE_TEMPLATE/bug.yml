@@ -6,7 +6,7 @@ body:
   - type: markdown
     attributes:
       value: |
-        Please fill out the sections below to help us diagnose and fix the issue. Before submitting a bug report, please check the [Reporting Bugs](https://github.com/MeikelLP/quantum-core-x/blob/master/CONTRIBUTING.md#reporting-bugs) section in the contributing guidelines.
+        Please fill out the sections below to help us diagnose and fix the issue. Before submitting a bug report, please check the [Reporting Bugs](https://github.com/MeikelLP/quantum-core-x/blob/main/CONTRIBUTING.md#reporting-bugs) section in the contributing guidelines.
 
   - type: textarea
     id: what-happened
