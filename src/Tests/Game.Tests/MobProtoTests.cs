@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+﻿using AwesomeAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.FileProviders.Physical;
@@ -80,7 +80,7 @@ public class MobProtoTests
             DrainSp = monsters[0].DrainSp,
             MonsterColor = monsters[0].MonsterColor,
             PolymorphItemId = monsters[0].PolymorphItemId,
-            Skills = monsters[0].Skills.Select(x => new MonsterSkillData {Id = x.Id, Level = x.Level}).ToList(),
+            Skills = monsters[0].Skills.Select(x => new MonsterSkillData { Id = x.Id, Level = x.Level }).ToList(),
             BerserkPoint = monsters[0].BerserkPoint,
             StoneSkinPoint = monsters[0].StoneSkinPoint,
             GodSpeedPoint = monsters[0].GodSpeedPoint,
@@ -91,9 +91,9 @@ public class MobProtoTests
             Id = 101,
             Name = "??",
             TranslatedName = "Wild Dog",
-            Type = (byte) EEntityType.Monster,
-            Rank = (byte) EMonsterLevel.Pawn,
-            BattleType = (byte) EBattleType.Melee,
+            Type = (byte)EEntityType.Monster,
+            Rank = (byte)EMonsterLevel.Pawn,
+            BattleType = (byte)EBattleType.Melee,
             Level = 1,
             Size = 0,
             // gold is not saved in client side mob proto (at least not by dump_proto)
@@ -105,7 +105,7 @@ public class MobProtoTests
             RegenPercentage = 7,
             Defence = 4,
             AiFlag = 0,
-            RaceFlag = (uint) ERaceFlag.Animal,
+            RaceFlag = (uint)ERaceFlag.Animal,
             ImmuneFlag = 0,
             St = 3,
             Dx = 6,
@@ -142,11 +142,11 @@ public class MobProtoTests
             PolymorphItemId = 0,
             Skills =
             [
-                new MonsterSkillData {Id = 0, Level = 0},
-                new MonsterSkillData {Id = 0, Level = 0},
-                new MonsterSkillData {Id = 0, Level = 0},
-                new MonsterSkillData {Id = 0, Level = 0},
-                new MonsterSkillData {Id = 0, Level = 0}
+                new MonsterSkillData { Id = 0, Level = 0 },
+                new MonsterSkillData { Id = 0, Level = 0 },
+                new MonsterSkillData { Id = 0, Level = 0 },
+                new MonsterSkillData { Id = 0, Level = 0 },
+                new MonsterSkillData { Id = 0, Level = 0 }
             ],
             BerserkPoint = 0,
             StoneSkinPoint = 0,

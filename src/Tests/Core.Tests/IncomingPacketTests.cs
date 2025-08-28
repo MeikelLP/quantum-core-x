@@ -1,7 +1,7 @@
 ﻿using System.Text;
 using AutoBogus;
+using AwesomeAssertions;
 using Core.Tests.Extensions;
-using FluentAssertions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using QuantumCore.Core.Packets;
@@ -43,7 +43,7 @@ public class IncomingPacketTests
     public void Attack()
     {
         var expected = new AutoFaker<Attack>()
-            .RuleFor(x => x.Unknown, faker => new[] {faker.Random.Byte(), faker.Random.Byte()})
+            .RuleFor(x => x.Unknown, faker => new[] { faker.Random.Byte(), faker.Random.Byte() })
             .Generate();
         var bytes = Array.Empty<byte>()
             .Append(expected.AttackType)
@@ -81,7 +81,7 @@ public class IncomingPacketTests
         var expected = new AutoFaker<CreateCharacter>()
             .RuleFor(x => x.Name, faker => faker.Lorem.Letter(25))
             .RuleFor(x => x.Unknown,
-                faker => new[] {faker.Random.Byte(), faker.Random.Byte(), faker.Random.Byte(), faker.Random.Byte()})
+                faker => new[] { faker.Random.Byte(), faker.Random.Byte(), faker.Random.Byte(), faker.Random.Byte() })
             .Generate();
         var bytes = Array.Empty<byte>()
             .Append(expected.Slot)
@@ -358,7 +358,7 @@ public class IncomingPacketTests
         var expected = new AutoFaker<TokenLogin>()
             .RuleFor(x => x.Username, faker => faker.Lorem.Letter(31))
             .RuleFor(x => x.Xteakeys,
-                faker => new[] {faker.Random.UInt(), faker.Random.UInt(), faker.Random.UInt(), faker.Random.UInt()})
+                faker => new[] { faker.Random.UInt(), faker.Random.UInt(), faker.Random.UInt(), faker.Random.UInt() })
             .Generate();
         var bytes = Array.Empty<byte>()
             .Concat(Encoding.ASCII.GetBytes(expected.Username))

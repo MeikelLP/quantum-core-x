@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+﻿using AwesomeAssertions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -21,21 +21,15 @@ public class NetworkingTests
             .AddSingleton<IConfiguration>(_ => new ConfigurationBuilder()
                 .AddInMemoryCollection(new Dictionary<string, string?>
                 {
-                    {"Mode", HostingOptions.ModeGame},
-                    {"BufferSize", bufferSize.ToString()}
+                    { "Mode", HostingOptions.ModeGame }, { "BufferSize", bufferSize.ToString() }
                 })
                 .Build())
             .AddLogging()
             .AddSingleton<IHostEnvironment>(_ => new HostingEnvironment())
             .AddKeyedSingleton<IPacketManager>(HostingOptions.ModeGame, (provider, _) =>
             {
-                return new PacketManager(provider.GetRequiredService<ILogger<PacketManager>>(), new[]
-                {
-                    typeof(Attack),
-                    typeof(CharacterDead),
-                    typeof(ChatIncoming),
-                    typeof(ShopBuy)
-                });
+                return new PacketManager(provider.GetRequiredService<ILogger<PacketManager>>(),
+                    new[] { typeof(Attack), typeof(CharacterDead), typeof(ChatIncoming), typeof(ShopBuy) });
             })
             .AddKeyedSingleton<IPacketReader, PacketReader>(HostingOptions.ModeGame)
             .BuildServiceProvider();
@@ -45,12 +39,7 @@ public class NetworkingTests
     [Fact]
     public async Task Simple()
     {
-        var obj = new Attack
-        {
-            Unknown = new byte[] {0, 0},
-            Vid = 1_000_000,
-            AttackType = 53
-        };
+        var obj = new Attack { Unknown = new byte[] { 0, 0 }, Vid = 1_000_000, AttackType = 53 };
         var size = obj.GetSize();
         var bytes = new byte[size];
         obj.Serialize(bytes);
@@ -65,11 +54,7 @@ public class NetworkingTests
     [Fact]
     public async Task SubPacket()
     {
-        var obj = new ShopBuy
-        {
-            Position = 24,
-            Count = 10
-        };
+        var obj = new ShopBuy { Position = 24, Count = 10 };
         var size = obj.GetSize();
         var bytes = new byte[size];
         obj.Serialize(bytes);
@@ -84,12 +69,7 @@ public class NetworkingTests
     [Fact]
     public async Task MultipleWithSequence()
     {
-        var obj = new Attack
-        {
-            Vid = 1_000_000,
-            AttackType = 5,
-            Unknown = new byte[] {0, 0}
-        };
+        var obj = new Attack { Vid = 1_000_000, AttackType = 5, Unknown = new byte[] { 0, 0 } };
         var size = obj.GetSize();
         var bytes = new byte[size * 2];
         obj.Serialize(bytes);
@@ -105,11 +85,7 @@ public class NetworkingTests
     [Fact]
     public async Task Dynamic()
     {
-        var obj = new ChatIncoming
-        {
-            MessageType = ChatMessageTypes.Normal,
-            Message = "Hello New World!"
-        };
+        var obj = new ChatIncoming { MessageType = ChatMessageTypes.Normal, Message = "Hello New World!" };
         var size = obj.GetSize();
         var bytes = new byte[size + 1]; // + 1 due to sequence
         obj.Serialize(bytes);
@@ -142,12 +118,7 @@ public class NetworkingTests
     [Fact]
     public async Task Multiple()
     {
-        var obj = new Attack
-        {
-            Unknown = new byte[] {0, 0},
-            Vid = 1_000_000,
-            AttackType = 53
-        };
+        var obj = new Attack { Unknown = new byte[] { 0, 0 }, Vid = 1_000_000, AttackType = 53 };
         var size = obj.GetSize();
         var bytes = new byte[size + size];
         obj.Serialize(bytes);
@@ -164,12 +135,7 @@ public class NetworkingTests
     [Fact]
     public async Task MoreThanBuffer()
     {
-        var obj = new Attack
-        {
-            Unknown = new byte[] {0, 0},
-            Vid = 1_000_000,
-            AttackType = 53
-        };
+        var obj = new Attack { Unknown = new byte[] { 0, 0 }, Vid = 1_000_000, AttackType = 53 };
         var size = obj.GetSize();
         var bytes = new byte[size * 3];
         obj.Serialize(bytes);
@@ -188,10 +154,7 @@ public class NetworkingTests
     [Fact]
     public async Task OddSize()
     {
-        var obj = new CharacterDead
-        {
-            Vid = 1_000_000
-        };
+        var obj = new CharacterDead { Vid = 1_000_000 };
         var size = obj.GetSize();
         var bytes = new byte[size * 10];
         for (var i = 0; i < 10; i++)
@@ -209,16 +172,8 @@ public class NetworkingTests
     [Fact]
     public async Task DifferentPackets()
     {
-        var charDeadObj = new CharacterDead
-        {
-            Vid = 1_000_000
-        };
-        var attackObj = new Attack
-        {
-            Unknown = new byte[] {0, 0},
-            Vid = 1_000_000,
-            AttackType = 53
-        };
+        var charDeadObj = new CharacterDead { Vid = 1_000_000 };
+        var attackObj = new Attack { Unknown = new byte[] { 0, 0 }, Vid = 1_000_000, AttackType = 53 };
         var charDeadSize = charDeadObj.GetSize();
         var attackSize = attackObj.GetSize();
         var bytes = new byte[charDeadSize + attackSize];

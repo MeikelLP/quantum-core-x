@@ -1,5 +1,5 @@
-﻿using CommandLine;
-using FluentAssertions;
+﻿using AwesomeAssertions;
+using CommandLine;
 using Game.Commands.Tests.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -31,7 +31,7 @@ public class StrictCommandManagerTests
                 return conn;
             })
             .AddSingleton<IConfiguration>(_ => new ConfigurationBuilder()
-                .AddInMemoryCollection(new Dictionary<string, string?> {{"Game:Commands:StrictMode", "true"}})
+                .AddInMemoryCollection(new Dictionary<string, string?> { { "Game:Commands:StrictMode", "true" } })
                 .Build())
             .AddGameCommands()
             .AddQuantumCoreTestLogger(outputHelper)
