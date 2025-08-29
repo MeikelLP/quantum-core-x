@@ -43,11 +43,11 @@ public static class ServiceExtensions
             var handlerTypes = assemblies.SelectMany(x => x.ExportedTypes)
                 .Where(x =>
                     x.IsAssignableTo(typeof(IPacketHandler)) &&
-                    x is {IsClass: true, IsAbstract: false, IsInterface: false})
+                    x is { IsClass: true, IsAbstract: false, IsInterface: false })
                 .OrderBy(x => x.FullName)
                 .ToArray();
             return ActivatorUtilities.CreateInstance<PacketManager>(provider,
-                new object[] {(IEnumerable<Type>) packetTypes, handlerTypes});
+                new object[] { (IEnumerable<Type>) packetTypes, handlerTypes });
         });
         return services;
     }
@@ -77,7 +77,7 @@ public static class ServiceExtensions
                 .SelectMany(x => x.ExportedTypes)
                 .Where(x =>
                     x.IsAssignableTo(typeof(IPacketHandler)) &&
-                    x is {IsClass: true, IsAbstract: false, IsInterface: false})
+                    x is { IsClass: true, IsAbstract: false, IsInterface: false })
                 .OrderBy(x => x.FullName)
                 .ToArray();
             return ActivatorUtilities.CreateInstance<PacketManager>(provider, [packetTypes, handlerTypes]);
@@ -128,7 +128,7 @@ public static class ServiceExtensions
         config.WriteTo.Console(outputTemplate: MessageTemplate);
 
         // sink to rolling file
-        config.WriteTo.RollingFile($"{Directory.GetCurrentDirectory()}/logs/api.log",
+        config.WriteTo.File($"{Directory.GetCurrentDirectory()}/logs/api.log",
             fileSizeLimitBytes: 10 * 1024 * 1024,
             buffered: true,
             outputTemplate: MessageTemplate);
