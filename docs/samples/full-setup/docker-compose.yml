@@ -44,7 +44,7 @@ services:
 
   # persistent storage
   db-mysql:
-    image: mariadb:11.3
+    image: mariadb:12.0
     hostname: db
     environment:
     - MARIADB_USER=metin2
