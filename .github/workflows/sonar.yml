@@ -4,11 +4,11 @@ on:
     branches:
       - main
     paths:
-      - 'src/**'
+      - 'src/**/*.cs'
   pull_request:
     types: [opened, synchronize, reopened]
     paths:
-      - 'src/**'
+      - 'src/**/*.cs'
 
 jobs:
   build:
