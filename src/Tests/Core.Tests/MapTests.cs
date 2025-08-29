@@ -1,5 +1,5 @@
+using AwesomeAssertions;
 using Core.Tests.Extensions;
-using FluentAssertions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -54,7 +54,7 @@ public class MapTests
             .AddSingleton<IAtlasProvider>(_ =>
             {
                 var mock = Substitute.For<IAtlasProvider>();
-                mock.GetAsync(Arg.Any<IWorld>()).Returns(_ => new[] {_map}!);
+                mock.GetAsync(Arg.Any<IWorld>()).Returns(_ => new[] { _map }!);
                 return mock;
             })
             .AddSingleton<IConfiguration>(_ => new ConfigurationBuilder().Build())
@@ -68,7 +68,7 @@ public class MapTests
                         Id = 101,
                         Name = "TestGroup1",
                         Leader = 101,
-                        Members = {new SpawnMember {Id = 101}, new SpawnMember {Id = 101}}
+                        Members = { new SpawnMember { Id = 101 }, new SpawnMember { Id = 101 } }
                     }
                 });
                 mock.GetSpawnGroupCollectionsAsync().Returns(_ => new[]
@@ -78,13 +78,13 @@ public class MapTests
                     {
                         Id = 101,
                         Name = "TestGroupCollection",
-                        Groups = {new SpawnGroupCollectionMember {Id = 101, Probability = 1}}
+                        Groups = { new SpawnGroupCollectionMember { Id = 101, Probability = 1 } }
                     },
                     new SpawnGroupCollection
                     {
                         Id = 101,
                         Name = "TestGroupCollection",
-                        Groups = {new SpawnGroupCollectionMember {Id = 101, Probability = 1}}
+                        Groups = { new SpawnGroupCollectionMember { Id = 101, Probability = 1 } }
                     }
                 });
                 return mock;

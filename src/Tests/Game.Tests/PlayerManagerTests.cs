@@ -1,4 +1,4 @@
-using FluentAssertions;
+using AwesomeAssertions;
 using Game.Caching;
 using Game.Tests.Fixtures;
 using Microsoft.EntityFrameworkCore;
@@ -40,15 +40,15 @@ public class PlayerManagerTests : IClassFixture<RedisFixture>, IClassFixture<Dat
             .AddSingleton<IConfiguration>(_ => new ConfigurationBuilder()
                 .AddInMemoryCollection(new Dictionary<string, string?>
                 {
-                    {"job:0:Ht", "4"},
-                    {"game:empire:0:x", "0"},
-                    {"game:empire:0:y", "0"},
-                    {"game:empire:1:x", "10"},
-                    {"game:empire:1:y", "15"},
-                    {"game:empire:2:x", "20"},
-                    {"game:empire:2:y", "25"},
-                    {"game:empire:3:x", "30"},
-                    {"game:empire:3:y", "35"},
+                    { "job:0:Ht", "4" },
+                    { "game:empire:0:x", "0" },
+                    { "game:empire:0:y", "0" },
+                    { "game:empire:1:x", "10" },
+                    { "game:empire:1:y", "15" },
+                    { "game:empire:2:x", "20" },
+                    { "game:empire:2:y", "25" },
+                    { "game:empire:3:x", "30" },
+                    { "game:empire:3:y", "35" },
                 })
                 .Build())
             .AddGameServices()
@@ -133,7 +133,7 @@ public class PlayerManagerTests : IClassFixture<RedisFixture>, IClassFixture<Dat
     public async Task GetPlayerById()
     {
         var playerId = (uint)Random.Shared.Next();
-        var input = new PlayerData {Id = playerId, Name = "1234"};
+        var input = new PlayerData { Id = playerId, Name = "1234" };
         await _cacheManager.Server.Set($"player:{playerId}", input);
 
         var output = await _playerManager.GetPlayer(playerId);
@@ -199,7 +199,7 @@ public class PlayerManagerTests : IClassFixture<RedisFixture>, IClassFixture<Dat
     {
         var playerId = (uint)Random.Shared.Next();
         var accountId = Guid.NewGuid();
-        await _dbPlayerRepository.CreateAsync(new PlayerData {AccountId = accountId, Id = playerId, Name = "1234"});
+        await _dbPlayerRepository.CreateAsync(new PlayerData { AccountId = accountId, Id = playerId, Name = "1234" });
         var player = await _playerManager.GetPlayer(accountId, 0);
 
         player.Should().NotBeNull();

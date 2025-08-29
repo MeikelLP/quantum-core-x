@@ -1,4 +1,4 @@
-using FluentAssertions;
+using AwesomeAssertions;
 using QuantumCore.Caching.InMemory;
 
 namespace Single.Tests;

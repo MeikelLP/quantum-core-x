@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+﻿using AwesomeAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -117,10 +117,10 @@ public class GuildTests
         var guildExperienceManager = Substitute.For<IGuildExperienceManager>();
         guildExperienceManager.GetNeededExperience(1).Returns(600_000u);
         guildExperienceManager.GetNeededExperience(2).Returns(1_800_000u);
-        guildExperienceManager.GetMaxPlayers(1).Returns((ushort) 32);
-        guildExperienceManager.GetMaxPlayers(2).Returns((ushort) 34);
-        guildExperienceManager.GetMaxPlayers(3).Returns((ushort) 36);
-        guildExperienceManager.MaxLevel.Returns((byte) 3);
+        guildExperienceManager.GetMaxPlayers(1).Returns((ushort)32);
+        guildExperienceManager.GetMaxPlayers(2).Returns((ushort)34);
+        guildExperienceManager.GetMaxPlayers(3).Returns((ushort)36);
+        guildExperienceManager.MaxLevel.Returns((byte)3);
         var services = serviceCollection
             .AddLogging()
             .AddGameDatabase()

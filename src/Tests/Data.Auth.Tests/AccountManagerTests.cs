@@ -1,5 +1,5 @@
-﻿using Data.Auth.Tests.Fixtures;
-using FluentAssertions;
+﻿using AwesomeAssertions;
+using Data.Auth.Tests.Fixtures;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -79,28 +79,27 @@ public class AccountManagerTests : IClassFixture<RedisFixture>, IClassFixture<Da
     {
         var account = await _accountManager.CreateAsync("testificate", "testificate", "some@gmail.com", "1234567");
 
-        account.Should().BeEquivalentTo(new AccountData
-        {
-            AccountStatus = new AccountStatusData
+        account.Should().BeEquivalentTo(
+            new AccountData
             {
-                Description = "Default Status",
-                Id = 1,
-                AllowLogin = true,
-                ClientStatus = "OK"
-            },
-            Status = 1,
-            Email = "some@gmail.com",
-            Username = "testificate",
-            DeleteCode = "1234567",
-            LastLogin = null
-        }, cfg =>
-        {
-            return cfg
-                .Excluding(x => x.Password)
-                .Excluding(x => x.CreatedAt)
-                .Excluding(x => x.UpdatedAt)
-                .Excluding(x => x.Id);
-        });
+                AccountStatus =
+                    new AccountStatusData
+                    {
+                        Description = "Default Status", Id = 1, AllowLogin = true, ClientStatus = "OK"
+                    },
+                Status = 1,
+                Email = "some@gmail.com",
+                Username = "testificate",
+                DeleteCode = "1234567",
+                LastLogin = null
+            }, cfg =>
+            {
+                return cfg
+                    .Excluding(x => x.Password)
+                    .Excluding(x => x.CreatedAt)
+                    .Excluding(x => x.UpdatedAt)
+                    .Excluding(x => x.Id);
+            });
 
         account.CreatedAt.Should().NotBeSameDateAs(default);
         account.UpdatedAt.Should().NotBeSameDateAs(default);
