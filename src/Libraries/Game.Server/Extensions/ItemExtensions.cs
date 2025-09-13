@@ -65,6 +65,34 @@ public static class ItemExtensions
         return item.GetMaxMagicWeaponBaseDamage() + item.GetAdditionalWeaponDamage();
     }
 
+    public static uint GetHairPartClientId(ItemInstance? itemInstance, EPlayerClass playerClass)
+    {
+        if (itemInstance is null)
+        {
+            return 0;
+        }
+       
+        var itemId = itemInstance.ItemId;
+        if (itemId < 72000)
+        {
+            return 0;
+        }
+        
+        switch (playerClass)
+        {
+            case EPlayerClass.Warrior:
+                return itemId - 72000; // 73001 - 72000 = 1001 start hair number from
+            case EPlayerClass.Ninja:
+                return itemId - 71250;
+            case EPlayerClass.Sura:
+                return itemId - 70500;
+            case EPlayerClass.Shaman:
+                return itemId - 69750;
+            default:
+                throw new NotImplementedException();
+        }
+    }
+
     public static EquipmentSlots? GetWearSlot(this IItemManager itemManager, uint itemId)
     {
         var proto = itemManager.GetItem(itemId);
@@ -73,10 +101,26 @@ public static class ItemExtensions
             return null;
         }
 
+        return proto.GetWearSlot();
+    }
+
+    public static EquipmentSlots? GetWearSlot(this ItemData proto)
+    {
+        if ((EItemType)proto.Type == EItemType.Costume)
+        {
+            switch ((EItemSubtype)proto.Subtype)
+            {
+                case EItemSubtype.CostumeBody:
+                    return EquipmentSlots.Costume;
+                case EItemSubtype.CostumeHair:
+                    return EquipmentSlots.Hair;
+            }
+        }
+
         return ((EWearFlags)proto.WearFlags).GetWearSlot();
     }
 
-    public static EquipmentSlots? GetWearSlot(this EWearFlags wearFlags)
+    private static EquipmentSlots? GetWearSlot(this EWearFlags wearFlags)
     {
         if (wearFlags.HasFlag(EWearFlags.Head))
         {

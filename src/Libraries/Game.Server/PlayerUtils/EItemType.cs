@@ -8,5 +8,6 @@
         Use = 3,
         Skillbook = 17,
         Polymorph = 19,
+        Costume = 28,
     }
 }
