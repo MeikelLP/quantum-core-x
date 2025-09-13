@@ -357,8 +357,23 @@ namespace QuantumCore.Game.PlayerUtils
 
         public void SetEquipment(ItemInstance item, ushort position)
         {
-            EquipmentWindow.SetItem(item, position);
-            OnSlotChanged?.Invoke(this, new SlotChangedEventArgs(item, _itemManager.GetWearSlot(item.ItemId)!.Value));
+            var equippedSuccesfully = EquipmentWindow.SetItem(item, position);
+
+            if (equippedSuccesfully)
+            {
+                OnSlotChanged?.Invoke(this, new SlotChangedEventArgs(item, _itemManager.GetWearSlot(item.ItemId)!.Value));
+            }
         }
+        
+        public void RemoveEquipment(ItemInstance item)
+        {
+            var removedSuccessfully = EquipmentWindow.RemoveItem(item);
+
+            if (removedSuccessfully)
+            {
+                OnSlotChanged?.Invoke(this, new SlotChangedEventArgs(null, _itemManager.GetWearSlot(item.ItemId)!.Value));
+            }
+        }
+
     }
 }

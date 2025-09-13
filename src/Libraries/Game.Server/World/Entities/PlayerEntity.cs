@@ -730,6 +730,17 @@ namespace QuantumCore.Game.World.Entities
                     }
 
                     break;
+                case EquipmentSlots.Body:
+                    if (args.ItemInstance is not null)
+                    {
+                        Player.BodyPart = args.ItemInstance.ItemId;
+                    }
+                    else
+                    {
+                        Player.BodyPart = 0;
+                    }
+                
+                    break;
             }
         }
 
@@ -1085,7 +1096,7 @@ namespace QuantumCore.Game.World.Entities
                     if (item.Position >= Inventory.Size)
                     {
                         // Equipment
-                        Inventory.EquipmentWindow.RemoveItem(item);
+                        Inventory.RemoveEquipment(item);
                         CalculateDefence();
                         CalculateMovement();
                         CalculateAttackSpeed();
