@@ -9,7 +9,7 @@ public static class PaketExtensions
     {
         return new Character
         {
-            Id = 1,
+            Id = player.Id,
             Name = player.Name,
             Class = player.PlayerClass,
             Level = player.Level,

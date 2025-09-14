@@ -41,6 +41,16 @@ public static class QueryExtensions
             GuildId = x.GuildId
         });
     }
+    
+    public static PlayerData[] AssignIncrementalSlots(this PlayerData[] players)
+    {
+        for (var i = 0; i < players.Length; i++)
+        {
+            players[i].Slot = (byte)i;
+        }
+
+        return players;
+    }
 
     public static IQueryable<Skill> SelectPlayerSkill(this IQueryable<PlayerSkill> query)
     {

@@ -17,11 +17,13 @@ public class DbPlayerRepository : IDbPlayerRepository
 
     public async Task<PlayerData[]> GetPlayersAsync(Guid accountId)
     {
-        return await _db.Players
-            .AsNoTracking()
-            .Where(x => x.AccountId == accountId)
-            .SelectPlayerData()
-            .ToArrayAsync();
+        return (await _db.Players
+                .AsNoTracking()
+                .Where(x => x.AccountId == accountId)
+                .OrderBy(x => x.Id) // deterministic ordering for character select slot
+                .SelectPlayerData()
+                .ToArrayAsync())
+            .AssignIncrementalSlots();
     }
 
     public async Task<bool> IsNameInUseAsync(string name)
