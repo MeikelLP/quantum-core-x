@@ -255,7 +255,7 @@ namespace QuantumCore.Game.World.Entities
                 var item = Inventory.EquipmentWindow.GetItem(slot);
                 if (item == null) continue;
                 var proto = _itemManager.GetItem(item.ItemId);
-                if (proto?.Type != (byte)EItemType.Armor) continue;
+                if (proto is null || !proto.IsType(EItemType.Armor)) continue;
 
                 _defence += (uint)proto.Values[1] + (uint)proto.Values[5] * 2;
             }
@@ -274,7 +274,7 @@ namespace QuantumCore.Game.World.Entities
                 var item = Inventory.EquipmentWindow.GetItem(slot);
                 if (item == null) continue;
                 var proto = _itemManager.GetItem(item.ItemId);
-                if (proto?.Type != (byte)EItemType.Armor) continue;
+                if (proto is null || !proto.IsType(EItemType.Armor)) continue;
 
                 modifier += proto.GetApplyValue(EApplyType.MovSpeed);
             }
@@ -730,6 +730,29 @@ namespace QuantumCore.Game.World.Entities
                     }
 
                     break;
+                case EquipmentSlots.Body:
+                    if (args.ItemInstance is not null)
+                    {
+                        Player.BodyPart = args.ItemInstance.ItemId;
+                    }
+                    else
+                    {
+                        Player.BodyPart = 0;
+                    }
+                
+                    break;
+                case EquipmentSlots.Hair:
+                    if (args.ItemInstance is not null)
+                    {
+                        Player.HairPart = args.ItemInstance.GetHairPartOffsetForClient(Player.PlayerClass.GetClass());
+                    }
+                    else
+                    {
+                        Player.HairPart = 0;
+                    }
+                
+                    break;
+                    
             }
         }
 
@@ -1032,7 +1055,7 @@ namespace QuantumCore.Game.World.Entities
                 return false;
             }
 
-            if (proto.WearFlags == 0)
+            if (proto.WearFlags == 0 && !proto.IsType(EItemType.Costume))
             {
                 // No wear flags -> not wearable
                 return false;
@@ -1085,7 +1108,7 @@ namespace QuantumCore.Game.World.Entities
                     if (item.Position >= Inventory.Size)
                     {
                         // Equipment
-                        Inventory.EquipmentWindow.RemoveItem(item);
+                        Inventory.RemoveEquipment(item);
                         CalculateDefence();
                         CalculateMovement();
                         CalculateAttackSpeed();
@@ -1234,7 +1257,7 @@ namespace QuantumCore.Game.World.Entities
                 {
                     (ushort)(Inventory.EquipmentWindow.Body?.ItemId ?? 0),
                     (ushort)(Inventory.EquipmentWindow.Weapon?.ItemId ?? 0), 0,
-                    (ushort)(Inventory.EquipmentWindow.Hair?.ItemId ?? 0)
+                    (ushort)Inventory.EquipmentWindow.Hair.GetHairPartOffsetForClient(Player.PlayerClass.GetClass())
                 }
             });
         }
@@ -1248,7 +1271,7 @@ namespace QuantumCore.Game.World.Entities
                 {
                     (ushort)(Inventory.EquipmentWindow.Body?.ItemId ?? 0),
                     (ushort)(Inventory.EquipmentWindow.Weapon?.ItemId ?? 0), 0,
-                    (ushort)(Inventory.EquipmentWindow.Hair?.ItemId ?? 0)
+                    (ushort)Inventory.EquipmentWindow.Hair.GetHairPartOffsetForClient(Player.PlayerClass.GetClass())
                 },
                 MoveSpeed = MovementSpeed,
                 AttackSpeed = AttackSpeed,

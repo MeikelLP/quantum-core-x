@@ -3,6 +3,7 @@ using QuantumCore.API.Core.Models;
 using QuantumCore.Caching;
 using QuantumCore.Game.Persistence;
 using QuantumCore.Game.PlayerUtils;
+using static QuantumCore.Game.Extensions.ItemConstants;
 
 namespace QuantumCore.Game.Extensions;
 
@@ -65,6 +66,44 @@ public static class ItemExtensions
         return item.GetMaxMagicWeaponBaseDamage() + item.GetAdditionalWeaponDamage();
     }
 
+    public static bool IsType(this ItemData item, EItemType type)
+    {
+        return (EItemType)item.Type == type;
+    }
+    
+    public static bool IsSubtype(this ItemData item, EItemSubtype subtype)
+    {
+        return (EItemSubtype)item.Subtype == subtype;
+    }
+
+    public static uint GetHairPartOffsetForClient(this ItemInstance? itemInstance, EPlayerClass playerClass)
+    {
+        if (itemInstance is null)
+        {
+            return 0;
+        }
+       
+        var itemId = itemInstance.ItemId;
+        if (itemId < HairPartIdOffsets.WarOffsetBase)
+        {
+            return 0;
+        }
+        
+        switch (playerClass)
+        {
+            case EPlayerClass.Warrior:
+                return itemId - HairPartIdOffsets.WarOffsetBase; // 73001 - 72000 = 1001 start hair number from
+            case EPlayerClass.Ninja:
+                return itemId - HairPartIdOffsets.NinjaOffsetBase;
+            case EPlayerClass.Sura:
+                return itemId - HairPartIdOffsets.SuraOffsetBase;
+            case EPlayerClass.Shaman:
+                return itemId - HairPartIdOffsets.ShamanOffsetBase;
+            default:
+                throw new NotImplementedException();
+        }
+    }
+
     public static EquipmentSlots? GetWearSlot(this IItemManager itemManager, uint itemId)
     {
         var proto = itemManager.GetItem(itemId);
@@ -73,10 +112,27 @@ public static class ItemExtensions
             return null;
         }
 
+        return proto.GetWearSlot();
+    }
+
+    public static EquipmentSlots? GetWearSlot(this ItemData proto)
+    {
+        if (proto.IsType(EItemType.Costume))
+        {
+            if (proto.IsSubtype(EItemSubtype.CostumeBody))
+            {
+                return EquipmentSlots.Costume;
+            }
+            if (proto.IsSubtype(EItemSubtype.CostumeHair))
+            {
+                return EquipmentSlots.Hair;
+            }
+        }
+
         return ((EWearFlags)proto.WearFlags).GetWearSlot();
     }
 
-    public static EquipmentSlots? GetWearSlot(this EWearFlags wearFlags)
+    private static EquipmentSlots? GetWearSlot(this EWearFlags wearFlags)
     {
         if (wearFlags.HasFlag(EWearFlags.Head))
         {

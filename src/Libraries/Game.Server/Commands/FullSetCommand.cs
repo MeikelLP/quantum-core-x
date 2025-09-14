@@ -11,11 +11,14 @@ namespace QuantumCore.Game.Commands;
 public class FullSetCommand : ICommandHandler
 {
     private readonly IItemRepository _itemRepository;
+
+    private static readonly uint hairBaseId = 73001;
+    
     private static readonly uint[] _sharedItems = [13069, 17209, 14209, 15229, 16209];
-    private static readonly uint[] _warriorItems = [12249, 189, 3169, 11299];
-    private static readonly uint[] _ninjaItems = [12389, 189, 1139, 2189, 11499];
-    private static readonly uint[] _suraItems = [12529, 189, 11699];
-    private static readonly uint[] _shamanItems = [12669, 5129, 11899];
+    private static readonly uint[] _warriorItems = [12249, 189, 3169, 11299, hairBaseId];
+    private static readonly uint[] _ninjaItems = [12389, 189, 1139, 2189, 11499, hairBaseId + 250];
+    private static readonly uint[] _suraItems = [12529, 189, 11699, hairBaseId + 500];
+    private static readonly uint[] _shamanItems = [12669, 5129, 11899, hairBaseId + 750];
 
     public FullSetCommand(IItemRepository itemRepository)
     {

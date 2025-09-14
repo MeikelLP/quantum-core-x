@@ -305,7 +305,7 @@ public class DropProvider : IDropProvider, ILoadable
 
                 var itemInstance = _itemManager.CreateItem(itemProto);
 
-                if ((EItemType)itemProto.Type == EItemType.Polymorph)
+                if (itemProto.IsType(EItemType.Polymorph))
                 {
                     if (monster.Proto.PolymorphItemId == itemProto.Id)
                     {
@@ -351,7 +351,7 @@ public class DropProvider : IDropProvider, ILoadable
                     _logger.LogDebug("Monster {Name} ({MobProtoId}) dropped an item group ({Item})",
                         monster.Proto.TranslatedName, monster.Proto.Id, itemProto.TranslatedName);
 
-                    if ((EItemType)itemProto.Type == EItemType.Polymorph)
+                    if (itemProto.IsType(EItemType.Polymorph))
                     {
                         if (monster.Proto.PolymorphItemId == itemProto.Id)
                         {

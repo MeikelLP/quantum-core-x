@@ -210,9 +210,9 @@ namespace QuantumCore.Game.PlayerUtils
                 case EquipmentSlots.Earring:
                     return wearFlags.HasFlag(EWearFlags.Earrings);
                 case EquipmentSlots.Costume:
-                    return false; // todo
+                    return proto.IsType(EItemType.Costume) && proto.IsSubtype(EItemSubtype.CostumeBody);
                 case EquipmentSlots.Hair:
-                    return false; // todo
+                    return proto.IsType(EItemType.Costume) && proto.IsSubtype(EItemSubtype.CostumeHair);
                 default:
                     return false;
             }
@@ -226,7 +226,7 @@ namespace QuantumCore.Game.PlayerUtils
                 return _offset + (ushort)EquipmentSlots.Body;
             }
 
-            var slot = ((EWearFlags)proto.WearFlags).GetWearSlot()!;
+            var slot = proto.GetWearSlot()!;
             return (long)slot + _offset;
         }
     }
