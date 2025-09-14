@@ -3,6 +3,7 @@ using QuantumCore.API.Core.Models;
 using QuantumCore.Caching;
 using QuantumCore.Game.Persistence;
 using QuantumCore.Game.PlayerUtils;
+using static QuantumCore.Game.Extensions.ItemConstants;
 
 namespace QuantumCore.Game.Extensions;
 
@@ -65,7 +66,17 @@ public static class ItemExtensions
         return item.GetMaxMagicWeaponBaseDamage() + item.GetAdditionalWeaponDamage();
     }
 
-    public static uint GetHairPartClientId(ItemInstance? itemInstance, EPlayerClass playerClass)
+    public static bool IsType(this ItemData item, EItemType type)
+    {
+        return (EItemType)item.Type == type;
+    }
+    
+    public static bool IsSubtype(this ItemData item, EItemSubtype subtype)
+    {
+        return (EItemSubtype)item.Subtype == subtype;
+    }
+
+    public static uint GetHairPartOffsetForClient(this ItemInstance? itemInstance, EPlayerClass playerClass)
     {
         if (itemInstance is null)
         {
@@ -73,7 +84,7 @@ public static class ItemExtensions
         }
        
         var itemId = itemInstance.ItemId;
-        if (itemId < 72000)
+        if (itemId < HairPartIdOffsets.WarOffsetBase)
         {
             return 0;
         }
@@ -81,13 +92,13 @@ public static class ItemExtensions
         switch (playerClass)
         {
             case EPlayerClass.Warrior:
-                return itemId - 72000; // 73001 - 72000 = 1001 start hair number from
+                return itemId - HairPartIdOffsets.WarOffsetBase; // 73001 - 72000 = 1001 start hair number from
             case EPlayerClass.Ninja:
-                return itemId - 71250;
+                return itemId - HairPartIdOffsets.NinjaOffsetBase;
             case EPlayerClass.Sura:
-                return itemId - 70500;
+                return itemId - HairPartIdOffsets.SuraOffsetBase;
             case EPlayerClass.Shaman:
-                return itemId - 69750;
+                return itemId - HairPartIdOffsets.ShamanOffsetBase;
             default:
                 throw new NotImplementedException();
         }
@@ -106,14 +117,15 @@ public static class ItemExtensions
 
     public static EquipmentSlots? GetWearSlot(this ItemData proto)
     {
-        if ((EItemType)proto.Type == EItemType.Costume)
+        if (proto.IsType(EItemType.Costume))
         {
-            switch ((EItemSubtype)proto.Subtype)
+            if (proto.IsSubtype(EItemSubtype.CostumeBody))
             {
-                case EItemSubtype.CostumeBody:
-                    return EquipmentSlots.Costume;
-                case EItemSubtype.CostumeHair:
-                    return EquipmentSlots.Hair;
+                return EquipmentSlots.Costume;
+            }
+            if (proto.IsSubtype(EItemSubtype.CostumeHair))
+            {
+                return EquipmentSlots.Hair;
             }
         }
 

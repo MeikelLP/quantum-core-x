@@ -210,11 +210,9 @@ namespace QuantumCore.Game.PlayerUtils
                 case EquipmentSlots.Earring:
                     return wearFlags.HasFlag(EWearFlags.Earrings);
                 case EquipmentSlots.Costume:
-                    return (EItemType)proto.Type == EItemType.Costume && 
-                           (EItemSubtype)proto.Subtype == EItemSubtype.CostumeBody;
+                    return proto.IsType(EItemType.Costume) && proto.IsSubtype(EItemSubtype.CostumeBody);
                 case EquipmentSlots.Hair:
-                    return (EItemType)proto.Type == EItemType.Costume && 
-                           (EItemSubtype)proto.Subtype == EItemSubtype.CostumeHair;
+                    return proto.IsType(EItemType.Costume) && proto.IsSubtype(EItemSubtype.CostumeHair);
                 default:
                     return false;
             }

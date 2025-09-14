@@ -102,7 +102,7 @@ public class ItemUseHandler : IGamePacketHandler<ItemUse>
         }
         // Skills related
         // note: Should maybe create an ItemUseHandler<ItemId> for this ? Similarly to the commands and packet handlers
-        else if ((EItemType)itemProto.Type == EItemType.Skillbook)
+        else if (itemProto.IsType(EItemType.Skillbook))
         {
             var skillId = 0;
 
