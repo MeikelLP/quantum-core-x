@@ -40,6 +40,9 @@ This project is currently maintained by:
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/NoFr1ends"><img src="https://avatars.githubusercontent.com/u/6075580?v=4?s=100" width="100px;" alt="Lynx"/><br /><sub><b>Lynx</b></sub></a><br /><a href="https://github.com/MeikelLP/quantum-core-x/commits?author=NoFr1ends" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://brixxhub.com/"><img src="https://avatars.githubusercontent.com/u/59138066?v=4?s=100" width="100px;" alt="Arichikurumo"/><br /><sub><b>Arichikurumo</b></sub></a><br /><a href="https://github.com/MeikelLP/quantum-core-x/commits?author=Arichikurumo" title="Tests">⚠️</a></td>
     </tr>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/andreionoie"><img src="https://avatars.githubusercontent.com/u/44656658?v=4?s=100" width="100px;" alt="Andrei Onoie"/><br /><sub><b>Andrei Onoie</b></sub></a><br /><a href="https://github.com/MeikelLP/quantum-core-x/commits?author=andreionoie" title="Code">💻</a></td>
+    </tr>
   </tbody>
 </table>
 

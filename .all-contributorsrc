@@ -69,6 +69,15 @@
       "contributions": [
         "test"
       ]
+    },
+    {
+      "login": "andreionoie",
+      "name": "Andrei Onoie",
+      "avatar_url": "https://avatars.githubusercontent.com/u/44656658?v=4",
+      "profile": "https://github.com/andreionoie",
+      "contributions": [
+        "code"
+      ]
     }
   ],
   "badgeTemplate": "[![All Contributors](https://img.shields.io/github/contributors/meikellp/quantum-core-x)](#contributors)",
