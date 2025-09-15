@@ -10,14 +10,13 @@ namespace QuantumCore.Game.Persistence.Extensions;
 
 public static class QueryExtensions
 {
-    public static IAsyncEnumerable<PlayerData> SelectPlayerData(this IAsyncEnumerable<Player> query)
+    public static IQueryable<PlayerData> SelectPlayerData(this IQueryable<Player> query)
     {
-        return query.Select((x, i) => new PlayerData
+        return query.Select(x => new PlayerData
         {
             Id = x.Id,
             AccountId = x.AccountId,
             Name = x.Name,
-            Slot = (byte)i,
             PlayerClass = (EPlayerClassGendered)x.PlayerClass,
             SkillGroup = x.SkillGroup,
             PlayTime = x.PlayTime,
@@ -41,6 +40,16 @@ public static class QueryExtensions
             Empire = x.Empire,
             GuildId = x.GuildId
         });
+    }
+    
+    public static PlayerData[] AssignIncrementalSlots(this PlayerData[] players)
+    {
+        for (var i = 0; i < players.Length; i++)
+        {
+            players[i].Slot = (byte)i;
+        }
+
+        return players;
     }
 
     public static IQueryable<Skill> SelectPlayerSkill(this IQueryable<PlayerSkill> query)

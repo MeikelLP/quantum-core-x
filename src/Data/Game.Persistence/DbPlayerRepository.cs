@@ -17,13 +17,15 @@ public class DbPlayerRepository : IDbPlayerRepository
 
     public async Task<PlayerData[]> GetPlayersAsync(Guid accountId)
     {
-        return await _db.Players
+        var playersWithUnpopulatedSlot = await _db.Players
             .AsNoTracking()
             .Where(x => x.AccountId == accountId)
-            .OrderBy(x => x.Id) // deterministic ordering for character select slot
-            .AsAsyncEnumerable()
+            .OrderBy(x => x.Id)
             .SelectPlayerData()
             .ToArrayAsync();
+
+        return playersWithUnpopulatedSlot
+            .AssignIncrementalSlots();
     }
 
     public async Task<bool> IsNameInUseAsync(string name)
@@ -112,10 +114,29 @@ public class DbPlayerRepository : IDbPlayerRepository
 
     public async Task<PlayerData?> GetPlayerAsync(uint playerId)
     {
-        return await _db.Players
+        // TODO: optimize/refactor this part while maintaining Slot field correctness
+        // (needed to avoid overwriting `players:..` cache keys when Slot is assigned default zero value for all players)
+        // Note that currently this method is not used in production code
+        var accountId = await _db.Players
+            .AsNoTracking()
             .Where(x => x.Id == playerId)
-            .AsAsyncEnumerable()
+            .Select(x => x.AccountId)
+            .SingleOrDefaultAsync();
+
+        if (accountId == Guid.Empty)
+        {
+            return null;
+        }
+
+        var playersWithUnpopulatedSlot = await _db.Players
+            .AsNoTracking()
+            .Where(x => x.AccountId == accountId)
+            .OrderBy(x => x.Id)
             .SelectPlayerData()
-            .FirstOrDefaultAsync();
+            .ToArrayAsync();
+
+        return playersWithUnpopulatedSlot
+            .AssignIncrementalSlots()
+            .SingleOrDefault(x => x.Id == playerId);
     }
 }
