@@ -1,3 +1,4 @@
+using System.Net;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.Game.Guild;
@@ -89,7 +90,8 @@ namespace QuantumCore.Game.PacketHandlers
                 var guild = await _guildManager.GetGuildForPlayerAsync(player.Id, cancellationToken);
                 var slot = (int)player.Slot;
                 characters.CharacterList[slot] = player.ToCharacter();
-                characters.CharacterList[slot].Ip = BitConverter.ToInt32(host.Ip.GetAddressBytes());
+                var advertisedIp = ResolveAdvertisedAddress(host.Ip, ctx.Connection.BoundIpAddress);
+                characters.CharacterList[slot].Ip = BitConverter.ToInt32(advertisedIp.GetAddressBytes());
                 characters.CharacterList[slot].Port = host.Port;
                 characters.GuildIds[slot] = guild?.Id ?? 0;
                 characters.GuildNames[slot] = guild?.Name ?? "";
@@ -108,6 +110,16 @@ namespace QuantumCore.Game.PacketHandlers
             ctx.Connection.Send(new Empire {EmpireId = empire});
             ctx.Connection.SetPhase(EPhases.Select);
             ctx.Connection.Send(characters);
+        }
+
+        private static IPAddress ResolveAdvertisedAddress(IPAddress mapHostAddress, IPAddress connectionLocalAddress)
+        {
+            if (mapHostAddress.Equals(IPAddress.Any) || mapHostAddress.Equals(IPAddress.IPv6Any))
+            {
+                return connectionLocalAddress;
+            }
+
+            return mapHostAddress;
         }
     }
 }
