@@ -33,16 +33,11 @@ public class PlayerManager : IPlayerManager
         if (cachedPlayer is null)
         {
             var players = await _dbPlayerRepository.GetPlayersAsync(accountId);
-            for (var i = 0; i < players.Length; i++)
+            var player = players.FirstOrDefault(p => p.Slot == slot);
+            if (player is not null)
             {
-                var player = players[i];
-                player.Slot = (byte)i;
-
-                if (i == slot)
-                {
-                    await _cachePlayerRepository.SetPlayerAsync(player);
-                    return player;
-                }
+                await _cachePlayerRepository.SetPlayerAsync(player);
+                return player;
             }
 
             _logger.LogWarning("Could not find player for account {AccountId} at slot {Slot}", accountId, slot);

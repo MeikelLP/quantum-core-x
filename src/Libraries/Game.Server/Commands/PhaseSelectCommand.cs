@@ -36,7 +36,6 @@ namespace QuantumCore.Game.Commands
             context.Player.Connection.SetPhase(EPhases.Select);
 
             var characters = new Characters();
-            var i = 0;
             await using var scope = _serviceProvider.CreateAsyncScope();
             var playerManager = scope.ServiceProvider.GetRequiredService<IPlayerManager>();
             var guildManager = scope.ServiceProvider.GetRequiredService<IGuildManager>();
@@ -46,14 +45,12 @@ namespace QuantumCore.Game.Commands
                 var host = _world.GetMapHost(player.PositionX, player.PositionY);
                 var guild = await guildManager.GetGuildForPlayerAsync(player.Id);
 
-                // todo character slot position
-                characters.CharacterList[i] = player.ToCharacter();
-                characters.CharacterList[i].Ip = BitConverter.ToInt32(host.Ip.GetAddressBytes());
-                characters.CharacterList[i].Port = host.Port;
-                characters.GuildIds[i] = guild?.Id ?? 0;
-                characters.GuildNames[i] = guild?.Name ?? "";
-
-                i++;
+                var slot = (int)player.Slot;
+                characters.CharacterList[slot] = player.ToCharacter();
+                characters.CharacterList[slot].Ip = BitConverter.ToInt32(host.Ip.GetAddressBytes());
+                characters.CharacterList[slot].Port = host.Port;
+                characters.GuildIds[slot] = guild?.Id ?? 0;
+                characters.GuildNames[slot] = guild?.Name ?? "";
             }
 
             context.Player.Connection.Send(characters);

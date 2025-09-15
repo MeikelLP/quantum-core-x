@@ -81,22 +81,18 @@ namespace QuantumCore.Game.PacketHandlers
 
             // Load players of account
             var characters = new Characters();
-            var i = 0;
             var charactersFromCacheOrDb = await _playerManager.GetPlayers(token.AccountId);
             foreach (var player in charactersFromCacheOrDb)
             {
                 var host = _world.GetMapHost(player.PositionX, player.PositionY);
 
                 var guild = await _guildManager.GetGuildForPlayerAsync(player.Id, cancellationToken);
-                // todo character slot position
-                characters.CharacterList[i] = player.ToCharacter();
-                characters.CharacterList[i].Ip = BitConverter.ToInt32(host.Ip.GetAddressBytes());
-                characters.CharacterList[i].Port = host.Port;
-                characters.GuildIds[i] = guild?.Id ?? 0;
-                characters.GuildNames[i] = guild?.Name ?? "";
-                // todo armor on character select
-
-                i++;
+                var slot = (int)player.Slot;
+                characters.CharacterList[slot] = player.ToCharacter();
+                characters.CharacterList[slot].Ip = BitConverter.ToInt32(host.Ip.GetAddressBytes());
+                characters.CharacterList[slot].Port = host.Port;
+                characters.GuildIds[slot] = guild?.Id ?? 0;
+                characters.GuildNames[slot] = guild?.Name ?? "";
             }
 
             // When there are no characters belonging to the account, the empire status is stored in the cache.
