@@ -1,4 +1,5 @@
-﻿using BenchmarkDotNet.Attributes;
+﻿using System.Net;
+using BenchmarkDotNet.Attributes;
 using Core.Persistence.Extensions;
 using Game.Caching.Extensions;
 using Microsoft.Extensions.Configuration;
@@ -118,6 +119,7 @@ public class WorldUpdateBenchmark
                 Name = i.ToString(), PlayerClass = EPlayerClassGendered.NinjaFemale, PositionX = 1, PositionY = 1
             };
             var conn = Substitute.For<IGameConnection>();
+            conn.BoundIpAddress.Returns(IPAddress.Loopback);
             var entity = ActivatorUtilities.CreateInstance<PlayerEntity>(services, _world, player, conn);
             _world.SpawnEntity(entity);
         }

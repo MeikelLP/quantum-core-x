@@ -1,3 +1,4 @@
+using System.Net;
 using System.Text;
 using AutoBogus;
 using AwesomeAssertions;
@@ -75,6 +76,7 @@ internal class MockedGameConnection : IGameConnection
     }
 
     public IServerBase Server { get; } = Substitute.For<IServerBase>();
+    public IPAddress BoundIpAddress { get; } = IPAddress.Loopback;
     public Guid? AccountId { get; set; } = Guid.NewGuid();
     public string Username { get; set; } = "";
     public IPlayerEntity? Player { get; set; }

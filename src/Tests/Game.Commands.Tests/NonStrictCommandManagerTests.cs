@@ -1,4 +1,5 @@
-﻿using AwesomeAssertions;
+﻿using System.Net;
+using AwesomeAssertions;
 using Game.Commands.Tests.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -27,6 +28,7 @@ public class NonStrictCommandManagerTests
                 player.When(x => x.SendChatInfo(Arg.Any<string>())).Do(info => _chatInfos.Add(info.Arg<string>()));
                 var conn = Substitute.For<IGameConnection>();
                 conn.Player.Returns(player);
+                conn.BoundIpAddress.Returns(IPAddress.Loopback);
                 return conn;
             })
             .AddSingleton<IConfiguration>(_ => new ConfigurationBuilder().Build())

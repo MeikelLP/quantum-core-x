@@ -1,5 +1,6 @@
 using System.Buffers;
 using System.Collections.Concurrent;
+using System.Net;
 using System.Net.Sockets;
 using System.Text.Json;
 using Microsoft.Extensions.Hosting;
@@ -27,6 +28,8 @@ namespace QuantumCore.Core.Networking
         private long _lastHandshakeTime;
         private CancellationTokenSource? _cts;
 
+        public IPAddress BoundIpAddress { get; private set; }
+
         public Guid Id { get; }
         public uint Handshake { get; private set; }
         public bool Handshaking { get; private set; }
@@ -43,6 +46,7 @@ namespace QuantumCore.Core.Networking
         public void Init(TcpClient client)
         {
             _client = client;
+            BoundIpAddress = ((IPEndPoint)_client.Client.LocalEndPoint!).Address;
             _cts = new CancellationTokenSource();
             Task.Factory.StartNew(SendPacketsWhenAvailable, TaskCreationOptions.LongRunning);
         }

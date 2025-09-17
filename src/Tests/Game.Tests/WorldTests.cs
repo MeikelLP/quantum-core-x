@@ -1,3 +1,4 @@
+using System.Net;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -109,6 +110,7 @@ public class WorldTests
         _world.InitAsync().Wait();
 
         var conn = Substitute.For<IGameConnection>();
+        conn.BoundIpAddress.Returns(IPAddress.Loopback);
         var playerData = new PlayerData
         {
             Name = "TestPlayer", PlayerClass = EPlayerClassGendered.NinjaFemale, PositionX = 1, PositionY = 1
