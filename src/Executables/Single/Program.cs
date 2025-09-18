@@ -14,8 +14,6 @@ using QuantumCore.Game;
 using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Persistence;
 
-var dataDir = "data";
-
 await Parser.Default.ParseArguments<SingleRunArgs>(args)
     .WithParsedAsync(async options =>
     {

@@ -56,6 +56,8 @@ namespace QuantumCore.Game
                     Path.Join(pc2, "general", "run.msa"));
             }
 
+            // Make sure mob data was loaded before proceeding
+            await _monsterManager.LoadAsync(token);
             // Load monster animations
             foreach (var monster in _monsterManager.GetMonsters())
             {
@@ -66,11 +68,11 @@ namespace QuantumCore.Game
                 var monster1 = Path.Join("monster", folder);
                 var monster2 = Path.Join("monster2", folder);
 
-                if (Directory.Exists(monster1))
+                if (_fileProvider.GetDirectoryContents(monster1).Exists)
                 {
                     await LoadMonsterAnimation(monster, monster1);
                 }
-                else if (Directory.Exists(monster2))
+                else if (_fileProvider.GetDirectoryContents(monster2).Exists)
                 {
                     await LoadMonsterAnimation(monster, monster2);
                 }

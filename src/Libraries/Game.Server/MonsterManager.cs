@@ -17,6 +17,8 @@ namespace QuantumCore.Game
         private readonly ILogger<MonsterManager> _logger;
         private readonly IFileProvider _fileProvider;
         private ImmutableArray<MonsterData> _proto = [];
+        
+        private readonly Lazy<Task> _loader;
 
         static MonsterManager()
         {
@@ -27,12 +29,19 @@ namespace QuantumCore.Game
         {
             _logger = logger;
             _fileProvider = fileProvider;
-        }
 
+            _loader = new Lazy<Task>(LoadMobProtoAsync, LazyThreadSafetyMode.ExecutionAndPublication);
+        }
+        
         /// <summary>
-        /// Try to load mob_proto file
+        /// Try to load mob_proto file - idempotent and thread-safe due to Lazy usage
         /// </summary>
         public async Task LoadAsync(CancellationToken token = default)
+        {
+            await _loader.Value.WaitAsync(token);
+        }
+
+        private async Task LoadMobProtoAsync()
         {
             var file = _fileProvider.GetFileInfo("mob_proto");
             if (!file.Exists)
