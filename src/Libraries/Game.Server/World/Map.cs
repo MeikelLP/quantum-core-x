@@ -9,6 +9,7 @@ using QuantumCore.API.Game.World;
 using QuantumCore.Caching;
 using QuantumCore.Core.Event;
 using QuantumCore.Core.Utils;
+using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Services;
 using QuantumCore.Game.World.Entities;
 
@@ -48,15 +49,18 @@ namespace QuantumCore.Game.World
         private readonly IWorld _world;
         private readonly ILogger _logger;
         private readonly ISpawnPointProvider _spawnPointProvider;
+        private readonly IMapAttributeProvider _attributeProvider;
         private readonly IDropProvider _dropProvider;
         private readonly IItemManager _itemManager;
         private readonly IServerBase _server;
         private readonly IServiceProvider _serviceProvider;
+        private IMapAttributeSet? _attributes;
 
         public Map(IMonsterManager monsterManager, IAnimationManager animationManager, ICacheManager cacheManager,
             IWorld world, ILogger logger, ISpawnPointProvider spawnPointProvider,
-            IDropProvider dropProvider, IItemManager itemManager, IServerBase server, string name, Coordinates position,
-            uint width, uint height, TownCoordinates? townCoordinates, IServiceProvider serviceProvider)
+            IMapAttributeProvider attributeProvider, IDropProvider dropProvider, IItemManager itemManager,
+            IServerBase server, string name, Coordinates position, uint width, uint height,
+            TownCoordinates? townCoordinates, IServiceProvider serviceProvider)
         {
             _monsterManager = monsterManager;
             _animationManager = animationManager;
@@ -64,6 +68,7 @@ namespace QuantumCore.Game.World
             _world = world;
             _logger = logger;
             _spawnPointProvider = spawnPointProvider;
+            _attributeProvider = attributeProvider;
             _dropProvider = dropProvider;
             _itemManager = itemManager;
             _server = server;
@@ -81,7 +86,10 @@ namespace QuantumCore.Game.World
                     Shinsoo = Position + townCoordinates.Shinsoo * SPAWN_POSITION_MULTIPLIER,
                     Common = Position + townCoordinates.Common * SPAWN_POSITION_MULTIPLIER
                 }
-                : null;_serviceProvider = serviceProvider;            _quadTree = new QuadTree((int)position.X, (int)position.Y, (int)(width * MapUnit), (int)(height * MapUnit), 20);
+                : null;
+
+            _quadTree = new QuadTree((int)position.X, (int)position.Y, (int)(width * MapUnit),
+                (int)(height * MapUnit), 20);
             _entityGauge = GameServer.Meter.CreateObservableGauge($"Map:{name}:EntityCount", () => Entities.Count);
         }
 
@@ -92,7 +100,13 @@ namespace QuantumCore.Game.World
             await _cacheManager.Set($"maps:{Name}", $"{_server.IpAddress}:{_server.Port}");
             await _cacheManager.Publish("maps", $"{Name} {_server.IpAddress}:{_server.Port}");
 
-            _spawnPoints.AddRange(await _spawnPointProvider.GetSpawnPointsForMap(Name));
+            var loadAttributesTask = _attributeProvider.GetAttributesAsync(Name, Position, Width, Height);
+            var loadSpawnPointsTask = _spawnPointProvider.GetSpawnPointsForMap(Name);
+            
+            await Task.WhenAll(loadAttributesTask, loadSpawnPointsTask);
+
+            _attributes = loadAttributesTask.Result;
+            _spawnPoints.AddRange(loadSpawnPointsTask.Result);
 
             _logger.LogDebug("Loaded {SpawnPointsCount} spawn points for map {MapName}", _spawnPoints.Count, Name);
 
@@ -264,7 +278,8 @@ namespace QuantumCore.Game.World
                     }
                 case ESpawnPointType.Monster:
                     {
-                        var monster = SpawnMonster(spawnPoint.Monster, spawnPoint);
+                        if (!TrySpawnMonster(spawnPoint.Monster, spawnPoint, out var monster))
+                            break;
 
                         spawnPoint.CurrentGroup = groupInstance;
                         groupInstance.Monsters.Add(monster);
@@ -282,34 +297,24 @@ namespace QuantumCore.Game.World
         {
             spawnPoint.CurrentGroup = groupInstance;
 
-            var leader = SpawnMonster(group.Leader, spawnPoint);
+            if (!TrySpawnMonster(group.Leader, spawnPoint, out var leader))
+                return;
             groupInstance.Monsters.Add(leader);
             leader.Group = groupInstance;
 
             foreach (var member in group.Members)
             {
-                var monster = SpawnMonster(member.Id, spawnPoint);
+                if (!TrySpawnMonster(member.Id, spawnPoint, out var monster))
+                    continue;
 
                 groupInstance.Monsters.Add(monster);
                 monster.Group = groupInstance;
             }
         }
 
-        private MonsterEntity SpawnMonster(uint id, SpawnPoint spawnPoint)
+        private bool TrySpawnMonster(uint id, SpawnPoint spawnPoint, out MonsterEntity monster)
         {
-            var baseX = spawnPoint.X;
-            var baseY = spawnPoint.Y;
-            if (spawnPoint.RangeX != 0)
-            {
-                baseX += RandomNumberGenerator.GetInt32(-spawnPoint.RangeX, spawnPoint.RangeX);
-            }
-
-            if (spawnPoint.RangeY != 0)
-            {
-                baseY += RandomNumberGenerator.GetInt32(-spawnPoint.RangeY, spawnPoint.RangeY);
-            }
-
-            var monster = new MonsterEntity(_monsterManager, _dropProvider, _animationManager, _serviceProvider, this,
+            monster = new MonsterEntity(_monsterManager, _dropProvider, _animationManager, _serviceProvider, this,
                 _logger,
                 _itemManager,
                 id,
@@ -317,28 +322,50 @@ namespace QuantumCore.Game.World
                 0
             );
 
-            if (monster.Proto.AiFlag.HasAnyFlags(EAiFlags.NoMove))
-            {
-                monster.PositionX = (int)(Position.X + baseX * SPAWN_POSITION_MULTIPLIER);
-                monster.PositionY = (int)(Position.Y + baseY * SPAWN_POSITION_MULTIPLIER);
-                var compassDirection = (int)spawnPoint.Direction - 1;
+            var ignoreAttrCheck =
+                (EEntityType)monster.Proto.Type is EEntityType.Npc or EEntityType.Warp or EEntityType.Goto; // TODO: mining ore
 
+            var foundValidPositionAttr = ignoreAttrCheck;
+
+            const int MaxSpawnAttempts = 16;
+            for (var attempt = 0; attempt < MaxSpawnAttempts; attempt++)
+            {
+                var baseX = RandomizeWithinRange(spawnPoint.X, spawnPoint.RangeX);
+                var baseY = RandomizeWithinRange(spawnPoint.Y, spawnPoint.RangeY);
+
+                if (!monster.Proto.AiFlag.HasFlag(EAiFlags.NoMove))
+                {
+                    baseX = RandomizeWithinRange(baseX, SPAWN_BASE_OFFSET);
+                    baseY = RandomizeWithinRange(baseY, SPAWN_BASE_OFFSET);
+                }
+
+                monster.PositionX = (int)Position.X + baseX * SPAWN_POSITION_MULTIPLIER;
+                monster.PositionY = (int)Position.Y + baseY * SPAWN_POSITION_MULTIPLIER;
+
+                if (ignoreAttrCheck ||
+                    !monster.PositionIsAttr(EMapAttribute.Block | EMapAttribute.Object | EMapAttribute.BanPk))
+                {
+                    foundValidPositionAttr = true;
+                    break;
+                }
+            }
+
+            if (!foundValidPositionAttr)
+            {
+                _logger.LogWarning("Cannot spawn mob on {Map}: failed to find spawn position with valid attr for {MonsterName} (id={MonsterId} {SpawnPointSummary})",
+                    Name, monster.Proto.TranslatedName, id, $"x={spawnPoint.X} y={spawnPoint.Y}, rangeX={spawnPoint.RangeX} rangeY={spawnPoint.RangeY}");
+                return false;
+            }
+            
+            if (monster.Proto.AiFlag.HasFlag(EAiFlags.NoMove))
+            {
+                var compassDirection = (int)spawnPoint.Direction - 1;
                 if (compassDirection < 0 || compassDirection > (int)Enum.GetValues<ESpawnPointDirection>().Last())
                 {
                     compassDirection = (int)ESpawnPointDirection.Random;
                 }
 
-                var rotation = SPAWN_ROTATION_SLICE_DEGREES * compassDirection;
-                monster.Rotation = rotation;
-            }
-            else
-            {
-                monster.PositionX = (int)Position.X +
-                                    (baseX + RandomNumberGenerator.GetInt32(-SPAWN_BASE_OFFSET, SPAWN_BASE_OFFSET)) *
-                                    SPAWN_POSITION_MULTIPLIER;
-                monster.PositionY = (int)Position.Y +
-                                    (baseY + RandomNumberGenerator.GetInt32(-SPAWN_BASE_OFFSET, SPAWN_BASE_OFFSET)) *
-                                    SPAWN_POSITION_MULTIPLIER;
+                monster.Rotation = SPAWN_ROTATION_SLICE_DEGREES * compassDirection;
             }
 
             if (monster.Rotation == 0)
@@ -347,7 +374,12 @@ namespace QuantumCore.Game.World
             }
 
             _world.SpawnEntity(monster);
-            return monster;
+            return true;
+
+            int RandomizeWithinRange(int value, int range)
+            {
+                return range == 0 ? value : value + RandomNumberGenerator.GetInt32(-range, range);
+            }
         }
 
         public void EnqueueGroupRespawn(MonsterGroup group)
@@ -366,6 +398,11 @@ namespace QuantumCore.Game.World
         {
             return x >= Position.X && x < Position.X + Width * MapUnit && y >= Position.Y &&
                    y < Position.Y + Height * MapUnit;
+        }
+
+        internal bool IsAttr(int x, int y, EMapAttribute flags)
+        {
+            return _attributes?.GetAttribute(x, y).HasAnyFlags(flags) ?? false;
         }
 
         public void SpawnEntity(IEntity entity)

@@ -31,6 +31,7 @@ internal partial class AtlasProvider : IAtlasProvider
     private readonly IFileProvider _fileProvider;
     private readonly IServerBase _server;
     private readonly IServiceProvider _serviceProvider;
+    private readonly IMapAttributeProvider _attributeProvider;
 
     /// <summary>
     /// Regex for parsing lines in the atlas info
@@ -42,7 +43,8 @@ internal partial class AtlasProvider : IAtlasProvider
     public AtlasProvider(IConfiguration configuration, IMonsterManager monsterManager,
         IAnimationManager animationManager, ISpawnPointProvider spawnPointProvider,
         ICacheManager cacheManager, ILogger<AtlasProvider> logger, IItemManager itemManager,
-        IFileProvider fileProvider, IServerBase server, IServiceProvider serviceProvider)
+        IFileProvider fileProvider, IServerBase server, IServiceProvider serviceProvider,
+        IMapAttributeProvider attributeProvider)
     {
         _configuration = configuration;
         _monsterManager = monsterManager;
@@ -54,6 +56,7 @@ internal partial class AtlasProvider : IAtlasProvider
         _fileProvider = fileProvider;
         _server = server;
         _serviceProvider = serviceProvider;
+        _attributeProvider = attributeProvider;
     }
 
     public async Task<IEnumerable<IMap>> GetAsync(IWorld world)
@@ -121,8 +124,8 @@ internal partial class AtlasProvider : IAtlasProvider
             {
                 townCoordsDict.TryGetValue(mapName, out var coords);
 
-                map = new Map(_monsterManager, _animationManager, _cacheManager, world, _logger,
-                    _spawnPointProvider, _serviceProvider.GetRequiredService<IDropProvider>(), _itemManager, _server,
+                map = new Map(_monsterManager, _animationManager, _cacheManager, world, _logger, _spawnPointProvider,
+                    _attributeProvider, _serviceProvider.GetRequiredService<IDropProvider>(), _itemManager, _server,
                     mapName, position,
                     width,
                     height, coords, _serviceProvider);

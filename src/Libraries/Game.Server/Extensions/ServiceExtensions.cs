@@ -45,6 +45,7 @@ public static class ServiceExtensions
         services.AddSingleton<IParserService, ParserService>();
         services.AddSingleton<ISpawnGroupProvider, SpawnGroupProvider>();
         services.AddSingleton<ISpawnPointProvider, SpawnPointProvider>();
+        services.AddSingleton<IMapAttributeProvider, MapAttributeProvider>();
         services.AddSingleton<IJobManager, JobManager>();
         services.AddSingleton<IStructuredFileProvider, StructuredFileProvider>();
         services.AddScoped<IAtlasProvider, AtlasProvider>();

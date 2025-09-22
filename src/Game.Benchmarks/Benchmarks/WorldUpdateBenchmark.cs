@@ -58,6 +58,7 @@ public class WorldUpdateBenchmark
                             provider.GetRequiredService<ICacheManager>(), callInfo.Arg<IWorld>(),
                             provider.GetRequiredService<ILogger<Map>>(),
                             provider.GetRequiredService<ISpawnPointProvider>(),
+                            provider.GetRequiredService<IMapAttributeProvider>(),
                             provider.GetRequiredService<IDropProvider>(),
                             provider.GetRequiredService<IItemManager>(),
                             provider.GetRequiredService<IServerBase>(),

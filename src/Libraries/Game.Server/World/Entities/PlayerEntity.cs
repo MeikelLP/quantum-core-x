@@ -16,6 +16,8 @@ using QuantumCore.Game.Packets.Guild;
 using QuantumCore.Game.Persistence;
 using QuantumCore.Game.PlayerUtils;
 using QuantumCore.Game.Skills;
+using QuantumCore.Game.World;
+using QuantumCore.Game.Services;
 
 namespace QuantumCore.Game.World.Entities
 {
@@ -236,6 +238,12 @@ namespace QuantumCore.Game.World.Entities
             if (!Map.IsPositionInside(x, y))
             {
                 Warp(x, y);
+                return;
+            }
+
+            if (Map is Map localMap && localMap.IsAttr(x, y, EMapAttribute.Block | EMapAttribute.Object))
+            {
+                _logger.LogDebug("Not allowed to move character {Name} to map position ({X}, {Y}) with attributes Block or Object", Name, x, y);
                 return;
             }
 
