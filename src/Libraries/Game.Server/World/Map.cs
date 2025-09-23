@@ -343,7 +343,7 @@ namespace QuantumCore.Game.World
                 monster.PositionY = (int)Position.Y + baseY * SPAWN_POSITION_MULTIPLIER;
 
                 if (ignoreAttrCheck ||
-                    !monster.PositionIsAttr(EMapAttribute.Block | EMapAttribute.Object | EMapAttribute.BanPk))
+                    !monster.PositionIsAttr(EMapAttribute.Block | EMapAttribute.Object | EMapAttribute.NonPvp))
                 {
                     foundValidPositionAttr = true;
                     break;
@@ -400,9 +400,9 @@ namespace QuantumCore.Game.World
                    y < Position.Y + Height * MapUnit;
         }
 
-        internal bool IsAttr(int x, int y, EMapAttribute flags)
+        internal bool IsAttr(Coordinates coords, EMapAttribute flags)
         {
-            return _attributes?.GetAttribute(x, y).HasAnyFlags(flags) ?? false;
+            return _attributes?.GetAttribute(coords).HasAnyFlags(flags) ?? false;
         }
 
         public void SpawnEntity(IEntity entity)

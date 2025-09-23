@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Numerics;
 using System.Security.Cryptography;
 using EnumsNET;
 using QuantumCore.API;
@@ -47,7 +48,9 @@ namespace QuantumCore.Game.World.AI
         private const long ChangeAttackPositionTimeNearMs = 10000;
         private const long ChangeAttackPositionTimeFarMs = 1000;
         private const double ChangeAttackPositionDistance = 100;
-
+        
+        private const double PreferredAttackRangePercentageRanged = 0.8;
+        private const double PreferredAttackRangePercentage = 0.9;
 
         public SimpleBehaviour(IMonsterManager monsterManager)
         {
@@ -81,12 +84,11 @@ namespace QuantumCore.Game.World.AI
             for (var attempt = 0; attempt < MaxPositionAttempts; attempt++)
             {
                 var distance = RandomNumberGenerator.GetInt32(MoveMinDistance, MoveMaxDistance + 1);
-                var (deltaX, deltaY) = MathUtils.GetDeltaByDegree(RandomNumberGenerator.GetInt32(0, 360));
+                var (angleDx, angleDy) = MathUtils.GetDeltaByDegree(RandomNumberGenerator.GetInt32(0, 360));
 
-                var targetX = _entity.PositionX + (int)Math.Round(deltaX * distance);
-                var targetY = _entity.PositionY + (int)Math.Round(deltaY * distance);
+                var delta = new Vector2((float)(distance * angleDx), (float)(distance * angleDy));
 
-                if (TryGoto(targetX, targetY))
+                if (TryGoto(_entity.Coordinates() + delta))
                 {
                     return;
                 }
@@ -124,17 +126,14 @@ namespace QuantumCore.Game.World.AI
 
             var baseRange = Math.Max(_proto.AttackRange * 0.75, 50);
 
-            var targetPositionX = target.PositionX + directionX * baseRange;
-            var targetPositionY = target.PositionY + directionY * baseRange;
-
-            if (TryGoto((int)targetPositionX, (int)targetPositionY))
+            var targetDelta = new Vector2((float)(directionX * baseRange), (float)(directionY * baseRange));
+            if (TryGoto(target.Coordinates() + targetDelta))
             {
                 return;
             }
 
-            var stepX = _entity.PositionX + (int)Math.Round(directionX * (directionLength - minDistance));
-            var stepY = _entity.PositionY + (int)Math.Round(directionY * (directionLength - minDistance));
-            TryGoto(stepX, stepY);
+            var stepDelta = new Vector2((float)(directionX * (directionLength - minDistance)), (float)(directionY * (directionLength - minDistance)));
+            TryGoto(target.Coordinates() + stepDelta);
         }
 
         public void Update(double elapsedTime)
@@ -187,7 +186,7 @@ namespace QuantumCore.Game.World.AI
                     {
                         _lastAttackTime = 0;
                         ResetChangeAttackPositionTimer();
-                        TryGoto(_spawnX, _spawnY);
+                        TryGoto(new Coordinates((uint)_spawnX, (uint)_spawnY));
                     }
                 }
 
@@ -238,7 +237,7 @@ namespace QuantumCore.Game.World.AI
             }
         }
 
-        private bool TryGoto(int x, int y)
+        private bool TryGoto(Coordinates target)
         {
             if (_entity is null)
             {
@@ -247,26 +246,26 @@ namespace QuantumCore.Game.World.AI
 
             if (_entity.Map is not Map localMap)
             {
-                _entity.Goto(x, y);
+                _entity.Goto((int)target.X, (int)target.Y);
                 return true;
             }
 
-            if (!localMap.IsPositionInside(x, y))
+            if (!localMap.IsPositionInside((int)target.X, (int)target.Y))
             {
                 return false;
             }
 
-            if (localMap.IsAttr(x, y, EMapAttribute.Block | EMapAttribute.Object))
+            if (localMap.IsAttr(target, EMapAttribute.Block | EMapAttribute.Object))
             {
                 return false;
             }
 
-            if (_entity.IsAttrOnStraightPathTo(x, y, EMapAttribute.Block | EMapAttribute.Object))
+            if (_entity.IsAttrOnStraightPathTo(target, EMapAttribute.Block | EMapAttribute.Object))
             {
                 return false;
             }
 
-            _entity.Goto(x, y);
+            _entity.Goto((int)target.X, (int)target.Y);
             return true;
         }
 
@@ -295,11 +294,10 @@ namespace QuantumCore.Game.World.AI
                     angle = RandomNumberGenerator.GetInt32(0, 360);
                 }
 
-                var (deltaX, deltaY) = MathUtils.GetDeltaByDegree(angle);
-                var destX = target.PositionX + (int)Math.Round(deltaX * approachDistance);
-                var destY = target.PositionY + (int)Math.Round(deltaY * approachDistance);
+                var (angleDx, angleDy) = MathUtils.GetDeltaByDegree(angle);
+                var delta = new Vector2((float)(approachDistance * angleDx), (float)(approachDistance * angleDy));
 
-                if (TryGoto(destX, destY))
+                if (TryGoto(target.Coordinates() + delta))
                 {
                     return true;
                 }
@@ -333,8 +331,8 @@ namespace QuantumCore.Game.World.AI
 
             var multiplier = _proto.BattleType switch
             {
-                EBattleType.Range or EBattleType.Magic => 0.8, // archers and wizards attack from 80% of their range
-                _ => 0.9
+                EBattleType.Range or EBattleType.Magic => PreferredAttackRangePercentageRanged, // archers and wizards attack from 80% of their range
+                _ => PreferredAttackRangePercentage
             };
             return _proto.AttackRange * multiplier;
         }

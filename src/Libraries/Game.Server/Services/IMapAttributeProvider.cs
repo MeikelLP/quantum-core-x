@@ -11,5 +11,5 @@ public interface IMapAttributeProvider
 
 public interface IMapAttributeSet
 {
-    EMapAttribute GetAttribute(int x, int y);
+    EMapAttribute GetAttribute(Coordinates coords);
 }

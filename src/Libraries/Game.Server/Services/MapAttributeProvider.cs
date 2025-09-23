@@ -155,22 +155,20 @@ internal sealed class MapAttributeProvider : IMapAttributeProvider
         private readonly MapAttributeSectree?[,] _sectreesAttrs;
         private readonly int _sectreesWidth;
         private readonly int _sectreesHeight;
-        private readonly int _baseX;
-        private readonly int _baseY;
+        private readonly Coordinates _baseCoords;
 
         public MapAttributeSet(int sectreesWidth, int sectreesHeight, Coordinates basePosition,
             MapAttributeSectree?[,] sectreesAttrs)
         {
             _sectreesWidth = sectreesWidth;
             _sectreesHeight = sectreesHeight;
-            _baseX = (int)basePosition.X;
-            _baseY = (int)basePosition.Y;
+            _baseCoords = basePosition;
             _sectreesAttrs = sectreesAttrs;
         }
 
-        public EMapAttribute GetAttribute(int x, int y)
+        public EMapAttribute GetAttribute(Coordinates coords)
         {
-            if (!TryLocate(x, y, out var locatedSectreeAttrs, out var cellX, out var cellY) || locatedSectreeAttrs is null)
+            if (!TryLocate(coords, out var locatedSectreeAttrs, out var cellX, out var cellY) || locatedSectreeAttrs is null)
             {
                 return EMapAttribute.None;
             }
@@ -178,36 +176,28 @@ internal sealed class MapAttributeProvider : IMapAttributeProvider
             return locatedSectreeAttrs.Get(cellX, cellY);
         }
 
-        private bool TryLocate(int x, int y, out MapAttributeSectree? sectreeAttrs, out int cellX, out int cellY)
+        private bool TryLocate(Coordinates coords, out MapAttributeSectree? sectreeAttrs, out int cellX, out int cellY)
         {
             sectreeAttrs = null;
             cellX = 0;
             cellY = 0;
 
-            var relativeX = x - _baseX;
-            var relativeY = y - _baseY;
-            if (relativeX < 0 || relativeY < 0)
-            {
-                return false;
-            }
+            var relativeCoords = coords - _baseCoords;
 
-            // find which sectree covers the x y coords
-            var sectreeIndexX = relativeX / SectreeSize;
-            var sectreeIndexY = relativeY / SectreeSize;
+            // find which sectree covers the x y relative map coords
+            var sectreeIndexX = relativeCoords.X / SectreeSize;
+            var sectreeIndexY = relativeCoords.Y / SectreeSize;
             if (sectreeIndexX >= _sectreesWidth || sectreeIndexY >= _sectreesHeight)
             {
                 return false;
             }
             sectreeAttrs = _sectreesAttrs[sectreeIndexY, sectreeIndexX];
             
-            // find which cell of the sectree covers the x y coords
-            cellX = (relativeX % SectreeSize) / CellSize;
-            cellY = (relativeY % SectreeSize) / CellSize;
-            if ((uint)cellX >= CellsPerAxis || (uint)cellY >= CellsPerAxis)
-            {
-                return false;
-            }
-            return true;
+            // find which cell of the sectree covers the x y relative map coords
+            cellX = (int)((relativeCoords.X % SectreeSize) / CellSize);
+            cellY = (int)((relativeCoords.Y % SectreeSize) / CellSize);
+            
+            return cellX < CellsPerAxis && cellY < CellsPerAxis;
         }
     }
 

@@ -6,6 +6,6 @@ public enum EMapAttribute : uint
     None = 0,
     Block = 1 << 0, // collision detection
     Water = 1 << 1,
-    BanPk = 1 << 2, // ban player kill AKA "No PvP"
+    NonPvp = 1 << 2, // AKA "BAN_PK"
     Object = 1 << 7, // building
 }
