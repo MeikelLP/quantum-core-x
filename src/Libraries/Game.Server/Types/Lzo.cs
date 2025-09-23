@@ -27,6 +27,14 @@ namespace QuantumCore.Core.Types
             return buffer;
         }
 
+        public byte[] DecodeRaw(byte[] data)
+        {
+            using var src = new MemoryStream(data);
+            var buffer = new byte[_size];
+            Decompress(src, buffer);
+            return buffer;
+        }
+
         private int ConsumeZeroByteLength(MemoryStream src)
         {
             var pos = src.Position;

@@ -5,6 +5,7 @@ using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.World;
 using QuantumCore.Core.Constants;
 using QuantumCore.Core.Utils;
+using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Packets;
 
 namespace QuantumCore.Game.World.Entities
@@ -193,6 +194,16 @@ namespace QuantumCore.Game.World.Entities
 
         public void Attack(IEntity victim)
         {
+            if (this.PositionIsAttr(EMapAttribute.NonPvp))
+            {
+                return;
+            }
+
+            if (victim.PositionIsAttr(EMapAttribute.NonPvp))
+            {
+                return;
+            }
+
             switch (GetBattleType())
             {
                 case EBattleType.Melee:
@@ -340,6 +351,14 @@ namespace QuantumCore.Game.World.Entities
 
         public virtual int Damage(IEntity attacker, EDamageType damageType, int damage)
         {
+
+            if (this.PositionIsAttr(EMapAttribute.NonPvp))
+            {
+                SendDebugDamage(attacker,
+                    $"{attacker}->{this} Ignoring damage inside NoPvP zone -> {damage} (should never happen)");
+                return -1;
+            }
+            
             if (damageType is not EDamageType.Normal and not EDamageType.NormalRange)
             {
                 throw new NotImplementedException();

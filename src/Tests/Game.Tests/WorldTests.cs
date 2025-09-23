@@ -52,6 +52,7 @@ public class WorldTests
                         provider.GetRequiredService<ICacheManager>(), info.Arg<IWorld>(),
                         provider.GetRequiredService<ILogger<Map>>(),
                         provider.GetRequiredService<ISpawnPointProvider>(),
+                        provider.GetRequiredService<IMapAttributeProvider>(),
                         provider.GetRequiredService<IDropProvider>(),
                         provider.GetRequiredService<IItemManager>(),
                         provider.GetRequiredService<IServerBase>(),

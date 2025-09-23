@@ -10,9 +10,11 @@ using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game.World;
 using QuantumCore.Caching;
 using QuantumCore.Core.Event;
+using QuantumCore.Game;
 using QuantumCore.Game.Services;
 using QuantumCore.Game.World;
 using QuantumCore.Game.World.Entities;
+using QuantumCore.Networking;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -29,6 +31,8 @@ public class MapTests
         var npcShopProvider = Substitute.For<INpcShopProvider>();
         npcShopProvider.Shops.Returns([]);
         var provider = new ServiceCollection()
+            .AddKeyedSingleton<IPacketManager>(HostingOptions.ModeGame, (_, _) => Substitute.For<IPacketManager>())
+            .AddSingleton(Substitute.For<ICommandManager>())
             .AddSingleton<IMonsterManager>(_ =>
             {
                 var mock = Substitute.For<IMonsterManager>();
@@ -50,6 +54,7 @@ public class MapTests
             .AddSingleton(Substitute.For<IServerBase>())
             .AddSingleton(Substitute.For<IItemManager>())
             .AddSingleton(Substitute.For<IDropProvider>())
+            .AddSingleton(Substitute.For<IMapAttributeProvider>())
             .AddSingleton<PluginExecutor>()
             .AddSingleton<IAtlasProvider>(_ =>
             {
@@ -96,20 +101,29 @@ public class MapTests
                 mock.GetSpawnPointsForMap(Arg.Any<string>()).Returns(_ => Task.FromResult(_spawnPoints));
                 return mock;
             })
+            .AddOptions<HostingOptions>(HostingOptions.ModeGame)
+            .Configure(options =>
+            {
+                options.Port = 0;
+                options.IpAddress = "127.0.0.1";
+            })
+            .Services
             .AddOptions<HostingOptions>().Services
             .AddQuantumCoreTestLogger(testOutputHelper)
             .BuildServiceProvider();
+        ActivatorUtilities.CreateInstance<GameServer>(provider);
         var monsterManager = provider.GetRequiredService<IMonsterManager>();
         var animationManager = provider.GetRequiredService<IAnimationManager>();
         var cacheManager = provider.GetRequiredService<ICacheManager>();
         var spawnPointProvider = provider.GetRequiredService<ISpawnPointProvider>();
+        var attributeProvider = provider.GetRequiredService<IMapAttributeProvider>();
         var dropProvider = provider.GetRequiredService<IDropProvider>();
         var itemManager = provider.GetRequiredService<IItemManager>();
         var server = provider.GetRequiredService<IServerBase>();
         var logger = provider.GetRequiredService<ILogger<MapTests>>();
         _world = provider.GetRequiredService<IWorld>();
-        _map = new Map(monsterManager, animationManager, cacheManager, _world, logger, spawnPointProvider, dropProvider,
-            itemManager, server,
+        _map = new Map(monsterManager, animationManager, cacheManager, _world, logger, spawnPointProvider,
+            attributeProvider, dropProvider, itemManager, server,
             "Test", new Coordinates(), 4096, 4096, null, provider);
     }
 
