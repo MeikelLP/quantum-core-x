@@ -61,7 +61,7 @@ jobs:
       - name: Build
         run: dotnet publish -r ${{ matrix.os }} --verbosity minimal -p DebugType=None -p DebugSymbols=false -p PublishSingleFile=true --self-contained  src/Executables/Single/
       - name: Archive build artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: QuantumCore Single ${{ matrix.os }}
           path: src/Executables/Single/bin/Release/net9.0/${{ matrix.os }}/publish
