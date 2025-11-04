@@ -86,7 +86,7 @@ jobs:
       # game
       - name: Extract metadata (tags, labels) for Docker
         id: meta-game
-        uses: docker/metadata-action@v5.8.0
+        uses: docker/metadata-action@v5.9.0
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/game
           tags: |
@@ -106,7 +106,7 @@ jobs:
       # auth
       - name: Extract metadata (tags, labels) for Docker
         id: meta-auth
-        uses: docker/metadata-action@v5.8.0
+        uses: docker/metadata-action@v5.9.0
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/auth
           tags: |
