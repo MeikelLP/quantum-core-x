@@ -2,7 +2,7 @@
 
     <ItemGroup>
       <PackageReference Include="AwesomeAssertions" Version="9.3.0"/>
-      <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.0"/>
+      <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.1"/>
         <PackageReference Include="NSubstitute" Version="5.3.0"/>
         <PackageReference Include="Serilog.Sinks.XUnit" Version="3.0.19"/>
       <PackageReference Include="Testcontainers.MySql" Version="4.8.1"/>
