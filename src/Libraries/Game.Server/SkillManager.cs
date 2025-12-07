@@ -23,7 +23,7 @@ public class SkillManager : ISkillManager, ILoadable
         _parserService = parserService;
     }
 
-    public SkillData? GetSkill(ESkillIndexes id)
+    public SkillData? GetSkill(ESkill id)
     {
         return _skills.FirstOrDefault(skill => skill.Id == id);
     }

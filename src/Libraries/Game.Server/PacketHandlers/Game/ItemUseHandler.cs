@@ -111,7 +111,7 @@ public class ItemUseHandler : IGamePacketHandler<ItemUse>
                 ? itemProto.Sockets[0]
                 : itemProto.Values[0];
 
-            if (!Enum.TryParse<ESkillIndexes>(skillId.ToString(), out var skill))
+            if (!Enum.TryParse<ESkill>(skillId.ToString(), out var skill))
             {
                 _logger.LogWarning("Skill with Id({SkillId}) not defined", skillId);
                 return;

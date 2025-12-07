@@ -17,7 +17,7 @@ namespace QuantumCore.Game.Skills;
 
 public class PlayerSkills : IPlayerSkills
 {
-    private readonly ConcurrentDictionary<ESkillIndexes, Skill>
+    private readonly ConcurrentDictionary<ESkill, Skill>
         _skills = new(); //todo: probably no need for concurrent variant
 
     private readonly ILogger<PlayerSkills> _logger;
@@ -37,72 +37,72 @@ public class PlayerSkills : IPlayerSkills
 
     #region Static Skill Data
 
-    private static readonly ESkillIndexes[,,] SkillList = new ESkillIndexes[JobMaxNum, SkillGroupMaxNum, SkillCount]
+    private static readonly ESkill[,,] SkillList = new ESkill[JobMaxNum, SkillGroupMaxNum, SkillCount]
     {
         // Warrior
         {
             {
-                ESkillIndexes.ThreeWayCut, ESkillIndexes.SwordSpin, ESkillIndexes.BerserkerFury,
-                ESkillIndexes.AuraOfTheSword, ESkillIndexes.Dash, ESkillIndexes.Life
+                ESkill.ThreeWayCut, ESkill.SwordSpin, ESkill.BerserkerFury,
+                ESkill.AuraOfTheSword, ESkill.Dash, ESkill.Life
             },
             {
-                ESkillIndexes.Shockwave, ESkillIndexes.Bash, ESkillIndexes.Stump, ESkillIndexes.StrongBody,
-                ESkillIndexes.SwordStrike, ESkillIndexes.SwordOrb
+                ESkill.Shockwave, ESkill.Bash, ESkill.Stump, ESkill.StrongBody,
+                ESkill.SwordStrike, ESkill.SwordOrb
             }
         },
         // Ninja
         {
             {
-                ESkillIndexes.Ambush, ESkillIndexes.FastAttack, ESkillIndexes.RollingDagger, ESkillIndexes.Stealth,
-                ESkillIndexes.PoisonousCloud, ESkillIndexes.InsidiousPoison
+                ESkill.Ambush, ESkill.FastAttack, ESkill.RollingDagger, ESkill.Stealth,
+                ESkill.PoisonousCloud, ESkill.InsidiousPoison
             },
             {
-                ESkillIndexes.RepetitiveShot, ESkillIndexes.ArrowShower, ESkillIndexes.FireArrow,
-                ESkillIndexes.FeatherWalk,
-                ESkillIndexes.PoisonArrow, ESkillIndexes.Spark
+                ESkill.RepetitiveShot, ESkill.ArrowShower, ESkill.FireArrow,
+                ESkill.FeatherWalk,
+                ESkill.PoisonArrow, ESkill.Spark
             }
         },
         // Sura
         {
             {
-                ESkillIndexes.FingerStrike, ESkillIndexes.DragonSwirl, ESkillIndexes.EnchantedBlade, ESkillIndexes.Fear,
-                ESkillIndexes.EnchantedArmor, ESkillIndexes.Dispel
+                ESkill.FingerStrike, ESkill.DragonSwirl, ESkill.EnchantedBlade, ESkill.Fear,
+                ESkill.EnchantedArmor, ESkill.Dispel
             },
             {
-                ESkillIndexes.DarkStrike, ESkillIndexes.FlameStrike, ESkillIndexes.FlameSpirit,
-                ESkillIndexes.DarkProtection, ESkillIndexes.SpiritStrike, ESkillIndexes.DarkOrb
+                ESkill.DarkStrike, ESkill.FlameStrike, ESkill.FlameSpirit,
+                ESkill.DarkProtection, ESkill.SpiritStrike, ESkill.DarkOrb
             }
         },
         // Shaman
         {
             {
-                ESkillIndexes.FlyingTalisman, ESkillIndexes.ShootingDragon, ESkillIndexes.DragonRoar,
-                ESkillIndexes.Blessing, ESkillIndexes.Reflect, ESkillIndexes.DragonAid
+                ESkill.FlyingTalisman, ESkill.ShootingDragon, ESkill.DragonRoar,
+                ESkill.Blessing, ESkill.Reflect, ESkill.DragonAid
             },
             {
-                ESkillIndexes.LightningThrow, ESkillIndexes.SummonLightning, ESkillIndexes.LightningClaw,
-                ESkillIndexes.Cure, ESkillIndexes.Swiftness, ESkillIndexes.AttackUp
+                ESkill.LightningThrow, ESkill.SummonLightning, ESkill.LightningClaw,
+                ESkill.Cure, ESkill.Swiftness, ESkill.AttackUp
             }
         }
     };
 
-    private static readonly ImmutableArray<ESkillIndexes> PassiveSkillIds =
+    private static readonly ImmutableArray<ESkill> PassiveSkillIds =
     [
-        ESkillIndexes.Leadership,
-        ESkillIndexes.Combo,
-        ESkillIndexes.Mining,
-        ESkillIndexes.LanguageShinsoo,
-        ESkillIndexes.LanguageChunjo,
-        ESkillIndexes.LanguageJinno,
-        ESkillIndexes.Polymorph,
-        ESkillIndexes.HorseRiding,
-        ESkillIndexes.HorseSummon,
-        ESkillIndexes.HoseWildAttack,
-        ESkillIndexes.HorseCharge,
-        ESkillIndexes.HorseEscape,
-        ESkillIndexes.HorseWildAttackRange,
-        ESkillIndexes.AddHp,
-        ESkillIndexes.PenetrationResistance
+        ESkill.Leadership,
+        ESkill.Combo,
+        ESkill.Mining,
+        ESkill.LanguageShinsoo,
+        ESkill.LanguageChunjo,
+        ESkill.LanguageJinno,
+        ESkill.Polymorph,
+        ESkill.HorseRiding,
+        ESkill.HorseSummon,
+        ESkill.HorseWildAttack,
+        ESkill.HorseCharge,
+        ESkill.HorseEscape,
+        ESkill.HorseWildAttackRange,
+        ESkill.AddHp,
+        ESkill.PenetrationResistance
     ];
 
     #endregion
@@ -142,7 +142,7 @@ public class PlayerSkills : IPlayerSkills
         }
     }
 
-    public ISKill? this[ESkillIndexes skillId] => _skills.TryGetValue(skillId, out var skill) ? skill : null;
+    public ISKill? this[ESkill skillId] => _skills.TryGetValue(skillId, out var skill) ? skill : null;
 
     public void SetSkillGroup(byte skillGroup)
     {
@@ -209,9 +209,9 @@ public class PlayerSkills : IPlayerSkills
         SendSkillLevelsPacket();
     }
 
-    public void Reset(ESkillIndexes skillId)
+    public void Reset(ESkill skillId)
     {
-        if (skillId >= ESkillIndexes.SkillMax)
+        if (skillId >= ESkill.SkillMax)
         {
             return;
         }
@@ -232,9 +232,9 @@ public class PlayerSkills : IPlayerSkills
         SendSkillLevelsPacket();
     }
 
-    public void SetLevel(ESkillIndexes skillId, byte level)
+    public void SetLevel(ESkill skillId, byte level)
     {
-        if (skillId >= ESkillIndexes.SkillMax)
+        if (skillId >= ESkill.SkillMax)
         {
             return;
         }
@@ -261,9 +261,9 @@ public class PlayerSkills : IPlayerSkills
         }
     }
 
-    public void SkillUp(ESkillIndexes skillId, ESkillLevelMethod method = ESkillLevelMethod.Point)
+    public void SkillUp(ESkill skillId, ESkillLevelMethod method = ESkillLevelMethod.Point)
     {
-        if (skillId >= ESkillIndexes.SkillMax)
+        if (skillId >= ESkill.SkillMax)
         {
             _logger.LogWarning("Invalid skill id: {SkillId}", skillId);
             return;
@@ -276,7 +276,7 @@ public class PlayerSkills : IPlayerSkills
             return;
         }
 
-        if (proto.Id >= ESkillIndexes.SkillMax)
+        if (proto.Id >= ESkill.SkillMax)
         {
             _logger.LogWarning("Invalid skill id: {SkillId}", skillId);
             return;
@@ -404,7 +404,7 @@ public class PlayerSkills : IPlayerSkills
         SendSkillLevelsPacket();
     }
 
-    private bool IsLearnableSkill(ESkillIndexes skillId)
+    private bool IsLearnableSkill(ESkill skillId)
     {
         var proto = _skillManager.GetSkill(skillId);
         if (proto == null)
@@ -421,7 +421,7 @@ public class PlayerSkills : IPlayerSkills
 
         if (proto.Type == ESkillCategoryType.HorseSkills)
         {
-            return skillId != ESkillIndexes.HorseWildAttackRange ||
+            return skillId != ESkill.HorseWildAttackRange ||
                    _player.Player.PlayerClass.GetClass()== EPlayerClass.Ninja;
         }
 
@@ -430,14 +430,14 @@ public class PlayerSkills : IPlayerSkills
         return (int)proto.Type - 1 == (byte)_player.Player.PlayerClass;
     }
 
-    private int GetSkillLevel(ESkillIndexes skillId)
+    private int GetSkillLevel(ESkill skillId)
     {
-        if (skillId >= ESkillIndexes.SkillMax) return 0;
+        if (skillId >= ESkill.SkillMax) return 0;
 
         return Math.Min(SkillMaxLevel, _skills.TryGetValue(skillId, out var skill) ? skill.Level : 0);
     }
 
-    public bool CanUse(ESkillIndexes skillId)
+    public bool CanUse(ESkill skillId)
     {
         if (skillId == 0) return false;
 
@@ -458,24 +458,24 @@ public class PlayerSkills : IPlayerSkills
 
         switch (skillId)
         {
-            case ESkillIndexes.Leadership:
-            case ESkillIndexes.Combo:
-            case ESkillIndexes.Mining:
-            case ESkillIndexes.LanguageShinsoo:
-            case ESkillIndexes.LanguageChunjo:
-            case ESkillIndexes.LanguageJinno:
-            case ESkillIndexes.Polymorph:
-            case ESkillIndexes.HorseRiding:
-            case ESkillIndexes.HorseSummon:
-            case ESkillIndexes.GuildEye:
-            case ESkillIndexes.GuildBlood:
-            case ESkillIndexes.GuildBless:
-            case ESkillIndexes.GuildSeonghwi:
-            case ESkillIndexes.GuildAcceleration:
-            case ESkillIndexes.GuildBunno:
-            case ESkillIndexes.GuildJumun:
-            case ESkillIndexes.GuildTeleport:
-            case ESkillIndexes.GuildDoor:
+            case ESkill.Leadership:
+            case ESkill.Combo:
+            case ESkill.Mining:
+            case ESkill.LanguageShinsoo:
+            case ESkill.LanguageChunjo:
+            case ESkill.LanguageJinno:
+            case ESkill.Polymorph:
+            case ESkill.HorseRiding:
+            case ESkill.HorseSummon:
+            case ESkill.GuildEye:
+            case ESkill.GuildBlood:
+            case ESkill.GuildBless:
+            case ESkill.GuildSeonghwi:
+            case ESkill.GuildAcceleration:
+            case ESkill.GuildBunno:
+            case ESkill.GuildJumun:
+            case ESkill.GuildTeleport:
+            case ESkill.GuildDoor:
                 return true;
         }
 
@@ -487,7 +487,7 @@ public class PlayerSkills : IPlayerSkills
         SendSkillLevelsPacket();
     }
 
-    public bool LearnSkillByBook(ESkillIndexes skillId)
+    public bool LearnSkillByBook(ESkill skillId)
     {
         var proto = _skillManager.GetSkill(skillId);
         if (proto == null)
@@ -578,9 +578,9 @@ public class PlayerSkills : IPlayerSkills
         return true;
     }
 
-    public void SetSkillNextReadTime(ESkillIndexes skillId, int time)
+    public void SetSkillNextReadTime(ESkill skillId, int time)
     {
-        if (skillId >= ESkillIndexes.SkillMax)
+        if (skillId >= ESkill.SkillMax)
         {
             return;
         }

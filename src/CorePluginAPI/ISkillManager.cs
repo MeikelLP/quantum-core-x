@@ -6,7 +6,7 @@ namespace QuantumCore.API;
 
 public interface ISkillManager
 {
-    SkillData? GetSkill(ESkillIndexes id);
+    SkillData? GetSkill(ESkill id);
     SkillData? GetSkillByName(ReadOnlySpan<char> name);
     Task ReloadAsync(CancellationToken token = default);
 }

@@ -45,7 +45,7 @@ namespace QuantumCore.Game.Commands
                 {
                     skillBookId = CoreRandom.GenerateUInt32(1, 112);
 
-                    if (!Enum.TryParse<ESkillIndexes>(skillBookId.ToString(), out var skillId))
+                    if (!Enum.TryParse<ESkill>(skillBookId.ToString(), out var skillId))
                     {
                         continue;
                     }

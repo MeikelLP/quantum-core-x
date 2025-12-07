@@ -7,21 +7,21 @@ public interface IPlayerSkills
     Task LoadAsync();
     Task PersistAsync();
 
-    ISKill? this[ESkillIndexes skillId] { get; }
+    ISKill? this[ESkill skillId] { get; }
 
     void SetSkillGroup(byte skillGroup);
     void ClearSkills();
     void ClearSubSkills();
-    void Reset(ESkillIndexes skillId);
-    void SetLevel(ESkillIndexes skillId, byte level);
-    void SkillUp(ESkillIndexes skillId, ESkillLevelMethod method = ESkillLevelMethod.Point);
-    bool CanUse(ESkillIndexes skillId);
+    void Reset(ESkill skillId);
+    void SetLevel(ESkill skillId, byte level);
+    void SkillUp(ESkill skillId, ESkillLevelMethod method = ESkillLevelMethod.Point);
+    bool CanUse(ESkill skillId);
 
     /// <summary>
     /// Send skill info to client
     /// </summary>
     void Send();
 
-    bool LearnSkillByBook(ESkillIndexes skillId);
-    void SetSkillNextReadTime(ESkillIndexes skillId, int time);
+    bool LearnSkillByBook(ESkill skillId);
+    void SetSkillNextReadTime(ESkill skillId, int time);
 }

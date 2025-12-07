@@ -1,6 +1,6 @@
 ﻿namespace QuantumCore.API.Game.Types.Skills;
 
-public enum ESkillIndexes : uint
+public enum ESkill : uint
 {
     // Warrior Body
     ThreeWayCut = 1,
@@ -70,7 +70,7 @@ public enum ESkillIndexes : uint
     
     HorseRiding = 130,
     HorseSummon = 131,
-    HoseWildAttack = 137,
+    HorseWildAttack = 137,
     HorseCharge = 138,
     HorseEscape = 139,
     HorseWildAttackRange = 140,

@@ -88,7 +88,7 @@ public partial class ParserService : IParserService
 
             try
             {
-                if (!Enum.TryParse<ESkillIndexes>(split[0], true, out var id))
+                if (!Enum.TryParse<ESkill>(split[0], true, out var id))
                 {
                     _logger.LogWarning("Failed to parse Skill with Id({Id}) from line: {Line}", split[0], line);
                     continue;

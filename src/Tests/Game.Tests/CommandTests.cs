@@ -801,7 +801,7 @@ public class CommandTests : IAsyncLifetime
         _player.SetPoint(EPoint.Level, 5);
         _player.Player.PlayerClass = 0;
 
-        var skillId = ESkillIndexes.AuraOfTheSword;
+        var skillId = ESkill.AuraOfTheSword;
 
         _skillManager.GetSkill(skillId).Returns(new SkillData
         {
@@ -824,7 +824,7 @@ public class CommandTests : IAsyncLifetime
         // Prepare
         _player.SetPoint(EPoint.Level, 5);
         _player.Player.PlayerClass = 0;
-        const ESkillIndexes skillId = ESkillIndexes.AuraOfTheSword;
+        const ESkill skillId = ESkill.AuraOfTheSword;
 
         _skillManager.GetSkill(skillId).Returns(new SkillData
         {

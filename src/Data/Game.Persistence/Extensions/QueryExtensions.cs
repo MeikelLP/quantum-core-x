@@ -58,7 +58,7 @@ public static class QueryExtensions
         return query.Select(x => new Skill
         {
             PlayerId = x.PlayerId,
-            SkillId = (ESkillIndexes)x.SkillId,
+            SkillId = (ESkill)x.SkillId,
             MasterType = x.MasterType,
             Level = x.Level,
             NextReadTime = x.NextReadTime,
