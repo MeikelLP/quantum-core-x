@@ -1,4 +1,4 @@
-﻿namespace QuantumCore.API;
+﻿namespace QuantumCore.API.Game.Types.Items;
 
 public enum EquipmentSlot : byte
 {

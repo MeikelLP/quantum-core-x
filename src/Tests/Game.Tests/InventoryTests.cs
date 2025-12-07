@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using NSubstitute;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
+using QuantumCore.API.Game.Types.Items;
 using QuantumCore.Caching;
 using QuantumCore.Game.Persistence;
 using QuantumCore.Game.PlayerUtils;

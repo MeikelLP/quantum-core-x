@@ -12,6 +12,7 @@ using QuantumCore.API.Game.Types.Entities;
 using QuantumCore.API.Game.Types.Items;
 using QuantumCore.API.Game.Types.Monsters;
 using QuantumCore.API.Game.Types.Players;
+using QuantumCore.API.Game.Types.Items;
 using QuantumCore.API.Game.World;
 using QuantumCore.Caching;
 using QuantumCore.Extensions;

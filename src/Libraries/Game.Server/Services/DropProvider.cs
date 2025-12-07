@@ -7,6 +7,7 @@ using Microsoft.Extensions.Options;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game.Types;
+using QuantumCore.API.Game.Types.Items;
 using QuantumCore.API.Game.Types.Monsters;
 using QuantumCore.API.Game.World;
 using QuantumCore.Core.Utils;

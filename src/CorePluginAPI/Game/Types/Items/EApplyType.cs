@@ -1,4 +1,4 @@
-﻿namespace QuantumCore.API.Core.Models;
+﻿namespace QuantumCore.API.Game.Types.Items;
 
 public enum EApplyType : byte
 {
