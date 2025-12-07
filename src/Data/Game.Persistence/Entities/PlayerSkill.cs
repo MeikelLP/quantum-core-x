@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using QuantumCore.API.Game.Skills;
+using QuantumCore.API.Game.Types.Skills;
 
 namespace QuantumCore.Game.Persistence.Entities;
 

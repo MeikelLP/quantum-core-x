@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game.Skills;
+using QuantumCore.API.Game.Types.Skills;
 using QuantumCore.Core.Utils;
 using QuantumCore.Game.Drops;
 using QuantumCore.Game.World;
@@ -109,7 +110,7 @@ public partial class ParserService : IParserService
                     CooldownPoly = split[11],
                     MasterBonusPoly = split[12],
                     AttackGradePoly = split[13],
-                    Flag = ExtractSkillFlags(split[14]),
+                    Flags = ExtractSkillFlags(split[14]),
                     AffectFlag = ExtractAffectFlags(split[15]),
                     PointOn2 = split[16],
                     PointPoly2 = split[17],
@@ -372,9 +373,9 @@ public partial class ParserService : IParserService
         throw new ArgumentOutOfRangeException(nameof(str), $"Don't know how to parse \"{str}\" to TimeSpan");
     }
 
-    private static ESkillFlag ExtractSkillFlags(string value)
+    private static ESkillFlags ExtractSkillFlags(string value)
     {
-        ESkillFlag result = 0;
+        ESkillFlags result = 0;
 
         if (string.IsNullOrWhiteSpace(value))
         {
@@ -385,7 +386,7 @@ public partial class ParserService : IParserService
 
         foreach (var flag in flags)
         {
-            if (!EnumUtils.TryParseEnum<ESkillFlag>(flag, out var parsed)) continue;
+            if (!EnumUtils.TryParseEnum<ESkillFlags>(flag, out var parsed)) continue;
             result |= parsed;
         }
 

@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game.Skills;
+using QuantumCore.API.Game.Types.Skills;
 using QuantumCore.Game.Services;
 
 namespace QuantumCore.Game;

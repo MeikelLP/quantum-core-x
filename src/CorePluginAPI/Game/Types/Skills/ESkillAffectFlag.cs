@@ -1,6 +1,4 @@
-﻿using System.Runtime.Serialization;
-
-namespace QuantumCore.API.Game.Skills;
+﻿namespace QuantumCore.API.Game.Types.Skills;
 
 [Flags]
 public enum ESkillAffectFlag

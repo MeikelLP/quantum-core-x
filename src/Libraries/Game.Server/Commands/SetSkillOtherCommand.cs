@@ -1,6 +1,7 @@
 ﻿using CommandLine;
 using QuantumCore.API.Game;
 using QuantumCore.API.Game.Skills;
+using QuantumCore.API.Game.Types.Skills;
 
 namespace QuantumCore.Game.Commands;
 

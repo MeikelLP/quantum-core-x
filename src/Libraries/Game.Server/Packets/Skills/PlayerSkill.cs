@@ -1,4 +1,4 @@
-﻿using QuantumCore.API.Game.Skills;
+﻿using QuantumCore.API.Game.Types.Skills;
 using QuantumCore.Networking;
 
 namespace QuantumCore.Game.Packets.Skills;

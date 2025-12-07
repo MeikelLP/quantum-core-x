@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using QuantumCore.API.Game.Skills;
+using QuantumCore.API.Game.Types.Skills;
 
 namespace QuantumCore.API.Core.Models;
 
@@ -20,7 +21,7 @@ public class SkillData
     public string CooldownPoly { get; set; } = "";
     public string MasterBonusPoly { get; set; } = "";
     public string AttackGradePoly { get; set; } = "";
-    public ESkillFlag Flag { get; set; }
+    public ESkillFlags Flags { get; set; }
     public ESkillAffectFlag AffectFlag { get; set; } = ESkillAffectFlag.Ymir;
     public string PointOn2 { get; set; } = "None";
     public string PointPoly2 { get; set; } = "";

@@ -6,6 +6,7 @@ using QuantumCore.API;
 using QuantumCore.API.Extensions;
 using QuantumCore.API.Game.Skills;
 using QuantumCore.API.Game.Types;
+using QuantumCore.API.Game.Types.Skills;
 using QuantumCore.Core.Utils;
 using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Packets.Skills;
@@ -309,7 +310,7 @@ public class PlayerSkills : IPlayerSkills
         switch (method)
         {
             case ESkillLevelMethod.Point when skill.MasterType != ESkillMasterType.Normal:
-            case ESkillLevelMethod.Point when (proto.Flag & ESkillFlag.DisableByPointUp) == ESkillFlag.DisableByPointUp:
+            case ESkillLevelMethod.Point when (proto.Flags & ESkillFlags.DisableByPointUp) == ESkillFlags.DisableByPointUp:
             case ESkillLevelMethod.Book when proto.Type != 0 && skill.MasterType != ESkillMasterType.Master:
                 return;
         }

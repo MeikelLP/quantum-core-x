@@ -1,4 +1,6 @@
-﻿namespace QuantumCore.API.Game.Skills;
+﻿using QuantumCore.API.Game.Types.Skills;
+
+namespace QuantumCore.API.Game.Skills;
 
 public interface IPlayerSkills
 {

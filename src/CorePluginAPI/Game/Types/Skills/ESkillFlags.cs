@@ -1,9 +1,7 @@
-﻿using System.Runtime.Serialization;
-
-namespace QuantumCore.API.Game.Skills;
+﻿namespace QuantumCore.API.Game.Types.Skills;
 
 [Flags]
-public enum ESkillFlag
+public enum ESkillFlags
 {
     Attack = 1 << 0,
     UseMeleeDamage = 1 << 1,

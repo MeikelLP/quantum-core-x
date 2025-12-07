@@ -17,6 +17,7 @@ using QuantumCore.API.Game;
 using QuantumCore.API.Game.Guild;
 using QuantumCore.API.Game.Skills;
 using QuantumCore.API.Game.Types;
+using QuantumCore.API.Game.Types.Skills;
 using QuantumCore.API.Game.World;
 using QuantumCore.Caching;
 using QuantumCore.Core.Packets;
@@ -804,7 +805,7 @@ public class CommandTests : IAsyncLifetime
 
         _skillManager.GetSkill(skillId).Returns(new SkillData
         {
-            Id = skillId, Type = (ESkillCategoryType)(_player.Player.PlayerClass + 1), Flag = ESkillFlag.Attack
+            Id = skillId, Type = (ESkillCategoryType)(_player.Player.PlayerClass + 1), Flags = ESkillFlags.Attack
         });
         _player.Skills.SetSkillGroup(1);
 
@@ -827,7 +828,7 @@ public class CommandTests : IAsyncLifetime
 
         _skillManager.GetSkill(skillId).Returns(new SkillData
         {
-            Id = skillId, Type = (ESkillCategoryType)(_player.Player.PlayerClass + 1), Flag = ESkillFlag.Attack
+            Id = skillId, Type = (ESkillCategoryType)(_player.Player.PlayerClass + 1), Flags = ESkillFlags.Attack
         });
         _player.Skills.SetSkillGroup(1);
         _player.Skills[skillId].Level = 19;

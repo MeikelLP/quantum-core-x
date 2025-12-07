@@ -1,4 +1,4 @@
-﻿namespace QuantumCore.API.Game.Skills;
+﻿namespace QuantumCore.API.Game.Types.Skills;
 
 public enum ESkillMasterType : byte
 {
