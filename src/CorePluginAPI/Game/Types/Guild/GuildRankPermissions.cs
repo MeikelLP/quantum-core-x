@@ -1,7 +1,7 @@
-﻿namespace QuantumCore.API.Game.Guild;
+﻿namespace QuantumCore.API.Game.Types.Guild;
 
 [Flags]
-public enum GuildRankPermission : byte
+public enum GuildRankPermissions : byte
 {
     None = 0,
     AddMember = 1,

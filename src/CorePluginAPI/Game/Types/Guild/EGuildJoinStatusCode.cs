@@ -1,4 +1,4 @@
-﻿namespace QuantumCore.API.Game.Types;
+﻿namespace QuantumCore.API.Game.Types.Guild;
 
 public enum EGuildJoinStatusCode : byte
 {

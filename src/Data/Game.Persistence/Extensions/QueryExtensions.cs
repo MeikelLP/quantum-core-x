@@ -1,5 +1,4 @@
 ﻿using System.Collections.Immutable;
-using QuantumCore.API;
 using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game.Guild;
 using QuantumCore.API.Game.Skills;

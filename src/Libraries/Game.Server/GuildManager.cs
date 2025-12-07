@@ -3,6 +3,7 @@ using EnumsNET;
 using Microsoft.EntityFrameworkCore;
 using QuantumCore.API;
 using QuantumCore.API.Game.Guild;
+using QuantumCore.API.Game.Types.Guild;
 using QuantumCore.Game.Persistence;
 using QuantumCore.Game.Persistence.Entities.Guilds;
 using QuantumCore.Game.Persistence.Extensions;
@@ -51,7 +52,7 @@ public class GuildManager : IGuildManager
         {
             Position = 1,
             Name = "Leader",
-            Permissions = GuildRankPermission.All
+            Permissions = GuildRankPermissions.All
         };
         var guild = new Guild
         {
@@ -109,7 +110,7 @@ public class GuildManager : IGuildManager
         return guildNews.Id;
     }
 
-    public async Task<bool> HasPermissionAsync(uint playerId, GuildRankPermission perm,
+    public async Task<bool> HasPermissionAsync(uint playerId, GuildRankPermissions perm,
         CancellationToken token = default)
     {
         var perms = await _db.GuildMembers
@@ -179,7 +180,7 @@ public class GuildManager : IGuildManager
             .ExecuteDeleteAsync(token);
     }
 
-    public async Task ChangePermissionAsync(uint guildId, byte position, GuildRankPermission permissions,
+    public async Task ChangePermissionAsync(uint guildId, byte position, GuildRankPermissions permissions,
         CancellationToken token = default)
     {
         await _db.GuildRanks
