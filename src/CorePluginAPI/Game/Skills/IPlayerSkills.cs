@@ -7,7 +7,7 @@ public interface IPlayerSkills
     Task LoadAsync();
     Task PersistAsync();
 
-    ISKill? this[ESkill skillId] { get; }
+    ISkill? this[ESkill skillId] { get; }
 
     void SetSkillGroup(byte skillGroup);
     void ClearSkills();

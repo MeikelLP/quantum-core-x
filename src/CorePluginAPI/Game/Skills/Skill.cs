@@ -4,7 +4,7 @@ using QuantumCore.API.Game.Types.Skills;
 namespace QuantumCore.API.Game.Skills;
 
 [DebuggerDisplay("Skill ({SkillId}) - MasterType: {MasterType}, Level: {Level}")]
-public class Skill : ISKill
+public class Skill : ISkill
 {
     public ESkill SkillId { get; set; }
     public uint PlayerId { get; set; }

@@ -142,7 +142,7 @@ public class PlayerSkills : IPlayerSkills
         }
     }
 
-    public ISKill? this[ESkill skillId] => _skills.TryGetValue(skillId, out var skill) ? skill : null;
+    public ISkill? this[ESkill skillId] => _skills.TryGetValue(skillId, out var skill) ? skill : null;
 
     public void SetSkillGroup(byte skillGroup)
     {

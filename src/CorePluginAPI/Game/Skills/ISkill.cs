@@ -2,7 +2,7 @@
 
 namespace QuantumCore.API.Game.Skills;
 
-public interface ISKill
+public interface ISkill
 {
     public ESkill SkillId { get; set; }
     public ESkillMasterType MasterType { get; set; }
