@@ -1,29 +1,10 @@
 ﻿using QuantumCore.API.Core.Utils;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.Types.Combat;
+using QuantumCore.API.Game.Types.Entities;
 
 namespace QuantumCore.API.Game.World
 {
-    public enum EEntityState
-    {
-        Idle,
-        Moving
-    }
-
-    public enum EEntityType
-    {
-        Monster = 0,
-        Npc = 1,
-        MetinStone = 2,
-        Warp = 3,
-        Door = 4,
-        Building = 5,
-        Player = 6,
-        PolymorphPlayer = 7,
-        Horse = 8,
-        Goto = 9
-    }
-
     public interface IEntity
     {
         public uint Vid { get; }

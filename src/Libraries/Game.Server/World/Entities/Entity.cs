@@ -3,6 +3,7 @@ using QuantumCore.API.Core.Models;
 using QuantumCore.API.Core.Utils;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.Types.Combat;
+using QuantumCore.API.Game.Types.Entities;
 using QuantumCore.API.Game.World;
 using QuantumCore.Core.Constants;
 using QuantumCore.Core.Utils;

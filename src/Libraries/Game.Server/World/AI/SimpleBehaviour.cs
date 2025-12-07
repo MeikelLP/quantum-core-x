@@ -6,6 +6,7 @@ using QuantumCore.API;
 using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.Types.Combat;
+using QuantumCore.API.Game.Types.Entities;
 using QuantumCore.API.Game.Types.Monsters;
 using QuantumCore.API.Game.World;
 using QuantumCore.API.Game.World.AI;

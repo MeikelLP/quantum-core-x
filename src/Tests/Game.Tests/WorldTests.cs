@@ -9,6 +9,7 @@ using QuantumCore;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game.Types.Monsters;
+using QuantumCore.API.Game.Types.Entities;
 using QuantumCore.API.Game.Types.Players;
 using QuantumCore.API.Game.World;
 using QuantumCore.Caching;
