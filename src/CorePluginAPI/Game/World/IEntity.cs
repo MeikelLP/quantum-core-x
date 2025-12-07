@@ -1,5 +1,6 @@
 ﻿using QuantumCore.API.Core.Utils;
 using QuantumCore.API.Game.Types;
+using QuantumCore.API.Game.Types.Combat;
 
 namespace QuantumCore.API.Game.World
 {

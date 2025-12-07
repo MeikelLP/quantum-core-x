@@ -1,4 +1,4 @@
-﻿namespace QuantumCore.API.Game.Types;
+﻿namespace QuantumCore.API.Game.Types.Combat;
 
 public enum EBattleType : byte
 {
