@@ -9,11 +9,11 @@ using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.Types.Items;
 using QuantumCore.API.Game.Types.Monsters;
+using QuantumCore.API.Game.Types.Players;
 using QuantumCore.API.Game.World;
 using QuantumCore.Core.Utils;
 using QuantumCore.Game.Drops;
 using QuantumCore.Game.Extensions;
-using QuantumCore.Game.PlayerUtils;
 using QuantumCore.Game.World.Entities;
 
 namespace QuantumCore.Game.Services;

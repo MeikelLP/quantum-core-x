@@ -8,11 +8,9 @@ using QuantumCore.API.Game.Guild;
 using QuantumCore.API.Game.Skills;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.Types.Combat;
-using QuantumCore.API.Game.Types.Entities;
 using QuantumCore.API.Game.Types.Items;
 using QuantumCore.API.Game.Types.Monsters;
 using QuantumCore.API.Game.Types.Players;
-using QuantumCore.API.Game.Types.Items;
 using QuantumCore.API.Game.World;
 using QuantumCore.Caching;
 using QuantumCore.Extensions;
@@ -22,8 +20,6 @@ using QuantumCore.Game.Packets.Guild;
 using QuantumCore.Game.Persistence;
 using QuantumCore.Game.PlayerUtils;
 using QuantumCore.Game.Skills;
-using QuantumCore.Game.World;
-using QuantumCore.Game.Services;
 
 namespace QuantumCore.Game.World.Entities
 {

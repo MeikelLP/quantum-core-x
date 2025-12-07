@@ -1,6 +1,7 @@
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game.Types.Items;
+using QuantumCore.API.Game.Types.Players;
 using QuantumCore.Caching;
 using QuantumCore.Game.Persistence;
 using QuantumCore.Game.PlayerUtils;
