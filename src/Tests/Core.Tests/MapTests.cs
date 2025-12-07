@@ -7,6 +7,7 @@ using NSubstitute;
 using QuantumCore;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
+using QuantumCore.API.Game.Types.Monsters;
 using QuantumCore.API.Game.World;
 using QuantumCore.Caching;
 using QuantumCore.Core.Event;

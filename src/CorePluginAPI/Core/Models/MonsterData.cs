@@ -2,6 +2,7 @@ using System.Diagnostics;
 using BinarySerialization;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.Types.Combat;
+using QuantumCore.API.Game.Types.Monsters;
 
 namespace QuantumCore.API.Core.Models;
 

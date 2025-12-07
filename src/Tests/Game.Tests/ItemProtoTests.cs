@@ -5,6 +5,8 @@ using Microsoft.Extensions.FileProviders.Physical;
 using NSubstitute;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
+using QuantumCore.API.Game.Types.Items;
+using QuantumCore.API.Game.Types.Monsters;
 using QuantumCore.Game;
 using QuantumCore.Game.Extensions;
 using QuantumCore.Game.PlayerUtils;
