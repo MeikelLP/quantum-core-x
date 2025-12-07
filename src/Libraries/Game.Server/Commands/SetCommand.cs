@@ -27,10 +27,10 @@ public class SetCommand : ICommandHandler<SetCommandOptions>
         switch (type)
         {
             case SetCommandType.Gold:
-                target.SetPoint(EPoints.Gold, context.Arguments.Value);
+                target.SetPoint(EPoint.Gold, context.Arguments.Value);
                 break;
             case SetCommandType.Exp:
-                target.SetPoint(EPoints.Experience, context.Arguments.Value);
+                target.SetPoint(EPoint.Experience, context.Arguments.Value);
                 break;
             case SetCommandType.Align:
                 // TODO align not implemented yet

@@ -27,8 +27,8 @@ namespace QuantumCore.API.Game.World
         void Respawn(bool town);
         uint CalculateAttackDamage(uint baseDamage);
         uint GetHitRate();
-        void AddPoint(EPoints point, int value);
-        void SetPoint(EPoints point, uint value);
+        void AddPoint(EPoint point, int value);
+        void SetPoint(EPoint point, uint value);
         void DropItem(ItemInstance item, byte count);
         void Pickup(IGroundItem groundItem);
         void DropGold(uint amount);

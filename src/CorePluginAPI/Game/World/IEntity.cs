@@ -66,7 +66,7 @@ namespace QuantumCore.API.Game.World
         byte MovementSpeed { get; set; }
         byte AttackSpeed { get; set; }
 
-        public uint GetPoint(EPoints point);
+        public uint GetPoint(EPoint point);
         public int GetMinDamage();
         public int GetMaxDamage();
         public int GetBonusDamage();

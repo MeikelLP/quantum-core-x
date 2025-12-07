@@ -212,7 +212,7 @@ public class DropProvider : IDropProvider, ILoadable
         var deltaPercentage = 0;
         var dropRange = 0;
 
-        var levelDropDelta = (int)(monster.GetPoint(EPoints.Level) + 15 - player.GetPoint(EPoints.Level));
+        var levelDropDelta = (int)(monster.GetPoint(EPoint.Level) + 15 - player.GetPoint(EPoint.Level));
 
         deltaPercentage = monster is {IsStone: false, Rank: >= EMonsterLevel.Boss}
             ? (int)_options.Delta.Boss[MathUtils.MinMax(0, levelDropDelta, _options.Delta.Boss.Count - 1)]
@@ -224,13 +224,13 @@ public class DropProvider : IDropProvider, ILoadable
             deltaPercentage += 500;
 
         _logger.LogDebug("CalculateDropPercentages for level: {Level} rank: {Rank} percentage: {DeltaPercentage}",
-            player.GetPoint(EPoints.Level), monster.Rank.ToString(), deltaPercentage);
+            player.GetPoint(EPoint.Level), monster.Rank.ToString(), deltaPercentage);
 
         deltaPercentage = deltaPercentage * player.GetMobItemRate() / 100;
 
-        if (player.GetPoint(EPoints.MallItemBonus) > 0)
+        if (player.GetPoint(EPoint.MallItemBonus) > 0)
         {
-            deltaPercentage += (int)(deltaPercentage * player.GetPoint(EPoints.MallItemBonus) / 100);
+            deltaPercentage += (int)(deltaPercentage * player.GetPoint(EPoint.MallItemBonus) / 100);
         }
 
         const int UNIQUE_GROUP_DOUBLE_ITEM = 10002; // todo: magic numbers
@@ -261,7 +261,7 @@ public class DropProvider : IDropProvider, ILoadable
             _logger.LogDebug("Player has irremovable gloves OR removeable gloves and mall item bonus");
         }
 
-        var itemDropBonus = (int)Math.Min(100, player.GetPoint(EPoints.ItemDropBonus));
+        var itemDropBonus = (int)Math.Min(100, player.GetPoint(EPoint.ItemDropBonus));
 
         var empireBonusDrop = 0; // todo: implement server / empire rates
 

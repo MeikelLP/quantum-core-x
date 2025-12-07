@@ -146,7 +146,7 @@ public class PlayerSkills : IPlayerSkills
     public void SetSkillGroup(byte skillGroup)
     {
         if (skillGroup > SkillGroupMaxNum) return;
-        if (_player.GetPoint(EPoints.Level) < MinimumLevel) return;
+        if (_player.GetPoint(EPoint.Level) < MinimumLevel) return;
 
         // todo: prevent changing skill group in certain situations
 
@@ -159,21 +159,21 @@ public class PlayerSkills : IPlayerSkills
 
     public void ClearSkills()
     {
-        var points = _player.GetPoint(EPoints.Level) < MinimumLevel
+        var points = _player.GetPoint(EPoint.Level) < MinimumLevel
             ? 0
-            : (MinimumLevel - 1) + (_player.GetPoint(EPoints.Level) - MinimumLevel) - _player.GetPoint(EPoints.Skill);
-        _player.SetPoint(EPoints.Skill, points);
+            : (MinimumLevel - 1) + (_player.GetPoint(EPoint.Level) - MinimumLevel) - _player.GetPoint(EPoint.Skill);
+        _player.SetPoint(EPoint.Skill, points);
 
         ResetSkills();
     }
 
     public void ClearSubSkills()
     {
-        var points = _player.GetPoint(EPoints.Level) < MinimumLevelSubSkills
+        var points = _player.GetPoint(EPoint.Level) < MinimumLevelSubSkills
             ? 0
-            : (_player.GetPoint(EPoints.Level) - (MinimumLevelSubSkills - 1)) - _player.GetPoint(EPoints.SubSkill);
+            : (_player.GetPoint(EPoint.Level) - (MinimumLevelSubSkills - 1)) - _player.GetPoint(EPoint.SubSkill);
 
-        _player.SetPoint(EPoints.SubSkill, points);
+        _player.SetPoint(EPoint.SubSkill, points);
 
         ResetSubSkills();
     }
@@ -226,7 +226,7 @@ public class PlayerSkills : IPlayerSkills
         if (level > MinimumSkillLevelUpgrade)
             level = MinimumSkillLevelUpgrade;
 
-        _player.AddPoint(EPoints.Skill, level);
+        _player.AddPoint(EPoint.Skill, level);
 
         SendSkillLevelsPacket();
     }
@@ -314,7 +314,7 @@ public class PlayerSkills : IPlayerSkills
                 return;
         }
 
-        if (_player.GetPoint(EPoints.Level) < proto.LevelLimit) return;
+        if (_player.GetPoint(EPoint.Level) < proto.LevelLimit) return;
 
         if (proto.PrerequisiteSkillVnum > 0)
         {
@@ -329,21 +329,21 @@ public class PlayerSkills : IPlayerSkills
 
         if (method == ESkillLevelMethod.Point)
         {
-            EPoints idx; // enum
+            EPoint idx; // enum
 
             switch (proto.Type)
             {
                 case ESkillCategoryType.PassiveSkills:
-                    idx = EPoints.SubSkill;
+                    idx = EPoint.SubSkill;
                     break;
                 case ESkillCategoryType.WarriorSkills: // warrior
                 case ESkillCategoryType.NinjaSkills: // ninja
                 case ESkillCategoryType.SuraSkills: // sura
                 case ESkillCategoryType.ShamanSkills: // shaman
-                    idx = EPoints.Skill;
+                    idx = EPoint.Skill;
                     break;
                 case ESkillCategoryType.HorseSkills:
-                    idx = EPoints.HorseSkill;
+                    idx = EPoint.HorseSkill;
                     break;
                 default:
                     _logger.LogWarning("Invalid skill type: {SkillType}", proto.Type);
@@ -500,7 +500,7 @@ public class PlayerSkills : IPlayerSkills
             return false;
         }
 
-        if (_player.GetPoint(EPoints.Experience) < _skillsOptions.SkillBookNeededExperience)
+        if (_player.GetPoint(EPoint.Experience) < _skillsOptions.SkillBookNeededExperience)
         {
             _player.SendChatInfo("Not enough experience.");
             return false;
@@ -531,7 +531,7 @@ public class PlayerSkills : IPlayerSkills
             return false;
         }
 
-        _player.AddPoint(EPoints.Experience, -_skillsOptions.SkillBookNeededExperience);
+        _player.AddPoint(EPoint.Experience, -_skillsOptions.SkillBookNeededExperience);
 
         var previousLevel = skill.Level;
 

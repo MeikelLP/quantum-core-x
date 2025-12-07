@@ -27,7 +27,7 @@ public class LevelCommand : ICommandHandler<LevelCommandOptions>
         }
         else
         {
-            target.SetPoint(EPoints.Level, context.Arguments.Level);
+            target.SetPoint(EPoint.Level, context.Arguments.Level);
             target.SendPoints();
         }
 

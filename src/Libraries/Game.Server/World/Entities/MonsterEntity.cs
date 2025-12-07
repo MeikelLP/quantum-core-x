@@ -195,29 +195,29 @@ namespace QuantumCore.Game.World.Entities
             Behaviour?.TookDamage(attacker, 0);
         }
 
-        public override void AddPoint(EPoints point, int value)
+        public override void AddPoint(EPoint point, int value)
         {
         }
 
-        public override void SetPoint(EPoints point, uint value)
+        public override void SetPoint(EPoint point, uint value)
         {
         }
 
-        public override uint GetPoint(EPoints point)
+        public override uint GetPoint(EPoint point)
         {
             switch (point)
             {
-                case EPoints.Level:
+                case EPoint.Level:
                     return Proto.Level;
-                case EPoints.Dx:
+                case EPoint.Dx:
                     return Proto.Dx;
-                case EPoints.AttackGrade:
+                case EPoint.AttackGrade:
                     return (uint)(Proto.Level * 2 + Proto.St * 2);
-                case EPoints.DefenceGrade:
+                case EPoint.DefenceGrade:
                     return (uint)(Proto.Level + Proto.Ht + Proto.Defence);
-                case EPoints.DefenceBonus:
+                case EPoint.DefenceBonus:
                     return 0;
-                case EPoints.Experience:
+                case EPoint.Experience:
                     return Proto.Experience;
             }
 

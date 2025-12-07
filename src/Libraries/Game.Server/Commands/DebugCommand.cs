@@ -8,10 +8,10 @@ namespace QuantumCore.Game.Commands
     {
         public Task ExecuteAsync(CommandContext context)
         {
-            var minWeapon = context.Player.GetPoint(EPoints.MinWeaponDamage);
-            var maxWeapon = context.Player.GetPoint(EPoints.MaxWeaponDamage);
-            var minAttack = context.Player.GetPoint(EPoints.MinAttackDamage);
-            var maxAttack = context.Player.GetPoint(EPoints.MaxAttackDamage);
+            var minWeapon = context.Player.GetPoint(EPoint.MinWeaponDamage);
+            var maxWeapon = context.Player.GetPoint(EPoint.MaxWeaponDamage);
+            var minAttack = context.Player.GetPoint(EPoint.MinAttackDamage);
+            var maxAttack = context.Player.GetPoint(EPoint.MaxAttackDamage);
             context.Player.SendChatMessage($"Weapon Damage: {minWeapon}-{maxWeapon}");
             context.Player.SendChatMessage($"Attack Damage: {minAttack}-{maxAttack}");
 

@@ -125,7 +125,7 @@ public class Shop : IShop
             return;
         }
 
-        var gold = p.GetPoint(EPoints.Gold);
+        var gold = p.GetPoint(EPoint.Gold);
         if (gold < item.Price)
         {
             p.Connection.Send(new ShopNotEnoughMoney());
@@ -143,7 +143,7 @@ public class Shop : IShop
             p.Connection.Send(new ShopNoSpaceLeft());
         }
 
-        p.AddPoint(EPoints.Gold, -(int) item.Price);
+        p.AddPoint(EPoint.Gold, -(int) item.Price);
 
         p.SendPoints();
         p.SendItem(playerItem);
@@ -170,7 +170,7 @@ public class Shop : IShop
 
         if (p.DestroyItem(item))
         {
-            p.AddPoint(EPoints.Gold, (int) proto.SellPrice);
+            p.AddPoint(EPoint.Gold, (int) proto.SellPrice);
             p.SendPoints();
         }
     }

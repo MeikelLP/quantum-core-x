@@ -10,13 +10,13 @@ public class StatCommand : ICommandHandler<StatCommandOptions>
 {
     public Task ExecuteAsync(CommandContext<StatCommandOptions> context)
     {
-        if (context.Player.GetPoint(EPoints.StatusPoints) <= 0)
+        if (context.Player.GetPoint(EPoint.StatusPoints) <= 0)
         {
             return Task.CompletedTask;
         }
 
         context.Player.AddPoint(context.Arguments.Point, 1);
-        context.Player.AddPoint(EPoints.StatusPoints, -1);
+        context.Player.AddPoint(EPoint.StatusPoints, -1);
         context.Player.SendPoints();
         return Task.CompletedTask;
     }
@@ -24,5 +24,5 @@ public class StatCommand : ICommandHandler<StatCommandOptions>
 
 public class StatCommandOptions
 {
-    [Value(0)] public EPoints Point { get; set; }
+    [Value(0)] public EPoint Point { get; set; }
 }

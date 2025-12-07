@@ -14,5 +14,5 @@ public class Job
     public uint SpPerIq { get; set; }
     public uint HpPerLevel { get; set; }
     public uint SpPerLevel { get; set; }
-    public EPoints AttackStatus { get; set; }
+    public EPoint AttackStatus { get; set; }
 }
