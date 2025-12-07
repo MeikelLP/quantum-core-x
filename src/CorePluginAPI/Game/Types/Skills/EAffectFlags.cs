@@ -1,7 +1,7 @@
 ﻿namespace QuantumCore.API.Game.Types.Skills;
 
 [Flags]
-public enum ESkillAffectFlag
+public enum EAffectFlags
 {
     None,
     Ymir = 1 << 0,

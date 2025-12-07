@@ -393,9 +393,9 @@ public partial class ParserService : IParserService
         return result;
     }
 
-    private static ESkillAffectFlag ExtractAffectFlags(string value)
+    private static EAffectFlags ExtractAffectFlags(string value)
     {
-        ESkillAffectFlag result = 0;
+        EAffectFlags result = 0;
 
         if (string.IsNullOrWhiteSpace(value))
         {
@@ -406,7 +406,7 @@ public partial class ParserService : IParserService
 
         foreach (var flag in flags)
         {
-            if (!EnumUtils.TryParseEnum<ESkillAffectFlag>(flag, out var parsed)) continue;
+            if (!EnumUtils.TryParseEnum<EAffectFlags>(flag, out var parsed)) continue;
             result |= parsed;
         }
 
