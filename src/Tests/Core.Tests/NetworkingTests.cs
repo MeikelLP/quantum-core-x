@@ -5,7 +5,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Hosting.Internal;
 using Microsoft.Extensions.Logging;
 using QuantumCore;
-using QuantumCore.Game;
+using QuantumCore.API.Game.Types;
 using QuantumCore.Game.Packets;
 using QuantumCore.Game.Packets.Shop;
 using QuantumCore.Networking;

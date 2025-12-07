@@ -1,7 +1,7 @@
-namespace QuantumCore.API.Core.Models;
+namespace QuantumCore.API.Game.Types;
 
 [Flags]
-public enum EMapAttribute : uint
+public enum EMapAttributes : uint
 {
     None = 0,
     Block = 1 << 0, // collision detection

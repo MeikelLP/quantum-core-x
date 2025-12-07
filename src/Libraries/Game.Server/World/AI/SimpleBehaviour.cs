@@ -255,12 +255,12 @@ namespace QuantumCore.Game.World.AI
                 return false;
             }
 
-            if (localMap.IsAttr(target, EMapAttribute.Block | EMapAttribute.Object))
+            if (localMap.IsAttr(target, EMapAttributes.Block | EMapAttributes.Object))
             {
                 return false;
             }
 
-            if (_entity.IsAttrOnStraightPathTo(target, EMapAttribute.Block | EMapAttribute.Object))
+            if (_entity.IsAttrOnStraightPathTo(target, EMapAttributes.Block | EMapAttributes.Object))
             {
                 return false;
             }

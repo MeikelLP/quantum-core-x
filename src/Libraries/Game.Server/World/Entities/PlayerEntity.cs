@@ -242,7 +242,7 @@ namespace QuantumCore.Game.World.Entities
             }
 
             if (Map is Map localMap &&
-                localMap.IsAttr(new Coordinates((uint)x, (uint)y), EMapAttribute.Block | EMapAttribute.Object))
+                localMap.IsAttr(new Coordinates((uint)x, (uint)y), EMapAttributes.Block | EMapAttributes.Object))
             {
                 _logger.LogDebug("Not allowed to move character {Name} to map position ({X}, {Y}) with attributes Block or Object", Name, x, y);
                 return;

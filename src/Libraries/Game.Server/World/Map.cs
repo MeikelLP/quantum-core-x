@@ -5,6 +5,9 @@ using EnumsNET;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
+using QuantumCore.API.Game.Types;
+using QuantumCore.API.Game.Types.Monsters;
+using QuantumCore.API.Game.Types.Entities;
 using QuantumCore.API.Game.World;
 using QuantumCore.Caching;
 using QuantumCore.Core.Event;
@@ -343,7 +346,7 @@ namespace QuantumCore.Game.World
                 monster.PositionY = (int)Position.Y + baseY * SPAWN_POSITION_MULTIPLIER;
 
                 if (ignoreAttrCheck ||
-                    !monster.PositionIsAttr(EMapAttribute.Block | EMapAttribute.Object | EMapAttribute.NonPvp))
+                    !monster.PositionIsAttr(EMapAttributes.Block | EMapAttributes.Object | EMapAttributes.NonPvp))
                 {
                     foundValidPositionAttr = true;
                     break;
@@ -400,9 +403,9 @@ namespace QuantumCore.Game.World
                    y < Position.Y + Height * MapUnit;
         }
 
-        internal bool IsAttr(Coordinates coords, EMapAttribute flags)
+        internal bool IsAttr(Coordinates coords, EMapAttributes flags)
         {
-            return _attributes?.GetAttribute(coords).HasAnyFlags(flags) ?? false;
+            return _attributes?.GetAttributesAt(coords).HasAnyFlags(flags) ?? false;
         }
 
         public void SpawnEntity(IEntity entity)

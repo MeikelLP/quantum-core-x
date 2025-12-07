@@ -1,5 +1,6 @@
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
+using QuantumCore.API.Game.Types;
 
 namespace QuantumCore.Game.Services;
 
@@ -11,5 +12,5 @@ public interface IMapAttributeProvider
 
 public interface IMapAttributeSet
 {
-    EMapAttribute GetAttribute(Coordinates coords);
+    EMapAttributes GetAttributesAt(Coordinates coords);
 }

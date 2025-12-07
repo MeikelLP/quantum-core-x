@@ -194,12 +194,12 @@ namespace QuantumCore.Game.World.Entities
 
         public void Attack(IEntity victim)
         {
-            if (this.PositionIsAttr(EMapAttribute.NonPvp))
+            if (this.PositionIsAttr(EMapAttributes.NonPvp))
             {
                 return;
             }
 
-            if (victim.PositionIsAttr(EMapAttribute.NonPvp))
+            if (victim.PositionIsAttr(EMapAttributes.NonPvp))
             {
                 return;
             }
@@ -352,7 +352,7 @@ namespace QuantumCore.Game.World.Entities
         public virtual int Damage(IEntity attacker, EDamageType damageType, int damage)
         {
 
-            if (this.PositionIsAttr(EMapAttribute.NonPvp))
+            if (this.PositionIsAttr(EMapAttributes.NonPvp))
             {
                 SendDebugDamage(attacker,
                     $"{attacker}->{this} Ignoring damage inside NoPvP zone -> {damage} (should never happen)");

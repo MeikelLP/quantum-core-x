@@ -1,4 +1,4 @@
-﻿namespace QuantumCore.Game;
+﻿namespace QuantumCore.API.Game.Types;
 
 public enum ChatMessageType : byte
 {
