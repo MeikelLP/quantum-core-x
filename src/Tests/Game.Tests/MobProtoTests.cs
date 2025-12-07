@@ -105,7 +105,7 @@ public class MobProtoTests
             RegenPercentage = 7,
             Defence = 4,
             AiFlag = 0,
-            RaceFlag = (uint)ERaceFlag.Animal,
+            RaceFlag = (uint)ERaceFlags.Animal,
             ImmuneFlag = 0,
             St = 3,
             Dx = 6,

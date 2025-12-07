@@ -1,7 +1,7 @@
 namespace QuantumCore.API.Game.Types;
 
 [Flags]
-public enum ERaceFlag : uint
+public enum ERaceFlags : uint
 {
     Animal = 1 << 0,
     Undead = 1 << 1,
