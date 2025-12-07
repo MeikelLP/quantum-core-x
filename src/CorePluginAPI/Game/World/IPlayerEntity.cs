@@ -57,7 +57,7 @@ namespace QuantumCore.API.Game.World
         int GetMobItemRate();
         bool HasUniqueItemEquipped(uint itemProtoId);
         bool HasUniqueGroupItemEquipped(uint itemProtoId);
-        int GetPremiumRemainSeconds(EPremiumTypes type);
+        int GetPremiumRemainSeconds(EPremiumType type);
         bool IsUsableSkillMotion(int motion);
         Task RefreshGuildAsync();
         void RecalculateStatusPoints();

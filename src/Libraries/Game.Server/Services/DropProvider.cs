@@ -237,7 +237,7 @@ public class DropProvider : IDropProvider, ILoadable
         const int UNIQUE_ITEM_DOUBLE_ITEM = 70043; // todo: magic numbers
 
         // Premium
-        if (player.GetPremiumRemainSeconds(EPremiumTypes.Item) > 0 ||
+        if (player.GetPremiumRemainSeconds(EPremiumType.Item) > 0 ||
             player.HasUniqueGroupItemEquipped(UNIQUE_GROUP_DOUBLE_ITEM))
         {
             deltaPercentage += deltaPercentage;
@@ -246,7 +246,7 @@ public class DropProvider : IDropProvider, ILoadable
 
         var bonus = 0;
         if (player.HasUniqueItemEquipped(UNIQUE_ITEM_DOUBLE_ITEM) &&
-            player.GetPremiumRemainSeconds(EPremiumTypes.Item) > 0)
+            player.GetPremiumRemainSeconds(EPremiumType.Item) > 0)
         {
             // irremovable gloves + mall item bonus
             bonus = 100;
@@ -254,7 +254,7 @@ public class DropProvider : IDropProvider, ILoadable
         }
         else if (player.HasUniqueItemEquipped(UNIQUE_ITEM_DOUBLE_ITEM)
                  || (player.HasUniqueGroupItemEquipped(UNIQUE_GROUP_DOUBLE_ITEM) &&
-                     player.GetPremiumRemainSeconds(EPremiumTypes.Item) > 0))
+                     player.GetPremiumRemainSeconds(EPremiumType.Item) > 0))
         {
             // irremovable gloves OR removeable gloves + mall item bonus
             bonus = 50;

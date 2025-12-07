@@ -956,12 +956,12 @@ namespace QuantumCore.Game.World.Entities
         public int GetMobItemRate()
         {
             // todo: implement server rates, and premium server rates
-            if (GetPremiumRemainSeconds(EPremiumTypes.Item) > 0)
+            if (GetPremiumRemainSeconds(EPremiumType.Item) > 0)
                 return 100;
             return 100_000_000;
         }
 
-        public int GetPremiumRemainSeconds(EPremiumTypes type)
+        public int GetPremiumRemainSeconds(EPremiumType type)
         {
             _logger.LogTrace("GetPremiumRemainSeconds not implemented yet");
             return 0; // todo: implement premium system

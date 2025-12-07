@@ -1,6 +1,6 @@
 ﻿namespace QuantumCore.API.Core.Models;
 
-public enum EPremiumTypes
+public enum EPremiumType
 {
     Experience = 0,
     Item = 1,
