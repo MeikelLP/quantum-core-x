@@ -45,7 +45,7 @@ public class InventoryTests
         var changed = 0;
         inv.OnSlotChanged += (_, _) => changed++;
 
-        inv.RemoveEquipment(new ItemInstance { Position = (ushort)(inv.Size + (int)EquipmentSlots.Body) });
+        inv.RemoveEquipment(new ItemInstance { Position = (ushort)(inv.Size + (int)EquipmentSlot.Body) });
 
         inv.EquipmentWindow.Body.Should().BeNull();
         changed.Should().Be(1);

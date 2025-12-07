@@ -33,33 +33,33 @@ namespace QuantumCore.Game.PlayerUtils
 
         public bool SetItem(ItemInstance item, ushort position)
         {
-            switch ((EquipmentSlots)(position - _offset))
+            switch ((EquipmentSlot)(position - _offset))
             {
-                case EquipmentSlots.Body:
+                case EquipmentSlot.Body:
                     Body = item;
                     return true;
-                case EquipmentSlots.Head:
+                case EquipmentSlot.Head:
                     Head = item;
                     return true;
-                case EquipmentSlots.Shoes:
+                case EquipmentSlot.Shoes:
                     Shoes = item;
                     return true;
-                case EquipmentSlots.Bracelet:
+                case EquipmentSlot.Bracelet:
                     Bracelet = item;
                     return true;
-                case EquipmentSlots.Weapon:
+                case EquipmentSlot.Weapon:
                     Weapon = item;
                     return true;
-                case EquipmentSlots.Necklace:
+                case EquipmentSlot.Necklace:
                     Necklace = item;
                     return true;
-                case EquipmentSlots.Earring:
+                case EquipmentSlot.Earring:
                     Earrings = item;
                     return true;
-                case EquipmentSlots.Costume:
+                case EquipmentSlot.Costume:
                     Costume = item;
                     return true;
-                case EquipmentSlots.Hair:
+                case EquipmentSlot.Hair:
                     Hair = item;
                     return true;
             }
@@ -67,27 +67,27 @@ namespace QuantumCore.Game.PlayerUtils
             return false;
         }
 
-        public ItemInstance? GetItem(EquipmentSlots slot)
+        public ItemInstance? GetItem(EquipmentSlot slot)
         {
             switch (slot)
             {
-                case EquipmentSlots.Body:
+                case EquipmentSlot.Body:
                     return Body;
-                case EquipmentSlots.Head:
+                case EquipmentSlot.Head:
                     return Head;
-                case EquipmentSlots.Shoes:
+                case EquipmentSlot.Shoes:
                     return Shoes;
-                case EquipmentSlots.Bracelet:
+                case EquipmentSlot.Bracelet:
                     return Bracelet;
-                case EquipmentSlots.Weapon:
+                case EquipmentSlot.Weapon:
                     return Weapon;
-                case EquipmentSlots.Necklace:
+                case EquipmentSlot.Necklace:
                     return Necklace;
-                case EquipmentSlots.Earring:
+                case EquipmentSlot.Earring:
                     return Earrings;
-                case EquipmentSlots.Costume:
+                case EquipmentSlot.Costume:
                     return Costume;
-                case EquipmentSlots.Hair:
+                case EquipmentSlot.Hair:
                     return Hair;
             }
 
@@ -96,38 +96,38 @@ namespace QuantumCore.Game.PlayerUtils
 
         public ItemInstance? GetItem(ushort position)
         {
-            return GetItem((EquipmentSlots)(position - _offset));
+            return GetItem((EquipmentSlot)(position - _offset));
         }
 
         public bool RemoveItem(ItemInstance item)
         {
-            switch ((EquipmentSlots)(item.Position - _offset))
+            switch ((EquipmentSlot)(item.Position - _offset))
             {
-                case EquipmentSlots.Body:
+                case EquipmentSlot.Body:
                     Body = null;
                     return true;
-                case EquipmentSlots.Head:
+                case EquipmentSlot.Head:
                     Head = null;
                     return true;
-                case EquipmentSlots.Shoes:
+                case EquipmentSlot.Shoes:
                     Shoes = null;
                     return true;
-                case EquipmentSlots.Bracelet:
+                case EquipmentSlot.Bracelet:
                     Bracelet = null;
                     return true;
-                case EquipmentSlots.Weapon:
+                case EquipmentSlot.Weapon:
                     Weapon = null;
                     return true;
-                case EquipmentSlots.Necklace:
+                case EquipmentSlot.Necklace:
                     Necklace = null;
                     return true;
-                case EquipmentSlots.Earring:
+                case EquipmentSlot.Earring:
                     Earrings = null;
                     return true;
-                case EquipmentSlots.Costume:
+                case EquipmentSlot.Costume:
                     Costume = null;
                     return true;
-                case EquipmentSlots.Hair:
+                case EquipmentSlot.Hair:
                     Hair = null;
                     return true;
             }
@@ -193,25 +193,25 @@ namespace QuantumCore.Game.PlayerUtils
 
             var wearFlags = (EWearFlags)proto.WearFlags;
 
-            switch ((EquipmentSlots)(position - _offset))
+            switch ((EquipmentSlot)(position - _offset))
             {
-                case EquipmentSlots.Body:
+                case EquipmentSlot.Body:
                     return wearFlags.HasFlag(EWearFlags.Body);
-                case EquipmentSlots.Head:
+                case EquipmentSlot.Head:
                     return wearFlags.HasFlag(EWearFlags.Head);
-                case EquipmentSlots.Shoes:
+                case EquipmentSlot.Shoes:
                     return wearFlags.HasFlag(EWearFlags.Shoes);
-                case EquipmentSlots.Bracelet:
+                case EquipmentSlot.Bracelet:
                     return wearFlags.HasFlag(EWearFlags.Bracelet);
-                case EquipmentSlots.Weapon:
+                case EquipmentSlot.Weapon:
                     return wearFlags.HasFlag(EWearFlags.Weapon);
-                case EquipmentSlots.Necklace:
+                case EquipmentSlot.Necklace:
                     return wearFlags.HasFlag(EWearFlags.Necklace);
-                case EquipmentSlots.Earring:
+                case EquipmentSlot.Earring:
                     return wearFlags.HasFlag(EWearFlags.Earrings);
-                case EquipmentSlots.Costume:
+                case EquipmentSlot.Costume:
                     return proto.IsType(EItemType.Costume) && proto.IsSubtype(EItemSubtype.CostumeBody);
-                case EquipmentSlots.Hair:
+                case EquipmentSlot.Hair:
                     return proto.IsType(EItemType.Costume) && proto.IsSubtype(EItemSubtype.CostumeHair);
                 default:
                     return false;
@@ -223,7 +223,7 @@ namespace QuantumCore.Game.PlayerUtils
             var proto = itemManager.GetItem(itemId);
             if (proto == null)
             {
-                return _offset + (ushort)EquipmentSlots.Body;
+                return _offset + (ushort)EquipmentSlot.Body;
             }
 
             var slot = proto.GetWearSlot()!;

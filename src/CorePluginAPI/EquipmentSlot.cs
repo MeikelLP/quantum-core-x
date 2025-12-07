@@ -1,6 +1,6 @@
 ﻿namespace QuantumCore.API;
 
-public enum EquipmentSlots : byte
+public enum EquipmentSlot : byte
 {
     Body = 0,
     Head = 1,

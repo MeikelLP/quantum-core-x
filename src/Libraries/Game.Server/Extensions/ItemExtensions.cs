@@ -104,7 +104,7 @@ public static class ItemExtensions
         }
     }
 
-    public static EquipmentSlots? GetWearSlot(this IItemManager itemManager, uint itemId)
+    public static EquipmentSlot? GetWearSlot(this IItemManager itemManager, uint itemId)
     {
         var proto = itemManager.GetItem(itemId);
         if (proto == null)
@@ -115,63 +115,63 @@ public static class ItemExtensions
         return proto.GetWearSlot();
     }
 
-    public static EquipmentSlots? GetWearSlot(this ItemData proto)
+    public static EquipmentSlot? GetWearSlot(this ItemData proto)
     {
         if (proto.IsType(EItemType.Costume))
         {
             if (proto.IsSubtype(EItemSubtype.CostumeBody))
             {
-                return EquipmentSlots.Costume;
+                return EquipmentSlot.Costume;
             }
             if (proto.IsSubtype(EItemSubtype.CostumeHair))
             {
-                return EquipmentSlots.Hair;
+                return EquipmentSlot.Hair;
             }
         }
 
         return ((EWearFlags)proto.WearFlags).GetWearSlot();
     }
 
-    private static EquipmentSlots? GetWearSlot(this EWearFlags wearFlags)
+    private static EquipmentSlot? GetWearSlot(this EWearFlags wearFlags)
     {
         if (wearFlags.HasFlag(EWearFlags.Head))
         {
-            return EquipmentSlots.Head;
+            return EquipmentSlot.Head;
         }
 
         if (wearFlags.HasFlag(EWearFlags.Shoes))
         {
-            return EquipmentSlots.Shoes;
+            return EquipmentSlot.Shoes;
         }
 
         if (wearFlags.HasFlag(EWearFlags.Bracelet))
         {
-            return EquipmentSlots.Bracelet;
+            return EquipmentSlot.Bracelet;
         }
 
         if (wearFlags.HasFlag(EWearFlags.Weapon))
         {
-            return EquipmentSlots.Weapon;
+            return EquipmentSlot.Weapon;
         }
 
         if (wearFlags.HasFlag(EWearFlags.Necklace))
         {
-            return EquipmentSlots.Necklace;
+            return EquipmentSlot.Necklace;
         }
 
         if (wearFlags.HasFlag(EWearFlags.Earrings))
         {
-            return EquipmentSlots.Earring;
+            return EquipmentSlot.Earring;
         }
 
         if (wearFlags.HasFlag(EWearFlags.Body))
         {
-            return EquipmentSlots.Body;
+            return EquipmentSlot.Body;
         }
 
         if (wearFlags.HasFlag(EWearFlags.Shield))
         {
-            return EquipmentSlots.Shield;
+            return EquipmentSlot.Shield;
         }
 
         throw new NotImplementedException($"No equipment slot for wear flags: {wearFlags}");

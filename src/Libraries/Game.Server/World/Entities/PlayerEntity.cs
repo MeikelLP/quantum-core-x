@@ -259,7 +259,7 @@ namespace QuantumCore.Game.World.Entities
         {
             _defence = GetPoint(EPoint.Level) + (uint)Math.Floor(0.8 * GetPoint(EPoint.Ht));
 
-            foreach (var slot in Enum.GetValues<EquipmentSlots>())
+            foreach (var slot in Enum.GetValues<EquipmentSlot>())
             {
                 var item = Inventory.EquipmentWindow.GetItem(slot);
                 if (item == null) continue;
@@ -278,7 +278,7 @@ namespace QuantumCore.Game.World.Entities
         {
             MovementSpeed = PlayerConstants.DEFAULT_MOVEMENT_SPEED;
             float modifier = 0;
-            foreach (var slot in Enum.GetValues<EquipmentSlots>())
+            foreach (var slot in Enum.GetValues<EquipmentSlot>())
             {
                 var item = Inventory.EquipmentWindow.GetItem(slot);
                 if (item == null) continue;
@@ -298,7 +298,7 @@ namespace QuantumCore.Game.World.Entities
         {
             AttackSpeed = PlayerConstants.DEFAULT_ATTACK_SPEED;
             float modifier = 0;
-            foreach (var slot in Enum.GetValues<EquipmentSlots>())
+            foreach (var slot in Enum.GetValues<EquipmentSlot>())
             {
                 var item = Inventory.EquipmentWindow.GetItem(slot);
                 if (item == null) continue;
@@ -725,7 +725,7 @@ namespace QuantumCore.Game.World.Entities
         {
             switch (args.Slot)
             {
-                case EquipmentSlots.Weapon:
+                case EquipmentSlot.Weapon:
                     if (args.ItemInstance is not null)
                     {
                         var item = _itemManager.GetItem(args.ItemInstance.ItemId);
@@ -739,7 +739,7 @@ namespace QuantumCore.Game.World.Entities
                     }
 
                     break;
-                case EquipmentSlots.Body:
+                case EquipmentSlot.Body:
                     if (args.ItemInstance is not null)
                     {
                         Player.BodyPart = args.ItemInstance.ItemId;
@@ -750,7 +750,7 @@ namespace QuantumCore.Game.World.Entities
                     }
                 
                     break;
-                case EquipmentSlots.Hair:
+                case EquipmentSlot.Hair:
                     if (args.ItemInstance is not null)
                     {
                         Player.HairPart = args.ItemInstance.GetHairPartOffsetForClient(Player.PlayerClass.GetClass());
@@ -982,14 +982,14 @@ namespace QuantumCore.Game.World.Entities
         public bool HasUniqueItemEquipped(uint itemProtoId)
         {
             {
-                var item = Inventory.EquipmentWindow.GetItem(EquipmentSlots.Unique1);
+                var item = Inventory.EquipmentWindow.GetItem(EquipmentSlot.Unique1);
                 if (item != null && item.ItemId == itemProtoId)
                 {
                     return true;
                 }
             }
             {
-                var item = Inventory.EquipmentWindow.GetItem(EquipmentSlots.Unique2);
+                var item = Inventory.EquipmentWindow.GetItem(EquipmentSlot.Unique2);
                 if (item != null && item.ItemId == itemProtoId)
                 {
                     return true;
