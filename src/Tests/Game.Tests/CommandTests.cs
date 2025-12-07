@@ -436,7 +436,7 @@ public class CommandTests : IAsyncLifetime
         var messages = (_connection as MockedGameConnection).SentMessages;
         messages.Should().HaveCountGreaterThan(1);
         messages[0].Should().BeEquivalentTo(
-            new ChatOutcoming { Message = "The following commands are available", MessageType = ChatMessageTypes.Info },
+            new ChatOutcoming { Message = "The following commands are available", MessageType = ChatMessageType.Info },
             cfg => cfg
                 .Including(x => x.Message)
                 .Using<string>(ctx => ctx.Subject.Should().StartWith(ctx.Expectation)).WhenTypeIs<string>()
@@ -684,7 +684,7 @@ public class CommandTests : IAsyncLifetime
 
         // Assert
         ((MockedGameConnection)_connection).SentMessages.Should().ContainEquivalentOf(
-            new ChatOutcoming { Message = "mall test", MessageType = ChatMessageTypes.Command },
+            new ChatOutcoming { Message = "mall test", MessageType = ChatMessageType.Command },
             cfg => cfg.Including(x => x.Message));
     }
 
@@ -698,7 +698,7 @@ public class CommandTests : IAsyncLifetime
         ((MockedGameConnection)_connection).SentMessages.Should().ContainEquivalentOf(
             new ChatOutcoming
             {
-                Message = $"Lv{_player.GetPoint(EPoint.Level)} {_player.Name}", MessageType = ChatMessageTypes.Info
+                Message = $"Lv{_player.GetPoint(EPoint.Level)} {_player.Name}", MessageType = ChatMessageType.Info
             }, cfg => cfg.Including(x => x.Message));
     }
 

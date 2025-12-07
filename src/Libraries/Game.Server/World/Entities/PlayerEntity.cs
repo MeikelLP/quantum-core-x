@@ -1302,7 +1302,7 @@ namespace QuantumCore.Game.World.Entities
         {
             var chat = new ChatOutcoming
             {
-                MessageType = ChatMessageTypes.Normal, Vid = Vid, Empire = Empire, Message = message
+                MessageType = ChatMessageType.Normal, Vid = Vid, Empire = Empire, Message = message
             };
             Connection.Send(chat);
         }
@@ -1311,7 +1311,7 @@ namespace QuantumCore.Game.World.Entities
         {
             var chat = new ChatOutcoming
             {
-                MessageType = ChatMessageTypes.Command, Vid = 0, Empire = Empire, Message = message
+                MessageType = ChatMessageType.Command, Vid = 0, Empire = Empire, Message = message
             };
             Connection.Send(chat);
         }
@@ -1320,7 +1320,7 @@ namespace QuantumCore.Game.World.Entities
         {
             var chat = new ChatOutcoming
             {
-                MessageType = ChatMessageTypes.Info, Vid = 0, Empire = Empire, Message = message
+                MessageType = ChatMessageType.Info, Vid = 0, Empire = Empire, Message = message
             };
             Connection.Send(chat);
         }

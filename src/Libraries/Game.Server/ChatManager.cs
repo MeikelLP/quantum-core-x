@@ -14,7 +14,7 @@ public class ChatManager : IChatManager, ILoadable
     private struct ChatMessage
     {
         public Guid OwnerCore { get; set; }
-        public ChatMessageTypes Type { get; set; }
+        public ChatMessageType Type { get; set; }
         public string Message { get; set; }
     }
 
@@ -71,7 +71,7 @@ public class ChatManager : IChatManager, ILoadable
     {
         var packet = new ChatOutcoming
         {
-            MessageType = ChatMessageTypes.Normal, Vid = entity.Vid, Empire = entity.Empire, Message = message
+            MessageType = ChatMessageType.Normal, Vid = entity.Vid, Empire = entity.Empire, Message = message
         };
 
         if (entity is IPlayerEntity player)
@@ -92,7 +92,7 @@ public class ChatManager : IChatManager, ILoadable
     {
         var chat = new ChatOutcoming
         {
-            MessageType = ChatMessageTypes.Shout,
+            MessageType = ChatMessageType.Shout,
             Vid = 0,
             Empire = EEmpire.Shinsoo, // todo
             Message = message
@@ -111,6 +111,6 @@ public class ChatManager : IChatManager, ILoadable
 
         // Broadcast message to all cores
         await _cacheManager.Publish("chat",
-            new ChatMessage {Type = ChatMessageTypes.Shout, Message = message, OwnerCore = _id});
+            new ChatMessage {Type = ChatMessageType.Shout, Message = message, OwnerCore = _id});
     }
 }

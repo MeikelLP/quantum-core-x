@@ -1,6 +1,6 @@
 ﻿namespace QuantumCore.Game;
 
-public enum ChatMessageTypes : byte
+public enum ChatMessageType : byte
 {
     Normal,
     Info,
