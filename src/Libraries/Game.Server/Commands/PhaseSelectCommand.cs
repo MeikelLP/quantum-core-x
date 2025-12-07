@@ -33,7 +33,7 @@ namespace QuantumCore.Game.Commands
             await context.Player.CalculatePlayedTimeAsync();
 
             await _world.DespawnPlayerAsync(context.Player);
-            context.Player.Connection.SetPhase(EPhases.Select);
+            context.Player.Connection.SetPhase(EPhase.Select);
 
             var characters = new Characters();
             await using var scope = _serviceProvider.CreateAsyncScope();

@@ -106,7 +106,7 @@ public class TokenLoginHandlerTests
             serverBase.IpAddress.Returns(connectionInterfaceIp);
             serverBase.Port.Returns(coreHost.Port);
 
-            var phase = EPhases.Handshake;
+            var phase = EPhase.Handshake;
             var assignedAccountId = (Guid?) null;
             var assignedUsername = string.Empty;
 
@@ -114,7 +114,7 @@ public class TokenLoginHandlerTests
             connection.Server.Returns(serverBase);
             connection.BoundIpAddress.Returns(connectionInterfaceIp);
             connection.Phase.Returns(_ => phase);
-            connection.When(x => x.Phase = Arg.Any<EPhases>()).Do(ci => phase = ci.Arg<EPhases>());
+            connection.When(x => x.Phase = Arg.Any<EPhase>()).Do(ci => phase = ci.Arg<EPhase>());
             connection.AccountId.Returns(_ => assignedAccountId);
             connection.When(x => x.AccountId = Arg.Any<Guid?>()).Do(ci => assignedAccountId = ci.Arg<Guid?>());
             connection.Username.Returns(_ => assignedUsername);

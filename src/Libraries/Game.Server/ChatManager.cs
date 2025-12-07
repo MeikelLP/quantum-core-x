@@ -58,7 +58,7 @@ public class ChatManager : IChatManager, ILoadable
         // Send message to all connections in the game phase
         GameServer.Instance.ForAllConnections(connection =>
         {
-            if (connection.Phase != EPhases.Game)
+            if (connection.Phase != EPhase.Game)
             {
                 return;
             }
@@ -101,7 +101,7 @@ public class ChatManager : IChatManager, ILoadable
         // Send message to all connections in the game phase
         GameServer.Instance.ForAllConnections(connection =>
         {
-            if (connection.Phase != EPhases.Game)
+            if (connection.Phase != EPhase.Game)
             {
                 return;
             }

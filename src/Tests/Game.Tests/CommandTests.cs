@@ -48,7 +48,7 @@ internal class MockedGameConnection : IGameConnection
     public readonly List<GCPhase> SentPhases = new();
     public readonly List<object> SentPackets = new();
     public Guid Id { get; }
-    public EPhases Phase { get; set; }
+    public EPhase Phase { get; set; }
     public Task ExecuteTask { get; } = null!;
 
     public void Close(bool expected = true)
@@ -515,7 +515,7 @@ public class CommandTests : IAsyncLifetime
 
         world.GetPlayer(_player.Name).Should().NotBeNull();
         (_connection as MockedGameConnection).SentPhases.Should()
-            .NotContainEquivalentOf(new GCPhase { Phase = EPhases.Select });
+            .NotContainEquivalentOf(new GCPhase { Phase = EPhase.Select });
 
         _player.Player.PlayTime = 0;
         _connection.Server.ServerTime.Returns(60000);
@@ -523,9 +523,9 @@ public class CommandTests : IAsyncLifetime
         await _commandManager.Handle(_connection, "/phase_select");
 
         _player.GetPoint(EPoint.PlayTime).Should().Be(1);
-        _player.Connection.Phase.Should().Be(EPhases.Select);
+        _player.Connection.Phase.Should().Be(EPhase.Select);
         (_connection as MockedGameConnection).SentPhases.Should()
-            .ContainEquivalentOf(new GCPhase { Phase = EPhases.Select });
+            .ContainEquivalentOf(new GCPhase { Phase = EPhase.Select });
         world.GetPlayer(_player.Name).Should().BeNull();
     }
 
