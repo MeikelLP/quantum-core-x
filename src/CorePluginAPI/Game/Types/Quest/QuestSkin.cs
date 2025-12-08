@@ -1,4 +1,4 @@
-﻿namespace QuantumCore.Game.Quest;
+﻿namespace QuantumCore.API.Game.Types.Quest;
 
 public enum QuestSkin
 {
