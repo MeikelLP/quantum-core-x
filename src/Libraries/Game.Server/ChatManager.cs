@@ -49,9 +49,9 @@ public class ChatManager : IChatManager, ILoadable
 
         var chat = new ChatOutcoming
         {
-            MessageType = message.Type,
+            MessageType = (byte)message.Type,
             Vid = 0,
-            Empire = EEmpire.Shinsoo, // todo
+            Empire = (byte)EEmpire.Shinsoo, // todo
             Message = message.Message
         };
 
@@ -71,7 +71,7 @@ public class ChatManager : IChatManager, ILoadable
     {
         var packet = new ChatOutcoming
         {
-            MessageType = ChatMessageType.Normal, Vid = entity.Vid, Empire = entity.Empire, Message = message
+            MessageType = (byte)ChatMessageType.Normal, Vid = entity.Vid, Empire = (byte)entity.Empire, Message = message
         };
 
         if (entity is IPlayerEntity player)
@@ -92,9 +92,9 @@ public class ChatManager : IChatManager, ILoadable
     {
         var chat = new ChatOutcoming
         {
-            MessageType = ChatMessageType.Shout,
+            MessageType = (byte)ChatMessageType.Shout,
             Vid = 0,
-            Empire = EEmpire.Shinsoo, // todo
+            Empire = (byte)EEmpire.Shinsoo, // todo
             Message = message
         };
 

@@ -2,6 +2,7 @@
 using Game.Caching;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
+using QuantumCore.API.Game.Types;
 using QuantumCore.API.PluginTypes;
 using QuantumCore.Caching;
 using QuantumCore.Game.Packets;
@@ -26,21 +27,20 @@ public class EmpireHandler : IGamePacketHandler<Empire>
 
     public async Task ExecuteAsync(GamePacketContext<Empire> ctx, CancellationToken token = default)
     {
-        if (ctx.Packet.EmpireId.IsDefined())
+        if (Enums.TryToObject<EEmpire>(ctx.Packet.EmpireId, out var empire, EnumValidation.IsDefined))
         {
-            _logger.LogInformation("Empire selected: {Empire}", ctx.Packet.EmpireId);
+            _logger.LogInformation("Empire selected: {Empire}", empire);
             var cacheKey = $"account:{ctx.Connection.AccountId}:game:select:selected-player";
             var player = await _cacheManager.Get<uint?>(cacheKey);
             if (player is not null)
             {
-                await _playerManager.SetPlayerEmpireAsync(ctx.Connection.AccountId!.Value, player.Value,
-                    ctx.Packet.EmpireId);
+                await _playerManager.SetPlayerEmpireAsync(ctx.Connection.AccountId!.Value, player.Value, empire);
                 await _cacheManager.Del(cacheKey);
             }
             else
             {
                 // No player created yet. This is the first time an empire is selected before creating an account
-                await _playerCache.SetTempEmpireAsync(ctx.Connection.AccountId!.Value, ctx.Packet.EmpireId);
+                await _playerCache.SetTempEmpireAsync(ctx.Connection.AccountId!.Value, empire);
             }
         }
         else

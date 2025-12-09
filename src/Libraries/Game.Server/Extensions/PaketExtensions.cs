@@ -11,7 +11,7 @@ public static class PaketExtensions
         {
             Id = player.Id,
             Name = player.Name,
-            Class = player.PlayerClass,
+            Class = (byte)player.PlayerClass,
             Level = player.Level,
             Playtime = (uint) TimeSpan.FromMilliseconds(player.PlayTime).TotalMinutes,
             St = player.St,

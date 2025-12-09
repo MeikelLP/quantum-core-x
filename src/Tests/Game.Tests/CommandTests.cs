@@ -436,7 +436,7 @@ public class CommandTests : IAsyncLifetime
         var messages = (_connection as MockedGameConnection).SentMessages;
         messages.Should().HaveCountGreaterThan(1);
         messages[0].Should().BeEquivalentTo(
-            new ChatOutcoming { Message = "The following commands are available", MessageType = ChatMessageType.Info },
+            new ChatOutcoming { Message = "The following commands are available", MessageType = (byte)ChatMessageType.Info },
             cfg => cfg
                 .Including(x => x.Message)
                 .Using<string>(ctx => ctx.Subject.Should().StartWith(ctx.Expectation)).WhenTypeIs<string>()
@@ -516,7 +516,7 @@ public class CommandTests : IAsyncLifetime
 
         world.GetPlayer(_player.Name).Should().NotBeNull();
         (_connection as MockedGameConnection).SentPhases.Should()
-            .NotContainEquivalentOf(new GCPhase { Phase = EPhase.Select });
+            .NotContainEquivalentOf(new GCPhase { Phase = (byte)EPhase.Select });
 
         _player.Player.PlayTime = 0;
         _connection.Server.ServerTime.Returns(60000);
@@ -526,7 +526,7 @@ public class CommandTests : IAsyncLifetime
         _player.GetPoint(EPoint.PlayTime).Should().Be(1);
         _player.Connection.Phase.Should().Be(EPhase.Select);
         (_connection as MockedGameConnection).SentPhases.Should()
-            .ContainEquivalentOf(new GCPhase { Phase = EPhase.Select });
+            .ContainEquivalentOf(new GCPhase { Phase = (byte)EPhase.Select });
         world.GetPlayer(_player.Name).Should().BeNull();
     }
 
@@ -684,7 +684,7 @@ public class CommandTests : IAsyncLifetime
 
         // Assert
         ((MockedGameConnection)_connection).SentMessages.Should().ContainEquivalentOf(
-            new ChatOutcoming { Message = "mall test", MessageType = ChatMessageType.Command },
+            new ChatOutcoming { Message = "mall test", MessageType = (byte)ChatMessageType.Command },
             cfg => cfg.Including(x => x.Message));
     }
 
@@ -698,7 +698,7 @@ public class CommandTests : IAsyncLifetime
         ((MockedGameConnection)_connection).SentMessages.Should().ContainEquivalentOf(
             new ChatOutcoming
             {
-                Message = $"Lv{_player.GetPoint(EPoint.Level)} {_player.Name}", MessageType = ChatMessageType.Info
+                Message = $"Lv{_player.GetPoint(EPoint.Level)} {_player.Name}", MessageType = (byte)ChatMessageType.Info
             }, cfg => cfg.Including(x => x.Message));
     }
 

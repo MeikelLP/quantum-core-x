@@ -1,5 +1,4 @@
-﻿using QuantumCore.API.Game.Types.Players;
-using QuantumCore.Networking;
+﻿using QuantumCore.Networking;
 
 namespace QuantumCore.Game.Packets.Guild;
 
@@ -17,7 +16,7 @@ public class GuildMember
     [Field(0)] public uint PlayerId { get; set; }
     [Field(1)] public byte Rank { get; set; }
     [Field(2)] public bool IsGeneral { get; set; }
-    [Field(3)] public EPlayerClassGendered Class { get; set; }
+    [Field(3)] public byte Class { get; set; }
     [Field(4)] public byte Level { get; set; }
     [Field(5)] public uint SpentExperience { get; set; }
     [Field(6)] public bool IsNameSent { get; set; }

@@ -107,7 +107,7 @@ namespace QuantumCore.Game.PacketHandlers
             }
 
             // TODO:: set player id to character?
-            ctx.Connection.Send(new Empire {EmpireId = empire});
+            ctx.Connection.Send(new Empire {EmpireId = (byte)empire});
             ctx.Connection.SetPhase(EPhase.Select);
             ctx.Connection.Send(characters);
         }

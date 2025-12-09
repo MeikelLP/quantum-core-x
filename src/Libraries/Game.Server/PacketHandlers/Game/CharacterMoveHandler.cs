@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using QuantumCore.API;
+using QuantumCore.API.Game.Types.Players;
 using QuantumCore.API.PluginTypes;
 using QuantumCore.Game.Packets;
 using QuantumCore.Game.World.Entities;
@@ -19,8 +20,8 @@ public class CharacterMoveHandler : IGamePacketHandler<CharacterMove>
 
     public Task ExecuteAsync(GamePacketContext<CharacterMove> ctx, CancellationToken token = default)
     {
-        if (ctx.Packet.MovementType >= (int) CharacterMove.CharacterMovementType.Max &&
-            (ctx.Packet.MovementType & (byte) CharacterMove.CharacterMovementType.Skill) == 0)
+        if (ctx.Packet.MovementType >= (int) CharacterMovementType.Max &&
+            (ctx.Packet.MovementType & (byte) CharacterMovementType.Skill) == 0)
         {
             _logger.LogError("Received unknown movement type ({MovementType})", ctx.Packet.MovementType);
             ctx.Connection.Close();
@@ -35,21 +36,21 @@ public class CharacterMoveHandler : IGamePacketHandler<CharacterMove>
         }
 
         _logger.LogDebug("Received movement packet with type {MovementType}",
-            (CharacterMove.CharacterMovementType) ctx.Packet.MovementType);
-        if (ctx.Packet.MovementType == (int) CharacterMove.CharacterMovementType.Move)
+            (CharacterMovementType) ctx.Packet.MovementType);
+        if (ctx.Packet.MovementType == (int) CharacterMovementType.Move)
         {
             ctx.Connection.Player.Rotation = ctx.Packet.Rotation * 5;
             ctx.Connection.Player.Goto(ctx.Packet.PositionX, ctx.Packet.PositionY);
         }
         else
         {
-            if (ctx.Packet.MovementType is (int) CharacterMove.CharacterMovementType.Attack
-                or (int) CharacterMove.CharacterMovementType.Combo)
+            if (ctx.Packet.MovementType is (int) CharacterMovementType.Attack
+                or (int) CharacterMovementType.Combo)
             {
                 // todo: cancel mining if actually mining
                 // todo: clears some affects (such as invisibility when attacking)
             }
-            else if ((ctx.Packet.MovementType & (byte) CharacterMove.CharacterMovementType.Skill) != 0)
+            else if ((ctx.Packet.MovementType & (byte) CharacterMovementType.Skill) != 0)
             {
                 var motion = ctx.Packet.MovementType & MaskSkillMotion;
 
@@ -64,7 +65,7 @@ public class CharacterMoveHandler : IGamePacketHandler<CharacterMove>
             }
         }
 
-        if (ctx.Packet.MovementType == (int) CharacterMove.CharacterMovementType.Wait)
+        if (ctx.Packet.MovementType == (int) CharacterMovementType.Wait)
         {
             ctx.Connection.Player.Wait(ctx.Packet.PositionX, ctx.Packet.PositionY);
         }
@@ -78,7 +79,7 @@ public class CharacterMoveHandler : IGamePacketHandler<CharacterMove>
             PositionX = ctx.Packet.PositionX,
             PositionY = ctx.Packet.PositionY,
             Time = ctx.Packet.Time,
-            Duration = ctx.Packet.MovementType == (int) CharacterMove.CharacterMovementType.Move
+            Duration = ctx.Packet.MovementType == (int) CharacterMovementType.Move
                 ? ctx.Connection.Player.MovementDuration
                 : 0
         };
