@@ -1,5 +1,4 @@
-﻿using EnumsNET;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.PluginTypes;
@@ -30,14 +29,7 @@ public class ChatIncomingHandler : IGamePacketHandler<ChatIncoming>
             return;
         }
 
-        if (!Enums.TryToObject<ChatMessageType>(ctx.Packet.MessageType, out var messageType, EnumValidation.IsDefined))
-        {
-            _logger.LogWarning("Undefined {ChatMessageType} {MessageType}, ignoring packet",
-                nameof(ChatMessageType), ctx.Packet.MessageType);
-            return;
-        }
-
-        if (messageType == ChatMessageType.Normal)
+        if (ctx.Packet.MessageType == ChatMessageType.Normal)
         {
             if (ctx.Packet.Message.StartsWith('/'))
             {
@@ -51,7 +43,7 @@ public class ChatIncomingHandler : IGamePacketHandler<ChatIncoming>
             }
         }
 
-        if (messageType == ChatMessageType.Shout)
+        if (ctx.Packet.MessageType == ChatMessageType.Shout)
         {
             // todo check 15 seconds cooldown
             var message = ctx.Connection.Player.Name + ": " + ctx.Packet.Message;

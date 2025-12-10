@@ -30,7 +30,7 @@ public static class GuildPacketExtensions
                 {
                     Rank = rank.Position,
                     Name = rank.Name,
-                    Permissions = (byte)rank.Permissions
+                    Permissions = rank.Permissions
                 })
                 .Take(GuildConstants.RANKS_LENGTH)
                 .ToArray()
@@ -43,7 +43,7 @@ public static class GuildPacketExtensions
         connection.Send(new GuildRankPermissionPacket
         {
             Position = position,
-            Permissions = (byte)permissions
+            Permissions = permissions
         });
     }
 
@@ -72,7 +72,7 @@ public static class GuildPacketExtensions
                 .Select(guildMember => new GuildMember
                 {
                     PlayerId = guildMember.Id,
-                    Class = (byte)guildMember.Class,
+                    Class = guildMember.Class,
                     Level = guildMember.Level,
                     IsGeneral = guildMember.IsLeader,
                     Name = guildMember.Name,

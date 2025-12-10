@@ -11,7 +11,7 @@ public static class ConnectionExtensions
         connection.Phase = phase;
         connection.Send(new GCPhase
         {
-            Phase = (byte)connection.Phase
+            Phase = connection.Phase
         });
     }
 }

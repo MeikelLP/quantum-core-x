@@ -596,7 +596,7 @@ public class PlayerSkills : IPlayerSkills
         var levels = new SkillLevels();
         for (var i = 0; i < SkillMaxNum; i++)
         {
-            levels.Skills[i] = new PlayerSkill {Level = 0, MasterType = (byte)ESkillMasterType.Normal, NextReadTime = 0};
+            levels.Skills[i] = new PlayerSkill {Level = 0, MasterType = ESkillMasterType.Normal, NextReadTime = 0};
         }
 
         for (var i = 0; i < _skills.Count; i++)
@@ -606,7 +606,7 @@ public class PlayerSkills : IPlayerSkills
             levels.Skills[(uint)skill.Key] = new PlayerSkill
             {
                 Level = skill.Value.Level,
-                MasterType = (byte)skill.Value.MasterType,
+                MasterType = skill.Value.MasterType,
                 NextReadTime = skill.Value.NextReadTime
             };
         }

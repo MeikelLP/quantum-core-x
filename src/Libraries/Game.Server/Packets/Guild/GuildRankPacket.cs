@@ -1,4 +1,5 @@
 ﻿using QuantumCore.API.Game.Guild;
+using QuantumCore.API.Game.Types.Guild;
 using QuantumCore.Networking;
 
 namespace QuantumCore.Game.Packets.Guild;
@@ -19,5 +20,5 @@ public class GuildRankDataPacket
 {
     [Field(0)] public byte Rank { get; set; }
     [Field(1, Length = 9)] public string Name { get; set; } = "";
-    [Field(2)] public byte Permissions { get; set; }
+    [Field(2)] public GuildRankPermissions Permissions { get; set; }
 }

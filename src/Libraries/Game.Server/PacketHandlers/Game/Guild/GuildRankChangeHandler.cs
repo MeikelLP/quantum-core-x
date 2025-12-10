@@ -1,7 +1,5 @@
-﻿using EnumsNET;
-using QuantumCore.API;
+﻿using QuantumCore.API;
 using QuantumCore.API.Game.Guild;
-using QuantumCore.API.Game.Types.Guild;
 using QuantumCore.API.PluginTypes;
 using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Packets.Guild;
@@ -30,17 +28,15 @@ public class GuildRankChangeHandler : IGamePacketHandler<GuildRankChangePacket>
             ctx.Connection.Player.SendChatInfo("You don't have permission to change a rank.");
             return;
         }
-
-        if (ctx.Packet.Position == GuildConstants.LEADER_RANK_POSITION)
+        else if (ctx.Packet.Position == GuildConstants.LEADER_RANK_POSITION)
         {
             ctx.Connection.Player.SendChatInfo("You cannot change the permissions of the guild leader.");
             return;
         }
 
         var guildId = ctx.Connection.Player!.Player.GuildId.Value;
-        var permissions = Enums.ToObject<GuildRankPermissions>(ctx.Packet.Permission, EnumValidation.IsValidFlagCombination);
-        await _guildManager.ChangePermissionAsync(guildId, ctx.Packet.Position, permissions, token);
-        ctx.Connection.SendGuildRankPermissions(ctx.Packet.Position, permissions);
+        await _guildManager.ChangePermissionAsync(guildId, ctx.Packet.Position, ctx.Packet.Permission, token);
+        ctx.Connection.SendGuildRankPermissions(ctx.Packet.Position, ctx.Packet.Permission);
         // TODO send to all guild members
     }
 }

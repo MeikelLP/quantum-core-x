@@ -8,7 +8,6 @@ using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.Types.Combat;
 using QuantumCore.API.Game.Types.Entities;
 using QuantumCore.API.Game.Types.Monsters;
-using QuantumCore.API.Game.Types.Players;
 using QuantumCore.API.Game.World;
 using QuantumCore.API.Game.World.AI;
 using QuantumCore.Core.Utils;
@@ -361,7 +360,7 @@ namespace QuantumCore.Game.World.AI
             // Send attack packet
             var packet = new CharacterMoveOut
             {
-                MovementType = (byte)CharacterMovementType.Attack,
+                MovementType = (byte)CharacterMove.CharacterMovementType.Attack,
                 Rotation = (byte)(monster.Rotation / 5),
                 Vid = monster.Vid,
                 PositionX = monster.PositionX,

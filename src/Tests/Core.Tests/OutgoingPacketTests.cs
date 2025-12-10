@@ -110,9 +110,9 @@ public class OutgoingPacketTests
         bytes.Should().Equal(
             new byte[] { 0x04 }
                 .Concat(BitConverter.GetBytes((short)obj.GetSize()))
-                .Append(obj.MessageType)
+                .Append((byte)obj.MessageType)
                 .Concat(BitConverter.GetBytes(obj.Vid))
-                .Append(obj.Empire)
+                .Append((byte)obj.Empire)
                 .Concat(Encoding.ASCII.GetBytes(obj.Message))
                 .Append((byte)0)
         );
@@ -372,7 +372,7 @@ public class OutgoingPacketTests
                 .Concat(obj.CharacterList.SelectMany(c => Array.Empty<byte>()
                     .Concat(BitConverter.GetBytes(c.Id))
                     .Concat(Encoding.ASCII.GetBytes(c.Name))
-                    .Append(c.Class)
+                    .Append((byte)c.Class)
                     .Append(c.Level)
                     .Concat(BitConverter.GetBytes(c.Playtime))
                     .Append(c.St)
@@ -528,7 +528,7 @@ public class OutgoingPacketTests
                 .Concat(BitConverter.GetBytes(obj.PositionX))
                 .Concat(BitConverter.GetBytes(obj.PositionY))
                 .Concat(BitConverter.GetBytes(obj.PositionZ))
-                .Append(obj.Empire)
+                .Append((byte)obj.Empire)
                 .Append(obj.SkillGroup)
         );
     }
@@ -577,7 +577,7 @@ public class OutgoingPacketTests
                 .Concat(BitConverter.GetBytes(obj.Vid))
                 .Concat(Encoding.ASCII.GetBytes(obj.Name))
                 .Concat(obj.Parts.SelectMany(BitConverter.GetBytes))
-                .Append(obj.Empire)
+                .Append((byte)obj.Empire)
                 .Concat(BitConverter.GetBytes(obj.GuildId))
                 .Concat(BitConverter.GetBytes(obj.Level))
                 .Concat(BitConverter.GetBytes(obj.RankPoints))

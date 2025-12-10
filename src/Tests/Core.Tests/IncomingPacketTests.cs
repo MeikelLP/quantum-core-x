@@ -63,7 +63,7 @@ public class IncomingPacketTests
         var bytes = Array.Empty<byte>()
             .Concat(BitConverter.GetBytes((ushort)(expected.Size + 1 +
                                                    3))) // size includes all package size + 0 terminating byte at end of string
-            .Append(expected.MessageType)
+            .Append((byte)expected.MessageType)
             .Concat(Encoding.ASCII.GetBytes(expected.Message))
             .Append((byte)0) // null byte for end of message
             .ToArray();
@@ -345,7 +345,7 @@ public class IncomingPacketTests
     {
         var expected = new AutoFaker<Empire>().Generate();
         var bytes = Array.Empty<byte>()
-            .Append(expected.EmpireId)
+            .Append((byte)expected.EmpireId)
             .ToArray();
         var result = _serializer.Deserialize<Empire>(bytes);
 

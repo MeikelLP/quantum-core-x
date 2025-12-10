@@ -1,10 +1,12 @@
-﻿using QuantumCore.Networking;
+﻿using QuantumCore.API.Game.Types;
+using QuantumCore.Networking;
 
-namespace QuantumCore.Game.Packets;
-
-[Packet(0x5a, EDirection.Incoming | EDirection.Outgoing, Sequence = true)]
-[PacketGenerator]
-public partial class Empire
+namespace QuantumCore.Game.Packets
 {
-    [Field(0)] public byte EmpireId { get; set; }
+    [Packet(0x5a, EDirection.Incoming | EDirection.Outgoing, Sequence = true)]
+    [PacketGenerator]
+    public partial class Empire
+    {
+        [Field(0)] public EEmpire EmpireId { get; set; }
+    }
 }

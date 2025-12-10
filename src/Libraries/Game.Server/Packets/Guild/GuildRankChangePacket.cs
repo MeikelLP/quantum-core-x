@@ -1,4 +1,5 @@
-﻿using QuantumCore.Networking;
+﻿using QuantumCore.API.Game.Types.Guild;
+using QuantumCore.Networking;
 
 namespace QuantumCore.Game.Packets.Guild;
 
@@ -8,5 +9,5 @@ namespace QuantumCore.Game.Packets.Guild;
 public partial class GuildRankChangePacket
 {
     public byte Position { get; set; }
-    public byte Permission { get; set; }
+    public GuildRankPermissions Permission { get; set; }
 }

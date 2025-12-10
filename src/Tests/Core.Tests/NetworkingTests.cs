@@ -85,7 +85,7 @@ public class NetworkingTests
     [Fact]
     public async Task Dynamic()
     {
-        var obj = new ChatIncoming { MessageType = (byte)ChatMessageType.Normal, Message = "Hello New World!" };
+        var obj = new ChatIncoming { MessageType = ChatMessageType.Normal, Message = "Hello New World!" };
         var size = obj.GetSize();
         var bytes = new byte[size + 1]; // + 1 due to sequence
         obj.Serialize(bytes);
@@ -102,7 +102,7 @@ public class NetworkingTests
     {
         var obj = new ChatIncoming
         {
-            MessageType = (byte)ChatMessageType.Normal,
+            MessageType = ChatMessageType.Normal,
             Message = new string(Enumerable.Range(0, 5000).Select(x => 'i').ToArray())
         };
         var size = obj.GetSize();
