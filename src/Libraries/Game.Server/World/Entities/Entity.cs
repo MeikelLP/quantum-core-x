@@ -1,5 +1,4 @@
 ﻿using QuantumCore.API;
-using QuantumCore.API.Core.Models;
 using QuantumCore.API.Core.Utils;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.Types.Combat;
@@ -407,15 +406,15 @@ namespace QuantumCore.Game.World.Entities
 
             // todo calculate hp steal, sp steal, hp recovery, sp recovery and mana burn
 
-            byte damageFlags = 1; // 1 = normal
+            var damageFlags = EDamageFlags.Normal; // 1 = normal
             if (isCritical)
             {
-                damageFlags |= 32;
+                damageFlags |= EDamageFlags.Critical;
             }
 
             if (isPenetrate)
             {
-                damageFlags |= 16;
+                damageFlags |= EDamageFlags.Piercing;
             }
 
             var victimPlayer = this as PlayerEntity;

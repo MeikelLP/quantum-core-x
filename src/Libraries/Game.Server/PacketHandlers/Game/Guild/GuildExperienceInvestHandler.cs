@@ -1,6 +1,6 @@
 ﻿using QuantumCore.API;
 using QuantumCore.API.Game.Guild;
-using QuantumCore.API.Game.Types;
+using QuantumCore.API.Game.Types.Entities;
 using QuantumCore.API.PluginTypes;
 using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Packets.Guild;

@@ -1,11 +1,12 @@
 ﻿using System.Collections.Concurrent;
 using System.Collections.Immutable;
+using EnumsNET;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using QuantumCore.API;
 using QuantumCore.API.Extensions;
 using QuantumCore.API.Game.Skills;
-using QuantumCore.API.Game.Types;
+using QuantumCore.API.Game.Types.Entities;
 using QuantumCore.API.Game.Types.Players;
 using QuantumCore.API.Game.Types.Skills;
 using QuantumCore.Core.Utils;
@@ -13,6 +14,7 @@ using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Packets.Skills;
 using QuantumCore.Game.Persistence;
 using QuantumCore.Game.World.Entities;
+using static QuantumCore.API.Game.Types.Skills.ESkillLevelUtils;
 
 namespace QuantumCore.Game.Skills;
 
@@ -27,14 +29,14 @@ public class PlayerSkills : IPlayerSkills
     private readonly ISkillManager _skillManager;
     private readonly SkillsOptions _skillsOptions;
 
-    public const int SkillMaxNum = 255;
-    public const int SkillMaxLevel = 40;
+    public const int SkillMaxNum = byte.MaxValue;
+    public const ESkillLevel SkillMaxLevel = ESkillLevel.PerfectMasterP;
     public const int SkillCount = 6;
     public const int JobMaxNum = 4;
     public const int SkillGroupMaxNum = 2;
     public const int MinimumLevel = 5;
     public const int MinimumLevelSubSkills = 10;
-    public const int MinimumSkillLevelUpgrade = 17;
+    public const ESkillLevel MinimumSkillLevelUpgrade = ESkillLevel.Normal17;
 
     #region Static Skill Data
 
@@ -120,7 +122,7 @@ public class PlayerSkills : IPlayerSkills
 
     public async Task LoadAsync()
     {
-        if (_player.Player.SkillGroup > 0)
+        if (_player.Player.SkillGroup.IsDefined())
         {
             AssignDefaultActiveSkills();
         }
@@ -145,9 +147,9 @@ public class PlayerSkills : IPlayerSkills
 
     public ISkill? this[ESkill skillId] => _skills.TryGetValue(skillId, out var skill) ? skill : null;
 
-    public void SetSkillGroup(byte skillGroup)
+    public void SetSkillGroup(ESkillGroup skillGroup)
     {
-        if (skillGroup > SkillGroupMaxNum) return;
+        if (!skillGroup.IsDefined() && skillGroup != 0) return;
         if (_player.GetPoint(EPoint.Level) < MinimumLevel) return;
 
         // todo: prevent changing skill group in certain situations
@@ -189,7 +191,7 @@ public class PlayerSkills : IPlayerSkills
 
         _skills.Clear();
 
-        if (_player.Player.SkillGroup > 0)
+        if (_player.Player.SkillGroup.IsDefined())
         {
             AssignDefaultActiveSkills();
         }
@@ -212,51 +214,50 @@ public class PlayerSkills : IPlayerSkills
 
     public void Reset(ESkill skillId)
     {
-        if (skillId >= ESkill.SkillMax)
+        if (!skillId.IsDefined())
         {
             return;
         }
 
         if (!_skills.TryGetValue(skillId, out var skill)) return;
 
-        var level = skill.Level;
+        var effectiveLevelForRestore = skill.Level < MinimumSkillLevelUpgrade
+            ? skill.Level
+            : MinimumSkillLevelUpgrade;
 
-        skill.Level = 0;
+        _player.AddPoint(EPoint.Skill, (byte)effectiveLevelForRestore);
+        
+        skill.Level = ESkillLevel.Unlearned;
         skill.MasterType = ESkillMasterType.Normal;
         skill.NextReadTime = 0;
-
-        if (level > MinimumSkillLevelUpgrade)
-            level = MinimumSkillLevelUpgrade;
-
-        _player.AddPoint(EPoint.Skill, level);
 
         SendSkillLevelsPacket();
     }
 
-    public void SetLevel(ESkill skillId, byte level)
+    public void SetLevel(ESkill skillId, ESkillLevel level)
     {
-        if (skillId >= ESkill.SkillMax)
+        if (!skillId.IsDefined())
         {
             return;
         }
 
         if (!_skills.TryGetValue(skillId, out var skill)) return;
 
-        skill.Level = Math.Min((byte)SkillMaxLevel, level);
+        skill.Level = Min(SkillMaxLevel, level);
 
         skill.MasterType = level switch
         {
             >= SkillMaxLevel => ESkillMasterType.PerfectMaster,
-            >= 30 => ESkillMasterType.GrandMaster,
-            >= 20 => ESkillMasterType.Master,
+            >= ESkillLevel.GrandMasterG1 => ESkillMasterType.GrandMaster,
+            >= ESkillLevel.MasterM1 => ESkillMasterType.Master,
             _ => ESkillMasterType.Normal
         };
 
         // Reset reads required when new master type is learned
         switch (skill)
         {
-            case {Level: 20, ReadsRequired: 0, MasterType: ESkillMasterType.Master}:
-            case {Level: 30, ReadsRequired: 0, MasterType: ESkillMasterType.GrandMaster}:
+            case {Level: ESkillLevel.MasterM1, ReadsRequired: 0, MasterType: ESkillMasterType.Master}:
+            case {Level: ESkillLevel.GrandMasterG1, ReadsRequired: 0, MasterType: ESkillMasterType.GrandMaster}:
                 skill.ReadsRequired = 1;
                 break;
         }
@@ -264,7 +265,7 @@ public class PlayerSkills : IPlayerSkills
 
     public void SkillUp(ESkill skillId, ESkillLevelMethod method = ESkillLevelMethod.Point)
     {
-        if (skillId >= ESkill.SkillMax)
+        if (!skillId.IsDefined())
         {
             _logger.LogWarning("Invalid skill id: {SkillId}", skillId);
             return;
@@ -277,7 +278,7 @@ public class PlayerSkills : IPlayerSkills
             return;
         }
 
-        if (proto.Id >= ESkill.SkillMax)
+        if (!proto.Id.IsDefined())
         {
             _logger.LogWarning("Invalid skill id: {SkillId}", skillId);
             return;
@@ -320,14 +321,15 @@ public class PlayerSkills : IPlayerSkills
 
         if (proto.PrerequisiteSkillVnum > 0)
         {
-            if (skill.MasterType == ESkillMasterType.Normal && GetSkillLevel(proto.Id) < proto.PrerequisiteSkillLevel)
+            var prerequisiteSkillLevel = (ESkillLevel)proto.PrerequisiteSkillLevel;
+            if (skill.MasterType == ESkillMasterType.Normal && GetSkillLevel(proto.Id) < prerequisiteSkillLevel)
             {
                 _player.SendChatInfo("You need to learn the prerequisite skill first.");
                 return;
             }
         }
 
-        if (_player.Player.SkillGroup == 0) return;
+        if (!_player.Player.SkillGroup.IsDefined()) return;
 
         if (method == ESkillLevelMethod.Point)
         {
@@ -359,7 +361,7 @@ public class PlayerSkills : IPlayerSkills
             _player.AddPoint(idx, -1);
         }
 
-        SetLevel(proto.Id, (byte)(GetSkillLevel(proto.Id) + 1));
+        SetLevel(proto.Id, GetSkillLevel(proto.Id) + 1);
 
         if (proto.Type != ESkillCategoryType.PassiveSkills)
         {
@@ -369,37 +371,41 @@ public class PlayerSkills : IPlayerSkills
                     if (GetSkillLevel(proto.Id) >= MinimumSkillLevelUpgrade)
                     {
                         //todo: implement reset scroll quest flag
-                        var random = CoreRandom.GenerateInt32(1, 21 - Math.Min(20, GetSkillLevel(proto.Id)) + 1);
+                        var effectiveLevel = Min(ESkillLevel.MasterM1, GetSkillLevel(proto.Id));
+                        var levelsUnder = ESkillLevel.MasterM2 - effectiveLevel;
+                        var random = CoreRandom.GenerateInt32(1, levelsUnder + 1);
                         if (random == 1)
                         {
-                            SetLevel(proto.Id, 20);
+                            SetLevel(proto.Id, ESkillLevel.MasterM1);
                         }
                     }
 
                     break;
                 case ESkillMasterType.Master:
-                    if (GetSkillLevel(proto.Id) >= 30)
+                    if (GetSkillLevel(proto.Id) >= ESkillLevel.GrandMasterG1)
                     {
-                        var random = CoreRandom.GenerateInt32(1, 31 - Math.Min(30, GetSkillLevel(proto.Id)) + 1);
+                        var effectiveLevel = Min(ESkillLevel.GrandMasterG1, GetSkillLevel(proto.Id));
+                        var levelsUnder = ESkillLevel.GrandMasterG2 - effectiveLevel;
+                        var random = CoreRandom.GenerateInt32(1, levelsUnder + 1);
                         if (random == 1)
                         {
-                            SetLevel(proto.Id, 30);
+                            SetLevel(proto.Id, ESkillLevel.GrandMasterG1);
                         }
                     }
 
                     break;
                 case ESkillMasterType.GrandMaster:
-                    if (GetSkillLevel(proto.Id) >= SkillMaxLevel)
+                    if (GetSkillLevel(proto.Id) >= ESkillLevel.PerfectMasterP)
                     {
-                        SetLevel(proto.Id, SkillMaxLevel);
+                        SetLevel(proto.Id, ESkillLevel.PerfectMasterP);
                     }
 
                     break;
             }
         }
 
-        _logger.LogInformation("Skill up: {SkillId} ({Name}) [{Master}] -> {Level}", proto.Id, proto.Name,
-            skill.MasterType, GetSkillLevel(proto.Id));
+        _logger.LogInformation("Skill up: {SkillId} ({Name}) [{Master}] -> {Level} ({LevelName})", proto.Id, proto.Name,
+            skill.MasterType, (byte)GetSkillLevel(proto.Id), GetSkillLevel(proto.Id).GetName());
 
         _player.SendPoints();
         SendSkillLevelsPacket();
@@ -417,7 +423,7 @@ public class PlayerSkills : IPlayerSkills
 
         if (proto.Type == ESkillCategoryType.PassiveSkills)
         {
-            return GetSkillLevel(skillId) < proto.MaxLevel;
+            return GetSkillLevel(skillId) < (ESkillLevel)proto.MaxLevel;
         }
 
         if (proto.Type == ESkillCategoryType.HorseSkills)
@@ -426,16 +432,19 @@ public class PlayerSkills : IPlayerSkills
                    _player.Player.PlayerClass.GetClass()== EPlayerClass.Ninja;
         }
 
-        if (_player.Player.SkillGroup == 0) return false;
+        if (!_player.Player.SkillGroup.IsDefined()) return false;
 
         return (int)proto.Type - 1 == (byte)_player.Player.PlayerClass;
     }
 
-    private int GetSkillLevel(ESkill skillId)
+    private ESkillLevel GetSkillLevel(ESkill skillId)
     {
-        if (skillId >= ESkill.SkillMax) return 0;
+        if (!skillId.IsDefined() || !_skills.TryGetValue(skillId, out var skill))
+        {
+            return ESkillLevel.Unlearned;
+        }
 
-        return Math.Min(SkillMaxLevel, _skills.TryGetValue(skillId, out var skill) ? skill.Level : 0);
+        return Min(SkillMaxLevel, skill.Level);
     }
 
     public bool CanUse(ESkill skillId)
@@ -444,11 +453,11 @@ public class PlayerSkills : IPlayerSkills
 
         var skillGroup = _player.Player.SkillGroup;
 
-        if (skillGroup > 0) // if skill group was chosen
+        if (skillGroup.IsDefined()) // if skill group was chosen
         {
             for (var i = 0; i < SkillCount; i++)
             {
-                if (SkillList[(int)_player.Player.PlayerClass, skillGroup - 1, i] == skillId)
+                if (SkillList[(int)_player.Player.PlayerClass, (byte)skillGroup - 1, i] == skillId)
                 {
                     return true;
                 }
@@ -546,16 +555,16 @@ public class PlayerSkills : IPlayerSkills
                 SkillUp(skillId, ESkillLevelMethod.Book);
                 skill.ReadsRequired = skill.Level switch
                 {
-                    21 => 2,
-                    22 => 3,
-                    23 => 4,
-                    24 => 5,
-                    25 => 6,
-                    26 => 7,
-                    27 => 8,
-                    28 => 9,
-                    29 => 10,
-                    30 => 1,
+                    ESkillLevel.MasterM2 => 2,
+                    ESkillLevel.MasterM3 => 3,
+                    ESkillLevel.MasterM4 => 4,
+                    ESkillLevel.MasterM5 => 5,
+                    ESkillLevel.MasterM6 => 6,
+                    ESkillLevel.MasterM7 => 7,
+                    ESkillLevel.MasterM8 => 8,
+                    ESkillLevel.MasterM9 => 9,
+                    ESkillLevel.MasterM10 => 10,
+                    ESkillLevel.GrandMasterG1 => 1,
                     _ => 0
                 };
             }
@@ -581,7 +590,7 @@ public class PlayerSkills : IPlayerSkills
 
     public void SetSkillNextReadTime(ESkill skillId, int time)
     {
-        if (skillId >= ESkill.SkillMax)
+        if (!skillId.IsDefined())
         {
             return;
         }
@@ -596,14 +605,14 @@ public class PlayerSkills : IPlayerSkills
         var levels = new SkillLevels();
         for (var i = 0; i < SkillMaxNum; i++)
         {
-            levels.Skills[i] = new PlayerSkill {Level = 0, MasterType = ESkillMasterType.Normal, NextReadTime = 0};
+            levels.Skills[i] = new PlayerSkill {Level = ESkillLevel.Unlearned, MasterType = ESkillMasterType.Normal, NextReadTime = 0};
         }
 
         for (var i = 0; i < _skills.Count; i++)
         {
             var skill = _skills.ElementAt(i);
 
-            levels.Skills[(uint)skill.Key] = new PlayerSkill
+            levels.Skills[(byte)skill.Key] = new PlayerSkill
             {
                 Level = skill.Value.Level,
                 MasterType = skill.Value.MasterType,
@@ -618,12 +627,12 @@ public class PlayerSkills : IPlayerSkills
     {
         for (var i = 0; i < SkillCount; i++)
         {
-            var skill = SkillList[(int)_player.Player.PlayerClass, _player.Player.SkillGroup - 1, i];
+            var skill = SkillList[(int)_player.Player.PlayerClass.GetClass(), (byte)_player.Player.SkillGroup - 1, i];
             if (skill == 0) continue;
 
             _skills[skill] = new Skill
             {
-                Level = 0,
+                Level = ESkillLevel.Unlearned,
                 MasterType = ESkillMasterType.Normal,
                 NextReadTime = 0,
                 SkillId = skill,
@@ -638,7 +647,7 @@ public class PlayerSkills : IPlayerSkills
         {
             _skills[skill] = new Skill
             {
-                Level = 0,
+                Level = ESkillLevel.Unlearned,
                 MasterType = ESkillMasterType.Normal,
                 NextReadTime = 0,
                 SkillId = skill,

@@ -1,6 +1,6 @@
 ﻿namespace QuantumCore.API.Game.Types.Entities;
 
-public enum EEntityType
+public enum EEntityType : byte
 {
     Monster = 0,
     Npc = 1,

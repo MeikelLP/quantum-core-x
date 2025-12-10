@@ -30,8 +30,8 @@ public class AttackHandler : IGamePacketHandler<Attack>
             return Task.CompletedTask;
         }
 
-        _logger.LogDebug("Attack from {Attacker} with type {AttackType} target {TargetId}", attacker.Name,
-            ctx.Packet.AttackType, ctx.Packet.Vid);
+        _logger.LogDebug("Attack from {Attacker} with type {SkillMotion} target {TargetId}", attacker.Name,
+            ctx.Packet.SkillMotion, ctx.Packet.Vid);
 
         attacker.Attack(entity);
         return Task.CompletedTask;

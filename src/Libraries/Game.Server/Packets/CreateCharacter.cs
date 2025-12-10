@@ -1,3 +1,4 @@
+using QuantumCore.API.Game.Types.Players;
 using QuantumCore.Networking;
 
 namespace QuantumCore.Game.Packets
@@ -11,8 +12,9 @@ namespace QuantumCore.Game.Packets
         [Field(1, Length = PlayerConstants.PLAYER_NAME_MAX_LENGTH)]
         public string Name { get; set; } = "";
 
-        [Field(2)] public ushort Class { get; set; }
-        [Field(3)] public byte Appearance { get; set; }
-        [Field(4, ArrayLength = 4)] public byte[] Unknown { get; set; } = new byte[4];
+        [Field(2)] public EPlayerClassGendered Class { get; set; }
+        [Field(3)] public byte ReservedByteForClass { get; set; }
+        [Field(4)] public byte Appearance { get; set; }
+        [Field(5, ArrayLength = 4)] public byte[] Unknown { get; set; } = new byte[4];
     }
 }

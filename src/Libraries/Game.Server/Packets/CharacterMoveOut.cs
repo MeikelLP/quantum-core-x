@@ -1,4 +1,5 @@
-﻿using QuantumCore.Networking;
+﻿using QuantumCore.API.Game.Types.Players;
+using QuantumCore.Networking;
 
 namespace QuantumCore.Game.Packets
 {
@@ -6,7 +7,7 @@ namespace QuantumCore.Game.Packets
     [PacketGenerator]
     public partial class CharacterMoveOut
     {
-        [Field(0)] public byte MovementType { get; set; }
+        [Field(0)] public CharacterMovementType MovementType { get; set; }
         [Field(1)] public byte Argument { get; set; }
         [Field(2)] public byte Rotation { get; set; }
         [Field(3)] public uint Vid { get; set; }

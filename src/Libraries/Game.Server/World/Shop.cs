@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
-using QuantumCore.API.Game.Types;
+using QuantumCore.API.Game.Types.Entities;
 using QuantumCore.API.Game.World;
 using QuantumCore.Core.Utils;
 using QuantumCore.Game.Packets.General;

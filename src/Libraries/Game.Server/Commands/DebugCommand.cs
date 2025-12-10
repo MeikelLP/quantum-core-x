@@ -1,5 +1,5 @@
 ﻿using QuantumCore.API.Game;
-using QuantumCore.API.Game.Types;
+using QuantumCore.API.Game.Types.Entities;
 
 namespace QuantumCore.Game.Commands
 {

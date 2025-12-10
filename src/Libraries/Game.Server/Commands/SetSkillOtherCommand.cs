@@ -1,6 +1,5 @@
 ﻿using CommandLine;
 using QuantumCore.API.Game;
-using QuantumCore.API.Game.Skills;
 using QuantumCore.API.Game.Types.Skills;
 
 namespace QuantumCore.Game.Commands;
@@ -28,5 +27,5 @@ public class SetSkillOtherCommandOptions
 {
     [Value(0, Required = true)] public string Target { get; set; } = "";
     [Value(1, Required = true)] public ESkill SkillId { get; set; }
-    [Value(2, Required = true)] public byte Level { get; set; }
+    [Value(2, Required = true)] public ESkillLevel Level { get; set; }
 }

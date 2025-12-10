@@ -1,4 +1,5 @@
 ﻿using QuantumCore.API.Core.Models;
+using QuantumCore.API.Game.Types.Entities;
 
 namespace QuantumCore.API;
 

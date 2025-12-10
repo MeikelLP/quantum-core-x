@@ -9,11 +9,11 @@ public interface IPlayerSkills
 
     ISkill? this[ESkill skillId] { get; }
 
-    void SetSkillGroup(byte skillGroup);
+    void SetSkillGroup(ESkillGroup skillGroup);
     void ClearSkills();
     void ClearSubSkills();
     void Reset(ESkill skillId);
-    void SetLevel(ESkill skillId, byte level);
+    void SetLevel(ESkill skillId, ESkillLevel level);
     void SkillUp(ESkill skillId, ESkillLevelMethod method = ESkillLevelMethod.Point);
     bool CanUse(ESkill skillId);
 

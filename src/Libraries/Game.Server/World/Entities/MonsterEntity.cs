@@ -2,10 +2,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
-using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.Types.Combat;
 using QuantumCore.API.Game.Types.Entities;
 using QuantumCore.API.Game.Types.Monsters;
+using QuantumCore.API.Game.Types.Players;
 using QuantumCore.API.Game.World;
 using QuantumCore.API.Game.World.AI;
 using QuantumCore.Core.Utils;
@@ -144,7 +144,7 @@ namespace QuantumCore.Game.World.Entities
             {
                 Vid = Vid,
                 Rotation = (byte)(Rotation / 5),
-                Argument = (byte)CharacterMove.CharacterMovementType.Wait,
+                Argument = (byte)CharacterMovementType.Wait,
                 PositionX = TargetPositionX,
                 PositionY = TargetPositionY,
                 Time = (uint)GameServer.Instance.ServerTime,
@@ -323,7 +323,7 @@ namespace QuantumCore.Game.World.Entities
             connection.Send(new SpawnCharacter
             {
                 Vid = Vid,
-                CharacterType = Proto.Type,
+                CharacterType = (EEntityType)Proto.Type,
                 Angle = Rotation,
                 PositionX = PositionX,
                 PositionY = PositionY,

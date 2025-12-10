@@ -48,7 +48,7 @@ public class ItemUseHandler : IGamePacketHandler<ItemUse>
             return;
         }
 
-        if (ctx.Packet.Window == (byte) WindowType.Inventory && ctx.Packet.Position >= player.Inventory.Size)
+        if (ctx.Packet.Window == WindowType.Inventory && ctx.Packet.Position >= player.Inventory.Size)
         {
             player.RemoveItem(item);
             if (await player.Inventory.PlaceItem(item))
@@ -94,7 +94,7 @@ public class ItemUseHandler : IGamePacketHandler<ItemUse>
                 else
                 {
                     player.RemoveItem(item);
-                    player.SetItem(item, (byte) WindowType.Inventory, (ushort) wearSlot);
+                    player.SetItem(item, WindowType.Inventory, (ushort) wearSlot);
                     player.SendRemoveItem(ctx.Packet.Window, ctx.Packet.Position);
                     player.SendItem(item);
                 }

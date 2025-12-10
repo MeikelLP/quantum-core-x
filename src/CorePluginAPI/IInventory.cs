@@ -1,12 +1,13 @@
 ﻿using System.Collections.ObjectModel;
 using QuantumCore.API.Core.Models;
+using QuantumCore.API.Game.Types.Items;
 
 namespace QuantumCore.API;
 
 public interface IInventory
 {
     uint Owner { get; }
-    byte Window { get; }
+    WindowType Window { get; }
     ReadOnlyCollection<ItemInstance> Items { get; }
     IEquipment EquipmentWindow { get; }
     long Size { get; }

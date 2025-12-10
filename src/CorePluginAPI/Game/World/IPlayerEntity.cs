@@ -1,9 +1,12 @@
 using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game.Skills;
 using QuantumCore.API.Game.Types;
+using QuantumCore.API.Game.Types.Entities;
+using QuantumCore.API.Game.Types.Items;
 using QuantumCore.API.Game.Types.Players;
 using QuantumCore.API.Game.Types.Monsters;
 using QuantumCore.API.Game.Types.Players;
+using QuantumCore.API.Game.Types.Skills;
 
 namespace QuantumCore.API.Game.World
 {
@@ -35,17 +38,17 @@ namespace QuantumCore.API.Game.World
         void DropItem(ItemInstance item, byte count);
         void Pickup(IGroundItem groundItem);
         void DropGold(uint amount);
-        ItemInstance? GetItem(byte window, ushort position);
-        bool IsSpaceAvailable(ItemInstance item, byte window, ushort position);
+        ItemInstance? GetItem(WindowType window, ushort position);
+        bool IsSpaceAvailable(ItemInstance item, WindowType window, ushort position);
         bool IsEquippable(ItemInstance item);
         bool DestroyItem(ItemInstance item);
         void RemoveItem(ItemInstance item);
-        void SetItem(ItemInstance item, byte window, ushort position);
+        void SetItem(ItemInstance item, WindowType window, ushort position);
         void SendBasicData();
         void SendPoints();
         void SendInventory();
         void SendItem(ItemInstance item);
-        void SendRemoveItem(byte window, ushort position);
+        void SendRemoveItem(WindowType window, ushort position);
         void SendCharacter(IConnection connection);
         void SendCharacterAdditional(IConnection connection);
         void SendCharacterUpdate();
@@ -61,7 +64,7 @@ namespace QuantumCore.API.Game.World
         bool HasUniqueItemEquipped(uint itemProtoId);
         bool HasUniqueGroupItemEquipped(uint itemProtoId);
         int GetPremiumRemainSeconds(EPremiumType type);
-        bool IsUsableSkillMotion(int motion);
+        bool IsUsableSkillMotion(ESkill motion);
         Task RefreshGuildAsync();
         void RecalculateStatusPoints();
     }

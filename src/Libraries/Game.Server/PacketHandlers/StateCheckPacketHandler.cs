@@ -1,4 +1,5 @@
 ﻿using QuantumCore.API;
+using QuantumCore.API.Game.Types;
 using QuantumCore.API.PluginTypes;
 using QuantumCore.Game.Packets;
 
@@ -14,8 +15,8 @@ public class StateCheckPacketHandler : IGamePacketHandler<StateCheckPacket>
             {
                 new ServerStatus
                 {
-                    Port = 13001,
-                    Status = 1
+                    Port = 13001,       // TODO: this should be based on `Hosting:Port` config
+                    Status = EServerStatus.Online
                 }
             },
             IsSuccess = 1

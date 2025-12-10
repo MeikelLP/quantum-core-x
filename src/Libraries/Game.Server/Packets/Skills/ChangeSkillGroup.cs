@@ -1,4 +1,5 @@
-﻿using QuantumCore.Networking;
+﻿using QuantumCore.API.Game.Types.Skills;
+using QuantumCore.Networking;
 
 namespace QuantumCore.Game.Packets.Skills;
 
@@ -6,5 +7,5 @@ namespace QuantumCore.Game.Packets.Skills;
 [PacketGenerator]
 public partial class ChangeSkillGroup
 {
-    [Field(0)] public byte SkillGroup { get; set; }
+    [Field(0)] public ESkillGroup SkillGroup { get; set; }
 }

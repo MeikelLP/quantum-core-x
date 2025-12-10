@@ -1,6 +1,6 @@
 ﻿namespace QuantumCore.API.Game.Types.Items;
 
-public enum WindowType
+public enum WindowType : byte
 {
     Inventory = 1
 }

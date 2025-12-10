@@ -12,6 +12,7 @@ using QuantumCore.API.Game.Types.Entities;
 using QuantumCore.API.Game.Types.Items;
 using QuantumCore.API.Game.Types.Monsters;
 using QuantumCore.API.Game.Types.Players;
+using QuantumCore.API.Game.Types.Skills;
 using QuantumCore.API.Game.World;
 using QuantumCore.Caching;
 using QuantumCore.Extensions;
@@ -120,7 +121,7 @@ namespace QuantumCore.Game.World.Entities
             _scope = serviceProvider.CreateScope();
             _itemRepository = _scope.ServiceProvider.GetRequiredService<IItemRepository>();
             Inventory = new Inventory(itemManager, _cacheManager, _logger, _itemRepository, player.Id,
-                (byte)WindowType.Inventory, InventoryConstants.DEFAULT_INVENTORY_WIDTH,
+                WindowType.Inventory, InventoryConstants.DEFAULT_INVENTORY_WIDTH,
                 InventoryConstants.DEFAULT_INVENTORY_HEIGHT, InventoryConstants.DEFAULT_INVENTORY_PAGES);
             Inventory.OnSlotChanged += Inventory_OnSlotChanged;
             Player = player;
@@ -970,7 +971,7 @@ namespace QuantumCore.Game.World.Entities
             return 0; // todo: implement premium system
         }
 
-        public bool IsUsableSkillMotion(int motion)
+        public bool IsUsableSkillMotion(ESkill motion)
         {
             // todo: check if riding, mining or fishing
             return true;
@@ -1012,11 +1013,11 @@ namespace QuantumCore.Game.World.Entities
             AddPoint(EPoint.PlayTime, (int)totalSessionTime);
         }
 
-        public ItemInstance? GetItem(byte window, ushort position)
+        public ItemInstance? GetItem(WindowType window, ushort position)
         {
             switch (window)
             {
-                case (byte)WindowType.Inventory:
+                case WindowType.Inventory:
                     if (position >= Inventory.Size)
                     {
                         // Equipment
@@ -1032,11 +1033,11 @@ namespace QuantumCore.Game.World.Entities
             return null;
         }
 
-        public bool IsSpaceAvailable(ItemInstance item, byte window, ushort position)
+        public bool IsSpaceAvailable(ItemInstance item, WindowType window, ushort position)
         {
             switch (window)
             {
-                case (byte)WindowType.Inventory:
+                case WindowType.Inventory:
                     if (position >= Inventory.Size)
                     {
                         // Equipment
@@ -1116,7 +1117,7 @@ namespace QuantumCore.Game.World.Entities
         {
             switch (item.Window)
             {
-                case (byte)WindowType.Inventory:
+                case WindowType.Inventory:
                     if (item.Position >= Inventory.Size)
                     {
                         // Equipment
@@ -1137,11 +1138,11 @@ namespace QuantumCore.Game.World.Entities
             }
         }
 
-        public void SetItem(ItemInstance item, byte window, ushort position)
+        public void SetItem(ItemInstance item, WindowType window, ushort position)
         {
             switch (window)
             {
-                case (byte)WindowType.Inventory:
+                case WindowType.Inventory:
                     if (position >= Inventory.Size)
                     {
                         // Equipment
@@ -1195,7 +1196,7 @@ namespace QuantumCore.Game.World.Entities
             {
                 Vid = Vid,
                 Name = Player.Name,
-                Class = (ushort)Player.PlayerClass,
+                Class = Player.PlayerClass,
                 PositionX = PositionX,
                 PositionY = PositionY,
                 Empire = Empire,
@@ -1236,7 +1237,7 @@ namespace QuantumCore.Game.World.Entities
             Connection.Send(p);
         }
 
-        public void SendRemoveItem(byte window, ushort position)
+        public void SendRemoveItem(WindowType window, ushort position)
         {
             Connection.Send(new SetItem {Window = window, Position = position, ItemId = 0, Count = 0});
         }
@@ -1246,7 +1247,7 @@ namespace QuantumCore.Game.World.Entities
             connection.Send(new SpawnCharacter
             {
                 Vid = Vid,
-                CharacterType = (byte)EEntityType.Player,
+                CharacterType = EEntityType.Player,
                 Angle = 0,
                 PositionX = PositionX,
                 PositionY = PositionY,

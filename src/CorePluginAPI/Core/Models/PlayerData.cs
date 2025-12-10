@@ -1,5 +1,6 @@
 ﻿using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.Types.Players;
+using QuantumCore.API.Game.Types.Skills;
 
 namespace QuantumCore.API.Core.Models;
 
@@ -9,7 +10,7 @@ public class PlayerData
     public Guid AccountId { get; set; }
     public string Name { get; set; } = "";
     public EPlayerClassGendered PlayerClass { get; set; }
-    public byte SkillGroup { get; set; }
+    public ESkillGroup SkillGroup { get; set; }
     public ulong PlayTime { get; set; }
     public byte Level { get; set; } = 1;
     public uint Experience { get; set; }

@@ -40,7 +40,7 @@ public class DbPlayerSkillsRepository : IDbPlayerSkillsRepository
         
         if (existingSkill != null)
         {
-            existingSkill.Level = skill.Level;
+            existingSkill.Level = (byte)skill.Level;
             existingSkill.MasterType = skill.MasterType;
             existingSkill.NextReadTime = skill.NextReadTime;
             existingSkill.UpdatedAt = DateTime.UtcNow;
@@ -56,7 +56,7 @@ public class DbPlayerSkillsRepository : IDbPlayerSkillsRepository
             PlayerId = skill.PlayerId,
             SkillId = (uint) skill.SkillId,
             MasterType = skill.MasterType,
-            Level = skill.Level,
+            Level = (byte)skill.Level,
             NextReadTime = skill.NextReadTime,
             ReadsRequired = skill.ReadsRequired,
             CreatedAt = DateTime.UtcNow,

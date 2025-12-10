@@ -16,6 +16,7 @@ using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game;
 using QuantumCore.API.Game.Guild;
 using QuantumCore.API.Game.Types;
+using QuantumCore.API.Game.Types.Entities;
 using QuantumCore.API.Game.Types.Items;
 using QuantumCore.API.Game.Types.Players;
 using QuantumCore.API.Game.Types.Skills;
@@ -117,7 +118,7 @@ public class CommandTests : IAsyncLifetime
             .RuleFor(x => x.PositionX, _ => (int)(10 * Map.MapUnit))
             .RuleFor(x => x.PositionY, _ => (int)(26 * Map.MapUnit))
             .RuleFor(x => x.PlayTime, _ => 0u)
-            .RuleFor(x => x.SkillGroup, _ => (byte)0)
+            .RuleFor(x => x.SkillGroup, _ => (ESkillGroup)0)
             .RuleFor(x => x.PlayerClass, _ => EPlayerClassGendered.WarriorMale)
             .Ignore(x => x.Health)
             .Ignore(x => x.Mana);
@@ -297,7 +298,7 @@ public class CommandTests : IAsyncLifetime
         var item = new ItemInstance { ItemId = 1, Count = 1 };
         var wearSlot = _player.Inventory.EquipmentWindow.GetWearPosition(_itemManager, item.ItemId);
 
-        _player.SetItem(item, (byte)WindowType.Inventory, (ushort)wearSlot);
+        _player.SetItem(item, WindowType.Inventory, (ushort)wearSlot);
 
         await _commandManager.Handle(_connection, "debug_damage");
         // simple calculation just for this test
@@ -757,9 +758,9 @@ public class CommandTests : IAsyncLifetime
         await _commandManager.Handle(_connection, "/setjob 1");
 
         // Assert
-        _player.Player.SkillGroup.Should().Be(1);
+        _player.Player.SkillGroup.Should().Be(ESkillGroup.BranchA);
         ((MockedGameConnection)_connection).SentPackets.Should()
-            .ContainEquivalentOf(new ChangeSkillGroup { SkillGroup = 1 });
+            .ContainEquivalentOf(new ChangeSkillGroup { SkillGroup = ESkillGroup.BranchA });
     }
 
     [Fact]
@@ -775,7 +776,7 @@ public class CommandTests : IAsyncLifetime
         // Assert
         _player.Player.SkillGroup.Should().Be(0);
         ((MockedGameConnection)_connection).SentPackets.Should()
-            .NotContainEquivalentOf(new ChangeSkillGroup { SkillGroup = 1 });
+            .NotContainEquivalentOf(new ChangeSkillGroup { SkillGroup = ESkillGroup.BranchA });
     }
 
     [Fact]
@@ -791,7 +792,7 @@ public class CommandTests : IAsyncLifetime
         // Assert
         _player.Player.SkillGroup.Should().Be(0);
         ((MockedGameConnection)_connection).SentPackets.Should()
-            .NotContainEquivalentOf(new ChangeSkillGroup { SkillGroup = 4 });
+            .NotContainEquivalentOf(new ChangeSkillGroup { SkillGroup = (ESkillGroup)4 });
     }
 
     [Fact]
@@ -807,7 +808,7 @@ public class CommandTests : IAsyncLifetime
         {
             Id = skillId, Type = (ESkillCategoryType)(_player.Player.PlayerClass + 1), Flags = ESkillFlags.Attack
         });
-        _player.Skills.SetSkillGroup(1);
+        _player.Skills.SetSkillGroup(ESkillGroup.BranchA);
 
         // Act
         await _commandManager.Handle(_connection, $"/skillup {(uint)skillId}");
@@ -815,7 +816,7 @@ public class CommandTests : IAsyncLifetime
         // Assert
         var skill = _player.Skills[skillId];
         skill.Should().NotBeNull();
-        skill?.Level.Should().Be(1);
+        skill?.Level.Should().Be(ESkillLevel.Normal01);
     }
 
     [Fact]
@@ -830,8 +831,8 @@ public class CommandTests : IAsyncLifetime
         {
             Id = skillId, Type = (ESkillCategoryType)(_player.Player.PlayerClass + 1), Flags = ESkillFlags.Attack
         });
-        _player.Skills.SetSkillGroup(1);
-        _player.Skills[skillId].Level = 19;
+        _player.Skills.SetSkillGroup(ESkillGroup.BranchA);
+        _player.Skills[skillId].Level = ESkillLevel.Normal19;
         _player.Skills[skillId].MasterType = ESkillMasterType.Normal;
 
         // Act
@@ -840,7 +841,7 @@ public class CommandTests : IAsyncLifetime
         // Assert
         var skill = _player.Skills[skillId];
         skill.Should().NotBeNull();
-        skill?.Level.Should().Be(20);
+        skill?.Level.Should().Be(ESkillLevel.MasterM1);
         skill?.MasterType.Should().Be(ESkillMasterType.Master);
     }
 }

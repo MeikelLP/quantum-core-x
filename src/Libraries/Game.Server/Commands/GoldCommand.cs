@@ -1,6 +1,6 @@
 using CommandLine;
 using QuantumCore.API.Game;
-using QuantumCore.API.Game.Types;
+using QuantumCore.API.Game.Types.Entities;
 using QuantumCore.API.Game.World;
 
 namespace QuantumCore.Game.Commands;

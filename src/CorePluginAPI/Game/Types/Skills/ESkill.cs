@@ -1,6 +1,6 @@
 ﻿namespace QuantumCore.API.Game.Types.Skills;
 
-public enum ESkill : uint
+public enum ESkill : byte
 {
     // Warrior Body
     ThreeWayCut = 1,

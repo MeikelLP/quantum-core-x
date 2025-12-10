@@ -1,6 +1,6 @@
 ﻿using System.Text;
 using QuantumCore.API.Game;
-using QuantumCore.API.Game.Types;
+using QuantumCore.API.Game.Types.Entities;
 using QuantumCore.Game.World;
 
 namespace QuantumCore.Game.Commands;

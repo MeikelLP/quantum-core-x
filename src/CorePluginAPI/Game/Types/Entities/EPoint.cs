@@ -1,4 +1,4 @@
-namespace QuantumCore.API.Game.Types;
+namespace QuantumCore.API.Game.Types.Entities;
 
 public enum EPoint
 {

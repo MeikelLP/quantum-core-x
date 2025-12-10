@@ -4,7 +4,6 @@ using QuantumCore.API.Game.Types.Items;
 using QuantumCore.API.Game.Types.Players;
 using QuantumCore.Caching;
 using QuantumCore.Game.Persistence;
-using QuantumCore.Game.PlayerUtils;
 using static QuantumCore.Game.Extensions.ItemConstants;
 
 namespace QuantumCore.Game.Extensions;
@@ -205,9 +204,9 @@ public static class ItemExtensions
     }
 
     public static async IAsyncEnumerable<ItemInstance> GetItems(this IItemRepository repository,
-        ICacheManager cacheManager, uint player, byte window)
+        ICacheManager cacheManager, uint player, WindowType window)
     {
-        var key = "items:" + player + ":" + window;
+        var key = "items:" + player + ":" + (byte)window;
 
         var list = cacheManager.Server.CreateList<Guid>(key);
 
@@ -269,8 +268,8 @@ public static class ItemExtensions
     /// <param name="owner">Owner the item is given to</param>
     /// <param name="window">Window the item is placed in</param>
     /// <param name="pos">Position of the item in the window</param>
-    public static async Task Set(this ItemInstance item, ICacheManager cacheManager, uint owner, byte window, uint pos,
-        IItemRepository itemRepository)
+    public static async Task Set(this ItemInstance item, ICacheManager cacheManager, uint owner, WindowType window,
+        uint pos, IItemRepository itemRepository)
     {
         var isPlayerDifferent = item.PlayerId != owner;
         var isWindowDifferent = item.Window != window;

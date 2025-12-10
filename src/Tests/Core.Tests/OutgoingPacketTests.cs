@@ -5,6 +5,7 @@ using Bogus;
 using Core.Tests.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using QuantumCore.API.Game.Types.Players;
 using QuantumCore.Extensions;
 using QuantumCore.Game.Packets;
 using QuantumCore.Game.Packets.General;
@@ -49,7 +50,6 @@ public class OutgoingPacketTests
     public void SpawnCharacter()
     {
         var obj = new AutoFaker<SpawnCharacter>()
-            .RuleFor(x => x.Affects, faker => new[] { faker.Random.UInt(), faker.Random.UInt() })
             .Generate();
         var bytes = _serializer.Serialize(obj);
 
@@ -60,12 +60,12 @@ public class OutgoingPacketTests
                 .Concat(BitConverter.GetBytes(obj.PositionX))
                 .Concat(BitConverter.GetBytes(obj.PositionY))
                 .Concat(BitConverter.GetBytes(obj.PositionZ))
-                .Append(obj.CharacterType)
+                .Append((byte)obj.CharacterType)
                 .Concat(BitConverter.GetBytes(obj.Class))
                 .Append(obj.MoveSpeed)
                 .Append(obj.AttackSpeed)
-                .Append(obj.State)
-                .Concat(obj.Affects.SelectMany(BitConverter.GetBytes))
+                .Append((byte)obj.State)
+                .Concat(BitConverter.GetBytes(obj.Affects))
         );
     }
 
@@ -89,7 +89,7 @@ public class OutgoingPacketTests
 
         bytes.Should().Equal(
             new byte[] { 0x03 }
-                .Append(obj.MovementType)
+                .Append((byte)obj.MovementType)
                 .Append(obj.Argument)
                 .Append(obj.Rotation)
                 .Concat(BitConverter.GetBytes(obj.Vid))
@@ -141,14 +141,14 @@ public class OutgoingPacketTests
                 .Append(obj.Character.Dx)
                 .Append(obj.Character.Iq)
                 .Concat(BitConverter.GetBytes(obj.Character.BodyPart))
-                .Append(obj.Character.NameChange)
-                .Concat(BitConverter.GetBytes(obj.Character.HairPort))
+                .Append((byte)obj.Character.NameChange)
+                .Concat(BitConverter.GetBytes(obj.Character.HairPart))
                 .Concat(BitConverter.GetBytes(obj.Character.Unknown))
                 .Concat(BitConverter.GetBytes(obj.Character.PositionX))
                 .Concat(BitConverter.GetBytes(obj.Character.PositionY))
                 .Concat(BitConverter.GetBytes(obj.Character.Ip))
                 .Concat(BitConverter.GetBytes(obj.Character.Port))
-                .Append(obj.Character.SkillGroup)
+                .Append((byte)obj.Character.SkillGroup)
         );
     }
 
@@ -222,7 +222,6 @@ public class OutgoingPacketTests
                 {
                     faker.Random.UShort(), faker.Random.UShort(), faker.Random.UShort(), faker.Random.UShort()
                 })
-            .RuleFor(x => x.Affects, faker => new[] { faker.Random.UInt(), faker.Random.UInt() })
             .Generate();
         var bytes = _serializer.Serialize(obj);
 
@@ -232,11 +231,11 @@ public class OutgoingPacketTests
                 .Concat(obj.Parts.SelectMany(BitConverter.GetBytes))
                 .Append(obj.MoveSpeed)
                 .Append(obj.AttackSpeed)
-                .Append(obj.State)
-                .Concat(obj.Affects.SelectMany(BitConverter.GetBytes))
+                .Append((byte)obj.State)
+                .Concat(BitConverter.GetBytes(obj.Affects))
                 .Concat(BitConverter.GetBytes(obj.GuildId))
                 .Concat(BitConverter.GetBytes(obj.RankPoints))
-                .Append(obj.PkMode)
+                .Append((byte)obj.PvpMode)
                 .Concat(BitConverter.GetBytes(obj.MountVnum))
                 .ToArray()
         );
@@ -260,12 +259,12 @@ public class OutgoingPacketTests
 
         bytes.Should().Equal(
             new byte[] { 0x15 }
-                .Append(obj.Window)
+                .Append((byte)obj.Window)
                 .Concat(BitConverter.GetBytes(obj.Position))
                 .Concat(BitConverter.GetBytes(obj.ItemId))
                 .Append(obj.Count)
                 .Concat(BitConverter.GetBytes(obj.Flags))
-                .Concat(BitConverter.GetBytes(obj.AnitFlags))
+                .Concat(BitConverter.GetBytes(obj.AntiFlags))
                 .Concat(BitConverter.GetBytes(obj.Highlight))
                 .Concat(obj.Sockets.SelectMany(BitConverter.GetBytes))
                 .Concat(obj.Bonuses.SelectMany(bonus =>
@@ -380,14 +379,14 @@ public class OutgoingPacketTests
                     .Append(c.Dx)
                     .Append(c.Iq)
                     .Concat(BitConverter.GetBytes(c.BodyPart))
-                    .Append(c.NameChange)
-                    .Concat(BitConverter.GetBytes(c.HairPort))
+                    .Append((byte)c.NameChange)
+                    .Concat(BitConverter.GetBytes(c.HairPart))
                     .Concat(BitConverter.GetBytes(c.Unknown))
                     .Concat(BitConverter.GetBytes(c.PositionX))
                     .Concat(BitConverter.GetBytes(c.PositionY))
                     .Concat(BitConverter.GetBytes(c.Ip))
                     .Concat(BitConverter.GetBytes(c.Port))
-                    .Append(c.SkillGroup)))
+                    .Append((byte)c.SkillGroup)))
                 .Concat(obj.GuildIds.SelectMany(BitConverter.GetBytes))
                 .Concat(obj.GuildNames.SelectMany(Encoding.ASCII.GetBytes))
                 .Concat(BitConverter.GetBytes(obj.Unknown1))
@@ -523,13 +522,14 @@ public class OutgoingPacketTests
         bytes.Should().Equal(
             new byte[] { 0x71 }
                 .Concat(BitConverter.GetBytes(obj.Vid))
-                .Concat(BitConverter.GetBytes(obj.Class))
+                .Append((byte)obj.Class)
+                .Append(obj.ReservedByteForClass)
                 .Concat(Encoding.ASCII.GetBytes(obj.Name))
                 .Concat(BitConverter.GetBytes(obj.PositionX))
                 .Concat(BitConverter.GetBytes(obj.PositionY))
                 .Concat(BitConverter.GetBytes(obj.PositionZ))
                 .Append((byte)obj.Empire)
-                .Append(obj.SkillGroup)
+                .Append((byte)obj.SkillGroup)
         );
     }
 
@@ -554,7 +554,7 @@ public class OutgoingPacketTests
         bytes.Should().Equal(
             new byte[] { 0x87 }
                 .Concat(BitConverter.GetBytes(obj.Vid))
-                .Append(obj.DamageFlags)
+                .Append((byte)obj.DamageFlags)
                 .Concat(BitConverter.GetBytes(obj.Damage))
         );
     }
@@ -581,7 +581,7 @@ public class OutgoingPacketTests
                 .Concat(BitConverter.GetBytes(obj.GuildId))
                 .Concat(BitConverter.GetBytes(obj.Level))
                 .Concat(BitConverter.GetBytes(obj.RankPoints))
-                .Append(obj.PkMode)
+                .Append((byte)obj.PvpMode)
                 .Concat(BitConverter.GetBytes(obj.MountVnum))
         );
     }
