@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Logging;
 using QuantumCore.API;
+using QuantumCore.API.Game.Types;
 using QuantumCore.API.PluginTypes;
 using QuantumCore.Game.Packets;
 
@@ -28,7 +29,7 @@ public class ChatIncomingHandler : IGamePacketHandler<ChatIncoming>
             return;
         }
 
-        if (ctx.Packet.MessageType == ChatMessageTypes.Normal)
+        if (ctx.Packet.MessageType == ChatMessageType.Normal)
         {
             if (ctx.Packet.Message.StartsWith('/'))
             {
@@ -42,7 +43,7 @@ public class ChatIncomingHandler : IGamePacketHandler<ChatIncoming>
             }
         }
 
-        if (ctx.Packet.MessageType == ChatMessageTypes.Shout)
+        if (ctx.Packet.MessageType == ChatMessageType.Shout)
         {
             // todo check 15 seconds cooldown
             var message = ctx.Connection.Player.Name + ": " + ctx.Packet.Message;

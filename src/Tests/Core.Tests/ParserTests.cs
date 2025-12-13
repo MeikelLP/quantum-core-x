@@ -5,6 +5,7 @@ using Microsoft.Extensions.FileProviders.Physical;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using QuantumCore.API;
+using QuantumCore.API.Game.Types.Monsters;
 using QuantumCore.API.Game.World;
 using QuantumCore.Game;
 using QuantumCore.Game.Drops;

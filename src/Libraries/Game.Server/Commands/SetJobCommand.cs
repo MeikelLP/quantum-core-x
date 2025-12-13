@@ -1,6 +1,7 @@
 ﻿using CommandLine;
+using EnumsNET;
 using QuantumCore.API.Game;
-using QuantumCore.Game.Skills;
+using QuantumCore.API.Game.Types.Skills;
 
 namespace QuantumCore.Game.Commands;
 
@@ -9,16 +10,13 @@ public class SetJobCommand : ICommandHandler<SetJobCommandOptions>
 {
     public Task ExecuteAsync(CommandContext<SetJobCommandOptions> context)
     {
-        if (context.Arguments.Job is 0 or > PlayerSkills.SkillGroupMaxNum)
+        if (!Enums.TryToObject<ESkillGroup>(context.Arguments.Job, out var job, EnumValidation.IsDefined))
         {
             context.Player.SendChatInfo("Job not valid");
             return Task.CompletedTask;
         }
 
-        var player = context.Player;
-        var job = context.Arguments.Job;
-
-        player.Skills.SetSkillGroup(job);
+        context.Player.Skills.SetSkillGroup(job);
 
         return Task.CompletedTask;
     }

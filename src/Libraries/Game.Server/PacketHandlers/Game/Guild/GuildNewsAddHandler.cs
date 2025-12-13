@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.Game.Guild;
+using QuantumCore.API.Game.Types.Guild;
 using QuantumCore.API.PluginTypes;
 using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Packets.Guild;
@@ -36,7 +37,7 @@ public class GuildNewsAddHandler : IGamePacketHandler<GuildNewsAddPacket>
             return;
         }
 
-        if (!await _guildManager.HasPermissionAsync(player.Id, GuildRankPermission.ModifyNews))
+        if (!await _guildManager.HasPermissionAsync(player.Id, GuildRankPermissions.ModifyNews))
         {
             ctx.Connection.Player.SendChatInfo("You don't have permission to create guild news.");
             return;

@@ -1,4 +1,5 @@
 ﻿using QuantumCore.API.Core.Models;
+using QuantumCore.API.Game.Types.Quest;
 using QuantumCore.API.Game.World;
 
 namespace QuantumCore.Game.Quest;

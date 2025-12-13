@@ -35,7 +35,7 @@ public class SelectGameCharacterHandler : IGamePacketHandler<SelectCharacter>
         var accountId = ctx.Connection.AccountId.Value;
 
         // Let the client load the game
-        ctx.Connection.SetPhase(EPhases.Loading);
+        ctx.Connection.SetPhase(EPhase.Loading);
 
         // Load player
         var player = await _playerManager.GetPlayer(accountId, ctx.Packet.Slot);

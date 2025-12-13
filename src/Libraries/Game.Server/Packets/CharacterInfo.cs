@@ -1,4 +1,5 @@
 ﻿using QuantumCore.API.Game.Types;
+using QuantumCore.API.Game.Types.Entities;
 using QuantumCore.Networking;
 
 namespace QuantumCore.Game.Packets
@@ -17,7 +18,7 @@ namespace QuantumCore.Game.Packets
         [Field(4)] public uint GuildId { get; set; }
         [Field(5)] public uint Level { get; set; }
         [Field(6)] public short RankPoints { get; set; }
-        [Field(7)] public byte PkMode { get; set; }
+        [Field(7)] public EPvpMode PvpMode { get; set; }
         [Field(8)] public uint MountVnum { get; set; }
     }
 }

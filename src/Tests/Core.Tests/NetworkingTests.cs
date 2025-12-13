@@ -5,7 +5,8 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Hosting.Internal;
 using Microsoft.Extensions.Logging;
 using QuantumCore;
-using QuantumCore.Game;
+using QuantumCore.API.Game.Types;
+using QuantumCore.API.Game.Types.Skills;
 using QuantumCore.Game.Packets;
 using QuantumCore.Game.Packets.Shop;
 using QuantumCore.Networking;
@@ -39,7 +40,7 @@ public class NetworkingTests
     [Fact]
     public async Task Simple()
     {
-        var obj = new Attack { Unknown = new byte[] { 0, 0 }, Vid = 1_000_000, AttackType = 53 };
+        var obj = new Attack { Unknown = new byte[] { 0, 0 }, Vid = 1_000_000, SkillMotion = (ESkill)53 };
         var size = obj.GetSize();
         var bytes = new byte[size];
         obj.Serialize(bytes);
@@ -69,7 +70,7 @@ public class NetworkingTests
     [Fact]
     public async Task MultipleWithSequence()
     {
-        var obj = new Attack { Vid = 1_000_000, AttackType = 5, Unknown = new byte[] { 0, 0 } };
+        var obj = new Attack { Vid = 1_000_000, SkillMotion = (ESkill)5, Unknown = new byte[] { 0, 0 } };
         var size = obj.GetSize();
         var bytes = new byte[size * 2];
         obj.Serialize(bytes);
@@ -85,7 +86,7 @@ public class NetworkingTests
     [Fact]
     public async Task Dynamic()
     {
-        var obj = new ChatIncoming { MessageType = ChatMessageTypes.Normal, Message = "Hello New World!" };
+        var obj = new ChatIncoming { MessageType = ChatMessageType.Normal, Message = "Hello New World!" };
         var size = obj.GetSize();
         var bytes = new byte[size + 1]; // + 1 due to sequence
         obj.Serialize(bytes);
@@ -102,7 +103,7 @@ public class NetworkingTests
     {
         var obj = new ChatIncoming
         {
-            MessageType = ChatMessageTypes.Normal,
+            MessageType = ChatMessageType.Normal,
             Message = new string(Enumerable.Range(0, 5000).Select(x => 'i').ToArray())
         };
         var size = obj.GetSize();
@@ -118,7 +119,7 @@ public class NetworkingTests
     [Fact]
     public async Task Multiple()
     {
-        var obj = new Attack { Unknown = new byte[] { 0, 0 }, Vid = 1_000_000, AttackType = 53 };
+        var obj = new Attack { Unknown = new byte[] { 0, 0 }, Vid = 1_000_000, SkillMotion = (ESkill)53 };
         var size = obj.GetSize();
         var bytes = new byte[size + size];
         obj.Serialize(bytes);
@@ -135,7 +136,7 @@ public class NetworkingTests
     [Fact]
     public async Task MoreThanBuffer()
     {
-        var obj = new Attack { Unknown = new byte[] { 0, 0 }, Vid = 1_000_000, AttackType = 53 };
+        var obj = new Attack { Unknown = new byte[] { 0, 0 }, Vid = 1_000_000, SkillMotion = (ESkill)53 };
         var size = obj.GetSize();
         var bytes = new byte[size * 3];
         obj.Serialize(bytes);
@@ -173,7 +174,7 @@ public class NetworkingTests
     public async Task DifferentPackets()
     {
         var charDeadObj = new CharacterDead { Vid = 1_000_000 };
-        var attackObj = new Attack { Unknown = new byte[] { 0, 0 }, Vid = 1_000_000, AttackType = 53 };
+        var attackObj = new Attack { Unknown = new byte[] { 0, 0 }, Vid = 1_000_000, SkillMotion = (ESkill)53 };
         var charDeadSize = charDeadObj.GetSize();
         var attackSize = attackObj.GetSize();
         var bytes = new byte[charDeadSize + attackSize];

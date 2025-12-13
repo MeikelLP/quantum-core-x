@@ -1,6 +1,7 @@
 ﻿using System.Collections.Immutable;
 using QuantumCore.API;
 using QuantumCore.API.Game.Guild;
+using QuantumCore.API.Game.Types.Guild;
 using QuantumCore.Game.Packets.Guild;
 
 namespace QuantumCore.Game.Extensions;
@@ -37,7 +38,7 @@ public static class GuildPacketExtensions
     }
 
     public static void SendGuildRankPermissions(this IConnection connection, byte position,
-        GuildRankPermission permissions)
+        GuildRankPermissions permissions)
     {
         connection.Send(new GuildRankPermissionPacket
         {

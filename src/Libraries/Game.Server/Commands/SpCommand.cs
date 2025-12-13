@@ -1,6 +1,6 @@
 ﻿using CommandLine;
 using QuantumCore.API.Game;
-using QuantumCore.API.Game.Types;
+using QuantumCore.API.Game.Types.Entities;
 using QuantumCore.API.Game.World;
 
 namespace QuantumCore.Game.Commands;
@@ -29,7 +29,7 @@ public class SpCommand : ICommandHandler<SpOtherOptions>
         }
         else
         {
-            target.AddPoint(EPoints.Sp, context.Arguments.Value);
+            target.AddPoint(EPoint.Sp, context.Arguments.Value);
             target.SendPoints();
         }
 

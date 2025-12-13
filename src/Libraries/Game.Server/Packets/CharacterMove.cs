@@ -1,4 +1,5 @@
-﻿using QuantumCore.Networking;
+﻿using QuantumCore.API.Game.Types.Players;
+using QuantumCore.Networking;
 
 namespace QuantumCore.Game.Packets
 {
@@ -6,18 +7,7 @@ namespace QuantumCore.Game.Packets
     [PacketGenerator]
     public partial class CharacterMove
     {
-        public enum CharacterMovementType
-        {
-            Wait = 0,
-            Move = 1,
-            Attack = 2,
-            Combo = 3,
-            MobSkill = 4,
-            Max = 6,
-            Skill = 0x80
-        }
-
-        [Field(0)] public byte MovementType { get; set; }
+        [Field(0)] public CharacterMovementType MovementType { get; set; }
         [Field(1)] public byte Argument { get; set; }
         [Field(2)] public byte Rotation { get; set; }
         [Field(3)] public int PositionX { get; set; }

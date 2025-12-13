@@ -1,6 +1,7 @@
 using System.Collections.ObjectModel;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
+using QuantumCore.API.Game.Types.Items;
 using QuantumCore.Caching;
 using QuantumCore.Core.Utils;
 using QuantumCore.Game.Extensions;
@@ -149,7 +150,7 @@ namespace QuantumCore.Game.PlayerUtils
 
         public event EventHandler<SlotChangedEventArgs>? OnSlotChanged;
         public uint Owner { get; private set; }
-        public byte Window { get; private set; }
+        public WindowType Window { get; private set; }
 
         public ReadOnlyCollection<ItemInstance> Items
         {
@@ -174,7 +175,7 @@ namespace QuantumCore.Game.PlayerUtils
         private readonly IItemRepository _itemRepository;
 
         public Inventory(IItemManager itemManager, ICacheManager cacheManager, ILogger logger,
-            IItemRepository itemRepository, uint owner, byte window, ushort width, ushort height, ushort pages)
+            IItemRepository itemRepository, uint owner, WindowType window, ushort width, ushort height, ushort pages)
         {
             Owner = owner;
             Window = window;

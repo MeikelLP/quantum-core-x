@@ -5,6 +5,10 @@ using EnumsNET;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game.Types;
+using QuantumCore.API.Game.Types.Combat;
+using QuantumCore.API.Game.Types.Entities;
+using QuantumCore.API.Game.Types.Monsters;
+using QuantumCore.API.Game.Types.Players;
 using QuantumCore.API.Game.World;
 using QuantumCore.API.Game.World.AI;
 using QuantumCore.Core.Utils;
@@ -255,12 +259,12 @@ namespace QuantumCore.Game.World.AI
                 return false;
             }
 
-            if (localMap.IsAttr(target, EMapAttribute.Block | EMapAttribute.Object))
+            if (localMap.IsAttr(target, EMapAttributes.Block | EMapAttributes.Object))
             {
                 return false;
             }
 
-            if (_entity.IsAttrOnStraightPathTo(target, EMapAttribute.Block | EMapAttribute.Object))
+            if (_entity.IsAttrOnStraightPathTo(target, EMapAttributes.Block | EMapAttributes.Object))
             {
                 return false;
             }
@@ -357,7 +361,7 @@ namespace QuantumCore.Game.World.AI
             // Send attack packet
             var packet = new CharacterMoveOut
             {
-                MovementType = (byte)CharacterMove.CharacterMovementType.Attack,
+                MovementType = CharacterMovementType.Attack,
                 Rotation = (byte)(monster.Rotation / 5),
                 Vid = monster.Vid,
                 PositionX = monster.PositionX,

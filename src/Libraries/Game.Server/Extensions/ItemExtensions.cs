@@ -1,8 +1,9 @@
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
+using QuantumCore.API.Game.Types.Items;
+using QuantumCore.API.Game.Types.Players;
 using QuantumCore.Caching;
 using QuantumCore.Game.Persistence;
-using QuantumCore.Game.PlayerUtils;
 using static QuantumCore.Game.Extensions.ItemConstants;
 
 namespace QuantumCore.Game.Extensions;
@@ -104,7 +105,7 @@ public static class ItemExtensions
         }
     }
 
-    public static EquipmentSlots? GetWearSlot(this IItemManager itemManager, uint itemId)
+    public static EquipmentSlot? GetWearSlot(this IItemManager itemManager, uint itemId)
     {
         var proto = itemManager.GetItem(itemId);
         if (proto == null)
@@ -115,63 +116,63 @@ public static class ItemExtensions
         return proto.GetWearSlot();
     }
 
-    public static EquipmentSlots? GetWearSlot(this ItemData proto)
+    public static EquipmentSlot? GetWearSlot(this ItemData proto)
     {
         if (proto.IsType(EItemType.Costume))
         {
             if (proto.IsSubtype(EItemSubtype.CostumeBody))
             {
-                return EquipmentSlots.Costume;
+                return EquipmentSlot.Costume;
             }
             if (proto.IsSubtype(EItemSubtype.CostumeHair))
             {
-                return EquipmentSlots.Hair;
+                return EquipmentSlot.Hair;
             }
         }
 
         return ((EWearFlags)proto.WearFlags).GetWearSlot();
     }
 
-    private static EquipmentSlots? GetWearSlot(this EWearFlags wearFlags)
+    private static EquipmentSlot? GetWearSlot(this EWearFlags wearFlags)
     {
         if (wearFlags.HasFlag(EWearFlags.Head))
         {
-            return EquipmentSlots.Head;
+            return EquipmentSlot.Head;
         }
 
         if (wearFlags.HasFlag(EWearFlags.Shoes))
         {
-            return EquipmentSlots.Shoes;
+            return EquipmentSlot.Shoes;
         }
 
         if (wearFlags.HasFlag(EWearFlags.Bracelet))
         {
-            return EquipmentSlots.Bracelet;
+            return EquipmentSlot.Bracelet;
         }
 
         if (wearFlags.HasFlag(EWearFlags.Weapon))
         {
-            return EquipmentSlots.Weapon;
+            return EquipmentSlot.Weapon;
         }
 
         if (wearFlags.HasFlag(EWearFlags.Necklace))
         {
-            return EquipmentSlots.Necklace;
+            return EquipmentSlot.Necklace;
         }
 
         if (wearFlags.HasFlag(EWearFlags.Earrings))
         {
-            return EquipmentSlots.Earring;
+            return EquipmentSlot.Earring;
         }
 
         if (wearFlags.HasFlag(EWearFlags.Body))
         {
-            return EquipmentSlots.Body;
+            return EquipmentSlot.Body;
         }
 
         if (wearFlags.HasFlag(EWearFlags.Shield))
         {
-            return EquipmentSlots.Shield;
+            return EquipmentSlot.Shield;
         }
 
         throw new NotImplementedException($"No equipment slot for wear flags: {wearFlags}");
@@ -203,9 +204,9 @@ public static class ItemExtensions
     }
 
     public static async IAsyncEnumerable<ItemInstance> GetItems(this IItemRepository repository,
-        ICacheManager cacheManager, uint player, byte window)
+        ICacheManager cacheManager, uint player, WindowType window)
     {
-        var key = "items:" + player + ":" + window;
+        var key = "items:" + player + ":" + (byte)window;
 
         var list = cacheManager.Server.CreateList<Guid>(key);
 
@@ -267,8 +268,8 @@ public static class ItemExtensions
     /// <param name="owner">Owner the item is given to</param>
     /// <param name="window">Window the item is placed in</param>
     /// <param name="pos">Position of the item in the window</param>
-    public static async Task Set(this ItemInstance item, ICacheManager cacheManager, uint owner, byte window, uint pos,
-        IItemRepository itemRepository)
+    public static async Task Set(this ItemInstance item, ICacheManager cacheManager, uint owner, WindowType window,
+        uint pos, IItemRepository itemRepository)
     {
         var isPlayerDifferent = item.PlayerId != owner;
         var isWindowDifferent = item.Window != window;

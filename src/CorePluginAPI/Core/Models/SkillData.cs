@@ -1,12 +1,12 @@
 ﻿using System.Diagnostics;
-using QuantumCore.API.Game.Skills;
+using QuantumCore.API.Game.Types.Skills;
 
 namespace QuantumCore.API.Core.Models;
 
 [DebuggerDisplay("{Name} ({Id})")]
 public class SkillData
 {
-    public required ESkillIndexes Id { get; set; }
+    public required ESkill Id { get; set; }
     public string Name { get; set; }
     public ESkillCategoryType Type { get; set; }
     public short LevelStep { get; set; }
@@ -20,12 +20,12 @@ public class SkillData
     public string CooldownPoly { get; set; } = "";
     public string MasterBonusPoly { get; set; } = "";
     public string AttackGradePoly { get; set; } = "";
-    public ESkillFlag Flag { get; set; }
-    public ESkillAffectFlag AffectFlag { get; set; } = ESkillAffectFlag.Ymir;
+    public ESkillFlags Flags { get; set; }
+    public EAffectFlags AffectFlag { get; set; } = EAffectFlags.Ymir;
     public string PointOn2 { get; set; } = "None";
     public string PointPoly2 { get; set; } = "";
     public string DurationPoly2 { get; set; } = "";
-    public ESkillAffectFlag AffectFlag2 { get; set; } = ESkillAffectFlag.Ymir;
+    public EAffectFlags AffectFlag2 { get; set; } = EAffectFlags.Ymir;
     public int PrerequisiteSkillVnum { get; set; } = 0;
     public int PrerequisiteSkillLevel { get; set; } = 0;
     public ESkillType SkillType { get; set; } = ESkillType.Normal;

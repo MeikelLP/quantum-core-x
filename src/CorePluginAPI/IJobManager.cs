@@ -1,4 +1,6 @@
-﻿namespace QuantumCore.API;
+﻿using QuantumCore.API.Game.Types.Players;
+
+namespace QuantumCore.API;
 
 public interface IJobManager
 {

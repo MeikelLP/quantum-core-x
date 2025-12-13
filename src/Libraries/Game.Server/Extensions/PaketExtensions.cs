@@ -1,4 +1,5 @@
 ﻿using QuantumCore.API.Core.Models;
+using QuantumCore.API.Game.Types.Players;
 using QuantumCore.Game.Packets;
 
 namespace QuantumCore.Game.Extensions;
@@ -19,8 +20,8 @@ public static class PaketExtensions
             Dx = player.Dx,
             Iq = player.Iq,
             BodyPart = (ushort) player.BodyPart,
-            NameChange = 0,
-            HairPort = (ushort) player.HairPart,
+            NameChange = ENameChangeStatus.Disabled,
+            HairPart = (ushort) player.HairPart,
             PositionX = player.PositionX,
             PositionY = player.PositionY,
             SkillGroup = player.SkillGroup

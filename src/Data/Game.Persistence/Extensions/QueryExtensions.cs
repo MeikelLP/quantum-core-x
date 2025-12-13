@@ -1,8 +1,10 @@
 ﻿using System.Collections.Immutable;
-using QuantumCore.API;
 using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game.Guild;
 using QuantumCore.API.Game.Skills;
+using QuantumCore.API.Game.Types.Items;
+using QuantumCore.API.Game.Types.Players;
+using QuantumCore.API.Game.Types.Skills;
 using QuantumCore.Game.Persistence.Entities;
 using QuantumCore.Game.Persistence.Entities.Guilds;
 
@@ -18,7 +20,7 @@ public static class QueryExtensions
             AccountId = x.AccountId,
             Name = x.Name,
             PlayerClass = (EPlayerClassGendered)x.PlayerClass,
-            SkillGroup = x.SkillGroup,
+            SkillGroup = (ESkillGroup)x.SkillGroup,
             PlayTime = x.PlayTime,
             Level = x.Level,
             Experience = x.Experience,
@@ -57,9 +59,9 @@ public static class QueryExtensions
         return query.Select(x => new Skill
         {
             PlayerId = x.PlayerId,
-            SkillId = (ESkillIndexes)x.SkillId,
+            SkillId = (ESkill)x.SkillId,
             MasterType = x.MasterType,
-            Level = x.Level,
+            Level = (ESkillLevel)x.Level,
             NextReadTime = x.NextReadTime,
             ReadsRequired = x.ReadsRequired
         });
@@ -100,7 +102,7 @@ public static class QueryExtensions
             Id = x.Id,
             PlayerId = x.PlayerId,
             ItemId = x.ItemId,
-            Window = x.Window,
+            Window = (WindowType)x.Window,
             Position = x.Position,
             Count = x.Count
         });

@@ -1,4 +1,6 @@
-﻿namespace QuantumCore.API.Extensions;
+﻿using QuantumCore.API.Game.Types.Players;
+
+namespace QuantumCore.API.Extensions;
 
 public static class PlayerExtensions
 {

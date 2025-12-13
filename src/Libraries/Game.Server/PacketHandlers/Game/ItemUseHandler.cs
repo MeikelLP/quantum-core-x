@@ -1,12 +1,12 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using QuantumCore.API;
-using QuantumCore.API.Game.Skills;
+using QuantumCore.API.Game.Types.Items;
+using QuantumCore.API.Game.Types.Skills;
 using QuantumCore.API.PluginTypes;
 using QuantumCore.Core.Utils;
 using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Packets;
-using QuantumCore.Game.PlayerUtils;
 
 namespace QuantumCore.Game.PacketHandlers.Game;
 
@@ -48,7 +48,7 @@ public class ItemUseHandler : IGamePacketHandler<ItemUse>
             return;
         }
 
-        if (ctx.Packet.Window == (byte) WindowType.Inventory && ctx.Packet.Position >= player.Inventory.Size)
+        if (ctx.Packet.Window == WindowType.Inventory && ctx.Packet.Position >= player.Inventory.Size)
         {
             player.RemoveItem(item);
             if (await player.Inventory.PlaceItem(item))
@@ -94,7 +94,7 @@ public class ItemUseHandler : IGamePacketHandler<ItemUse>
                 else
                 {
                     player.RemoveItem(item);
-                    player.SetItem(item, (byte) WindowType.Inventory, (ushort) wearSlot);
+                    player.SetItem(item, WindowType.Inventory, (ushort) wearSlot);
                     player.SendRemoveItem(ctx.Packet.Window, ctx.Packet.Position);
                     player.SendItem(item);
                 }
@@ -110,7 +110,7 @@ public class ItemUseHandler : IGamePacketHandler<ItemUse>
                 ? itemProto.Sockets[0]
                 : itemProto.Values[0];
 
-            if (!Enum.TryParse<ESkillIndexes>(skillId.ToString(), out var skill))
+            if (!Enum.TryParse<ESkill>(skillId.ToString(), out var skill))
             {
                 _logger.LogWarning("Skill with Id({SkillId}) not defined", skillId);
                 return;

@@ -9,7 +9,7 @@ public partial class ChatOutcoming
 {
     [Field(0)] public ushort Size => (ushort)Message.Length;
 
-    [Field(1)] public ChatMessageTypes MessageType { get; set; }
+    [Field(1)] public ChatMessageType MessageType { get; set; }
 
     [Field(2)] public uint Vid { get; set; }
 

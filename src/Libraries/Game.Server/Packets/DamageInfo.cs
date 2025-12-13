@@ -1,3 +1,4 @@
+using QuantumCore.API.Game.Types.Combat;
 using QuantumCore.Networking;
 
 namespace QuantumCore.Game.Packets
@@ -7,7 +8,7 @@ namespace QuantumCore.Game.Packets
     public partial class DamageInfo
     {
         [Field(0)] public uint Vid { get; set; }
-        [Field(1)] public byte DamageFlags { get; set; }
+        [Field(1)] public EDamageFlags DamageFlags { get; set; }
         [Field(2)] public int Damage { get; set; }
     }
 }

@@ -6,6 +6,9 @@ using NSubstitute;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game.Types;
+using QuantumCore.API.Game.Types.Combat;
+using QuantumCore.API.Game.Types.Entities;
+using QuantumCore.API.Game.Types.Monsters;
 using QuantumCore.API.Game.World;
 using QuantumCore.Game;
 
@@ -105,7 +108,7 @@ public class MobProtoTests
             RegenPercentage = 7,
             Defence = 4,
             AiFlag = 0,
-            RaceFlag = (uint)ERaceFlag.Animal,
+            RaceFlag = (uint)ERaceFlags.Animal,
             ImmuneFlag = 0,
             St = 3,
             Dx = 6,

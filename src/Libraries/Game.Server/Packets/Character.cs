@@ -1,6 +1,5 @@
-﻿#nullable enable
-
-using QuantumCore.API;
+﻿using QuantumCore.API.Game.Types.Players;
+using QuantumCore.API.Game.Types.Skills;
 using QuantumCore.Networking;
 
 namespace QuantumCore.Game.Packets
@@ -20,13 +19,13 @@ namespace QuantumCore.Game.Packets
         [Field(7)] public byte Dx { get; set; }
         [Field(8)] public byte Iq { get; set; }
         [Field(9)] public ushort BodyPart { get; set; }
-        [Field(10)] public byte NameChange { get; set; }
-        [Field(11)] public ushort HairPort { get; set; }
+        [Field(10)] public ENameChangeStatus NameChange { get; set; }
+        [Field(11)] public ushort HairPart { get; set; }
         [Field(12)] public uint Unknown { get; set; }
         [Field(13)] public int PositionX { get; set; }
         [Field(14)] public int PositionY { get; set; }
         [Field(15)] public int Ip { get; set; }
         [Field(16)] public ushort Port { get; set; }
-        [Field(17)] public byte SkillGroup { get; set; }
+        [Field(17)] public ESkillGroup SkillGroup { get; set; }
     }
 }

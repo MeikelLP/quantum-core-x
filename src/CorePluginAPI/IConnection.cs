@@ -6,7 +6,7 @@ namespace QuantumCore.API
     public interface IConnection
     {
         Guid Id { get; }
-        EPhases Phase { get; set; }
+        EPhase Phase { get; set; }
         Task ExecuteTask { get; }
         void Close(bool expected = true);
         void Send<T>(T packet) where T : IPacketSerializable;

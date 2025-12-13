@@ -1,4 +1,5 @@
-﻿using QuantumCore.Networking;
+﻿using QuantumCore.API.Game.Types;
+using QuantumCore.Networking;
 
 namespace QuantumCore.Game.Packets;
 
@@ -17,5 +18,5 @@ public class ServerStatus
 {
     [Field(0)] public short Port { get; set; }
 
-    [Field(1)] public byte Status { get; set; }
+    [Field(1)] public EServerStatus Status { get; set; }
 }

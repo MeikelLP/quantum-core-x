@@ -1,4 +1,5 @@
 ﻿using QuantumCore.API.Core.Models;
+using QuantumCore.API.Game.Types.Items;
 using QuantumCore.API.Game.World;
 
 namespace QuantumCore.API;
@@ -17,7 +18,7 @@ public interface IEquipment
     ItemInstance? Hair { get; }
     bool SetItem(ItemInstance item);
     bool SetItem(ItemInstance item, ushort position);
-    ItemInstance? GetItem(EquipmentSlots slot);
+    ItemInstance? GetItem(EquipmentSlot slot);
     ItemInstance? GetItem(ushort position);
     bool RemoveItem(ItemInstance item);
     void Send(IPlayerEntity player);

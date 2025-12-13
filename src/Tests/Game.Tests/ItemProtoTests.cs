@@ -5,9 +5,10 @@ using Microsoft.Extensions.FileProviders.Physical;
 using NSubstitute;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
+using QuantumCore.API.Game.Types.Items;
+using QuantumCore.API.Game.Types.Monsters;
 using QuantumCore.Game;
 using QuantumCore.Game.Extensions;
-using QuantumCore.Game.PlayerUtils;
 
 namespace Game.Tests;
 
@@ -79,7 +80,7 @@ public class ItemProtoTests
     {
         await _itemManager.LoadAsync();
         var item = _itemManager.GetItem(10);
-        var value = item.GetApplyValue(EApplyType.AttackSpeed);
+        var value = item!.GetApplyValue(EApplyType.AttackSpeed);
         value.Should().Be(22);
     }
 }

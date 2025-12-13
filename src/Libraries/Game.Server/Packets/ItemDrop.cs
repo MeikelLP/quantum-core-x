@@ -1,4 +1,5 @@
-﻿using QuantumCore.Networking;
+﻿using QuantumCore.API.Game.Types.Items;
+using QuantumCore.Networking;
 
 namespace QuantumCore.Game.Packets;
 
@@ -6,7 +7,7 @@ namespace QuantumCore.Game.Packets;
 [PacketGenerator]
 public partial class ItemDrop
 {
-    [Field(0)] public byte Window { get; set; }
+    [Field(0)] public WindowType Window { get; set; }
 
     [Field(1)] public ushort Position { get; set; }
 

@@ -2,6 +2,7 @@
 
 using Microsoft.EntityFrameworkCore;
 using QuantumCore.API.Core.Models;
+using QuantumCore.API.Game.Types.Items;
 using QuantumCore.Caching;
 using QuantumCore.Game.Persistence.Entities;
 using QuantumCore.Game.Persistence.Extensions;
@@ -10,7 +11,7 @@ namespace QuantumCore.Game.Persistence;
 
 public interface IItemRepository
 {
-    Task<IEnumerable<Guid>> GetItemIdsForPlayerAsync(uint playerId, byte window);
+    Task<IEnumerable<Guid>> GetItemIdsForPlayerAsync(uint playerId, WindowType window);
     Task<ItemInstance?> GetItemAsync(Guid id);
     Task DeletePlayerItemsAsync(uint playerId);
     Task DeletePlayerItemAsync(uint playerId, uint itemId);
@@ -28,10 +29,10 @@ public class ItemRepository : IItemRepository
         _db = db;
     }
 
-    public async Task<IEnumerable<Guid>> GetItemIdsForPlayerAsync(uint playerId, byte window)
+    public async Task<IEnumerable<Guid>> GetItemIdsForPlayerAsync(uint playerId, WindowType window)
     {
         return await _db.Items
-            .Where(x => x.PlayerId == playerId && x.Window == window)
+            .Where(x => x.PlayerId == playerId && x.Window == (byte)window)
             .Select(x => x.Id)
             .ToArrayAsync();
     }
@@ -62,7 +63,7 @@ public class ItemRepository : IItemRepository
                 .ExecuteUpdateAsync(p => p
                     .SetProperty(x => x.PlayerId, x => item.PlayerId)
                     .SetProperty(x => x.Count, x => item.Count)
-                    .SetProperty(x => x.Window, x => item.Window)
+                    .SetProperty(x => x.Window, x => (byte)item.Window)
                     .SetProperty(x => x.Position, x => item.Position)
                 );
         }
@@ -73,7 +74,7 @@ public class ItemRepository : IItemRepository
                 Id = Guid.NewGuid(),
                 PlayerId = item.PlayerId,
                 ItemId = item.ItemId,
-                Window = item.Window,
+                Window = (byte)item.Window,
                 Position = item.Position,
                 Count = item.Count,
                 CreatedAt = DateTime.UtcNow,
