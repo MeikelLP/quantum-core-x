@@ -1,4 +1,4 @@
-﻿using QuantumCore.API;
+﻿using QuantumCore.API.Game.Types.Players;
 using QuantumCore.Networking;
 
 namespace QuantumCore.Game.Packets.Guild;

@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using System.Drawing;
 using QuantumCore.API.Core.Utils;
+using QuantumCore.API.Game.Types.Entities;
 using QuantumCore.API.Game.World;
 
 namespace QuantumCore.Core.Utils

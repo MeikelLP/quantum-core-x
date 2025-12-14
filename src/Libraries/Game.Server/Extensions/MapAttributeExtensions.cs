@@ -1,6 +1,6 @@
 using System.Numerics;
 using QuantumCore.API;
-using QuantumCore.API.Core.Models;
+using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.World;
 using QuantumCore.Game.World;
 
@@ -8,13 +8,13 @@ namespace QuantumCore.Game.Extensions;
 
 internal static class MapAttributeExtensions
 {
-    public static bool PositionIsAttr(this IEntity entity, EMapAttribute flags)
+    public static bool PositionIsAttr(this IEntity entity, EMapAttributes flags)
     {
         return entity.Map is Map localMap && localMap.IsAttr(entity.Coordinates(), flags);
     }
     
     // TODO: optimize / improve this function for better AI following around obstacles
-    public static bool IsAttrOnStraightPathTo(this IEntity entity, Coordinates endCoords, EMapAttribute flags)
+    public static bool IsAttrOnStraightPathTo(this IEntity entity, Coordinates endCoords, EMapAttributes flags)
     {
         if (entity.Map is not Map localMap)
             return false;

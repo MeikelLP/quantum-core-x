@@ -1,6 +1,6 @@
 ﻿using EnumsNET;
 using QuantumCore.API.Game;
-using QuantumCore.API.Game.Skills;
+using QuantumCore.API.Game.Types.Skills;
 using QuantumCore.Game.Skills;
 
 namespace QuantumCore.Game.Commands;
@@ -10,7 +10,7 @@ public class AllSkillsMasterCommand : ICommandHandler
 {
     public Task ExecuteAsync(CommandContext context)
     {
-        foreach (var skill in Enums.GetValues<ESkillIndexes>())
+        foreach (var skill in Enums.GetValues<ESkill>())
         {
             if (context.Player.Skills.CanUse(skill))
             {

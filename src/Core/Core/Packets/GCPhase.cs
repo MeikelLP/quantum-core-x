@@ -7,6 +7,6 @@ namespace QuantumCore.Core.Packets
     [PacketGenerator]
     public partial class GCPhase
     {
-        [Field(0)] public EPhases Phase { get; set; }
+        [Field(0)] public EPhase Phase { get; set; }
     }
 }

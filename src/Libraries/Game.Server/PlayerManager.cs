@@ -4,6 +4,7 @@ using Microsoft.Extensions.Options;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game.Types;
+using QuantumCore.API.Game.Types.Players;
 using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Persistence;
 

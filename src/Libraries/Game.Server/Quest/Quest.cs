@@ -1,6 +1,7 @@
 using System.Diagnostics;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
+using QuantumCore.API.Game.Types.Quest;
 using QuantumCore.API.Game.World;
 using QuantumCore.Game.Packets.Quest;
 using QuantumCore.Game.World.Entities;

@@ -1,20 +1,17 @@
 using System.Net;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game.Guild;
 using QuantumCore.API.Game.Types;
+using QuantumCore.API.Game.Types.Players;
 using QuantumCore.API.Game.World;
 using QuantumCore.Auth.Cache;
 using QuantumCore.Caching;
 using QuantumCore.Game;
 using QuantumCore.Game.PacketHandlers;
 using QuantumCore.Game.Packets;
-using QuantumCore.Networking;
-using Xunit;
 
 namespace Game.Tests;
 
@@ -106,7 +103,7 @@ public class TokenLoginHandlerTests
             serverBase.IpAddress.Returns(connectionInterfaceIp);
             serverBase.Port.Returns(coreHost.Port);
 
-            var phase = EPhases.Handshake;
+            var phase = EPhase.Handshake;
             var assignedAccountId = (Guid?) null;
             var assignedUsername = string.Empty;
 
@@ -114,7 +111,7 @@ public class TokenLoginHandlerTests
             connection.Server.Returns(serverBase);
             connection.BoundIpAddress.Returns(connectionInterfaceIp);
             connection.Phase.Returns(_ => phase);
-            connection.When(x => x.Phase = Arg.Any<EPhases>()).Do(ci => phase = ci.Arg<EPhases>());
+            connection.When(x => x.Phase = Arg.Any<EPhase>()).Do(ci => phase = ci.Arg<EPhase>());
             connection.AccountId.Returns(_ => assignedAccountId);
             connection.When(x => x.AccountId = Arg.Any<Guid?>()).Do(ci => assignedAccountId = ci.Arg<Guid?>());
             connection.Username.Returns(_ => assignedUsername);

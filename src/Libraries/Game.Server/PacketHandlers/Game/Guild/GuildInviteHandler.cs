@@ -1,6 +1,6 @@
 ﻿using QuantumCore.API;
 using QuantumCore.API.Game.Guild;
-using QuantumCore.API.Game.Types;
+using QuantumCore.API.Game.Types.Guild;
 using QuantumCore.API.PluginTypes;
 using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Packets.Guild;
@@ -36,7 +36,7 @@ public class GuildInviteHandler : IGamePacketHandler<GuildInviteIncoming>
         // TODO check if player is in active quest where invite cannot be accepted
         // TODO check if player blocks guild invites
 
-        if (!await _guildManager.HasPermissionAsync(inviter.Player.Id, GuildRankPermission.AddMember,
+        if (!await _guildManager.HasPermissionAsync(inviter.Player.Id, GuildRankPermissions.AddMember,
                 token))
         {
             inviter.SendChatInfo("You do not have permission to invite members.");

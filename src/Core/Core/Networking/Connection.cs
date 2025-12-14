@@ -33,7 +33,7 @@ namespace QuantumCore.Core.Networking
         public Guid Id { get; }
         public uint Handshake { get; private set; }
         public bool Handshaking { get; private set; }
-        public EPhases Phase { get; set; }
+        public EPhase Phase { get; set; }
 
         protected Connection(ILogger logger, PluginExecutor pluginExecutor, IPacketReader packetReader)
         {
@@ -202,7 +202,7 @@ namespace QuantumCore.Core.Networking
             // Generate random handshake and start the handshaking
             Handshake = CoreRandom.GenerateUInt32();
             Handshaking = true;
-            this.SetPhase(EPhases.Handshake);
+            this.SetPhase(EPhase.Handshake);
             SendHandshake();
         }
 

@@ -1,10 +1,9 @@
 using System.Buffers.Binary;
 using System.Numerics;
-using EnumsNET;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
-using QuantumCore.API.Core.Models;
+using QuantumCore.API.Game.Types;
 using QuantumCore.Core.Types;
 using QuantumCore.Game.World;
 
@@ -58,8 +57,8 @@ internal sealed class MapAttributeProvider : IMapAttributeProvider
         // info for debug logging only
         long cellsWithKnownFlags = 0;
         var unknownFlagCounts = new Dictionary<int, long>();
-        var flagCountsDebugInfo = Enum.GetValues<EMapAttribute>()
-            .Where(x => x != EMapAttribute.None)
+        var flagCountsDebugInfo = Enum.GetValues<EMapAttributes>()
+            .Where(x => x != EMapAttributes.None)
             .ToDictionary(attr => attr, _ => 0L);
 
         for (var y = 0; y < sectreesHeight; y++)
@@ -80,14 +79,14 @@ internal sealed class MapAttributeProvider : IMapAttributeProvider
                     continue;
                 }
 
-                var allCellsAttrs = new EMapAttribute[MapAttributeSet.CellsPerSectree];
+                var allCellsAttrs = new EMapAttributes[MapAttributeSet.CellsPerSectree];
                 for (var i = 0; i < allCellsAttrs.Length; i++)
                 {
                     var rawCellFlags = BinaryPrimitives.ReadUInt32LittleEndian(
                         decompressedSectree.AsSpan(i * sizeof(uint), sizeof(uint))
                     );
                     // all set bits of `rawCellFlags` are preserved when cast to enum - individual flags can be extracted with HasFlag()
-                    var cellAttrFlags = (EMapAttribute)rawCellFlags;
+                    var cellAttrFlags = (EMapAttributes)rawCellFlags;
                     allCellsAttrs[i] = cellAttrFlags;
 
                     // saving debug info if server_attr is corrupted or wrong format
@@ -105,9 +104,9 @@ internal sealed class MapAttributeProvider : IMapAttributeProvider
                         if (cellHasValidFlag) cellsWithKnownFlags++;
 
                         var unknownFlags = cellAttrFlags &
-                                           ~flagCountsDebugInfo.Keys.Aggregate(EMapAttribute.None,
+                                           ~flagCountsDebugInfo.Keys.Aggregate(EMapAttributes.None,
                                                (acc, attr) => acc | attr);
-                        if (unknownFlags != EMapAttribute.None)
+                        if (unknownFlags != EMapAttributes.None)
                         {
                             var remaining = (uint)unknownFlags;
                             while (remaining != 0)
@@ -166,11 +165,11 @@ internal sealed class MapAttributeProvider : IMapAttributeProvider
             _sectreesAttrs = sectreesAttrs;
         }
 
-        public EMapAttribute GetAttribute(Coordinates coords)
+        public EMapAttributes GetAttributesAt(Coordinates coords)
         {
             if (!TryLocate(coords, out var locatedSectreeAttrs, out var cellX, out var cellY) || locatedSectreeAttrs is null)
             {
-                return EMapAttribute.None;
+                return EMapAttributes.None;
             }
 
             return locatedSectreeAttrs.Get(cellX, cellY);
@@ -201,11 +200,11 @@ internal sealed class MapAttributeProvider : IMapAttributeProvider
         }
     }
 
-    private sealed class MapAttributeSectree(EMapAttribute[] values)
+    private sealed class MapAttributeSectree(EMapAttributes[] values)
     {
-        public static MapAttributeSectree Empty { get; } = new(new EMapAttribute[MapAttributeSet.CellsPerSectree]);
+        public static MapAttributeSectree Empty { get; } = new(new EMapAttributes[MapAttributeSet.CellsPerSectree]);
 
-        public EMapAttribute Get(int x, int y)
+        public EMapAttributes Get(int x, int y)
         {
             return values[y * MapAttributeSet.CellsPerAxis + x];
         }

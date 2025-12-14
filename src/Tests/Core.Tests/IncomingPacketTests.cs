@@ -46,7 +46,7 @@ public class IncomingPacketTests
             .RuleFor(x => x.Unknown, faker => new[] { faker.Random.Byte(), faker.Random.Byte() })
             .Generate();
         var bytes = Array.Empty<byte>()
-            .Append(expected.AttackType)
+            .Append((byte)expected.SkillMotion)
             .Concat(BitConverter.GetBytes(expected.Vid))
             .Concat(expected.Unknown)
             .ToArray();
@@ -86,7 +86,8 @@ public class IncomingPacketTests
         var bytes = Array.Empty<byte>()
             .Append(expected.Slot)
             .Concat(Encoding.ASCII.GetBytes(expected.Name))
-            .Concat(BitConverter.GetBytes(expected.Class))
+            .Append((byte)expected.Class)
+            .Append(expected.ReservedByteForClass)
             .Append(expected.Appearance)
             .Concat(expected.Unknown)
             .ToArray();
@@ -127,7 +128,7 @@ public class IncomingPacketTests
     {
         var expected = new AutoFaker<CharacterMove>().Generate();
         var bytes = Array.Empty<byte>()
-            .Append(expected.MovementType)
+            .Append((byte)expected.MovementType)
             .Append(expected.Argument)
             .Append(expected.Rotation)
             .Concat(BitConverter.GetBytes(expected.PositionX))
@@ -158,7 +159,7 @@ public class IncomingPacketTests
     {
         var expected = new AutoFaker<ItemUse>().Generate();
         var bytes = Array.Empty<byte>()
-            .Append(expected.Window)
+            .Append((byte)expected.Window)
             .Concat(BitConverter.GetBytes(expected.Position))
             .ToArray();
         var result = _serializer.Deserialize<ItemUse>(bytes);
@@ -171,9 +172,9 @@ public class IncomingPacketTests
     {
         var expected = new AutoFaker<ItemMove>().Generate();
         var bytes = Array.Empty<byte>()
-            .Append(expected.FromWindow)
+            .Append((byte)expected.FromWindow)
             .Concat(BitConverter.GetBytes(expected.FromPosition))
-            .Append(expected.ToWindow)
+            .Append((byte)expected.ToWindow)
             .Concat(BitConverter.GetBytes(expected.ToPosition))
             .Append(expected.Count)
             .ToArray();
@@ -238,7 +239,7 @@ public class IncomingPacketTests
     {
         var expected = new AutoFaker<ItemDrop>().Generate();
         var bytes = Array.Empty<byte>()
-            .Append(expected.Window)
+            .Append((byte)expected.Window)
             .Concat(BitConverter.GetBytes(expected.Position))
             .Concat(BitConverter.GetBytes(expected.Gold))
             .Append(expected.Count)
@@ -331,7 +332,7 @@ public class IncomingPacketTests
         var expected = new AutoFaker<ItemGive>().Generate();
         var bytes = Array.Empty<byte>()
             .Concat(BitConverter.GetBytes(expected.TargetVid))
-            .Append(expected.Window)
+            .Append((byte)expected.Window)
             .Concat(BitConverter.GetBytes(expected.Position))
             .Append(expected.Count)
             .ToArray();

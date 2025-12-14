@@ -1,6 +1,6 @@
 ﻿using CommandLine;
 using QuantumCore.API.Game;
-using QuantumCore.API.Game.Types;
+using QuantumCore.API.Game.Types.Entities;
 using QuantumCore.API.Game.World;
 
 namespace QuantumCore.Game.Commands;
@@ -27,7 +27,7 @@ public class LevelCommand : ICommandHandler<LevelCommandOptions>
         }
         else
         {
-            target.SetPoint(EPoints.Level, context.Arguments.Level);
+            target.SetPoint(EPoint.Level, context.Arguments.Level);
             target.SendPoints();
         }
 

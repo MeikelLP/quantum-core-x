@@ -40,8 +40,7 @@ public class CreateCharacterHandler : IGamePacketHandler<CreateCharacter>
         }
 
 
-        var player = await _playerManager.CreateAsync(accountId.Value, ctx.Packet.Name,
-            (EPlayerClassGendered)ctx.Packet.Class,
+        var player = await _playerManager.CreateAsync(accountId.Value, ctx.Packet.Name, ctx.Packet.Class,
             ctx.Packet.Appearance);
         // Query responsible host for the map
         var host = _world.GetMapHost(player.PositionX, player.PositionY);

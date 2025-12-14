@@ -1,6 +1,7 @@
 ﻿using QuantumCore.API;
 using QuantumCore.API.Core.Models;
-using QuantumCore.API.Game.Types;
+using QuantumCore.API.Game.Types.Combat;
+using QuantumCore.API.Game.Types.Entities;
 using QuantumCore.API.Game.World;
 using QuantumCore.Game.Packets;
 
@@ -54,7 +55,7 @@ public class GroundItem : Entity, IGroundItem
         connection.Send(new GroundItemRemove {Vid = Vid});
     }
 
-    public override uint GetPoint(EPoints point)
+    public override uint GetPoint(EPoint point)
     {
         throw new NotImplementedException();
     }
@@ -79,11 +80,11 @@ public class GroundItem : Entity, IGroundItem
         throw new NotImplementedException();
     }
 
-    public override void AddPoint(EPoints point, int value)
+    public override void AddPoint(EPoint point, int value)
     {
     }
 
-    public override void SetPoint(EPoints point, uint value)
+    public override void SetPoint(EPoint point, uint value)
     {
     }
 }

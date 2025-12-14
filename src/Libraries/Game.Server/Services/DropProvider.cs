@@ -6,12 +6,14 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
-using QuantumCore.API.Game.Types;
+using QuantumCore.API.Game.Types.Entities;
+using QuantumCore.API.Game.Types.Items;
+using QuantumCore.API.Game.Types.Monsters;
+using QuantumCore.API.Game.Types.Players;
 using QuantumCore.API.Game.World;
 using QuantumCore.Core.Utils;
 using QuantumCore.Game.Drops;
 using QuantumCore.Game.Extensions;
-using QuantumCore.Game.PlayerUtils;
 using QuantumCore.Game.World.Entities;
 
 namespace QuantumCore.Game.Services;
@@ -212,7 +214,7 @@ public class DropProvider : IDropProvider, ILoadable
         var deltaPercentage = 0;
         var dropRange = 0;
 
-        var levelDropDelta = (int)(monster.GetPoint(EPoints.Level) + 15 - player.GetPoint(EPoints.Level));
+        var levelDropDelta = (int)(monster.GetPoint(EPoint.Level) + 15 - player.GetPoint(EPoint.Level));
 
         deltaPercentage = monster is {IsStone: false, Rank: >= EMonsterLevel.Boss}
             ? (int)_options.Delta.Boss[MathUtils.MinMax(0, levelDropDelta, _options.Delta.Boss.Count - 1)]
@@ -224,20 +226,20 @@ public class DropProvider : IDropProvider, ILoadable
             deltaPercentage += 500;
 
         _logger.LogDebug("CalculateDropPercentages for level: {Level} rank: {Rank} percentage: {DeltaPercentage}",
-            player.GetPoint(EPoints.Level), monster.Rank.ToString(), deltaPercentage);
+            player.GetPoint(EPoint.Level), monster.Rank.ToString(), deltaPercentage);
 
         deltaPercentage = deltaPercentage * player.GetMobItemRate() / 100;
 
-        if (player.GetPoint(EPoints.MallItemBonus) > 0)
+        if (player.GetPoint(EPoint.MallItemBonus) > 0)
         {
-            deltaPercentage += (int)(deltaPercentage * player.GetPoint(EPoints.MallItemBonus) / 100);
+            deltaPercentage += (int)(deltaPercentage * player.GetPoint(EPoint.MallItemBonus) / 100);
         }
 
         const int UNIQUE_GROUP_DOUBLE_ITEM = 10002; // todo: magic numbers
         const int UNIQUE_ITEM_DOUBLE_ITEM = 70043; // todo: magic numbers
 
         // Premium
-        if (player.GetPremiumRemainSeconds(EPremiumTypes.Item) > 0 ||
+        if (player.GetPremiumRemainSeconds(EPremiumType.Item) > 0 ||
             player.HasUniqueGroupItemEquipped(UNIQUE_GROUP_DOUBLE_ITEM))
         {
             deltaPercentage += deltaPercentage;
@@ -246,7 +248,7 @@ public class DropProvider : IDropProvider, ILoadable
 
         var bonus = 0;
         if (player.HasUniqueItemEquipped(UNIQUE_ITEM_DOUBLE_ITEM) &&
-            player.GetPremiumRemainSeconds(EPremiumTypes.Item) > 0)
+            player.GetPremiumRemainSeconds(EPremiumType.Item) > 0)
         {
             // irremovable gloves + mall item bonus
             bonus = 100;
@@ -254,14 +256,14 @@ public class DropProvider : IDropProvider, ILoadable
         }
         else if (player.HasUniqueItemEquipped(UNIQUE_ITEM_DOUBLE_ITEM)
                  || (player.HasUniqueGroupItemEquipped(UNIQUE_GROUP_DOUBLE_ITEM) &&
-                     player.GetPremiumRemainSeconds(EPremiumTypes.Item) > 0))
+                     player.GetPremiumRemainSeconds(EPremiumType.Item) > 0))
         {
             // irremovable gloves OR removeable gloves + mall item bonus
             bonus = 50;
             _logger.LogDebug("Player has irremovable gloves OR removeable gloves and mall item bonus");
         }
 
-        var itemDropBonus = (int)Math.Min(100, player.GetPoint(EPoints.ItemDropBonus));
+        var itemDropBonus = (int)Math.Min(100, player.GetPoint(EPoint.ItemDropBonus));
 
         var empireBonusDrop = 0; // todo: implement server / empire rates
 

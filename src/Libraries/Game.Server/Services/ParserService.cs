@@ -8,7 +8,8 @@ using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
-using QuantumCore.API.Game.Skills;
+using QuantumCore.API.Game.Types.Monsters;
+using QuantumCore.API.Game.Types.Skills;
 using QuantumCore.Core.Utils;
 using QuantumCore.Game.Drops;
 using QuantumCore.Game.World;
@@ -87,7 +88,7 @@ public partial class ParserService : IParserService
 
             try
             {
-                if (!Enum.TryParse<ESkillIndexes>(split[0], true, out var id))
+                if (!Enum.TryParse<ESkill>(split[0], true, out var id))
                 {
                     _logger.LogWarning("Failed to parse Skill with Id({Id}) from line: {Line}", split[0], line);
                     continue;
@@ -109,7 +110,7 @@ public partial class ParserService : IParserService
                     CooldownPoly = split[11],
                     MasterBonusPoly = split[12],
                     AttackGradePoly = split[13],
-                    Flag = ExtractSkillFlags(split[14]),
+                    Flags = ExtractSkillFlags(split[14]),
                     AffectFlag = ExtractAffectFlags(split[15]),
                     PointOn2 = split[16],
                     PointPoly2 = split[17],
@@ -372,9 +373,9 @@ public partial class ParserService : IParserService
         throw new ArgumentOutOfRangeException(nameof(str), $"Don't know how to parse \"{str}\" to TimeSpan");
     }
 
-    private static ESkillFlag ExtractSkillFlags(string value)
+    private static ESkillFlags ExtractSkillFlags(string value)
     {
-        ESkillFlag result = 0;
+        ESkillFlags result = 0;
 
         if (string.IsNullOrWhiteSpace(value))
         {
@@ -385,16 +386,16 @@ public partial class ParserService : IParserService
 
         foreach (var flag in flags)
         {
-            if (!EnumUtils.TryParseEnum<ESkillFlag>(flag, out var parsed)) continue;
+            if (!EnumUtils.TryParseEnum<ESkillFlags>(flag, out var parsed)) continue;
             result |= parsed;
         }
 
         return result;
     }
 
-    private static ESkillAffectFlag ExtractAffectFlags(string value)
+    private static EAffectFlags ExtractAffectFlags(string value)
     {
-        ESkillAffectFlag result = 0;
+        EAffectFlags result = 0;
 
         if (string.IsNullOrWhiteSpace(value))
         {
@@ -405,7 +406,7 @@ public partial class ParserService : IParserService
 
         foreach (var flag in flags)
         {
-            if (!EnumUtils.TryParseEnum<ESkillAffectFlag>(flag, out var parsed)) continue;
+            if (!EnumUtils.TryParseEnum<EAffectFlags>(flag, out var parsed)) continue;
             result |= parsed;
         }
 

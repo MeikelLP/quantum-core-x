@@ -1,7 +1,8 @@
 ﻿using QuantumCore.API;
-using QuantumCore.API.Core.Models;
 using QuantumCore.API.Core.Utils;
 using QuantumCore.API.Game.Types;
+using QuantumCore.API.Game.Types.Combat;
+using QuantumCore.API.Game.Types.Entities;
 using QuantumCore.API.Game.World;
 using QuantumCore.Core.Constants;
 using QuantumCore.Core.Utils;
@@ -188,18 +189,18 @@ namespace QuantumCore.Game.World.Entities
         public abstract int GetMinDamage();
         public abstract int GetMaxDamage();
         public abstract int GetBonusDamage();
-        public abstract void AddPoint(EPoints point, int value);
-        public abstract void SetPoint(EPoints point, uint value);
-        public abstract uint GetPoint(EPoints point);
+        public abstract void AddPoint(EPoint point, int value);
+        public abstract void SetPoint(EPoint point, uint value);
+        public abstract uint GetPoint(EPoint point);
 
         public void Attack(IEntity victim)
         {
-            if (this.PositionIsAttr(EMapAttribute.NonPvp))
+            if (this.PositionIsAttr(EMapAttributes.NonPvp))
             {
                 return;
             }
 
-            if (victim.PositionIsAttr(EMapAttribute.NonPvp))
+            if (victim.PositionIsAttr(EMapAttributes.NonPvp))
             {
                 return;
             }
@@ -228,8 +229,8 @@ namespace QuantumCore.Game.World.Entities
         {
             // todo verify victim is in range
 
-            var attackerRating = Math.Min(90, (GetPoint(EPoints.Dx) * 4 + GetPoint(EPoints.Level) * 2) / 6);
-            var victimRating = Math.Min(90, (victim.GetPoint(EPoints.Dx) * 4 + victim.GetPoint(EPoints.Level) * 2) / 6);
+            var attackerRating = Math.Min(90, (GetPoint(EPoint.Dx) * 4 + GetPoint(EPoint.Level) * 2) / 6);
+            var victimRating = Math.Min(90, (victim.GetPoint(EPoint.Dx) * 4 + victim.GetPoint(EPoint.Level) * 2) / 6);
             var attackRating = (attackerRating + 210.0) / 300.0 -
                                (victimRating * 2 + 5) / (victimRating + 95) * 3.0 / 10.0;
 
@@ -238,14 +239,14 @@ namespace QuantumCore.Game.World.Entities
 
             var damage = CoreRandom.GenerateInt32(minDamage, maxDamage + 1) * 2;
             SendDebugDamage(victim, $"{this}->{victim} Base Attack value: {damage}");
-            var attack = (int)(GetPoint(EPoints.AttackGrade) + damage - GetPoint(EPoints.Level) * 2);
+            var attack = (int)(GetPoint(EPoint.AttackGrade) + damage - GetPoint(EPoint.Level) * 2);
             attack = (int)Math.Floor(attack * attackRating);
-            attack += (int)GetPoint(EPoints.Level) * 2 + GetBonusDamage() * 2;
-            attack *= (int)((100 + GetPoint(EPoints.AttackBonus) + GetPoint(EPoints.MagicAttackBonus)) / 100);
+            attack += (int)GetPoint(EPoint.Level) * 2 + GetBonusDamage() * 2;
+            attack *= (int)((100 + GetPoint(EPoint.AttackBonus) + GetPoint(EPoint.MagicAttackBonus)) / 100);
             attack = CalculateAttackBonus(victim, attack);
             SendDebugDamage(victim, $"{this}->{victim} With bonus and level {attack}");
 
-            var defence = (int)(victim.GetPoint(EPoints.DefenceGrade) * (100 + victim.GetPoint(EPoints.DefenceBonus)) /
+            var defence = (int)(victim.GetPoint(EPoint.DefenceGrade) * (100 + victim.GetPoint(EPoint.DefenceBonus)) /
                                 100);
             SendDebugDamage(victim, $"{this}->{victim} Base defence: {defence}");
             if (this is MonsterEntity thisMonster)
@@ -269,8 +270,8 @@ namespace QuantumCore.Game.World.Entities
         {
             // todo verify victim is in range
 
-            var attackerRating = Math.Min(90, (GetPoint(EPoints.Dx) * 4 + GetPoint(EPoints.Level) * 2) / 6);
-            var victimRating = Math.Min(90, (victim.GetPoint(EPoints.Dx) * 4 + victim.GetPoint(EPoints.Level) * 2) / 6);
+            var attackerRating = Math.Min(90, (GetPoint(EPoint.Dx) * 4 + GetPoint(EPoint.Level) * 2) / 6);
+            var victimRating = Math.Min(90, (victim.GetPoint(EPoint.Dx) * 4 + victim.GetPoint(EPoint.Level) * 2) / 6);
             var attackRating = (attackerRating + 210.0) / 300.0 -
                                (victimRating * 2 + 5) / (victimRating + 95) * 3.0 / 10.0;
 
@@ -278,13 +279,13 @@ namespace QuantumCore.Game.World.Entities
             var maxDamage = GetMaxDamage();
 
             var damage = CoreRandom.GenerateInt32(minDamage, maxDamage + 1) * 2;
-            var attack = (int)(GetPoint(EPoints.AttackGrade) + damage - GetPoint(EPoints.Level) * 2);
+            var attack = (int)(GetPoint(EPoint.AttackGrade) + damage - GetPoint(EPoint.Level) * 2);
             attack = (int)Math.Floor(attack * attackRating);
-            attack += (int)GetPoint(EPoints.Level) * 2 + GetBonusDamage() * 2;
-            attack *= (int)((100 + GetPoint(EPoints.AttackBonus) + GetPoint(EPoints.MagicAttackBonus)) / 100);
+            attack += (int)GetPoint(EPoint.Level) * 2 + GetBonusDamage() * 2;
+            attack *= (int)((100 + GetPoint(EPoint.AttackBonus) + GetPoint(EPoint.MagicAttackBonus)) / 100);
             attack = CalculateAttackBonus(victim, attack);
 
-            var defence = (int)(victim.GetPoint(EPoints.DefenceGrade) * (100 + victim.GetPoint(EPoints.DefenceBonus)) /
+            var defence = (int)(victim.GetPoint(EPoint.DefenceGrade) * (100 + victim.GetPoint(EPoint.DefenceBonus)) /
                                 100);
             if (this is MonsterEntity thisMonster)
             {
@@ -328,8 +329,8 @@ namespace QuantumCore.Game.World.Entities
 
         private int CalculateExperience(uint playerLevel)
         {
-            var baseExp = GetPoint(EPoints.Experience);
-            var entityLevel = GetPoint(EPoints.Level);
+            var baseExp = GetPoint(EPoint.Experience);
+            var entityLevel = GetPoint(EPoint.Level);
 
             var percentage = ExperienceConstants.GetExperiencePercentageByLevelDifference(playerLevel, entityLevel);
 
@@ -352,7 +353,7 @@ namespace QuantumCore.Game.World.Entities
         public virtual int Damage(IEntity attacker, EDamageType damageType, int damage)
         {
 
-            if (this.PositionIsAttr(EMapAttribute.NonPvp))
+            if (this.PositionIsAttr(EMapAttributes.NonPvp))
             {
                 SendDebugDamage(attacker,
                     $"{attacker}->{this} Ignoring damage inside NoPvP zone -> {damage} (should never happen)");
@@ -373,10 +374,10 @@ namespace QuantumCore.Game.World.Entities
             var isCritical = false;
             var isPenetrate = false;
 
-            var criticalPercentage = attacker.GetPoint(EPoints.CriticalPercentage);
+            var criticalPercentage = attacker.GetPoint(EPoint.CriticalPercentage);
             if (criticalPercentage > 0)
             {
-                var resist = GetPoint(EPoints.ResistCritical);
+                var resist = GetPoint(EPoint.ResistCritical);
                 criticalPercentage = resist > criticalPercentage ? 0 : criticalPercentage - resist;
                 if (CoreRandom.PercentageCheck(criticalPercentage))
                 {
@@ -388,16 +389,16 @@ namespace QuantumCore.Game.World.Entities
                 }
             }
 
-            var penetratePercentage = attacker.GetPoint(EPoints.PenetratePercentage);
+            var penetratePercentage = attacker.GetPoint(EPoint.PenetratePercentage);
             // todo add penetrate chance from passive
             if (penetratePercentage > 0)
             {
-                var resist = GetPoint(EPoints.ResistPenetrate);
+                var resist = GetPoint(EPoint.ResistPenetrate);
                 penetratePercentage = resist > penetratePercentage ? 0 : penetratePercentage - resist;
                 if (CoreRandom.PercentageCheck(penetratePercentage))
                 {
                     isPenetrate = true;
-                    damage += (int)(GetPoint(EPoints.DefenceGrade) * (100 + GetPoint(EPoints.DefenceBonus)) / 100);
+                    damage += (int)(GetPoint(EPoint.DefenceGrade) * (100 + GetPoint(EPoint.DefenceBonus)) / 100);
                     SendDebugDamage(attacker,
                         $"{attacker}->{this} Penetrate hit -> {damage} (percentage was {penetratePercentage})");
                 }
@@ -405,15 +406,15 @@ namespace QuantumCore.Game.World.Entities
 
             // todo calculate hp steal, sp steal, hp recovery, sp recovery and mana burn
 
-            byte damageFlags = 1; // 1 = normal
+            var damageFlags = EDamageFlags.Normal; // 1 = normal
             if (isCritical)
             {
-                damageFlags |= 32;
+                damageFlags |= EDamageFlags.Critical;
             }
 
             if (isPenetrate)
             {
-                damageFlags |= 16;
+                damageFlags |= EDamageFlags.Piercing;
             }
 
             var victimPlayer = this as PlayerEntity;
@@ -453,8 +454,8 @@ namespace QuantumCore.Game.World.Entities
                 Die();
                 if (Type != EEntityType.Player && attackerPlayer is not null)
                 {
-                    var exp = CalculateExperience(attackerPlayer.GetPoint(EPoints.Level));
-                    attackerPlayer.AddPoint(EPoints.Experience, exp);
+                    var exp = CalculateExperience(attackerPlayer.GetPoint(EPoint.Level));
+                    attackerPlayer.AddPoint(EPoint.Experience, exp);
                     attackerPlayer.SendPoints();
                 }
             }

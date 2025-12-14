@@ -1,5 +1,4 @@
-﻿using System.Net;
-using System.Net.Sockets;
+﻿using System.Net.Sockets;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
@@ -60,13 +59,13 @@ namespace QuantumCore.Game
                 }
                 else
                 {
-                    if (Phase is EPhases.Game or EPhases.Loading)
+                    if (Phase is EPhase.Game or EPhase.Loading)
                     {
                         await Player.CalculatePlayedTimeAsync();
                     }
 
                     // In case of unexpected disconnection, we need to save the player's state
-                    if (Phase is EPhases.Game or EPhases.Loading or EPhases.Select)
+                    if (Phase is EPhase.Game or EPhase.Loading or EPhase.Select)
                     {
                         await _world.DespawnPlayerAsync(Player);
                     }

@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
-using QuantumCore.API.Game.Skills;
+using QuantumCore.API.Game.Types.Skills;
 using QuantumCore.Game.Services;
 
 namespace QuantumCore.Game;
@@ -22,7 +22,7 @@ public class SkillManager : ISkillManager, ILoadable
         _parserService = parserService;
     }
 
-    public SkillData? GetSkill(ESkillIndexes id)
+    public SkillData? GetSkill(ESkill id)
     {
         return _skills.FirstOrDefault(skill => skill.Id == id);
     }

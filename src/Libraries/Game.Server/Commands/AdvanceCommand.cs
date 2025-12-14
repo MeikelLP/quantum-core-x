@@ -1,6 +1,6 @@
 ﻿using CommandLine;
 using QuantumCore.API.Game;
-using QuantumCore.API.Game.Types;
+using QuantumCore.API.Game.Types.Entities;
 using QuantumCore.API.Game.World;
 
 namespace QuantumCore.Game.Commands;
@@ -33,8 +33,8 @@ public class AdvanceCommand : ICommandHandler<AdvanceCommandOptions>
                 context.Arguments.Level = 1;
             }
 
-            target.AddPoint(EPoints.Level, context.Arguments.Level);
-            target.SendChatInfo($"You have advanced to level {target.GetPoint(EPoints.Level)}");
+            target.AddPoint(EPoint.Level, context.Arguments.Level);
+            target.SendChatInfo($"You have advanced to level {target.GetPoint(EPoint.Level)}");
         }
     }
 }
