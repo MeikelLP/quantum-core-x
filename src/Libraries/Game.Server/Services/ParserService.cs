@@ -8,7 +8,6 @@ using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
-using QuantumCore.API.Game.Skills;
 using QuantumCore.API.Game.Types.Monsters;
 using QuantumCore.API.Game.Types.Skills;
 using QuantumCore.Core.Utils;

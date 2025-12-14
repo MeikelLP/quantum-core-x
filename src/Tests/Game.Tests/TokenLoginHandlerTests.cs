@@ -1,6 +1,4 @@
 using System.Net;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
 using QuantumCore.API;
@@ -14,8 +12,6 @@ using QuantumCore.Caching;
 using QuantumCore.Game;
 using QuantumCore.Game.PacketHandlers;
 using QuantumCore.Game.Packets;
-using QuantumCore.Networking;
-using Xunit;
 
 namespace Game.Tests;
 

@@ -1,5 +1,4 @@
 ﻿using QuantumCore.API.Core.Models;
-using QuantumCore.API.Game.Skills;
 using QuantumCore.API.Game.Types.Skills;
 
 namespace QuantumCore.API;

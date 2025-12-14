@@ -5,7 +5,6 @@ using Bogus;
 using Core.Tests.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using QuantumCore.API.Game.Types.Players;
 using QuantumCore.Extensions;
 using QuantumCore.Game.Packets;
 using QuantumCore.Game.Packets.General;

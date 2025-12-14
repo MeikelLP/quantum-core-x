@@ -1,6 +1,5 @@
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
-using QuantumCore.API.Game.Types.Players;
 using QuantumCore.API.Game.World;
 using QuantumCore.API.PluginTypes;
 using QuantumCore.Game.Extensions;
