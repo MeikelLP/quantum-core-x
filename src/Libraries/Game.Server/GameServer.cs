@@ -13,134 +13,133 @@ using QuantumCore.Core.Networking;
 using QuantumCore.Extensions;
 using QuantumCore.Networking;
 
-namespace QuantumCore.Game
+namespace QuantumCore.Game;
+
+public class GameServer : ServerBase<GameConnection>, IGameServer
 {
-    public class GameServer : ServerBase<GameConnection>, IGameServer
+    public static readonly Meter Meter = new Meter("QuantumCore:Game");
+    private readonly Histogram<double> _serverTimes = Meter.CreateHistogram<double>("TickTime", "ms");
+    private readonly ILogger<GameServer> _logger;
+    private readonly PluginExecutor _pluginExecutor;
+    private readonly ICommandManager _commandManager;
+    private readonly IWorld _world;
+
+    private readonly Stopwatch _gameTime = new Stopwatch();
+    private long _previousTicks = 0;
+    private TimeSpan _accumulatedElapsedTime;
+    private TimeSpan _targetElapsedTime = TimeSpan.FromTicks(100000); // 100hz
+    private TimeSpan _maxElapsedTime = TimeSpan.FromMilliseconds(500);
+    private readonly Stopwatch _serverTimer = new();
+
+    public new ImmutableArray<IGameConnection> Connections =>
+        [..base.Connections.Values.Cast<IGameConnection>()];
+
+    public static GameServer Instance { get; private set; } = null!; // singleton
+
+    public GameServer(
+        [FromKeyedServices(HostingOptions.ModeGame)]
+        IPacketManager packetManager, ILogger<GameServer> logger,
+        PluginExecutor pluginExecutor, IServiceProvider serviceProvider,
+        ICommandManager commandManager)
+        : base(packetManager, logger, pluginExecutor, serviceProvider, HostingOptions.ModeGame)
     {
-        public static readonly Meter Meter = new Meter("QuantumCore:Game");
-        private readonly Histogram<double> _serverTimes = Meter.CreateHistogram<double>("TickTime", "ms");
-        private readonly ILogger<GameServer> _logger;
-        private readonly PluginExecutor _pluginExecutor;
-        private readonly ICommandManager _commandManager;
-        private readonly IWorld _world;
+        _logger = logger;
+        _pluginExecutor = pluginExecutor;
+        _commandManager = commandManager;
+        Instance = this;
+        _world = Scope.ServiceProvider.GetRequiredService<IWorld>();
+        Meter.CreateObservableGauge("Connections", () => Connections.Length);
+    }
 
-        private readonly Stopwatch _gameTime = new Stopwatch();
-        private long _previousTicks = 0;
-        private TimeSpan _accumulatedElapsedTime;
-        private TimeSpan _targetElapsedTime = TimeSpan.FromTicks(100000); // 100hz
-        private TimeSpan _maxElapsedTime = TimeSpan.FromMilliseconds(500);
-        private readonly Stopwatch _serverTimer = new();
+    private void Update(double elapsedTime)
+    {
+        EventSystem.Update(elapsedTime);
 
-        public new ImmutableArray<IGameConnection> Connections =>
-            [..base.Connections.Values.Cast<IGameConnection>()];
+        _world.Update(elapsedTime);
+    }
 
-        public static GameServer Instance { get; private set; } = null!; // singleton
+    protected override async Task ExecuteAsync(CancellationToken stoppingToken)
+    {
+        // Load game data
+        await Task.WhenAll(Scope.ServiceProvider.GetServices<ILoadable>().Select(x => x.LoadAsync(stoppingToken)));
 
-        public GameServer(
-            [FromKeyedServices(HostingOptions.ModeGame)]
-            IPacketManager packetManager, ILogger<GameServer> logger,
-            PluginExecutor pluginExecutor, IServiceProvider serviceProvider,
-            ICommandManager commandManager)
-            : base(packetManager, logger, pluginExecutor, serviceProvider, HostingOptions.ModeGame)
+        await _world.InitAsync();
+
+        // Register all default commands
+        _commandManager.Register("QuantumCore.Game.Commands", Assembly.GetExecutingAssembly());
+        _commandManager.Register("QuantumCore.Game.Commands.Guild", Assembly.GetExecutingAssembly());
+
+        // Put all new connections into login phase
+        RegisterNewConnectionListener(connection =>
         {
-            _logger = logger;
-            _pluginExecutor = pluginExecutor;
-            _commandManager = commandManager;
-            Instance = this;
-            _world = Scope.ServiceProvider.GetRequiredService<IWorld>();
-            Meter.CreateObservableGauge("Connections", () => Connections.Length);
-        }
+            connection.SetPhase(EPhase.Login);
+            return true;
+        });
 
-        private void Update(double elapsedTime)
+        // Start server timer
+        _serverTimer.Start();
+
+        _logger.LogInformation("Start listening for connections...");
+
+        StartListening();
+
+        _gameTime.Start();
+
+        _logger.LogDebug("Start!");
+
+        while (!stoppingToken.IsCancellationRequested)
         {
-            EventSystem.Update(elapsedTime);
-
-            _world.Update(elapsedTime);
-        }
-
-        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
-        {
-            // Load game data
-            await Task.WhenAll(Scope.ServiceProvider.GetServices<ILoadable>().Select(x => x.LoadAsync(stoppingToken)));
-
-            await _world.InitAsync();
-
-            // Register all default commands
-            _commandManager.Register("QuantumCore.Game.Commands", Assembly.GetExecutingAssembly());
-            _commandManager.Register("QuantumCore.Game.Commands.Guild", Assembly.GetExecutingAssembly());
-
-            // Put all new connections into login phase
-            RegisterNewConnectionListener(connection =>
+            try
             {
-                connection.SetPhase(EPhase.Login);
-                return true;
-            });
-
-            // Start server timer
-            _serverTimer.Start();
-
-            _logger.LogInformation("Start listening for connections...");
-
-            StartListening();
-
-            _gameTime.Start();
-
-            _logger.LogDebug("Start!");
-
-            while (!stoppingToken.IsCancellationRequested)
+                await _pluginExecutor.ExecutePlugins<IGameTickListener>(_logger,
+                    x => x.PreUpdateAsync(stoppingToken));
+                await Tick();
+                await _pluginExecutor.ExecutePlugins<IGameTickListener>(_logger,
+                    x => x.PostUpdateAsync(stoppingToken));
+            }
+            catch (Exception e)
             {
-                try
-                {
-                    await _pluginExecutor.ExecutePlugins<IGameTickListener>(_logger,
-                        x => x.PreUpdateAsync(stoppingToken));
-                    await Tick();
-                    await _pluginExecutor.ExecutePlugins<IGameTickListener>(_logger,
-                        x => x.PostUpdateAsync(stoppingToken));
-                }
-                catch (Exception e)
-                {
-                    _logger.LogError(e, "Tick failed");
-                }
+                _logger.LogError(e, "Tick failed");
             }
         }
+    }
 
-        private async ValueTask Tick()
+    private async ValueTask Tick()
+    {
+        var currentTicks = _gameTime.Elapsed.Ticks;
+        var elapsedTime = TimeSpan.FromTicks(currentTicks - _previousTicks);
+        _serverTimes.Record(elapsedTime.TotalMilliseconds);
+        _accumulatedElapsedTime += elapsedTime;
+        _previousTicks = currentTicks;
+
+        if (_accumulatedElapsedTime < _targetElapsedTime)
         {
-            var currentTicks = _gameTime.Elapsed.Ticks;
-            var elapsedTime = TimeSpan.FromTicks(currentTicks - _previousTicks);
-            _serverTimes.Record(elapsedTime.TotalMilliseconds);
-            _accumulatedElapsedTime += elapsedTime;
-            _previousTicks = currentTicks;
-
-            if (_accumulatedElapsedTime < _targetElapsedTime)
-            {
-                var sleepTime = (_targetElapsedTime - _accumulatedElapsedTime).TotalMilliseconds;
-                await Task.Delay((int) sleepTime).ConfigureAwait(false);
-                return;
-            }
-
-            if (_accumulatedElapsedTime > _maxElapsedTime)
-            {
-                _logger.LogWarning($"Server is running slow");
-                _accumulatedElapsedTime = _maxElapsedTime;
-            }
-
-            var stepCount = 0;
-            while (_accumulatedElapsedTime >= _targetElapsedTime)
-            {
-                _accumulatedElapsedTime -= _targetElapsedTime;
-                ++stepCount;
-
-                //_logger.LogDebug($"Update... ({stepCount})");
-                Update(_targetElapsedTime.TotalMilliseconds);
-            }
-
-            // todo detect lags
+            var sleepTime = (_targetElapsedTime - _accumulatedElapsedTime).TotalMilliseconds;
+            await Task.Delay((int) sleepTime).ConfigureAwait(false);
+            return;
         }
 
-        public void RegisterCommandNamespace(Type t)
+        if (_accumulatedElapsedTime > _maxElapsedTime)
         {
-            _commandManager.Register(t.Namespace!, t.Assembly);
+            _logger.LogWarning($"Server is running slow");
+            _accumulatedElapsedTime = _maxElapsedTime;
         }
+
+        var stepCount = 0;
+        while (_accumulatedElapsedTime >= _targetElapsedTime)
+        {
+            _accumulatedElapsedTime -= _targetElapsedTime;
+            ++stepCount;
+
+            //_logger.LogDebug($"Update... ({stepCount})");
+            Update(_targetElapsedTime.TotalMilliseconds);
+        }
+
+        // todo detect lags
+    }
+
+    public void RegisterCommandNamespace(Type t)
+    {
+        _commandManager.Register(t.Namespace!, t.Assembly);
     }
 }

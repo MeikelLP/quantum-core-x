@@ -2,19 +2,18 @@
 
 using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace QuantumCore.Game.Persistence.Migrations.Sqlite
+namespace QuantumCore.Game.Persistence.Migrations.Sqlite;
+
+/// <inheritdoc />
+public partial class AlterPlayerQuickSlotValueByte : Migration
 {
     /// <inheritdoc />
-    public partial class AlterPlayerQuickSlotValueByte : Migration
+    protected override void Up(MigrationBuilder migrationBuilder)
     {
-        /// <inheritdoc />
-        protected override void Up(MigrationBuilder migrationBuilder)
-        {
-        }
+    }
 
-        /// <inheritdoc />
-        protected override void Down(MigrationBuilder migrationBuilder)
-        {
-        }
+    /// <inheritdoc />
+    protected override void Down(MigrationBuilder migrationBuilder)
+    {
     }
 }
