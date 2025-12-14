@@ -1,21 +1,20 @@
 using QuantumCore.API.Game.Types.Entities;
 using QuantumCore.Networking;
 
-namespace QuantumCore.Game.Packets
+namespace QuantumCore.Game.Packets;
+
+[Packet(0x13, EDirection.Outgoing)]
+[PacketGenerator]
+public partial class CharacterUpdate
 {
-    [Packet(0x13, EDirection.Outgoing)]
-    [PacketGenerator]
-    public partial class CharacterUpdate
-    {
-        [Field(0)] public uint Vid { get; set; }
-        [Field(1, ArrayLength = 4)] public ushort[] Parts { get; set; } = new ushort[4];
-        [Field(2)] public byte MoveSpeed { get; set; }
-        [Field(3)] public byte AttackSpeed { get; set; }
-        [Field(4)] public ESpawnStateFlags State { get; set; }
-        [Field(5)] public ulong Affects { get; set; }
-        [Field(6)] public uint GuildId { get; set; }
-        [Field(7)] public short RankPoints { get; set; }
-        [Field(8)] public EPvpMode PvpMode { get; set; }
-        [Field(9)] public uint MountVnum { get; set; }
-    }
+    [Field(0)] public uint Vid { get; set; }
+    [Field(1, ArrayLength = 4)] public ushort[] Parts { get; set; } = new ushort[4];
+    [Field(2)] public byte MoveSpeed { get; set; }
+    [Field(3)] public byte AttackSpeed { get; set; }
+    [Field(4)] public ESpawnStateFlags State { get; set; }
+    [Field(5)] public ulong Affects { get; set; }
+    [Field(6)] public uint GuildId { get; set; }
+    [Field(7)] public short RankPoints { get; set; }
+    [Field(8)] public EPvpMode PvpMode { get; set; }
+    [Field(9)] public uint MountVnum { get; set; }
 }

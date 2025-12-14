@@ -11,363 +11,362 @@ using QuantumCore.Caching;
 using QuantumCore.Core.Utils;
 using QuantumCore.Game.Services;
 
-namespace QuantumCore.Game.World
+namespace QuantumCore.Game.World;
+
+public class World : IWorld, ILoadable
 {
-    public class World : IWorld, ILoadable
+    private readonly ILogger<World> _logger;
+    private readonly PluginExecutor _pluginExecutor;
+    private uint _vid;
+    private readonly Grid<IMap> _world = new(0, 0);
+    private readonly Dictionary<string, IMap> _maps = new();
+    private readonly Dictionary<string, IPlayerEntity> _players = new();
+    private readonly Dictionary<uint, SpawnGroup> _groups = new();
+    private readonly Dictionary<uint, SpawnGroupCollection> _groupCollections = new();
+
+    private readonly Dictionary<uint, Shop> _staticShops = new();
+
+    private IRedisSubscriber? _mapSubscriber;
+    private readonly IItemManager _itemManager;
+    private readonly ICacheManager _cacheManager;
+    private readonly INpcShopProvider _shopProvider;
+    private readonly ISpawnGroupProvider _spawnGroupProvider;
+    private readonly IServiceProvider _serviceProvider;
+
+    public World(ILogger<World> logger, PluginExecutor pluginExecutor, IItemManager itemManager,
+        ICacheManager cacheManager, ISpawnGroupProvider spawnGroupProvider,
+        IServiceProvider serviceProvider, INpcShopProvider shopProvider)
     {
-        private readonly ILogger<World> _logger;
-        private readonly PluginExecutor _pluginExecutor;
-        private uint _vid;
-        private readonly Grid<IMap> _world = new(0, 0);
-        private readonly Dictionary<string, IMap> _maps = new();
-        private readonly Dictionary<string, IPlayerEntity> _players = new();
-        private readonly Dictionary<uint, SpawnGroup> _groups = new();
-        private readonly Dictionary<uint, SpawnGroupCollection> _groupCollections = new();
+        _logger = logger;
+        _pluginExecutor = pluginExecutor;
+        _itemManager = itemManager;
+        _cacheManager = cacheManager;
+        _spawnGroupProvider = spawnGroupProvider;
+        _serviceProvider = serviceProvider;
+        _shopProvider = shopProvider;
+        _vid = 0;
+    }
 
-        private readonly Dictionary<uint, Shop> _staticShops = new();
-
-        private IRedisSubscriber? _mapSubscriber;
-        private readonly IItemManager _itemManager;
-        private readonly ICacheManager _cacheManager;
-        private readonly INpcShopProvider _shopProvider;
-        private readonly ISpawnGroupProvider _spawnGroupProvider;
-        private readonly IServiceProvider _serviceProvider;
-
-        public World(ILogger<World> logger, PluginExecutor pluginExecutor, IItemManager itemManager,
-            ICacheManager cacheManager, ISpawnGroupProvider spawnGroupProvider,
-            IServiceProvider serviceProvider, INpcShopProvider shopProvider)
+    public async Task LoadAsync(CancellationToken token = default)
+    {
+        var groups = await _spawnGroupProvider.GetSpawnGroupsAsync();
+        foreach (var g in groups)
         {
-            _logger = logger;
-            _pluginExecutor = pluginExecutor;
-            _itemManager = itemManager;
-            _cacheManager = cacheManager;
-            _spawnGroupProvider = spawnGroupProvider;
-            _serviceProvider = serviceProvider;
-            _shopProvider = shopProvider;
-            _vid = 0;
+            _groups[g.Id] = g;
         }
 
-        public async Task LoadAsync(CancellationToken token = default)
+        var spawnGroups = await _spawnGroupProvider.GetSpawnGroupCollectionsAsync();
+        foreach (var g in spawnGroups)
         {
-            var groups = await _spawnGroupProvider.GetSpawnGroupsAsync();
-            foreach (var g in groups)
-            {
-                _groups[g.Id] = g;
-            }
+            _groupCollections[g.Id] = g;
+        }
 
-            var spawnGroups = await _spawnGroupProvider.GetSpawnGroupCollectionsAsync();
-            foreach (var g in spawnGroups)
-            {
-                _groupCollections[g.Id] = g;
-            }
-
-            var atlasProvider = _serviceProvider.GetRequiredService<IAtlasProvider>();
-            var maps = await atlasProvider.GetAsync(this);
-            foreach (var map in maps)
-            {
-                _maps[map.Name] = map;
-            }
+        var atlasProvider = _serviceProvider.GetRequiredService<IAtlasProvider>();
+        var maps = await atlasProvider.GetAsync(this);
+        foreach (var map in maps)
+        {
+            _maps[map.Name] = map;
+        }
 
 
-            // Initialize world grid and place maps on it
-            var maxX = _maps.Max(x => x.Value.Position.X + x.Value.Width * Map.MapUnit);
-            var maxY = _maps.Max(x => x.Value.Position.Y + x.Value.Height * Map.MapUnit);
-            _world.Resize(maxX / Map.MapUnit, maxY / Map.MapUnit);
-            foreach (var map in _maps.Values)
+        // Initialize world grid and place maps on it
+        var maxX = _maps.Max(x => x.Value.Position.X + x.Value.Width * Map.MapUnit);
+        var maxY = _maps.Max(x => x.Value.Position.Y + x.Value.Height * Map.MapUnit);
+        _world.Resize(maxX / Map.MapUnit, maxY / Map.MapUnit);
+        foreach (var map in _maps.Values)
+        {
+            for (var x = map.UnitX; x < map.UnitX + map.Width; x++)
             {
-                for (var x = map.UnitX; x < map.UnitX + map.Width; x++)
+                for (var y = map.UnitY; y < map.UnitY + map.Height; y++)
                 {
-                    for (var y = map.UnitY; y < map.UnitY + map.Height; y++)
-                    {
-                        _world.Set(x, y, map);
-                    }
+                    _world.Set(x, y, map);
                 }
             }
-
-            await LoadRemoteMaps();
         }
 
-        /// <summary>
-        /// Initialize maps, spawn monsters etc
-        /// Must be loaded via <see cref="LoadAsync"/> first
-        /// </summary>
-        public async Task InitAsync()
+        await LoadRemoteMaps();
+    }
+
+    /// <summary>
+    /// Initialize maps, spawn monsters etc
+    /// Must be loaded via <see cref="LoadAsync"/> first
+    /// </summary>
+    public async Task InitAsync()
+    {
+        foreach (var map in _maps.Values)
         {
-            foreach (var map in _maps.Values)
+            if (map is Map m)
             {
-                if (map is Map m)
-                {
-                    await m.Initialize();
-                }
-            }
-
-            LoadShops();
-        }
-
-        private void LoadShops()
-        {
-            foreach (var shopDef in _shopProvider.Shops)
-            {
-                var shop = new Shop(_itemManager, _logger);
-
-                _staticShops[shopDef.Monster] = shop;
-
-                foreach (var item in shopDef.Items)
-                {
-                    if (!_itemManager.TryGetItem(item.Item, out var itemData))
-                    {
-                        _logger.LogWarning("Failed to load item info for item with ID {Id}", item.Item);
-                        continue;
-                    }
-
-                    shop.AddItem(item.Item, item.Amount, itemData.BuyPrice);
-                }
-
-                GameEventManager.RegisterNpcClickEvent(shop.Name, shopDef.Monster, player =>
-                {
-                    shop.Open(player);
-                    return Task.CompletedTask;
-                });
+                await m.Initialize();
             }
         }
 
-        private async Task LoadRemoteMaps()
-        {
-            var keys = await _cacheManager.Keys("maps:*");
+        LoadShops();
+    }
 
-            foreach (var key in keys)
+    private void LoadShops()
+    {
+        foreach (var shopDef in _shopProvider.Shops)
+        {
+            var shop = new Shop(_itemManager, _logger);
+
+            _staticShops[shopDef.Monster] = shop;
+
+            foreach (var item in shopDef.Items)
             {
-                var mapName = key[5..];
-                var map = _maps[mapName];
-                if (map is not RemoteMap remoteMap)
+                if (!_itemManager.TryGetItem(item.Item, out var itemData))
                 {
+                    _logger.LogWarning("Failed to load item info for item with ID {Id}", item.Item);
                     continue;
                 }
 
-                var address = await _cacheManager.Get<string>(key);
-                var parts = address.Split(":");
-                Debug.Assert(parts.Length == 2);
-
-                remoteMap.Host = IPAddress.Parse(parts[0]);
-                remoteMap.Port = ushort.Parse(parts[1]);
-
-                _logger.LogDebug("Map {Name} is available at {Host}:{Port}", remoteMap.Name, remoteMap.Host,
-                    remoteMap.Port);
+                shop.AddItem(item.Item, item.Amount, itemData.BuyPrice);
             }
 
-            _mapSubscriber = _cacheManager.Subscribe();
-            _mapSubscriber.Register<string>("maps", mapDetails =>
+            GameEventManager.RegisterNpcClickEvent(shop.Name, shopDef.Monster, player =>
             {
-                var data = mapDetails.Split(" ");
-                Debug.Assert(data.Length == 2);
-
-                var mapName = data[0];
-                var parts = data[1].Split(":");
-                Debug.Assert(parts.Length == 2);
-
-                var map = _maps[mapName];
-                if (map is not RemoteMap remoteMap)
-                {
-                    return;
-                }
-
-                remoteMap.Host = IPAddress.Parse(parts[0]);
-                remoteMap.Port = ushort.Parse(parts[1]);
-
-                _logger.LogDebug("Map {Name} is now available at {Host}:{Port}", remoteMap.Name, remoteMap.Host,
-                    remoteMap.Port);
+                shop.Open(player);
+                return Task.CompletedTask;
             });
-
-            _mapSubscriber.Listen();
         }
+    }
 
-        public void Update(double elapsedTime)
+    private async Task LoadRemoteMaps()
+    {
+        var keys = await _cacheManager.Keys("maps:*");
+
+        foreach (var key in keys)
         {
-            // HookManager.Instance.CallHook<IHookWorldUpdate>(elapsedTime);
-
-            foreach (var map in _maps.Values)
+            var mapName = key[5..];
+            var map = _maps[mapName];
+            if (map is not RemoteMap remoteMap)
             {
-                map.Update(elapsedTime);
-            }
-        }
-
-        public IMap? GetMapAt(uint x, uint y)
-        {
-            var gridX = x / Map.MapUnit;
-            var gridY = y / Map.MapUnit;
-
-            return _world.Get(gridX, gridY);
-        }
-
-        public IMap? GetMapByName(string name)
-        {
-            return _maps.TryGetValue(name, out var map) ? map : null;
-        }
-
-        public List<IMap> FindMapsByName(string needle)
-        {
-            var list = new List<IMap>();
-            foreach (var (name, map) in _maps)
-            {
-                if (name == needle)
-                {
-                    list.Clear();
-                    list.Add(map);
-                    return list;
-                }
-
-                if (name.Contains(needle, StringComparison.InvariantCultureIgnoreCase))
-                {
-                    list.Add(map);
-                }
+                continue;
             }
 
-            return list;
+            var address = await _cacheManager.Get<string>(key);
+            var parts = address.Split(":");
+            Debug.Assert(parts.Length == 2);
+
+            remoteMap.Host = IPAddress.Parse(parts[0]);
+            remoteMap.Port = ushort.Parse(parts[1]);
+
+            _logger.LogDebug("Map {Name} is available at {Host}:{Port}", remoteMap.Name, remoteMap.Host,
+                remoteMap.Port);
         }
 
-        public CoreHost GetMapHost(int x, int y)
+        _mapSubscriber = _cacheManager.Subscribe();
+        _mapSubscriber.Register<string>("maps", mapDetails =>
         {
-            var map = GetMapAt((uint)x, (uint)y);
-            if (map == null)
+            var data = mapDetails.Split(" ");
+            Debug.Assert(data.Length == 2);
+
+            var mapName = data[0];
+            var parts = data[1].Split(":");
+            Debug.Assert(parts.Length == 2);
+
+            var map = _maps[mapName];
+            if (map is not RemoteMap remoteMap)
             {
-                _logger.LogWarning("No available host for map at {X}|{Y}", x, y);
-                return new CoreHost {Ip = IPAddress.None, Port = 0};
-            }
-
-            if (map is RemoteMap remoteMap)
-            {
-                if (remoteMap.Host is null)
-                {
-                    _logger.LogCritical("Remote maps IP is null. This should never happen. Name: {MapName}",
-                        remoteMap.Name);
-                    throw new InvalidOperationException("Cannot handle this situation. See logs.");
-                }
-
-                return new CoreHost {Ip = remoteMap.Host, Port = remoteMap.Port};
-            }
-
-            return new CoreHost
-            {
-                Ip = _serviceProvider.GetRequiredService<IServerBase>().IpAddress, // lazy because of dependency loop
-                Port = (ushort)GameServer.Instance.Port
-            };
-        }
-
-        public SpawnGroup? GetGroup(uint id)
-        {
-            if (!_groups.ContainsKey(id))
-            {
-                return null;
-            }
-
-            return _groups[id];
-        }
-
-        public SpawnGroup GetRandomGroup()
-        {
-            var span = new Span<uint>([0], 0, 1);
-            RandomNumberGenerator.GetItems([.._groups.Keys], span);
-
-            return _groups[span[0]];
-        }
-
-        public SpawnGroupCollection? GetGroupCollection(uint id)
-        {
-            if (!_groupCollections.ContainsKey(id))
-            {
-                return null;
-            }
-
-            return _groupCollections[id];
-        }
-
-        public void SpawnEntity(IEntity e)
-        {
-            var map = GetMapAt((uint)e.PositionX, (uint)e.PositionY);
-            if (map == null)
-            {
-                _logger.LogWarning("Could not spawn entity at ({X};{Y}) No Map found for this coordinate", e.PositionX,
-                    e.PositionY);
                 return;
             }
 
-            if (map is RemoteMap)
-            {
-                _logger.LogWarning("Cannot spawn entity on RemoteMap. This is not implemented yet");
-                return;
-            }
+            remoteMap.Host = IPAddress.Parse(parts[0]);
+            remoteMap.Port = ushort.Parse(parts[1]);
 
-            if (e is IPlayerEntity player)
-            {
-                AddPlayer(player);
-                _logger.LogInformation("Player {PlayerName} ({PlayerId}) joined the map {MapName}", player.Name,
-                    player.Vid, map.Name);
-            }
+            _logger.LogDebug("Map {Name} is now available at {Host}:{Port}", remoteMap.Name, remoteMap.Host,
+                remoteMap.Port);
+        });
 
-            _pluginExecutor.ExecutePlugins<IGameEntityLifetimeListener>(_logger, x => x.OnPreCreatedAsync()).Wait();
-            map.SpawnEntity(e);
+        _mapSubscriber.Listen();
+    }
 
-            _pluginExecutor.ExecutePlugins<IGameEntityLifetimeListener>(_logger, x => x.OnPostCreatedAsync()).Wait();
-        }
+    public void Update(double elapsedTime)
+    {
+        // HookManager.Instance.CallHook<IHookWorldUpdate>(elapsedTime);
 
-        public void DespawnEntity(IEntity entity)
+        foreach (var map in _maps.Values)
         {
-            if (entity is IPlayerEntity player)
+            map.Update(elapsedTime);
+        }
+    }
+
+    public IMap? GetMapAt(uint x, uint y)
+    {
+        var gridX = x / Map.MapUnit;
+        var gridY = y / Map.MapUnit;
+
+        return _world.Get(gridX, gridY);
+    }
+
+    public IMap? GetMapByName(string name)
+    {
+        return _maps.TryGetValue(name, out var map) ? map : null;
+    }
+
+    public List<IMap> FindMapsByName(string needle)
+    {
+        var list = new List<IMap>();
+        foreach (var (name, map) in _maps)
+        {
+            if (name == needle)
             {
-                RemovePlayer(player);
+                list.Clear();
+                list.Add(map);
+                return list;
             }
 
-            _pluginExecutor.ExecutePlugins<IGameEntityLifetimeListener>(_logger, x => x.OnPreDeletedAsync()).Wait();
-            entity.Map?.DespawnEntity(entity);
-            _pluginExecutor.ExecutePlugins<IGameEntityLifetimeListener>(_logger, x => x.OnPostDeletedAsync()).Wait();
+            if (name.Contains(needle, StringComparison.InvariantCultureIgnoreCase))
+            {
+                list.Add(map);
+            }
         }
 
-        public async Task DespawnPlayerAsync(IPlayerEntity player)
+        return list;
+    }
+
+    public CoreHost GetMapHost(int x, int y)
+    {
+        var map = GetMapAt((uint)x, (uint)y);
+        if (map == null)
+        {
+            _logger.LogWarning("No available host for map at {X}|{Y}", x, y);
+            return new CoreHost {Ip = IPAddress.None, Port = 0};
+        }
+
+        if (map is RemoteMap remoteMap)
+        {
+            if (remoteMap.Host is null)
+            {
+                _logger.LogCritical("Remote maps IP is null. This should never happen. Name: {MapName}",
+                    remoteMap.Name);
+                throw new InvalidOperationException("Cannot handle this situation. See logs.");
+            }
+
+            return new CoreHost {Ip = remoteMap.Host, Port = remoteMap.Port};
+        }
+
+        return new CoreHost
+        {
+            Ip = _serviceProvider.GetRequiredService<IServerBase>().IpAddress, // lazy because of dependency loop
+            Port = (ushort)GameServer.Instance.Port
+        };
+    }
+
+    public SpawnGroup? GetGroup(uint id)
+    {
+        if (!_groups.ContainsKey(id))
+        {
+            return null;
+        }
+
+        return _groups[id];
+    }
+
+    public SpawnGroup GetRandomGroup()
+    {
+        var span = new Span<uint>([0], 0, 1);
+        RandomNumberGenerator.GetItems([.._groups.Keys], span);
+
+        return _groups[span[0]];
+    }
+
+    public SpawnGroupCollection? GetGroupCollection(uint id)
+    {
+        if (!_groupCollections.ContainsKey(id))
+        {
+            return null;
+        }
+
+        return _groupCollections[id];
+    }
+
+    public void SpawnEntity(IEntity e)
+    {
+        var map = GetMapAt((uint)e.PositionX, (uint)e.PositionY);
+        if (map == null)
+        {
+            _logger.LogWarning("Could not spawn entity at ({X};{Y}) No Map found for this coordinate", e.PositionX,
+                e.PositionY);
+            return;
+        }
+
+        if (map is RemoteMap)
+        {
+            _logger.LogWarning("Cannot spawn entity on RemoteMap. This is not implemented yet");
+            return;
+        }
+
+        if (e is IPlayerEntity player)
+        {
+            AddPlayer(player);
+            _logger.LogInformation("Player {PlayerName} ({PlayerId}) joined the map {MapName}", player.Name,
+                player.Vid, map.Name);
+        }
+
+        _pluginExecutor.ExecutePlugins<IGameEntityLifetimeListener>(_logger, x => x.OnPreCreatedAsync()).Wait();
+        map.SpawnEntity(e);
+
+        _pluginExecutor.ExecutePlugins<IGameEntityLifetimeListener>(_logger, x => x.OnPostCreatedAsync()).Wait();
+    }
+
+    public void DespawnEntity(IEntity entity)
+    {
+        if (entity is IPlayerEntity player)
         {
             RemovePlayer(player);
-            await player.OnDespawnAsync();
-
-            _pluginExecutor.ExecutePlugins<IGameEntityLifetimeListener>(_logger, x => x.OnPreDeletedAsync()).Wait();
-            player.Map?.DespawnEntity(player);
-            _pluginExecutor.ExecutePlugins<IGameEntityLifetimeListener>(_logger, x => x.OnPostDeletedAsync()).Wait();
         }
 
-        public uint GenerateVid()
+        _pluginExecutor.ExecutePlugins<IGameEntityLifetimeListener>(_logger, x => x.OnPreDeletedAsync()).Wait();
+        entity.Map?.DespawnEntity(entity);
+        _pluginExecutor.ExecutePlugins<IGameEntityLifetimeListener>(_logger, x => x.OnPostDeletedAsync()).Wait();
+    }
+
+    public async Task DespawnPlayerAsync(IPlayerEntity player)
+    {
+        RemovePlayer(player);
+        await player.OnDespawnAsync();
+
+        _pluginExecutor.ExecutePlugins<IGameEntityLifetimeListener>(_logger, x => x.OnPreDeletedAsync()).Wait();
+        player.Map?.DespawnEntity(player);
+        _pluginExecutor.ExecutePlugins<IGameEntityLifetimeListener>(_logger, x => x.OnPostDeletedAsync()).Wait();
+    }
+
+    public uint GenerateVid()
+    {
+        return ++_vid;
+    }
+
+    private void AddPlayer(IPlayerEntity e)
+    {
+        if (_players.ContainsKey(e.Name))
+            _players[e.Name] = e;
+        else
+            _players.Add(e.Name, e);
+    }
+
+    public void RemovePlayer(IPlayerEntity e)
+    {
+        _players.Remove(e.Name);
+    }
+
+    public IPlayerEntity? GetPlayer(string playerName)
+    {
+        if (string.IsNullOrWhiteSpace(playerName))
         {
-            return ++_vid;
+            return null;
         }
 
-        private void AddPlayer(IPlayerEntity e)
-        {
-            if (_players.ContainsKey(e.Name))
-                _players[e.Name] = e;
-            else
-                _players.Add(e.Name, e);
-        }
+        return _players.TryGetValue(playerName, out var player) ? player : null;
+    }
 
-        public void RemovePlayer(IPlayerEntity e)
-        {
-            _players.Remove(e.Name);
-        }
+    public IList<IPlayerEntity> GetPlayers()
+    {
+        return _players.Values.ToList();
+    }
 
-        public IPlayerEntity? GetPlayer(string playerName)
-        {
-            if (string.IsNullOrWhiteSpace(playerName))
-            {
-                return null;
-            }
-
-            return _players.TryGetValue(playerName, out var player) ? player : null;
-        }
-
-        public IList<IPlayerEntity> GetPlayers()
-        {
-            return _players.Values.ToList();
-        }
-
-        public IPlayerEntity? GetPlayerById(uint playerId)
-        {
-            return _players.Values.FirstOrDefault(x => x.Vid == playerId);
-        }
+    public IPlayerEntity? GetPlayerById(uint playerId)
+    {
+        return _players.Values.FirstOrDefault(x => x.Vid == playerId);
     }
 }

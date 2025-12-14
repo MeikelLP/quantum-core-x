@@ -7,73 +7,72 @@ using QuantumCore.API;
 using QuantumCore.API.Core.Models;
 using QuantumCore.Core.Types;
 
-namespace QuantumCore.Game
+namespace QuantumCore.Game;
+
+/// <summary>
+/// Manage all static data related to monster
+/// </summary>
+public class MonsterManager : IMonsterManager, ILoadable
 {
-    /// <summary>
-    /// Manage all static data related to monster
-    /// </summary>
-    public class MonsterManager : IMonsterManager, ILoadable
+    private readonly ILogger<MonsterManager> _logger;
+    private readonly IFileProvider _fileProvider;
+    private ImmutableArray<MonsterData> _proto = [];
+        
+    private readonly Lazy<Task> _loader;
+
+    static MonsterManager()
     {
-        private readonly ILogger<MonsterManager> _logger;
-        private readonly IFileProvider _fileProvider;
-        private ImmutableArray<MonsterData> _proto = [];
+        Encoding.RegisterProvider(CodePagesEncodingProvider.Instance); // register korean locale
+    }
+
+    public MonsterManager(ILogger<MonsterManager> logger, IFileProvider fileProvider)
+    {
+        _logger = logger;
+        _fileProvider = fileProvider;
+
+        _loader = new Lazy<Task>(LoadMobProtoAsync, LazyThreadSafetyMode.ExecutionAndPublication);
+    }
         
-        private readonly Lazy<Task> _loader;
+    /// <summary>
+    /// Try to load mob_proto file - idempotent and thread-safe due to Lazy usage
+    /// </summary>
+    public async Task LoadAsync(CancellationToken token = default)
+    {
+        await _loader.Value.WaitAsync(token);
+    }
 
-        static MonsterManager()
+    private async Task LoadMobProtoAsync()
+    {
+        var file = _fileProvider.GetFileInfo("mob_proto");
+        if (!file.Exists)
         {
-            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance); // register korean locale
+            _logger.LogWarning("{Path} does not exist, mobs not loaded", file.PhysicalPath);
+            _proto = [];
+            return;
         }
 
-        public MonsterManager(ILogger<MonsterManager> logger, IFileProvider fileProvider)
+        _logger.LogInformation("Loading mob_proto");
+
+        await using var fs = file.CreateReadStream();
+        var bs = new BinarySerializer
         {
-            _logger = logger;
-            _fileProvider = fileProvider;
+            Options = SerializationOptions.ThrowOnEndOfStream
+        };
+        var result = await bs.DeserializeAsync<MonsterDataContainer>(fs);
+        var items = new LzoXtea(result.Payload.RealSize, result.Payload.EncryptedSize, 0x497446, 0x4A0B, 0x86EB7,
+            0x68189D);
+        var itemsRaw = items.Decode(result.Payload.EncryptedPayload);
+        _proto = [..bs.Deserialize<MonsterData[]>(itemsRaw)];
+        _logger.LogDebug("Loaded {Count} monsters", _proto.Length);
+    }
 
-            _loader = new Lazy<Task>(LoadMobProtoAsync, LazyThreadSafetyMode.ExecutionAndPublication);
-        }
-        
-        /// <summary>
-        /// Try to load mob_proto file - idempotent and thread-safe due to Lazy usage
-        /// </summary>
-        public async Task LoadAsync(CancellationToken token = default)
-        {
-            await _loader.Value.WaitAsync(token);
-        }
+    public MonsterData? GetMonster(uint id)
+    {
+        return _proto.FirstOrDefault(monster => monster.Id == id);
+    }
 
-        private async Task LoadMobProtoAsync()
-        {
-            var file = _fileProvider.GetFileInfo("mob_proto");
-            if (!file.Exists)
-            {
-                _logger.LogWarning("{Path} does not exist, mobs not loaded", file.PhysicalPath);
-                _proto = [];
-                return;
-            }
-
-            _logger.LogInformation("Loading mob_proto");
-
-            await using var fs = file.CreateReadStream();
-            var bs = new BinarySerializer
-            {
-                Options = SerializationOptions.ThrowOnEndOfStream
-            };
-            var result = await bs.DeserializeAsync<MonsterDataContainer>(fs);
-            var items = new LzoXtea(result.Payload.RealSize, result.Payload.EncryptedSize, 0x497446, 0x4A0B, 0x86EB7,
-                0x68189D);
-            var itemsRaw = items.Decode(result.Payload.EncryptedPayload);
-            _proto = [..bs.Deserialize<MonsterData[]>(itemsRaw)];
-            _logger.LogDebug("Loaded {Count} monsters", _proto.Length);
-        }
-
-        public MonsterData? GetMonster(uint id)
-        {
-            return _proto.FirstOrDefault(monster => monster.Id == id);
-        }
-
-        public ImmutableArray<MonsterData> GetMonsters()
-        {
-            return _proto;
-        }
+    public ImmutableArray<MonsterData> GetMonsters()
+    {
+        return _proto;
     }
 }

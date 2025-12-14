@@ -10,85 +10,84 @@ using QuantumCore.Core.Networking;
 using QuantumCore.Game.Packets;
 using QuantumCore.Networking;
 
-namespace QuantumCore.Game
+namespace QuantumCore.Game;
+
+public class GameConnection : Connection, IGameConnection
 {
-    public class GameConnection : Connection, IGameConnection
+    private readonly IWorld _world;
+    private readonly ILogger<GameConnection> _logger;
+    private readonly ICacheManager _cacheManager;
+    public IServerBase Server { get; }
+    public Guid? AccountId { get; set; }
+    public string Username { get; set; } = "";
+    public IPlayerEntity? Player { get; set; }
+
+
+    public GameConnection(IServerBase server, TcpClient client, ILogger<GameConnection> logger,
+        PluginExecutor pluginExecutor, IWorld world,
+        [FromKeyedServices(HostingOptions.ModeGame)]
+        IPacketReader packetReader,
+        ICacheManager cacheManager)
+        : base(logger, pluginExecutor, packetReader)
     {
-        private readonly IWorld _world;
-        private readonly ILogger<GameConnection> _logger;
-        private readonly ICacheManager _cacheManager;
-        public IServerBase Server { get; }
-        public Guid? AccountId { get; set; }
-        public string Username { get; set; } = "";
-        public IPlayerEntity? Player { get; set; }
+        _world = world;
+        _logger = logger;
+        Server = server;
+        _cacheManager = cacheManager;
+        Init(client);
+    }
 
-
-        public GameConnection(IServerBase server, TcpClient client, ILogger<GameConnection> logger,
-            PluginExecutor pluginExecutor, IWorld world,
-            [FromKeyedServices(HostingOptions.ModeGame)]
-            IPacketReader packetReader,
-            ICacheManager cacheManager)
-            : base(logger, pluginExecutor, packetReader)
+    protected override void OnHandshakeFinished()
+    {
+        GameServer.Instance.CallConnectionListener(this);
+        var pingInterval = NetworkingConstants.PingIntervalInSeconds * 1000;
+        var ping = new Ping();
+        EventSystem.EnqueueEvent(() =>
         {
-            _world = world;
-            _logger = logger;
-            Server = server;
-            _cacheManager = cacheManager;
-            Init(client);
-        }
+            Send(ping);
+            return pingInterval;
+        }, pingInterval);
+    }
 
-        protected override void OnHandshakeFinished()
+    protected override async Task OnClose(bool expected = true)
+    {
+        if (Player != null)
         {
-            GameServer.Instance.CallConnectionListener(this);
-            var pingInterval = NetworkingConstants.PingIntervalInSeconds * 1000;
-            var ping = new Ping();
-            EventSystem.EnqueueEvent(() =>
+            if (expected)
             {
-                Send(ping);
-                return pingInterval;
-            }, pingInterval);
-        }
-
-        protected override async Task OnClose(bool expected = true)
-        {
-            if (Player != null)
+                _world.DespawnEntity(Player);
+            }
+            else
             {
-                if (expected)
+                if (Phase is EPhase.Game or EPhase.Loading)
                 {
-                    _world.DespawnEntity(Player);
-                }
-                else
-                {
-                    if (Phase is EPhase.Game or EPhase.Loading)
-                    {
-                        await Player.CalculatePlayedTimeAsync();
-                    }
-
-                    // In case of unexpected disconnection, we need to save the player's state
-                    if (Phase is EPhase.Game or EPhase.Loading or EPhase.Select)
-                    {
-                        await _world.DespawnPlayerAsync(Player);
-                    }
+                    await Player.CalculatePlayedTimeAsync();
                 }
 
-
-                _cacheManager.Server.DelAllAsync($"player:{Player!.Player.Id}");
-                await _cacheManager.Del($"account:token:{Player.Player.AccountId}");
+                // In case of unexpected disconnection, we need to save the player's state
+                if (Phase is EPhase.Game or EPhase.Loading or EPhase.Select)
+                {
+                    await _world.DespawnPlayerAsync(Player);
+                }
             }
 
-            await Server.RemoveConnection(this);
 
-            // todo enable expiry on auth token
+            _cacheManager.Server.DelAllAsync($"player:{Player!.Player.Id}");
+            await _cacheManager.Del($"account:token:{Player.Player.AccountId}");
         }
 
-        protected override async Task OnReceive(IPacketSerializable packet)
-        {
-            await Server.CallListener(this, packet);
-        }
+        await Server.RemoveConnection(this);
 
-        protected override long GetServerTime()
-        {
-            return Server.ServerTime;
-        }
+        // todo enable expiry on auth token
+    }
+
+    protected override async Task OnReceive(IPacketSerializable packet)
+    {
+        await Server.CallListener(this, packet);
+    }
+
+    protected override long GetServerTime()
+    {
+        return Server.ServerTime;
     }
 }

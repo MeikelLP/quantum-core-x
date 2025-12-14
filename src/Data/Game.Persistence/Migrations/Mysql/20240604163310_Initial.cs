@@ -4,18 +4,18 @@ using QuantumCore.API.Game.Types;
 
 #nullable disable
 
-namespace QuantumCore.Game.Persistence.Migrations.Mysql
+namespace QuantumCore.Game.Persistence.Migrations.Mysql;
+
+/// <inheritdoc />
+public partial class Initial : Migration
 {
     /// <inheritdoc />
-    public partial class Initial : Migration
+    protected override void Up(MigrationBuilder migrationBuilder)
     {
-        /// <inheritdoc />
-        protected override void Up(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.AlterDatabase()
-                .Annotation("MySql:CharSet", "utf8mb4");
+        migrationBuilder.AlterDatabase()
+            .Annotation("MySql:CharSet", "utf8mb4");
 
-            migrationBuilder.CreateTable(
+        migrationBuilder.CreateTable(
                 name: "DeletedPlayers",
                 columns: table => new
                 {
@@ -48,9 +48,9 @@ namespace QuantumCore.Game.Persistence.Migrations.Mysql
                 {
                     table.PrimaryKey("PK_DeletedPlayers", x => x.Id);
                 })
-                .Annotation("MySql:CharSet", "utf8mb4");
+            .Annotation("MySql:CharSet", "utf8mb4");
 
-            migrationBuilder.CreateTable(
+        migrationBuilder.CreateTable(
                 name: "PermissionGroups",
                 columns: table => new
                 {
@@ -62,9 +62,9 @@ namespace QuantumCore.Game.Persistence.Migrations.Mysql
                 {
                     table.PrimaryKey("PK_PermissionGroups", x => x.Id);
                 })
-                .Annotation("MySql:CharSet", "utf8mb4");
+            .Annotation("MySql:CharSet", "utf8mb4");
 
-            migrationBuilder.CreateTable(
+        migrationBuilder.CreateTable(
                 name: "Players",
                 columns: table => new
                 {
@@ -101,9 +101,9 @@ namespace QuantumCore.Game.Persistence.Migrations.Mysql
                 {
                     table.PrimaryKey("PK_Players", x => x.Id);
                 })
-                .Annotation("MySql:CharSet", "utf8mb4");
+            .Annotation("MySql:CharSet", "utf8mb4");
 
-            migrationBuilder.CreateTable(
+        migrationBuilder.CreateTable(
                 name: "PlayerSkills",
                 columns: table => new
                 {
@@ -121,9 +121,9 @@ namespace QuantumCore.Game.Persistence.Migrations.Mysql
                 {
                     table.PrimaryKey("PK_PlayerSkills", x => x.Id);
                 })
-                .Annotation("MySql:CharSet", "utf8mb4");
+            .Annotation("MySql:CharSet", "utf8mb4");
 
-            migrationBuilder.CreateTable(
+        migrationBuilder.CreateTable(
                 name: "Permissions",
                 columns: table => new
                 {
@@ -142,9 +142,9 @@ namespace QuantumCore.Game.Persistence.Migrations.Mysql
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 })
-                .Annotation("MySql:CharSet", "utf8mb4");
+            .Annotation("MySql:CharSet", "utf8mb4");
 
-            migrationBuilder.CreateTable(
+        migrationBuilder.CreateTable(
                 name: "Items",
                 columns: table => new
                 {
@@ -167,9 +167,9 @@ namespace QuantumCore.Game.Persistence.Migrations.Mysql
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 })
-                .Annotation("MySql:CharSet", "utf8mb4");
+            .Annotation("MySql:CharSet", "utf8mb4");
 
-            migrationBuilder.CreateTable(
+        migrationBuilder.CreateTable(
                 name: "PermissionUsers",
                 columns: table => new
                 {
@@ -192,68 +192,67 @@ namespace QuantumCore.Game.Persistence.Migrations.Mysql
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 })
-                .Annotation("MySql:CharSet", "utf8mb4");
+            .Annotation("MySql:CharSet", "utf8mb4");
 
-            migrationBuilder.InsertData(
-                table: "PermissionGroups",
-                columns: new[] { "Id", "Name" },
-                values: new object[] { new Guid("45bff707-1836-42b7-956d-00b9b69e0ee0"), "Operator" });
+        migrationBuilder.InsertData(
+            table: "PermissionGroups",
+            columns: new[] { "Id", "Name" },
+            values: new object[] { new Guid("45bff707-1836-42b7-956d-00b9b69e0ee0"), "Operator" });
 
-            migrationBuilder.InsertData(
-                table: "Players",
-                columns: new[] { "Id", "AccountId", "AvailableSkillPoints", "AvailableStatusPoints", "BodyPart", "CreatedAt", "Dx", "Empire", "Experience", "GivenStatusPoints", "Gold", "HairPart", "Health", "Ht", "Iq", "Level", "Mana", "Name", "PlayTime", "PlayerClass", "PositionX", "PositionY", "SkillGroup", "St", "Stamina" },
-                values: new object[] { 1u, new Guid("e34fd5ab-fb3b-428e-935b-7db5bd08a3e5"), 99u, 0u, 0u, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), (byte)99, (byte)EEmpire.Jinno, 0u, 0u, 2000000000u, 0u, 99999L, (byte)99, (byte)99, (byte)99, 99999L, "Admin", 0ul, (byte)0, 958870, 272788, (byte)0, (byte)99, 0L });
+        migrationBuilder.InsertData(
+            table: "Players",
+            columns: new[] { "Id", "AccountId", "AvailableSkillPoints", "AvailableStatusPoints", "BodyPart", "CreatedAt", "Dx", "Empire", "Experience", "GivenStatusPoints", "Gold", "HairPart", "Health", "Ht", "Iq", "Level", "Mana", "Name", "PlayTime", "PlayerClass", "PositionX", "PositionY", "SkillGroup", "St", "Stamina" },
+            values: new object[] { 1u, new Guid("e34fd5ab-fb3b-428e-935b-7db5bd08a3e5"), 99u, 0u, 0u, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), (byte)99, (byte)EEmpire.Jinno, 0u, 0u, 2000000000u, 0u, 99999L, (byte)99, (byte)99, (byte)99, 99999L, "Admin", 0ul, (byte)0, 958870, 272788, (byte)0, (byte)99, 0L });
 
-            migrationBuilder.InsertData(
-                table: "PermissionUsers",
-                columns: new[] { "GroupId", "PlayerId" },
-                values: new object[] { new Guid("45bff707-1836-42b7-956d-00b9b69e0ee0"), 1u });
+        migrationBuilder.InsertData(
+            table: "PermissionUsers",
+            columns: new[] { "GroupId", "PlayerId" },
+            values: new object[] { new Guid("45bff707-1836-42b7-956d-00b9b69e0ee0"), 1u });
 
-            migrationBuilder.CreateIndex(
-                name: "IX_Items_PlayerId",
-                table: "Items",
-                column: "PlayerId");
+        migrationBuilder.CreateIndex(
+            name: "IX_Items_PlayerId",
+            table: "Items",
+            column: "PlayerId");
 
-            migrationBuilder.CreateIndex(
-                name: "IX_PermissionGroups_Name",
-                table: "PermissionGroups",
-                column: "Name",
-                unique: true);
+        migrationBuilder.CreateIndex(
+            name: "IX_PermissionGroups_Name",
+            table: "PermissionGroups",
+            column: "Name",
+            unique: true);
 
-            migrationBuilder.CreateIndex(
-                name: "IX_Permissions_GroupId",
-                table: "Permissions",
-                column: "GroupId");
+        migrationBuilder.CreateIndex(
+            name: "IX_Permissions_GroupId",
+            table: "Permissions",
+            column: "GroupId");
 
-            migrationBuilder.CreateIndex(
-                name: "IX_PermissionUsers_PlayerId",
-                table: "PermissionUsers",
-                column: "PlayerId");
-        }
+        migrationBuilder.CreateIndex(
+            name: "IX_PermissionUsers_PlayerId",
+            table: "PermissionUsers",
+            column: "PlayerId");
+    }
 
-        /// <inheritdoc />
-        protected override void Down(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.DropTable(
-                name: "DeletedPlayers");
+    /// <inheritdoc />
+    protected override void Down(MigrationBuilder migrationBuilder)
+    {
+        migrationBuilder.DropTable(
+            name: "DeletedPlayers");
 
-            migrationBuilder.DropTable(
-                name: "Items");
+        migrationBuilder.DropTable(
+            name: "Items");
 
-            migrationBuilder.DropTable(
-                name: "Permissions");
+        migrationBuilder.DropTable(
+            name: "Permissions");
 
-            migrationBuilder.DropTable(
-                name: "PermissionUsers");
+        migrationBuilder.DropTable(
+            name: "PermissionUsers");
 
-            migrationBuilder.DropTable(
-                name: "PlayerSkills");
+        migrationBuilder.DropTable(
+            name: "PlayerSkills");
 
-            migrationBuilder.DropTable(
-                name: "PermissionGroups");
+        migrationBuilder.DropTable(
+            name: "PermissionGroups");
 
-            migrationBuilder.DropTable(
-                name: "Players");
-        }
+        migrationBuilder.DropTable(
+            name: "Players");
     }
 }

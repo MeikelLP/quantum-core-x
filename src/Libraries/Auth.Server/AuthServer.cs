@@ -5,38 +5,37 @@ using QuantumCore.Core.Networking;
 using QuantumCore.Extensions;
 using QuantumCore.Networking;
 
-namespace QuantumCore.Auth
+namespace QuantumCore.Auth;
+
+public class AuthServer : ServerBase<AuthConnection>
 {
-    public class AuthServer : ServerBase<AuthConnection>
+    private readonly ILogger<AuthServer> _logger;
+    private readonly ICacheManager _cacheManager;
+
+    public AuthServer([FromKeyedServices(HostingOptions.ModeAuth)] IPacketManager packetManager,
+        ILogger<AuthServer> logger,
+        PluginExecutor pluginExecutor, IServiceProvider serviceProvider, ICacheManager cacheManager)
+        : base(packetManager, logger, pluginExecutor, serviceProvider, HostingOptions.ModeAuth)
     {
-        private readonly ILogger<AuthServer> _logger;
-        private readonly ICacheManager _cacheManager;
+        _logger = logger;
+        _cacheManager = cacheManager;
+    }
 
-        public AuthServer([FromKeyedServices(HostingOptions.ModeAuth)] IPacketManager packetManager,
-            ILogger<AuthServer> logger,
-            PluginExecutor pluginExecutor, IServiceProvider serviceProvider, ICacheManager cacheManager)
-            : base(packetManager, logger, pluginExecutor, serviceProvider, HostingOptions.ModeAuth)
+    protected override async Task ExecuteAsync(CancellationToken token)
+    {
+        // Register auth server features
+        RegisterNewConnectionListener(NewConnection);
+
+        var pong = await _cacheManager.Ping();
+        if (!pong)
         {
-            _logger = logger;
-            _cacheManager = cacheManager;
+            _logger.LogError("Failed to ping redis server");
         }
+    }
 
-        protected override async Task ExecuteAsync(CancellationToken token)
-        {
-            // Register auth server features
-            RegisterNewConnectionListener(NewConnection);
-
-            var pong = await _cacheManager.Ping();
-            if (!pong)
-            {
-                _logger.LogError("Failed to ping redis server");
-            }
-        }
-
-        private bool NewConnection(IConnection connection)
-        {
-            connection.SetPhase(EPhase.Auth);
-            return true;
-        }
+    private bool NewConnection(IConnection connection)
+    {
+        connection.SetPhase(EPhase.Auth);
+        return true;
     }
 }

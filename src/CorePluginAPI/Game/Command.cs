@@ -1,29 +1,28 @@
-﻿namespace QuantumCore.API.Game
+﻿namespace QuantumCore.API.Game;
+
+[AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
+public class CommandAttribute : Attribute
 {
-    [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
-    public class CommandAttribute : Attribute
+    public CommandAttribute(string name, string description)
     {
-        public CommandAttribute(string name, string description)
-        {
-            Name = name;
-            Description = description;
-        }
-
-        public string Name { get; }
-        public string Description { get; }
+        Name = name;
+        Description = description;
     }
 
-    [AttributeUsage(AttributeTargets.Method)]
-    public class CommandMethodAttribute : Attribute
-    {
-        public CommandMethodAttribute(string description = "")
-        {
-            Description = description;
-        }
-
-        public string Description { get; }
-    }
-
-    [AttributeUsage(AttributeTargets.Class)]
-    public class CommandNoPermissionAttribute : Attribute {}
+    public string Name { get; }
+    public string Description { get; }
 }
+
+[AttributeUsage(AttributeTargets.Method)]
+public class CommandMethodAttribute : Attribute
+{
+    public CommandMethodAttribute(string description = "")
+    {
+        Description = description;
+    }
+
+    public string Description { get; }
+}
+
+[AttributeUsage(AttributeTargets.Class)]
+public class CommandNoPermissionAttribute : Attribute {}
