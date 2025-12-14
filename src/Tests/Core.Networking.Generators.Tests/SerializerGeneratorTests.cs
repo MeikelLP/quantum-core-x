@@ -32,7 +32,7 @@ using QuantumCore.Networking;
 
 namespace QuantumCore.Core.Packets;
 
-[Packet(0xff, EDirection.Incoming | EDirection.Outgoing)]
+[Packet(0xff, EDirection.INCOMING | EDirection.OUTGOING)]
 [PacketGenerator]
 public partial record struct GCHandshake(uint Handshake, uint Time, uint Delta);
 ".Trim());
@@ -150,7 +150,7 @@ using QuantumCore.Networking;
 
 namespace QuantumCore.Core.Packets;
 
-[Packet(0xff, EDirection.Incoming | EDirection.Outgoing)]
+[Packet(0xff, EDirection.INCOMING | EDirection.OUTGOING)]
 [PacketGenerator]
 public partial record GCHandshake(uint Handshake, uint Time, uint Delta);
 ".Trim());
@@ -272,7 +272,7 @@ public enum HandshakeType : byte {
     
 }
 
-[Packet(0xff, EDirection.Incoming | EDirection.Outgoing)]
+[Packet(0xff, EDirection.INCOMING | EDirection.OUTGOING)]
 [PacketGenerator]
 public partial record GCHandshake(uint Handshake, HandshakeType Type);
 ".Trim());
@@ -383,7 +383,7 @@ public enum HandshakeType : int {
     
 }
 
-[Packet(0xff, EDirection.Incoming | EDirection.Outgoing)]
+[Packet(0xff, EDirection.INCOMING | EDirection.OUTGOING)]
 [PacketGenerator]
 public partial record GCHandshake(uint Handshake, HandshakeType Type);
 ".Trim());
@@ -493,7 +493,7 @@ using QuantumCore.Networking;
 
 namespace QuantumCore.Core.Packets;
 
-[Packet(0xff, EDirection.Incoming | EDirection.Outgoing)]
+[Packet(0xff, EDirection.INCOMING | EDirection.OUTGOING)]
 [PacketGenerator]
 public partial record struct GCHandshake(uint Handshake, uint Time) {
     [Field(0)]
@@ -612,7 +612,7 @@ using QuantumCore.Networking;
 
 namespace QuantumCore.Core.Packets;
 
-[Packet(0xff, EDirection.Incoming | EDirection.Outgoing)]
+[Packet(0xff, EDirection.INCOMING | EDirection.OUTGOING)]
 [PacketGenerator]
 public partial record struct GCHandshake(byte Type, string Message) {
     [Field(1)]
@@ -725,7 +725,7 @@ using QuantumCore.Networking;
 
 namespace QuantumCore.Core.Packets;
 
-[Packet(0xff, EDirection.Incoming | EDirection.Outgoing)]
+[Packet(0xff, EDirection.INCOMING | EDirection.OUTGOING)]
 [PacketGenerator]
 public partial record struct GCHandshake(byte Type, byte[] Flags) {
     [Field(1)]
@@ -838,7 +838,7 @@ using QuantumCore.Networking;
 
 namespace QuantumCore.Core.Packets;
 
-[Packet(0xff, EDirection.Incoming | EDirection.Outgoing)]
+[Packet(0xff, EDirection.INCOMING | EDirection.OUTGOING)]
 [PacketGenerator]
 public partial record struct GCHandshake(byte Type)
 {
@@ -949,7 +949,7 @@ using QuantumCore.Networking;
 
 namespace QuantumCore.Core.Packets;
 
-[Packet(0xff, EDirection.Incoming | EDirection.Outgoing)]
+[Packet(0xff, EDirection.INCOMING | EDirection.OUTGOING)]
 [PacketGenerator]
 public partial record struct GCHandshake(byte Type)
 {
@@ -1071,7 +1071,7 @@ using QuantumCore.Networking;
 
 namespace QuantumCore.Core.Packets;
 
-[Packet(0x32, EDirection.Incoming)]
+[Packet(0x32, EDirection.INCOMING)]
 [SubPacket(0x01, 0)]
 [PacketGenerator]
 public partial class ShopBuy {
@@ -1179,7 +1179,7 @@ using QuantumCore.Networking;
 
 namespace QuantumCore.Core.Packets;
 
-[Packet(0x02, EDirection.Incoming, Sequence = true)]
+[Packet(0x02, EDirection.INCOMING, Sequence = true)]
 [PacketGenerator]
 public partial class Attack
 {
@@ -1299,7 +1299,7 @@ using QuantumCore.Networking;
 
 namespace QuantumCore.Game.Packets;
 
-[Packet(0x03, EDirection.Incoming, Sequence = true)]
+[Packet(0x03, EDirection.INCOMING, Sequence = true)]
 [PacketGenerator]
 public partial class ChatIncoming
 {
@@ -1415,7 +1415,7 @@ using QuantumCore.Networking;
 
 namespace QuantumCore.Core.Packets;
 
-[Packet(0x0B, EDirection.Outgoing)]
+[Packet(0x0B, EDirection.OUTGOING)]
 [PacketGenerator]
 public partial class DeleteCharacterFail
 {
@@ -1514,7 +1514,7 @@ public static class Constants
     public const int FieldLength = 10;
 }
 
-[Packet(0x0B, EDirection.Outgoing)]
+[Packet(0x0B, EDirection.OUTGOING)]
 [PacketGenerator]
 public partial class DeleteCharacterFail
 {
@@ -1620,7 +1620,7 @@ public static class Constants
     public const int FieldLength = 5;
 }
 
-[Packet(0x0B, EDirection.Outgoing)]
+[Packet(0x0B, EDirection.OUTGOING)]
 [PacketGenerator]
 public partial class DeleteCharacterFail
 {
@@ -1721,7 +1721,7 @@ using QuantumCore.Networking;
 
 namespace QuantumCore.Core.Packets;
 
-[Packet(0x0B, EDirection.Outgoing)]
+[Packet(0x0B, EDirection.OUTGOING)]
 [PacketGenerator]
 public partial class DeleteCharacterFail
 {
@@ -1822,7 +1822,7 @@ using QuantumCore.Networking;
 
 namespace QuantumCore.Core.Packets;
 
-[Packet(0x32, EDirection.Incoming, Sequence = true)]
+[Packet(0x32, EDirection.INCOMING, Sequence = true)]
 [SubPacket(0x01, 0)]
 [PacketGenerator]
 public partial class ShopBuy
@@ -1852,7 +1852,7 @@ using QuantumCore.Networking;
 
 namespace QuantumCore.Core.Packets;
 
-[Packet(0xff, EDirection.Incoming | EDirection.Outgoing)]
+[Packet(0xff, EDirection.INCOMING | EDirection.OUTGOING)]
 [PacketGenerator]
 public partial record struct GCHandshake()
 {
@@ -1964,7 +1964,7 @@ using QuantumCore.Networking;
 
 namespace QuantumCore.Core.Packets;
 
-[Packet(0xff, EDirection.Incoming | EDirection.Outgoing)]
+[Packet(0xff, EDirection.INCOMING | EDirection.OUTGOING)]
 [PacketGenerator]
 public partial record struct GCHandshake(byte Type, ushort[] Flags)
 {
@@ -2090,7 +2090,7 @@ using QuantumCore.Networking;
 
 namespace QuantumCore.Core.Packets;
 
-[Packet(0xff, EDirection.Incoming | EDirection.Outgoing)]
+[Packet(0xff, EDirection.INCOMING | EDirection.OUTGOING)]
 [PacketGenerator]
 public partial record struct GCHandshake(byte Type, ushort[] Flags)
 {
@@ -2116,7 +2116,7 @@ using QuantumCore.Networking;
 
 namespace QuantumCore.Core.Packets;
 
-[Packet(0xff, EDirection.Incoming | EDirection.Outgoing)]
+[Packet(0xff, EDirection.INCOMING | EDirection.OUTGOING)]
 [PacketGenerator]
 public partial record struct GCHandshake(byte Type, string Message, byte Location) {
     [Field(1)]
@@ -2234,11 +2234,11 @@ using QuantumCore.Networking;
 
 namespace QuantumCore.Core.Packets;
 
-[Packet(0xff, EDirection.Incoming | EDirection.Outgoing)]
+[Packet(0xff, EDirection.INCOMING | EDirection.OUTGOING)]
 [PacketGenerator]
 public partial record struct GCHandshake(uint Handshake, uint Time, uint Delta);
 
-[Packet(0xfd, EDirection.Outgoing)]
+[Packet(0xfd, EDirection.OUTGOING)]
 [PacketGenerator]
 public partial record struct GCPhase(byte Phase);
 ".Trim());
@@ -2427,7 +2427,7 @@ using QuantumCore.Networking;
 
 namespace QuantumCore.Core.Packets;
 
-[Packet(0xff, EDirection.Incoming | EDirection.Outgoing)]
+[Packet(0xff, EDirection.INCOMING | EDirection.OUTGOING)]
 [PacketGenerator]
 public partial struct GCHandshake {
     public uint Handshake { get; set; }
@@ -2548,7 +2548,7 @@ using QuantumCore.Networking;
 
 namespace QuantumCore.Core.Packets;
 
-[Packet(0xff, EDirection.Incoming | EDirection.Outgoing)]
+[Packet(0xff, EDirection.INCOMING | EDirection.OUTGOING)]
 [PacketGenerator]
 public partial class GCHandshake {
     public uint Handshake { get; set; }
@@ -2669,7 +2669,7 @@ using QuantumCore.Networking;
 
 namespace QuantumCore.Core.Packets;
 
-[Packet(0xff, EDirection.Incoming)]
+[Packet(0xff, EDirection.INCOMING)]
 [PacketGenerator]
 public partial class Squidward {
     public bool IsHandsome { get; set; }
@@ -2770,7 +2770,7 @@ using QuantumCore.Networking;
 namespace QuantumCore.Core.Packets;
 
 [PacketGenerator]
-[Packet(0x4B, EDirection.Outgoing)]
+[Packet(0x4B, EDirection.OUTGOING)]
 [SubPacket(0x10, 1)]
 public partial class GuildName
 {
@@ -2887,7 +2887,7 @@ using QuantumCore.Networking;
 namespace QuantumCore.Core.Packets;
 
 [PacketGenerator]
-[Packet(0x4B, EDirection.Outgoing)]
+[Packet(0x4B, EDirection.OUTGOING)]
 [SubPacket(0x10, 0)]
 public partial class GuildName
 {
@@ -2983,7 +2983,7 @@ using QuantumCore.Networking;
 
 namespace QuantumCore.Core.Packets;
 
-[Packet(0xff, EDirection.Incoming | EDirection.Outgoing)]
+[Packet(0xff, EDirection.INCOMING | EDirection.OUTGOING)]
 [PacketGenerator]
 public partial class GCHandshake {
     public uint Handshake { get; set; }
@@ -3123,7 +3123,7 @@ using QuantumCore.Networking;
 
 namespace QuantumCore.Core.Packets;
 
-[Packet(0xff, EDirection.Incoming | EDirection.Outgoing)]
+[Packet(0xff, EDirection.INCOMING | EDirection.OUTGOING)]
 [PacketGenerator]
 public partial record GCHandshake(uint Handshake, uint Time) {
     public uint Delta { get; init; }
@@ -3247,7 +3247,7 @@ using QuantumCore.Networking;
 
 namespace QuantumCore.Core.Packets;
 
-[Packet(0xff, EDirection.Incoming | EDirection.Outgoing)]
+[Packet(0xff, EDirection.INCOMING | EDirection.OUTGOING)]
 [PacketGenerator]
 public partial class GCHandshake {
     public uint Handshake { get; set; }
@@ -3454,7 +3454,7 @@ using QuantumCore.Networking;
 
 namespace QuantumCore.Core.Packets;
 
-[Packet(0xff, EDirection.Incoming | EDirection.Outgoing)]
+[Packet(0xff, EDirection.INCOMING | EDirection.OUTGOING)]
 [PacketGenerator]
 public partial class GCHandshake {
     public uint Handshake { get; set; }
@@ -3610,7 +3610,7 @@ using QuantumCore.Networking;
 
 namespace QuantumCore.Core.Packets;
 
-[Packet(0x88, EDirection.Incoming)]
+[Packet(0x88, EDirection.INCOMING)]
 [PacketGenerator]
 public partial class CharacterInfo {
     [Field(0)]
@@ -3754,7 +3754,7 @@ using QuantumCore.Networking;
 
 namespace QuantumCore.Auth.Packets
 {
-    [Packet(0x07, EDirection.Outgoing)]
+    [Packet(0x07, EDirection.OUTGOING)]
     [PacketGenerator]
     public partial class LoginFailed
     {
@@ -3781,7 +3781,7 @@ using QuantumCore.Networking;
 
 namespace QuantumCore.Game.Packets;
 
-[Packet(0x20, EDirection.Outgoing)]
+[Packet(0x20, EDirection.OUTGOING)]
 [PacketGenerator]
 public partial record struct Characters ()
 {
@@ -3914,7 +3914,7 @@ using QuantumCore.Networking;
 
 namespace QuantumCore.Game.Packets;
 
-[Packet(0x20, EDirection.Incoming)]
+[Packet(0x20, EDirection.INCOMING)]
 [PacketGenerator]
 public partial record struct StringTest ()
 {
