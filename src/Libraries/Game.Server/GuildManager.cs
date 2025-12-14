@@ -68,7 +68,7 @@ public class GuildManager : IGuildManager
                     Rank = leaderRank
                 }
             },
-            Ranks = Enumerable.Range(2, GuildConstants.RANKS_LENGTH - 1)
+            Ranks = Enumerable.Range(2, GuildConstants.RanksLength - 1)
                 .Select(rank => new GuildRank
                 {
                     Position = (byte) rank,
@@ -76,7 +76,7 @@ public class GuildManager : IGuildManager
                 })
                 .Prepend(leaderRank)
                 .ToList(),
-            MaxMemberCount = GuildConstants.MEMBERS_MAX_DEFAULT
+            MaxMemberCount = GuildConstants.MembersMaxDefault
         };
         _db.Guilds.Add(guild);
         await _db.SaveChangesAsync(token);
@@ -128,7 +128,7 @@ public class GuildManager : IGuildManager
             ..await _db.GuildNews
                 .OrderByDescending(x => x.CreatedAt)
                 .Where(x => x.GuildId == guildId)
-                .Take(GuildConstants.MAX_NEWS_LOAD)
+                .Take(GuildConstants.MaxNewsLoad)
                 .Select(x => new GuildNewsData(x.Id, x.Player.Name, x.Message))
                 .ToArrayAsync(token)
         ];
@@ -155,7 +155,7 @@ public class GuildManager : IGuildManager
             ..await _db.GuildRanks
                 .Where(x => x.GuildId == guildId)
                 .OrderBy(x => x.Position)
-                .Take(GuildConstants.RANKS_LENGTH)
+                .Take(GuildConstants.RanksLength)
                 .Select(x => new GuildRankData
                 {
                     Name = x.Name,

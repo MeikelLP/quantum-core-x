@@ -21,7 +21,7 @@ public partial class ParserService : IParserService
     private readonly IFileProvider _fileProvider;
     private static readonly NumberFormatInfo InvNum = NumberFormatInfo.InvariantInfo;
     private static readonly Encoding DefaultEncoding = Encoding.GetEncoding("EUC-KR");
-    private const StringComparison INV_CUL = StringComparison.InvariantCultureIgnoreCase;
+    private const StringComparison InvCul = StringComparison.InvariantCultureIgnoreCase;
 
     private readonly ILogger<ParserService> _logger;
 
@@ -104,9 +104,9 @@ public partial class ParserService : IParserService
                     LevelLimit = short.Parse(split[5]),
                     PointOn = split[6],
                     PointPoly = split[7],
-                    SPCostPoly = split[8],
+                    SpCostPoly = split[8],
                     DurationPoly = split[9],
-                    DurationSPCostPoly = split[10],
+                    DurationSpCostPoly = split[10],
                     CooldownPoly = split[11],
                     MasterBonusPoly = split[12],
                     AttackGradePoly = split[13],
@@ -151,7 +151,7 @@ public partial class ParserService : IParserService
                 continue;
             }
 
-            if (line.StartsWith("Group", INV_CUL))
+            if (line.StartsWith("Group", InvCul))
             {
                 line = line.Trim();
                 if (currentGroup != null)
@@ -213,7 +213,7 @@ public partial class ParserService : IParserService
             throw new MissingRequiredFieldException("Mob");
         }
 
-        if (type.Equals("Kill", INV_CUL))
+        if (type.Equals("Kill", InvCul))
         {
             minKillCount = group.GetField<uint>("kill_drop");
         }
@@ -222,7 +222,7 @@ public partial class ParserService : IParserService
             minKillCount = 1;
         }
 
-        if (type.Equals("Limit", INV_CUL))
+        if (type.Equals("Limit", InvCul))
         {
             levelLimit = group.GetField<uint>("Level_limit");
             if (levelLimit == default)
@@ -240,7 +240,7 @@ public partial class ParserService : IParserService
             return null;
         }
 
-        if (type.Equals("Kill", INV_CUL)) // MobItemGroup
+        if (type.Equals("Kill", InvCul)) // MobItemGroup
         {
             var entry = new MonsterItemGroup {MonsterProtoId = monsterProtoId, MinKillCount = minKillCount,};
 
@@ -279,7 +279,7 @@ public partial class ParserService : IParserService
             return entry;
         }
 
-        if (type.Equals("Drop", INV_CUL)) // DropItemGroup
+        if (type.Equals("Drop", InvCul)) // DropItemGroup
         {
             var entry = new DropItemGroup {MonsterProtoId = monsterProtoId,};
 
@@ -311,7 +311,7 @@ public partial class ParserService : IParserService
             return entry;
         }
 
-        if (type.Equals("Limit", INV_CUL)) // LevelItemGroup
+        if (type.Equals("Limit", InvCul)) // LevelItemGroup
         {
             var entry = new LevelItemGroup {LevelLimit = levelLimit};
 

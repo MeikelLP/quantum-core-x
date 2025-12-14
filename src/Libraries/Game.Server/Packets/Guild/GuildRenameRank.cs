@@ -14,6 +14,6 @@ public partial class GuildRenameRank
     [Field(0)]
     public byte Position { get; set; }
 
-    [Field(1, Length = GuildConstants.RANK_NAME_MAX_LENGTH + 1)]
+    [Field(1, Length = GuildConstants.RankNameMaxLength + 1)]
     public string Name { get; set; } = "";
 }

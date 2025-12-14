@@ -36,7 +36,7 @@ public class IncomingPacketTests
     [Fact]
     public void WrongLengthThrowsArgumentException()
     {
-        Assert.Throws<ArgumentOutOfRangeException>(() => _serializer.Deserialize<GCHandshake>(Array.Empty<byte>()));
+        Assert.Throws<ArgumentOutOfRangeException>(() => _serializer.Deserialize<GcHandshake>(Array.Empty<byte>()));
     }
 
     [Fact]

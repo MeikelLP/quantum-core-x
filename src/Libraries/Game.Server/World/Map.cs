@@ -23,9 +23,9 @@ namespace QuantumCore.Game.World;
 public class Map : IMap
 {
     public const uint MapUnit = 25600;
-    private const int SPAWN_BASE_OFFSET = 5;
-    public const int SPAWN_POSITION_MULTIPLIER = 100;
-    private const int SPAWN_ROTATION_SLICE_DEGREES = 45;
+    private const int SpawnBaseOffset = 5;
+    public const int SpawnPositionMultiplier = 100;
+    private const int SpawnRotationSliceDegrees = 45;
     public string Name { get; private set; }
     public Coordinates Position { get; private set; }
     public uint UnitX => Position.X / MapUnit;
@@ -84,10 +84,10 @@ public class Map : IMap
         TownCoordinates = townCoordinates is not null
             ? new TownCoordinates
             {
-                Jinno = Position + townCoordinates.Jinno * SPAWN_POSITION_MULTIPLIER,
-                Chunjo = Position + townCoordinates.Chunjo * SPAWN_POSITION_MULTIPLIER,
-                Shinsoo = Position + townCoordinates.Shinsoo * SPAWN_POSITION_MULTIPLIER,
-                Common = Position + townCoordinates.Common * SPAWN_POSITION_MULTIPLIER
+                Jinno = Position + townCoordinates.Jinno * SpawnPositionMultiplier,
+                Chunjo = Position + townCoordinates.Chunjo * SpawnPositionMultiplier,
+                Shinsoo = Position + townCoordinates.Shinsoo * SpawnPositionMultiplier,
+                Common = Position + townCoordinates.Common * SpawnPositionMultiplier
             }
             : null;
 
@@ -338,12 +338,12 @@ public class Map : IMap
 
             if (!monster.Proto.AiFlag.HasFlag(EAiFlags.NoMove))
             {
-                baseX = RandomizeWithinRange(baseX, SPAWN_BASE_OFFSET);
-                baseY = RandomizeWithinRange(baseY, SPAWN_BASE_OFFSET);
+                baseX = RandomizeWithinRange(baseX, SpawnBaseOffset);
+                baseY = RandomizeWithinRange(baseY, SpawnBaseOffset);
             }
 
-            monster.PositionX = (int)Position.X + baseX * SPAWN_POSITION_MULTIPLIER;
-            monster.PositionY = (int)Position.Y + baseY * SPAWN_POSITION_MULTIPLIER;
+            monster.PositionX = (int)Position.X + baseX * SpawnPositionMultiplier;
+            monster.PositionY = (int)Position.Y + baseY * SpawnPositionMultiplier;
 
             if (ignoreAttrCheck ||
                 !monster.PositionIsAttr(EMapAttributes.Block | EMapAttributes.Object | EMapAttributes.NonPvp))
@@ -368,7 +368,7 @@ public class Map : IMap
                 compassDirection = (int)ESpawnPointDirection.Random;
             }
 
-            monster.Rotation = SPAWN_ROTATION_SLICE_DEGREES * compassDirection;
+            monster.Rotation = SpawnRotationSliceDegrees * compassDirection;
         }
 
         if (monster.Rotation == 0)

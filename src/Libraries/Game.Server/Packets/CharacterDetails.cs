@@ -13,7 +13,7 @@ public partial class CharacterDetails
     [Field(1)] public EPlayerClassGendered Class { get; set; }
     [Field(2)] public byte ReservedByteForClass { get; set; }
 
-    [Field(3, Length = PlayerConstants.PLAYER_NAME_MAX_LENGTH)]
+    [Field(3, Length = PlayerConstants.PlayerNameMaxLength)]
     public string Name { get; set; } = "";
 
     [Field(4)] public int PositionX { get; set; }

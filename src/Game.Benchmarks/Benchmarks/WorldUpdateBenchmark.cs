@@ -30,9 +30,9 @@ namespace Game.Benchmarks.Benchmarks;
 [MediumRunJob]
 public class WorldUpdateBenchmark
 {
-    [Params(0, 100, 1000)] public int MobAmount;
+    [Params(0, 100, 1000)] public int _mobAmount;
 
-    [Params(0, 1, 10)] public int PlayerAmount;
+    [Params(0, 1, 10)] public int _playerAmount;
 
     private World _world = null!;
 
@@ -82,7 +82,7 @@ public class WorldUpdateBenchmark
             {
                 var mock = Substitute.For<ISpawnPointProvider>();
                 mock.GetSpawnPointsForMap("test_map").Returns(Enumerable
-                    .Range(0, MobAmount)
+                    .Range(0, _mobAmount)
                     .Select(_ =>
                         new SpawnPoint
                         {
@@ -116,7 +116,7 @@ public class WorldUpdateBenchmark
         ActivatorUtilities.CreateInstance<GameServer>(services); // for setting the singleton GameServer.Instance
         _world.LoadAsync().Wait();
 
-        foreach (var i in Enumerable.Range(0, PlayerAmount))
+        foreach (var i in Enumerable.Range(0, _playerAmount))
         {
             var player = new PlayerData
             {

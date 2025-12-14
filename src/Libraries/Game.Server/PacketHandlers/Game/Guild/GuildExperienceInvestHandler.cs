@@ -27,7 +27,7 @@ public class GuildExperienceInvestHandler : IGamePacketHandler<GuildExperienceIn
         }
 
         var guild = await _guildManager.GetGuildByIdAsync(player.Player.GuildId.Value, token);
-        if (guild!.Level == GuildConstants.MAX_LEVEL)
+        if (guild!.Level == GuildConstants.MaxLevel)
         {
             player.SendChatInfo("Guild is already at max level.");
             return;

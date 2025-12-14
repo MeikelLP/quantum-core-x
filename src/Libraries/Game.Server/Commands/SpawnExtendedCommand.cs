@@ -46,10 +46,10 @@ public class SpawnExtendedCommand : ICommandHandler<SpawnExtendedCommandOptions>
         // Calculate random spawn position close by the player
         var map = context.Player.Map;
         var x = context.Arguments.PositionX != null
-            ? map.Position.X + context.Arguments.PositionX.Value * Map.SPAWN_POSITION_MULTIPLIER
+            ? map.Position.X + context.Arguments.PositionX.Value * Map.SpawnPositionMultiplier
             : (uint)(context.Player.PositionX + RandomNumberGenerator.GetInt32(-1500, 1501));
         var y = context.Arguments.PositionY != null
-            ? map.Position.Y + context.Arguments.PositionY.Value * Map.SPAWN_POSITION_MULTIPLIER
+            ? map.Position.Y + context.Arguments.PositionY.Value * Map.SpawnPositionMultiplier
             : (uint)(context.Player.PositionY + RandomNumberGenerator.GetInt32(-1500, 1501));
         var rotation = context.Arguments.Rotation ?? 0;
 

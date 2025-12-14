@@ -47,7 +47,7 @@ namespace Game.Tests;
 internal class MockedGameConnection : IGameConnection
 {
     public readonly List<ChatOutcoming> SentMessages = new();
-    public readonly List<GCPhase> SentPhases = new();
+    public readonly List<GcPhase> SentPhases = new();
     public readonly List<object> SentPackets = new();
     public Guid Id { get; }
     public EPhase Phase { get; set; }
@@ -64,7 +64,7 @@ internal class MockedGameConnection : IGameConnection
         {
             SentMessages.Add(chat);
         }
-        else if (packet is GCPhase phase)
+        else if (packet is GcPhase phase)
         {
             SentPhases.Add(phase);
         }
@@ -83,7 +83,7 @@ internal class MockedGameConnection : IGameConnection
     public string Username { get; set; } = "";
     public IPlayerEntity? Player { get; set; }
 
-    public bool HandleHandshake(GCHandshakeData handshake)
+    public bool HandleHandshake(GcHandshakeData handshake)
     {
         return true;
     }
@@ -517,7 +517,7 @@ public class CommandTests : IAsyncLifetime
 
         world.GetPlayer(_player.Name).Should().NotBeNull();
         (_connection as MockedGameConnection).SentPhases.Should()
-            .NotContainEquivalentOf(new GCPhase { Phase = EPhase.Select });
+            .NotContainEquivalentOf(new GcPhase { Phase = EPhase.Select });
 
         _player.Player.PlayTime = 0;
         _connection.Server.ServerTime.Returns(60000);
@@ -527,7 +527,7 @@ public class CommandTests : IAsyncLifetime
         _player.GetPoint(EPoint.PlayTime).Should().Be(1);
         _player.Connection.Phase.Should().Be(EPhase.Select);
         (_connection as MockedGameConnection).SentPhases.Should()
-            .ContainEquivalentOf(new GCPhase { Phase = EPhase.Select });
+            .ContainEquivalentOf(new GcPhase { Phase = EPhase.Select });
         world.GetPlayer(_player.Name).Should().BeNull();
     }
 
@@ -558,8 +558,8 @@ public class CommandTests : IAsyncLifetime
 
         await _commandManager.Handle(_connection, "/restart_here");
 
-        _player.Health.Should().Be(PlayerConstants.RESPAWN_HEALTH);
-        _player.Mana.Should().Be(PlayerConstants.RESPAWN_MANA);
+        _player.Health.Should().Be(PlayerConstants.RespawnHealth);
+        _player.Mana.Should().Be(PlayerConstants.RespawnMana);
         _player.PositionX.Should().Be(256000);
         _player.PositionY.Should().Be(665600);
     }
@@ -580,11 +580,11 @@ public class CommandTests : IAsyncLifetime
 
         await _commandManager.Handle(_connection, "/restart_town");
 
-        _player.Health.Should().Be(PlayerConstants.RESPAWN_HEALTH);
-        _player.Mana.Should().Be(PlayerConstants.RESPAWN_MANA);
+        _player.Health.Should().Be(PlayerConstants.RespawnHealth);
+        _player.Mana.Should().Be(PlayerConstants.RespawnMana);
 
-        _player.PositionX.Should().Be((int)(_player.Map.Position.X + 675 * Map.SPAWN_POSITION_MULTIPLIER));
-        _player.PositionY.Should().Be((int)(_player.Map.Position.Y + 1413 * Map.SPAWN_POSITION_MULTIPLIER));
+        _player.PositionX.Should().Be((int)(_player.Map.Position.X + 675 * Map.SpawnPositionMultiplier));
+        _player.PositionY.Should().Be((int)(_player.Map.Position.Y + 1413 * Map.SpawnPositionMultiplier));
     }
 
     [Fact]
@@ -825,21 +825,21 @@ public class CommandTests : IAsyncLifetime
         // Prepare
         _player.SetPoint(EPoint.Level, 5);
         _player.Player.PlayerClass = 0;
-        const ESkill skillId = ESkill.AuraOfTheSword;
+        const ESkill SkillId = ESkill.AuraOfTheSword;
 
-        _skillManager.GetSkill(skillId).Returns(new SkillData
+        _skillManager.GetSkill(SkillId).Returns(new SkillData
         {
-            Id = skillId, Type = (ESkillCategoryType)(_player.Player.PlayerClass + 1), Flags = ESkillFlags.Attack
+            Id = SkillId, Type = (ESkillCategoryType)(_player.Player.PlayerClass + 1), Flags = ESkillFlags.Attack
         });
         _player.Skills.SetSkillGroup(ESkillGroup.BranchA);
-        _player.Skills[skillId].Level = ESkillLevel.Normal19;
-        _player.Skills[skillId].MasterType = ESkillMasterType.Normal;
+        _player.Skills[SkillId].Level = ESkillLevel.Normal19;
+        _player.Skills[SkillId].MasterType = ESkillMasterType.Normal;
 
         // Act
-        await _commandManager.Handle(_connection, $"/skillup {(uint)skillId}");
+        await _commandManager.Handle(_connection, $"/skillup {(uint)SkillId}");
 
         // Assert
-        var skill = _player.Skills[skillId];
+        var skill = _player.Skills[SkillId];
         skill.Should().NotBeNull();
         skill?.Level.Should().Be(ESkillLevel.MasterM1);
         skill?.MasterType.Should().Be(ESkillMasterType.Master);

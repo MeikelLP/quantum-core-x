@@ -14,9 +14,9 @@ public class SkillData
     public short LevelLimit { get; set; }
     public string PointOn { get; set; } = "0";
     public string PointPoly { get; set; } = "";
-    public string SPCostPoly { get; set; } = "";
+    public string SpCostPoly { get; set; } = "";
     public string DurationPoly { get; set; } = "";
-    public string DurationSPCostPoly { get; set; } = "";
+    public string DurationSpCostPoly { get; set; } = "";
     public string CooldownPoly { get; set; } = "";
     public string MasterBonusPoly { get; set; } = "";
     public string AttackGradePoly { get; set; } = "";

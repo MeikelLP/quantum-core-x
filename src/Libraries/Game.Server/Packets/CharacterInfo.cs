@@ -10,7 +10,7 @@ public partial class CharacterInfo
 {
     [Field(0)] public uint Vid { get; set; }
 
-    [Field(1, Length = PlayerConstants.PLAYER_NAME_MAX_LENGTH)]
+    [Field(1, Length = PlayerConstants.PlayerNameMaxLength)]
     public string Name { get; set; } = "";
 
     [Field(2, ArrayLength = 4)] public ushort[] Parts { get; set; } = new ushort[4];

@@ -9,7 +9,7 @@ public partial class CreateCharacter
 {
     [Field(0)] public byte Slot { get; set; }
 
-    [Field(1, Length = PlayerConstants.PLAYER_NAME_MAX_LENGTH)]
+    [Field(1, Length = PlayerConstants.PlayerNameMaxLength)]
     public string Name { get; set; } = "";
 
     [Field(2)] public EPlayerClassGendered Class { get; set; }

@@ -32,7 +32,7 @@ internal class GeneratorContext
                 var fieldAttrArgs = x.AttributeLists
                     .SelectMany(attr => attr.Attributes)
                     .FirstOrDefault(attr =>
-                        GetTypeInfo(attr).GetFullName() == GeneratorConstants.FIELDATTRIBUTE_FULLNAME
+                        GetTypeInfo(attr).GetFullName() == GeneratorConstants.FieldAttributeFullName
                     )?.ArgumentList!.Arguments;
                 var orderStr = fieldAttrArgs?[0].Expression.ToString();
                 var lengthAttrExpression = fieldAttrArgs
@@ -354,7 +354,7 @@ internal class GeneratorContext
             .FirstOrDefault(a => a
                 .DescendantTokens()
                 .Any(dt => dt.IsKind(SyntaxKind.IdentifierToken) &&
-                           GetTypeInfo(dt.Parent!).GetFullName() == GeneratorConstants.SUBPACKETATTRIBUTE_FULLNAME));
+                           GetTypeInfo(dt.Parent!).GetFullName() == GeneratorConstants.SubPacketAttributeFullName));
         var value = attr?.ArgumentList?.Arguments[0].ToString();
         if (value is null) return null;
         var position = attr?.ArgumentList?.Arguments.ElementAtOrDefault(1)?.ToString();

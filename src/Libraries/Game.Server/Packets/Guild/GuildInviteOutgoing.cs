@@ -12,6 +12,6 @@ public partial class GuildInviteOutgoing
 
     [Field(1)] public uint GuildId { get; set; }
 
-    [Field(2, Length = GuildConstants.NAME_MAX_LENGTH + 1)]
+    [Field(2, Length = GuildConstants.NameMaxLength + 1)]
     public string GuildName { get; set; } = "";
 }

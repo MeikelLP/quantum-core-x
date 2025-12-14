@@ -206,7 +206,7 @@ public abstract class Connection : BackgroundService, IConnection
         SendHandshake();
     }
 
-    public bool HandleHandshake(GCHandshakeData handshake)
+    public bool HandleHandshake(GcHandshakeData handshake)
     {
         if (!Handshaking)
         {
@@ -255,12 +255,12 @@ public abstract class Connection : BackgroundService, IConnection
     {
         var time = GetServerTime();
         _lastHandshakeTime = time;
-        Send(new GCHandshake(Handshake, (uint) time, 0));
+        Send(new GcHandshake(Handshake, (uint) time, 0));
     }
 
     private void SendHandshake(uint time, uint delta)
     {
         _lastHandshakeTime = time;
-        Send(new GCHandshake(Handshake, time, delta));
+        Send(new GcHandshake(Handshake, time, delta));
     }
 }

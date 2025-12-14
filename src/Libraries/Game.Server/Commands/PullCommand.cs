@@ -11,8 +11,8 @@ public class PullCommand : ICommandHandler
 {
     public Task ExecuteAsync(CommandContext context)
     {
-        const int maxDistance = 3000;
-        const int minDistance = 100;
+        const int MaxDistance = 3000;
+        const int MinDistance = 100;
         var p = context.Player;
         context.Player.ForEachNearbyEntity(e =>
         {
@@ -20,7 +20,7 @@ public class PullCommand : ICommandHandler
             {
                 var dist = Vector2.Distance(new Vector2(p.PositionX, p.PositionY),
                     new Vector2(e.PositionX, e.PositionY));
-                if (dist is > maxDistance or < minDistance)
+                if (dist is > MaxDistance or < MinDistance)
                     return;
 
                 var degree = MathUtils.Rotation(p.PositionX - e.PositionX, p.PositionY - e.PositionY);

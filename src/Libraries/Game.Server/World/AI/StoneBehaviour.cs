@@ -21,7 +21,7 @@ public class StoneBehaviour : IBehaviour
     private readonly ILogger<StoneBehaviour> _logger;
     private readonly IServiceProvider _serviceProvider;
     private ImmutableArray<SpawnGroup> _groups;
-    private byte HealthChunkCount = 10;
+    private byte _healthChunkCount = 10;
     private long _lastChunk;
     private uint _chunkSize;
     private readonly List<IEntity> _spawnedEntities = new();
@@ -63,8 +63,8 @@ public class StoneBehaviour : IBehaviour
             _logger.LogWarning("Stone has no groups. You are probably missing the group.txt or group_group.txt");
         }
 
-        _chunkSize = (uint)(mob.Proto.Hp / (float)HealthChunkCount);
-        _lastChunk = HealthChunkCount;
+        _chunkSize = (uint)(mob.Proto.Hp / (float)_healthChunkCount);
+        _lastChunk = _healthChunkCount;
     }
 
     public void Update(double elapsedTime)

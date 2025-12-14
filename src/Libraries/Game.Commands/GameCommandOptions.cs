@@ -2,7 +2,7 @@
 
 public class GameCommandOptions
 {
-    public const string CONFIG_SECTION = "Game:Commands";
+    public const string ConfigSection = "Game:Commands";
 
     /// <summary>
     /// Will crash if a command cannot be found. Useful for testing but not in production

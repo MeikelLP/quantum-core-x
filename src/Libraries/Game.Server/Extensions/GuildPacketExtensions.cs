@@ -32,7 +32,7 @@ public static class GuildPacketExtensions
                     Name = rank.Name,
                     Permissions = rank.Permissions
                 })
-                .Take(GuildConstants.RANKS_LENGTH)
+                .Take(GuildConstants.RanksLength)
                 .ToArray()
         });
     }

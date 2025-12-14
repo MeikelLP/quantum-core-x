@@ -10,7 +10,7 @@ public class GamePacketLocationProvider : IPacketLocationProvider
         return new[]
         {
             typeof(GameServer).Assembly,
-            typeof(GCHandshake).Assembly
+            typeof(GcHandshake).Assembly
         };
     }
 }

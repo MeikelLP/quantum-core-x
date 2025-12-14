@@ -235,27 +235,27 @@ public class DropProvider : IDropProvider, ILoadable
             deltaPercentage += (int)(deltaPercentage * player.GetPoint(EPoint.MallItemBonus) / 100);
         }
 
-        const int UNIQUE_GROUP_DOUBLE_ITEM = 10002; // todo: magic numbers
-        const int UNIQUE_ITEM_DOUBLE_ITEM = 70043; // todo: magic numbers
+        const int UniqueGroupDoubleItem = 10002; // todo: magic numbers
+        const int UniqueItemDoubleItem = 70043; // todo: magic numbers
 
         // Premium
         if (player.GetPremiumRemainSeconds(EPremiumType.Item) > 0 ||
-            player.HasUniqueGroupItemEquipped(UNIQUE_GROUP_DOUBLE_ITEM))
+            player.HasUniqueGroupItemEquipped(UniqueGroupDoubleItem))
         {
             deltaPercentage += deltaPercentage;
         }
         // Premium end
 
         var bonus = 0;
-        if (player.HasUniqueItemEquipped(UNIQUE_ITEM_DOUBLE_ITEM) &&
+        if (player.HasUniqueItemEquipped(UniqueItemDoubleItem) &&
             player.GetPremiumRemainSeconds(EPremiumType.Item) > 0)
         {
             // irremovable gloves + mall item bonus
             bonus = 100;
             _logger.LogDebug("Player has irremovable gloves and mall item bonus");
         }
-        else if (player.HasUniqueItemEquipped(UNIQUE_ITEM_DOUBLE_ITEM)
-                 || (player.HasUniqueGroupItemEquipped(UNIQUE_GROUP_DOUBLE_ITEM) &&
+        else if (player.HasUniqueItemEquipped(UniqueItemDoubleItem)
+                 || (player.HasUniqueGroupItemEquipped(UniqueGroupDoubleItem) &&
                      player.GetPremiumRemainSeconds(EPremiumType.Item) > 0))
         {
             // irremovable gloves OR removeable gloves + mall item bonus

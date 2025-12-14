@@ -96,12 +96,12 @@ public class TokenLoginHandlerTests
             guildManager.GetGuildForPlayerAsync(player.Id, Arg.Any<CancellationToken>())
                 .Returns(Task.FromResult<GuildData?>(null));
 
-            var coreHost = new CoreHost {Ip = mapHostIp, Port = 13000};
+            var coreHost = new CoreHost {_ip = mapHostIp, _port = 13000};
             world.GetMapHost(Arg.Any<int>(), Arg.Any<int>()).Returns(coreHost);
 
             var serverBase = Substitute.For<IServerBase>();
             serverBase.IpAddress.Returns(connectionInterfaceIp);
-            serverBase.Port.Returns(coreHost.Port);
+            serverBase.Port.Returns(coreHost._port);
 
             var phase = EPhase.Handshake;
             var assignedAccountId = (Guid?) null;

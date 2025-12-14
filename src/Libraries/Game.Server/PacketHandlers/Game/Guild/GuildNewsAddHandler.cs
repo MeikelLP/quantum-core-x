@@ -21,7 +21,7 @@ public class GuildNewsAddHandler : IGamePacketHandler<GuildNewsAddPacket>
 
     public async Task ExecuteAsync(GamePacketContext<GuildNewsAddPacket> ctx, CancellationToken token = default)
     {
-        if (ctx.Packet.Message.Length > GuildConstants.NEWS_MESSAGE_MAX_LENGTH)
+        if (ctx.Packet.Message.Length > GuildConstants.NewsMessageMaxLength)
         {
             _logger.LogWarning("Received a guild message that is too long: {Message}", ctx.Packet.Message);
             ctx.Connection.Close(); // equal behaviour as original implementation

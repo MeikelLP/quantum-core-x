@@ -10,7 +10,7 @@ public static class ServiceExtensions
     public static IServiceCollection AddGameCommands(this IServiceCollection services)
     {
         services.AddQuantumCoreCaching();
-        services.AddOptions<GameCommandOptions>().BindConfiguration(GameCommandOptions.CONFIG_SECTION);
+        services.AddOptions<GameCommandOptions>().BindConfiguration(GameCommandOptions.ConfigSection);
         services.TryAddSingleton<ICommandManager, CommandManager>();
         return services;
     }

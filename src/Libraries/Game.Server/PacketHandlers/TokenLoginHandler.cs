@@ -90,9 +90,9 @@ public class TokenLoginHandler : IGamePacketHandler<TokenLogin>
             var guild = await _guildManager.GetGuildForPlayerAsync(player.Id, cancellationToken);
             var slot = (int)player.Slot;
             characters.CharacterList[slot] = player.ToCharacter();
-            var advertisedIp = ResolveAdvertisedAddress(host.Ip, ctx.Connection.BoundIpAddress);
+            var advertisedIp = ResolveAdvertisedAddress(host._ip, ctx.Connection.BoundIpAddress);
             characters.CharacterList[slot].Ip = BitConverter.ToInt32(advertisedIp.GetAddressBytes());
-            characters.CharacterList[slot].Port = host.Port;
+            characters.CharacterList[slot].Port = host._port;
             characters.GuildIds[slot] = guild?.Id ?? 0;
             characters.GuildNames[slot] = guild?.Name ?? "";
         }

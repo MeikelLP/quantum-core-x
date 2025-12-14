@@ -29,7 +29,7 @@ public class GuildRenameRankHandler : IGamePacketHandler<GuildRenameRank>
             return;
         }
 
-        if (ctx.Packet.Position == GuildConstants.LEADER_RANK_POSITION)
+        if (ctx.Packet.Position == GuildConstants.LeaderRankPosition)
         {
             ctx.Connection.Player.SendChatInfo("You cannot rename the guild leader rank.");
             return;

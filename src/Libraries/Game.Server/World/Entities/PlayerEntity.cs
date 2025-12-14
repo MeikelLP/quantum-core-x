@@ -121,8 +121,8 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
         _scope = serviceProvider.CreateScope();
         _itemRepository = _scope.ServiceProvider.GetRequiredService<IItemRepository>();
         Inventory = new Inventory(itemManager, _cacheManager, _logger, _itemRepository, player.Id,
-            WindowType.Inventory, InventoryConstants.DEFAULT_INVENTORY_WIDTH,
-            InventoryConstants.DEFAULT_INVENTORY_HEIGHT, InventoryConstants.DEFAULT_INVENTORY_PAGES);
+            WindowType.Inventory, InventoryConstants.DefaultInventoryWidth,
+            InventoryConstants.DefaultInventoryHeight, InventoryConstants.DefaultInventoryPages);
         Inventory.OnSlotChanged += Inventory_OnSlotChanged;
         Player = player;
         Empire = player.Empire;
@@ -131,8 +131,8 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
         QuickSlotBar = ActivatorUtilities.CreateInstance<QuickSlotBar>(_scope.ServiceProvider, this);
         Skills = ActivatorUtilities.CreateInstance<PlayerSkills>(_scope.ServiceProvider, this);
 
-        MovementSpeed = PlayerConstants.DEFAULT_MOVEMENT_SPEED;
-        AttackSpeed = PlayerConstants.DEFAULT_ATTACK_SPEED;
+        MovementSpeed = PlayerConstants.DefaultMovementSpeed;
+        AttackSpeed = PlayerConstants.DefaultAttackSpeed;
         EntityClass = (uint)player.PlayerClass;
 
         Groups = new List<Guid>();
@@ -226,8 +226,8 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
         {
             PositionX = PositionX,
             PositionY = PositionY,
-            ServerAddress = BitConverter.ToInt32(host.Ip.GetAddressBytes()),
-            ServerPort = host.Port
+            ServerAddress = BitConverter.ToInt32(host._ip.GetAddressBytes()),
+            ServerPort = host._port
         };
         Connection.Send(packet);
     }
@@ -280,7 +280,7 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
 
     private void CalculateMovement()
     {
-        MovementSpeed = PlayerConstants.DEFAULT_MOVEMENT_SPEED;
+        MovementSpeed = PlayerConstants.DefaultMovementSpeed;
         float modifier = 0;
         foreach (var slot in Enum.GetValues<EquipmentSlot>())
         {
@@ -300,7 +300,7 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
 
     private void CalculateAttackSpeed()
     {
-        AttackSpeed = PlayerConstants.DEFAULT_ATTACK_SPEED;
+        AttackSpeed = PlayerConstants.DefaultAttackSpeed;
         float modifier = 0;
         foreach (var slot in Enum.GetValues<EquipmentSlot>())
         {
@@ -404,8 +404,8 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
             entity.ShowEntity(Connection);
         }
 
-        Health = PlayerConstants.RESPAWN_HEALTH;
-        Mana = PlayerConstants.RESPAWN_MANA;
+        Health = PlayerConstants.RespawnHealth;
+        Mana = PlayerConstants.RespawnMana;
         SendPoints();
     }
 
@@ -690,8 +690,8 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
     {
         if (after >= requiredForNextLevel) return 0;
 
-        const int CHUNK_AMOUNT = 4;
-        var chunk = requiredForNextLevel / CHUNK_AMOUNT;
+        const int ChunkAmount = 4;
+        var chunk = requiredForNextLevel / ChunkAmount;
         var beforeChunk = (int)(before / (float)chunk);
         var afterChunk = (int)(after / (float)chunk);
 

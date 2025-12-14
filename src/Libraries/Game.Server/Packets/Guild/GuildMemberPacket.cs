@@ -22,6 +22,6 @@ public class GuildMember
     [Field(5)] public uint SpentExperience { get; set; }
     [Field(6)] public bool IsNameSent { get; set; }
 
-    [Field(7, Length = PlayerConstants.PLAYER_NAME_MAX_LENGTH)]
+    [Field(7, Length = PlayerConstants.PlayerNameMaxLength)]
     public string Name { get; set; } = "";
 }

@@ -12,7 +12,7 @@ public class QuestManager : IQuestManager, ILoadable
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<QuestManager> _logger;
-    private readonly Dictionary<string, Type> Quests = new();
+    private readonly Dictionary<string, Type> _quests = new();
 
     public QuestManager(IServiceProvider serviceProvider, ILogger<QuestManager> logger)
     {
@@ -44,7 +44,7 @@ public class QuestManager : IQuestManager, ILoadable
             return;
         }
 
-        foreach (var (id, questType) in Quests)
+        foreach (var (id, questType) in _quests)
         {
             // todo load state
             var state = new QuestState();
@@ -67,7 +67,7 @@ public class QuestManager : IQuestManager, ILoadable
     public void RegisterQuest(Type questType)
     {
         var id = questType.FullName ?? Guid.NewGuid().ToString();
-        if (Quests.ContainsKey(id))
+        if (_quests.ContainsKey(id))
         {
             _logger.LogError("Can't register quest {Type} because it's already registered or a duplicate",
                 questType.FullName);
@@ -75,6 +75,6 @@ public class QuestManager : IQuestManager, ILoadable
         }
 
         _logger.LogInformation("Registered quest {Id}", id);
-        Quests[id] = questType;
+        _quests[id] = questType;
     }
 }

@@ -51,8 +51,8 @@ public class SpawnMapRandomCommand : ICommandHandler<SpawnMapRandomCommandOption
             _logger, _itemManager, context.Arguments.MonsterId, x, y);
         _world.SpawnEntity(monster);
 
-        var localX = (uint)((x - map.Position.X) / (float)Map.SPAWN_POSITION_MULTIPLIER);
-        var localY = (uint)((y - map.Position.Y) / (float)Map.SPAWN_POSITION_MULTIPLIER);
+        var localX = (uint)((x - map.Position.X) / (float)Map.SpawnPositionMultiplier);
+        var localY = (uint)((y - map.Position.Y) / (float)Map.SpawnPositionMultiplier);
         context.Player.SendChatInfo($"Monster spawned at ({localX}|{localY})");
 
         return Task.CompletedTask;

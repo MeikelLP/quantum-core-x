@@ -49,8 +49,8 @@ public class GuildInviteResponseHandler : IGamePacketHandler<GuildInviteResponse
                     return;
             }
 
-            const byte rank = GuildConstants.DEFAULT_JOIN_RANK;
-            await _guildManager.AddMemberAsync(guildId, invitee.Player.Id, rank, token);
+            const byte Rank = GuildConstants.DefaultJoinRank;
+            await _guildManager.AddMemberAsync(guildId, invitee.Player.Id, Rank, token);
 
             invitee.Player.GuildId = guildId;
             await invitee.RefreshGuildAsync();
@@ -63,7 +63,7 @@ public class GuildInviteResponseHandler : IGamePacketHandler<GuildInviteResponse
                     {
                         Id = invitee.Player.Id,
                         Name = invitee.Player.Name,
-                        Rank = rank,
+                        Rank = Rank,
                         SpentExperience = 0,
                         Class = invitee.Player.PlayerClass,
                         Level = invitee.Player.Level,

@@ -5,7 +5,7 @@ namespace QuantumCore.Core.Event;
 public class EventSystem
 {
     private static readonly Dictionary<long, Event> PendingEvents = new();
-    private static long _nextEventId = 1;
+    private static long NextEventId = 1;
 
     private static readonly List<long> Remove = new();
         
@@ -63,7 +63,7 @@ public class EventSystem
     {
         lock (PendingEvents)
         {
-            var id = _nextEventId++;
+            var id = NextEventId++;
             var evt = new Event(id, timeout) { Callback = callback };
             PendingEvents[id] = evt;
         }
