@@ -3,7 +3,7 @@ using QuantumCore.Networking;
 
 namespace QuantumCore.Game.Packets;
 
-[Packet(0x03, EDirection.Outgoing, Sequence = true)]
+[Packet(0x03, EDirection.OUTGOING, Sequence = true)]
 [PacketGenerator]
 public partial class CharacterMoveOut
 {

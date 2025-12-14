@@ -9,8 +9,8 @@ public static class ServiceExtensions
 {
     public static IServiceCollection AddAuthServices(this IServiceCollection services)
     {
-        services.AddPacketProvider<AuthPacketLocationProvider>(HostingOptions.ModeAuth);
-        services.AddOptions<HostingOptions>(HostingOptions.ModeAuth).BindConfiguration("Hosting");
+        services.AddPacketProvider<AuthPacketLocationProvider>(HostingOptions.MODE_AUTH);
+        services.AddOptions<HostingOptions>(HostingOptions.MODE_AUTH).BindConfiguration("Hosting");
         services.AddAuthDatabase();
         services.AddQuantumCoreCaching();
         services.Scan(scan =>

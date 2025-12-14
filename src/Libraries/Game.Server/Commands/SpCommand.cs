@@ -29,7 +29,7 @@ public class SpCommand : ICommandHandler<SpOtherOptions>
         }
         else
         {
-            target.AddPoint(EPoint.Sp, context.Arguments.Value);
+            target.AddPoint(EPoint.SP, context.Arguments.Value);
             target.SendPoints();
         }
 

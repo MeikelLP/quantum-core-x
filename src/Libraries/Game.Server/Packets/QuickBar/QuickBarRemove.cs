@@ -2,7 +2,7 @@ using QuantumCore.Networking;
 
 namespace QuantumCore.Game.Packets.QuickBar;
 
-[Packet(0x11, EDirection.Incoming, Sequence = true)]
+[Packet(0x11, EDirection.INCOMING, Sequence = true)]
 [PacketGenerator]
 public partial class QuickBarRemove
 {

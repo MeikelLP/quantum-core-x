@@ -9,18 +9,18 @@ public static class ServiceExtensions
 {
     public static IServiceCollection AddAuthDatabase(this IServiceCollection services)
     {
-        services.AddQuantumCoreDatabase(HostingOptions.ModeAuth);
+        services.AddQuantumCoreDatabase(HostingOptions.MODE_AUTH);
         services.AddDbContext<MySqlAuthDbContext>();
         services.AddDbContext<PostgresqlAuthDbContext>();
         services.AddDbContext<SqliteAuthDbContext>();
         services.AddScoped<AuthDbContext>(provider =>
         {
-            var options = provider.GetRequiredService<IOptionsSnapshot<DatabaseOptions>>().Get(HostingOptions.ModeAuth);
+            var options = provider.GetRequiredService<IOptionsSnapshot<DatabaseOptions>>().Get(HostingOptions.MODE_AUTH);
             return options.Provider switch
             {
-                DatabaseProvider.Mysql => provider.GetRequiredService<MySqlAuthDbContext>(),
-                DatabaseProvider.Postgresql => provider.GetRequiredService<PostgresqlAuthDbContext>(),
-                DatabaseProvider.Sqlite => provider.GetRequiredService<SqliteAuthDbContext>(),
+                DatabaseProvider.MYSQL => provider.GetRequiredService<MySqlAuthDbContext>(),
+                DatabaseProvider.POSTGRESQL => provider.GetRequiredService<PostgresqlAuthDbContext>(),
+                DatabaseProvider.SQLITE => provider.GetRequiredService<SqliteAuthDbContext>(),
                 _ => throw new InvalidOperationException(
                     $"Cannot create db context for out of range provider: {options.Provider}")
             };

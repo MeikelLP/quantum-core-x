@@ -2,6 +2,6 @@
 
 public enum EItemSubtype
 {
-    CostumeBody = 0,
-    CostumeHair = 1,
+    COSTUME_BODY = 0,
+    COSTUME_HAIR = 1,
 }

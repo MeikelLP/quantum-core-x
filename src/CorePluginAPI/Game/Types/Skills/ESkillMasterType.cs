@@ -2,8 +2,8 @@
 
 public enum ESkillMasterType : byte
 {
-    Normal = 0,
-    Master = 1,
-    GrandMaster = 2,
-    PerfectMaster = 3
+    NORMAL = 0,
+    MASTER = 1,
+    GRAND_MASTER = 2,
+    PERFECT_MASTER = 3
 }

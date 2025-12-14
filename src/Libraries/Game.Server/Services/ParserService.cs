@@ -21,7 +21,7 @@ public partial class ParserService : IParserService
     private readonly IFileProvider _fileProvider;
     private static readonly NumberFormatInfo InvNum = NumberFormatInfo.InvariantInfo;
     private static readonly Encoding DefaultEncoding = Encoding.GetEncoding("EUC-KR");
-    private const StringComparison InvCul = StringComparison.InvariantCultureIgnoreCase;
+    private const StringComparison INV_CUL = StringComparison.InvariantCultureIgnoreCase;
 
     private readonly ILogger<ParserService> _logger;
 
@@ -119,7 +119,7 @@ public partial class ParserService : IParserService
                     PrerequisiteSkillVnum = int.Parse(split[20]),
                     PrerequisiteSkillLevel = int.Parse(split[21]),
                     SkillType =
-                        Enum.TryParse<ESkillType>(split[22], true, out var result) ? result : ESkillType.Normal,
+                        Enum.TryParse<ESkillType>(split[22], true, out var result) ? result : ESkillType.NORMAL,
                     MaxHit = short.Parse(split[23]),
                     SplashAroundDamageAdjustPoly = split[24],
                     TargetRange = int.Parse(split[25]),
@@ -151,7 +151,7 @@ public partial class ParserService : IParserService
                 continue;
             }
 
-            if (line.StartsWith("Group", InvCul))
+            if (line.StartsWith("Group", INV_CUL))
             {
                 line = line.Trim();
                 if (currentGroup != null)
@@ -213,7 +213,7 @@ public partial class ParserService : IParserService
             throw new MissingRequiredFieldException("Mob");
         }
 
-        if (type.Equals("Kill", InvCul))
+        if (type.Equals("Kill", INV_CUL))
         {
             minKillCount = group.GetField<uint>("kill_drop");
         }
@@ -222,7 +222,7 @@ public partial class ParserService : IParserService
             minKillCount = 1;
         }
 
-        if (type.Equals("Limit", InvCul))
+        if (type.Equals("Limit", INV_CUL))
         {
             levelLimit = group.GetField<uint>("Level_limit");
             if (levelLimit == default)
@@ -240,7 +240,7 @@ public partial class ParserService : IParserService
             return null;
         }
 
-        if (type.Equals("Kill", InvCul)) // MobItemGroup
+        if (type.Equals("Kill", INV_CUL)) // MobItemGroup
         {
             var entry = new MonsterItemGroup {MonsterProtoId = monsterProtoId, MinKillCount = minKillCount,};
 
@@ -279,7 +279,7 @@ public partial class ParserService : IParserService
             return entry;
         }
 
-        if (type.Equals("Drop", InvCul)) // DropItemGroup
+        if (type.Equals("Drop", INV_CUL)) // DropItemGroup
         {
             var entry = new DropItemGroup {MonsterProtoId = monsterProtoId,};
 
@@ -311,7 +311,7 @@ public partial class ParserService : IParserService
             return entry;
         }
 
-        if (type.Equals("Limit", InvCul)) // LevelItemGroup
+        if (type.Equals("Limit", INV_CUL)) // LevelItemGroup
         {
             var entry = new LevelItemGroup {LevelLimit = levelLimit};
 

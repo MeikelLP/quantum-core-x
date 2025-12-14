@@ -18,9 +18,9 @@ public class InventoryTests
         var itemManager = Substitute.For<IItemManager>();
         itemManager
             .GetItem(Arg.Any<uint>())
-            .Returns(new ItemData { WearFlags = (uint)EWearFlags.Body, Size = 1 });
+            .Returns(new ItemData { WearFlags = (uint)EWearFlags.BODY, Size = 1 });
         var inv = new Inventory(itemManager,
-            Substitute.For<ICacheManager>(), Substitute.For<ILogger>(), Substitute.For<IItemRepository>(), 0, WindowType.Inventory, 1, 1,
+            Substitute.For<ICacheManager>(), Substitute.For<ILogger>(), Substitute.For<IItemRepository>(), 0, WindowType.INVENTORY, 1, 1,
             1);
         var changed = 0;
         inv.OnSlotChanged += (_, _) => changed++;
@@ -38,15 +38,15 @@ public class InventoryTests
         var itemManager = Substitute.For<IItemManager>();
         itemManager
             .GetItem(Arg.Any<uint>())
-            .Returns(new ItemData { WearFlags = (uint)EWearFlags.Body, Size = 1 });
+            .Returns(new ItemData { WearFlags = (uint)EWearFlags.BODY, Size = 1 });
 
         var inv = new Inventory(itemManager,
-            Substitute.For<ICacheManager>(), Substitute.For<ILogger>(), Substitute.For<IItemRepository>(), 0, WindowType.Inventory, 1, 1,
+            Substitute.For<ICacheManager>(), Substitute.For<ILogger>(), Substitute.For<IItemRepository>(), 0, WindowType.INVENTORY, 1, 1,
             1);
         var changed = 0;
         inv.OnSlotChanged += (_, _) => changed++;
 
-        inv.RemoveEquipment(new ItemInstance { Position = (ushort)(inv.Size + (int)EquipmentSlot.Body) });
+        inv.RemoveEquipment(new ItemInstance { Position = (ushort)(inv.Size + (int)EquipmentSlot.BODY) });
 
         inv.EquipmentWindow.Body.Should().BeNull();
         changed.Should().Be(1);

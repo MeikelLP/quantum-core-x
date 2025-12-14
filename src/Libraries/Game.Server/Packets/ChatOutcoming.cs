@@ -3,7 +3,7 @@ using QuantumCore.Networking;
 
 namespace QuantumCore.Game.Packets;
 
-[Packet(0x04, EDirection.Outgoing, Sequence = false)]
+[Packet(0x04, EDirection.OUTGOING, Sequence = false)]
 [PacketGenerator]
 public partial class ChatOutcoming
 {

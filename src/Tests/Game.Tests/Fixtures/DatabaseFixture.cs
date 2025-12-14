@@ -13,17 +13,17 @@ public class DatabaseFixture : IAsyncLifetime
 {
     private readonly IMessageSink _messageSink;
     public MySqlContainer Container { get; }
-    public const string UserName = "root";
-    public const string Password = "supersecure.123";
-    public const string Database = "game";
+    public const string USER_NAME = "root";
+    public const string PASSWORD = "supersecure.123";
+    public const string DATABASE = "game";
 
     public DatabaseFixture(IMessageSink messageSink)
     {
         _messageSink = messageSink;
         Container = new MySqlBuilder()
-            .WithDatabase(Database)
-            .WithPassword(Password)
-            .WithUsername(UserName)
+            .WithDatabase(DATABASE)
+            .WithPassword(PASSWORD)
+            .WithUsername(USER_NAME)
             .Build();
     }
 
@@ -39,10 +39,10 @@ public class DatabaseFixture : IAsyncLifetime
                     .WriteTo.TestOutput(_messageSink)
                     .CreateLogger());
             })
-            .Configure<DatabaseOptions>(HostingOptions.ModeGame, opts =>
+            .Configure<DatabaseOptions>(HostingOptions.MODE_GAME, opts =>
             {
                 opts.ConnectionString = connectionString;
-                opts.Provider = DatabaseProvider.Mysql;
+                opts.Provider = DatabaseProvider.MYSQL;
             })
             .AddDbContext<MySqlGameDbContext>(cfg =>
             {

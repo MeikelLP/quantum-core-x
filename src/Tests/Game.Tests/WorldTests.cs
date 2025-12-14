@@ -40,10 +40,10 @@ public class WorldTests
             .AddGameServices()
             .AddSingleton(Substitute.For<IServerBase>())
             .AddSingleton(Substitute.For<IGameServer>())
-            .Configure<DatabaseOptions>(HostingOptions.ModeGame, opts =>
+            .Configure<DatabaseOptions>(HostingOptions.MODE_GAME, opts =>
             {
                 opts.ConnectionString = "Server:abc;";
-                opts.Provider = DatabaseProvider.Mysql;
+                opts.Provider = DatabaseProvider.MYSQL;
             })
             .Replace(new ServiceDescriptor(typeof(IAtlasProvider), provider =>
             {
@@ -79,7 +79,7 @@ public class WorldTests
                         new SpawnPoint
                         {
                             Chance = 100,
-                            Type = ESpawnPointType.Monster,
+                            Type = ESpawnPointType.MONSTER,
                             Monster = 42,
                             X = 1,
                             Y = 1,
@@ -94,15 +94,15 @@ public class WorldTests
             .Replace(new ServiceDescriptor(typeof(IJobManager), _ =>
             {
                 var mock = Substitute.For<IJobManager>();
-                mock.Get(EPlayerClassGendered.NinjaFemale).Returns(new Job());
+                mock.Get(EPlayerClassGendered.NINJA_FEMALE).Returns(new Job());
                 return mock;
             }, ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(IMonsterManager), _ =>
             {
                 var mock = Substitute.For<IMonsterManager>();
-                mock.GetMonster(42).Returns(new MonsterData {Type = (byte)EEntityType.Monster});
+                mock.GetMonster(42).Returns(new MonsterData {Type = (byte)EEntityType.MONSTER});
                 mock.GetMonsters().Returns([
-                    new MonsterData {Type = (byte)EEntityType.Monster}
+                    new MonsterData {Type = (byte)EEntityType.MONSTER}
                 ]);
                 return mock;
             }, ServiceLifetime.Singleton))
@@ -117,7 +117,7 @@ public class WorldTests
         conn.BoundIpAddress.Returns(IPAddress.Loopback);
         var playerData = new PlayerData
         {
-            Name = "TestPlayer", PlayerClass = EPlayerClassGendered.NinjaFemale, PositionX = 1, PositionY = 1
+            Name = "TestPlayer", PlayerClass = EPlayerClassGendered.NINJA_FEMALE, PositionX = 1, PositionY = 1
         };
         _playerEntity = ActivatorUtilities.CreateInstance<PlayerEntity>(services, _world, playerData, conn);
         _world.SpawnEntity(_playerEntity);

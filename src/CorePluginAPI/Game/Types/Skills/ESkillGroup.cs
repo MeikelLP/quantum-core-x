@@ -2,6 +2,6 @@
 
 public enum ESkillGroup : byte
 {
-    BranchA = 1,
-    BranchB = 2
+    BRANCH_A = 1,
+    BRANCH_B = 2
 }

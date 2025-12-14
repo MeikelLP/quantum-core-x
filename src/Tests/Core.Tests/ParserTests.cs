@@ -19,7 +19,7 @@ namespace Core.Tests;
 
 public class ParserTests
 {
-    private const float ChanceAllowedApproximation = 0.00005f;
+    private const float CHANCE_ALLOWED_APPROXIMATION = 0.00005f;
 
     private readonly ParserService _parserService;
 
@@ -48,12 +48,12 @@ public class ParserTests
     [Fact]
     public void Spawn_Regular()
     {
-        const string Input = "r	751	311	10	10	0	0	5s	100	1	101";
-        var result = _parserService.GetSpawnFromLine(Input);
+        const string INPUT = "r	751	311	10	10	0	0	5s	100	1	101";
+        var result = _parserService.GetSpawnFromLine(INPUT);
 
         result.Should().BeEquivalentTo(new SpawnPoint
         {
-            Type = ESpawnPointType.GroupCollection,
+            Type = ESpawnPointType.GROUP_COLLECTION,
             IsAggressive = false,
             X = 751,
             Y = 311,
@@ -70,12 +70,12 @@ public class ParserTests
     [Fact]
     public void Spawn_GroupAggressive()
     {
-        const string Input = "ga	188	470	10	10	0	0	0s	100	1	1005";
-        var result = _parserService.GetSpawnFromLine(Input);
+        const string INPUT = "ga	188	470	10	10	0	0	0s	100	1	1005";
+        var result = _parserService.GetSpawnFromLine(INPUT);
 
         result.Should().BeEquivalentTo(new SpawnPoint
         {
-            Type = ESpawnPointType.Group,
+            Type = ESpawnPointType.GROUP,
             IsAggressive = true,
             X = 188,
             Y = 470,
@@ -1127,7 +1127,7 @@ public class ParserTests
         result[0].MinLevel.Should().Be(1);
         result[0].MaxLevel.Should().Be(15);
         result[0].ItemProtoId.Should().Be(11);
-        result[0].Chance.Should().BeApproximately(0.08f * 10000, ChanceAllowedApproximation);
+        result[0].Chance.Should().BeApproximately(0.08f * 10000, CHANCE_ALLOWED_APPROXIMATION);
     }
 
     [Fact]
@@ -1143,7 +1143,7 @@ public class ParserTests
         result[0].MinLevel.Should().Be(1);
         result[0].MaxLevel.Should().Be(15);
         result[0].ItemProtoId.Should().Be(11);
-        result[0].Chance.Should().BeApproximately(0.08f * 10000, ChanceAllowedApproximation);
+        result[0].Chance.Should().BeApproximately(0.08f * 10000, CHANCE_ALLOWED_APPROXIMATION);
     }
 
     [Fact]
@@ -1171,22 +1171,22 @@ public class ParserTests
         result[0].MinLevel.Should().Be(1);
         result[0].MaxLevel.Should().Be(15);
         result[0].ItemProtoId.Should().Be(11);
-        result[0].Chance.Should().BeApproximately(0.08f * 10000, ChanceAllowedApproximation);
+        result[0].Chance.Should().BeApproximately(0.08f * 10000, CHANCE_ALLOWED_APPROXIMATION);
 
         result[1].MinLevel.Should().Be(1);
         result[1].MaxLevel.Should().Be(15);
         result[1].ItemProtoId.Should().Be(11);
-        result[1].Chance.Should().BeApproximately(0.104f * 10000, ChanceAllowedApproximation);
+        result[1].Chance.Should().BeApproximately(0.104f * 10000, CHANCE_ALLOWED_APPROXIMATION);
 
         result[2].MinLevel.Should().Be(1);
         result[2].MaxLevel.Should().Be(15);
         result[2].ItemProtoId.Should().Be(11);
-        result[2].Chance.Should().BeApproximately(0.12f * 10000, ChanceAllowedApproximation);
+        result[2].Chance.Should().BeApproximately(0.12f * 10000, CHANCE_ALLOWED_APPROXIMATION);
 
         result[3].MinLevel.Should().Be(1);
         result[3].MaxLevel.Should().Be(15);
         result[3].ItemProtoId.Should().Be(11);
-        result[3].Chance.Should().BeApproximately(0.32f * 10000, ChanceAllowedApproximation);
+        result[3].Chance.Should().BeApproximately(0.32f * 10000, CHANCE_ALLOWED_APPROXIMATION);
     }
 
     [Fact]
@@ -1202,21 +1202,21 @@ public class ParserTests
         result[0].MinLevel.Should().Be(1);
         result[0].MaxLevel.Should().Be(15);
         result[0].ItemProtoId.Should().Be(12);
-        result[0].Chance.Should().BeApproximately(0.04f * 10000, ChanceAllowedApproximation);
+        result[0].Chance.Should().BeApproximately(0.04f * 10000, CHANCE_ALLOWED_APPROXIMATION);
 
         result[1].MinLevel.Should().Be(1);
         result[1].MaxLevel.Should().Be(15);
         result[1].ItemProtoId.Should().Be(12);
-        result[1].Chance.Should().BeApproximately(0.052f * 10000, ChanceAllowedApproximation);
+        result[1].Chance.Should().BeApproximately(0.052f * 10000, CHANCE_ALLOWED_APPROXIMATION);
 
         result[2].MinLevel.Should().Be(1);
         result[2].MaxLevel.Should().Be(15);
         result[2].ItemProtoId.Should().Be(12);
-        result[2].Chance.Should().BeApproximately(0.06f * 10000, ChanceAllowedApproximation);
+        result[2].Chance.Should().BeApproximately(0.06f * 10000, CHANCE_ALLOWED_APPROXIMATION);
 
         result[3].MinLevel.Should().Be(1);
         result[3].MaxLevel.Should().Be(15);
         result[3].ItemProtoId.Should().Be(12);
-        result[3].Chance.Should().BeApproximately(0.16f * 10000, ChanceAllowedApproximation);
+        result[3].Chance.Should().BeApproximately(0.16f * 10000, CHANCE_ALLOWED_APPROXIMATION);
     }
 }

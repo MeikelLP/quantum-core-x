@@ -10,13 +10,13 @@ public class StatCommand : ICommandHandler<StatCommandOptions>
 {
     public Task ExecuteAsync(CommandContext<StatCommandOptions> context)
     {
-        if (context.Player.GetPoint(EPoint.StatusPoints) <= 0)
+        if (context.Player.GetPoint(EPoint.STATUS_POINTS) <= 0)
         {
             return Task.CompletedTask;
         }
 
         context.Player.AddPoint(context.Arguments.Point, 1);
-        context.Player.AddPoint(EPoint.StatusPoints, -1);
+        context.Player.AddPoint(EPoint.STATUS_POINTS, -1);
         context.Player.SendPoints();
         return Task.CompletedTask;
     }

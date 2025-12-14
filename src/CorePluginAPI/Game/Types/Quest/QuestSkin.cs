@@ -2,6 +2,6 @@
 
 public enum QuestSkin
 {
-    NoWindow = 0,
-    Normal = 1
+    NO_WINDOW = 0,
+    NORMAL = 1
 }

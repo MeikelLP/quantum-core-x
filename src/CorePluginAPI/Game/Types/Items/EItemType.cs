@@ -2,11 +2,11 @@
 
 public enum EItemType
 {
-    None = 0,
-    Weapon = 1,
-    Armor = 2,
-    Use = 3,
-    Skillbook = 17,
-    Polymorph = 19,
-    Costume = 28,
+    NONE = 0,
+    WEAPON = 1,
+    ARMOR = 2,
+    USE = 3,
+    SKILLBOOK = 17,
+    POLYMORPH = 19,
+    COSTUME = 28,
 }

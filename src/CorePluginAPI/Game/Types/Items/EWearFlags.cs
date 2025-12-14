@@ -3,14 +3,14 @@ namespace QuantumCore.API.Game.Types.Items;
 [Flags]
 public enum EWearFlags
 {
-    Body = (1 << 0),
-    Head = (1 << 1),
-    Shoes = (1 << 2),
-    Bracelet = (1 << 3),
-    Weapon = (1 << 4),
-    Necklace = (1 << 5),
-    Earrings = (1 << 6),
-    Unique = (1 << 7),
-    Shield = (1 << 8),
-    Arrow = (1 << 9),
+    BODY = (1 << 0),
+    HEAD = (1 << 1),
+    SHOES = (1 << 2),
+    BRACELET = (1 << 3),
+    WEAPON = (1 << 4),
+    NECKLACE = (1 << 5),
+    EARRINGS = (1 << 6),
+    UNIQUE = (1 << 7),
+    SHIELD = (1 << 8),
+    ARROW = (1 << 9),
 }

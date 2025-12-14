@@ -13,9 +13,9 @@ namespace QuantumCore.Game.PlayerUtils;
 
 public static class InventoryConstants
 {
-    public const ushort DefaultInventoryWidth = 5;
-    public const ushort DefaultInventoryHeight = 9;
-    public const ushort DefaultInventoryPages = 2;
+    public const ushort DEFAULT_INVENTORY_WIDTH = 5;
+    public const ushort DEFAULT_INVENTORY_HEIGHT = 9;
+    public const ushort DEFAULT_INVENTORY_PAGES = 2;
 }
 
 public class Inventory : IInventory

@@ -43,16 +43,16 @@ public class SpawnMapRandomCommand : ICommandHandler<SpawnMapRandomCommandOption
         }
 
         var map = context.Player.Map!;
-        var x = Random.Shared.Next((int)map.Position.X, (int)(map.Position.X + (map.Width * Map.MapUnit) + 1));
-        var y = Random.Shared.Next((int)map.Position.Y, (int)(map.Position.Y + (map.Height * Map.MapUnit) + 1));
+        var x = Random.Shared.Next((int)map.Position.X, (int)(map.Position.X + (map.Width * Map.MAP_UNIT) + 1));
+        var y = Random.Shared.Next((int)map.Position.Y, (int)(map.Position.Y + (map.Height * Map.MAP_UNIT) + 1));
 
         // Create entity instance
         var monster = new MonsterEntity(_monsterManager, _dropProvider, _animationManager, _serviceProvider, map,
             _logger, _itemManager, context.Arguments.MonsterId, x, y);
         _world.SpawnEntity(monster);
 
-        var localX = (uint)((x - map.Position.X) / (float)Map.SpawnPositionMultiplier);
-        var localY = (uint)((y - map.Position.Y) / (float)Map.SpawnPositionMultiplier);
+        var localX = (uint)((x - map.Position.X) / (float)Map.SPAWN_POSITION_MULTIPLIER);
+        var localY = (uint)((y - map.Position.Y) / (float)Map.SPAWN_POSITION_MULTIPLIER);
         context.Player.SendChatInfo($"Monster spawned at ({localX}|{localY})");
 
         return Task.CompletedTask;

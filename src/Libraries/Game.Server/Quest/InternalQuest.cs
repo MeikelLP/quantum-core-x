@@ -22,7 +22,7 @@ public class InternalQuest : Quest
 
     public void EndQuest()
     {
-        SetSkin(QuestSkin.NoWindow);
+        SetSkin(QuestSkin.NO_WINDOW);
         Done();
     }
 }

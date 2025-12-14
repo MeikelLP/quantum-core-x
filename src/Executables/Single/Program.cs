@@ -29,17 +29,17 @@ await Parser.Default.ParseArguments<SingleRunArgs>(args)
             provider.GetServices<IHostedService>().OfType<GameServer>().Single());
 
         // overrides
-        hostBuilder.Services.Replace(new ServiceDescriptor(typeof(IRedisStore), CacheStoreType.Shared,
+        hostBuilder.Services.Replace(new ServiceDescriptor(typeof(IRedisStore), CacheStoreType.SHARED,
             typeof(InMemoryRedisStore), ServiceLifetime.Singleton));
-        hostBuilder.Services.Replace(new ServiceDescriptor(typeof(IRedisStore), CacheStoreType.Server,
+        hostBuilder.Services.Replace(new ServiceDescriptor(typeof(IRedisStore), CacheStoreType.SERVER,
             typeof(InMemoryRedisStore), ServiceLifetime.Singleton));
         hostBuilder.Services.AddSingleton<IConfigureOptions<DatabaseOptions>>(provider =>
         {
             var fileProvider = provider.GetRequiredService<IFileProvider>();
             var filePath = fileProvider.GetFileInfo("database.db").PhysicalPath;
-            return new ConfigureNamedOptions<DatabaseOptions>(HostingOptions.ModeGame, opts =>
+            return new ConfigureNamedOptions<DatabaseOptions>(HostingOptions.MODE_GAME, opts =>
             {
-                opts.Provider = DatabaseProvider.Sqlite;
+                opts.Provider = DatabaseProvider.SQLITE;
                 opts.ConnectionString = $"Data Source={filePath}";
             });
         });
@@ -47,14 +47,14 @@ await Parser.Default.ParseArguments<SingleRunArgs>(args)
         {
             var fileProvider = provider.GetRequiredService<IFileProvider>();
             var filePath = fileProvider.GetFileInfo("database.db").PhysicalPath;
-            return new ConfigureNamedOptions<DatabaseOptions>(HostingOptions.ModeAuth, opts =>
+            return new ConfigureNamedOptions<DatabaseOptions>(HostingOptions.MODE_AUTH, opts =>
             {
-                opts.Provider = DatabaseProvider.Sqlite;
+                opts.Provider = DatabaseProvider.SQLITE;
                 opts.ConnectionString = $"Data Source={filePath}";
             });
         });
-        hostBuilder.Services.Configure<HostingOptions>(HostingOptions.ModeGame, opts => { opts.Port = 13001; });
-        hostBuilder.Services.Configure<HostingOptions>(HostingOptions.ModeAuth, opts => { opts.Port = 11002; });
+        hostBuilder.Services.Configure<HostingOptions>(HostingOptions.MODE_GAME, opts => { opts.Port = 13001; });
+        hostBuilder.Services.Configure<HostingOptions>(HostingOptions.MODE_AUTH, opts => { opts.Port = 11002; });
 
         var host = hostBuilder.Build();
 

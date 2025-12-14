@@ -41,8 +41,8 @@ internal sealed class MapAttributeProvider : IMapAttributeProvider
         var sectreesWidth = BinaryPrimitives.ReadInt32LittleEndian(headerBuffer.AsSpan(0 * sizeof(int), sizeof(int)));
         var sectreesHeight = BinaryPrimitives.ReadInt32LittleEndian(headerBuffer.AsSpan(1 * sizeof(int), sizeof(int)));
 
-        var expectedSectreesWidth = (int)(mapWidth * Map.MapUnit / MapAttributeSet.SectreeSize);
-        var expectedSectreesHeight = (int)(mapHeight * Map.MapUnit / MapAttributeSet.SectreeSize);
+        var expectedSectreesWidth = (int)(mapWidth * Map.MAP_UNIT / MapAttributeSet.SECTREE_SIZE);
+        var expectedSectreesHeight = (int)(mapHeight * Map.MAP_UNIT / MapAttributeSet.SECTREE_SIZE);
         if (sectreesWidth != expectedSectreesWidth || sectreesHeight != expectedSectreesHeight)
         {
             _logger.LogWarning(
@@ -51,14 +51,14 @@ internal sealed class MapAttributeProvider : IMapAttributeProvider
         }
 
         var sectrees = new MapAttributeSectree?[sectreesHeight, sectreesWidth];
-        var lzoDecompressor = new Lzo(MapAttributeSet.CellsPerSectree * sizeof(uint));
+        var lzoDecompressor = new Lzo(MapAttributeSet.CELLS_PER_SECTREE * sizeof(uint));
         var intBuffer = new byte[4];
 
         // info for debug logging only
         long cellsWithKnownFlags = 0;
         var unknownFlagCounts = new Dictionary<int, long>();
         var flagCountsDebugInfo = Enum.GetValues<EMapAttributes>()
-            .Where(x => x != EMapAttributes.None)
+            .Where(x => x != EMapAttributes.NONE)
             .ToDictionary(attr => attr, _ => 0L);
 
         for (var y = 0; y < sectreesHeight; y++)
@@ -72,14 +72,14 @@ internal sealed class MapAttributeProvider : IMapAttributeProvider
                 await stream.ReadExactlyAsync(compressedSectree, cancellationToken);
                 
                 var decompressedSectree = lzoDecompressor.DecodeRaw(compressedSectree);
-                if (decompressedSectree.Length != MapAttributeSet.CellsPerSectree * sizeof(uint))
+                if (decompressedSectree.Length != MapAttributeSet.CELLS_PER_SECTREE * sizeof(uint))
                 {
                     _logger.LogWarning("{ServerAttrPath} failed to decode sectree ({X}, {Y}): unexpected size {DecompressedSectorLength}", attrPath, x, y, decompressedSectree.Length);
                     sectrees[y, x] = MapAttributeSectree.Empty;
                     continue;
                 }
 
-                var allCellsAttrs = new EMapAttributes[MapAttributeSet.CellsPerSectree];
+                var allCellsAttrs = new EMapAttributes[MapAttributeSet.CELLS_PER_SECTREE];
                 for (var i = 0; i < allCellsAttrs.Length; i++)
                 {
                     var rawCellFlags = BinaryPrimitives.ReadUInt32LittleEndian(
@@ -104,9 +104,9 @@ internal sealed class MapAttributeProvider : IMapAttributeProvider
                         if (cellHasValidFlag) cellsWithKnownFlags++;
 
                         var unknownFlags = cellAttrFlags &
-                                           ~flagCountsDebugInfo.Keys.Aggregate(EMapAttributes.None,
+                                           ~flagCountsDebugInfo.Keys.Aggregate(EMapAttributes.NONE,
                                                (acc, attr) => acc | attr);
-                        if (unknownFlags != EMapAttributes.None)
+                        if (unknownFlags != EMapAttributes.NONE)
                         {
                             var remaining = (uint)unknownFlags;
                             while (remaining != 0)
@@ -127,10 +127,10 @@ internal sealed class MapAttributeProvider : IMapAttributeProvider
 
         if (_logger.IsEnabled(LogLevel.Debug))
         {
-            var totalCells = (long)sectreesHeight * sectreesWidth * MapAttributeSet.CellsPerSectree;
+            var totalCells = (long)sectreesHeight * sectreesWidth * MapAttributeSet.CELLS_PER_SECTREE;
             var percentage = 100.0 * cellsWithKnownFlags / totalCells;
             _logger.LogDebug( "Loaded {ServerAttrPath} {CellSize}x{CellSize2} cell attributes: {Summary} (cells with known flags: {NonZero}/{Total} = {Percentage:F2}%)",
-                attrPath, MapAttributeSet.CellSize, MapAttributeSet.CellSize,
+                attrPath, MapAttributeSet.CELL_SIZE, MapAttributeSet.CELL_SIZE,
                 string.Join(" ", flagCountsDebugInfo.Select(kv => $"{kv.Key}={kv.Value}")),
                 cellsWithKnownFlags, totalCells, percentage);
 
@@ -146,10 +146,10 @@ internal sealed class MapAttributeProvider : IMapAttributeProvider
 
     private sealed class MapAttributeSet : IMapAttributeSet
     {
-        internal const int SectreeSize = 6400; // 64m x 64m
-        internal const int CellSize = 50; // 50cm x 50cm  - basically a quarter of the size of a full world cell (2m x 2m)
-        internal const int CellsPerAxis = SectreeSize / CellSize;
-        internal const int CellsPerSectree = CellsPerAxis * CellsPerAxis;
+        internal const int SECTREE_SIZE = 6400; // 64m x 64m
+        internal const int CELL_SIZE = 50; // 50cm x 50cm  - basically a quarter of the size of a full world cell (2m x 2m)
+        internal const int CELLS_PER_AXIS = SECTREE_SIZE / CELL_SIZE;
+        internal const int CELLS_PER_SECTREE = CELLS_PER_AXIS * CELLS_PER_AXIS;
 
         private readonly MapAttributeSectree?[,] _sectreesAttrs;
         private readonly int _sectreesWidth;
@@ -169,7 +169,7 @@ internal sealed class MapAttributeProvider : IMapAttributeProvider
         {
             if (!TryLocate(coords, out var locatedSectreeAttrs, out var cellX, out var cellY) || locatedSectreeAttrs is null)
             {
-                return EMapAttributes.None;
+                return EMapAttributes.NONE;
             }
 
             return locatedSectreeAttrs.Get(cellX, cellY);
@@ -184,8 +184,8 @@ internal sealed class MapAttributeProvider : IMapAttributeProvider
             var relativeCoords = coords - _baseCoords;
 
             // find which sectree covers the x y relative map coords
-            var sectreeIndexX = relativeCoords.X / SectreeSize;
-            var sectreeIndexY = relativeCoords.Y / SectreeSize;
+            var sectreeIndexX = relativeCoords.X / SECTREE_SIZE;
+            var sectreeIndexY = relativeCoords.Y / SECTREE_SIZE;
             if (sectreeIndexX >= _sectreesWidth || sectreeIndexY >= _sectreesHeight)
             {
                 return false;
@@ -193,20 +193,20 @@ internal sealed class MapAttributeProvider : IMapAttributeProvider
             sectreeAttrs = _sectreesAttrs[sectreeIndexY, sectreeIndexX];
             
             // find which cell of the sectree covers the x y relative map coords
-            cellX = (int)((relativeCoords.X % SectreeSize) / CellSize);
-            cellY = (int)((relativeCoords.Y % SectreeSize) / CellSize);
+            cellX = (int)((relativeCoords.X % SECTREE_SIZE) / CELL_SIZE);
+            cellY = (int)((relativeCoords.Y % SECTREE_SIZE) / CELL_SIZE);
             
-            return cellX < CellsPerAxis && cellY < CellsPerAxis;
+            return cellX < CELLS_PER_AXIS && cellY < CELLS_PER_AXIS;
         }
     }
 
     private sealed class MapAttributeSectree(EMapAttributes[] values)
     {
-        public static MapAttributeSectree Empty { get; } = new(new EMapAttributes[MapAttributeSet.CellsPerSectree]);
+        public static MapAttributeSectree Empty { get; } = new(new EMapAttributes[MapAttributeSet.CELLS_PER_SECTREE]);
 
         public EMapAttributes Get(int x, int y)
         {
-            return values[y * MapAttributeSet.CellsPerAxis + x];
+            return values[y * MapAttributeSet.CELLS_PER_AXIS + x];
         }
     }
 }

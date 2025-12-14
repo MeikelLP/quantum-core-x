@@ -2,7 +2,7 @@
 
 namespace QuantumCore.Game.Packets.Skills;
 
-[Packet(0x4C, EDirection.Outgoing)]
+[Packet(0x4C, EDirection.OUTGOING)]
 [PacketGenerator]
 public partial class SkillLevels
 {

@@ -2,7 +2,7 @@
 
 namespace QuantumCore.Game.Packets;
 
-[Packet(0x79, EDirection.Outgoing)]
+[Packet(0x79, EDirection.OUTGOING)]
 [PacketGenerator]
 public partial class Channel
 {

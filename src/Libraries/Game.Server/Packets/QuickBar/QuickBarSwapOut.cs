@@ -2,7 +2,7 @@ using QuantumCore.Networking;
 
 namespace QuantumCore.Game.Packets.QuickBar;
 
-[Packet(0x1E, EDirection.Outgoing)]
+[Packet(0x1E, EDirection.OUTGOING)]
 [PacketGenerator]
 public partial class QuickBarSwapOut
 {

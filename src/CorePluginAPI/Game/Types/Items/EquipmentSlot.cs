@@ -2,17 +2,17 @@
 
 public enum EquipmentSlot : byte
 {
-    Body = 0,
-    Head = 1,
-    Shoes = 2,
-    Bracelet = 3,
-    Weapon = 4,
-    Necklace = 5,
-    Earring = 6,
-    Unique1 = 7,
-    Unique2 = 8,
-    Arrow = 9,
-    Shield = 10,
-    Costume = 19,
-    Hair = 20
+    BODY = 0,
+    HEAD = 1,
+    SHOES = 2,
+    BRACELET = 3,
+    WEAPON = 4,
+    NECKLACE = 5,
+    EARRING = 6,
+    UNIQUE1 = 7,
+    UNIQUE2 = 8,
+    ARROW = 9,
+    SHIELD = 10,
+    COSTUME = 19,
+    HAIR = 20
 }

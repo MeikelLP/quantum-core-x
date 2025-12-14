@@ -3,7 +3,7 @@ using QuantumCore.Networking;
 
 namespace QuantumCore.Game.Packets.Guild;
 
-[Packet(0x50, EDirection.Incoming, Sequence = true)]
+[Packet(0x50, EDirection.INCOMING, Sequence = true)]
 [SubPacket(0x02, 0)]
 [PacketGenerator]
 public partial class GuildRenameRank
@@ -14,6 +14,6 @@ public partial class GuildRenameRank
     [Field(0)]
     public byte Position { get; set; }
 
-    [Field(1, Length = GuildConstants.RankNameMaxLength + 1)]
+    [Field(1, Length = GuildConstants.RANK_NAME_MAX_LENGTH + 1)]
     public string Name { get; set; } = "";
 }

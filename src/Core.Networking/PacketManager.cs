@@ -10,11 +10,11 @@ public class PacketManager : IPacketManager
 
     public PacketManager(ILogger<PacketManager> logger, IEnumerable<Type> packetTypes, Type[]? packetHandlerTypes = null)
     {
-        const BindingFlags Flags = BindingFlags.Static | BindingFlags.Public;
+        const BindingFlags FLAGS = BindingFlags.Static | BindingFlags.Public;
         foreach (var packetType in packetTypes)
         {
-            var header = (byte)packetType.GetProperty(nameof(IPacketSerializable.Header), Flags)!.GetValue(null)!;
-            var subHeader = (byte?)packetType.GetProperty(nameof(IPacketSerializable.SubHeader), Flags)!.GetValue(null);
+            var header = (byte)packetType.GetProperty(nameof(IPacketSerializable.Header), FLAGS)!.GetValue(null)!;
+            var subHeader = (byte?)packetType.GetProperty(nameof(IPacketSerializable.SubHeader), FLAGS)!.GetValue(null);
 
             // last or default so it can be overriden via plugins - last one is chosen
             var packetHandlerType = packetHandlerTypes?

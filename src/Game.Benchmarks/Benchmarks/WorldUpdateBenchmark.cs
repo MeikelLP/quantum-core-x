@@ -48,7 +48,7 @@ public class WorldUpdateBenchmark
             .AddCoreServices(new EmptyPluginCatalog(), config)
             .AddQuantumCoreCaching()
             .AddGameCaching()
-            .AddQuantumCoreDatabase(HostingOptions.ModeGame)
+            .AddQuantumCoreDatabase(HostingOptions.MODE_GAME)
             .AddGameServices()
             .Replace(new ServiceDescriptor(typeof(IAtlasProvider), provider =>
             {
@@ -87,7 +87,7 @@ public class WorldUpdateBenchmark
                         new SpawnPoint
                         {
                             Chance = 100,
-                            Type = ESpawnPointType.Monster,
+                            Type = ESpawnPointType.MONSTER,
                             Monster = 42,
                             X = 1,
                             Y = 1,
@@ -102,13 +102,13 @@ public class WorldUpdateBenchmark
             .Replace(new ServiceDescriptor(typeof(IJobManager), _ =>
             {
                 var mock = Substitute.For<IJobManager>();
-                mock.Get(EPlayerClassGendered.NinjaFemale).Returns(new Job());
+                mock.Get(EPlayerClassGendered.NINJA_FEMALE).Returns(new Job());
                 return mock;
             }, ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(IMonsterManager), _ =>
             {
                 var mock = Substitute.For<IMonsterManager>();
-                mock.GetMonster(42).Returns(new MonsterData {Type = (byte)EEntityType.Monster});
+                mock.GetMonster(42).Returns(new MonsterData {Type = (byte)EEntityType.MONSTER});
                 return mock;
             }, ServiceLifetime.Singleton))
             .BuildServiceProvider();
@@ -120,7 +120,7 @@ public class WorldUpdateBenchmark
         {
             var player = new PlayerData
             {
-                Name = i.ToString(), PlayerClass = EPlayerClassGendered.NinjaFemale, PositionX = 1, PositionY = 1
+                Name = i.ToString(), PlayerClass = EPlayerClassGendered.NINJA_FEMALE, PositionX = 1, PositionY = 1
             };
             var conn = Substitute.For<IGameConnection>();
             conn.BoundIpAddress.Returns(IPAddress.Loopback);

@@ -2,6 +2,6 @@
 
 public enum AnimationType
 {
-    Run,
-    Walk
+    RUN,
+    WALK
 }

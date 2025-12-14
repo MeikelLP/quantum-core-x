@@ -3776,7 +3776,7 @@ namespace QuantumCore.Auth.Packets
     [Fact]
     public void MultipleFiles()
     {
-        const string File1 = @"
+        const string FILE1 = @"
 using QuantumCore.Networking;
 
 namespace QuantumCore.Game.Packets;
@@ -3787,12 +3787,12 @@ public partial record struct Characters ()
 {
     public Character[] CharacterList { get; set; } = new Character[2];
 }";
-        const string File2 = @"
+        const string FILE2 = @"
 namespace QuantumCore.Game.Packets;
 
 public record Character(uint Id);";
         GeneratorDriver driver = CSharpGeneratorDriver.Create(new PacketSerializerGenerator());
-        var inputCompilation = CreateCompilation(File1, File2);
+        var inputCompilation = CreateCompilation(FILE1, FILE2);
 
         driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation,
             out var diagnostics);

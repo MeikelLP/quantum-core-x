@@ -2,9 +2,9 @@
 
 public enum EPvpMode : byte
 {
-    Peaceful,
-    Hostile,
-    Free,
-    Protected,
-    Guild
+    PEACEFUL,
+    HOSTILE,
+    FREE,
+    PROTECTED,
+    GUILD
 }

@@ -5,7 +5,7 @@ using QuantumCore.Networking;
 
 namespace QuantumCore.Game.Packets;
 
-[Packet(0x71, EDirection.Outgoing)]
+[Packet(0x71, EDirection.OUTGOING)]
 [PacketGenerator]
 public partial class CharacterDetails
 {
@@ -13,7 +13,7 @@ public partial class CharacterDetails
     [Field(1)] public EPlayerClassGendered Class { get; set; }
     [Field(2)] public byte ReservedByteForClass { get; set; }
 
-    [Field(3, Length = PlayerConstants.PlayerNameMaxLength)]
+    [Field(3, Length = PlayerConstants.PLAYER_NAME_MAX_LENGTH)]
     public string Name { get; set; } = "";
 
     [Field(4)] public int PositionX { get; set; }

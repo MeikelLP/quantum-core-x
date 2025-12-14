@@ -28,7 +28,7 @@ public class GuildRankChangeHandler : IGamePacketHandler<GuildRankChangePacket>
             ctx.Connection.Player.SendChatInfo("You don't have permission to change a rank.");
             return;
         }
-        else if (ctx.Packet.Position == GuildConstants.LeaderRankPosition)
+        else if (ctx.Packet.Position == GuildConstants.LEADER_RANK_POSITION)
         {
             ctx.Connection.Player.SendChatInfo("You cannot change the permissions of the guild leader.");
             return;

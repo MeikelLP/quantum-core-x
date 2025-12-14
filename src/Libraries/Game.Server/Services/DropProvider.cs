@@ -24,12 +24,12 @@ public class DropProvider : IDropProvider, ILoadable
     private readonly Dictionary<uint, MonsterItemGroup> _monsterDrops = new();
     private readonly Dictionary<uint, DropItemGroup> _itemDrops = new();
 
-    private const string CommonDropItemFile = "common_drop_item.txt";
-    private const string EtcDropItemFile = "etc_drop_item.txt";
-    private const string MobDropItemFile = "mob_drop_item.txt";
+    private const string COMMON_DROP_ITEM_FILE = "common_drop_item.txt";
+    private const string ETC_DROP_ITEM_FILE = "etc_drop_item.txt";
+    private const string MOB_DROP_ITEM_FILE = "mob_drop_item.txt";
 
 #if DEBUG
-    private const bool DropDebug = true;
+    private const bool DROP_DEBUG = true;
 #else
     private const bool DropDebug = false;
 #endif
@@ -79,7 +79,7 @@ public class DropProvider : IDropProvider, ILoadable
 
     private async Task LoadCommonMobDropsAsync(CancellationToken cancellationToken)
     {
-        var file = _fileProvider.GetFileInfo(CommonDropItemFile);
+        var file = _fileProvider.GetFileInfo(COMMON_DROP_ITEM_FILE);
         if (!file.Exists) return;
 
         _logger.LogDebug("Loading common drops from {FilePath}", file);
@@ -97,7 +97,7 @@ public class DropProvider : IDropProvider, ILoadable
     /// </summary>
     private async Task LoadSimpleMobDropsAsync(CancellationToken cancellationToken)
     {
-        var file = _fileProvider.GetFileInfo(EtcDropItemFile);
+        var file = _fileProvider.GetFileInfo(ETC_DROP_ITEM_FILE);
         if (!file.Exists) return;
 
         _logger.LogDebug("Loading item drop modifiers from {FilePath}", file);
@@ -158,7 +158,7 @@ public class DropProvider : IDropProvider, ILoadable
 
     private async Task LoadDropsForMonstersAsync(CancellationToken token)
     {
-        var file = _fileProvider.GetFileInfo(MobDropItemFile);
+        var file = _fileProvider.GetFileInfo(MOB_DROP_ITEM_FILE);
         if (!file.Exists) return;
         _logger.LogDebug("Loading drops from {FilePath}", file);
 
@@ -214,9 +214,9 @@ public class DropProvider : IDropProvider, ILoadable
         var deltaPercentage = 0;
         var dropRange = 0;
 
-        var levelDropDelta = (int)(monster.GetPoint(EPoint.Level) + 15 - player.GetPoint(EPoint.Level));
+        var levelDropDelta = (int)(monster.GetPoint(EPoint.LEVEL) + 15 - player.GetPoint(EPoint.LEVEL));
 
-        deltaPercentage = monster is {IsStone: false, Rank: >= EMonsterLevel.Boss}
+        deltaPercentage = monster is {IsStone: false, Rank: >= EMonsterLevel.BOSS}
             ? (int)_options.Delta.Boss[MathUtils.MinMax(0, levelDropDelta, _options.Delta.Boss.Count - 1)]
             : (int)_options.Delta.Normal[MathUtils.MinMax(0, levelDropDelta, _options.Delta.Normal.Count - 1)];
 
@@ -226,44 +226,44 @@ public class DropProvider : IDropProvider, ILoadable
             deltaPercentage += 500;
 
         _logger.LogDebug("CalculateDropPercentages for level: {Level} rank: {Rank} percentage: {DeltaPercentage}",
-            player.GetPoint(EPoint.Level), monster.Rank.ToString(), deltaPercentage);
+            player.GetPoint(EPoint.LEVEL), monster.Rank.ToString(), deltaPercentage);
 
         deltaPercentage = deltaPercentage * player.GetMobItemRate() / 100;
 
-        if (player.GetPoint(EPoint.MallItemBonus) > 0)
+        if (player.GetPoint(EPoint.MALL_ITEM_BONUS) > 0)
         {
-            deltaPercentage += (int)(deltaPercentage * player.GetPoint(EPoint.MallItemBonus) / 100);
+            deltaPercentage += (int)(deltaPercentage * player.GetPoint(EPoint.MALL_ITEM_BONUS) / 100);
         }
 
-        const int UniqueGroupDoubleItem = 10002; // todo: magic numbers
-        const int UniqueItemDoubleItem = 70043; // todo: magic numbers
+        const int UNIQUE_GROUP_DOUBLE_ITEM = 10002; // todo: magic numbers
+        const int UNIQUE_ITEM_DOUBLE_ITEM = 70043; // todo: magic numbers
 
         // Premium
-        if (player.GetPremiumRemainSeconds(EPremiumType.Item) > 0 ||
-            player.HasUniqueGroupItemEquipped(UniqueGroupDoubleItem))
+        if (player.GetPremiumRemainSeconds(EPremiumType.ITEM) > 0 ||
+            player.HasUniqueGroupItemEquipped(UNIQUE_GROUP_DOUBLE_ITEM))
         {
             deltaPercentage += deltaPercentage;
         }
         // Premium end
 
         var bonus = 0;
-        if (player.HasUniqueItemEquipped(UniqueItemDoubleItem) &&
-            player.GetPremiumRemainSeconds(EPremiumType.Item) > 0)
+        if (player.HasUniqueItemEquipped(UNIQUE_ITEM_DOUBLE_ITEM) &&
+            player.GetPremiumRemainSeconds(EPremiumType.ITEM) > 0)
         {
             // irremovable gloves + mall item bonus
             bonus = 100;
             _logger.LogDebug("Player has irremovable gloves and mall item bonus");
         }
-        else if (player.HasUniqueItemEquipped(UniqueItemDoubleItem)
-                 || (player.HasUniqueGroupItemEquipped(UniqueGroupDoubleItem) &&
-                     player.GetPremiumRemainSeconds(EPremiumType.Item) > 0))
+        else if (player.HasUniqueItemEquipped(UNIQUE_ITEM_DOUBLE_ITEM)
+                 || (player.HasUniqueGroupItemEquipped(UNIQUE_GROUP_DOUBLE_ITEM) &&
+                     player.GetPremiumRemainSeconds(EPremiumType.ITEM) > 0))
         {
             // irremovable gloves OR removeable gloves + mall item bonus
             bonus = 50;
             _logger.LogDebug("Player has irremovable gloves OR removeable gloves and mall item bonus");
         }
 
-        var itemDropBonus = (int)Math.Min(100, player.GetPoint(EPoint.ItemDropBonus));
+        var itemDropBonus = (int)Math.Min(100, player.GetPoint(EPoint.ITEM_DROP_BONUS));
 
         var empireBonusDrop = 0; // todo: implement server / empire rates
 
@@ -286,7 +286,7 @@ public class DropProvider : IDropProvider, ILoadable
             var percent = (drop.Chance * delta) / 100;
             var target = CoreRandom.GenerateInt32(1, range + 1);
 
-            if (DropDebug)
+            if (DROP_DEBUG)
             {
                 var realPercent = percent / range * 100;
                 _logger.LogTrace("Drop chance for {Name} ({MobProtoId}) is {RealPercent}%",
@@ -307,7 +307,7 @@ public class DropProvider : IDropProvider, ILoadable
 
                 var itemInstance = _itemManager.CreateItem(itemProto);
 
-                if (itemProto.IsType(EItemType.Polymorph))
+                if (itemProto.IsType(EItemType.POLYMORPH))
                 {
                     if (monster.Proto.PolymorphItemId == itemProto.Id)
                     {
@@ -334,7 +334,7 @@ public class DropProvider : IDropProvider, ILoadable
                 var percent = drop.Chance * delta / 100;
                 var target = CoreRandom.GenerateInt32(1, range + 1);
 
-                if (DropDebug)
+                if (DROP_DEBUG)
                 {
                     var realPercent = percent / range * 100;
                     _logger.LogTrace("Drop chance for {Name} ({MobProtoId}) is {RealPercent}%",
@@ -353,7 +353,7 @@ public class DropProvider : IDropProvider, ILoadable
                     _logger.LogDebug("Monster {Name} ({MobProtoId}) dropped an item group ({Item})",
                         monster.Proto.TranslatedName, monster.Proto.Id, itemProto.TranslatedName);
 
-                    if (itemProto.IsType(EItemType.Polymorph))
+                    if (itemProto.IsType(EItemType.POLYMORPH))
                     {
                         if (monster.Proto.PolymorphItemId == itemProto.Id)
                         {
@@ -381,7 +381,7 @@ public class DropProvider : IDropProvider, ILoadable
         var percent = 40000 * delta / mobDrops.MinKillCount;
         var target = CoreRandom.GenerateInt32(1, range + 1);
 
-        if (DropDebug)
+        if (DROP_DEBUG)
         {
             var realPercent = (float)percent / range * 100;
             _logger.LogTrace("Drop chance for {Name} ({MobProtoId}) is {RealPercent}%",
@@ -421,7 +421,7 @@ public class DropProvider : IDropProvider, ILoadable
                 var percent = drop.Chance;
                 var target = CoreRandom.GenerateInt32(1, 1_000_000 + 1);
 
-                if (DropDebug)
+                if (DROP_DEBUG)
                 {
                     var realPercent = percent / range * 100;
                     _logger.LogTrace("Drop chance for {Name} ({MobProtoId}) is {RealPercent}%",
@@ -458,7 +458,7 @@ public class DropProvider : IDropProvider, ILoadable
             var percent = drop.Multiplier * delta / 100;
             var target = CoreRandom.GenerateInt32(1, range + 1);
 
-            if (DropDebug)
+            if (DROP_DEBUG)
             {
                 var realPercent = percent / range * 100;
                 _logger.LogTrace("Drop chance for {Name} ({MobProtoId}) is {RealPercent}%",
@@ -542,7 +542,7 @@ public class DropProvider : IDropProvider, ILoadable
         var percent = chance * delta * 400;
         var target = CoreRandom.GenerateInt32(1, range + 1);
 
-        if (DropDebug)
+        if (DROP_DEBUG)
         {
             var realPercent = percent / range * 100;
             _logger.LogTrace("Drop chance for {Name} ({MobProtoId}) is {RealPercent}%",

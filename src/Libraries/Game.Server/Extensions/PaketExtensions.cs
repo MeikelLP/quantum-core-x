@@ -20,7 +20,7 @@ public static class PaketExtensions
             Dx = player.Dx,
             Iq = player.Iq,
             BodyPart = (ushort) player.BodyPart,
-            NameChange = ENameChangeStatus.Disabled,
+            NameChange = ENameChangeStatus.DISABLED,
             HairPart = (ushort) player.HairPart,
             PositionX = player.PositionX,
             PositionY = player.PositionY,

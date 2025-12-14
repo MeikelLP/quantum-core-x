@@ -97,7 +97,7 @@ public class PlayerManager : IPlayerManager
 
         var existingPlayers = await _dbPlayerRepository.GetPlayersAsync(accountId);
 
-        if (existingPlayers.Length >= PlayerConstants.MaxPlayersPerAccount)
+        if (existingPlayers.Length >= PlayerConstants.MAX_PLAYERS_PER_ACCOUNT)
         {
             throw new InvalidOperationException("Already have max allowed players for this account");
         }

@@ -2,11 +2,11 @@
 
 public enum CharacterMovementType : byte
 {
-    Wait = 0,
-    Move = 1,
-    Attack = 2,
-    Combo = 3,
-    MobSkill = 4,
+    WAIT = 0,
+    MOVE = 1,
+    ATTACK = 2,
+    COMBO = 3,
+    MOB_SKILL = 4,
 
-    SkillFlag = 1 << 7
+    SKILL_FLAG = 1 << 7
 }

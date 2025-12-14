@@ -8,7 +8,7 @@ using Xunit;
 
 namespace Core.Tests;
 
-[Packet(0x01, EDirection.Outgoing)]
+[Packet(0x01, EDirection.OUTGOING)]
 [PacketGenerator]
 public partial class MyPacket
 {
@@ -34,7 +34,7 @@ public class PacketSerializerTests
     {
         var services = new ServiceCollection()
             .AddSingleton<IConfiguration>(_ => new ConfigurationBuilder()
-                .AddInMemoryCollection(new Dictionary<string, string?> { { "Mode", HostingOptions.ModeGame } })
+                .AddInMemoryCollection(new Dictionary<string, string?> { { "Mode", HostingOptions.MODE_GAME } })
                 .Build())
             .AddSingleton<IPacketManager>(provider => new PacketManager(
                 provider.GetRequiredService<ILogger<PacketManager>>(), new[] { typeof(MyPacket) }))

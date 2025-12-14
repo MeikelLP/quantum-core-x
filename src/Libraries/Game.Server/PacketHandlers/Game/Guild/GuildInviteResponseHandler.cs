@@ -41,16 +41,16 @@ public class GuildInviteResponseHandler : IGamePacketHandler<GuildInviteResponse
 
             switch (status)
             {
-                case EGuildJoinStatusCode.AlreadyInAnyGuild:
+                case EGuildJoinStatusCode.ALREADY_IN_ANY_GUILD:
                     invitee.SendChatInfo("You are already in a guild.");
                     return;
-                case EGuildJoinStatusCode.GuildFull:
+                case EGuildJoinStatusCode.GUILD_FULL:
                     invitee.SendChatInfo("The target guild is full.");
                     return;
             }
 
-            const byte Rank = GuildConstants.DefaultJoinRank;
-            await _guildManager.AddMemberAsync(guildId, invitee.Player.Id, Rank, token);
+            const byte RANK = GuildConstants.DEFAULT_JOIN_RANK;
+            await _guildManager.AddMemberAsync(guildId, invitee.Player.Id, RANK, token);
 
             invitee.Player.GuildId = guildId;
             await invitee.RefreshGuildAsync();
@@ -63,7 +63,7 @@ public class GuildInviteResponseHandler : IGamePacketHandler<GuildInviteResponse
                     {
                         Id = invitee.Player.Id,
                         Name = invitee.Player.Name,
-                        Rank = Rank,
+                        Rank = RANK,
                         SpentExperience = 0,
                         Class = invitee.Player.PlayerClass,
                         Level = invitee.Player.Level,

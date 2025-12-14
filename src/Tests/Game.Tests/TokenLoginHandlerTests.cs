@@ -63,17 +63,17 @@ public class TokenLoginHandlerTests
             cacheManager.Server.Returns(serverStore);
             cacheManager.Shared.Returns(sharedStore);
 
-            const string Username = "test-user";
+            const string USERNAME = "test-user";
             var accountId = Guid.Parse("df2ce2b2-e1b9-46e4-9d62-991b8b590d1b");
-            const uint TokenKey = 0xDEADBEEFu;
-            var tokenCacheKey = $"token:{TokenKey}";
+            const uint TOKEN_KEY = 0xDEADBEEFu;
+            var tokenCacheKey = $"token:{TOKEN_KEY}";
             var accountTokenKey = $"account:token:{accountId}";
 
             serverStore.Exists(tokenCacheKey).Returns(new ValueTask<long>(1));
             serverStore.Get<Token>(tokenCacheKey).Returns(new ValueTask<Token>(new Token
             {
                 AccountId = accountId,
-                Username = Username
+                Username = USERNAME
             }));
             sharedStore.Get<uint>(accountTokenKey).Returns(new ValueTask<uint>(0));
             serverStore.Persist(tokenCacheKey).Returns(new ValueTask<long>(1));
@@ -85,11 +85,11 @@ public class TokenLoginHandlerTests
                 Id = 100,
                 AccountId = accountId,
                 Name = "TestPlayer",
-                PlayerClass = EPlayerClassGendered.NinjaFemale,
+                PlayerClass = EPlayerClassGendered.NINJA_FEMALE,
                 Slot = 0,
                 PositionX = 100,
                 PositionY = 200,
-                Empire = EEmpire.Shinsoo
+                Empire = EEmpire.SHINSOO
             };
 
             playerManager.GetPlayers(accountId).Returns(Task.FromResult(new[] {player}));
@@ -103,7 +103,7 @@ public class TokenLoginHandlerTests
             serverBase.IpAddress.Returns(connectionInterfaceIp);
             serverBase.Port.Returns(coreHost._port);
 
-            var phase = EPhase.Handshake;
+            var phase = EPhase.HANDSHAKE;
             var assignedAccountId = (Guid?) null;
             var assignedUsername = string.Empty;
 
@@ -119,7 +119,7 @@ public class TokenLoginHandlerTests
             connection.Send(Arg.Do<Characters>(packet => _characters = packet));
 
             _connection = connection;
-            _tokenLogin = new TokenLogin {Username = Username, Key = TokenKey};
+            _tokenLogin = new TokenLogin {Username = USERNAME, Key = TOKEN_KEY};
             _handler = new TokenLoginHandler(Substitute.For<ILogger<TokenLoginHandler>>(), cacheManager, world, playerManager, guildManager);
         }
 

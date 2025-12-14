@@ -2,7 +2,7 @@
 
 namespace QuantumCore.Auth.Packets;
 
-[Packet(0x07, EDirection.Outgoing)]
+[Packet(0x07, EDirection.OUTGOING)]
 [PacketGenerator]
 public partial class LoginFailed
 {

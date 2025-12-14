@@ -40,21 +40,21 @@ public class SimpleBehaviour : IBehaviour
     public bool IsAggressive { get; set; }
 
     // mob idle wander
-    private const int MoveMinDistance = 300;
-    private const int MoveMaxDistance = 700;
+    private const int MOVE_MIN_DISTANCE = 300;
+    private const int MOVE_MAX_DISTANCE = 700;
         
-    private const int MaxPositionAttempts = 16;
+    private const int MAX_POSITION_ATTEMPTS = 16;
         
-    private const long ReturnTimeoutMs = 15000;
-    private const double ReturnDistance = 5000; // return to spawn if last attack >50m away
-    private const double GiveUpDistance = 4000; // stop chase if target >40m away
+    private const long RETURN_TIMEOUT_MS = 15000;
+    private const double RETURN_DISTANCE = 5000; // return to spawn if last attack >50m away
+    private const double GIVE_UP_DISTANCE = 4000; // stop chase if target >40m away
         
-    private const long ChangeAttackPositionTimeNearMs = 10000;
-    private const long ChangeAttackPositionTimeFarMs = 1000;
-    private const double ChangeAttackPositionDistance = 100;
+    private const long CHANGE_ATTACK_POSITION_TIME_NEAR_MS = 10000;
+    private const long CHANGE_ATTACK_POSITION_TIME_FAR_MS = 1000;
+    private const double CHANGE_ATTACK_POSITION_DISTANCE = 100;
         
-    private const double PreferredAttackRangePercentageRanged = 0.8;
-    private const double PreferredAttackRangePercentage = 0.9;
+    private const double PREFERRED_ATTACK_RANGE_PERCENTAGE_RANGED = 0.8;
+    private const double PREFERRED_ATTACK_RANGE_PERCENTAGE = 0.9;
 
     public SimpleBehaviour(IMonsterManager monsterManager)
     {
@@ -71,7 +71,7 @@ public class SimpleBehaviour : IBehaviour
 
         _spawnX = entity.PositionX;
         _spawnY = entity.PositionY;
-        IsAggressive = entity is MonsterEntity mob && mob.Proto.AiFlag.HasAnyFlags(EAiFlags.Aggressive);
+        IsAggressive = entity is MonsterEntity mob && mob.Proto.AiFlag.HasAnyFlags(EAiFlags.AGGRESSIVE);
         _lastAttackTime = 0;
         ResetChangeAttackPositionTimer();
     }
@@ -85,9 +85,9 @@ public class SimpleBehaviour : IBehaviour
     {
         if (_entity is null) return;
 
-        for (var attempt = 0; attempt < MaxPositionAttempts; attempt++)
+        for (var attempt = 0; attempt < MAX_POSITION_ATTEMPTS; attempt++)
         {
-            var distance = RandomNumberGenerator.GetInt32(MoveMinDistance, MoveMaxDistance + 1);
+            var distance = RandomNumberGenerator.GetInt32(MOVE_MIN_DISTANCE, MOVE_MAX_DISTANCE + 1);
             var (angleDx, angleDy) = MathUtils.GetDeltaByDegree(RandomNumberGenerator.GetInt32(0, 360));
 
             var delta = new Vector2((float)(distance * angleDx), (float)(distance * angleDy));
@@ -119,7 +119,7 @@ public class SimpleBehaviour : IBehaviour
         directionX /= directionLength;
         directionY /= directionLength;
 
-        if (_entity is MonsterEntity monster && monster.Rank < EMonsterLevel.Boss &&
+        if (_entity is MonsterEntity monster && monster.Rank < EMonsterLevel.BOSS &&
             ShouldChangeAttackPosition(directionLength))
         {
             if (TryChangeAttackPosition(target, directionLength, minDistance))
@@ -151,7 +151,7 @@ public class SimpleBehaviour : IBehaviour
         {
             var targetLost = Target.Dead || Target.Map != _entity.Map;
 
-            if (!targetLost && GiveUpDistance <= MathUtils.Distance(_entity.PositionX, _entity.PositionY,
+            if (!targetLost && GIVE_UP_DISTANCE <= MathUtils.Distance(_entity.PositionX, _entity.PositionY,
                     Target.PositionX, Target.PositionY))
             {
                 targetLost = true;
@@ -160,7 +160,7 @@ public class SimpleBehaviour : IBehaviour
             if (!targetLost && _lastAttackTime > 0)
             {
                 var elapsedSinceAttack = GameServer.Instance.ServerTime - _lastAttackTime;
-                if (elapsedSinceAttack >= ReturnTimeoutMs)
+                if (elapsedSinceAttack >= RETURN_TIMEOUT_MS)
                 {
                     if (_proto.AttackRange < MathUtils.Distance(_entity.PositionX, _entity.PositionY,
                             Target.PositionX, Target.PositionY))
@@ -170,7 +170,7 @@ public class SimpleBehaviour : IBehaviour
 
                     if (!targetLost)
                     {
-                        if (ReturnDistance <= MathUtils.Distance(_entity.PositionX, _entity.PositionY,
+                        if (RETURN_DISTANCE <= MathUtils.Distance(_entity.PositionX, _entity.PositionY,
                                 _lastAttackX, _lastAttackY))
                         {
                             targetLost = true;
@@ -196,7 +196,7 @@ public class SimpleBehaviour : IBehaviour
 
             if (Target != null)
             {
-                if (_entity.State == EEntityState.Moving)
+                if (_entity.State == EEntityState.MOVING)
                 {
                     // Check if current movement goal is in attack range of our target
                     var movementDistance = MathUtils.Distance(_entity.TargetPositionX, _entity.TargetPositionY,
@@ -228,7 +228,7 @@ public class SimpleBehaviour : IBehaviour
             }
         }
 
-        if (_entity.State == EEntityState.Idle)
+        if (_entity.State == EEntityState.IDLE)
         {
             _nextMovementIn -= (int)elapsedTime;
 
@@ -259,12 +259,12 @@ public class SimpleBehaviour : IBehaviour
             return false;
         }
 
-        if (localMap.IsAttr(target, EMapAttributes.Block | EMapAttributes.Object))
+        if (localMap.IsAttr(target, EMapAttributes.BLOCK | EMapAttributes.OBJECT))
         {
             return false;
         }
 
-        if (_entity.IsAttrOnStraightPathTo(target, EMapAttributes.Block | EMapAttributes.Object))
+        if (_entity.IsAttrOnStraightPathTo(target, EMapAttributes.BLOCK | EMapAttributes.OBJECT))
         {
             return false;
         }
@@ -285,7 +285,7 @@ public class SimpleBehaviour : IBehaviour
         var rotationFromTarget = MathUtils.Rotation(_entity.PositionX - target.PositionX,
             _entity.PositionY - target.PositionY);
 
-        for (var attempt = 0; attempt < MaxPositionAttempts; attempt++)
+        for (var attempt = 0; attempt < MAX_POSITION_ATTEMPTS; attempt++)
         {
             double angle;
             if (currentDistance < 500.0)
@@ -317,10 +317,10 @@ public class SimpleBehaviour : IBehaviour
             return true;
         }
 
-        var changeInterval = ChangeAttackPositionTimeNearMs;
-        if (currentDistance > ChangeAttackPositionDistance + mob.Proto.AttackRange)
+        var changeInterval = CHANGE_ATTACK_POSITION_TIME_NEAR_MS;
+        if (currentDistance > CHANGE_ATTACK_POSITION_DISTANCE + mob.Proto.AttackRange)
         {
-            changeInterval = ChangeAttackPositionTimeFarMs;
+            changeInterval = CHANGE_ATTACK_POSITION_TIME_FAR_MS;
         }
 
         return GameServer.Instance.ServerTime - _lastChangeAttackPositionTime > changeInterval;
@@ -335,15 +335,15 @@ public class SimpleBehaviour : IBehaviour
 
         var multiplier = _proto.BattleType switch
         {
-            EBattleType.Range or EBattleType.Magic => PreferredAttackRangePercentageRanged, // archers and wizards attack from 80% of their range
-            _ => PreferredAttackRangePercentage
+            EBattleType.RANGE or EBattleType.MAGIC => PREFERRED_ATTACK_RANGE_PERCENTAGE_RANGED, // archers and wizards attack from 80% of their range
+            _ => PREFERRED_ATTACK_RANGE_PERCENTAGE
         };
         return _proto.AttackRange * multiplier;
     }
 
     private void ResetChangeAttackPositionTimer()
     {
-        _lastChangeAttackPositionTime = GameServer.Instance.ServerTime - ChangeAttackPositionTimeNearMs;
+        _lastChangeAttackPositionTime = GameServer.Instance.ServerTime - CHANGE_ATTACK_POSITION_TIME_NEAR_MS;
     }
 
     private void Attack(IEntity victim)
@@ -361,7 +361,7 @@ public class SimpleBehaviour : IBehaviour
         // Send attack packet
         var packet = new CharacterMoveOut
         {
-            MovementType = CharacterMovementType.Attack,
+            MovementType = CharacterMovementType.ATTACK,
             Rotation = (byte)(monster.Rotation / 5),
             Vid = monster.Vid,
             PositionX = monster.PositionX,

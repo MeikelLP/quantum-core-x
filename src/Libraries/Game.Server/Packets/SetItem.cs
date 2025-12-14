@@ -4,7 +4,7 @@ using QuantumCore.Networking;
 
 namespace QuantumCore.Game.Packets;
 
-[Packet(0x15, EDirection.Outgoing)]
+[Packet(0x15, EDirection.OUTGOING)]
 [PacketGenerator]
 public partial class SetItem
 {

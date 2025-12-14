@@ -29,7 +29,7 @@ public class ExperienceCommand : ICommandHandler<ExperienceOtherOptions>
         }
         else
         {
-            target.AddPoint(EPoint.Experience, context.Arguments.Value);
+            target.AddPoint(EPoint.EXPERIENCE, context.Arguments.Value);
             target.SendPoints();
         }
 

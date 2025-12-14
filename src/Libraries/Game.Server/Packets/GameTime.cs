@@ -2,7 +2,7 @@
 
 namespace QuantumCore.Game.Packets;
 
-[Packet(0x6a, EDirection.Outgoing)]
+[Packet(0x6a, EDirection.OUTGOING)]
 [PacketGenerator]
 public partial class GameTime
 {

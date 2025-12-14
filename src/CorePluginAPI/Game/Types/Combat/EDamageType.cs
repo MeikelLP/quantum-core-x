@@ -2,15 +2,15 @@
 
 public enum EDamageType
 {
-    None,
-    Normal,
-    NormalRange,
-    Melee,
-    Range,
-    Fire,
-    Ice,
-    Elec,
-    Magic,
-    Poison,
-    Special
+    NONE,
+    NORMAL,
+    NORMAL_RANGE,
+    MELEE,
+    RANGE,
+    FIRE,
+    ICE,
+    ELEC,
+    MAGIC,
+    POISON,
+    SPECIAL
 }

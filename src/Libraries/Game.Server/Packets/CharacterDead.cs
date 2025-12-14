@@ -2,7 +2,7 @@
 
 namespace QuantumCore.Game.Packets;
 
-[Packet(0x0e, EDirection.Outgoing)]
+[Packet(0x0e, EDirection.OUTGOING)]
 [PacketGenerator]
 public partial class CharacterDead
 {

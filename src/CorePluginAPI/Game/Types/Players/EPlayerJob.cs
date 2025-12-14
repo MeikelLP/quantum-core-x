@@ -2,18 +2,18 @@
 
 public enum EPlayerJob : byte
 {
-    WarriorBody = 0,
-    NinjaDagger = 1,
-    SuraWeapons = 2,
-    ShamanDragon = 3,
-    WarriorMind = 4,
-    NinjaBow = 5,
-    SuraMagic = 6,
-    ShamanLightning = 7
+    WARRIOR_BODY = 0,
+    NINJA_DAGGER = 1,
+    SURA_WEAPONS = 2,
+    SHAMAN_DRAGON = 3,
+    WARRIOR_MIND = 4,
+    NINJA_BOW = 5,
+    SURA_MAGIC = 6,
+    SHAMAN_LIGHTNING = 7
 }
 
 public enum EPlayerGender : byte
 {
-    Male = 0,
-    Female = 1
+    MALE = 0,
+    FEMALE = 1
 }

@@ -85,21 +85,21 @@ public static class ItemExtensions
         }
        
         var itemId = itemInstance.ItemId;
-        if (itemId < HairPartIdOffsets.WarOffsetBase)
+        if (itemId < HairPartIdOffsets.WAR_OFFSET_BASE)
         {
             return 0;
         }
         
         switch (playerClass)
         {
-            case EPlayerClass.Warrior:
-                return itemId - HairPartIdOffsets.WarOffsetBase; // 73001 - 72000 = 1001 start hair number from
-            case EPlayerClass.Ninja:
-                return itemId - HairPartIdOffsets.NinjaOffsetBase;
-            case EPlayerClass.Sura:
-                return itemId - HairPartIdOffsets.SuraOffsetBase;
-            case EPlayerClass.Shaman:
-                return itemId - HairPartIdOffsets.ShamanOffsetBase;
+            case EPlayerClass.WARRIOR:
+                return itemId - HairPartIdOffsets.WAR_OFFSET_BASE; // 73001 - 72000 = 1001 start hair number from
+            case EPlayerClass.NINJA:
+                return itemId - HairPartIdOffsets.NINJA_OFFSET_BASE;
+            case EPlayerClass.SURA:
+                return itemId - HairPartIdOffsets.SURA_OFFSET_BASE;
+            case EPlayerClass.SHAMAN:
+                return itemId - HairPartIdOffsets.SHAMAN_OFFSET_BASE;
             default:
                 throw new NotImplementedException();
         }
@@ -118,15 +118,15 @@ public static class ItemExtensions
 
     public static EquipmentSlot? GetWearSlot(this ItemData proto)
     {
-        if (proto.IsType(EItemType.Costume))
+        if (proto.IsType(EItemType.COSTUME))
         {
-            if (proto.IsSubtype(EItemSubtype.CostumeBody))
+            if (proto.IsSubtype(EItemSubtype.COSTUME_BODY))
             {
-                return EquipmentSlot.Costume;
+                return EquipmentSlot.COSTUME;
             }
-            if (proto.IsSubtype(EItemSubtype.CostumeHair))
+            if (proto.IsSubtype(EItemSubtype.COSTUME_HAIR))
             {
-                return EquipmentSlot.Hair;
+                return EquipmentSlot.HAIR;
             }
         }
 
@@ -135,44 +135,44 @@ public static class ItemExtensions
 
     private static EquipmentSlot? GetWearSlot(this EWearFlags wearFlags)
     {
-        if (wearFlags.HasFlag(EWearFlags.Head))
+        if (wearFlags.HasFlag(EWearFlags.HEAD))
         {
-            return EquipmentSlot.Head;
+            return EquipmentSlot.HEAD;
         }
 
-        if (wearFlags.HasFlag(EWearFlags.Shoes))
+        if (wearFlags.HasFlag(EWearFlags.SHOES))
         {
-            return EquipmentSlot.Shoes;
+            return EquipmentSlot.SHOES;
         }
 
-        if (wearFlags.HasFlag(EWearFlags.Bracelet))
+        if (wearFlags.HasFlag(EWearFlags.BRACELET))
         {
-            return EquipmentSlot.Bracelet;
+            return EquipmentSlot.BRACELET;
         }
 
-        if (wearFlags.HasFlag(EWearFlags.Weapon))
+        if (wearFlags.HasFlag(EWearFlags.WEAPON))
         {
-            return EquipmentSlot.Weapon;
+            return EquipmentSlot.WEAPON;
         }
 
-        if (wearFlags.HasFlag(EWearFlags.Necklace))
+        if (wearFlags.HasFlag(EWearFlags.NECKLACE))
         {
-            return EquipmentSlot.Necklace;
+            return EquipmentSlot.NECKLACE;
         }
 
-        if (wearFlags.HasFlag(EWearFlags.Earrings))
+        if (wearFlags.HasFlag(EWearFlags.EARRINGS))
         {
-            return EquipmentSlot.Earring;
+            return EquipmentSlot.EARRING;
         }
 
-        if (wearFlags.HasFlag(EWearFlags.Body))
+        if (wearFlags.HasFlag(EWearFlags.BODY))
         {
-            return EquipmentSlot.Body;
+            return EquipmentSlot.BODY;
         }
 
-        if (wearFlags.HasFlag(EWearFlags.Shield))
+        if (wearFlags.HasFlag(EWearFlags.SHIELD))
         {
-            return EquipmentSlot.Shield;
+            return EquipmentSlot.SHIELD;
         }
 
         throw new NotImplementedException($"No equipment slot for wear flags: {wearFlags}");

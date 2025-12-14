@@ -22,14 +22,14 @@ namespace QuantumCore.Game.World;
 
 public class Map : IMap
 {
-    public const uint MapUnit = 25600;
-    private const int SpawnBaseOffset = 5;
-    public const int SpawnPositionMultiplier = 100;
-    private const int SpawnRotationSliceDegrees = 45;
+    public const uint MAP_UNIT = 25600;
+    private const int SPAWN_BASE_OFFSET = 5;
+    public const int SPAWN_POSITION_MULTIPLIER = 100;
+    private const int SPAWN_ROTATION_SLICE_DEGREES = 45;
     public string Name { get; private set; }
     public Coordinates Position { get; private set; }
-    public uint UnitX => Position.X / MapUnit;
-    public uint UnitY => Position.Y / MapUnit;
+    public uint UnitX => Position.X / MAP_UNIT;
+    public uint UnitY => Position.Y / MAP_UNIT;
     public uint Width { get; private set; }
     public uint Height { get; private set; }
     public TownCoordinates? TownCoordinates { get; private set; }
@@ -84,15 +84,15 @@ public class Map : IMap
         TownCoordinates = townCoordinates is not null
             ? new TownCoordinates
             {
-                Jinno = Position + townCoordinates.Jinno * SpawnPositionMultiplier,
-                Chunjo = Position + townCoordinates.Chunjo * SpawnPositionMultiplier,
-                Shinsoo = Position + townCoordinates.Shinsoo * SpawnPositionMultiplier,
-                Common = Position + townCoordinates.Common * SpawnPositionMultiplier
+                Jinno = Position + townCoordinates.Jinno * SPAWN_POSITION_MULTIPLIER,
+                Chunjo = Position + townCoordinates.Chunjo * SPAWN_POSITION_MULTIPLIER,
+                Shinsoo = Position + townCoordinates.Shinsoo * SPAWN_POSITION_MULTIPLIER,
+                Common = Position + townCoordinates.Common * SPAWN_POSITION_MULTIPLIER
             }
             : null;
 
-        _quadTree = new QuadTree((int)position.X, (int)position.Y, (int)(width * MapUnit),
-            (int)(height * MapUnit), 20);
+        _quadTree = new QuadTree((int)position.X, (int)position.Y, (int)(width * MAP_UNIT),
+            (int)(height * MAP_UNIT), 20);
         _entityGauge = GameServer.Meter.CreateObservableGauge($"Map:{name}:EntityCount", () => Entities.Count);
     }
 
@@ -132,13 +132,13 @@ public class Map : IMap
             // Add this entity to all entities nearby
             var nearby = new List<IEntity>();
             EEntityType? filter = null;
-            if (entity.Type != EEntityType.Player)
+            if (entity.Type != EEntityType.PLAYER)
             {
                 // if we aren't a player only players are relevant for nearby
-                filter = EEntityType.Player;
+                filter = EEntityType.PLAYER;
             }
 
-            _quadTree.QueryAround(nearby, entity.PositionX, entity.PositionY, Entity.ViewDistance, filter);
+            _quadTree.QueryAround(nearby, entity.PositionX, entity.PositionY, Entity.VIEW_DISTANCE, filter);
             foreach (var e in nearby)
             {
                 if (e == entity) continue;
@@ -184,18 +184,18 @@ public class Map : IMap
                 // Update position in our quad tree (used for faster nearby look up)
                 _quadTree.UpdatePosition(entity);
 
-                if (entity.Type == EEntityType.Player)
+                if (entity.Type == EEntityType.PLAYER)
                 {
                     // Check which entities are relevant for nearby
                     EEntityType? filter = null;
-                    if (entity.Type != EEntityType.Player)
+                    if (entity.Type != EEntityType.PLAYER)
                     {
                         // if we aren't a player only players are relevant for nearby
-                        filter = EEntityType.Player;
+                        filter = EEntityType.PLAYER;
                     }
 
                     // Update entities nearby
-                    _quadTree.QueryAround(_nearby, entity.PositionX, entity.PositionY, Entity.ViewDistance,
+                    _quadTree.QueryAround(_nearby, entity.PositionX, entity.PositionY, Entity.VIEW_DISTANCE,
                         filter);
 
                     // Check nearby entities and mark all entities which are too far away now
@@ -244,7 +244,7 @@ public class Map : IMap
 
         switch (spawnPoint.Type)
         {
-            case ESpawnPointType.GroupCollection:
+            case ESpawnPointType.GROUP_COLLECTION:
                 var groupCollection = _world.GetGroupCollection(spawnPoint.Monster);
                 if (groupCollection != null)
                 {
@@ -269,7 +269,7 @@ public class Map : IMap
                 }
 
                 break;
-            case ESpawnPointType.Group:
+            case ESpawnPointType.GROUP:
                 {
                     var group = _world.GetGroup(spawnPoint.Monster);
                     if (group != null)
@@ -279,7 +279,7 @@ public class Map : IMap
 
                     break;
                 }
-            case ESpawnPointType.Monster:
+            case ESpawnPointType.MONSTER:
                 {
                     if (!TrySpawnMonster(spawnPoint.Monster, spawnPoint, out var monster))
                         break;
@@ -326,27 +326,27 @@ public class Map : IMap
         );
 
         var ignoreAttrCheck =
-            (EEntityType)monster.Proto.Type is EEntityType.Npc or EEntityType.Warp or EEntityType.Goto; // TODO: mining ore
+            (EEntityType)monster.Proto.Type is EEntityType.NPC or EEntityType.WARP or EEntityType.GOTO; // TODO: mining ore
 
         var foundValidPositionAttr = ignoreAttrCheck;
 
-        const int MaxSpawnAttempts = 16;
-        for (var attempt = 0; attempt < MaxSpawnAttempts; attempt++)
+        const int MAX_SPAWN_ATTEMPTS = 16;
+        for (var attempt = 0; attempt < MAX_SPAWN_ATTEMPTS; attempt++)
         {
             var baseX = RandomizeWithinRange(spawnPoint.X, spawnPoint.RangeX);
             var baseY = RandomizeWithinRange(spawnPoint.Y, spawnPoint.RangeY);
 
-            if (!monster.Proto.AiFlag.HasFlag(EAiFlags.NoMove))
+            if (!monster.Proto.AiFlag.HasFlag(EAiFlags.NO_MOVE))
             {
-                baseX = RandomizeWithinRange(baseX, SpawnBaseOffset);
-                baseY = RandomizeWithinRange(baseY, SpawnBaseOffset);
+                baseX = RandomizeWithinRange(baseX, SPAWN_BASE_OFFSET);
+                baseY = RandomizeWithinRange(baseY, SPAWN_BASE_OFFSET);
             }
 
-            monster.PositionX = (int)Position.X + baseX * SpawnPositionMultiplier;
-            monster.PositionY = (int)Position.Y + baseY * SpawnPositionMultiplier;
+            monster.PositionX = (int)Position.X + baseX * SPAWN_POSITION_MULTIPLIER;
+            monster.PositionY = (int)Position.Y + baseY * SPAWN_POSITION_MULTIPLIER;
 
             if (ignoreAttrCheck ||
-                !monster.PositionIsAttr(EMapAttributes.Block | EMapAttributes.Object | EMapAttributes.NonPvp))
+                !monster.PositionIsAttr(EMapAttributes.BLOCK | EMapAttributes.OBJECT | EMapAttributes.NON_PVP))
             {
                 foundValidPositionAttr = true;
                 break;
@@ -360,15 +360,15 @@ public class Map : IMap
             return false;
         }
             
-        if (monster.Proto.AiFlag.HasFlag(EAiFlags.NoMove))
+        if (monster.Proto.AiFlag.HasFlag(EAiFlags.NO_MOVE))
         {
             var compassDirection = (int)spawnPoint.Direction - 1;
             if (compassDirection < 0 || compassDirection > (int)Enum.GetValues<ESpawnPointDirection>().Last())
             {
-                compassDirection = (int)ESpawnPointDirection.Random;
+                compassDirection = (int)ESpawnPointDirection.RANDOM;
             }
 
-            monster.Rotation = SpawnRotationSliceDegrees * compassDirection;
+            monster.Rotation = SPAWN_ROTATION_SLICE_DEGREES * compassDirection;
         }
 
         if (monster.Rotation == 0)
@@ -399,8 +399,8 @@ public class Map : IMap
 
     public bool IsPositionInside(int x, int y)
     {
-        return x >= Position.X && x < Position.X + Width * MapUnit && y >= Position.Y &&
-               y < Position.Y + Height * MapUnit;
+        return x >= Position.X && x < Position.X + Width * MAP_UNIT && y >= Position.Y &&
+               y < Position.Y + Height * MAP_UNIT;
     }
 
     internal bool IsAttr(Coordinates coords, EMapAttributes flags)

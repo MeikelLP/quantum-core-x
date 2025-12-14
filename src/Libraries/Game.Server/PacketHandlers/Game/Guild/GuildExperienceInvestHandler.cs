@@ -27,7 +27,7 @@ public class GuildExperienceInvestHandler : IGamePacketHandler<GuildExperienceIn
         }
 
         var guild = await _guildManager.GetGuildByIdAsync(player.Player.GuildId.Value, token);
-        if (guild!.Level == GuildConstants.MaxLevel)
+        if (guild!.Level == GuildConstants.MAX_LEVEL)
         {
             player.SendChatInfo("Guild is already at max level.");
             return;
@@ -42,7 +42,7 @@ public class GuildExperienceInvestHandler : IGamePacketHandler<GuildExperienceIn
         var spenderId = player.Player.Id;
         var amount = ctx.Packet.Amount / 100 * 100; // round to 100s
         guild = await _guildManager.AddExperienceAsync(spenderId, amount, token);
-        player.SetPoint(EPoint.Experience, player.Player.Experience - amount);
+        player.SetPoint(EPoint.EXPERIENCE, player.Player.Experience - amount);
         player.SendPoints();
 
         foreach (var p in player.Map!.World.GetGuildMembers(guild.Id))

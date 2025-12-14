@@ -2,10 +2,10 @@
 
 public enum ESkillCategoryType
 {
-    PassiveSkills = 0,
-    WarriorSkills = 1,
-    NinjaSkills = 2,
-    SuraSkills = 3,
-    ShamanSkills = 4,
-    HorseSkills = 5,
+    PASSIVE_SKILLS = 0,
+    WARRIOR_SKILLS = 1,
+    NINJA_SKILLS = 2,
+    SURA_SKILLS = 3,
+    SHAMAN_SKILLS = 4,
+    HORSE_SKILLS = 5,
 }

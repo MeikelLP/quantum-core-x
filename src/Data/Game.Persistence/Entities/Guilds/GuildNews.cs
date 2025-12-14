@@ -11,7 +11,7 @@ public class GuildNews
     public uint Id { get; set; }
     public uint PlayerId { get; set; }
 
-    [StringLength(GuildConstants.NewsMessageMaxLength)]
+    [StringLength(GuildConstants.NEWS_MESSAGE_MAX_LENGTH)]
     public string Message { get; set; } = "";
 
     public Player Player { get; set; } = null!;

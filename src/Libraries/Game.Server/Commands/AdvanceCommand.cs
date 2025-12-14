@@ -33,8 +33,8 @@ public class AdvanceCommand : ICommandHandler<AdvanceCommandOptions>
                 context.Arguments.Level = 1;
             }
 
-            target.AddPoint(EPoint.Level, context.Arguments.Level);
-            target.SendChatInfo($"You have advanced to level {target.GetPoint(EPoint.Level)}");
+            target.AddPoint(EPoint.LEVEL, context.Arguments.Level);
+            target.SendChatInfo($"You have advanced to level {target.GetPoint(EPoint.LEVEL)}");
         }
     }
 }

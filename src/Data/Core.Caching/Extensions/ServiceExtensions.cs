@@ -12,8 +12,8 @@ public static class ServiceExtensions
         services.AddOptions<CacheOptions>()
             .BindConfiguration("Cache")
             .ValidateDataAnnotations();
-        RegisterKeyedRedisStore(services, CacheStoreType.Shared);
-        RegisterKeyedRedisStore(services, CacheStoreType.Server);
+        RegisterKeyedRedisStore(services, CacheStoreType.SHARED);
+        RegisterKeyedRedisStore(services, CacheStoreType.SERVER);
         services.TryAddSingleton<ICacheManager, CacheManager>();
 
         return services;

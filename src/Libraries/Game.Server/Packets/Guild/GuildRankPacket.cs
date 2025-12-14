@@ -4,15 +4,15 @@ using QuantumCore.Networking;
 
 namespace QuantumCore.Game.Packets.Guild;
 
-[Packet(0x4B, EDirection.Outgoing)]
+[Packet(0x4B, EDirection.OUTGOING)]
 [SubPacket(0x03, 1)]
 [PacketGenerator]
 public partial class GuildRankPacket
 {
     [Field(0)] public ushort Size => (ushort) Ranks.Length;
-    [Field(1)] public byte Length { get; set; } = GuildConstants.RanksLength;
+    [Field(1)] public byte Length { get; set; } = GuildConstants.RANKS_LENGTH;
 
-    [Field(2, ArrayLength = GuildConstants.RanksLength)]
+    [Field(2, ArrayLength = GuildConstants.RANKS_LENGTH)]
     public GuildRankDataPacket[] Ranks { get; set; } = [];
 }
 

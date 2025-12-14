@@ -2,7 +2,7 @@
 
 namespace QuantumCore.Game.Packets;
 
-[Packet(0xCE, EDirection.Incoming)]
+[Packet(0xCE, EDirection.INCOMING)]
 [PacketGenerator]
 public partial class StateCheckPacket
 {

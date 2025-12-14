@@ -33,7 +33,7 @@ public class EnterGameHandler : IGamePacketHandler<EnterGame>
         }
 
         // Enable game phase
-        ctx.Connection.SetPhase(EPhase.Game);
+        ctx.Connection.SetPhase(EPhase.GAME);
 
         ctx.Connection.Send(new GameTime {Time = (uint)ctx.Connection.Server.ServerTime});
         ctx.Connection.Send(new Channel {ChannelNo = 1}); // todo

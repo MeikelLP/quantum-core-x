@@ -3,7 +3,7 @@ using QuantumCore.Networking;
 
 namespace QuantumCore.Game.Packets.Guild;
 
-[Packet(0x50, EDirection.Incoming)]
+[Packet(0x50, EDirection.INCOMING)]
 [SubPacket(0x05, 0)]
 public partial class GuildNewsAddPacket
 {

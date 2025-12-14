@@ -2,7 +2,7 @@
 
 namespace QuantumCore.Game.Packets;
 
-[Packet(0x34, EDirection.Incoming, Sequence = true)]
+[Packet(0x34, EDirection.INCOMING, Sequence = true)]
 [PacketGenerator]
 public partial class PlayerUseSkill
 {

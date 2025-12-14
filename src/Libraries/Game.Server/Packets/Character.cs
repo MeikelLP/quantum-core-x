@@ -8,7 +8,7 @@ public class Character
 {
     [Field(0)] public uint Id { get; set; }
 
-    [Field(1, Length = PlayerConstants.PlayerNameMaxLength)]
+    [Field(1, Length = PlayerConstants.PLAYER_NAME_MAX_LENGTH)]
     public string Name { get; set; } = "";
 
     [Field(2)] public EPlayerClassGendered Class { get; set; }

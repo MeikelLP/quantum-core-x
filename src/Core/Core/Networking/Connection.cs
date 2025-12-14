@@ -202,7 +202,7 @@ public abstract class Connection : BackgroundService, IConnection
         // Generate random handshake and start the handshaking
         Handshake = CoreRandom.GenerateUInt32();
         Handshaking = true;
-        this.SetPhase(EPhase.Handshake);
+        this.SetPhase(EPhase.HANDSHAKE);
         SendHandshake();
     }
 

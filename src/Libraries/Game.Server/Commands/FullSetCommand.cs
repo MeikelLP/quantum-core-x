@@ -42,10 +42,10 @@ public class FullSetCommand : ICommandHandler
 
         var jobItems = context.Player.Player.PlayerClass.GetClass() switch
         {
-            EPlayerClass.Warrior => WarriorItems,
-            EPlayerClass.Ninja => NinjaItems,
-            EPlayerClass.Sura => SuraItems,
-            EPlayerClass.Shaman => ShamanItems,
+            EPlayerClass.WARRIOR => WarriorItems,
+            EPlayerClass.NINJA => NinjaItems,
+            EPlayerClass.SURA => SuraItems,
+            EPlayerClass.SHAMAN => ShamanItems,
             _ => throw new ArgumentOutOfRangeException(nameof(context),
                 $"No default items for player job {context.Player.Player.PlayerClass}")
         };

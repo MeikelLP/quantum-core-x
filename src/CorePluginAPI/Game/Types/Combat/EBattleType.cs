@@ -2,12 +2,12 @@
 
 public enum EBattleType : byte
 {
-    Melee = 0,
-    Range = 1,
-    Magic = 2,
-    Special = 3,
-    Power = 4,
-    Tanker = 5,
-    SuperPower = 6,
-    SuperTanker = 7
+    MELEE = 0,
+    RANGE = 1,
+    MAGIC = 2,
+    SPECIAL = 3,
+    POWER = 4,
+    TANKER = 5,
+    SUPER_POWER = 6,
+    SUPER_TANKER = 7
 }

@@ -3,10 +3,10 @@
 [Flags]
 public enum GuildRankPermissions : byte
 {
-    None = 0,
-    AddMember = 1,
-    RemoveMember = 2,
-    ModifyNews = 4,
-    UseSkill = 8,
-    All = AddMember | RemoveMember | ModifyNews | UseSkill
+    NONE = 0,
+    ADD_MEMBER = 1,
+    REMOVE_MEMBER = 2,
+    MODIFY_NEWS = 4,
+    USE_SKILL = 8,
+    ALL = ADD_MEMBER | REMOVE_MEMBER | MODIFY_NEWS | USE_SKILL
 }

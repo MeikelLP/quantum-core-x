@@ -4,8 +4,8 @@ namespace QuantumCore;
 
 public class HostingOptions
 {
-    public const string ModeAuth = "auth";
-    public const string ModeGame = "game";
+    public const string MODE_AUTH = "auth";
+    public const string MODE_GAME = "game";
     [Required] public ushort Port { get; set; }
     public string? IpAddress { get; set; }
 }

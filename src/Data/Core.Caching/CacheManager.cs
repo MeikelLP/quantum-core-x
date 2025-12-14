@@ -17,8 +17,8 @@ public class CacheManager : ICacheManager
         _logger = logger;
         _logger.LogInformation("Initialize Cache Manager");
 
-        Shared = serviceProvider.GetRequiredKeyedService<IRedisStore>(CacheStoreType.Shared);
-        Server = serviceProvider.GetRequiredKeyedService<IRedisStore>(CacheStoreType.Server);
+        Shared = serviceProvider.GetRequiredKeyedService<IRedisStore>(CacheStoreType.SHARED);
+        Server = serviceProvider.GetRequiredKeyedService<IRedisStore>(CacheStoreType.SERVER);
 
         _defaultRedisStore = Shared;
     }

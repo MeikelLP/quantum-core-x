@@ -33,7 +33,7 @@ public class PhaseSelectCommand : ICommandHandler
         await context.Player.CalculatePlayedTimeAsync();
 
         await _world.DespawnPlayerAsync(context.Player);
-        context.Player.Connection.SetPhase(EPhase.Select);
+        context.Player.Connection.SetPhase(EPhase.SELECT);
 
         var characters = new Characters();
         await using var scope = _serviceProvider.CreateAsyncScope();

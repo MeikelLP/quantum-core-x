@@ -2,7 +2,7 @@
 
 namespace QuantumCore.Game.Packets;
 
-[Packet(0x47, EDirection.Outgoing)]
+[Packet(0x47, EDirection.OUTGOING)]
 [PacketGenerator]
 public partial class ProjectilePacket
 {

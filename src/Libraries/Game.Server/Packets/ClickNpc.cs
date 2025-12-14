@@ -2,7 +2,7 @@
 
 namespace QuantumCore.Game.Packets;
 
-[Packet(0x1a, EDirection.Incoming, Sequence = true)]
+[Packet(0x1a, EDirection.INCOMING, Sequence = true)]
 [PacketGenerator]
 public partial class ClickNpc
 {

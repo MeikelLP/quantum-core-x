@@ -11,7 +11,7 @@ public class AttractRangerCommand : ICommandHandler
     {
         context.Player.ForEachNearbyEntity(e =>
         {
-            if (e is not MonsterEntity monster || monster.GetBattleType() != EBattleType.Range) return;
+            if (e is not MonsterEntity monster || monster.GetBattleType() != EBattleType.RANGE) return;
             e.Target = context.Player;
         });
         return Task.CompletedTask;

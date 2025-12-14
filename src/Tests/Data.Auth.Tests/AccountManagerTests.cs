@@ -39,9 +39,9 @@ public class AccountManagerTests : IClassFixture<RedisFixture>, IClassFixture<Da
             .AddAuthDatabase()
             .AddQuantumCoreCaching()
             .AddSingleton<IConfiguration>(new ConfigurationBuilder().Build())
-            .Configure<DatabaseOptions>(HostingOptions.ModeAuth, opts =>
+            .Configure<DatabaseOptions>(HostingOptions.MODE_AUTH, opts =>
             {
-                opts.Provider = DatabaseProvider.Mysql;
+                opts.Provider = DatabaseProvider.MYSQL;
                 opts.ConnectionString = databaseFixture.Container.GetConnectionString();
             })
             .Configure<CacheOptions>(opts =>

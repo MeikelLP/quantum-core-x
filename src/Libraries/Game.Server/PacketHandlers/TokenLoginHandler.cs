@@ -98,7 +98,7 @@ public class TokenLoginHandler : IGamePacketHandler<TokenLogin>
         }
 
         // When there are no characters belonging to the account, the empire status is stored in the cache.
-        var empire = EEmpire.Shinsoo;
+        var empire = EEmpire.SHINSOO;
         if (charactersFromCacheOrDb.Length > 0)
         {
             empire = charactersFromCacheOrDb[0].Empire;
@@ -108,7 +108,7 @@ public class TokenLoginHandler : IGamePacketHandler<TokenLogin>
 
         // TODO:: set player id to character?
         ctx.Connection.Send(new Empire {EmpireId = empire});
-        ctx.Connection.SetPhase(EPhase.Select);
+        ctx.Connection.SetPhase(EPhase.SELECT);
         ctx.Connection.Send(characters);
     }
 

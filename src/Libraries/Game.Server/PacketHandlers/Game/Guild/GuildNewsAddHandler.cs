@@ -21,7 +21,7 @@ public class GuildNewsAddHandler : IGamePacketHandler<GuildNewsAddPacket>
 
     public async Task ExecuteAsync(GamePacketContext<GuildNewsAddPacket> ctx, CancellationToken token = default)
     {
-        if (ctx.Packet.Message.Length > GuildConstants.NewsMessageMaxLength)
+        if (ctx.Packet.Message.Length > GuildConstants.NEWS_MESSAGE_MAX_LENGTH)
         {
             _logger.LogWarning("Received a guild message that is too long: {Message}", ctx.Packet.Message);
             ctx.Connection.Close(); // equal behaviour as original implementation
@@ -37,7 +37,7 @@ public class GuildNewsAddHandler : IGamePacketHandler<GuildNewsAddPacket>
             return;
         }
 
-        if (!await _guildManager.HasPermissionAsync(player.Id, GuildRankPermissions.ModifyNews))
+        if (!await _guildManager.HasPermissionAsync(player.Id, GuildRankPermissions.MODIFY_NEWS))
         {
             ctx.Connection.Player.SendChatInfo("You don't have permission to create guild news.");
             return;

@@ -43,8 +43,8 @@ public class GotoCommand : ICommandHandler<GotoCommandOptions>
             // todo read goto position from map instead of using center
 
             var targetMap = maps[0];
-            var x = (int)(targetMap.Position.X + targetMap.Width * Map.MapUnit / 2);
-            var y = (int)(targetMap.Position.Y + targetMap.Height * Map.MapUnit / 2);
+            var x = (int)(targetMap.Position.X + targetMap.Width * Map.MAP_UNIT / 2);
+            var y = (int)(targetMap.Position.Y + targetMap.Height * Map.MAP_UNIT / 2);
             context.Player.Move(x, y);
         }
         else

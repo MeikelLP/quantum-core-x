@@ -2,6 +2,6 @@
 
 public enum EEntityState
 {
-    Idle,
-    Moving
+    IDLE,
+    MOVING
 }

@@ -2,7 +2,7 @@
 
 namespace QuantumCore.Auth.Packets;
 
-[Packet(0x96, EDirection.Outgoing)]
+[Packet(0x96, EDirection.OUTGOING)]
 [PacketGenerator]
 public partial class LoginSuccess
 {

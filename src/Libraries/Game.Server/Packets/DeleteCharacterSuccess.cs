@@ -2,7 +2,7 @@
 
 namespace QuantumCore.Game.Packets;
 
-[Packet(0x0A, EDirection.Outgoing)]
+[Packet(0x0A, EDirection.OUTGOING)]
 [PacketGenerator]
 public partial class DeleteCharacterSuccess
 {

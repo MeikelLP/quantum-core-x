@@ -21,14 +21,14 @@ public class SkillData
     public string MasterBonusPoly { get; set; } = "";
     public string AttackGradePoly { get; set; } = "";
     public ESkillFlags Flags { get; set; }
-    public EAffectFlags AffectFlag { get; set; } = EAffectFlags.Ymir;
+    public EAffectFlags AffectFlag { get; set; } = EAffectFlags.YMIR;
     public string PointOn2 { get; set; } = "None";
     public string PointPoly2 { get; set; } = "";
     public string DurationPoly2 { get; set; } = "";
-    public EAffectFlags AffectFlag2 { get; set; } = EAffectFlags.Ymir;
+    public EAffectFlags AffectFlag2 { get; set; } = EAffectFlags.YMIR;
     public int PrerequisiteSkillVnum { get; set; } = 0;
     public int PrerequisiteSkillLevel { get; set; } = 0;
-    public ESkillType SkillType { get; set; } = ESkillType.Normal;
+    public ESkillType SkillType { get; set; } = ESkillType.NORMAL;
     public short MaxHit { get; set; } = 0;
     public string SplashAroundDamageAdjustPoly { get; set; } = "1";
     public int TargetRange { get; set; } = 1000;

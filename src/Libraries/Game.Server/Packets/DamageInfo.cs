@@ -3,7 +3,7 @@ using QuantumCore.Networking;
 
 namespace QuantumCore.Game.Packets;
 
-[Packet(0x87, EDirection.Outgoing)]
+[Packet(0x87, EDirection.OUTGOING)]
 [PacketGenerator]
 public partial class DamageInfo
 {

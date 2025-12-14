@@ -32,7 +32,7 @@ public class MapTests
         var npcShopProvider = Substitute.For<INpcShopProvider>();
         npcShopProvider.Shops.Returns([]);
         var provider = new ServiceCollection()
-            .AddKeyedSingleton<IPacketManager>(HostingOptions.ModeGame, (_, _) => Substitute.For<IPacketManager>())
+            .AddKeyedSingleton<IPacketManager>(HostingOptions.MODE_GAME, (_, _) => Substitute.For<IPacketManager>())
             .AddSingleton(Substitute.For<ICommandManager>())
             .AddSingleton<IMonsterManager>(_ =>
             {
@@ -102,7 +102,7 @@ public class MapTests
                 mock.GetSpawnPointsForMap(Arg.Any<string>()).Returns(_ => Task.FromResult(_spawnPoints));
                 return mock;
             })
-            .AddOptions<HostingOptions>(HostingOptions.ModeGame)
+            .AddOptions<HostingOptions>(HostingOptions.MODE_GAME)
             .Configure(options =>
             {
                 options.Port = 0;
@@ -135,7 +135,7 @@ public class MapTests
         {
             new SpawnPoint
             {
-                Type = ESpawnPointType.Monster,
+                Type = ESpawnPointType.MONSTER,
                 Monster = 101,
                 X = 500,
                 Y = 500,
@@ -160,7 +160,7 @@ public class MapTests
         {
             new SpawnPoint
             {
-                Type = ESpawnPointType.Group,
+                Type = ESpawnPointType.GROUP,
                 Monster = 101,
                 X = 500,
                 Y = 500,
@@ -184,7 +184,7 @@ public class MapTests
         {
             new SpawnPoint
             {
-                Type = ESpawnPointType.GroupCollection,
+                Type = ESpawnPointType.GROUP_COLLECTION,
                 Monster = 101,
                 X = 500,
                 Y = 500,

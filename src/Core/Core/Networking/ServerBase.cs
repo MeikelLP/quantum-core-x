@@ -119,11 +119,11 @@ public abstract class ServerBase<T> : BackgroundService, IServerBase
         }
 
         object context;
-        if (_serverMode == HostingOptions.ModeGame)
+        if (_serverMode == HostingOptions.MODE_GAME)
         {
             context = GetGameContextPacket(connection, packet, details.PacketType);
         }
-        else if (_serverMode == HostingOptions.ModeAuth)
+        else if (_serverMode == HostingOptions.MODE_AUTH)
         {
             context = GetAuthContextPacket(connection, packet, details.PacketType);
         }

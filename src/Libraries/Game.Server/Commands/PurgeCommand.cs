@@ -10,15 +10,15 @@ public class PurgeCommand : ICommandHandler<PurgeCommandOptions>
 {
     public Task ExecuteAsync(CommandContext<PurgeCommandOptions> context)
     {
-        const int MaxDistance = 10000;
+        const int MAX_DISTANCE = 10000;
         var p = context.Player;
-        var all = context.Arguments.Argument == PurgeCommandOption.All;
+        var all = context.Arguments.Argument == PurgeCommandOption.ALL;
         foreach (var e in context.Player.Map!.Entities)
         {
             if (e is IPlayerEntity) continue;
             var distance = MathUtils.Distance(e.PositionX, e.PositionY, p.PositionX, p.PositionY);
 
-            if (!all && distance >= MaxDistance) continue;
+            if (!all && distance >= MAX_DISTANCE) continue;
 
             context.Player.Map.DespawnEntity(e);
         }
@@ -35,5 +35,5 @@ public class PurgeCommandOptions
 
 public enum PurgeCommandOption
 {
-    All = 1
+    ALL = 1
 }

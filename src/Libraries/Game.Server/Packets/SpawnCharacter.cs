@@ -3,7 +3,7 @@ using QuantumCore.Networking;
 
 namespace QuantumCore.Game.Packets;
 
-[Packet(0x01, EDirection.Outgoing)]
+[Packet(0x01, EDirection.OUTGOING)]
 [PacketGenerator]
 public partial class SpawnCharacter
 {

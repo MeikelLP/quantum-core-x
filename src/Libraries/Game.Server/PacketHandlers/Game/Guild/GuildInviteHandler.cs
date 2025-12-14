@@ -36,7 +36,7 @@ public class GuildInviteHandler : IGamePacketHandler<GuildInviteIncoming>
         // TODO check if player is in active quest where invite cannot be accepted
         // TODO check if player blocks guild invites
 
-        if (!await _guildManager.HasPermissionAsync(inviter.Player.Id, GuildRankPermissions.AddMember,
+        if (!await _guildManager.HasPermissionAsync(inviter.Player.Id, GuildRankPermissions.ADD_MEMBER,
                 token))
         {
             inviter.SendChatInfo("You do not have permission to invite members.");
@@ -53,10 +53,10 @@ public class GuildInviteHandler : IGamePacketHandler<GuildInviteIncoming>
         var status = guild!.CanJoinGuild(invitee);
         switch (status)
         {
-            case EGuildJoinStatusCode.GuildFull:
+            case EGuildJoinStatusCode.GUILD_FULL:
                 inviter.SendChatInfo("The guild is already full.");
                 return;
-            case EGuildJoinStatusCode.AlreadyInAnyGuild:
+            case EGuildJoinStatusCode.ALREADY_IN_ANY_GUILD:
                 inviter.SendChatInfo("The other player already belongs to another guild.");
                 return;
         }

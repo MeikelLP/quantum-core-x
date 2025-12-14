@@ -15,18 +15,18 @@ public enum LoginFailedBecause
     /// <summary>
     /// Invalid credentials
     /// </summary>
-    [EnumMember(Value = "WRONGPWD")] InvalidCredentials,
+    [EnumMember(Value = "WRONGPWD")] INVALID_CREDENTIALS,
 
     /// <summary>
     /// Account is already logged in
     /// </summary>
-    [EnumMember(Value = "ALREADY")] AlreadyLoggedIn,
+    [EnumMember(Value = "ALREADY")] ALREADY_LOGGED_IN,
 
     /// <summary>
     /// Server has reached its maximum capacity
     /// TODO: implement this behavior
     /// </summary>
-    [EnumMember(Value = "FULL")] Full,
+    [EnumMember(Value = "FULL")] FULL,
 }
 
 public class LoginRequestHandler : IAuthPacketHandler<LoginRequest>
@@ -35,7 +35,7 @@ public class LoginRequestHandler : IAuthPacketHandler<LoginRequest>
     private readonly ILogger<LoginRequestHandler> _logger;
     private readonly ICacheManager _cacheManager;
 
-    private const int DropConnectionAfterAttempts = 1;
+    private const int DROP_CONNECTION_AFTER_ATTEMPTS = 1;
 
     public LoginRequestHandler(IAccountRepository accountRepository, ILogger<LoginRequestHandler> logger,
         ICacheManager cacheManager)
@@ -57,7 +57,7 @@ public class LoginRequestHandler : IAuthPacketHandler<LoginRequest>
             _logger.LogDebug("Account {Username} not found", ctx.Packet.Username);
             ctx.Connection.Send(new LoginFailed
             {
-                Status = LoginFailedBecause.InvalidCredentials.AsString(EnumFormat.EnumMemberValue)!
+                Status = LoginFailedBecause.INVALID_CREDENTIALS.AsString(EnumFormat.EnumMemberValue)!
             });
 
             return;
@@ -71,7 +71,7 @@ public class LoginRequestHandler : IAuthPacketHandler<LoginRequest>
             if (!BCrypt.Net.BCrypt.Verify(ctx.Packet.Password, account.Password))
             {
                 _logger.LogDebug("Wrong password supplied for account {Username}", ctx.Packet.Username);
-                status = LoginFailedBecause.InvalidCredentials.AsString(EnumFormat.EnumMemberValue)!;
+                status = LoginFailedBecause.INVALID_CREDENTIALS.AsString(EnumFormat.EnumMemberValue)!;
             }
             else
             {
@@ -86,7 +86,7 @@ public class LoginRequestHandler : IAuthPacketHandler<LoginRequest>
         {
             _logger.LogWarning("Failed to verify password for account {Username}: {Message}", ctx.Packet.Username,
                 e.Message);
-            status = LoginFailedBecause.InvalidCredentials.AsString(EnumFormat.EnumMemberValue)!;
+            status = LoginFailedBecause.INVALID_CREDENTIALS.AsString(EnumFormat.EnumMemberValue)!;
         }
 
         // Check if the account is already logged in
@@ -150,9 +150,9 @@ public class LoginRequestHandler : IAuthPacketHandler<LoginRequest>
         await _cacheManager.Shared.Expire(attemptKey, ExpiresIn.OneMinute);
 
         // check if the attempts are less than the limit
-        if (attempts <= DropConnectionAfterAttempts)
+        if (attempts <= DROP_CONNECTION_AFTER_ATTEMPTS)
         {
-            return LoginFailedBecause.AlreadyLoggedIn.AsString(EnumFormat.EnumMemberValue)!;
+            return LoginFailedBecause.ALREADY_LOGGED_IN.AsString(EnumFormat.EnumMemberValue)!;
         }
 
         // publish a message through redis to drop the connection

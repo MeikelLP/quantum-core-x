@@ -2,7 +2,7 @@
 
 namespace QuantumCore.Game.Packets;
 
-[Packet(0x1A, EDirection.Outgoing)]
+[Packet(0x1A, EDirection.OUTGOING)]
 [PacketGenerator]
 public partial class GroundItemAdd
 {

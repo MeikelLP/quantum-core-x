@@ -13,7 +13,7 @@ namespace QuantumCore.Extensions;
 
 public static class ServiceExtensions
 {
-    private const string MessageTemplate = "[{Timestamp:HH:mm:ss.fff}][{Level:u3}]{Message:lj} " +
+    private const string MESSAGE_TEMPLATE = "[{Timestamp:HH:mm:ss.fff}][{Level:u3}]{Message:lj} " +
                                            "{NewLine:1}{Exception:1}";
 
     /// <summary>
@@ -37,7 +37,7 @@ public static class ServiceExtensions
             var assemblies = packetLocationProvider.GetPacketAssemblies();
             var packetTypes = assemblies.SelectMany(x => x.ExportedTypes)
                 .Where(x => x.IsAssignableTo(typeof(IPacketSerializable)) &&
-                            x.GetCustomAttribute<PacketAttribute>()?.Direction.HasFlag(EDirection.Incoming) == true)
+                            x.GetCustomAttribute<PacketAttribute>()?.Direction.HasFlag(EDirection.INCOMING) == true)
                 .OrderBy(x => x.FullName)
                 .ToArray();
             var handlerTypes = assemblies.SelectMany(x => x.ExportedTypes)
@@ -69,7 +69,7 @@ public static class ServiceExtensions
                             false) // ignore Castle.Core proxies
                 .SelectMany(x => x.ExportedTypes)
                 .Where(x => x.IsAssignableTo(typeof(IPacketSerializable)) &&
-                            x.GetCustomAttribute<PacketAttribute>()?.Direction.HasFlag(EDirection.Incoming) == true)
+                            x.GetCustomAttribute<PacketAttribute>()?.Direction.HasFlag(EDirection.INCOMING) == true)
                 .OrderBy(x => x.FullName)
                 .ToArray();
             var handlerTypes = AppDomain.CurrentDomain.GetAssemblies()
@@ -125,13 +125,13 @@ public static class ServiceExtensions
         config.Enrich.WithExceptionData();
 
         // sink to console
-        config.WriteTo.Console(outputTemplate: MessageTemplate);
+        config.WriteTo.Console(outputTemplate: MESSAGE_TEMPLATE);
 
         // sink to rolling file
         config.WriteTo.File($"{Directory.GetCurrentDirectory()}/logs/api.log",
             fileSizeLimitBytes: 10 * 1024 * 1024,
             buffered: true,
-            outputTemplate: MessageTemplate);
+            outputTemplate: MESSAGE_TEMPLATE);
 
         config.ReadFrom.Configuration(configuration);
 

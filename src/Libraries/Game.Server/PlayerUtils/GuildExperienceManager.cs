@@ -26,7 +26,7 @@ public class GuildExperienceManager : IGuildExperienceManager
     public ushort GetMaxPlayers(byte level)
     {
         return level > MaxLevel
-            ? GuildConstants.MembersMax
+            ? GuildConstants.MEMBERS_MAX
             : _experienceTable[level - 1].MaxPlayers;
     }
 
@@ -40,7 +40,7 @@ public class GuildExperienceManager : IGuildExperienceManager
             return;
         }
 
-        const char Delimiter = ';';
+        const char DELIMITER = ';';
         var lines = await File.ReadAllLinesAsync(path, token);
         for (var i = 0; i < lines.Length; i++)
         {
@@ -50,7 +50,7 @@ public class GuildExperienceManager : IGuildExperienceManager
                 break;
             }
 
-            var parts = line.Split(Delimiter);
+            var parts = line.Split(DELIMITER);
 
             if (!uint.TryParse(parts[0], out var experience))
             {

@@ -5,13 +5,13 @@
 /// </summary>
 public enum ESpawnPointDirection : byte
 {
-    Random = 0,
-    South = 1,
-    SouthEast = 2,
-    East = 3,
-    NorthEast = 4,
-    North = 5,
-    NorthWest = 6,
-    West = 7,
-    SouthWest = 8
+    RANDOM = 0,
+    SOUTH = 1,
+    SOUTH_EAST = 2,
+    EAST = 3,
+    NORTH_EAST = 4,
+    NORTH = 5,
+    NORTH_WEST = 6,
+    WEST = 7,
+    SOUTH_WEST = 8
 }

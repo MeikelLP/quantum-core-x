@@ -33,13 +33,13 @@ public class SkillUpCommand : ICommandHandler<SkillUpCommandOptions>
 
         switch (skill)
         {
-            case ESkill.HorseWildAttack:
-            case ESkill.HorseCharge:
-            case ESkill.HorseEscape:
-            case ESkill.HorseWildAttackRange:
+            case ESkill.HORSE_WILD_ATTACK:
+            case ESkill.HORSE_CHARGE:
+            case ESkill.HORSE_ESCAPE:
+            case ESkill.HORSE_WILD_ATTACK_RANGE:
 
-            case ESkill.AddHp:
-            case ESkill.PenetrationResistance:
+            case ESkill.ADD_HP:
+            case ESkill.PENETRATION_RESISTANCE:
                 player.Skills.SkillUp(skill);
                 break;
         }

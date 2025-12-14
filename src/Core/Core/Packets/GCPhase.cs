@@ -3,7 +3,7 @@ using QuantumCore.Networking;
 
 namespace QuantumCore.Core.Packets;
 
-[Packet(0xfd, EDirection.Outgoing)]
+[Packet(0xfd, EDirection.OUTGOING)]
 [PacketGenerator]
 public partial class GcPhase
 {

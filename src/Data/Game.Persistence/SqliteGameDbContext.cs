@@ -14,7 +14,7 @@ internal class SqliteGameDbContext : GameDbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        var opts = _options.Get(HostingOptions.ModeGame);
+        var opts = _options.Get(HostingOptions.MODE_GAME);
         optionsBuilder.UseSqlite(opts.ConnectionString);
     }
 }
