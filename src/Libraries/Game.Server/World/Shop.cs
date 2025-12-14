@@ -40,7 +40,7 @@ public class Shop : IShop
     public void AddItem(uint itemId, byte count, uint price)
     {
         var proto = _itemManager.GetItem(itemId);
-        if (proto == null)
+        if (proto is null)
         {
             return;
         }
@@ -110,7 +110,7 @@ public class Shop : IShop
 
         // Look up item the player wants to buy
         var item = _items.Find(item => item.Position == position);
-        if (item == null)
+        if (item is null)
         {
             _logger.LogInformation("{Player} tried to buy non existing item", player);
             p.Connection.Close();
@@ -157,13 +157,13 @@ public class Shop : IShop
         }
 
         var item = p.Inventory.GetItem(position);
-        if (item == null)
+        if (item is null)
         {
             return;
         }
 
         var proto = _itemManager.GetItem(item.ItemId);
-        if (proto == null)
+        if (proto is null)
         {
             return;
         }

@@ -53,7 +53,7 @@ public class PlayerManager : IPlayerManager
         if (cachedPlayer is null)
         {
             var player = await _dbPlayerRepository.GetPlayerAsync(playerId);
-            if (player == null)
+            if (player is null)
             {
                 _logger.LogWarning("Could not find player with ID {PlayerId}", playerId);
             }

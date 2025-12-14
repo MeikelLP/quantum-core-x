@@ -170,7 +170,7 @@ public class DropProvider : IDropProvider, ILoadable
         foreach (var mobGroup in mobGroups)
         {
             var container = _parserService.ParseMobGroup(mobGroup, _itemManager);
-            if (container != null)
+            if (container is not null)
             {
                 parsedGroups.Add(container);
             }

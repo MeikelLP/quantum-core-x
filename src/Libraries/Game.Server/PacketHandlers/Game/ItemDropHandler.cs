@@ -9,7 +9,7 @@ public class ItemDropHandler : IGamePacketHandler<ItemDrop>
     public Task ExecuteAsync(GamePacketContext<ItemDrop> ctx, CancellationToken token = default)
     {
         var player = ctx.Connection.Player;
-        if (player == null)
+        if (player is null)
         {
             ctx.Connection.Close();
             return Task.CompletedTask;
@@ -24,7 +24,7 @@ public class ItemDropHandler : IGamePacketHandler<ItemDrop>
         {
             // We're dropping an item...
             var item = player.GetItem(ctx.Packet.Window, ctx.Packet.Position);
-            if (item == null)
+            if (item is null)
             {
                 return Task.CompletedTask; // Item slot is empty
             }

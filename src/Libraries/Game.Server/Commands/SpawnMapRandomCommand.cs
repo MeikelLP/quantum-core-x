@@ -36,7 +36,7 @@ public class SpawnMapRandomCommand : ICommandHandler<SpawnMapRandomCommandOption
     public Task ExecuteAsync(CommandContext<SpawnMapRandomCommandOptions> context)
     {
         var proto = _monsterManager.GetMonster(context.Arguments.MonsterId);
-        if (proto == null)
+        if (proto is null)
         {
             context.Player.SendChatInfo("No monster found with the specified id");
             return Task.CompletedTask;

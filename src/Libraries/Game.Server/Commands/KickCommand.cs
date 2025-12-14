@@ -17,7 +17,7 @@ public class KickCommand : ICommandHandler<KickCommandOptions>
 
     public Task ExecuteAsync(CommandContext<KickCommandOptions> context)
     {
-        if (context.Arguments.Target == null)
+        if (context.Arguments.Target is null)
         {
             context.Player.SendChatMessage("No target given");
             return Task.CompletedTask;

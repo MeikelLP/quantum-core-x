@@ -64,7 +64,7 @@ public class SimpleBehaviour : IBehaviour
 
     public void Init(IEntity entity)
     {
-        Debug.Assert(_entity == null);
+        Debug.Assert(_entity is null);
         _entity = entity;
 
         _proto = _monsterManager.GetMonster(_entity.EntityClass);
@@ -147,7 +147,7 @@ public class SimpleBehaviour : IBehaviour
             return;
         }
 
-        if (Target != null)
+        if (Target is not null)
         {
             var targetLost = Target.Dead || Target.Map != _entity.Map;
 
@@ -194,7 +194,7 @@ public class SimpleBehaviour : IBehaviour
                 }
             }
 
-            if (Target != null)
+            if (Target is not null)
             {
                 if (_entity.State == EEntityState.MOVING)
                 {
@@ -388,7 +388,7 @@ public class SimpleBehaviour : IBehaviour
             if (damage > maxDamage)
             {
                 var attacker = _entity.Map?.GetEntity(vid);
-                if (attacker != null)
+                if (attacker is not null)
                 {
                     target = attacker;
                     maxDamage = damage;

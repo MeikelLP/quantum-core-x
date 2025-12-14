@@ -38,7 +38,7 @@ public class DbPlayerSkillsRepository : IDbPlayerSkillsRepository
             .Where(x => x.PlayerId == skill.PlayerId && x.SkillId == (uint) skill.SkillId)
             .FirstOrDefaultAsync();
         
-        if (existingSkill != null)
+        if (existingSkill is not null)
         {
             existingSkill.Level = (byte)skill.Level;
             existingSkill.MasterType = skill.MasterType;

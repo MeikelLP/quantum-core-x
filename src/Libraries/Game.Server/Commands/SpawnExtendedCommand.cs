@@ -37,7 +37,7 @@ public class SpawnExtendedCommand : ICommandHandler<SpawnExtendedCommandOptions>
     public Task ExecuteAsync(CommandContext<SpawnExtendedCommandOptions> context)
     {
         var proto = _monsterManager.GetMonster(context.Arguments.MonsterId);
-        if (proto == null)
+        if (proto is null)
         {
             context.Player.SendChatInfo("No monster found with the specified id");
             return Task.CompletedTask;
@@ -45,10 +45,10 @@ public class SpawnExtendedCommand : ICommandHandler<SpawnExtendedCommandOptions>
 
         // Calculate random spawn position close by the player
         var map = context.Player.Map;
-        var x = context.Arguments.PositionX != null
+        var x = context.Arguments.PositionX is not null
             ? map.Position.X + context.Arguments.PositionX.Value * Map.SPAWN_POSITION_MULTIPLIER
             : (uint)(context.Player.PositionX + RandomNumberGenerator.GetInt32(-1500, 1501));
-        var y = context.Arguments.PositionY != null
+        var y = context.Arguments.PositionY is not null
             ? map.Position.Y + context.Arguments.PositionY.Value * Map.SPAWN_POSITION_MULTIPLIER
             : (uint)(context.Player.PositionY + RandomNumberGenerator.GetInt32(-1500, 1501));
         var rotation = context.Arguments.Rotation ?? 0;

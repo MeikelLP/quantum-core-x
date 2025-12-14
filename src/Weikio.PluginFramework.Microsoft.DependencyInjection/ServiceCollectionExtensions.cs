@@ -16,7 +16,7 @@ public static class ServiceCollectionExtensions
     public static IServiceCollection AddPluginFramework(this IServiceCollection services,
         Action<PluginFrameworkOptions>? configure = null)
     {
-        if (configure != null)
+        if (configure is not null)
         {
             services.Configure(configure);
         }
@@ -57,7 +57,7 @@ public static class ServiceCollectionExtensions
         {
             var entryAssembly = Assembly.GetEntryAssembly();
 
-            if (entryAssembly == null)
+            if (entryAssembly is null)
             {
                 dllPath = Environment.CurrentDirectory;
             }
@@ -129,7 +129,7 @@ public static class ServiceCollectionExtensions
                     // Try to find any registered converter that can convert the specified type.
                     var foundConverter = converters.FirstOrDefault(converter => converter.CanConvert(item.Type));
 
-                    if (foundConverter == null)
+                    if (foundConverter is null)
                     {
                         throw new ArgumentException(
                             $"The type provided for Plugin catalog at position {i + 1} is unknown.");
@@ -191,12 +191,12 @@ public static class ServiceCollectionExtensions
         var defaultPluginOption = new DefaultPluginOption();
 
         // If no configuration is provided though action try to get configuration from named options
-        if (configureDefault == null)
+        if (configureDefault is null)
         {
             var optionsFromMonitor =
                 sp.GetService<IOptionsMonitor<DefaultPluginOption>>().Get(typeof(T).Name);
 
-            if (optionsFromMonitor != null)
+            if (optionsFromMonitor is not null)
             {
                 defaultPluginOption = optionsFromMonitor;
             }

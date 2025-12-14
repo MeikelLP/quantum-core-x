@@ -17,7 +17,7 @@ public class TargetChangeHandler : IGamePacketHandler<TargetChange>
     public Task ExecuteAsync(GamePacketContext<TargetChange> ctx, CancellationToken token = default)
     {
         var player = ctx.Connection.Player;
-        if (player == null)
+        if (player is null)
         {
             _logger.LogWarning("Target Change without having a player instance");
             ctx.Connection.Close();
@@ -25,7 +25,7 @@ public class TargetChangeHandler : IGamePacketHandler<TargetChange>
         }
 
         var entity = player.Map?.GetEntity(ctx.Packet.TargetVid);
-        if (entity == null)
+        if (entity is null)
         {
             return Task.CompletedTask;
         }

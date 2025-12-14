@@ -26,7 +26,7 @@ public class ItemUseHandler : IGamePacketHandler<ItemUse>
     public async Task ExecuteAsync(GamePacketContext<ItemUse> ctx, CancellationToken token = default)
     {
         var player = ctx.Connection.Player;
-        if (player == null)
+        if (player is null)
         {
             ctx.Connection.Close();
             return;
@@ -35,14 +35,14 @@ public class ItemUseHandler : IGamePacketHandler<ItemUse>
         _logger.LogDebug("Use item {Window},{Position}", ctx.Packet.Window, ctx.Packet.Position);
 
         var item = player.GetItem(ctx.Packet.Window, ctx.Packet.Position);
-        if (item == null)
+        if (item is null)
         {
             _logger.LogDebug("Used item not found!");
             return;
         }
 
         var itemProto = _itemManager.GetItem(item.ItemId);
-        if (itemProto == null)
+        if (itemProto is null)
         {
             _logger.LogDebug("Cannot find item proto {ItemId}", item.ItemId);
             return;
@@ -71,7 +71,7 @@ public class ItemUseHandler : IGamePacketHandler<ItemUse>
             {
                 var item2 = player.Inventory.EquipmentWindow.GetItem((ushort) wearSlot);
 
-                if (item2 != null)
+                if (item2 is not null)
                 {
                     player.RemoveItem(item);
                     player.RemoveItem(item2);

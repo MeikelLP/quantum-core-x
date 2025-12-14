@@ -163,7 +163,7 @@ public class AnimationManager : IAnimationManager, ILoadable
         }
 
         var duration = msa.GetFloatValue("MotionDuration");
-        if (duration == null)
+        if (duration is null)
         {
             _logger.LogWarning("Missing MotionDuration in msa file {Path}", path);
             return false;
@@ -172,7 +172,7 @@ public class AnimationManager : IAnimationManager, ILoadable
         var accuX = msa.GetFloatValue("Accumulation", 0);
         var accuY = msa.GetFloatValue("Accumulation", 1);
         var accuZ = msa.GetFloatValue("Accumulation", 2);
-        if (accuX == null || accuY == null || accuZ == null)
+        if (accuX is null || accuY is null || accuZ is null)
         {
             _logger.LogWarning("Invalid Accumulation found in msa file {Path}", path);
             return false;

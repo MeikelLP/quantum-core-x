@@ -108,7 +108,7 @@ public static class ItemExtensions
     public static EquipmentSlot? GetWearSlot(this IItemManager itemManager, uint itemId)
     {
         var proto = itemManager.GetItem(itemId);
-        if (proto == null)
+        if (proto is null)
         {
             return null;
         }

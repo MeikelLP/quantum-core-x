@@ -47,7 +47,7 @@ public class DeleteCharacterHandler : IGamePacketHandler<DeleteCharacter>
         });
 
         var player = await _playerManager.GetPlayer(accountId.Value, ctx.Packet.Slot);
-        if (player == null)
+        if (player is null)
         {
             ctx.Connection.Close();
             _logger.LogWarning("Invalid or not exist character");

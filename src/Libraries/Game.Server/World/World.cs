@@ -228,7 +228,7 @@ public class World : IWorld, ILoadable
     public CoreHost GetMapHost(int x, int y)
     {
         var map = GetMapAt((uint)x, (uint)y);
-        if (map == null)
+        if (map is null)
         {
             _logger.LogWarning("No available host for map at {X}|{Y}", x, y);
             return new CoreHost {_ip = IPAddress.None, _port = 0};
@@ -284,7 +284,7 @@ public class World : IWorld, ILoadable
     public void SpawnEntity(IEntity e)
     {
         var map = GetMapAt((uint)e.PositionX, (uint)e.PositionY);
-        if (map == null)
+        if (map is null)
         {
             _logger.LogWarning("Could not spawn entity at ({X};{Y}) No Map found for this coordinate", e.PositionX,
                 e.PositionY);

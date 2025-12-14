@@ -154,7 +154,7 @@ public partial class ParserService : IParserService
             if (line.StartsWith("Group", INV_CUL))
             {
                 line = line.Trim();
-                if (currentGroup != null)
+                if (currentGroup is not null)
                 {
                     groups.Add(currentGroup);
                 }
@@ -163,7 +163,7 @@ public partial class ParserService : IParserService
                 line = SplitByWhitespaceOrTabRegex().Replace(line, " ");
                 currentGroup = new DataFileGroup {Name = line.Split()[1]};
             }
-            else if (!string.IsNullOrWhiteSpace(line) && currentGroup != null)
+            else if (!string.IsNullOrWhiteSpace(line) && currentGroup is not null)
             {
                 var parts = SplitByWhitespaceOrTabRegex().Split(line).ToList();
 
@@ -188,7 +188,7 @@ public partial class ParserService : IParserService
             }
         }
 
-        if (currentGroup != null)
+        if (currentGroup is not null)
         {
             groups.Add(currentGroup);
         }
@@ -250,7 +250,7 @@ public partial class ParserService : IParserService
                 if (itemProtoId < 1)
                 {
                     var item = itemManager.GetItemByName(dropData[1]); // Some entries are the names instead of the id
-                    if (item == null)
+                    if (item is null)
                     {
                         throw new MissingRequiredFieldException("ItemProtoId");
                     }
@@ -321,7 +321,7 @@ public partial class ParserService : IParserService
                 if (itemProtoId < 1)
                 {
                     var item = itemManager.GetItemByName(dropData[1]); // Some entries are the names instead of the id
-                    if (item == null)
+                    if (item is null)
                     {
                         throw new MissingRequiredFieldException("ItemProtoId");
                     }
@@ -518,7 +518,7 @@ public partial class ParserService : IParserService
         public T? GetField<T>(string key)
         {
             var foundKey = Fields.Keys.FirstOrDefault(k => k.Equals(key, StringComparison.InvariantCultureIgnoreCase));
-            if (foundKey == null)
+            if (foundKey is null)
             {
                 return default;
             }

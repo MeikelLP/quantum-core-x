@@ -138,47 +138,47 @@ public class Equipment : IEquipment
 
     public void Send(IPlayerEntity player)
     {
-        if (Body != null)
+        if (Body is not null)
         {
             player.SendItem(Body);
         }
 
-        if (Head != null)
+        if (Head is not null)
         {
             player.SendItem(Head);
         }
 
-        if (Shoes != null)
+        if (Shoes is not null)
         {
             player.SendItem(Shoes);
         }
 
-        if (Bracelet != null)
+        if (Bracelet is not null)
         {
             player.SendItem(Bracelet);
         }
 
-        if (Weapon != null)
+        if (Weapon is not null)
         {
             player.SendItem(Weapon);
         }
 
-        if (Necklace != null)
+        if (Necklace is not null)
         {
             player.SendItem(Necklace);
         }
 
-        if (Earrings != null)
+        if (Earrings is not null)
         {
             player.SendItem(Earrings);
         }
 
-        if (Costume != null)
+        if (Costume is not null)
         {
             player.SendItem(Costume);
         }
 
-        if (Hair != null)
+        if (Hair is not null)
         {
             player.SendItem(Hair);
         }
@@ -187,7 +187,7 @@ public class Equipment : IEquipment
     public bool IsSuitable(IItemManager itemManager, ItemInstance item, ushort position)
     {
         var proto = itemManager.GetItem(item.ItemId);
-        if (proto == null)
+        if (proto is null)
         {
             return false;
         }
@@ -222,7 +222,7 @@ public class Equipment : IEquipment
     public long GetWearPosition(IItemManager itemManager, uint itemId)
     {
         var proto = itemManager.GetItem(itemId);
-        if (proto == null)
+        if (proto is null)
         {
             return _offset + (ushort)EquipmentSlot.BODY;
         }

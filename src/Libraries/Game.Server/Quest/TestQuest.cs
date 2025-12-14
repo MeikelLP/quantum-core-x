@@ -44,7 +44,7 @@ public class TestQuest : Quest
     {
         var proto = _itemManager.GetItem(item.ItemId);
 
-        if (proto == null)
+        if (proto is null)
         {
             Text("Failure: Could not find item.");
         }
