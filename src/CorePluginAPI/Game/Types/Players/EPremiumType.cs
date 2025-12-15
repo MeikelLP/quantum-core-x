@@ -2,10 +2,10 @@
 
 public enum EPremiumType
 {
-    Experience = 0,
-    Item = 1,
-    Safebox = 2,
-    Autoloot = 3,
+    EXPERIENCE = 0,
+    ITEM = 1,
+    SAFEBOX = 2,
+    AUTOLOOT = 3,
     
-    Gold = 6
+    GOLD = 6
 }

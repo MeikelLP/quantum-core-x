@@ -3,7 +3,7 @@ using QuantumCore.Networking;
 
 namespace QuantumCore.Game.Packets;
 
-[Packet(0xD2, EDirection.Outgoing)]
+[Packet(0xD2, EDirection.OUTGOING)]
 [PacketGenerator]
 public partial class ServerStatusPacket
 {

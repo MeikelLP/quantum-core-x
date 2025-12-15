@@ -2,5 +2,5 @@
 
 public enum AnimationSubType
 {
-    General
+    GENERAL
 }

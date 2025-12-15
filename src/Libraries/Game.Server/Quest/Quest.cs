@@ -15,7 +15,7 @@ public abstract class Quest : IQuest
 
     private readonly PlayerEntity _player;
     private string _questScript = "";
-    private QuestSkin _currentSkin = QuestSkin.Normal;
+    private QuestSkin _currentSkin = QuestSkin.NORMAL;
 
     private TaskCompletionSource? _currentNextTask;
     private TaskCompletionSource<byte>? _currentChoiceTask;
@@ -37,7 +37,7 @@ public abstract class Quest : IQuest
             Source = _questScript
         });
 
-        _currentSkin = QuestSkin.Normal;
+        _currentSkin = QuestSkin.NORMAL;
         _questScript = "";
     }
 

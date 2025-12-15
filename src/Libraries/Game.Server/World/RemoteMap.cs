@@ -8,9 +8,9 @@ namespace QuantumCore.Game.World;
 public class RemoteMap : IMap
 {
     public string Name { get; }
-    public uint UnitX => Position.X / Map.MapUnit;
+    public uint UnitX => Position.X / Map.MAP_UNIT;
     public Coordinates Position { get; }
-    public uint UnitY => Position.Y / Map.MapUnit;
+    public uint UnitY => Position.Y / Map.MAP_UNIT;
     public uint Width { get; }
     public uint Height { get; }
     public IWorld World { get; }
@@ -51,8 +51,8 @@ public class RemoteMap : IMap
 
     public bool IsPositionInside(int x, int y)
     {
-        return x >= Position.X && x < Position.X + Width * Map.MapUnit && y >= Position.Y &&
-               y < Position.Y + Height * Map.MapUnit;
+        return x >= Position.X && x < Position.X + Width * Map.MAP_UNIT && y >= Position.Y &&
+               y < Position.Y + Height * Map.MAP_UNIT;
     }
 
     public void Update(double elapsedTime)

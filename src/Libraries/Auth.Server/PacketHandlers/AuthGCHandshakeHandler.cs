@@ -5,11 +5,11 @@ using QuantumCore.Core.Packets;
 
 namespace QuantumCore.Auth.PacketHandlers;
 
-public class AuthGCHandshakeHandler : IAuthPacketHandler<GCHandshake>
+public class AuthGcHandshakeHandler : IAuthPacketHandler<GcHandshake>
 {
-    public Task ExecuteAsync(AuthPacketContext<GCHandshake> ctx, CancellationToken token = default)
+    public Task ExecuteAsync(AuthPacketContext<GcHandshake> ctx, CancellationToken token = default)
     {
-        ctx.Connection.HandleHandshake(new GCHandshakeData
+        ctx.Connection.HandleHandshake(new GcHandshakeData
         {
             Delta = ctx.Packet.Delta,
             Handshake = ctx.Packet.Handshake,

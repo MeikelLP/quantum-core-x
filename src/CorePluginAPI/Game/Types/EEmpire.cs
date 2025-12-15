@@ -2,8 +2,8 @@
 
 public enum EEmpire: byte
 {
-    Neutral = 0,
-    Shinsoo = 1,
-    Chunjo = 2,
-    Jinno = 3
+    NEUTRAL = 0,
+    SHINSOO = 1,
+    CHUNJO = 2,
+    JINNO = 3
 }

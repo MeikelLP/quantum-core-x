@@ -12,10 +12,10 @@ public class AuthServer : ServerBase<AuthConnection>
     private readonly ILogger<AuthServer> _logger;
     private readonly ICacheManager _cacheManager;
 
-    public AuthServer([FromKeyedServices(HostingOptions.ModeAuth)] IPacketManager packetManager,
+    public AuthServer([FromKeyedServices(HostingOptions.MODE_AUTH)] IPacketManager packetManager,
         ILogger<AuthServer> logger,
         PluginExecutor pluginExecutor, IServiceProvider serviceProvider, ICacheManager cacheManager)
-        : base(packetManager, logger, pluginExecutor, serviceProvider, HostingOptions.ModeAuth)
+        : base(packetManager, logger, pluginExecutor, serviceProvider, HostingOptions.MODE_AUTH)
     {
         _logger = logger;
         _cacheManager = cacheManager;
@@ -35,7 +35,7 @@ public class AuthServer : ServerBase<AuthConnection>
 
     private bool NewConnection(IConnection connection)
     {
-        connection.SetPhase(EPhase.Auth);
+        connection.SetPhase(EPhase.AUTH);
         return true;
     }
 }

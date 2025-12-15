@@ -47,7 +47,7 @@ namespace Game.Tests;
 internal class MockedGameConnection : IGameConnection
 {
     public readonly List<ChatOutcoming> SentMessages = new();
-    public readonly List<GCPhase> SentPhases = new();
+    public readonly List<GcPhase> SentPhases = new();
     public readonly List<object> SentPackets = new();
     public Guid Id { get; }
     public EPhase Phase { get; set; }
@@ -64,7 +64,7 @@ internal class MockedGameConnection : IGameConnection
         {
             SentMessages.Add(chat);
         }
-        else if (packet is GCPhase phase)
+        else if (packet is GcPhase phase)
         {
             SentPhases.Add(phase);
         }
@@ -83,7 +83,7 @@ internal class MockedGameConnection : IGameConnection
     public string Username { get; set; } = "";
     public IPlayerEntity? Player { get; set; }
 
-    public bool HandleHandshake(GCHandshakeData handshake)
+    public bool HandleHandshake(GcHandshakeData handshake)
     {
         return true;
     }
@@ -113,13 +113,13 @@ public class CommandTests : IAsyncLifetime
             .RuleFor(x => x.Ht, _ => (byte)1)
             .RuleFor(x => x.Dx, _ => (byte)1)
             .RuleFor(x => x.Gold, _ => (uint)0)
-            .RuleFor(x => x.Empire, _ => EEmpire.Chunjo)
+            .RuleFor(x => x.Empire, _ => EEmpire.CHUNJO)
             .RuleFor(x => x.Experience, _ => (uint)0)
-            .RuleFor(x => x.PositionX, _ => (int)(10 * Map.MapUnit))
-            .RuleFor(x => x.PositionY, _ => (int)(26 * Map.MapUnit))
+            .RuleFor(x => x.PositionX, _ => (int)(10 * Map.MAP_UNIT))
+            .RuleFor(x => x.PositionY, _ => (int)(26 * Map.MAP_UNIT))
             .RuleFor(x => x.PlayTime, _ => 0u)
             .RuleFor(x => x.SkillGroup, _ => (ESkillGroup)0)
-            .RuleFor(x => x.PlayerClass, _ => EPlayerClassGendered.WarriorMale)
+            .RuleFor(x => x.PlayerClass, _ => EPlayerClassGendered.WARRIOR_MALE)
             .Ignore(x => x.Health)
             .Ignore(x => x.Mana);
         var monsterManagerMock = Substitute.For<IMonsterManager>();
@@ -135,7 +135,7 @@ public class CommandTests : IAsyncLifetime
         itemManagerMock.GetItem(Arg.Any<uint>()).Returns(call => new AutoFaker<ItemData>()
             .RuleFor(x => x.Id, _ => call.Arg<uint>())
             .RuleFor(x => x.Size, _ => (byte)1)
-            .RuleFor(x => x.WearFlags, _ => (byte)EWearFlags.Weapon)
+            .RuleFor(x => x.WearFlags, _ => (byte)EWearFlags.WEAPON)
             .RuleFor(x => x.Values, _ => new List<int>
             {
                 0,
@@ -168,8 +168,8 @@ public class CommandTests : IAsyncLifetime
             var fileInfo = Substitute.For<IFileInfo>();
             fileInfo.Exists.Returns(true);
             fileInfo.CreateReadStream().Returns(new MemoryStream(Encoding.UTF8.GetBytes(
-                $"map_a2	{Map.MapUnit * 10}	{Map.MapUnit * 26}	6	6\n" +
-                $"map_b2	{Map.MapUnit * 10}	{Map.MapUnit * 26}	6	6")));
+                $"map_a2	{Map.MAP_UNIT * 10}	{Map.MAP_UNIT * 26}	6	6\n" +
+                $"map_b2	{Map.MAP_UNIT * 10}	{Map.MAP_UNIT * 26}	6	6")));
             return fileInfo;
         });
         _services = new ServiceCollection()
@@ -261,15 +261,15 @@ public class CommandTests : IAsyncLifetime
         world.SpawnEntity(_player);
         world.SpawnEntity(player2);
         world.Update(0); // spawn entities
-        player2.Move((int)(11 * Map.MapUnit), (int)(27 * Map.MapUnit));
+        player2.Move((int)(11 * Map.MAP_UNIT), (int)(27 * Map.MAP_UNIT));
 
-        Assert.Equal((int)(10 * Map.MapUnit), _player.PositionX);
-        Assert.Equal((int)(26 * Map.MapUnit), _player.PositionY);
+        Assert.Equal((int)(10 * Map.MAP_UNIT), _player.PositionX);
+        Assert.Equal((int)(26 * Map.MAP_UNIT), _player.PositionY);
 
         await _commandManager.Handle(_connection, $"/tp \"{player2.Name}\"");
 
-        Assert.Equal((int)(11 * Map.MapUnit), _player.PositionX);
-        Assert.Equal((int)(27 * Map.MapUnit), _player.PositionY);
+        Assert.Equal((int)(11 * Map.MAP_UNIT), _player.PositionX);
+        Assert.Equal((int)(27 * Map.MAP_UNIT), _player.PositionY);
     }
 
     [Fact]
@@ -280,16 +280,16 @@ public class CommandTests : IAsyncLifetime
         world.SpawnEntity(_player);
         world.SpawnEntity(player2);
         world.Update(0); // spawn entities
-        player2.Move((int)(11 * Map.MapUnit), (int)(27 * Map.MapUnit));
+        player2.Move((int)(11 * Map.MAP_UNIT), (int)(27 * Map.MAP_UNIT));
 
 
-        Assert.Equal((int)(11 * Map.MapUnit), player2.PositionX);
-        Assert.Equal((int)(27 * Map.MapUnit), player2.PositionY);
+        Assert.Equal((int)(11 * Map.MAP_UNIT), player2.PositionX);
+        Assert.Equal((int)(27 * Map.MAP_UNIT), player2.PositionY);
 
         await _commandManager.Handle(_connection, $"/tphere \"{player2.Name}\"");
 
-        Assert.Equal((int)(10 * Map.MapUnit), player2.PositionX);
-        Assert.Equal((int)(26 * Map.MapUnit), player2.PositionY);
+        Assert.Equal((int)(10 * Map.MAP_UNIT), player2.PositionX);
+        Assert.Equal((int)(26 * Map.MAP_UNIT), player2.PositionY);
     }
 
     [Fact]
@@ -298,12 +298,12 @@ public class CommandTests : IAsyncLifetime
         var item = new ItemInstance { ItemId = 1, Count = 1 };
         var wearSlot = _player.Inventory.EquipmentWindow.GetWearPosition(_itemManager, item.ItemId);
 
-        _player.SetItem(item, WindowType.Inventory, (ushort)wearSlot);
+        _player.SetItem(item, WindowType.INVENTORY, (ushort)wearSlot);
 
         await _commandManager.Handle(_connection, "debug_damage");
         // simple calculation just for this test
-        var minAttack = _player.GetPoint(EPoint.MinAttackDamage);
-        var maxAttack = _player.GetPoint(EPoint.MaxAttackDamage);
+        var minAttack = _player.GetPoint(EPoint.MIN_ATTACK_DAMAGE);
+        var maxAttack = _player.GetPoint(EPoint.MAX_ATTACK_DAMAGE);
         var sentMessages = (_connection as MockedGameConnection).SentMessages;
 
         sentMessages.Should().ContainEquivalentOf(new ChatOutcoming { Message = $"Weapon Damage: 10-16" }, Config);
@@ -320,7 +320,7 @@ public class CommandTests : IAsyncLifetime
     {
         await _commandManager.Handle(_connection, "/exp 500");
 
-        _player.GetPoint(EPoint.Experience).Should().Be(500);
+        _player.GetPoint(EPoint.EXPERIENCE).Should().Be(500);
     }
 
     [Fact]
@@ -333,7 +333,7 @@ public class CommandTests : IAsyncLifetime
 
         await _commandManager.Handle(_connection, $"/exp 500 \"{player2.Name}\"");
 
-        player2.GetPoint(EPoint.Experience).Should().Be(500);
+        player2.GetPoint(EPoint.EXPERIENCE).Should().Be(500);
     }
 
     [Fact]
@@ -374,10 +374,10 @@ public class CommandTests : IAsyncLifetime
     [Fact]
     public async Task GoldCommand_Self()
     {
-        _player.GetPoint(EPoint.Gold).Should().Be(0);
+        _player.GetPoint(EPoint.GOLD).Should().Be(0);
         await _commandManager.Handle(_connection, "/gold 10");
 
-        _player.GetPoint(EPoint.Gold).Should().Be(10);
+        _player.GetPoint(EPoint.GOLD).Should().Be(10);
     }
 
     [Fact]
@@ -388,9 +388,9 @@ public class CommandTests : IAsyncLifetime
         world.SpawnEntity(_player);
         world.SpawnEntity(player2);
 
-        player2.GetPoint(EPoint.Gold).Should().Be(0);
+        player2.GetPoint(EPoint.GOLD).Should().Be(0);
         await _commandManager.Handle(_connection, $"/gold 10 \"{player2.Name}\"");
-        player2.GetPoint(EPoint.Gold).Should().Be(10);
+        player2.GetPoint(EPoint.GOLD).Should().Be(10);
     }
 
     [Fact]
@@ -400,10 +400,10 @@ public class CommandTests : IAsyncLifetime
         world.SpawnEntity(_player);
         world.Update(0); // spawn entities
 
-        _player.Move((int)(Map.MapUnit * 10), (int)(Map.MapUnit * 26));
+        _player.Move((int)(Map.MAP_UNIT * 10), (int)(Map.MAP_UNIT * 26));
 
-        Assert.Equal((int)(10 * Map.MapUnit), _player.PositionX);
-        Assert.Equal((int)(26 * Map.MapUnit), _player.PositionY);
+        Assert.Equal((int)(10 * Map.MAP_UNIT), _player.PositionX);
+        Assert.Equal((int)(26 * Map.MAP_UNIT), _player.PositionY);
 
         await _commandManager.Handle(_connection, $"/goto {11} {27}");
 
@@ -419,14 +419,14 @@ public class CommandTests : IAsyncLifetime
         world.Update(0); // spawn entities
 
 
-        Assert.Equal((int)(10 * Map.MapUnit), _player.PositionX);
-        Assert.Equal((int)(26 * Map.MapUnit), _player.PositionY);
+        Assert.Equal((int)(10 * Map.MAP_UNIT), _player.PositionX);
+        Assert.Equal((int)(26 * Map.MAP_UNIT), _player.PositionY);
 
         await _commandManager.Handle(_connection, "/goto --map map_b2");
 
         // target position is half of X & Y
-        Assert.Equal((int)(13 * Map.MapUnit), _player.PositionX);
-        Assert.Equal((int)(29 * Map.MapUnit), _player.PositionY);
+        Assert.Equal((int)(13 * Map.MAP_UNIT), _player.PositionX);
+        Assert.Equal((int)(29 * Map.MAP_UNIT), _player.PositionY);
     }
 
     [Fact]
@@ -437,7 +437,7 @@ public class CommandTests : IAsyncLifetime
         var messages = (_connection as MockedGameConnection).SentMessages;
         messages.Should().HaveCountGreaterThan(1);
         messages[0].Should().BeEquivalentTo(
-            new ChatOutcoming { Message = "The following commands are available", MessageType = ChatMessageType.Info },
+            new ChatOutcoming { Message = "The following commands are available", MessageType = ChatMessageType.INFO },
             cfg => cfg
                 .Including(x => x.Message)
                 .Using<string>(ctx => ctx.Subject.Should().StartWith(ctx.Expectation)).WhenTypeIs<string>()
@@ -470,11 +470,11 @@ public class CommandTests : IAsyncLifetime
     [Fact]
     public async Task LevelCommand_Self()
     {
-        _player.GetPoint(EPoint.Level).Should().Be(1);
+        _player.GetPoint(EPoint.LEVEL).Should().Be(1);
 
         await _commandManager.Handle(_connection, "/level 30");
 
-        _player.GetPoint(EPoint.Level).Should().Be(30);
+        _player.GetPoint(EPoint.LEVEL).Should().Be(30);
     }
 
     [Fact]
@@ -485,11 +485,11 @@ public class CommandTests : IAsyncLifetime
         world.SpawnEntity(_player);
         world.SpawnEntity(player2);
 
-        player2.GetPoint(EPoint.Level).Should().Be(1);
+        player2.GetPoint(EPoint.LEVEL).Should().Be(1);
 
         await _commandManager.Handle(_connection, $"/level 30 \"{player2.Name}\"");
 
-        player2.GetPoint(EPoint.Level).Should().Be(30);
+        player2.GetPoint(EPoint.LEVEL).Should().Be(30);
     }
 
     [Fact]
@@ -505,7 +505,7 @@ public class CommandTests : IAsyncLifetime
 
         await _commandManager.Handle(_connection, "/logout");
 
-        _player.GetPoint(EPoint.PlayTime).Should().Be(1);
+        _player.GetPoint(EPoint.PLAY_TIME).Should().Be(1);
         world.GetPlayer(_player.Name).Should().BeNull();
     }
 
@@ -517,17 +517,17 @@ public class CommandTests : IAsyncLifetime
 
         world.GetPlayer(_player.Name).Should().NotBeNull();
         (_connection as MockedGameConnection).SentPhases.Should()
-            .NotContainEquivalentOf(new GCPhase { Phase = EPhase.Select });
+            .NotContainEquivalentOf(new GcPhase { Phase = EPhase.SELECT });
 
         _player.Player.PlayTime = 0;
         _connection.Server.ServerTime.Returns(60000);
 
         await _commandManager.Handle(_connection, "/phase_select");
 
-        _player.GetPoint(EPoint.PlayTime).Should().Be(1);
-        _player.Connection.Phase.Should().Be(EPhase.Select);
+        _player.GetPoint(EPoint.PLAY_TIME).Should().Be(1);
+        _player.Connection.Phase.Should().Be(EPhase.SELECT);
         (_connection as MockedGameConnection).SentPhases.Should()
-            .ContainEquivalentOf(new GCPhase { Phase = EPhase.Select });
+            .ContainEquivalentOf(new GcPhase { Phase = EPhase.SELECT });
         world.GetPlayer(_player.Name).Should().BeNull();
     }
 
@@ -593,7 +593,7 @@ public class CommandTests : IAsyncLifetime
         var world = await PrepareWorldAsync();
         world.SpawnEntity(_player);
         world.Update(0); // spawn entities
-        _player.Move((int)(Map.MapUnit * 13), (int)(Map.MapUnit * 29)); // center of the map
+        _player.Move((int)(Map.MAP_UNIT * 13), (int)(Map.MAP_UNIT * 29)); // center of the map
         _player.Map.Entities.Count.Should().Be(1);
 
         await _commandManager.Handle(_connection, "/spawn 101");
@@ -608,7 +608,7 @@ public class CommandTests : IAsyncLifetime
         var world = await PrepareWorldAsync();
         world.SpawnEntity(_player);
         world.Update(0); // spawn entities
-        _player.Move((int)(Map.MapUnit * 13), (int)(Map.MapUnit * 29)); // center of the map
+        _player.Move((int)(Map.MAP_UNIT * 13), (int)(Map.MAP_UNIT * 29)); // center of the map
         _player.Map.Entities.Count.Should().Be(1);
 
         await _commandManager.Handle(_connection, "/spawn 101 10");
@@ -620,12 +620,12 @@ public class CommandTests : IAsyncLifetime
     [Fact]
     public async Task StatCommand()
     {
-        _player.AddPoint(EPoint.StatusPoints, 1);
-        _player.GetPoint(EPoint.Ht).Should().Be(1);
+        _player.AddPoint(EPoint.STATUS_POINTS, 1);
+        _player.GetPoint(EPoint.HT).Should().Be(1);
 
         await _commandManager.Handle(_connection, "/stat ht");
 
-        _player.GetPoint(EPoint.Ht).Should().Be(2);
+        _player.GetPoint(EPoint.HT).Should().Be(2);
     }
 
     private async Task<IWorld> PrepareWorldAsync()
@@ -685,7 +685,7 @@ public class CommandTests : IAsyncLifetime
 
         // Assert
         ((MockedGameConnection)_connection).SentMessages.Should().ContainEquivalentOf(
-            new ChatOutcoming { Message = "mall test", MessageType = ChatMessageType.Command },
+            new ChatOutcoming { Message = "mall test", MessageType = ChatMessageType.COMMAND },
             cfg => cfg.Including(x => x.Message));
     }
 
@@ -699,18 +699,18 @@ public class CommandTests : IAsyncLifetime
         ((MockedGameConnection)_connection).SentMessages.Should().ContainEquivalentOf(
             new ChatOutcoming
             {
-                Message = $"Lv{_player.GetPoint(EPoint.Level)} {_player.Name}", MessageType = ChatMessageType.Info
+                Message = $"Lv{_player.GetPoint(EPoint.LEVEL)} {_player.Name}", MessageType = ChatMessageType.INFO
             }, cfg => cfg.Including(x => x.Message));
     }
 
     [Fact]
     public async Task AdvanceCommand_NoLevel()
     {
-        _player.SetPoint(EPoint.Level, 1);
+        _player.SetPoint(EPoint.LEVEL, 1);
 
         await _commandManager.Handle(_connection, $"/a $self");
 
-        _player.GetPoint(EPoint.Level).Should().Be(2);
+        _player.GetPoint(EPoint.LEVEL).Should().Be(2);
 
         ((MockedGameConnection)_connection).SentMessages.Should().ContainEquivalentOf(
             new ChatOutcoming { Message = "You have advanced to level 2" }, cfg => cfg.Including(x => x.Message));
@@ -719,11 +719,11 @@ public class CommandTests : IAsyncLifetime
     [Fact]
     public async Task AdvanceCommand_LevelSpecified()
     {
-        _player.SetPoint(EPoint.Level, 1);
+        _player.SetPoint(EPoint.LEVEL, 1);
 
         await _commandManager.Handle(_connection, $"/a $self 10");
 
-        _player.GetPoint(EPoint.Level).Should().Be(11);
+        _player.GetPoint(EPoint.LEVEL).Should().Be(11);
 
         ((MockedGameConnection)_connection).SentMessages.Should().ContainEquivalentOf(
             new ChatOutcoming { Message = "You have advanced to level 11" }, cfg => cfg.Including(x => x.Message));
@@ -733,14 +733,14 @@ public class CommandTests : IAsyncLifetime
     public async Task AdvanceCommand_OtherTarget()
     {
         var player2 = ActivatorUtilities.CreateInstance<PlayerEntity>(_services, _playerDataFaker.Generate());
-        player2.SetPoint(EPoint.Level, 1);
+        player2.SetPoint(EPoint.LEVEL, 1);
 
         var world = await PrepareWorldAsync();
         world.SpawnEntity(player2);
 
         await _commandManager.Handle(_connection, $"/a {player2.Player.Name} 4");
 
-        player2.GetPoint(EPoint.Level).Should().Be(5);
+        player2.GetPoint(EPoint.LEVEL).Should().Be(5);
 
         ((MockedGameConnection)_connection).SentMessages.Should().ContainEquivalentOf(
             new ChatOutcoming { Message = "You have advanced to level 5" }, cfg => cfg.Including(x => x.Message));
@@ -752,15 +752,15 @@ public class CommandTests : IAsyncLifetime
         // Prepare
         _player.Player.SkillGroup = 0;
         _player.Player.PlayerClass = 0;
-        _player.SetPoint(EPoint.Level, 5);
+        _player.SetPoint(EPoint.LEVEL, 5);
 
         // Act
         await _commandManager.Handle(_connection, "/setjob 1");
 
         // Assert
-        _player.Player.SkillGroup.Should().Be(ESkillGroup.BranchA);
+        _player.Player.SkillGroup.Should().Be(ESkillGroup.BRANCH_A);
         ((MockedGameConnection)_connection).SentPackets.Should()
-            .ContainEquivalentOf(new ChangeSkillGroup { SkillGroup = ESkillGroup.BranchA });
+            .ContainEquivalentOf(new ChangeSkillGroup { SkillGroup = ESkillGroup.BRANCH_A });
     }
 
     [Fact]
@@ -768,7 +768,7 @@ public class CommandTests : IAsyncLifetime
     {
         // Prepare
         _player.Player.SkillGroup = 0;
-        _player.SetPoint(EPoint.Level, 3);
+        _player.SetPoint(EPoint.LEVEL, 3);
 
         // Act
         await _commandManager.Handle(_connection, "/setjob 1");
@@ -776,7 +776,7 @@ public class CommandTests : IAsyncLifetime
         // Assert
         _player.Player.SkillGroup.Should().Be(0);
         ((MockedGameConnection)_connection).SentPackets.Should()
-            .NotContainEquivalentOf(new ChangeSkillGroup { SkillGroup = ESkillGroup.BranchA });
+            .NotContainEquivalentOf(new ChangeSkillGroup { SkillGroup = ESkillGroup.BRANCH_A });
     }
 
     [Fact]
@@ -784,7 +784,7 @@ public class CommandTests : IAsyncLifetime
     {
         // Prepare
         _player.Player.SkillGroup = 0;
-        _player.SetPoint(EPoint.Level, 5);
+        _player.SetPoint(EPoint.LEVEL, 5);
 
         // Act
         await _commandManager.Handle(_connection, "/setjob 4");
@@ -799,16 +799,16 @@ public class CommandTests : IAsyncLifetime
     public async Task SkillUpCommand_ValidSkill()
     {
         // Prepare
-        _player.SetPoint(EPoint.Level, 5);
+        _player.SetPoint(EPoint.LEVEL, 5);
         _player.Player.PlayerClass = 0;
 
-        var skillId = ESkill.AuraOfTheSword;
+        var skillId = ESkill.AURA_OF_THE_SWORD;
 
         _skillManager.GetSkill(skillId).Returns(new SkillData
         {
-            Id = skillId, Type = (ESkillCategoryType)(_player.Player.PlayerClass + 1), Flags = ESkillFlags.Attack
+            Id = skillId, Type = (ESkillCategoryType)(_player.Player.PlayerClass + 1), Flags = ESkillFlags.ATTACK
         });
-        _player.Skills.SetSkillGroup(ESkillGroup.BranchA);
+        _player.Skills.SetSkillGroup(ESkillGroup.BRANCH_A);
 
         // Act
         await _commandManager.Handle(_connection, $"/skillup {(uint)skillId}");
@@ -816,32 +816,32 @@ public class CommandTests : IAsyncLifetime
         // Assert
         var skill = _player.Skills[skillId];
         skill.Should().NotBeNull();
-        skill?.Level.Should().Be(ESkillLevel.Normal01);
+        skill?.Level.Should().Be(ESkillLevel.NORMAL01);
     }
 
     [Fact]
     public async Task SkillUpCommand_MasterSkill()
     {
         // Prepare
-        _player.SetPoint(EPoint.Level, 5);
+        _player.SetPoint(EPoint.LEVEL, 5);
         _player.Player.PlayerClass = 0;
-        const ESkill skillId = ESkill.AuraOfTheSword;
+        const ESkill SKILL_ID = ESkill.AURA_OF_THE_SWORD;
 
-        _skillManager.GetSkill(skillId).Returns(new SkillData
+        _skillManager.GetSkill(SKILL_ID).Returns(new SkillData
         {
-            Id = skillId, Type = (ESkillCategoryType)(_player.Player.PlayerClass + 1), Flags = ESkillFlags.Attack
+            Id = SKILL_ID, Type = (ESkillCategoryType)(_player.Player.PlayerClass + 1), Flags = ESkillFlags.ATTACK
         });
-        _player.Skills.SetSkillGroup(ESkillGroup.BranchA);
-        _player.Skills[skillId].Level = ESkillLevel.Normal19;
-        _player.Skills[skillId].MasterType = ESkillMasterType.Normal;
+        _player.Skills.SetSkillGroup(ESkillGroup.BRANCH_A);
+        _player.Skills[SKILL_ID].Level = ESkillLevel.NORMAL19;
+        _player.Skills[SKILL_ID].MasterType = ESkillMasterType.NORMAL;
 
         // Act
-        await _commandManager.Handle(_connection, $"/skillup {(uint)skillId}");
+        await _commandManager.Handle(_connection, $"/skillup {(uint)SKILL_ID}");
 
         // Assert
-        var skill = _player.Skills[skillId];
+        var skill = _player.Skills[SKILL_ID];
         skill.Should().NotBeNull();
-        skill?.Level.Should().Be(ESkillLevel.MasterM1);
-        skill?.MasterType.Should().Be(ESkillMasterType.Master);
+        skill?.Level.Should().Be(ESkillLevel.MASTER_M1);
+        skill?.MasterType.Should().Be(ESkillMasterType.MASTER);
     }
 }

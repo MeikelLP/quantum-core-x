@@ -2,7 +2,7 @@
 
 namespace QuantumCore.Game.Packets;
 
-[Packet(0x6d, EDirection.Incoming, Sequence = true)]
+[Packet(0x6d, EDirection.INCOMING, Sequence = true)]
 [PacketGenerator]
 public partial class TokenLogin
 {

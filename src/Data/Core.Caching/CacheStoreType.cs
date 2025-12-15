@@ -9,12 +9,12 @@ public enum CacheStoreType
     /// Redis database for common data
     /// </summary>
     [EnumMember(Value = "Common")]
-    Shared = 0,
+    SHARED = 0,
     
     /// <summary>
     /// Redis database for current server
     /// </summary>
     [EnumMember(Value = "Server")]
-    Server = 1, // todo: read from config
+    SERVER = 1, // todo: read from config
     
 }

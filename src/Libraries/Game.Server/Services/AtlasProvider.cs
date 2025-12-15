@@ -131,8 +131,8 @@ internal partial class AtlasProvider : IAtlasProvider
                     height, coords, _serviceProvider);
             }
 
-            if (position.X + width * Map.MapUnit > maxX) maxX = position.X + width * Map.MapUnit;
-            if (position.Y + height * Map.MapUnit > maxY) maxY = position.Y + height * Map.MapUnit;
+            if (position.X + width * Map.MAP_UNIT > maxX) maxX = position.X + width * Map.MAP_UNIT;
+            if (position.Y + height * Map.MAP_UNIT > maxY) maxY = position.Y + height * Map.MAP_UNIT;
 
             return map;
         });

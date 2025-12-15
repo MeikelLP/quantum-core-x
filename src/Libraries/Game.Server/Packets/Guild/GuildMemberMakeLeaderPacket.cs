@@ -2,7 +2,7 @@
 
 namespace QuantumCore.Game.Packets.Guild;
 
-[Packet(0x50, EDirection.Incoming, Sequence = true)]
+[Packet(0x50, EDirection.INCOMING, Sequence = true)]
 [SubPacket(0x0A, 0)]
 [PacketGenerator]
 public partial class GuildMemberMakeLeaderPacket

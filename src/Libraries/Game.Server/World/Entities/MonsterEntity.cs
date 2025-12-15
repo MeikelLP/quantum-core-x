@@ -19,8 +19,8 @@ public class MonsterEntity : Entity
 {
     private readonly IDropProvider _dropProvider;
     private readonly ILogger _logger;
-    public override EEntityType Type => EEntityType.Monster;
-    public bool IsStone => Proto.Type == (byte)EEntityType.MetinStone;
+    public override EEntityType Type => EEntityType.MONSTER;
+    public bool IsStone => Proto.Type == (byte)EEntityType.METIN_STONE;
     public EMonsterLevel Rank => (EMonsterLevel)Proto.Rank;
 
     public override IEntity? Target
@@ -93,16 +93,16 @@ public class MonsterEntity : Entity
         Health = Proto.Hp;
         EntityClass = id;
 
-        if (Proto.Type == (byte)EEntityType.Monster)
+        if (Proto.Type == (byte)EEntityType.MONSTER)
         {
             // it's a monster
             _behaviour = new SimpleBehaviour(monsterManager);
         }
-        else if (Proto.Type == (byte)EEntityType.Npc)
+        else if (Proto.Type == (byte)EEntityType.NPC)
         {
             // npc
         }
-        else if (Proto.Type == (byte)EEntityType.MetinStone)
+        else if (Proto.Type == (byte)EEntityType.METIN_STONE)
         {
             _behaviour = ActivatorUtilities.CreateInstance<StoneBehaviour>(_serviceProvider);
         }
@@ -144,7 +144,7 @@ public class MonsterEntity : Entity
         {
             Vid = Vid,
             Rotation = (byte)(Rotation / 5),
-            Argument = (byte)CharacterMovementType.Wait,
+            Argument = (byte)CharacterMovementType.WAIT,
             PositionX = TargetPositionX,
             PositionY = TargetPositionY,
             Time = (uint)GameServer.Instance.ServerTime,
@@ -210,17 +210,17 @@ public class MonsterEntity : Entity
     {
         switch (point)
         {
-            case EPoint.Level:
+            case EPoint.LEVEL:
                 return Proto.Level;
-            case EPoint.Dx:
+            case EPoint.DX:
                 return Proto.Dx;
-            case EPoint.AttackGrade:
+            case EPoint.ATTACK_GRADE:
                 return (uint)(Proto.Level * 2 + Proto.St * 2);
-            case EPoint.DefenceGrade:
+            case EPoint.DEFENCE_GRADE:
                 return (uint)(Proto.Level + Proto.Ht + Proto.Defence);
-            case EPoint.DefenceBonus:
+            case EPoint.DEFENCE_BONUS:
                 return 0;
-            case EPoint.Experience:
+            case EPoint.EXPERIENCE:
                 return Proto.Experience;
         }
 
@@ -332,7 +332,7 @@ public class MonsterEntity : Entity
             AttackSpeed = (byte)Proto.AttackSpeed
         });
 
-        if (Proto.Type == (byte)EEntityType.Npc)
+        if (Proto.Type == (byte)EEntityType.NPC)
         {
             // NPCs need additional information too to show up for some reason
             connection.Send(new CharacterInfo

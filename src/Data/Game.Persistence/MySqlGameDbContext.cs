@@ -18,7 +18,7 @@ internal class MySqlGameDbContext : GameDbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
-        var opts = _options.Get(HostingOptions.ModeGame);
+        var opts = _options.Get(HostingOptions.MODE_GAME);
         optionsBuilder.UseLoggerFactory(_loggerFactory);
         optionsBuilder.UseMySql(opts.ConnectionString, ServerVersion.AutoDetect(opts.ConnectionString), mysql =>
         {

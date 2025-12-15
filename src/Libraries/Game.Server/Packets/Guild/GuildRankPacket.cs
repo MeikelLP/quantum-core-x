@@ -4,7 +4,7 @@ using QuantumCore.Networking;
 
 namespace QuantumCore.Game.Packets.Guild;
 
-[Packet(0x4B, EDirection.Outgoing)]
+[Packet(0x4B, EDirection.OUTGOING)]
 [SubPacket(0x03, 1)]
 [PacketGenerator]
 public partial class GuildRankPacket

@@ -2,10 +2,10 @@
 
 public enum EMonsterLevel : byte
 {
-    Pawn,
-    SPawn,
-    Knight,
-    SKnight,
-    Boss,
-    King,
+    PAWN,
+    S_PAWN,
+    KNIGHT,
+    S_KNIGHT,
+    BOSS,
+    KING,
 }

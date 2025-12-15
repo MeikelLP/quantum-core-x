@@ -47,8 +47,8 @@ public class CreateCharacterHandler : IGamePacketHandler<CreateCharacter>
 
         // Send success response
         var character = player.ToCharacter();
-        character.Ip = BitConverter.ToInt32(host.Ip.GetAddressBytes());
-        character.Port = host.Port;
+        character.Ip = BitConverter.ToInt32(host._ip.GetAddressBytes());
+        character.Port = host._port;
         ctx.Connection.Send(new CreateCharacterSuccess {Slot = player.Slot, Character = character});
     }
 }

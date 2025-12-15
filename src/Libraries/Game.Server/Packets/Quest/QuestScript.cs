@@ -2,7 +2,7 @@ using QuantumCore.Networking;
 
 namespace QuantumCore.Game.Packets.Quest;
 
-[Packet(0x2D, EDirection.Outgoing)]
+[Packet(0x2D, EDirection.OUTGOING)]
 [PacketGenerator]
 public partial class QuestScript
 {

@@ -188,7 +188,7 @@ public partial class Initial : Migration
         migrationBuilder.InsertData(
             table: "Players",
             columns: new[] { "Id", "AccountId", "AvailableSkillPoints", "AvailableStatusPoints", "BodyPart", "CreatedAt", "Dx", "Empire", "Experience", "GivenStatusPoints", "Gold", "HairPart", "Health", "Ht", "Iq", "Level", "Mana", "Name", "PlayTime", "PlayerClass", "PositionX", "PositionY", "SkillGroup", "St", "Stamina" },
-            values: new object[] { 1L, new Guid("e34fd5ab-fb3b-428e-935b-7db5bd08a3e5"), 99L, 0L, 0L, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), (byte)99, (byte)EEmpire.Jinno, 0L, 0L, 2000000000L, 0L, 99999L, (byte)99, (byte)99, (byte)99, 99999L, "Admin", 0m, (byte)0, 958870, 272788, (byte)0, (byte)99, 0L });
+            values: new object[] { 1L, new Guid("e34fd5ab-fb3b-428e-935b-7db5bd08a3e5"), 99L, 0L, 0L, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), (byte)99, (byte)EEmpire.JINNO, 0L, 0L, 2000000000L, 0L, 99999L, (byte)99, (byte)99, (byte)99, 99999L, "Admin", 0m, (byte)0, 958870, 272788, (byte)0, (byte)99, 0L });
 
         migrationBuilder.InsertData(
             table: "PermissionUsers",

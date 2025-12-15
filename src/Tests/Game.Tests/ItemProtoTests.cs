@@ -41,25 +41,25 @@ public class ItemProtoTests
         item.Should().BeEquivalentTo(new ItemData
         {
             Name = "Item1",
-            AntiFlags = (int)EAntiFlags.Shaman,
+            AntiFlags = (int)EAntiFlags.SHAMAN,
             Flags = 1u,
             Applies =
             [
-                new ItemApplyData { Type = (byte)EApplyType.AttackSpeed, Value = 22 },
+                new ItemApplyData { Type = (byte)EApplyType.ATTACK_SPEED, Value = 22 },
                 new ItemApplyData { Type = 0, Value = 0 },
                 new ItemApplyData { Type = 0, Value = 0 },
             ],
             Id = 10,
             Limits =
             [
-                new ItemLimitData { Type = (byte)ELimitType.Level, Value = 0 },
+                new ItemLimitData { Type = (byte)ELimitType.LEVEL, Value = 0 },
                 new ItemLimitData { Type = 0, Value = 0 }
             ],
             Size = 2,
             Sockets = [0, 0, 0],
             Specular = 0,
-            Subtype = (byte)EWeaponType.Sword,
-            Type = (byte)EItemType.Weapon,
+            Subtype = (byte)EWeaponType.SWORD,
+            Type = (byte)EItemType.WEAPON,
             Unknown = 0,
             Unknown2 = 0,
             Values = [0, 15, 19, 13, 15, 0],
@@ -70,7 +70,7 @@ public class ItemProtoTests
             TranslatedName = "Sword+0",
             UpgradeId = 11,
             UpgradeSet = 1,
-            WearFlags = (uint)EWearFlags.Weapon,
+            WearFlags = (uint)EWearFlags.WEAPON,
             MagicItemPercentage = 15
         });
     }
@@ -80,7 +80,7 @@ public class ItemProtoTests
     {
         await _itemManager.LoadAsync();
         var item = _itemManager.GetItem(10);
-        var value = item!.GetApplyValue(EApplyType.AttackSpeed);
+        var value = item!.GetApplyValue(EApplyType.ATTACK_SPEED);
         value.Should().Be(22);
     }
 }

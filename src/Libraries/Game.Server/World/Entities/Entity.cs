@@ -78,7 +78,7 @@ public abstract class Entity : IEntity
     public IReadOnlyCollection<IEntity> NearbyEntities => _nearbyEntities;
     private readonly List<IEntity> _nearbyEntities = new();
     public List<IPlayerEntity> TargetedBy { get; } = new();
-    public const int ViewDistance = 10000;
+    public const int VIEW_DISTANCE = 10000;
 
     private int _positionX;
     private int _positionY;
@@ -100,7 +100,7 @@ public abstract class Entity : IEntity
 
     public virtual void Update(double elapsedTime)
     {
-        if (State == EEntityState.Moving)
+        if (State == EEntityState.MOVING)
         {
             var elapsed = GameServer.Instance.ServerTime - MovementStart;
             var rate = MovementDuration == 0 ? 1 : elapsed / (float)MovementDuration;
@@ -114,7 +114,7 @@ public abstract class Entity : IEntity
 
             if (rate >= 1)
             {
-                State = EEntityState.Idle;
+                State = EEntityState.IDLE;
             }
         }
     }
@@ -136,9 +136,9 @@ public abstract class Entity : IEntity
         if (TargetPositionX == x && TargetPositionY == y) return;
 
         var animation =
-            _animationManager.GetAnimation(EntityClass, AnimationType.Run, AnimationSubType.General);
+            _animationManager.GetAnimation(EntityClass, AnimationType.RUN, AnimationSubType.GENERAL);
 
-        State = EEntityState.Moving;
+        State = EEntityState.MOVING;
         TargetPositionX = x;
         TargetPositionY = y;
         StartPositionX = PositionX;
@@ -181,7 +181,7 @@ public abstract class Entity : IEntity
 
     public void Stop()
     {
-        State = EEntityState.Idle;
+        State = EEntityState.IDLE;
         MovementDuration = 0;
     }
 
@@ -195,31 +195,31 @@ public abstract class Entity : IEntity
 
     public void Attack(IEntity victim)
     {
-        if (this.PositionIsAttr(EMapAttributes.NonPvp))
+        if (this.PositionIsAttr(EMapAttributes.NON_PVP))
         {
             return;
         }
 
-        if (victim.PositionIsAttr(EMapAttributes.NonPvp))
+        if (victim.PositionIsAttr(EMapAttributes.NON_PVP))
         {
             return;
         }
 
         switch (GetBattleType())
         {
-            case EBattleType.Melee:
-            case EBattleType.Power:
-            case EBattleType.Tanker:
-            case EBattleType.SuperPower:
-            case EBattleType.SuperTanker:
+            case EBattleType.MELEE:
+            case EBattleType.POWER:
+            case EBattleType.TANKER:
+            case EBattleType.SUPER_POWER:
+            case EBattleType.SUPER_TANKER:
                 // melee sort attack
                 MeleeAttack(victim);
                 break;
-            case EBattleType.Range:
+            case EBattleType.RANGE:
 
                 RangeAttack(victim);
                 break;
-            case EBattleType.Magic:
+            case EBattleType.MAGIC:
                 // todo magic attack
                 break;
         }
@@ -229,8 +229,8 @@ public abstract class Entity : IEntity
     {
         // todo verify victim is in range
 
-        var attackerRating = Math.Min(90, (GetPoint(EPoint.Dx) * 4 + GetPoint(EPoint.Level) * 2) / 6);
-        var victimRating = Math.Min(90, (victim.GetPoint(EPoint.Dx) * 4 + victim.GetPoint(EPoint.Level) * 2) / 6);
+        var attackerRating = Math.Min(90, (GetPoint(EPoint.DX) * 4 + GetPoint(EPoint.LEVEL) * 2) / 6);
+        var victimRating = Math.Min(90, (victim.GetPoint(EPoint.DX) * 4 + victim.GetPoint(EPoint.LEVEL) * 2) / 6);
         var attackRating = (attackerRating + 210.0) / 300.0 -
                            (victimRating * 2 + 5) / (victimRating + 95) * 3.0 / 10.0;
 
@@ -239,14 +239,14 @@ public abstract class Entity : IEntity
 
         var damage = CoreRandom.GenerateInt32(minDamage, maxDamage + 1) * 2;
         SendDebugDamage(victim, $"{this}->{victim} Base Attack value: {damage}");
-        var attack = (int)(GetPoint(EPoint.AttackGrade) + damage - GetPoint(EPoint.Level) * 2);
+        var attack = (int)(GetPoint(EPoint.ATTACK_GRADE) + damage - GetPoint(EPoint.LEVEL) * 2);
         attack = (int)Math.Floor(attack * attackRating);
-        attack += (int)GetPoint(EPoint.Level) * 2 + GetBonusDamage() * 2;
-        attack *= (int)((100 + GetPoint(EPoint.AttackBonus) + GetPoint(EPoint.MagicAttackBonus)) / 100);
+        attack += (int)GetPoint(EPoint.LEVEL) * 2 + GetBonusDamage() * 2;
+        attack *= (int)((100 + GetPoint(EPoint.ATTACK_BONUS) + GetPoint(EPoint.MAGIC_ATTACK_BONUS)) / 100);
         attack = CalculateAttackBonus(victim, attack);
         SendDebugDamage(victim, $"{this}->{victim} With bonus and level {attack}");
 
-        var defence = (int)(victim.GetPoint(EPoint.DefenceGrade) * (100 + victim.GetPoint(EPoint.DefenceBonus)) /
+        var defence = (int)(victim.GetPoint(EPoint.DEFENCE_GRADE) * (100 + victim.GetPoint(EPoint.DEFENCE_BONUS)) /
                             100);
         SendDebugDamage(victim, $"{this}->{victim} Base defence: {defence}");
         if (this is MonsterEntity thisMonster)
@@ -263,15 +263,15 @@ public abstract class Entity : IEntity
 
         // todo reduce damage by weapon type resist
 
-        victim.Damage(this, EDamageType.Normal, damage);
+        victim.Damage(this, EDamageType.NORMAL, damage);
     }
 
     private void RangeAttack(IEntity victim)
     {
         // todo verify victim is in range
 
-        var attackerRating = Math.Min(90, (GetPoint(EPoint.Dx) * 4 + GetPoint(EPoint.Level) * 2) / 6);
-        var victimRating = Math.Min(90, (victim.GetPoint(EPoint.Dx) * 4 + victim.GetPoint(EPoint.Level) * 2) / 6);
+        var attackerRating = Math.Min(90, (GetPoint(EPoint.DX) * 4 + GetPoint(EPoint.LEVEL) * 2) / 6);
+        var victimRating = Math.Min(90, (victim.GetPoint(EPoint.DX) * 4 + victim.GetPoint(EPoint.LEVEL) * 2) / 6);
         var attackRating = (attackerRating + 210.0) / 300.0 -
                            (victimRating * 2 + 5) / (victimRating + 95) * 3.0 / 10.0;
 
@@ -279,13 +279,13 @@ public abstract class Entity : IEntity
         var maxDamage = GetMaxDamage();
 
         var damage = CoreRandom.GenerateInt32(minDamage, maxDamage + 1) * 2;
-        var attack = (int)(GetPoint(EPoint.AttackGrade) + damage - GetPoint(EPoint.Level) * 2);
+        var attack = (int)(GetPoint(EPoint.ATTACK_GRADE) + damage - GetPoint(EPoint.LEVEL) * 2);
         attack = (int)Math.Floor(attack * attackRating);
-        attack += (int)GetPoint(EPoint.Level) * 2 + GetBonusDamage() * 2;
-        attack *= (int)((100 + GetPoint(EPoint.AttackBonus) + GetPoint(EPoint.MagicAttackBonus)) / 100);
+        attack += (int)GetPoint(EPoint.LEVEL) * 2 + GetBonusDamage() * 2;
+        attack *= (int)((100 + GetPoint(EPoint.ATTACK_BONUS) + GetPoint(EPoint.MAGIC_ATTACK_BONUS)) / 100);
         attack = CalculateAttackBonus(victim, attack);
 
-        var defence = (int)(victim.GetPoint(EPoint.DefenceGrade) * (100 + victim.GetPoint(EPoint.DefenceBonus)) /
+        var defence = (int)(victim.GetPoint(EPoint.DEFENCE_GRADE) * (100 + victim.GetPoint(EPoint.DEFENCE_BONUS)) /
                             100);
         if (this is MonsterEntity thisMonster)
         {
@@ -308,7 +308,7 @@ public abstract class Entity : IEntity
             });
         }
 
-        victim.Damage(this, EDamageType.NormalRange, damage);
+        victim.Damage(this, EDamageType.NORMAL_RANGE, damage);
     }
 
     /// <summary>
@@ -329,8 +329,8 @@ public abstract class Entity : IEntity
 
     private int CalculateExperience(uint playerLevel)
     {
-        var baseExp = GetPoint(EPoint.Experience);
-        var entityLevel = GetPoint(EPoint.Level);
+        var baseExp = GetPoint(EPoint.EXPERIENCE);
+        var entityLevel = GetPoint(EPoint.LEVEL);
 
         var percentage = ExperienceConstants.GetExperiencePercentageByLevelDifference(playerLevel, entityLevel);
 
@@ -353,14 +353,14 @@ public abstract class Entity : IEntity
     public virtual int Damage(IEntity attacker, EDamageType damageType, int damage)
     {
 
-        if (this.PositionIsAttr(EMapAttributes.NonPvp))
+        if (this.PositionIsAttr(EMapAttributes.NON_PVP))
         {
             SendDebugDamage(attacker,
                 $"{attacker}->{this} Ignoring damage inside NoPvP zone -> {damage} (should never happen)");
             return -1;
         }
             
-        if (damageType is not EDamageType.Normal and not EDamageType.NormalRange)
+        if (damageType is not EDamageType.NORMAL and not EDamageType.NORMAL_RANGE)
         {
             throw new NotImplementedException();
         }
@@ -374,10 +374,10 @@ public abstract class Entity : IEntity
         var isCritical = false;
         var isPenetrate = false;
 
-        var criticalPercentage = attacker.GetPoint(EPoint.CriticalPercentage);
+        var criticalPercentage = attacker.GetPoint(EPoint.CRITICAL_PERCENTAGE);
         if (criticalPercentage > 0)
         {
-            var resist = GetPoint(EPoint.ResistCritical);
+            var resist = GetPoint(EPoint.RESIST_CRITICAL);
             criticalPercentage = resist > criticalPercentage ? 0 : criticalPercentage - resist;
             if (CoreRandom.PercentageCheck(criticalPercentage))
             {
@@ -389,16 +389,16 @@ public abstract class Entity : IEntity
             }
         }
 
-        var penetratePercentage = attacker.GetPoint(EPoint.PenetratePercentage);
+        var penetratePercentage = attacker.GetPoint(EPoint.PENETRATE_PERCENTAGE);
         // todo add penetrate chance from passive
         if (penetratePercentage > 0)
         {
-            var resist = GetPoint(EPoint.ResistPenetrate);
+            var resist = GetPoint(EPoint.RESIST_PENETRATE);
             penetratePercentage = resist > penetratePercentage ? 0 : penetratePercentage - resist;
             if (CoreRandom.PercentageCheck(penetratePercentage))
             {
                 isPenetrate = true;
-                damage += (int)(GetPoint(EPoint.DefenceGrade) * (100 + GetPoint(EPoint.DefenceBonus)) / 100);
+                damage += (int)(GetPoint(EPoint.DEFENCE_GRADE) * (100 + GetPoint(EPoint.DEFENCE_BONUS)) / 100);
                 SendDebugDamage(attacker,
                     $"{attacker}->{this} Penetrate hit -> {damage} (percentage was {penetratePercentage})");
             }
@@ -406,15 +406,15 @@ public abstract class Entity : IEntity
 
         // todo calculate hp steal, sp steal, hp recovery, sp recovery and mana burn
 
-        var damageFlags = EDamageFlags.Normal; // 1 = normal
+        var damageFlags = EDamageFlags.NORMAL; // 1 = normal
         if (isCritical)
         {
-            damageFlags |= EDamageFlags.Critical;
+            damageFlags |= EDamageFlags.CRITICAL;
         }
 
         if (isPenetrate)
         {
-            damageFlags |= EDamageFlags.Piercing;
+            damageFlags |= EDamageFlags.PIERCING;
         }
 
         var victimPlayer = this as PlayerEntity;
@@ -452,10 +452,10 @@ public abstract class Entity : IEntity
         if (Health <= 0)
         {
             Die();
-            if (Type != EEntityType.Player && attackerPlayer is not null)
+            if (Type != EEntityType.PLAYER && attackerPlayer is not null)
             {
-                var exp = CalculateExperience(attackerPlayer.GetPoint(EPoint.Level));
-                attackerPlayer.AddPoint(EPoint.Experience, exp);
+                var exp = CalculateExperience(attackerPlayer.GetPoint(EPoint.LEVEL));
+                attackerPlayer.AddPoint(EPoint.EXPERIENCE, exp);
                 attackerPlayer.SendPoints();
             }
         }

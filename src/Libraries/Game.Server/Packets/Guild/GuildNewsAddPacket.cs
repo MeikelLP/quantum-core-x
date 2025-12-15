@@ -3,7 +3,7 @@ using QuantumCore.Networking;
 
 namespace QuantumCore.Game.Packets.Guild;
 
-[Packet(0x50, EDirection.Incoming)]
+[Packet(0x50, EDirection.INCOMING)]
 [SubPacket(0x05, 0)]
 public partial class GuildNewsAddPacket
 {
@@ -34,11 +34,11 @@ public partial class GuildNewsAddPacket : IPacketSerializable
 
     public static GuildNewsAddPacket Deserialize(ReadOnlySpan<byte> bytes, in int offset = 0)
     {
-        var __Size = bytes[(offset + 0)] + 1;
-        var __Message = (bytes[(offset + 1)..(Index) (offset + 1 + __Size)]).ReadNullTerminatedString();
+        var size = bytes[(offset + 0)] + 1;
+        var message = (bytes[(offset + 1)..(Index) (offset + 1 + size)]).ReadNullTerminatedString();
         var obj = new GuildNewsAddPacket
         {
-            Message = __Message
+            Message = message
         };
         return obj;
     }
@@ -54,11 +54,11 @@ public partial class GuildNewsAddPacket : IPacketSerializable
         var buffer = ArrayPool<byte>.Shared.Rent(NetworkingConstants.BufferSize);
         try
         {
-            var __Size = await stream.ReadValueFromStreamAsync<Byte>(buffer) + 1;
-            var __Message = await stream.ReadStringFromStreamAsync(buffer, (int) __Size);
+            var size = await stream.ReadValueFromStreamAsync<Byte>(buffer) + 1;
+            var message = await stream.ReadStringFromStreamAsync(buffer, (int) size);
             var obj = new GuildNewsAddPacket
             {
-                Message = __Message
+                Message = message
             };
             return obj;
         }

@@ -10,7 +10,7 @@ public class AuthPacketLocationProvider : IPacketLocationProvider
         return new[]
         {
             typeof(AuthServer).Assembly,
-            typeof(GCHandshake).Assembly
+            typeof(GcHandshake).Assembly
         };
     }
 }

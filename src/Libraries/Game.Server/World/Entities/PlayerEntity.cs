@@ -27,7 +27,7 @@ namespace QuantumCore.Game.World.Entities;
 
 public class PlayerEntity : Entity, IPlayerEntity, IDisposable
 {
-    public override EEntityType Type => EEntityType.Player;
+    public override EEntityType Type => EEntityType.PLAYER;
 
     public string Name => Player.Name;
     public IGameConnection Connection { get; }
@@ -55,14 +55,14 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
         {
             switch (Player.PlayerClass.GetClass())
             {
-                case EPlayerClass.Warrior:
-                    return EAntiFlags.Warrior;
-                case EPlayerClass.Ninja:
-                    return EAntiFlags.Assassin;
-                case EPlayerClass.Sura:
-                    return EAntiFlags.Sura;
-                case EPlayerClass.Shaman:
-                    return EAntiFlags.Shaman;
+                case EPlayerClass.WARRIOR:
+                    return EAntiFlags.WARRIOR;
+                case EPlayerClass.NINJA:
+                    return EAntiFlags.ASSASSIN;
+                case EPlayerClass.SURA:
+                    return EAntiFlags.SURA;
+                case EPlayerClass.SHAMAN:
+                    return EAntiFlags.SHAMAN;
                 default:
                     return 0;
             }
@@ -75,10 +75,10 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
         {
             switch (Player.PlayerClass.GetGender())
             {
-                case EPlayerGender.Male:
-                    return EAntiFlags.Male;
-                case EPlayerGender.Female:
-                    return EAntiFlags.Female;
+                case EPlayerGender.MALE:
+                    return EAntiFlags.MALE;
+                case EPlayerGender.FEMALE:
+                    return EAntiFlags.FEMALE;
                 default:
                     return 0;
             }
@@ -87,12 +87,12 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
 
     private uint _defence;
 
-    private const int PersistInterval = 30 * 1000; // 30s
+    private const int PERSIST_INTERVAL = 30 * 1000; // 30s
     private int _persistTime = 0;
-    private const int HealthRegenInterval = 3 * 1000;
-    private const int ManaRegenInterval = 3 * 1000;
-    private double _healthRegenTime = HealthRegenInterval;
-    private double _manaRegenTime = ManaRegenInterval;
+    private const int HEALTH_REGEN_INTERVAL = 3 * 1000;
+    private const int MANA_REGEN_INTERVAL = 3 * 1000;
+    private double _healthRegenTime = HEALTH_REGEN_INTERVAL;
+    private double _manaRegenTime = MANA_REGEN_INTERVAL;
     private readonly IItemManager _itemManager;
     private readonly IJobManager _jobManager;
     private readonly IExperienceManager _experienceManager;
@@ -121,7 +121,7 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
         _scope = serviceProvider.CreateScope();
         _itemRepository = _scope.ServiceProvider.GetRequiredService<IItemRepository>();
         Inventory = new Inventory(itemManager, _cacheManager, _logger, _itemRepository, player.Id,
-            WindowType.Inventory, InventoryConstants.DEFAULT_INVENTORY_WIDTH,
+            WindowType.INVENTORY, InventoryConstants.DEFAULT_INVENTORY_WIDTH,
             InventoryConstants.DEFAULT_INVENTORY_HEIGHT, InventoryConstants.DEFAULT_INVENTORY_PAGES);
         Inventory.OnSlotChanged += Inventory_OnSlotChanged;
         Player = player;
@@ -166,8 +166,8 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
         await QuickSlotBar.Load();
         Player.MaxHp = GetMaxHp(_jobManager, Player.PlayerClass, Player.Level, Player.Ht);
         Player.MaxSp = GetMaxSp(_jobManager, Player.PlayerClass, Player.Level, Player.Iq);
-        Health = (int)GetPoint(EPoint.MaxHp); // todo: cache hp of player
-        Mana = (int)GetPoint(EPoint.MaxSp);
+        Health = (int)GetPoint(EPoint.MAX_HP); // todo: cache hp of player
+        Mana = (int)GetPoint(EPoint.MAX_SP);
         await LoadPermGroups();
         await Skills.LoadAsync();
         var guildManager = _scope.ServiceProvider.GetRequiredService<IGuildManager>();
@@ -226,8 +226,8 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
         {
             PositionX = PositionX,
             PositionY = PositionY,
-            ServerAddress = BitConverter.ToInt32(host.Ip.GetAddressBytes()),
-            ServerPort = host.Port
+            ServerAddress = BitConverter.ToInt32(host._ip.GetAddressBytes()),
+            ServerPort = host._port
         };
         Connection.Send(packet);
     }
@@ -246,7 +246,7 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
         }
 
         if (Map is Map localMap &&
-            localMap.IsAttr(new Coordinates((uint)x, (uint)y), EMapAttributes.Block | EMapAttributes.Object))
+            localMap.IsAttr(new Coordinates((uint)x, (uint)y), EMapAttributes.BLOCK | EMapAttributes.OBJECT))
         {
             _logger.LogDebug("Not allowed to move character {Name} to map position ({X}, {Y}) with attributes Block or Object", Name, x, y);
             return;
@@ -261,14 +261,14 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
 
     private void CalculateDefence()
     {
-        _defence = GetPoint(EPoint.Level) + (uint)Math.Floor(0.8 * GetPoint(EPoint.Ht));
+        _defence = GetPoint(EPoint.LEVEL) + (uint)Math.Floor(0.8 * GetPoint(EPoint.HT));
 
         foreach (var slot in Enum.GetValues<EquipmentSlot>())
         {
             var item = Inventory.EquipmentWindow.GetItem(slot);
             if (item == null) continue;
             var proto = _itemManager.GetItem(item.ItemId);
-            if (proto is null || !proto.IsType(EItemType.Armor)) continue;
+            if (proto is null || !proto.IsType(EItemType.ARMOR)) continue;
 
             _defence += (uint)proto.Values[1] + (uint)proto.Values[5] * 2;
         }
@@ -287,9 +287,9 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
             var item = Inventory.EquipmentWindow.GetItem(slot);
             if (item == null) continue;
             var proto = _itemManager.GetItem(item.ItemId);
-            if (proto is null || !proto.IsType(EItemType.Armor)) continue;
+            if (proto is null || !proto.IsType(EItemType.ARMOR)) continue;
 
-            modifier += proto.GetApplyValue(EApplyType.MovSpeed);
+            modifier += proto.GetApplyValue(EApplyType.MOV_SPEED);
         }
 
         var calculatedSpeed = MovementSpeed * (1 + modifier / 100);
@@ -309,7 +309,7 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
             var proto = _itemManager.GetItem(item.ItemId);
             if (proto == null) continue;
 
-            modifier += proto.GetApplyValue(EApplyType.AttackSpeed);
+            modifier += proto.GetApplyValue(EApplyType.ATTACK_SPEED);
         }
 
         AttackSpeed = (byte)Math.Min(AttackSpeed * (1 + modifier / 100), byte.MaxValue);
@@ -375,9 +375,9 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
             {
                 Move(Player.Empire switch
                 {
-                    EEmpire.Chunjo => townCoordinates.Chunjo,
-                    EEmpire.Jinno => townCoordinates.Jinno,
-                    EEmpire.Shinsoo => townCoordinates.Shinsoo,
+                    EEmpire.CHUNJO => townCoordinates.Chunjo,
+                    EEmpire.JINNO => townCoordinates.Jinno,
+                    EEmpire.SHINSOO => townCoordinates.Shinsoo,
                     _ => throw new ArgumentOutOfRangeException(nameof(Player.Empire),
                         $"Can't get empire coordinates for empire {Player.Empire}")
                 });
@@ -387,7 +387,7 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
         // todo spawn with invisible affect
 
         SendChatCommand("CloseRestartWindow");
-        Connection.SetPhase(EPhase.Game);
+        Connection.SetPhase(EPhase.GAME);
 
         var remove = new RemoveCharacter {Vid = Vid};
 
@@ -413,7 +413,7 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
     {
         var shouldHavePoints = (uint)((Player.Level - 1) * 3);
         var steps = (byte)Math.Floor(
-            GetPoint(EPoint.Experience) / (double)GetPoint(EPoint.NeededExperience) * 4);
+            GetPoint(EPoint.EXPERIENCE) / (double)GetPoint(EPoint.NEEDED_EXPERIENCE) * 4);
         shouldHavePoints += steps;
 
         if (shouldHavePoints <= Player.GivenStatusPoints)
@@ -437,12 +437,12 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
 
     private bool CheckLevelUp()
     {
-        var exp = GetPoint(EPoint.Experience);
-        var needed = GetPoint(EPoint.NeededExperience);
+        var exp = GetPoint(EPoint.EXPERIENCE);
+        var needed = GetPoint(EPoint.NEEDED_EXPERIENCE);
 
         if (needed > 0 && exp >= needed)
         {
-            SetPoint(EPoint.Experience, exp - needed);
+            SetPoint(EPoint.EXPERIENCE, exp - needed);
             LevelUp();
 
             if (!CheckLevelUp())
@@ -464,8 +464,8 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
             return;
         }
 
-        AddPoint(EPoint.Skill, level);
-        AddPoint(EPoint.SubSkill, level < 10 ? 0 : level - Math.Max((int)Player.Level, 9));
+        AddPoint(EPoint.SKILL, level);
+        AddPoint(EPoint.SUB_SKILL, level < 10 ? 0 : level - Math.Max((int)Player.Level, 9));
 
         Player.Level = (byte)(Player.Level + level);
 
@@ -487,9 +487,9 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
 
         if (attackStatus is null) return 0;
 
-        var levelBonus = GetPoint(EPoint.Level) * 2;
+        var levelBonus = GetPoint(EPoint.LEVEL) * 2;
         var statusBonus = (
-            4 * GetPoint(EPoint.St) +
+            4 * GetPoint(EPoint.ST) +
             2 * GetPoint(attackStatus.Value)
         ) / 3;
         var weaponDamage = baseDamage * 2;
@@ -499,7 +499,7 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
 
     public uint GetHitRate()
     {
-        var b = (GetPoint(EPoint.Dx) * 4 + GetPoint(EPoint.Level) * 2) / 6;
+        var b = (GetPoint(EPoint.DX) * 4 + GetPoint(EPoint.LEVEL) * 2) / 6;
         return 100 * ((b > 90 ? 90 : b) + 210) / 300;
     }
 
@@ -509,45 +509,45 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
 
         base.Update(elapsedTime);
 
-        var maxHp = GetPoint(EPoint.MaxHp);
+        var maxHp = GetPoint(EPoint.MAX_HP);
         if (Health < maxHp && !Dead)
         {
             _healthRegenTime -= elapsedTime;
             if (_healthRegenTime <= 0)
             {
-                var factor = State == EEntityState.Idle ? 0.05 : 0.01;
+                var factor = State == EEntityState.IDLE ? 0.05 : 0.01;
                 Health = Math.Min((int)maxHp, Health + 15 + (int)(maxHp * factor));
                 SendPoints();
 
-                _healthRegenTime += HealthRegenInterval;
+                _healthRegenTime += HEALTH_REGEN_INTERVAL;
             }
         }
 
-        var maxSp = GetPoint(EPoint.MaxSp);
+        var maxSp = GetPoint(EPoint.MAX_SP);
         if (Mana < maxSp && !Dead)
         {
             _manaRegenTime -= elapsedTime;
             if (_manaRegenTime <= 0)
             {
-                var factor = State == EEntityState.Idle ? 0.05 : 0.01;
+                var factor = State == EEntityState.IDLE ? 0.05 : 0.01;
                 Mana = Math.Min((int)maxSp, Mana + 15 + (int)(maxSp * factor));
                 SendPoints();
 
-                _manaRegenTime += ManaRegenInterval;
+                _manaRegenTime += MANA_REGEN_INTERVAL;
             }
         }
 
         _persistTime += (int)elapsedTime;
-        if (_persistTime > PersistInterval)
+        if (_persistTime > PERSIST_INTERVAL)
         {
             Persist().Wait(); // TODO
-            _persistTime -= PersistInterval;
+            _persistTime -= PERSIST_INTERVAL;
         }
     }
 
     public override EBattleType GetBattleType()
     {
-        return EBattleType.Melee;
+        return EBattleType.MELEE;
     }
 
     public override int GetMinDamage()
@@ -586,11 +586,11 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
 
         switch (point)
         {
-            case EPoint.Level:
+            case EPoint.LEVEL:
                 LevelUp(value);
                 break;
-            case EPoint.Experience:
-                if (_experienceManager.GetNeededExperience((byte)GetPoint(EPoint.Level)) == 0)
+            case EPoint.EXPERIENCE:
+                if (_experienceManager.GetNeededExperience((byte)GetPoint(EPoint.LEVEL)) == 0)
                 {
                     // we cannot add experience if no level up is possible
                     return;
@@ -608,8 +608,8 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
 
                 if (value > 0)
                 {
-                    var partialLevelUps = CalcPartialLevelUps(before, GetPoint(EPoint.Experience),
-                        GetPoint(EPoint.NeededExperience));
+                    var partialLevelUps = CalcPartialLevelUps(before, GetPoint(EPoint.EXPERIENCE),
+                        GetPoint(EPoint.NEEDED_EXPERIENCE));
                     if (partialLevelUps > 0)
                     {
                         Health = Player.MaxHp;
@@ -624,31 +624,31 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
                 }
 
                 break;
-            case EPoint.Gold:
+            case EPoint.GOLD:
                 var gold = Player.Gold + value;
                 Player.Gold = (uint)Math.Min(uint.MaxValue, Math.Max(0, gold));
                 break;
-            case EPoint.St:
+            case EPoint.ST:
                 Player.St += (byte)value;
                 break;
-            case EPoint.Dx:
+            case EPoint.DX:
                 Player.Dx += (byte)value;
                 break;
-            case EPoint.Ht:
+            case EPoint.HT:
                 Player.Ht += (byte)value;
                 break;
-            case EPoint.Iq:
+            case EPoint.IQ:
                 Player.Iq += (byte)value;
                 break;
-            case EPoint.Hp:
+            case EPoint.HP:
                 if (value <= 0)
                 {
                     // 0 gets ignored by client
                     // Setting the Hp to 0 does not register as killing the player
                 }
-                else if (value > GetPoint(EPoint.MaxHp))
+                else if (value > GetPoint(EPoint.MAX_HP))
                 {
-                    Health = GetPoint(EPoint.MaxHp);
+                    Health = GetPoint(EPoint.MAX_HP);
                 }
                 else
                 {
@@ -656,14 +656,14 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
                 }
 
                 break;
-            case EPoint.Sp:
+            case EPoint.SP:
                 if (value <= 0)
                 {
                     // 0 gets ignored by client
                 }
-                else if (value > GetPoint(EPoint.MaxSp))
+                else if (value > GetPoint(EPoint.MAX_SP))
                 {
-                    Mana = GetPoint(EPoint.MaxSp);
+                    Mana = GetPoint(EPoint.MAX_SP);
                 }
                 else
                 {
@@ -671,13 +671,13 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
                 }
 
                 break;
-            case EPoint.StatusPoints:
+            case EPoint.STATUS_POINTS:
                 Player.AvailableStatusPoints += (uint)value;
                 break;
-            case EPoint.Skill:
+            case EPoint.SKILL:
                 Player.AvailableSkillPoints += (uint)value;
                 break;
-            case EPoint.PlayTime:
+            case EPoint.PLAY_TIME:
                 Player.PlayTime += (uint)value;
                 break;
             default:
@@ -702,21 +702,21 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
     {
         switch (point)
         {
-            case EPoint.Level:
-                var currentLevel = GetPoint(EPoint.Level);
+            case EPoint.LEVEL:
+                var currentLevel = GetPoint(EPoint.LEVEL);
                 LevelUp((int)(value - currentLevel));
                 break;
-            case EPoint.Experience:
+            case EPoint.EXPERIENCE:
                 Player.Experience = value;
                 CheckLevelUp();
                 break;
-            case EPoint.Gold:
+            case EPoint.GOLD:
                 Player.Gold = value;
                 break;
-            case EPoint.PlayTime:
+            case EPoint.PLAY_TIME:
                 Player.PlayTime = value;
                 break;
-            case EPoint.Skill:
+            case EPoint.SKILL:
                 Player.AvailableSkillPoints = (byte)value;
                 break;
             default:
@@ -729,7 +729,7 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
     {
         switch (args.Slot)
         {
-            case EquipmentSlot.Weapon:
+            case EquipmentSlot.WEAPON:
                 if (args.ItemInstance is not null)
                 {
                     var item = _itemManager.GetItem(args.ItemInstance.ItemId);
@@ -743,7 +743,7 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
                 }
 
                 break;
-            case EquipmentSlot.Body:
+            case EquipmentSlot.BODY:
                 if (args.ItemInstance is not null)
                 {
                     Player.BodyPart = args.ItemInstance.ItemId;
@@ -754,7 +754,7 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
                 }
                 
                 break;
-            case EquipmentSlot.Hair:
+            case EquipmentSlot.HAIR:
                 if (args.ItemInstance is not null)
                 {
                     Player.HairPart = args.ItemInstance.GetHairPartOffsetForClient(Player.PlayerClass.GetClass());
@@ -773,52 +773,52 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
     {
         switch (point)
         {
-            case EPoint.Level:
+            case EPoint.LEVEL:
                 return Player.Level;
-            case EPoint.Experience:
+            case EPoint.EXPERIENCE:
                 return Player.Experience;
-            case EPoint.NeededExperience:
+            case EPoint.NEEDED_EXPERIENCE:
                 return _experienceManager.GetNeededExperience(Player.Level);
-            case EPoint.Hp:
+            case EPoint.HP:
                 return (uint)Health;
-            case EPoint.Sp:
+            case EPoint.SP:
                 return (uint)Mana;
-            case EPoint.MaxHp:
+            case EPoint.MAX_HP:
                 return Player.MaxHp;
-            case EPoint.MaxSp:
+            case EPoint.MAX_SP:
                 return Player.MaxSp;
-            case EPoint.St:
+            case EPoint.ST:
                 return Player.St;
-            case EPoint.Ht:
+            case EPoint.HT:
                 return Player.Ht;
-            case EPoint.Dx:
+            case EPoint.DX:
                 return Player.Dx;
-            case EPoint.Iq:
+            case EPoint.IQ:
                 return Player.Iq;
-            case EPoint.AttackSpeed:
+            case EPoint.ATTACK_SPEED:
                 return AttackSpeed;
-            case EPoint.MoveSpeed:
+            case EPoint.MOVE_SPEED:
                 return MovementSpeed;
-            case EPoint.Gold:
+            case EPoint.GOLD:
                 return Player.Gold;
-            case EPoint.MinWeaponDamage:
+            case EPoint.MIN_WEAPON_DAMAGE:
                 return Player.MinWeaponDamage;
-            case EPoint.MaxWeaponDamage:
+            case EPoint.MAX_WEAPON_DAMAGE:
                 return Player.MaxWeaponDamage;
-            case EPoint.MinAttackDamage:
+            case EPoint.MIN_ATTACK_DAMAGE:
                 return Player.MinAttackDamage;
-            case EPoint.MaxAttackDamage:
+            case EPoint.MAX_ATTACK_DAMAGE:
                 return Player.MaxAttackDamage;
-            case EPoint.Defence:
-            case EPoint.DefenceGrade:
+            case EPoint.DEFENCE:
+            case EPoint.DEFENCE_GRADE:
                 return _defence;
-            case EPoint.StatusPoints:
+            case EPoint.STATUS_POINTS:
                 return Player.AvailableStatusPoints;
-            case EPoint.PlayTime:
+            case EPoint.PLAY_TIME:
                 return (uint)TimeSpan.FromMilliseconds(Player.PlayTime).TotalMinutes;
-            case EPoint.Skill:
+            case EPoint.SKILL:
                 return Player.AvailableSkillPoints;
-            case EPoint.SubSkill:
+            case EPoint.SUB_SKILL:
                 return 1;
             default:
                 if (Enum.GetValues<EPoint>().Contains(point))
@@ -894,7 +894,7 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
         var item = groundItem.Item;
         if (item.ItemId == 1)
         {
-            AddPoint(EPoint.Gold, (int)groundItem.Amount);
+            AddPoint(EPoint.GOLD, (int)groundItem.Amount);
             SendPoints();
             Map.DespawnEntity(groundItem);
 
@@ -932,12 +932,12 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
 
         // todo prevent crashing the server with dropping gold too often ;)
 
-        if (amount > GetPoint(EPoint.Gold))
+        if (amount > GetPoint(EPoint.GOLD))
         {
             return; // We can't drop more gold than we have ^^
         }
 
-        AddPoint(EPoint.Gold, -(int)amount);
+        AddPoint(EPoint.GOLD, -(int)amount);
         SendPoints();
 
         var item = _itemManager.CreateItem(proto, 1); // count will be overwritten as it's gold
@@ -960,7 +960,7 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
     public int GetMobItemRate()
     {
         // todo: implement server rates, and premium server rates
-        if (GetPremiumRemainSeconds(EPremiumType.Item) > 0)
+        if (GetPremiumRemainSeconds(EPremiumType.ITEM) > 0)
             return 100;
         return 100_000_000;
     }
@@ -986,14 +986,14 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
     public bool HasUniqueItemEquipped(uint itemProtoId)
     {
         {
-            var item = Inventory.EquipmentWindow.GetItem(EquipmentSlot.Unique1);
+            var item = Inventory.EquipmentWindow.GetItem(EquipmentSlot.UNIQUE1);
             if (item != null && item.ItemId == itemProtoId)
             {
                 return true;
             }
         }
         {
-            var item = Inventory.EquipmentWindow.GetItem(EquipmentSlot.Unique2);
+            var item = Inventory.EquipmentWindow.GetItem(EquipmentSlot.UNIQUE2);
             if (item != null && item.ItemId == itemProtoId)
             {
                 return true;
@@ -1010,14 +1010,14 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
         var totalSessionTime = Connection.Server.ServerTime - startSessionTime;
         if (totalSessionTime <= 0) return;
 
-        AddPoint(EPoint.PlayTime, (int)totalSessionTime);
+        AddPoint(EPoint.PLAY_TIME, (int)totalSessionTime);
     }
 
     public ItemInstance? GetItem(WindowType window, ushort position)
     {
         switch (window)
         {
-            case WindowType.Inventory:
+            case WindowType.INVENTORY:
                 if (position >= Inventory.Size)
                 {
                     // Equipment
@@ -1037,7 +1037,7 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
     {
         switch (window)
         {
-            case WindowType.Inventory:
+            case WindowType.INVENTORY:
                 if (position >= Inventory.Size)
                 {
                     // Equipment
@@ -1068,7 +1068,7 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
             return false;
         }
 
-        if (proto.WearFlags == 0 && !proto.IsType(EItemType.Costume))
+        if (proto.WearFlags == 0 && !proto.IsType(EItemType.COSTUME))
         {
             // No wear flags -> not wearable
             return false;
@@ -1089,7 +1089,7 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
         // Check limits (level)
         foreach (var limit in proto.Limits)
         {
-            if (limit.Type == (byte)ELimitType.Level)
+            if (limit.Type == (byte)ELimitType.LEVEL)
             {
                 if (Player.Level < limit.Value)
                 {
@@ -1117,7 +1117,7 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
     {
         switch (item.Window)
         {
-            case WindowType.Inventory:
+            case WindowType.INVENTORY:
                 if (item.Position >= Inventory.Size)
                 {
                     // Equipment
@@ -1142,7 +1142,7 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
     {
         switch (window)
         {
-            case WindowType.Inventory:
+            case WindowType.INVENTORY:
                 if (position >= Inventory.Size)
                 {
                     // Equipment
@@ -1247,7 +1247,7 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
         connection.Send(new SpawnCharacter
         {
             Vid = Vid,
-            CharacterType = EEntityType.Player,
+            CharacterType = EEntityType.PLAYER,
             Angle = 0,
             PositionX = PositionX,
             PositionY = PositionY,
@@ -1306,7 +1306,7 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
     {
         var chat = new ChatOutcoming
         {
-            MessageType = ChatMessageType.Normal, Vid = Vid, Empire = Empire, Message = message
+            MessageType = ChatMessageType.NORMAL, Vid = Vid, Empire = Empire, Message = message
         };
         Connection.Send(chat);
     }
@@ -1315,7 +1315,7 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
     {
         var chat = new ChatOutcoming
         {
-            MessageType = ChatMessageType.Command, Vid = 0, Empire = Empire, Message = message
+            MessageType = ChatMessageType.COMMAND, Vid = 0, Empire = Empire, Message = message
         };
         Connection.Send(chat);
     }
@@ -1324,7 +1324,7 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
     {
         var chat = new ChatOutcoming
         {
-            MessageType = ChatMessageType.Info, Vid = 0, Empire = Empire, Message = message
+            MessageType = ChatMessageType.INFO, Vid = 0, Empire = Empire, Message = message
         };
         Connection.Send(chat);
     }

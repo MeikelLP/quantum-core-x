@@ -2,10 +2,10 @@ namespace QuantumCore.API.Game.Types;
 
 public enum EPhase : byte
 {
-    Handshake = 1,
-    Login = 2,
-    Select = 3,
-    Loading = 4,
-    Game = 5,
-    Auth = 10
+    HANDSHAKE = 1,
+    LOGIN = 2,
+    SELECT = 3,
+    LOADING = 4,
+    GAME = 5,
+    AUTH = 10
 }

@@ -47,13 +47,13 @@ public class AnimationManager : IAnimationManager, ILoadable
             var pc1 = Path.Join("pc", characterClass);
             var pc2 = Path.Join("pc2", characterClass);
 
-            await LoadAnimation(i, AnimationType.Walk, AnimationSubType.General,
+            await LoadAnimation(i, AnimationType.WALK, AnimationSubType.GENERAL,
                 Path.Join(pc1, "general", "walk.msa"));
-            await LoadAnimation(i, AnimationType.Run, AnimationSubType.General,
+            await LoadAnimation(i, AnimationType.RUN, AnimationSubType.GENERAL,
                 Path.Join(pc1, "general", "run.msa"));
-            await LoadAnimation(i + 4, AnimationType.Walk, AnimationSubType.General,
+            await LoadAnimation(i + 4, AnimationType.WALK, AnimationSubType.GENERAL,
                 Path.Join(pc2, "general", "walk.msa"));
-            await LoadAnimation(i + 4, AnimationType.Run, AnimationSubType.General,
+            await LoadAnimation(i + 4, AnimationType.RUN, AnimationSubType.GENERAL,
                 Path.Join(pc2, "general", "run.msa"));
         }
 
@@ -106,12 +106,12 @@ public class AnimationManager : IAnimationManager, ILoadable
 
             if (parts[1].Equals("run", StringComparison.InvariantCultureIgnoreCase))
             {
-                await LoadAnimation(monster.Id, AnimationType.Run, AnimationSubType.General,
+                await LoadAnimation(monster.Id, AnimationType.RUN, AnimationSubType.GENERAL,
                     Path.Join(folder, parts[2]));
             }
             else if (parts[1].Equals("walk", StringComparison.InvariantCultureIgnoreCase))
             {
-                await LoadAnimation(monster.Id, AnimationType.Walk, AnimationSubType.General,
+                await LoadAnimation(monster.Id, AnimationType.WALK, AnimationSubType.GENERAL,
                     Path.Join(folder, parts[2]));
             }
         }

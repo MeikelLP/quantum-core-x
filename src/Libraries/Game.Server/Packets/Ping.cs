@@ -2,7 +2,7 @@
 
 namespace QuantumCore.Game.Packets;
 
-[Packet(0x2C, EDirection.Outgoing, Sequence = true)]
+[Packet(0x2C, EDirection.OUTGOING, Sequence = true)]
 [PacketGenerator]
 public partial class Ping
 {

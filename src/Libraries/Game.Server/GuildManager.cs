@@ -52,7 +52,7 @@ public class GuildManager : IGuildManager
         {
             Position = 1,
             Name = "Leader",
-            Permissions = GuildRankPermissions.All
+            Permissions = GuildRankPermissions.ALL
         };
         var guild = new Guild
         {

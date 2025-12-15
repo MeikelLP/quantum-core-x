@@ -3,7 +3,7 @@ using QuantumCore.Networking;
 
 namespace QuantumCore.Game.Packets;
 
-[Packet(0x0d, EDirection.Incoming, Sequence = true)]
+[Packet(0x0d, EDirection.INCOMING, Sequence = true)]
 [PacketGenerator]
 public partial class ItemMove
 {

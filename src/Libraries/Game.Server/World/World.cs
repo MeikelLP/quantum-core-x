@@ -70,9 +70,9 @@ public class World : IWorld, ILoadable
 
 
         // Initialize world grid and place maps on it
-        var maxX = _maps.Max(x => x.Value.Position.X + x.Value.Width * Map.MapUnit);
-        var maxY = _maps.Max(x => x.Value.Position.Y + x.Value.Height * Map.MapUnit);
-        _world.Resize(maxX / Map.MapUnit, maxY / Map.MapUnit);
+        var maxX = _maps.Max(x => x.Value.Position.X + x.Value.Width * Map.MAP_UNIT);
+        var maxY = _maps.Max(x => x.Value.Position.Y + x.Value.Height * Map.MAP_UNIT);
+        _world.Resize(maxX / Map.MAP_UNIT, maxY / Map.MAP_UNIT);
         foreach (var map in _maps.Values)
         {
             for (var x = map.UnitX; x < map.UnitX + map.Width; x++)
@@ -193,8 +193,8 @@ public class World : IWorld, ILoadable
 
     public IMap? GetMapAt(uint x, uint y)
     {
-        var gridX = x / Map.MapUnit;
-        var gridY = y / Map.MapUnit;
+        var gridX = x / Map.MAP_UNIT;
+        var gridY = y / Map.MAP_UNIT;
 
         return _world.Get(gridX, gridY);
     }
@@ -231,7 +231,7 @@ public class World : IWorld, ILoadable
         if (map == null)
         {
             _logger.LogWarning("No available host for map at {X}|{Y}", x, y);
-            return new CoreHost {Ip = IPAddress.None, Port = 0};
+            return new CoreHost {_ip = IPAddress.None, _port = 0};
         }
 
         if (map is RemoteMap remoteMap)
@@ -243,13 +243,13 @@ public class World : IWorld, ILoadable
                 throw new InvalidOperationException("Cannot handle this situation. See logs.");
             }
 
-            return new CoreHost {Ip = remoteMap.Host, Port = remoteMap.Port};
+            return new CoreHost {_ip = remoteMap.Host, _port = remoteMap.Port};
         }
 
         return new CoreHost
         {
-            Ip = _serviceProvider.GetRequiredService<IServerBase>().IpAddress, // lazy because of dependency loop
-            Port = (ushort)GameServer.Instance.Port
+            _ip = _serviceProvider.GetRequiredService<IServerBase>().IpAddress, // lazy because of dependency loop
+            _port = (ushort)GameServer.Instance.Port
         };
     }
 

@@ -3,10 +3,10 @@
 [Flags]
 public enum EDamageFlags : byte
 {
-    Normal = 1 << 0, 
-    Poison = 1 << 1,
-    Dodge = 1 << 2,
-    Blocked = 1 << 3,
-    Piercing = 1 << 4,
-    Critical = 1 << 5
+    NORMAL = 1 << 0, 
+    POISON = 1 << 1,
+    DODGE = 1 << 2,
+    BLOCKED = 1 << 3,
+    PIERCING = 1 << 4,
+    CRITICAL = 1 << 5
 }

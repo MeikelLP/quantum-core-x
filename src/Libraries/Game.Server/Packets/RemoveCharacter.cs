@@ -2,7 +2,7 @@ using QuantumCore.Networking;
 
 namespace QuantumCore.Game.Packets;
 
-[Packet(0x02, EDirection.Outgoing)]
+[Packet(0x02, EDirection.OUTGOING)]
 [PacketGenerator]
 public partial class RemoveCharacter
 {

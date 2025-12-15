@@ -10,13 +10,13 @@ public static class DropExtensions
 {
     public static bool CanDropFor(this CommonDropEntry drop, IPlayerEntity player)
     {
-        return drop.MinLevel <= player.GetPoint(EPoint.Level) &&
-               drop.MaxLevel >= player.GetPoint(EPoint.Level);
+        return drop.MinLevel <= player.GetPoint(EPoint.LEVEL) &&
+               drop.MaxLevel >= player.GetPoint(EPoint.LEVEL);
     }
 
     public static bool CanDropFor(this LevelItemGroup drop, IPlayerEntity player)
     {
-        return drop.LevelLimit <= player.GetPoint(EPoint.Level);
+        return drop.LevelLimit <= player.GetPoint(EPoint.LEVEL);
     }
 
     public static ImmutableArray<CommonDropEntry> GetPossibleCommonDropsForPlayer(this IDropProvider dropProvider,

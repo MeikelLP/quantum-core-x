@@ -14,7 +14,7 @@ public interface IPlayerSkills
     void ClearSubSkills();
     void Reset(ESkill skillId);
     void SetLevel(ESkill skillId, ESkillLevel level);
-    void SkillUp(ESkill skillId, ESkillLevelMethod method = ESkillLevelMethod.Point);
+    void SkillUp(ESkill skillId, ESkillLevelMethod method = ESkillLevelMethod.POINT);
     bool CanUse(ESkill skillId);
 
     /// <summary>

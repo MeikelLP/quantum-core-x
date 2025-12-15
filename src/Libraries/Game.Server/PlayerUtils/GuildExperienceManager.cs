@@ -40,7 +40,7 @@ public class GuildExperienceManager : IGuildExperienceManager
             return;
         }
 
-        const char delimiter = ';';
+        const char DELIMITER = ';';
         var lines = await File.ReadAllLinesAsync(path, token);
         for (var i = 0; i < lines.Length; i++)
         {
@@ -50,7 +50,7 @@ public class GuildExperienceManager : IGuildExperienceManager
                 break;
             }
 
-            var parts = line.Split(delimiter);
+            var parts = line.Split(DELIMITER);
 
             if (!uint.TryParse(parts[0], out var experience))
             {

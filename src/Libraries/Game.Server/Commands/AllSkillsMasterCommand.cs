@@ -14,7 +14,7 @@ public class AllSkillsMasterCommand : ICommandHandler
         {
             if (context.Player.Skills.CanUse(skill))
             {
-                context.Player.Skills.SetLevel(skill, PlayerSkills.SkillMaxLevel);
+                context.Player.Skills.SetLevel(skill, PlayerSkills.SKILL_MAX_LEVEL);
             }
         }
 

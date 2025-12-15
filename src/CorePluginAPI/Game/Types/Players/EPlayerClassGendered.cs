@@ -2,12 +2,12 @@
 
 public enum EPlayerClassGendered : byte
 {
-    WarriorMale = 0,
-    NinjaFemale = 1,
-    SuraMale = 2,
-    ShamanFemale = 3,
-    WarriorFemale = 4,
-    NinjaMale = 5,
-    SuraFemale = 6,
-    ShamanMale = 7,
+    WARRIOR_MALE = 0,
+    NINJA_FEMALE = 1,
+    SURA_MALE = 2,
+    SHAMAN_FEMALE = 3,
+    WARRIOR_FEMALE = 4,
+    NINJA_MALE = 5,
+    SURA_FEMALE = 6,
+    SHAMAN_MALE = 7,
 }

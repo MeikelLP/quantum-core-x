@@ -30,7 +30,7 @@ public class MigrateTests
             .WithPassword("metin2")
             .Build();
         await container.StartAsync();
-        await ExecuteMigrate(DatabaseProvider.Mysql, container.GetConnectionString());
+        await ExecuteMigrate(DatabaseProvider.MYSQL, container.GetConnectionString());
         Assert.True(true);
     }
 
@@ -43,7 +43,7 @@ public class MigrateTests
             .WithPassword("metin2")
             .Build();
         await container.StartAsync();
-        await ExecuteMigrate(DatabaseProvider.Postgresql, container.GetConnectionString());
+        await ExecuteMigrate(DatabaseProvider.POSTGRESQL, container.GetConnectionString());
         Assert.True(true);
     }
 
@@ -51,7 +51,7 @@ public class MigrateTests
     public async Task Sqlite()
     {
         var fileName = $"{Guid.NewGuid()}.testdb";
-        await ExecuteMigrate(DatabaseProvider.Sqlite, $"Data Source={fileName};");
+        await ExecuteMigrate(DatabaseProvider.SQLITE, $"Data Source={fileName};");
         Assert.True(true);
     }
 
@@ -61,7 +61,7 @@ public class MigrateTests
             .AddQuantumCoreTestLogger(_testOutputHelper)
             .AddSingleton<IConfiguration>(_ => new ConfigurationBuilder().Build())
             .AddAuthDatabase()
-            .Configure<DatabaseOptions>(HostingOptions.ModeAuth, opts =>
+            .Configure<DatabaseOptions>(HostingOptions.MODE_AUTH, opts =>
             {
                 opts.ConnectionString = connectionString;
                 opts.Provider = provider;

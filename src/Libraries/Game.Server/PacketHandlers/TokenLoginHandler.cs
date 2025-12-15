@@ -90,15 +90,15 @@ public class TokenLoginHandler : IGamePacketHandler<TokenLogin>
             var guild = await _guildManager.GetGuildForPlayerAsync(player.Id, cancellationToken);
             var slot = (int)player.Slot;
             characters.CharacterList[slot] = player.ToCharacter();
-            var advertisedIp = ResolveAdvertisedAddress(host.Ip, ctx.Connection.BoundIpAddress);
+            var advertisedIp = ResolveAdvertisedAddress(host._ip, ctx.Connection.BoundIpAddress);
             characters.CharacterList[slot].Ip = BitConverter.ToInt32(advertisedIp.GetAddressBytes());
-            characters.CharacterList[slot].Port = host.Port;
+            characters.CharacterList[slot].Port = host._port;
             characters.GuildIds[slot] = guild?.Id ?? 0;
             characters.GuildNames[slot] = guild?.Name ?? "";
         }
 
         // When there are no characters belonging to the account, the empire status is stored in the cache.
-        var empire = EEmpire.Shinsoo;
+        var empire = EEmpire.SHINSOO;
         if (charactersFromCacheOrDb.Length > 0)
         {
             empire = charactersFromCacheOrDb[0].Empire;
@@ -108,7 +108,7 @@ public class TokenLoginHandler : IGamePacketHandler<TokenLogin>
 
         // TODO:: set player id to character?
         ctx.Connection.Send(new Empire {EmpireId = empire});
-        ctx.Connection.SetPhase(EPhase.Select);
+        ctx.Connection.SetPhase(EPhase.SELECT);
         ctx.Connection.Send(characters);
     }
 

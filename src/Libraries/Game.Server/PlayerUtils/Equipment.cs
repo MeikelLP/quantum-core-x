@@ -36,31 +36,31 @@ public class Equipment : IEquipment
     {
         switch ((EquipmentSlot)(position - _offset))
         {
-            case EquipmentSlot.Body:
+            case EquipmentSlot.BODY:
                 Body = item;
                 return true;
-            case EquipmentSlot.Head:
+            case EquipmentSlot.HEAD:
                 Head = item;
                 return true;
-            case EquipmentSlot.Shoes:
+            case EquipmentSlot.SHOES:
                 Shoes = item;
                 return true;
-            case EquipmentSlot.Bracelet:
+            case EquipmentSlot.BRACELET:
                 Bracelet = item;
                 return true;
-            case EquipmentSlot.Weapon:
+            case EquipmentSlot.WEAPON:
                 Weapon = item;
                 return true;
-            case EquipmentSlot.Necklace:
+            case EquipmentSlot.NECKLACE:
                 Necklace = item;
                 return true;
-            case EquipmentSlot.Earring:
+            case EquipmentSlot.EARRING:
                 Earrings = item;
                 return true;
-            case EquipmentSlot.Costume:
+            case EquipmentSlot.COSTUME:
                 Costume = item;
                 return true;
-            case EquipmentSlot.Hair:
+            case EquipmentSlot.HAIR:
                 Hair = item;
                 return true;
         }
@@ -72,23 +72,23 @@ public class Equipment : IEquipment
     {
         switch (slot)
         {
-            case EquipmentSlot.Body:
+            case EquipmentSlot.BODY:
                 return Body;
-            case EquipmentSlot.Head:
+            case EquipmentSlot.HEAD:
                 return Head;
-            case EquipmentSlot.Shoes:
+            case EquipmentSlot.SHOES:
                 return Shoes;
-            case EquipmentSlot.Bracelet:
+            case EquipmentSlot.BRACELET:
                 return Bracelet;
-            case EquipmentSlot.Weapon:
+            case EquipmentSlot.WEAPON:
                 return Weapon;
-            case EquipmentSlot.Necklace:
+            case EquipmentSlot.NECKLACE:
                 return Necklace;
-            case EquipmentSlot.Earring:
+            case EquipmentSlot.EARRING:
                 return Earrings;
-            case EquipmentSlot.Costume:
+            case EquipmentSlot.COSTUME:
                 return Costume;
-            case EquipmentSlot.Hair:
+            case EquipmentSlot.HAIR:
                 return Hair;
         }
 
@@ -104,31 +104,31 @@ public class Equipment : IEquipment
     {
         switch ((EquipmentSlot)(item.Position - _offset))
         {
-            case EquipmentSlot.Body:
+            case EquipmentSlot.BODY:
                 Body = null;
                 return true;
-            case EquipmentSlot.Head:
+            case EquipmentSlot.HEAD:
                 Head = null;
                 return true;
-            case EquipmentSlot.Shoes:
+            case EquipmentSlot.SHOES:
                 Shoes = null;
                 return true;
-            case EquipmentSlot.Bracelet:
+            case EquipmentSlot.BRACELET:
                 Bracelet = null;
                 return true;
-            case EquipmentSlot.Weapon:
+            case EquipmentSlot.WEAPON:
                 Weapon = null;
                 return true;
-            case EquipmentSlot.Necklace:
+            case EquipmentSlot.NECKLACE:
                 Necklace = null;
                 return true;
-            case EquipmentSlot.Earring:
+            case EquipmentSlot.EARRING:
                 Earrings = null;
                 return true;
-            case EquipmentSlot.Costume:
+            case EquipmentSlot.COSTUME:
                 Costume = null;
                 return true;
-            case EquipmentSlot.Hair:
+            case EquipmentSlot.HAIR:
                 Hair = null;
                 return true;
         }
@@ -196,24 +196,24 @@ public class Equipment : IEquipment
 
         switch ((EquipmentSlot)(position - _offset))
         {
-            case EquipmentSlot.Body:
-                return wearFlags.HasFlag(EWearFlags.Body);
-            case EquipmentSlot.Head:
-                return wearFlags.HasFlag(EWearFlags.Head);
-            case EquipmentSlot.Shoes:
-                return wearFlags.HasFlag(EWearFlags.Shoes);
-            case EquipmentSlot.Bracelet:
-                return wearFlags.HasFlag(EWearFlags.Bracelet);
-            case EquipmentSlot.Weapon:
-                return wearFlags.HasFlag(EWearFlags.Weapon);
-            case EquipmentSlot.Necklace:
-                return wearFlags.HasFlag(EWearFlags.Necklace);
-            case EquipmentSlot.Earring:
-                return wearFlags.HasFlag(EWearFlags.Earrings);
-            case EquipmentSlot.Costume:
-                return proto.IsType(EItemType.Costume) && proto.IsSubtype(EItemSubtype.CostumeBody);
-            case EquipmentSlot.Hair:
-                return proto.IsType(EItemType.Costume) && proto.IsSubtype(EItemSubtype.CostumeHair);
+            case EquipmentSlot.BODY:
+                return wearFlags.HasFlag(EWearFlags.BODY);
+            case EquipmentSlot.HEAD:
+                return wearFlags.HasFlag(EWearFlags.HEAD);
+            case EquipmentSlot.SHOES:
+                return wearFlags.HasFlag(EWearFlags.SHOES);
+            case EquipmentSlot.BRACELET:
+                return wearFlags.HasFlag(EWearFlags.BRACELET);
+            case EquipmentSlot.WEAPON:
+                return wearFlags.HasFlag(EWearFlags.WEAPON);
+            case EquipmentSlot.NECKLACE:
+                return wearFlags.HasFlag(EWearFlags.NECKLACE);
+            case EquipmentSlot.EARRING:
+                return wearFlags.HasFlag(EWearFlags.EARRINGS);
+            case EquipmentSlot.COSTUME:
+                return proto.IsType(EItemType.COSTUME) && proto.IsSubtype(EItemSubtype.COSTUME_BODY);
+            case EquipmentSlot.HAIR:
+                return proto.IsType(EItemType.COSTUME) && proto.IsSubtype(EItemSubtype.COSTUME_HAIR);
             default:
                 return false;
         }
@@ -224,7 +224,7 @@ public class Equipment : IEquipment
         var proto = itemManager.GetItem(itemId);
         if (proto == null)
         {
-            return _offset + (ushort)EquipmentSlot.Body;
+            return _offset + (ushort)EquipmentSlot.BODY;
         }
 
         var slot = proto.GetWearSlot()!;

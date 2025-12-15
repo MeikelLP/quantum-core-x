@@ -48,12 +48,12 @@ public class ParserTests
     [Fact]
     public void Spawn_Regular()
     {
-        const string input = "r	751	311	10	10	0	0	5s	100	1	101";
-        var result = _parserService.GetSpawnFromLine(input);
+        const string INPUT = "r	751	311	10	10	0	0	5s	100	1	101";
+        var result = _parserService.GetSpawnFromLine(INPUT);
 
         result.Should().BeEquivalentTo(new SpawnPoint
         {
-            Type = ESpawnPointType.GroupCollection,
+            Type = ESpawnPointType.GROUP_COLLECTION,
             IsAggressive = false,
             X = 751,
             Y = 311,
@@ -70,12 +70,12 @@ public class ParserTests
     [Fact]
     public void Spawn_GroupAggressive()
     {
-        const string input = "ga	188	470	10	10	0	0	0s	100	1	1005";
-        var result = _parserService.GetSpawnFromLine(input);
+        const string INPUT = "ga	188	470	10	10	0	0	0s	100	1	1005";
+        var result = _parserService.GetSpawnFromLine(INPUT);
 
         result.Should().BeEquivalentTo(new SpawnPoint
         {
-            Type = ESpawnPointType.Group,
+            Type = ESpawnPointType.GROUP,
             IsAggressive = true,
             X = 188,
             Y = 470,

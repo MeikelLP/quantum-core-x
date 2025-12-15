@@ -3,7 +3,7 @@
 namespace QuantumCore.Game.Packets.Guild;
 
 [PacketGenerator]
-[Packet(0x4B, EDirection.Outgoing)]
+[Packet(0x4B, EDirection.OUTGOING)]
 [SubPacket(0x10, 1)]
 public partial class GuildName
 {

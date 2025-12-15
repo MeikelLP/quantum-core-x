@@ -17,7 +17,7 @@ internal class PostgresqlAuthDbContext : AuthDbContext
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         base.OnConfiguring(optionsBuilder);
-        var opts = _options.Get(HostingOptions.ModeAuth);
+        var opts = _options.Get(HostingOptions.MODE_AUTH);
         optionsBuilder.UseNpgsql(opts.ConnectionString);
     }
 }

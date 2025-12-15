@@ -17,7 +17,7 @@ public class UserCommand : ICommandHandler
     public Task ExecuteAsync(CommandContext context)
     {
         var message = string.Join("\n",
-            _server.Connections.Select(x => $"Lv{x.Player!.GetPoint(EPoint.Level)} {x.Player!.Name}"));
+            _server.Connections.Select(x => $"Lv{x.Player!.GetPoint(EPoint.LEVEL)} {x.Player!.Name}"));
 
         context.Player.SendChatInfo(message);
         return Task.CompletedTask;

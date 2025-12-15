@@ -2,7 +2,7 @@
 
 namespace QuantumCore.Game.Packets;
 
-[Packet(0x06, EDirection.Incoming, Sequence = true)]
+[Packet(0x06, EDirection.INCOMING, Sequence = true)]
 [PacketGenerator]
 public partial class SelectCharacter
 {

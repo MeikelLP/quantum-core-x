@@ -25,7 +25,7 @@ public class GameConnection : Connection, IGameConnection
 
     public GameConnection(IServerBase server, TcpClient client, ILogger<GameConnection> logger,
         PluginExecutor pluginExecutor, IWorld world,
-        [FromKeyedServices(HostingOptions.ModeGame)]
+        [FromKeyedServices(HostingOptions.MODE_GAME)]
         IPacketReader packetReader,
         ICacheManager cacheManager)
         : base(logger, pluginExecutor, packetReader)
@@ -59,13 +59,13 @@ public class GameConnection : Connection, IGameConnection
             }
             else
             {
-                if (Phase is EPhase.Game or EPhase.Loading)
+                if (Phase is EPhase.GAME or EPhase.LOADING)
                 {
                     await Player.CalculatePlayedTimeAsync();
                 }
 
                 // In case of unexpected disconnection, we need to save the player's state
-                if (Phase is EPhase.Game or EPhase.Loading or EPhase.Select)
+                if (Phase is EPhase.GAME or EPhase.LOADING or EPhase.SELECT)
                 {
                     await _world.DespawnPlayerAsync(Player);
                 }

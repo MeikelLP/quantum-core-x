@@ -2,7 +2,7 @@ using QuantumCore.Networking;
 
 namespace QuantumCore.Game.Packets;
 
-[Packet(0x3f, EDirection.Outgoing)]
+[Packet(0x3f, EDirection.OUTGOING)]
 [PacketGenerator]
 public partial class SetTarget
 {

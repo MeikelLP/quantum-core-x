@@ -33,7 +33,7 @@ public class PhaseSelectCommand : ICommandHandler
         await context.Player.CalculatePlayedTimeAsync();
 
         await _world.DespawnPlayerAsync(context.Player);
-        context.Player.Connection.SetPhase(EPhase.Select);
+        context.Player.Connection.SetPhase(EPhase.SELECT);
 
         var characters = new Characters();
         await using var scope = _serviceProvider.CreateAsyncScope();
@@ -47,8 +47,8 @@ public class PhaseSelectCommand : ICommandHandler
 
             var slot = (int)player.Slot;
             characters.CharacterList[slot] = player.ToCharacter();
-            characters.CharacterList[slot].Ip = BitConverter.ToInt32(host.Ip.GetAddressBytes());
-            characters.CharacterList[slot].Port = host.Port;
+            characters.CharacterList[slot].Ip = BitConverter.ToInt32(host._ip.GetAddressBytes());
+            characters.CharacterList[slot].Port = host._port;
             characters.GuildIds[slot] = guild?.Id ?? 0;
             characters.GuildNames[slot] = guild?.Name ?? "";
         }

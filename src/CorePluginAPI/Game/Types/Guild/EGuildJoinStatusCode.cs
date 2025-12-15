@@ -2,7 +2,7 @@
 
 public enum EGuildJoinStatusCode : byte
 {
-    Success = 0,
-    AlreadyInAnyGuild = 1,
-    GuildFull = 2
+    SUCCESS = 0,
+    ALREADY_IN_ANY_GUILD = 1,
+    GUILD_FULL = 2
 }

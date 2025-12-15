@@ -8,14 +8,14 @@ public static class PlayerExtensions
     {
         return playerClass switch
         {
-            EPlayerClassGendered.WarriorMale => EPlayerClass.Warrior,
-            EPlayerClassGendered.NinjaFemale => EPlayerClass.Ninja,
-            EPlayerClassGendered.SuraMale => EPlayerClass.Sura,
-            EPlayerClassGendered.ShamanFemale => EPlayerClass.Shaman,
-            EPlayerClassGendered.WarriorFemale => EPlayerClass.Warrior,
-            EPlayerClassGendered.NinjaMale => EPlayerClass.Ninja,
-            EPlayerClassGendered.SuraFemale => EPlayerClass.Sura,
-            EPlayerClassGendered.ShamanMale => EPlayerClass.Shaman,
+            EPlayerClassGendered.WARRIOR_MALE => EPlayerClass.WARRIOR,
+            EPlayerClassGendered.NINJA_FEMALE => EPlayerClass.NINJA,
+            EPlayerClassGendered.SURA_MALE => EPlayerClass.SURA,
+            EPlayerClassGendered.SHAMAN_FEMALE => EPlayerClass.SHAMAN,
+            EPlayerClassGendered.WARRIOR_FEMALE => EPlayerClass.WARRIOR,
+            EPlayerClassGendered.NINJA_MALE => EPlayerClass.NINJA,
+            EPlayerClassGendered.SURA_FEMALE => EPlayerClass.SURA,
+            EPlayerClassGendered.SHAMAN_MALE => EPlayerClass.SHAMAN,
             _ => throw new ArgumentOutOfRangeException(nameof(playerClass), playerClass, null)
         };
     }
@@ -24,14 +24,14 @@ public static class PlayerExtensions
     {
         return playerClass switch
         {
-            EPlayerClassGendered.WarriorMale => EPlayerGender.Male,
-            EPlayerClassGendered.NinjaFemale => EPlayerGender.Female,
-            EPlayerClassGendered.SuraMale => EPlayerGender.Male,
-            EPlayerClassGendered.ShamanFemale => EPlayerGender.Female,
-            EPlayerClassGendered.WarriorFemale => EPlayerGender.Female,
-            EPlayerClassGendered.NinjaMale => EPlayerGender.Male,
-            EPlayerClassGendered.SuraFemale => EPlayerGender.Female,
-            EPlayerClassGendered.ShamanMale => EPlayerGender.Male,
+            EPlayerClassGendered.WARRIOR_MALE => EPlayerGender.MALE,
+            EPlayerClassGendered.NINJA_FEMALE => EPlayerGender.FEMALE,
+            EPlayerClassGendered.SURA_MALE => EPlayerGender.MALE,
+            EPlayerClassGendered.SHAMAN_FEMALE => EPlayerGender.FEMALE,
+            EPlayerClassGendered.WARRIOR_FEMALE => EPlayerGender.FEMALE,
+            EPlayerClassGendered.NINJA_MALE => EPlayerGender.MALE,
+            EPlayerClassGendered.SURA_FEMALE => EPlayerGender.FEMALE,
+            EPlayerClassGendered.SHAMAN_MALE => EPlayerGender.MALE,
             _ => throw new ArgumentOutOfRangeException(nameof(playerClass), playerClass, null)
         };
     }

@@ -2,12 +2,12 @@
 
 public enum ChatMessageType : byte
 {
-    Normal,
-    Info,
+    NORMAL,
+    INFO,
 
     // What is type 2?
-    Group = 3,
-    Guild,
-    Command,
-    Shout
+    GROUP = 3,
+    GUILD,
+    COMMAND,
+    SHOUT
 }

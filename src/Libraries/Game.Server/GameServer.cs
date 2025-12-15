@@ -37,11 +37,11 @@ public class GameServer : ServerBase<GameConnection>, IGameServer
     public static GameServer Instance { get; private set; } = null!; // singleton
 
     public GameServer(
-        [FromKeyedServices(HostingOptions.ModeGame)]
+        [FromKeyedServices(HostingOptions.MODE_GAME)]
         IPacketManager packetManager, ILogger<GameServer> logger,
         PluginExecutor pluginExecutor, IServiceProvider serviceProvider,
         ICommandManager commandManager)
-        : base(packetManager, logger, pluginExecutor, serviceProvider, HostingOptions.ModeGame)
+        : base(packetManager, logger, pluginExecutor, serviceProvider, HostingOptions.MODE_GAME)
     {
         _logger = logger;
         _pluginExecutor = pluginExecutor;
@@ -72,7 +72,7 @@ public class GameServer : ServerBase<GameConnection>, IGameServer
         // Put all new connections into login phase
         RegisterNewConnectionListener(connection =>
         {
-            connection.SetPhase(EPhase.Login);
+            connection.SetPhase(EPhase.LOGIN);
             return true;
         });
 

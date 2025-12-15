@@ -52,10 +52,10 @@ public class PlayerManagerTests : IClassFixture<RedisFixture>, IClassFixture<Dat
                 })
                 .Build())
             .AddGameServices()
-            .Configure<DatabaseOptions>(HostingOptions.ModeGame, opts =>
+            .Configure<DatabaseOptions>(HostingOptions.MODE_GAME, opts =>
             {
                 opts.ConnectionString = databaseFixture.Container.GetConnectionString();
-                opts.Provider = DatabaseProvider.Mysql;
+                opts.Provider = DatabaseProvider.MYSQL;
             })
             .Configure<CacheOptions>(opts => { opts.Port = redisFixture.Container.GetMappedPublicPort(6379); })
             .BuildServiceProvider();
@@ -81,9 +81,9 @@ public class PlayerManagerTests : IClassFixture<RedisFixture>, IClassFixture<Dat
     }
 
     [Theory]
-    [InlineData(EEmpire.Shinsoo)]
-    [InlineData(EEmpire.Chunjo)]
-    [InlineData(EEmpire.Jinno)]
+    [InlineData(EEmpire.SHINSOO)]
+    [InlineData(EEmpire.CHUNJO)]
+    [InlineData(EEmpire.JINNO)]
     public async Task CreateCharacter(EEmpire empire)
     {
         var accountId = Guid.NewGuid();
@@ -119,7 +119,7 @@ public class PlayerManagerTests : IClassFixture<RedisFixture>, IClassFixture<Dat
     public async Task IsNameInUseOtherAccount()
     {
         var accountId = Guid.NewGuid();
-        await _cachePlayer.SetTempEmpireAsync(accountId, EEmpire.Chunjo);
+        await _cachePlayer.SetTempEmpireAsync(accountId, EEmpire.CHUNJO);
         await _playerManager.CreateAsync(accountId, "Testificate", 0, 1);
 
         var resultCaseSensitive = await _playerManager.IsNameInUseAsync("Testificate");
@@ -160,7 +160,7 @@ public class PlayerManagerTests : IClassFixture<RedisFixture>, IClassFixture<Dat
     [Fact]
     public async Task GetPlayerByAccountIdAndSlot()
     {
-        var empire = EEmpire.Jinno;
+        var empire = EEmpire.JINNO;
         var accountId = Guid.NewGuid();
         var input1 = new PlayerData
         {
@@ -225,19 +225,19 @@ public class PlayerManagerTests : IClassFixture<RedisFixture>, IClassFixture<Dat
 
         var accountId = Guid.NewGuid();
 
-        const uint FirstId = 100u, SecondId = 200u, ThirdId = 300u;
-        await _dbPlayerRepository.CreateAsync(new PlayerData { Id = FirstId, AccountId = accountId, Name = "PlayerA" });
-        await _dbPlayerRepository.CreateAsync(new PlayerData { Id = SecondId, AccountId = accountId, Name = "PlayerB" });
-        await _dbPlayerRepository.CreateAsync(new PlayerData { Id = ThirdId, AccountId = accountId, Name = "PlayerC" });
+        const uint FIRST_ID = 100u, SECOND_ID = 200u, THIRD_ID = 300u;
+        await _dbPlayerRepository.CreateAsync(new PlayerData { Id = FIRST_ID, AccountId = accountId, Name = "PlayerA" });
+        await _dbPlayerRepository.CreateAsync(new PlayerData { Id = SECOND_ID, AccountId = accountId, Name = "PlayerB" });
+        await _dbPlayerRepository.CreateAsync(new PlayerData { Id = THIRD_ID, AccountId = accountId, Name = "PlayerC" });
 
-        var fetched = await _playerManager.GetPlayer(SecondId);
+        var fetched = await _playerManager.GetPlayer(SECOND_ID);
 
         fetched.Should().NotBeNull();
-        fetched.Id.Should().Be(SecondId);
+        fetched.Id.Should().Be(SECOND_ID);
 
         var keys = await _cacheManager.Server.Keys("*");
         keys.Should().HaveCount(2)
-            .And.Contain($"player:{SecondId}")
+            .And.Contain($"player:{SECOND_ID}")
             .And.Contain($"players:{accountId}:1");
         keys.Should().NotContain($"players:{accountId}:0");
         keys.Should().NotContain($"players:{accountId}:2");
@@ -255,7 +255,7 @@ public class PlayerManagerTests : IClassFixture<RedisFixture>, IClassFixture<Dat
     public async Task DeleteCharacter()
     {
         var accountId = Guid.NewGuid();
-        await _cachePlayer.SetTempEmpireAsync(accountId, EEmpire.Chunjo);
+        await _cachePlayer.SetTempEmpireAsync(accountId, EEmpire.CHUNJO);
         var player = await _playerManager.CreateAsync(accountId, "Testificate", 0, 1);
         await _playerManager.DeletePlayerAsync(player);
 

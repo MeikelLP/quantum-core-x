@@ -43,8 +43,8 @@ public class SpawnMapRandomCommand : ICommandHandler<SpawnMapRandomCommandOption
         }
 
         var map = context.Player.Map!;
-        var x = Random.Shared.Next((int)map.Position.X, (int)(map.Position.X + (map.Width * Map.MapUnit) + 1));
-        var y = Random.Shared.Next((int)map.Position.Y, (int)(map.Position.Y + (map.Height * Map.MapUnit) + 1));
+        var x = Random.Shared.Next((int)map.Position.X, (int)(map.Position.X + (map.Width * Map.MAP_UNIT) + 1));
+        var y = Random.Shared.Next((int)map.Position.Y, (int)(map.Position.Y + (map.Height * Map.MAP_UNIT) + 1));
 
         // Create entity instance
         var monster = new MonsterEntity(_monsterManager, _dropProvider, _animationManager, _serviceProvider, map,

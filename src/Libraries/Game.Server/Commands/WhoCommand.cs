@@ -18,9 +18,9 @@ public class WhoCommand : ICommandHandler
     {
         var players = context.Player.Map!.World.GetPlayers();
         var allPlayers = players.Count;
-        var empire1Count = players.Count(x => x.Empire == EEmpire.Shinsoo);
-        var empire2Count = players.Count(x => x.Empire == EEmpire.Chunjo);
-        var empire3Count = players.Count(x => x.Empire == EEmpire.Jinno);
+        var empire1Count = players.Count(x => x.Empire == EEmpire.SHINSOO);
+        var empire2Count = players.Count(x => x.Empire == EEmpire.CHUNJO);
+        var empire3Count = players.Count(x => x.Empire == EEmpire.JINNO);
         var iLocal = _server.Connections.Length;
 
         context.Player.SendChatInfo(

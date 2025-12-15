@@ -2,7 +2,7 @@
 
 namespace QuantumCore.Game.Packets;
 
-[Packet(0x1F, EDirection.Outgoing)]
+[Packet(0x1F, EDirection.OUTGOING)]
 [PacketGenerator]
 public partial class ItemOwnership
 {

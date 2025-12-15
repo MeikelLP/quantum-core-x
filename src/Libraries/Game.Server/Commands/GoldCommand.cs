@@ -29,7 +29,7 @@ public class GoldCommand : ICommandHandler<GoldCommandOptions>
             return Task.CompletedTask;
         }
 
-        target.AddPoint(EPoint.Gold, context.Arguments.Value);
+        target.AddPoint(EPoint.GOLD, context.Arguments.Value);
         target.SendPoints();
 
         return Task.CompletedTask;

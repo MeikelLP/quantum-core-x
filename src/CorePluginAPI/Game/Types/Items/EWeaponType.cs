@@ -2,14 +2,14 @@ namespace QuantumCore.API.Game.Types.Items;
 
 public enum EWeaponType : byte
 {
-    Sword = 0,
-    Dagger = 1,
-    Bow = 2,
-    TwoHanded = 3,
-    Bell = 4,
-    Fan = 5,
-    Arrow = 6,
-    MountSpear = 7,
-    Claw = 8,
-    Wedding = 9
+    SWORD = 0,
+    DAGGER = 1,
+    BOW = 2,
+    TWO_HANDED = 3,
+    BELL = 4,
+    FAN = 5,
+    ARROW = 6,
+    MOUNT_SPEAR = 7,
+    CLAW = 8,
+    WEDDING = 9
 }

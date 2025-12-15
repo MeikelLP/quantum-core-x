@@ -3,6 +3,6 @@
 [Flags]
 public enum EDirection
 {
-    Incoming = 1,
-    Outgoing = 2
+    INCOMING = 1,
+    OUTGOING = 2
 }

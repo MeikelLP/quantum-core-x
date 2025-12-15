@@ -4,7 +4,7 @@ namespace QuantumCore.Core.Utils;
 
 public static class Xtea
 {
-    private const uint Delta = 0x9E3779B9;
+    private const uint DELTA = 0x9E3779B9;
 	    
     public static byte[] Decrypt(byte[] input, uint size, uint[] key, uint rounds)
     {
@@ -43,11 +43,11 @@ public static class Xtea
 
     private static void DecryptStep(uint rounds, ref uint u1, ref uint u2, uint[] key)
     {
-        var sum = Delta * rounds;
+        var sum = DELTA * rounds;
         for (var i = 0; i < rounds; i++)
         {
             u2 -= (((u1 << 4) ^ (u1 >> 5)) + u1) ^ (sum + key[(sum >> 11) & 3]);
-            sum -= Delta;
+            sum -= DELTA;
             u1 -= (((u2 << 4) ^ (u2 >> 5)) + u2) ^ (sum + key[sum & 3]);
         }
     }

@@ -9,7 +9,7 @@ public static class ConnectionExtensions
     public static void SetPhase(this IConnection connection, EPhase phase)
     {
         connection.Phase = phase;
-        connection.Send(new GCPhase
+        connection.Send(new GcPhase
         {
             Phase = connection.Phase
         });

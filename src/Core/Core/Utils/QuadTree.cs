@@ -9,7 +9,7 @@ namespace QuantumCore.Core.Utils;
 [DebuggerDisplay("{Bounds}")]
 public class QuadTree : IQuadTree
 {
-    private const int MinQuadSize = 16;
+    private const int MIN_QUAD_SIZE = 16;
     public int X { get; private set; }
     public int Y { get; private set; }
     public int Width { get; private set; }
@@ -51,7 +51,7 @@ public class QuadTree : IQuadTree
 
         if (!Subdivided)
         {
-            if (Width > MinQuadSize && Height > MinQuadSize)
+            if (Width > MIN_QUAD_SIZE && Height > MIN_QUAD_SIZE)
             {
                 // No place left but we aren't subdivded yet
                 Subdivide();

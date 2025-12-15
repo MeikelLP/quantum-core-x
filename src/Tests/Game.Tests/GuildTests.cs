@@ -109,9 +109,9 @@ public class GuildTests
     private static async Task<IGuildManager> SetupGuild()
     {
         var serviceCollection = new ServiceCollection();
-        serviceCollection.AddOptions<DatabaseOptions>(HostingOptions.ModeGame).Configure(x =>
+        serviceCollection.AddOptions<DatabaseOptions>(HostingOptions.MODE_GAME).Configure(x =>
         {
-            x.Provider = DatabaseProvider.Sqlite;
+            x.Provider = DatabaseProvider.SQLITE;
             x.ConnectionString = "Data Source=test.db";
         });
         var guildExperienceManager = Substitute.For<IGuildExperienceManager>();

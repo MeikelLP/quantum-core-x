@@ -3,7 +3,7 @@ using QuantumCore.Networking;
 
 namespace QuantumCore.Game.Packets.QuickBar;
 
-[Packet(0x10, EDirection.Incoming, Sequence = true)]
+[Packet(0x10, EDirection.INCOMING, Sequence = true)]
 [PacketGenerator]
 public partial class QuickBarAdd
 {

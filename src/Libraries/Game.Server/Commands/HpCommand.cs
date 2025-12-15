@@ -29,7 +29,7 @@ public class HpCommand : ICommandHandler<HpOtherOptions>
         }
         else
         {
-            target.AddPoint(EPoint.Hp, context.Arguments.Value);
+            target.AddPoint(EPoint.HP, context.Arguments.Value);
             target.SendPoints();
         }
 

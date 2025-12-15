@@ -22,19 +22,19 @@ public class NetworkingTests
             .AddSingleton<IConfiguration>(_ => new ConfigurationBuilder()
                 .AddInMemoryCollection(new Dictionary<string, string?>
                 {
-                    { "Mode", HostingOptions.ModeGame }, { "BufferSize", bufferSize.ToString() }
+                    { "Mode", HostingOptions.MODE_GAME }, { "BufferSize", bufferSize.ToString() }
                 })
                 .Build())
             .AddLogging()
             .AddSingleton<IHostEnvironment>(_ => new HostingEnvironment())
-            .AddKeyedSingleton<IPacketManager>(HostingOptions.ModeGame, (provider, _) =>
+            .AddKeyedSingleton<IPacketManager>(HostingOptions.MODE_GAME, (provider, _) =>
             {
                 return new PacketManager(provider.GetRequiredService<ILogger<PacketManager>>(),
                     new[] { typeof(Attack), typeof(CharacterDead), typeof(ChatIncoming), typeof(ShopBuy) });
             })
-            .AddKeyedSingleton<IPacketReader, PacketReader>(HostingOptions.ModeGame)
+            .AddKeyedSingleton<IPacketReader, PacketReader>(HostingOptions.MODE_GAME)
             .BuildServiceProvider();
-        return services.GetRequiredKeyedService<IPacketReader>(HostingOptions.ModeGame);
+        return services.GetRequiredKeyedService<IPacketReader>(HostingOptions.MODE_GAME);
     }
 
     [Fact]
@@ -86,7 +86,7 @@ public class NetworkingTests
     [Fact]
     public async Task Dynamic()
     {
-        var obj = new ChatIncoming { MessageType = ChatMessageType.Normal, Message = "Hello New World!" };
+        var obj = new ChatIncoming { MessageType = ChatMessageType.NORMAL, Message = "Hello New World!" };
         var size = obj.GetSize();
         var bytes = new byte[size + 1]; // + 1 due to sequence
         obj.Serialize(bytes);
@@ -103,7 +103,7 @@ public class NetworkingTests
     {
         var obj = new ChatIncoming
         {
-            MessageType = ChatMessageType.Normal,
+            MessageType = ChatMessageType.NORMAL,
             Message = new string(Enumerable.Range(0, 5000).Select(x => 'i').ToArray())
         };
         var size = obj.GetSize();

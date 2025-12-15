@@ -40,70 +40,70 @@ public class StateCommand : ICommandHandler
         context.Player.SendChatInfo($"LEV {p.Player.Level}");
         context.Player.SendChatInfo($"HP {p.Health}/{p.Player.MaxHp}");
         context.Player.SendChatInfo($"SP {p.Mana}/{p.Player.MaxSp}");
-        context.Player.SendChatInfo($"ATT {context.Player.GetPoint(EPoint.AttackGrade)} " +
-                                    $"MAGIC_ATT {context.Player.GetPoint(EPoint.MagicAttackGrade)} " +
-                                    $"SPD {context.Player.GetPoint(EPoint.AttackSpeed)} " +
-                                    $"CRIT {context.Player.GetPoint(EPoint.CriticalPercentage)}% " +
-                                    $"PENE {context.Player.GetPoint(EPoint.PenetratePercentage)}% " +
-                                    $"ATT_BONUS {context.Player.GetPoint(EPoint.AttackBonus)}%");
-        context.Player.SendChatInfo($"DEF {context.Player.GetPoint(EPoint.DefenceGrade)} " +
-                                    $"MAGIC_DEF {context.Player.GetPoint(EPoint.MagicDefenceGrade)} " +
-                                    $"BLOCK {context.Player.GetPoint(EPoint.Block)}% " +
-                                    $"DODGE {context.Player.GetPoint(EPoint.Dodge)}% " +
-                                    $"DEF_BONUS {context.Player.GetPoint(EPoint.DefenceBonus)}%");
+        context.Player.SendChatInfo($"ATT {context.Player.GetPoint(EPoint.ATTACK_GRADE)} " +
+                                    $"MAGIC_ATT {context.Player.GetPoint(EPoint.MAGIC_ATTACK_GRADE)} " +
+                                    $"SPD {context.Player.GetPoint(EPoint.ATTACK_SPEED)} " +
+                                    $"CRIT {context.Player.GetPoint(EPoint.CRITICAL_PERCENTAGE)}% " +
+                                    $"PENE {context.Player.GetPoint(EPoint.PENETRATE_PERCENTAGE)}% " +
+                                    $"ATT_BONUS {context.Player.GetPoint(EPoint.ATTACK_BONUS)}%");
+        context.Player.SendChatInfo($"DEF {context.Player.GetPoint(EPoint.DEFENCE_GRADE)} " +
+                                    $"MAGIC_DEF {context.Player.GetPoint(EPoint.MAGIC_DEFENCE_GRADE)} " +
+                                    $"BLOCK {context.Player.GetPoint(EPoint.BLOCK)}% " +
+                                    $"DODGE {context.Player.GetPoint(EPoint.DODGE)}% " +
+                                    $"DEF_BONUS {context.Player.GetPoint(EPoint.DEFENCE_BONUS)}%");
         context.Player.SendChatInfo("RESISTANCES:");
-        context.Player.SendChatInfo($"   WARR:{context.Player.GetPoint(EPoint.ResistWarrior)}% " +
-                                    $"ASAS:{context.Player.GetPoint(EPoint.ResistAssassin)}% " +
-                                    $"SURA:{context.Player.GetPoint(EPoint.ResistSura)}% " +
-                                    $"SHAM:{context.Player.GetPoint(EPoint.ResistShaman)}%");
-        context.Player.SendChatInfo($"   SWORD:{context.Player.GetPoint(EPoint.ResistSword)}% " +
-                                    $"THSWORD:{context.Player.GetPoint(EPoint.ResistTwoHanded)}% " +
-                                    $"DAGGER:{context.Player.GetPoint(EPoint.ResistDagger)}% " +
-                                    $"BELL:{context.Player.GetPoint(EPoint.ResistBell)}% " +
-                                    $"FAN:{context.Player.GetPoint(EPoint.ResistFan)}% " +
-                                    $"BOW:{context.Player.GetPoint(EPoint.ResistBow)}%");
-        context.Player.SendChatInfo($"   FIRE:{context.Player.GetPoint(EPoint.ResistFire)}% " +
-                                    $"ELEC:{context.Player.GetPoint(EPoint.ResistElectric)}% " +
-                                    $"MAGIC:{context.Player.GetPoint(EPoint.ResistMagic)}% " +
-                                    $"WIND:{context.Player.GetPoint(EPoint.ResistWind)}% " +
-                                    $"CRIT:{context.Player.GetPoint(EPoint.ResistCritical)}% " +
-                                    $"PENE:{context.Player.GetPoint(EPoint.ResistPenetrate)}%");
-        context.Player.SendChatInfo($"   ICE:{context.Player.GetPoint(EPoint.ResistIce)}% " +
-                                    $"EARTH:{context.Player.GetPoint(EPoint.ResistEarth)}% " +
-                                    $"DARK:{context.Player.GetPoint(EPoint.ResistDark)}%");
+        context.Player.SendChatInfo($"   WARR:{context.Player.GetPoint(EPoint.RESIST_WARRIOR)}% " +
+                                    $"ASAS:{context.Player.GetPoint(EPoint.RESIST_ASSASSIN)}% " +
+                                    $"SURA:{context.Player.GetPoint(EPoint.RESIST_SURA)}% " +
+                                    $"SHAM:{context.Player.GetPoint(EPoint.RESIST_SHAMAN)}%");
+        context.Player.SendChatInfo($"   SWORD:{context.Player.GetPoint(EPoint.RESIST_SWORD)}% " +
+                                    $"THSWORD:{context.Player.GetPoint(EPoint.RESIST_TWO_HANDED)}% " +
+                                    $"DAGGER:{context.Player.GetPoint(EPoint.RESIST_DAGGER)}% " +
+                                    $"BELL:{context.Player.GetPoint(EPoint.RESIST_BELL)}% " +
+                                    $"FAN:{context.Player.GetPoint(EPoint.RESIST_FAN)}% " +
+                                    $"BOW:{context.Player.GetPoint(EPoint.RESIST_BOW)}%");
+        context.Player.SendChatInfo($"   FIRE:{context.Player.GetPoint(EPoint.RESIST_FIRE)}% " +
+                                    $"ELEC:{context.Player.GetPoint(EPoint.RESIST_ELECTRIC)}% " +
+                                    $"MAGIC:{context.Player.GetPoint(EPoint.RESIST_MAGIC)}% " +
+                                    $"WIND:{context.Player.GetPoint(EPoint.RESIST_WIND)}% " +
+                                    $"CRIT:{context.Player.GetPoint(EPoint.RESIST_CRITICAL)}% " +
+                                    $"PENE:{context.Player.GetPoint(EPoint.RESIST_PENETRATE)}%");
+        context.Player.SendChatInfo($"   ICE:{context.Player.GetPoint(EPoint.RESIST_ICE)}% " +
+                                    $"EARTH:{context.Player.GetPoint(EPoint.RESIST_EARTH)}% " +
+                                    $"DARK:{context.Player.GetPoint(EPoint.RESIST_DARK)}%");
 
         context.Player.SendChatInfo("MALL:");
-        context.Player.SendChatInfo($"   ATT:{context.Player.GetPoint(EPoint.MallAttBonus)}% " +
-                                    $"DEF:{context.Player.GetPoint(EPoint.MallDefBonus)}% " +
-                                    $"EXP:{context.Player.GetPoint(EPoint.MallExpBonus)}% " +
-                                    $"ITEMx{context.Player.GetPoint(EPoint.MallItemBonus) / 10} " +
-                                    $"GOLDx{context.Player.GetPoint(EPoint.MallGoldBonus) / 10}");
+        context.Player.SendChatInfo($"   ATT:{context.Player.GetPoint(EPoint.MALL_ATT_BONUS)}% " +
+                                    $"DEF:{context.Player.GetPoint(EPoint.MALL_DEF_BONUS)}% " +
+                                    $"EXP:{context.Player.GetPoint(EPoint.MALL_EXP_BONUS)}% " +
+                                    $"ITEMx{context.Player.GetPoint(EPoint.MALL_ITEM_BONUS) / 10} " +
+                                    $"GOLDx{context.Player.GetPoint(EPoint.MALL_GOLD_BONUS) / 10}");
 
         context.Player.SendChatInfo("BONUS:");
-        context.Player.SendChatInfo($"   SKILL:{context.Player.GetPoint(EPoint.SkillDamageBonus)}% " +
-                                    $"NORMAL:{context.Player.GetPoint(EPoint.NormalHitDamageBonus)}% " +
-                                    $"SKILL_DEF:{context.Player.GetPoint(EPoint.SkillDefendBonus)}% " +
-                                    $"NORMAL_DEF:{context.Player.GetPoint(EPoint.NormalHitDefendBonus)}%");
+        context.Player.SendChatInfo($"   SKILL:{context.Player.GetPoint(EPoint.SKILL_DAMAGE_BONUS)}% " +
+                                    $"NORMAL:{context.Player.GetPoint(EPoint.NORMAL_HIT_DAMAGE_BONUS)}% " +
+                                    $"SKILL_DEF:{context.Player.GetPoint(EPoint.SKILL_DEFEND_BONUS)}% " +
+                                    $"NORMAL_DEF:{context.Player.GetPoint(EPoint.NORMAL_HIT_DEFEND_BONUS)}%");
 
-        context.Player.SendChatInfo($"   HUMAN:{context.Player.GetPoint(EPoint.AttackBonusHuman)}% " +
-                                    $"ANIMAL:{context.Player.GetPoint(EPoint.AttackBonusAnimal)}% " +
-                                    $"ORC:{context.Player.GetPoint(EPoint.AttackBonusOrc)}% " +
-                                    $"ESO:{context.Player.GetPoint(EPoint.AttackBonusEsoterics)}% " +
-                                    $"UNDEAD:{context.Player.GetPoint(EPoint.AttackBonusUndead)}%");
+        context.Player.SendChatInfo($"   HUMAN:{context.Player.GetPoint(EPoint.ATTACK_BONUS_HUMAN)}% " +
+                                    $"ANIMAL:{context.Player.GetPoint(EPoint.ATTACK_BONUS_ANIMAL)}% " +
+                                    $"ORC:{context.Player.GetPoint(EPoint.ATTACK_BONUS_ORC)}% " +
+                                    $"ESO:{context.Player.GetPoint(EPoint.ATTACK_BONUS_ESOTERICS)}% " +
+                                    $"UNDEAD:{context.Player.GetPoint(EPoint.ATTACK_BONUS_UNDEAD)}%");
 
-        context.Player.SendChatInfo($"   DEVIL:{context.Player.GetPoint(EPoint.AttackBonusDevil)}% " +
-                                    $"INSECT:{context.Player.GetPoint(EPoint.AttackBonusInsect)}% " +
-                                    $"FIRE:{context.Player.GetPoint(EPoint.AttackBonusFire)}% " +
-                                    $"ICE:{context.Player.GetPoint(EPoint.AttackBonusIce)}% " +
-                                    $"DESERT:{context.Player.GetPoint(EPoint.AttackBonusDesert)}%");
+        context.Player.SendChatInfo($"   DEVIL:{context.Player.GetPoint(EPoint.ATTACK_BONUS_DEVIL)}% " +
+                                    $"INSECT:{context.Player.GetPoint(EPoint.ATTACK_BONUS_INSECT)}% " +
+                                    $"FIRE:{context.Player.GetPoint(EPoint.ATTACK_BONUS_FIRE)}% " +
+                                    $"ICE:{context.Player.GetPoint(EPoint.ATTACK_BONUS_ICE)}% " +
+                                    $"DESERT:{context.Player.GetPoint(EPoint.ATTACK_BONUS_DESERT)}%");
 
-        context.Player.SendChatInfo($"   TREE:{context.Player.GetPoint(EPoint.AttackBonusTree)}% " +
-                                    $"MONSTER:{context.Player.GetPoint(EPoint.AttackBonusMonster)}%");
+        context.Player.SendChatInfo($"   TREE:{context.Player.GetPoint(EPoint.ATTACK_BONUS_TREE)}% " +
+                                    $"MONSTER:{context.Player.GetPoint(EPoint.ATTACK_BONUS_MONSTER)}%");
 
-        context.Player.SendChatInfo($"   WARR:{context.Player.GetPoint(EPoint.AttackBonusWarrior)}% " +
-                                    $"ASAS:{context.Player.GetPoint(EPoint.AttackBonusAssassin)}% " +
-                                    $"SURA:{context.Player.GetPoint(EPoint.AttackBonusSura)}% " +
-                                    $"SHAM:{context.Player.GetPoint(EPoint.AttackBonusShaman)}%");
+        context.Player.SendChatInfo($"   WARR:{context.Player.GetPoint(EPoint.ATTACK_BONUS_WARRIOR)}% " +
+                                    $"ASAS:{context.Player.GetPoint(EPoint.ATTACK_BONUS_ASSASSIN)}% " +
+                                    $"SURA:{context.Player.GetPoint(EPoint.ATTACK_BONUS_SURA)}% " +
+                                    $"SHAM:{context.Player.GetPoint(EPoint.ATTACK_BONUS_SHAMAN)}%");
 
         return Task.CompletedTask;
     }

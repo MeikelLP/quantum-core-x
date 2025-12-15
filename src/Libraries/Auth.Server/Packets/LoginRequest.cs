@@ -2,7 +2,7 @@ using QuantumCore.Networking;
 
 namespace QuantumCore.Auth.Packets;
 
-[Packet(0x6f, EDirection.Incoming, Sequence = true)]
+[Packet(0x6f, EDirection.INCOMING, Sequence = true)]
 [PacketGenerator]
 public partial class LoginRequest
 {

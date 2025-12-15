@@ -6,10 +6,10 @@ namespace QuantumCore.Core.Types;
 /// </summary>
 public class Lzo
 {
-    private const uint M1Marker = 0x0;
-    private const uint M2Marker = 0x40;
-    private const uint M3Marker = 0x20;
-    private const uint M4Marker = 0x10;
+    private const uint M1_MARKER = 0x0;
+    private const uint M2_MARKER = 0x40;
+    private const uint M3_MARKER = 0x20;
+    private const uint M4_MARKER = 0x10;
 
     private uint _size;
 
@@ -122,7 +122,7 @@ public class Lzo
                 lblen = (inst >> 5) + 1;
                 nstate = inst & 0x3;
             }
-            else if ((inst & M3Marker) != 0)
+            else if ((inst & M3_MARKER) != 0)
             {
                 /* [M3]
                  * 0 0 1 L L L L L  (32..63)
@@ -144,7 +144,7 @@ public class Lzo
                 lbcur = destPos - ((nstate >> 2) + 1);
                 nstate &= 0x3;
             }
-            else if ((inst & M4Marker) != 0)
+            else if ((inst & M4_MARKER) != 0)
             {
                 /* [M4]
                  * 0 0 0 1 H L L L  (16..31)

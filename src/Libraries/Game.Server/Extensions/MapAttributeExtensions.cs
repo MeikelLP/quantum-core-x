@@ -27,10 +27,10 @@ internal static class MapAttributeExtensions
             return entity.PositionIsAttr(flags);
         }
 
-        const int Samples = 100;
-        for (var i = 1; i <= Samples; i++)
+        const int SAMPLES = 100;
+        for (var i = 1; i <= SAMPLES; i++)
         {
-            var t = (float)i / Samples;
+            var t = (float)i / SAMPLES;
             var sampleDelta = new Vector2(dx * t, dy * t);
 
             if (localMap.IsAttr(entity.Coordinates() + sampleDelta, flags))

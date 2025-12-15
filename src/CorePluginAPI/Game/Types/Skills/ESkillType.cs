@@ -2,8 +2,8 @@
 
 public enum ESkillType
 {
-    Normal,
-    Melee,
-    Range,
-    Magic
+    NORMAL,
+    MELEE,
+    RANGE,
+    MAGIC
 }

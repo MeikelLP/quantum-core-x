@@ -3,13 +3,13 @@ namespace QuantumCore.API.Game.Types.Monsters;
 [Flags]
 public enum EAntiFlags
 {
-    Female = (1 << 0),
-    Male = (1 << 1),
-    Warrior = (1 << 2),
-    Assassin = (1 << 3),
-    Sura = (1 << 4),
-    Shaman = (1 << 5),
-    Drop = (1 << 7),
-    Sell = (1 << 8),
-    Safebox = (1 << 17),
+    FEMALE = (1 << 0),
+    MALE = (1 << 1),
+    WARRIOR = (1 << 2),
+    ASSASSIN = (1 << 3),
+    SURA = (1 << 4),
+    SHAMAN = (1 << 5),
+    DROP = (1 << 7),
+    SELL = (1 << 8),
+    SAFEBOX = (1 << 17),
 }

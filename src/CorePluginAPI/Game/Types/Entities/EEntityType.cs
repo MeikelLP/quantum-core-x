@@ -2,14 +2,14 @@
 
 public enum EEntityType : byte
 {
-    Monster = 0,
-    Npc = 1,
-    MetinStone = 2,
-    Warp = 3,
-    Door = 4,
-    Building = 5,
-    Player = 6,
-    PolymorphPlayer = 7,
-    Horse = 8,
-    Goto = 9
+    MONSTER = 0,
+    NPC = 1,
+    METIN_STONE = 2,
+    WARP = 3,
+    DOOR = 4,
+    BUILDING = 5,
+    PLAYER = 6,
+    POLYMORPH_PLAYER = 7,
+    HORSE = 8,
+    GOTO = 9
 }

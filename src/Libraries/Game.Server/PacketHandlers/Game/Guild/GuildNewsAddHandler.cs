@@ -37,7 +37,7 @@ public class GuildNewsAddHandler : IGamePacketHandler<GuildNewsAddPacket>
             return;
         }
 
-        if (!await _guildManager.HasPermissionAsync(player.Id, GuildRankPermissions.ModifyNews))
+        if (!await _guildManager.HasPermissionAsync(player.Id, GuildRankPermissions.MODIFY_NEWS))
         {
             ctx.Connection.Player.SendChatInfo("You don't have permission to create guild news.");
             return;

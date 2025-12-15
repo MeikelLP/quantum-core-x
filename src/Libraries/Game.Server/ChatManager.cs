@@ -51,14 +51,14 @@ public class ChatManager : IChatManager, ILoadable
         {
             MessageType = message.Type,
             Vid = 0,
-            Empire = EEmpire.Shinsoo, // todo
+            Empire = EEmpire.SHINSOO, // todo
             Message = message.Message
         };
 
         // Send message to all connections in the game phase
         GameServer.Instance.ForAllConnections(connection =>
         {
-            if (connection.Phase != EPhase.Game)
+            if (connection.Phase != EPhase.GAME)
             {
                 return;
             }
@@ -71,7 +71,7 @@ public class ChatManager : IChatManager, ILoadable
     {
         var packet = new ChatOutcoming
         {
-            MessageType = ChatMessageType.Normal, Vid = entity.Vid, Empire = entity.Empire, Message = message
+            MessageType = ChatMessageType.NORMAL, Vid = entity.Vid, Empire = entity.Empire, Message = message
         };
 
         if (entity is IPlayerEntity player)
@@ -92,16 +92,16 @@ public class ChatManager : IChatManager, ILoadable
     {
         var chat = new ChatOutcoming
         {
-            MessageType = ChatMessageType.Shout,
+            MessageType = ChatMessageType.SHOUT,
             Vid = 0,
-            Empire = EEmpire.Shinsoo, // todo
+            Empire = EEmpire.SHINSOO, // todo
             Message = message
         };
 
         // Send message to all connections in the game phase
         GameServer.Instance.ForAllConnections(connection =>
         {
-            if (connection.Phase != EPhase.Game)
+            if (connection.Phase != EPhase.GAME)
             {
                 return;
             }
@@ -111,6 +111,6 @@ public class ChatManager : IChatManager, ILoadable
 
         // Broadcast message to all cores
         await _cacheManager.Publish("chat",
-            new ChatMessage {Type = ChatMessageType.Shout, Message = message, OwnerCore = _id});
+            new ChatMessage {Type = ChatMessageType.SHOUT, Message = message, OwnerCore = _id});
     }
 }

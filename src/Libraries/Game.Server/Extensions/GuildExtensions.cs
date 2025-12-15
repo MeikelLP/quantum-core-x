@@ -12,15 +12,15 @@ public static class GuildExtensions
         // TODO check if player has recently dissolved any guild
         if (invitee.Player.GuildId is not null)
         {
-            return EGuildJoinStatusCode.AlreadyInAnyGuild;
+            return EGuildJoinStatusCode.ALREADY_IN_ANY_GUILD;
         }
 
         if (guild.Members.Length >= guild.MaxMemberCount)
         {
-            return EGuildJoinStatusCode.GuildFull;
+            return EGuildJoinStatusCode.GUILD_FULL;
         }
 
-        return EGuildJoinStatusCode.Success;
+        return EGuildJoinStatusCode.SUCCESS;
     }
 
     // TODO cache

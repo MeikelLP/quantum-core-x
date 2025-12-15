@@ -1,6 +1,6 @@
 ﻿namespace QuantumCore.API.Core.Models;
 
-public class GCHandshakeData
+public class GcHandshakeData
 {
     public ulong Handshake { get; set; }
     public long Time { get; set; }

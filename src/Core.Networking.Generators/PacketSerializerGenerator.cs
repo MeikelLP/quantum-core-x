@@ -74,7 +74,7 @@ public class PacketSerializerGenerator : IIncrementalGenerator
     {
         var assemblyName = context.CompilationProvider.Select(static (c, _) => c.AssemblyName);
         var sourceFiles = context.SyntaxProvider
-            .ForAttributeWithMetadataName(GeneratorConstants.PACKETGENEREATOR_ATTRIBUTE_FULLNAME, CouldBeEnumerationAsync, GetTypeInfo)
+            .ForAttributeWithMetadataName(GeneratorConstants.PACKET_GENERATOR_ATTRIBUTE_FULL_NAME, CouldBeEnumerationAsync, GetTypeInfo)
             .Collect()
             .SelectMany((info, _) => info.Distinct());
         

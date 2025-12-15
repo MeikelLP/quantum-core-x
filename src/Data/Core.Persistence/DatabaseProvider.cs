@@ -2,7 +2,7 @@
 
 public enum DatabaseProvider
 {
-    Mysql = 1,
-    Postgresql = 2,
-    Sqlite = 3
+    MYSQL = 1,
+    POSTGRESQL = 2,
+    SQLITE = 3
 }

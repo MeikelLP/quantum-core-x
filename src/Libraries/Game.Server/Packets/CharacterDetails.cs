@@ -5,7 +5,7 @@ using QuantumCore.Networking;
 
 namespace QuantumCore.Game.Packets;
 
-[Packet(0x71, EDirection.Outgoing)]
+[Packet(0x71, EDirection.OUTGOING)]
 [PacketGenerator]
 public partial class CharacterDetails
 {

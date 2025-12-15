@@ -2,8 +2,8 @@
 
 public enum EPlayerClass : byte
 {
-    Warrior = 0,
-    Ninja = 1,
-    Sura = 2,
-    Shaman = 3,
+    WARRIOR = 0,
+    NINJA = 1,
+    SURA = 2,
+    SHAMAN = 3,
 }

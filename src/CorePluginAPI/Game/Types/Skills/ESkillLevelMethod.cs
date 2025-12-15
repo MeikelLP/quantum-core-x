@@ -2,8 +2,8 @@
 
 public enum ESkillLevelMethod
 {
-    Point = 0,
-    Book = 1,
-    Train = 2,
-    Quest = 3
+    POINT = 0,
+    BOOK = 1,
+    TRAIN = 2,
+    QUEST = 3
 }
