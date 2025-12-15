@@ -31,7 +31,7 @@ public class DropProvider : IDropProvider, ILoadable
 #if DEBUG
     private const bool DROP_DEBUG = true;
 #else
-    private const bool DropDebug = false;
+    private const bool DROP_DEBUG = false;
 #endif
 
     private readonly ILogger<DropProvider> _logger;
@@ -216,7 +216,7 @@ public class DropProvider : IDropProvider, ILoadable
 
         var levelDropDelta = (int)(monster.GetPoint(EPoint.LEVEL) + 15 - player.GetPoint(EPoint.LEVEL));
 
-        deltaPercentage = monster is {IsStone: false, Rank: >= EMonsterLevel.BOSS}
+        deltaPercentage = monster is { IsStone: false, Rank: >= EMonsterLevel.BOSS }
             ? (int)_options.Delta.Boss[MathUtils.MinMax(0, levelDropDelta, _options.Delta.Boss.Count - 1)]
             : (int)_options.Delta.Normal[MathUtils.MinMax(0, levelDropDelta, _options.Delta.Normal.Count - 1)];
 
@@ -376,7 +376,7 @@ public class DropProvider : IDropProvider, ILoadable
         var items = new List<ItemInstance>();
 
         var mobDrops = this.GetPossibleMobDropsForPlayer(monster.Proto.Id);
-        if (mobDrops is not {IsEmpty: false}) return items;
+        if (mobDrops is not { IsEmpty: false }) return items;
 
         var percent = 40000 * delta / mobDrops.MinKillCount;
         var target = CoreRandom.GenerateInt32(1, range + 1);
