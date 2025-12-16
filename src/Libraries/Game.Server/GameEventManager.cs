@@ -32,7 +32,7 @@ public static class GameEventManager
             return;
         }
 
-        var events = NpcClickEvents[npcId].Where(e => e.Condition == null || e.Condition(player)).ToList();
+        var events = NpcClickEvents[npcId].Where(e => e.Condition is null || e.Condition(player)).ToList();
         if (events.Count > 1)
         {
             // todo make sure interface IPlayerEntity is enough
@@ -69,13 +69,13 @@ public static class GameEventManager
             return;
         }
 
-        var events = NpcGiveEvents[npcId].Where(e => e.Condition == null || e.Condition(player, item)).ToList();
+        var events = NpcGiveEvents[npcId].Where(e => e.Condition is null || e.Condition(player, item)).ToList();
         if (events.Count > 1)
         {
             // todo make sure interface IPlayerEntity is enough
             var internalQuest = player.GetQuestInstance<InternalQuest>();
 
-            if (internalQuest == null) return;
+            if (internalQuest is null) return;
 
             var selected = await internalQuest.SelectQuest(events.Select(e => e.Name));
             if (events[selected].Callback.Target is not Quest.Quest)

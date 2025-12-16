@@ -25,7 +25,7 @@ public class GuildCreateCommand : ICommandHandler<GuildCreateCommandOptions>
             return;
         }
 
-        if (await _guildManager.GetGuildByNameAsync(context.Arguments.Name) != null)
+        if (await _guildManager.GetGuildByNameAsync(context.Arguments.Name) is not null)
         {
             context.Player.SendChatInfo("Guild name already in use");
             return;

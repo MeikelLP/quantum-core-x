@@ -146,7 +146,7 @@ public abstract class Entity : IEntity
         MovementStart = GameServer.Instance.ServerTime;
 
         var distance = MathUtils.Distance(StartPositionX, StartPositionY, TargetPositionX, TargetPositionY);
-        if (animation == null)
+        if (animation is null)
         {
             MovementDuration = 0;
         }
@@ -419,19 +419,19 @@ public abstract class Entity : IEntity
 
         var victimPlayer = this as PlayerEntity;
         var attackerPlayer = attacker as PlayerEntity;
-        if (victimPlayer != null || attackerPlayer != null)
+        if (victimPlayer is not null || attackerPlayer is not null)
         {
             var damageInfo = new DamageInfo();
             damageInfo.Vid = Vid;
             damageInfo.Damage = damage;
             damageInfo.DamageFlags = damageFlags;
 
-            if (victimPlayer != null)
+            if (victimPlayer is not null)
             {
                 victimPlayer.Connection.Send(damageInfo);
             }
 
-            if (attackerPlayer != null)
+            if (attackerPlayer is not null)
             {
                 attackerPlayer.Connection.Send(damageInfo);
                 LastAttacker = attackerPlayer;
@@ -439,7 +439,7 @@ public abstract class Entity : IEntity
         }
 
         this.Health -= damage;
-        if (victimPlayer != null)
+        if (victimPlayer is not null)
         {
             victimPlayer.SendPoints();
         }

@@ -44,7 +44,7 @@ internal class CommandManager : ICommandManager, ILoadable
     public void Register(string ns, Assembly? assembly = null)
     {
         _logger.LogDebug("Registring commands from namespace {Namespace}", ns);
-        if (assembly == null) assembly = Assembly.GetAssembly(typeof(CommandManager))!;
+        if (assembly is null) assembly = Assembly.GetAssembly(typeof(CommandManager))!;
 
         var types = assembly.GetTypes().Where(t => string.Equals(t.Namespace, ns, StringComparison.Ordinal))
             .Where(t => (t.GetInterfaces().Any(x =>

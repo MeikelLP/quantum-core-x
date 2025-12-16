@@ -17,7 +17,7 @@ public class ItemMoveHandler : IGamePacketHandler<ItemMove>
     public Task ExecuteAsync(GamePacketContext<ItemMove> ctx, CancellationToken token = default)
     {
         var player = ctx.Connection.Player;
-        if (player == null)
+        if (player is null)
         {
             ctx.Connection.Close();
             return Task.CompletedTask;
@@ -28,7 +28,7 @@ public class ItemMoveHandler : IGamePacketHandler<ItemMove>
 
         // Get moved item
         var item = player.GetItem(ctx.Packet.FromWindow, ctx.Packet.FromPosition);
-        if (item == null)
+        if (item is null)
         {
             _logger.LogDebug("Moved item not found!");
             return Task.CompletedTask;

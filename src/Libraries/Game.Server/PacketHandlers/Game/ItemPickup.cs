@@ -10,7 +10,7 @@ public class ItemPickupHandler : IGamePacketHandler<ItemPickup>
     public Task ExecuteAsync(GamePacketContext<ItemPickup> ctx, CancellationToken token = default)
     {
         var player = ctx.Connection.Player;
-        if (player == null)
+        if (player is null)
         {
             ctx.Connection.Close();
             return Task.CompletedTask;

@@ -303,7 +303,7 @@ public class MonsterEntity : Entity
 
     public override void OnDespawn()
     {
-        if (Group != null)
+        if (Group is not null)
         {
             Group.Monsters.Remove(this);
             if (Group.Monsters.Count == 0)

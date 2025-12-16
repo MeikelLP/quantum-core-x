@@ -30,7 +30,7 @@ public class ItemCommand : ICommandHandler<ItemCommandOptions>
     public async Task ExecuteAsync(CommandContext<ItemCommandOptions> context)
     {
         var item = _itemManager.GetItem(context.Arguments.ItemId);
-        if (item == null)
+        if (item is null)
         {
             context.Player.SendChatInfo("Item not found");
             return;
@@ -50,7 +50,7 @@ public class ItemCommand : ICommandHandler<ItemCommandOptions>
                 }
 
                 var skill = _skillManager.GetSkill(skillId);
-                if (skill == null)
+                if (skill is null)
                 {
                     continue;
                 }
@@ -61,7 +61,7 @@ public class ItemCommand : ICommandHandler<ItemCommandOptions>
             var bookId = _skillsOptions.SkillBookStartId + skillBookId;
 
             item = _itemManager.GetItem(bookId);
-            if (item == null)
+            if (item is null)
             {
                 context.Player.SendChatInfo($"Skillbook ({bookId}) not found");
                 return;

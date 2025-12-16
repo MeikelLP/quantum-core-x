@@ -17,7 +17,7 @@ public class QuestAnswerHandler : IGamePacketHandler<QuestAnswer>
     public Task ExecuteAsync(GamePacketContext<QuestAnswer> ctx, CancellationToken token = default)
     {
         var player = ctx.Connection.Player;
-        if (player == null)
+        if (player is null)
         {
             ctx.Connection.Close();
             return Task.CompletedTask;

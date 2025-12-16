@@ -37,7 +37,7 @@ public class SpawnCommand : ICommandHandler<SpawnCommandOptions>
     public Task ExecuteAsync(CommandContext<SpawnCommandOptions> context)
     {
         var proto = _monsterManager.GetMonster(context.Arguments.MonsterId);
-        if (proto == null)
+        if (proto is null)
         {
             context.Player.SendChatInfo("No monster found with the specified id");
             return Task.CompletedTask;

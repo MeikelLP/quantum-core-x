@@ -17,7 +17,7 @@ public class AttackHandler : IGamePacketHandler<Attack>
     public Task ExecuteAsync(GamePacketContext<Attack> ctx, CancellationToken token = default)
     {
         var attacker = ctx.Connection.Player;
-        if (attacker == null)
+        if (attacker is null)
         {
             _logger.LogWarning("Attack without having a player instance");
             ctx.Connection.Close();
@@ -25,7 +25,7 @@ public class AttackHandler : IGamePacketHandler<Attack>
         }
 
         var entity = attacker.Map?.GetEntity(ctx.Packet.Vid);
-        if (entity == null)
+        if (entity is null)
         {
             return Task.CompletedTask;
         }

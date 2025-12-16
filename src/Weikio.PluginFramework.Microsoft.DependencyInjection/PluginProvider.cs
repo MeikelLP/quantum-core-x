@@ -44,7 +44,7 @@ public class PluginProvider
         {
             var result = pluginCatalog.Get(name, version);
 
-            if (result != null)
+            if (result is not null)
             {
                 return result;
             }

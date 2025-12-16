@@ -272,7 +272,7 @@ public class PlayerSkills : IPlayerSkills
         }
 
         var proto = _skillManager.GetSkill(skillId);
-        if (proto == null)
+        if (proto is null)
         {
             _logger.LogWarning("Skill not found: {SkillId}", skillId);
             return;
@@ -285,7 +285,7 @@ public class PlayerSkills : IPlayerSkills
         }
 
         var skill = _skills.TryGetValue(proto.Id, out var playerSkill) ? playerSkill : null;
-        if (skill == null)
+        if (skill is null)
         {
             _logger.LogWarning("Skill not found: {SkillId}", skillId);
             return;
@@ -414,7 +414,7 @@ public class PlayerSkills : IPlayerSkills
     private bool IsLearnableSkill(ESkill skillId)
     {
         var proto = _skillManager.GetSkill(skillId);
-        if (proto == null)
+        if (proto is null)
         {
             return false;
         }
@@ -500,7 +500,7 @@ public class PlayerSkills : IPlayerSkills
     public bool LearnSkillByBook(ESkill skillId)
     {
         var proto = _skillManager.GetSkill(skillId);
-        if (proto == null)
+        if (proto is null)
         {
             return false;
         }
@@ -518,7 +518,7 @@ public class PlayerSkills : IPlayerSkills
         }
 
         var skill = _skills.TryGetValue(skillId, out var playerSkill) ? playerSkill : null;
-        if (skill == null)
+        if (skill is null)
         {
             _logger.LogWarning("Skill not found: {SkillId}", skillId);
             return false;

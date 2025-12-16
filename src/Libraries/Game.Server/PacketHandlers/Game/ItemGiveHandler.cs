@@ -17,21 +17,21 @@ public class ItemGiveHandler : IGamePacketHandler<ItemGive>
     public async Task ExecuteAsync(GamePacketContext<ItemGive> ctx, CancellationToken token = default)
     {
         var player = ctx.Connection.Player;
-        if (player == null)
+        if (player is null)
         {
             ctx.Connection.Close();
             return;
         }
 
         var entity = player.Map?.GetEntity(ctx.Packet.TargetVid);
-        if (entity == null)
+        if (entity is null)
         {
             _logger.LogDebug("Ignore item give to non existing entity");
             return;
         }
 
         var item = player.GetItem(ctx.Packet.Window, ctx.Packet.Position);
-        if (item == null)
+        if (item is null)
         {
             return;
         }

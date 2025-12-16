@@ -102,7 +102,7 @@ public class QuadTree : IQuadTree
             // Go through all objects and check if their position is inside the circle
             foreach (var obj in Objects)
             {
-                if (filter != null && obj.Type != filter)
+                if (filter is not null && obj.Type != filter)
                 {
                     continue;
                 }
@@ -186,7 +186,7 @@ public class QuadTree : IQuadTree
 
     public void UpdatePosition(IEntity entity)
     {
-        if (entity.LastQuadTree == null)
+        if (entity.LastQuadTree is null)
         {
             Insert(entity);
             return;

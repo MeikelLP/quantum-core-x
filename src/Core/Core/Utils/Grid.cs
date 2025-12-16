@@ -59,7 +59,7 @@ public class Grid<T> where T : class?
         {
             for (uint x = 0; x < Width - width + 1; x++)
             {
-                if (Get(x, y) != null)
+                if (Get(x, y) is not null)
                 {
                     continue;
                 }
@@ -69,7 +69,7 @@ public class Grid<T> where T : class?
                 {
                     for (var x2 = x; x2 < x + width; x2++)
                     {
-                        isFree = Get(x2, y2) == null;
+                        isFree = Get(x2, y2) is null;
                         if (!isFree)
                         {
                             break;

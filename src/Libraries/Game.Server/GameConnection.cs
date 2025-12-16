@@ -51,7 +51,7 @@ public class GameConnection : Connection, IGameConnection
 
     protected override async Task OnClose(bool expected = true)
     {
-        if (Player != null)
+        if (Player is not null)
         {
             if (expected)
             {

@@ -246,12 +246,12 @@ public class Map : IMap
         {
             case ESpawnPointType.GROUP_COLLECTION:
                 var groupCollection = _world.GetGroupCollection(spawnPoint.Monster);
-                if (groupCollection != null)
+                if (groupCollection is not null)
                 {
                     var index = Random.Shared.Next(0, groupCollection.Groups.Count);
                     var collectionGroup = groupCollection.Groups[index];
                     var group = _world.GetGroup(collectionGroup.Id);
-                    if (group != null)
+                    if (group is not null)
                     {
                         if (collectionGroup.Probability < 1)
                         {
@@ -272,7 +272,7 @@ public class Map : IMap
             case ESpawnPointType.GROUP:
                 {
                     var group = _world.GetGroup(spawnPoint.Monster);
-                    if (group != null)
+                    if (group is not null)
                     {
                         SpawnGroup(groupInstance, spawnPoint, group);
                     }
@@ -387,7 +387,7 @@ public class Map : IMap
 
     public void EnqueueGroupRespawn(MonsterGroup group)
     {
-        if (group.SpawnPoint == null) return;
+        if (group.SpawnPoint is null) return;
 
         EventSystem.EnqueueEvent(() =>
         {
