@@ -49,7 +49,7 @@ public class LoginRequestHandler : IAuthPacketHandler<LoginRequest>
     {
         var account = await _accountRepository.FindByNameAsync(ctx.Packet.Username);
         // Check if account was found
-        if (account == default)
+        if (account is null)
         {
             // Hash the password to prevent timing attacks
             BCrypt.Net.BCrypt.HashPassword(ctx.Packet.Password);

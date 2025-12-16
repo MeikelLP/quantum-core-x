@@ -202,7 +202,7 @@ public partial class ParserService : IParserService
         uint levelLimit = 0;
 
         var type = group.GetField<string>("Type");
-        if (type == default)
+        if (type is null)
         {
             throw new MissingRequiredFieldException("Type");
         }
