@@ -51,6 +51,6 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         shell: powershell
         run: |
-          .\.sonar\scanner\dotnet-sonarscanner begin /k:"MeikelLP_quantum-core-x" /o:"meikel" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io"
-          dotnet build --configuration Release src/QuantumCore.sln
+          .\.sonar\scanner\dotnet-sonarscanner begin /k:"MeikelLP_quantum-core-x" /o:"meikel" /d:sonar.token="${{ secrets.SONAR_TOKEN }}" /d:sonar.host.url="https://sonarcloud.io" /d:sonar.verbose=true /d:sonar.log.level=DEBUG
+          dotnet build --configuration Release src/QuantumCore.sln -v:n
           .\.sonar\scanner\dotnet-sonarscanner end /d:sonar.token="${{ secrets.SONAR_TOKEN }}"
