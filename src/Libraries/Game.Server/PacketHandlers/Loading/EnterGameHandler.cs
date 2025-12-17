@@ -25,7 +25,7 @@ public class EnterGameHandler : IGamePacketHandler<EnterGame>
     public async Task ExecuteAsync(GamePacketContext<EnterGame> ctx, CancellationToken token = default)
     {
         var player = ctx.Connection.Player;
-        if (player == null)
+        if (player is null)
         {
             _logger.LogWarning("Trying to enter game without a player!");
             ctx.Connection.Close();

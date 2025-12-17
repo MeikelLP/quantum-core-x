@@ -24,12 +24,12 @@ public class QuestManager : IQuestManager, ILoadable
     {
         // Scan for all available quests
         var assembly = Assembly.GetAssembly(typeof(QuestManager));
-        if (assembly == null)
+        if (assembly is null)
         {
             return Task.CompletedTask;
         }
 
-        foreach (var questType in assembly.GetTypes().Where(type => type.GetCustomAttribute<QuestAttribute>() != null))
+        foreach (var questType in assembly.GetTypes().Where(type => type.GetCustomAttribute<QuestAttribute>() is not null))
         {
             RegisterQuest(questType);
         }

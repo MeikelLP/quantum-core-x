@@ -29,7 +29,7 @@ public class StructuredFile
     public float? GetFloatValue(string key)
     {
         var value = GetValue(key);
-        if (value == null) return null;
+        if (value is null) return null;
 
         if (!float.TryParse(value, NumberStyles.Float, NumberFormatInfo.InvariantInfo, out var f)) return null;
         return f;
@@ -44,7 +44,7 @@ public class StructuredFile
     public float? GetFloatValue(string key, int position)
     {
         var value = GetValue(key);
-        if (value == null) return null;
+        if (value is null) return null;
 
         var values = value.Split(' ');
         if (position >= values.Length) return null;

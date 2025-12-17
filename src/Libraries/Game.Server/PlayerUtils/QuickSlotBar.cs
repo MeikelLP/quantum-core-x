@@ -90,7 +90,7 @@ public class QuickSlotBar : IQuickSlotBar
         for (var i = 0; i < Slots.Length; i++)
         {
             var slot = Slots[i];
-            if (slot == null)
+            if (slot is null)
             {
                 continue;
             }

@@ -9,7 +9,7 @@ public class ShopBuyHandler : IGamePacketHandler<ShopBuy>
     public Task ExecuteAsync(GamePacketContext<ShopBuy> ctx, CancellationToken token = default)
     {
         var player = ctx.Connection.Player;
-        if (player == null)
+        if (player is null)
         {
             ctx.Connection.Close();
 

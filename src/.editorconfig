@@ -226,3 +226,7 @@ csharp_preserve_single_line_statements = true
 
 # IDE0060: Remove unused parameter
 dotnet_diagnostic.IDE0060.severity = warning
+
+# Don't suggest primary constructors
+resharper_convert_to_primary_constructor_highlighting = none
+csharp_style_prefer_primary_constructors = false

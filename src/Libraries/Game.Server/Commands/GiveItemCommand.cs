@@ -35,7 +35,7 @@ public class GiveItemCommand : ICommandHandler<GiveCommandOptions>
         else
         {
             var item = _itemManager.GetItem(context.Arguments.ItemId);
-            if (item == null)
+            if (item is null)
             {
                 context.Player.SendChatInfo("Item not found");
                 return;

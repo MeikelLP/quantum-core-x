@@ -36,7 +36,7 @@ public class GroupCommand : ICommandHandler<GroupCommandOptions>
     public Task ExecuteAsync(CommandContext<GroupCommandOptions> context)
     {
         var group = _world.GetGroup(context.Arguments.GroupId);
-        if (group == null)
+        if (group is null)
         {
             context.Player.SendChatInfo("No monster group found with the specified id");
             return Task.CompletedTask;

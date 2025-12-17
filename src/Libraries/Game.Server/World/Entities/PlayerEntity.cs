@@ -141,7 +141,7 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
     private static uint GetMaxSp(IJobManager jobManager, EPlayerClassGendered playerClass, byte level, uint point)
     {
         var info = jobManager.Get(playerClass);
-        if (info == null)
+        if (info is null)
         {
             return 0;
         }
@@ -152,7 +152,7 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
     private static uint GetMaxHp(IJobManager jobManager, EPlayerClassGendered playerClass, byte level, uint point)
     {
         var info = jobManager.Get(playerClass);
-        if (info == null)
+        if (info is null)
         {
             return 0;
         }
@@ -202,7 +202,7 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
     public T? GetQuestInstance<T>() where T : class, IQuest
     {
         var id = typeof(T).FullName;
-        if (id == null)
+        if (id is null)
         {
             return default;
         }
@@ -266,7 +266,7 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
         foreach (var slot in Enum.GetValues<EquipmentSlot>())
         {
             var item = Inventory.EquipmentWindow.GetItem(slot);
-            if (item == null) continue;
+            if (item is null) continue;
             var proto = _itemManager.GetItem(item.ItemId);
             if (proto is null || !proto.IsType(EItemType.ARMOR)) continue;
 
@@ -285,7 +285,7 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
         foreach (var slot in Enum.GetValues<EquipmentSlot>())
         {
             var item = Inventory.EquipmentWindow.GetItem(slot);
-            if (item == null) continue;
+            if (item is null) continue;
             var proto = _itemManager.GetItem(item.ItemId);
             if (proto is null || !proto.IsType(EItemType.ARMOR)) continue;
 
@@ -305,9 +305,9 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
         foreach (var slot in Enum.GetValues<EquipmentSlot>())
         {
             var item = Inventory.EquipmentWindow.GetItem(slot);
-            if (item == null) continue;
+            if (item is null) continue;
             var proto = _itemManager.GetItem(item.ItemId);
-            if (proto == null) continue;
+            if (proto is null) continue;
 
             modifier += proto.GetApplyValue(EApplyType.ATTACK_SPEED);
         }
@@ -505,7 +505,7 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
 
     public override void Update(double elapsedTime)
     {
-        if (Map == null) return; // We don't have a map yet so we aren't spawned
+        if (Map is null) return; // We don't have a map yet so we aren't spawned
 
         base.Update(elapsedTime);
 
@@ -553,27 +553,27 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
     public override int GetMinDamage()
     {
         var weapon = Inventory.EquipmentWindow.Weapon;
-        if (weapon == null) return 0;
+        if (weapon is null) return 0;
         var item = _itemManager.GetItem(weapon.ItemId);
-        if (item == null) return 0;
+        if (item is null) return 0;
         return item.Values[3];
     }
 
     public override int GetMaxDamage()
     {
         var weapon = Inventory.EquipmentWindow.Weapon;
-        if (weapon == null) return 0;
+        if (weapon is null) return 0;
         var item = _itemManager.GetItem(weapon.ItemId);
-        if (item == null) return 0;
+        if (item is null) return 0;
         return item.Values[4];
     }
 
     public override int GetBonusDamage()
     {
         var weapon = Inventory.EquipmentWindow.Weapon;
-        if (weapon == null) return 0;
+        if (weapon is null) return 0;
         var item = _itemManager.GetItem(weapon.ItemId);
-        if (item == null) return 0;
+        if (item is null) return 0;
         return item.Values[5];
     }
 
@@ -901,7 +901,7 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
             return;
         }
 
-        if (groundItem.OwnerName != null && !string.Equals(groundItem.OwnerName, Name))
+        if (groundItem.OwnerName is not null && !string.Equals(groundItem.OwnerName, Name))
         {
             SendChatInfo("This item is not yours");
             return;
@@ -987,14 +987,14 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
     {
         {
             var item = Inventory.EquipmentWindow.GetItem(EquipmentSlot.UNIQUE1);
-            if (item != null && item.ItemId == itemProtoId)
+            if (item is not null && item.ItemId == itemProtoId)
             {
                 return true;
             }
         }
         {
             var item = Inventory.EquipmentWindow.GetItem(EquipmentSlot.UNIQUE2);
-            if (item != null && item.ItemId == itemProtoId)
+            if (item is not null && item.ItemId == itemProtoId)
             {
                 return true;
             }
@@ -1044,7 +1044,7 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
                     // Make sure item fits in equipment window
                     if (IsEquippable(item) && Inventory.EquipmentWindow.IsSuitable(_itemManager, item, position))
                     {
-                        return Inventory.EquipmentWindow.GetItem(position) == null;
+                        return Inventory.EquipmentWindow.GetItem(position) is null;
                     }
 
                     return false;
@@ -1062,7 +1062,7 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
     public bool IsEquippable(ItemInstance item)
     {
         var proto = _itemManager.GetItem(item.ItemId);
-        if (proto == null)
+        if (proto is null)
         {
             // Proto for item not found
             return false;
@@ -1146,7 +1146,7 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
                 if (position >= Inventory.Size)
                 {
                     // Equipment
-                    if (Inventory.EquipmentWindow.GetItem(position) == null)
+                    if (Inventory.EquipmentWindow.GetItem(position) is null)
                     {
                         Inventory.SetEquipment(item, position);
                         item.Set(_cacheManager, Player.Id, window, position, _itemRepository).Wait(); // TODO
@@ -1332,7 +1332,7 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
     public void SendTarget()
     {
         var packet = new SetTarget();
-        if (Target != null)
+        if (Target is not null)
         {
             packet.TargetVid = Target.Vid;
             packet.Percentage = Target.HealthPercentage;

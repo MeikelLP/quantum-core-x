@@ -24,7 +24,7 @@ public class SelectGameCharacterHandler : IGamePacketHandler<SelectCharacter>
     public async Task ExecuteAsync(GamePacketContext<SelectCharacter> ctx, CancellationToken token = default)
     {
         _logger.LogDebug("Selected character in slot {Slot}", ctx.Packet.Slot);
-        if (ctx.Connection.AccountId == null)
+        if (ctx.Connection.AccountId is null)
         {
             // We didn't received any login before
             ctx.Connection.Close();

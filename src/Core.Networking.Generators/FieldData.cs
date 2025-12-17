@@ -18,7 +18,7 @@ internal class FieldData
         : ElementSize * (ArrayLength ?? 1);
 
     public bool HasDynamicLength => (SemanticType.Name == "String" && ElementSize == 0) || 
-                                    (IsArray && ArrayLength == null);
+                                    (IsArray && ArrayLength is null);
     public ITypeSymbol SemanticType { get; set; } = null!;
     public SyntaxNode SyntaxNode { get; set; } = null!;
     public string? SizeFieldName { get; set; }

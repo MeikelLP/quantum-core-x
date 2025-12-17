@@ -9,7 +9,7 @@ public class QuickBarSwapHandler : IGamePacketHandler<QuickBarSwap>
     public Task ExecuteAsync(GamePacketContext<QuickBarSwap> ctx, CancellationToken token = default)
     {
         var player = ctx.Connection.Player;
-        if (player == null)
+        if (player is null)
         {
             ctx.Connection.Close();
             return Task.CompletedTask;
