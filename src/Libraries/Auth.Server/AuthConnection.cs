@@ -1,5 +1,6 @@
 ﻿using System.Net.Sockets;
 using QuantumCore.API;
+using QuantumCore.API.Core.Timekeeping;
 using QuantumCore.Core.Networking;
 using QuantumCore.Networking;
 
@@ -32,7 +33,7 @@ public class AuthConnection : Connection, IAuthConnection
         await _server.CallListener(this, packet);
     }
 
-    protected override long GetServerTime()
+    protected override ServerTimestamp GetServerTime()
     {
         return _server.ServerTime;
     }

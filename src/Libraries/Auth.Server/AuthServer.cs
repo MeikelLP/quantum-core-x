@@ -1,4 +1,5 @@
 using QuantumCore.API;
+using QuantumCore.API.Core.Timekeeping;
 using QuantumCore.API.Game.Types;
 using QuantumCore.Caching;
 using QuantumCore.Core.Networking;
@@ -14,8 +15,8 @@ public class AuthServer : ServerBase<AuthConnection>
 
     public AuthServer([FromKeyedServices(HostingOptions.MODE_AUTH)] IPacketManager packetManager,
         ILogger<AuthServer> logger,
-        PluginExecutor pluginExecutor, IServiceProvider serviceProvider, ICacheManager cacheManager)
-        : base(packetManager, logger, pluginExecutor, serviceProvider, HostingOptions.MODE_AUTH)
+        PluginExecutor pluginExecutor, IServiceProvider serviceProvider, ITimeProvider timeProvider, ICacheManager cacheManager)
+        : base(packetManager, logger, pluginExecutor, serviceProvider, timeProvider, HostingOptions.MODE_AUTH)
     {
         _logger = logger;
         _cacheManager = cacheManager;

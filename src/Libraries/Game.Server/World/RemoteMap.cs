@@ -1,6 +1,7 @@
 ﻿using System.Net;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
+using QuantumCore.API.Core.Timekeeping;
 using QuantumCore.API.Game.World;
 
 namespace QuantumCore.Game.World;
@@ -55,7 +56,7 @@ public class RemoteMap : IMap
                y < Position.Y + Height * Map.MAP_UNIT;
     }
 
-    public void Update(double elapsedTime)
+    public void Update(TickContext ctx)
     {
     }
 

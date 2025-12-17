@@ -35,11 +35,13 @@ public class EnterGameHandler : IGamePacketHandler<EnterGame>
         // Enable game phase
         ctx.Connection.SetPhase(EPhase.GAME);
 
-        ctx.Connection.Send(new GameTime {Time = (uint)ctx.Connection.Server.ServerTime});
+        var uptimeMs = ctx.Connection.Server.ServerTime.TotalMilliseconds;
+
+        ctx.Connection.Send(new GameTime {Time = (uint)uptimeMs});
         ctx.Connection.Send(new Channel {ChannelNo = 1}); // todo
 
         var key = $"player:{player.Player.Id}:loggedInTime";
-        await _cache.Server.Set(key, ctx.Connection.Server.ServerTime);
+        await _cache.Server.Set(key, (long)uptimeMs);
 
         player.ShowEntity(ctx.Connection);
         _world.SpawnEntity(player);

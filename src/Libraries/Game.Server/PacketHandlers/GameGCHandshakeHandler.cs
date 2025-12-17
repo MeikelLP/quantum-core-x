@@ -1,5 +1,6 @@
 ﻿using QuantumCore.API;
 using QuantumCore.API.Core.Models;
+using QuantumCore.API.Core.Timekeeping;
 using QuantumCore.API.PluginTypes;
 using QuantumCore.Core.Packets;
 
@@ -11,9 +12,9 @@ public class GameGcHandshakeHandler : IGamePacketHandler<GcHandshake>
     {
         ctx.Connection.HandleHandshake(new GcHandshakeData
         {
-            Delta = ctx.Packet.Delta,
+            Delta = TimeSpan.FromMilliseconds(ctx.Packet.Delta),
             Handshake = ctx.Packet.Handshake,
-            Time = ctx.Packet.Time
+            Time = new ServerTimestamp(TimeSpan.FromMilliseconds(ctx.Packet.Time))
         });
         return Task.CompletedTask;
     }

@@ -3,10 +3,10 @@
 public class Event
 {
     public long Id { get; }
-    public required Func<int> Callback { get; init; }
-    public int Time { get; set; }
+    public required Func<TimeSpan> Callback { get; init; }
+    public TimeSpan Time { get; set; }
 
-    public Event(long id, int timeout)
+    public Event(long id, TimeSpan timeout)
     {
         Id = id;
         Time = timeout;

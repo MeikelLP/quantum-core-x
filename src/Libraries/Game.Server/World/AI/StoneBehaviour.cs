@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Security.Cryptography;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
+using QuantumCore.API.Core.Timekeeping;
 using QuantumCore.API.Game.World;
 using QuantumCore.API.Game.World.AI;
 using QuantumCore.Game.Services;
@@ -67,7 +68,7 @@ public class StoneBehaviour : IBehaviour
         _lastChunk = _healthChunkCount;
     }
 
-    public void Update(double elapsedTime)
+    public void Update(TickContext ctx)
     {
     }
 

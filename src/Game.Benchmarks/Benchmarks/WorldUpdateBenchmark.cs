@@ -10,12 +10,14 @@ using NSubstitute;
 using QuantumCore;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
+using QuantumCore.API.Core.Timekeeping;
 using QuantumCore.API.Game.Types.Monsters;
 using QuantumCore.API.Game.Types.Entities;
 using QuantumCore.API.Game.Types.Players;
 using QuantumCore.API.Game.World;
 using QuantumCore.Caching;
 using QuantumCore.Caching.Extensions;
+using QuantumCore.Core.Timekeeping;
 using QuantumCore.Extensions;
 using QuantumCore.Game;
 using QuantumCore.Game.Extensions;
@@ -35,6 +37,7 @@ public class WorldUpdateBenchmark
     [Params(0, 1, 10)] public int _playerAmount;
 
     private World _world = null!;
+    private readonly ManualTimeProvider _timeProvider = new();
 
     [GlobalSetup]
     public void GlobalSetup()
@@ -111,6 +114,7 @@ public class WorldUpdateBenchmark
                 mock.GetMonster(42).Returns(new MonsterData {Type = (byte)EEntityType.MONSTER});
                 return mock;
             }, ServiceLifetime.Singleton))
+            .Replace(new ServiceDescriptor(typeof(ITimeProvider), _ => _timeProvider, ServiceLifetime.Singleton))
             .BuildServiceProvider();
         _world = ActivatorUtilities.CreateInstance<World>(services);
         ActivatorUtilities.CreateInstance<GameServer>(services); // for setting the singleton GameServer.Instance
@@ -130,15 +134,22 @@ public class WorldUpdateBenchmark
 
         foreach (var e in _world.GetMapAt(0, 0)!.Entities)
         {
-            e?.Goto(0, 0);
+            e?.Goto(0, 0, Tick(0).Now);
         }
 
-        _world.Update(0.2); // spawn entities
+        _world.Update(Tick(0.2)); // spawn entities
     }
 
     [Benchmark]
     public void World_Tick()
     {
-        _world.Update(0.2);
+        _world.Update(Tick(0.2));
+    }
+
+    private TickContext Tick(double elapsedMilliseconds)
+    {
+        var delta = TimeSpan.FromMilliseconds(elapsedMilliseconds);
+        _timeProvider.Advance(delta);
+        return new TickContext(delta, _timeProvider.Now);
     }
 }

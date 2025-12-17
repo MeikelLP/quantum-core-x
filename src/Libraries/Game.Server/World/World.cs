@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
+using QuantumCore.API.Core.Timekeeping;
 using QuantumCore.API.Game.World;
 using QuantumCore.API.PluginTypes;
 using QuantumCore.Caching;
@@ -181,13 +182,13 @@ public class World : IWorld, ILoadable
         _mapSubscriber.Listen();
     }
 
-    public void Update(double elapsedTime)
+    public void Update(TickContext ctx)
     {
-        // HookManager.Instance.CallHook<IHookWorldUpdate>(elapsedTime);
+        // HookManager.Instance.CallHook<IHookWorldUpdate>(ctx);
 
         foreach (var map in _maps.Values)
         {
-            map.Update(elapsedTime);
+            map.Update(ctx);
         }
     }
 

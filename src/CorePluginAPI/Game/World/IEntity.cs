@@ -1,4 +1,5 @@
-﻿using QuantumCore.API.Core.Utils;
+﻿using QuantumCore.API.Core.Timekeeping;
+using QuantumCore.API.Core.Utils;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.Types.Combat;
 using QuantumCore.API.Game.Types.Entities;
@@ -29,14 +30,14 @@ public interface IEntity
     public IQuadTree? LastQuadTree { get; set; }
 
     // Movement related
-    public long MovementStart { get; }
+    public ServerTimestamp MovementStart { get; }
     public int TargetPositionX { get; }
     public int StartPositionX { get; }
     public int TargetPositionY { get; }
     public int StartPositionY { get; }
     public uint MovementDuration { get; }
 
-    public void Update(double elapsedTime);
+    public void Update(TickContext ctx);
 
     public void OnDespawn();
     public void AddNearbyEntity(IEntity entity);
@@ -53,7 +54,7 @@ public interface IEntity
     public int GetMaxDamage();
     public int GetBonusDamage();
 
-    public void Goto(int x, int y);
+    public void Goto(int x, int y, ServerTimestamp? startAt = null);
     public void Wait(int x, int y);
 
     public void Attack(IEntity victim);

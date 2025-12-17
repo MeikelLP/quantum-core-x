@@ -1,3 +1,5 @@
+using QuantumCore.API.Core.Timekeeping;
+
 namespace QuantumCore.API.Game.World.AI;
 
 public interface IBehaviour
@@ -11,7 +13,7 @@ public interface IBehaviour
     /// <summary>
     /// Executes behaviour logic
     /// </summary>
-    void Update(double elapsedTime);
+    void Update(TickContext ctx);
 
     /// <summary>
     /// Called as soon as the entity got damage

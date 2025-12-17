@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
+using QuantumCore.API.Core.Timekeeping;
 using QuantumCore.API.Extensions;
 using QuantumCore.API.Game.Guild;
 using QuantumCore.API.Game.Skills;
@@ -88,11 +89,11 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
     private uint _defence;
 
     private const int PERSIST_INTERVAL = 30 * 1000; // 30s
-    private int _persistTime = 0;
+    private ServerTimestamp _lastPersistTime = new(TimeSpan.Zero);
     private const int HEALTH_REGEN_INTERVAL = 3 * 1000;
     private const int MANA_REGEN_INTERVAL = 3 * 1000;
-    private double _healthRegenTime = HEALTH_REGEN_INTERVAL;
-    private double _manaRegenTime = MANA_REGEN_INTERVAL;
+    private ServerTimestamp? _lastHealthRegenTime;
+    private ServerTimestamp? _lastManaRegenTime;
     private readonly IItemManager _itemManager;
     private readonly IJobManager _jobManager;
     private readonly IExperienceManager _experienceManager;
@@ -503,45 +504,59 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
         return 100 * ((b > 90 ? 90 : b) + 210) / 300;
     }
 
-    public override void Update(double elapsedTime)
+    public override void Update(TickContext ctx)
     {
         if (Map is null) return; // We don't have a map yet so we aren't spawned
 
-        base.Update(elapsedTime);
+        base.Update(ctx);
+
+        var hpOrSpChanged = false;
 
         var maxHp = GetPoint(EPoint.MAX_HP);
         if (Health < maxHp && !Dead)
         {
-            _healthRegenTime -= elapsedTime;
-            if (_healthRegenTime <= 0)
+            if (!_lastHealthRegenTime.HasValue)
+            {
+                // start counting interval only from first viable reset
+                _lastHealthRegenTime = ctx.Now;
+            } 
+            else if (ctx.Now.Since(_lastHealthRegenTime.Value) > TimeSpan.FromMilliseconds(HEALTH_REGEN_INTERVAL))
             {
                 var factor = State == EEntityState.IDLE ? 0.05 : 0.01;
                 Health = Math.Min((int)maxHp, Health + 15 + (int)(maxHp * factor));
-                SendPoints();
+                hpOrSpChanged = true;
 
-                _healthRegenTime += HEALTH_REGEN_INTERVAL;
+                _lastHealthRegenTime = ctx.Now;
             }
         }
 
         var maxSp = GetPoint(EPoint.MAX_SP);
         if (Mana < maxSp && !Dead)
         {
-            _manaRegenTime -= elapsedTime;
-            if (_manaRegenTime <= 0)
+            if (!_lastManaRegenTime.HasValue)
+            {
+                // start counting interval only from first viable reset
+                _lastManaRegenTime = ctx.Now;
+            }
+            else if (ctx.Now.Since(_lastManaRegenTime.Value) > TimeSpan.FromMilliseconds(MANA_REGEN_INTERVAL))
             {
                 var factor = State == EEntityState.IDLE ? 0.05 : 0.01;
                 Mana = Math.Min((int)maxSp, Mana + 15 + (int)(maxSp * factor));
-                SendPoints();
+                hpOrSpChanged = true;
 
-                _manaRegenTime += MANA_REGEN_INTERVAL;
+                _lastManaRegenTime = ctx.Now;
             }
         }
 
-        _persistTime += (int)elapsedTime;
-        if (_persistTime > PERSIST_INTERVAL)
+        if (hpOrSpChanged)
+        {
+            SendPoints();
+        }
+
+        if (ctx.Now.Since(_lastPersistTime) > TimeSpan.FromMilliseconds(PERSIST_INTERVAL))
         {
             Persist().Wait(); // TODO
-            _persistTime -= PERSIST_INTERVAL;
+            _lastPersistTime = ctx.Now;
         }
     }
 
@@ -1006,11 +1021,13 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
     public async Task CalculatePlayedTimeAsync()
     {
         var key = $"player:{Player.Id}:loggedInTime";
-        var startSessionTime = await _cacheManager.Server.Get<long>(key);
+        var startSessionTime = new ServerTimestamp(TimeSpan.FromMilliseconds(
+            await _cacheManager.Server.Get<long>(key)
+        ));
         var totalSessionTime = Connection.Server.ServerTime - startSessionTime;
-        if (totalSessionTime <= 0) return;
+        if (totalSessionTime <= TimeSpan.Zero) return;
 
-        AddPoint(EPoint.PLAY_TIME, (int)totalSessionTime);
+        AddPoint(EPoint.PLAY_TIME, (int)totalSessionTime.TotalMilliseconds);
     }
 
     public ItemInstance? GetItem(WindowType window, ushort position)

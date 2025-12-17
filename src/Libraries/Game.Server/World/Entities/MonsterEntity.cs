@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
+using QuantumCore.API.Core.Timekeeping;
 using QuantumCore.API.Game.Types.Combat;
 using QuantumCore.API.Game.Types.Entities;
 using QuantumCore.API.Game.Types.Monsters;
@@ -59,7 +60,7 @@ public class MonsterEntity : Entity
 
     private IBehaviour? _behaviour;
     private bool _behaviourInitialized;
-    private double _deadTime = 5000;
+    private ServerTimestamp? _diedAt;
     private readonly IMap _map;
     private readonly IItemManager _itemManager;
     private IServiceProvider _serviceProvider;
@@ -108,13 +109,16 @@ public class MonsterEntity : Entity
         }
     }
 
-    public override void Update(double elapsedTime)
+    public override void Update(TickContext ctx)
     {
         if (Map is null) return;
         if (Dead)
         {
-            _deadTime -= elapsedTime;
-            if (_deadTime <= 0)
+            if (!_diedAt.HasValue)
+            {
+                _diedAt = ctx.Now;
+            }
+            else if (ctx.Now.Since(_diedAt.Value) >= TimeSpan.FromSeconds(5))
             {
                 Map.DespawnEntity(this);
             }
@@ -128,17 +132,17 @@ public class MonsterEntity : Entity
 
         if (!Dead)
         {
-            _behaviour?.Update(elapsedTime);
+            _behaviour?.Update(ctx);
         }
 
-        base.Update(elapsedTime);
+        base.Update(ctx);
     }
 
-    public override void Goto(int x, int y)
+    public override void Goto(int x, int y, ServerTimestamp? startAt = null)
     {
         Rotation = (float)MathUtils.Rotation(x - PositionX, y - PositionY);
 
-        base.Goto(x, y);
+        base.Goto(x, y, startAt);
         // Send movement to nearby players
         var movement = new CharacterMoveOut
         {
@@ -147,7 +151,7 @@ public class MonsterEntity : Entity
             Argument = (byte)CharacterMovementType.WAIT,
             PositionX = TargetPositionX,
             PositionY = TargetPositionY,
-            Time = (uint)GameServer.Instance.ServerTime,
+            Time = (uint)(startAt ?? GameServer.Instance.ServerTime).TotalMilliseconds,
             Duration = MovementDuration
         };
 

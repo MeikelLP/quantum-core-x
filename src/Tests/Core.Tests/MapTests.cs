@@ -7,10 +7,12 @@ using NSubstitute;
 using QuantumCore;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
+using QuantumCore.API.Core.Timekeeping;
 using QuantumCore.API.Game.Types.Monsters;
 using QuantumCore.API.Game.World;
 using QuantumCore.Caching;
 using QuantumCore.Core.Event;
+using QuantumCore.Core.Timekeeping;
 using QuantumCore.Game;
 using QuantumCore.Game.Services;
 using QuantumCore.Game.World;
@@ -24,6 +26,7 @@ namespace Core.Tests;
 public class MapTests
 {
     private SpawnPoint[] _spawnPoints = Array.Empty<SpawnPoint>();
+    private readonly ManualTimeProvider _timeProvider = new();
     private readonly Map _map;
     private readonly IWorld _world;
 
@@ -63,6 +66,7 @@ public class MapTests
                 mock.GetAsync(Arg.Any<IWorld>()).Returns(_ => new[] { _map }!);
                 return mock;
             })
+            .AddSingleton<ITimeProvider>(_ => _timeProvider)
             .AddSingleton<IConfiguration>(_ => new ConfigurationBuilder().Build())
             .AddSingleton<ISpawnGroupProvider>(_ =>
             {
@@ -144,8 +148,9 @@ public class MapTests
         };
         await _world.LoadAsync();
         await _world.InitAsync();
-        EventSystem.Update(0);
-        _world.Update(0); // spawn entities
+        var ctx = Tick();
+        EventSystem.Update(ctx);
+        _world.Update(ctx); // spawn entities
 
         _map.Entities.Should().HaveCount(1);
         var entity = _map.Entities.ElementAt(0);
@@ -169,8 +174,9 @@ public class MapTests
         };
         await _world.LoadAsync();
         await _world.InitAsync();
-        EventSystem.Update(0);
-        _world.Update(0); // spawn entities
+        var ctx = Tick();
+        EventSystem.Update(ctx);
+        _world.Update(ctx); // spawn entities
 
         _map.Entities.Should().HaveCount(3);
         var mobs = _map.Entities.Should().AllBeOfType<MonsterEntity>().Subject;
@@ -193,11 +199,19 @@ public class MapTests
         };
         await _world.LoadAsync();
         await _world.InitAsync();
-        EventSystem.Update(0);
-        _world.Update(0); // spawn entities
+        var ctx = Tick();
+        EventSystem.Update(ctx);
+        _world.Update(ctx); // spawn entities
 
         _map.Entities.Should().HaveCount(3);
         var mobs = _map.Entities.Should().AllBeOfType<MonsterEntity>().Subject;
         mobs.Should().AllSatisfy(x => x.Proto.Id.Should().Be(101));
+    }
+
+    private TickContext Tick(double elapsedMilliseconds = 0)
+    {
+        var delta = TimeSpan.FromMilliseconds(elapsedMilliseconds);
+        _timeProvider.Advance(delta);
+        return new TickContext(delta, _timeProvider.Now);
     }
 }

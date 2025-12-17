@@ -13,6 +13,7 @@ using Microsoft.Extensions.Options;
 using NSubstitute;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
+using QuantumCore.API.Core.Timekeeping;
 using QuantumCore.API.Game;
 using QuantumCore.API.Game.Guild;
 using QuantumCore.API.Game.Types;
@@ -23,6 +24,7 @@ using QuantumCore.API.Game.Types.Skills;
 using QuantumCore.API.Game.World;
 using QuantumCore.Caching;
 using QuantumCore.Core.Packets;
+using QuantumCore.Core.Timekeeping;
 using QuantumCore.Extensions;
 using QuantumCore.Game;
 using QuantumCore.Game.Commands;
@@ -101,6 +103,7 @@ public class CommandTests : IAsyncLifetime
     private readonly ISkillManager _skillManager;
     private readonly AsyncServiceScope _scope;
     private readonly GameDbContext _db;
+    private readonly ManualTimeProvider _timeProvider = new();
 
     public CommandTests(ITestOutputHelper testOutputHelper)
     {
@@ -177,6 +180,7 @@ public class CommandTests : IAsyncLifetime
             .AddGameServices()
             .AddSingleton(Substitute.For<IServerBase>())
             .AddQuantumCoreTestLogger(testOutputHelper)
+            .Replace(new ServiceDescriptor(typeof(ITimeProvider), _ => _timeProvider, ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(IItemRepository), _ => Substitute.For<IItemRepository>(),
                 ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(ICommandPermissionRepository),
@@ -260,7 +264,7 @@ public class CommandTests : IAsyncLifetime
         var player2 = ActivatorUtilities.CreateInstance<PlayerEntity>(_services, _playerDataFaker.Generate());
         world.SpawnEntity(_player);
         world.SpawnEntity(player2);
-        world.Update(0); // spawn entities
+        world.Update(Tick()); // spawn entities
         player2.Move((int)(11 * Map.MAP_UNIT), (int)(27 * Map.MAP_UNIT));
 
         Assert.Equal((int)(10 * Map.MAP_UNIT), _player.PositionX);
@@ -279,7 +283,7 @@ public class CommandTests : IAsyncLifetime
         var player2 = ActivatorUtilities.CreateInstance<PlayerEntity>(_services, _playerDataFaker.Generate());
         world.SpawnEntity(_player);
         world.SpawnEntity(player2);
-        world.Update(0); // spawn entities
+        world.Update(Tick()); // spawn entities
         player2.Move((int)(11 * Map.MAP_UNIT), (int)(27 * Map.MAP_UNIT));
 
 
@@ -398,7 +402,7 @@ public class CommandTests : IAsyncLifetime
     {
         var world = await PrepareWorldAsync();
         world.SpawnEntity(_player);
-        world.Update(0); // spawn entities
+        world.Update(Tick()); // spawn entities
 
         _player.Move((int)(Map.MAP_UNIT * 10), (int)(Map.MAP_UNIT * 26));
 
@@ -416,7 +420,7 @@ public class CommandTests : IAsyncLifetime
     {
         var world = await PrepareWorldAsync();
         world.SpawnEntity(_player);
-        world.Update(0); // spawn entities
+        world.Update(Tick()); // spawn entities
 
 
         Assert.Equal((int)(10 * Map.MAP_UNIT), _player.PositionX);
@@ -501,7 +505,7 @@ public class CommandTests : IAsyncLifetime
         world.GetPlayer(_player.Name).Should().NotBeNull();
 
         _player.Player.PlayTime = 0;
-        _connection.Server.ServerTime.Returns(60000); // 1 minute in ms
+        _connection.Server.ServerTime.Returns(new ServerTimestamp(TimeSpan.FromMinutes(1)));
 
         await _commandManager.Handle(_connection, "/logout");
 
@@ -520,7 +524,7 @@ public class CommandTests : IAsyncLifetime
             .NotContainEquivalentOf(new GcPhase { Phase = EPhase.SELECT });
 
         _player.Player.PlayTime = 0;
-        _connection.Server.ServerTime.Returns(60000);
+        _connection.Server.ServerTime.Returns(new ServerTimestamp(TimeSpan.FromMinutes(1)));
 
         await _commandManager.Handle(_connection, "/phase_select");
 
@@ -569,7 +573,7 @@ public class CommandTests : IAsyncLifetime
     {
         var world = await PrepareWorldAsync();
         world.SpawnEntity(_player);
-        world.Update(0.1);
+        world.Update(Tick(0.1));
         _player.Map.Should().NotBeNull();
 
         _player.Health.Should().Be(676L);
@@ -592,12 +596,12 @@ public class CommandTests : IAsyncLifetime
     {
         var world = await PrepareWorldAsync();
         world.SpawnEntity(_player);
-        world.Update(0); // spawn entities
+        world.Update(Tick()); // spawn entities
         _player.Move((int)(Map.MAP_UNIT * 13), (int)(Map.MAP_UNIT * 29)); // center of the map
         _player.Map.Entities.Count.Should().Be(1);
 
         await _commandManager.Handle(_connection, "/spawn 101");
-        world.Update(0); // spawn entities
+        world.Update(Tick()); // spawn entities
 
         _player.Map.Entities.Count.Should().Be(2);
     }
@@ -607,12 +611,12 @@ public class CommandTests : IAsyncLifetime
     {
         var world = await PrepareWorldAsync();
         world.SpawnEntity(_player);
-        world.Update(0); // spawn entities
+        world.Update(Tick()); // spawn entities
         _player.Move((int)(Map.MAP_UNIT * 13), (int)(Map.MAP_UNIT * 29)); // center of the map
         _player.Map.Entities.Count.Should().Be(1);
 
         await _commandManager.Handle(_connection, "/spawn 101 10");
-        world.Update(0); // spawn entities
+        world.Update(Tick()); // spawn entities
 
         _player.Map.Entities.Count.Should().Be(11);
     }
@@ -843,5 +847,12 @@ public class CommandTests : IAsyncLifetime
         skill.Should().NotBeNull();
         skill?.Level.Should().Be(ESkillLevel.MASTER_M1);
         skill?.MasterType.Should().Be(ESkillMasterType.MASTER);
+    }
+
+    private TickContext Tick(double elapsedMilliseconds = 0)
+    {
+        var delta = TimeSpan.FromMilliseconds(elapsedMilliseconds);
+        _timeProvider.Advance(delta);
+        return new TickContext(delta, _timeProvider.Now);
     }
 }

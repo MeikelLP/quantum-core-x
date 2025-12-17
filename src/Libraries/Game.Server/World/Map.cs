@@ -5,6 +5,7 @@ using EnumsNET;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
+using QuantumCore.API.Core.Timekeeping;
 using QuantumCore.API.Game.Types.Monsters;
 using QuantumCore.API.Game.Types.Entities;
 using QuantumCore.API.Game.Types;
@@ -121,9 +122,9 @@ public class Map : IMap
         }
     }
 
-    public void Update(double elapsedTime)
+    public void Update(TickContext ctx)
     {
-        // HookManager.Instance.CallHook<IHookMapUpdate>(this, elapsedTime);
+        // HookManager.Instance.CallHook<IHookMapUpdate>(this, ctx);
 
         while (_pendingSpawns.TryDequeue(out var entity))
         {
@@ -175,7 +176,7 @@ public class Map : IMap
 
         foreach (var entity in _entities)
         {
-            entity.Update(elapsedTime);
+            entity.Update(ctx);
 
             if (entity.PositionChanged)
             {
@@ -393,8 +394,8 @@ public class Map : IMap
         {
             // TODO
             SpawnGroup(group);
-            return 0;
-        }, group.SpawnPoint.RespawnTime * 1000);
+            return TimeSpan.Zero;
+        }, TimeSpan.FromSeconds(group.SpawnPoint.RespawnTime));
     }
 
     public bool IsPositionInside(int x, int y)
