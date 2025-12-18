@@ -4,9 +4,15 @@ namespace QuantumCore.API.Core.Timekeeping;
 /// Strongly typed wrapper for monotonic timestamps returned by <see cref="TimeProvider.GetTimestamp"/>.
 /// The underlying value is opaque and must be interpreted via a <see cref="ServerClock"/>.
 /// </summary>
-public readonly record struct ServerTimestamp(long Stamp)
-    : IComparable<ServerTimestamp>
+public readonly record struct ServerTimestamp : IComparable<ServerTimestamp>
 {
+    internal long Stamp { get; }
+
+    internal ServerTimestamp(long Stamp)
+    {
+        this.Stamp = Stamp;
+    }
+
     public int CompareTo(ServerTimestamp other) => Stamp.CompareTo(other.Stamp);
 
     public static bool operator <(ServerTimestamp left, ServerTimestamp right) => left.Stamp < right.Stamp;
