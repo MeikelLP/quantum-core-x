@@ -113,7 +113,7 @@ public class WorldTests
             .Replace(new ServiceDescriptor(typeof(TimeProvider), _ => _timeProvider, ServiceLifetime.Singleton))
             .AddSingleton(Substitute.For<IFileProvider>())
             .BuildServiceProvider();
-        _clock = new ServerClock(_timeProvider);
+        _clock = services.GetRequiredService<ServerClock>();
         var server = services.GetRequiredService<IServerBase>();
         server.Clock.Returns(_clock);
         _world = ActivatorUtilities.CreateInstance<World>(services);

@@ -43,7 +43,6 @@ public class WorldUpdateBenchmark
     [GlobalSetup]
     public void GlobalSetup()
     {
-        _clock = new ServerClock(_timeProvider);
         var config = new ConfigurationBuilder()
             .AddInMemoryCollection(new Dictionary<string, string?>())
             .Build();
@@ -118,6 +117,7 @@ public class WorldUpdateBenchmark
             }, ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(TimeProvider), _ => _timeProvider, ServiceLifetime.Singleton))
             .BuildServiceProvider();
+        _clock = services.GetRequiredService<ServerClock>();
         _world = ActivatorUtilities.CreateInstance<World>(services);
         ActivatorUtilities.CreateInstance<GameServer>(services); // for setting the singleton GameServer.Instance
         _world.LoadAsync().Wait();

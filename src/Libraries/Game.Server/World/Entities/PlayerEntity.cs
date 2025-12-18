@@ -1028,7 +1028,7 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
         var startSessionElapsed = TimeSpan.FromMilliseconds(
             await _cacheManager.Server.Get<long>(key)
         );
-        var currentElapsed = Connection.Server.Clock.Elapsed();
+        var currentElapsed = Connection.Server.Clock.Elapsed;
         var totalSessionTime = currentElapsed - startSessionElapsed;
         if (totalSessionTime <= TimeSpan.Zero) return;
 

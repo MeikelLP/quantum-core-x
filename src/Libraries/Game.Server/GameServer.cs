@@ -37,9 +37,9 @@ public class GameServer : ServerBase<GameConnection>, IGameServer
     public GameServer(
         [FromKeyedServices(HostingOptions.MODE_GAME)]
         IPacketManager packetManager, ILogger<GameServer> logger,
-        PluginExecutor pluginExecutor, IServiceProvider serviceProvider, TimeProvider timeProvider,
+        PluginExecutor pluginExecutor, IServiceProvider serviceProvider, ServerClock clock,
         ICommandManager commandManager)
-        : base(packetManager, logger, pluginExecutor, serviceProvider, timeProvider, HostingOptions.MODE_GAME)
+        : base(packetManager, logger, pluginExecutor, serviceProvider, clock, HostingOptions.MODE_GAME)
     {
         _logger = logger;
         _pluginExecutor = pluginExecutor;
@@ -112,7 +112,7 @@ public class GameServer : ServerBase<GameConnection>, IGameServer
         if (_accumulatedElapsedTime < _targetElapsedTime)
         {
             var sleepTime = _targetElapsedTime - _accumulatedElapsedTime;
-            await Task.Delay(sleepTime, Clock.GetTimeProvider(), stoppingToken).ConfigureAwait(false);
+            await Task.Delay(sleepTime, Clock.TimeProvider, stoppingToken).ConfigureAwait(false);
             return;
         }
 

@@ -2,6 +2,7 @@ using System.Reflection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using QuantumCore.API.Core.Timekeeping;
 using QuantumCore.API.PluginTypes;
 using QuantumCore.Networking;
 using Serilog;
@@ -83,6 +84,7 @@ public static class ServiceExtensions
             return ActivatorUtilities.CreateInstance<PacketManager>(provider, [packetTypes, handlerTypes]);
         });
         services.AddSingleton(_ => TimeProvider.System);
+        services.AddSingleton<ServerClock>();
         services.AddSingleton<PluginExecutor>();
         services.AddPluginFramework()
             .AddPluginCatalog(pluginCatalog)

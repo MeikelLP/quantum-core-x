@@ -228,7 +228,7 @@ public class CommandTests : IAsyncLifetime
         _commandManager.Register("QuantumCore.Game.Commands", typeof(SpawnCommand).Assembly);
         _connection = _services.GetRequiredService<IGameConnection>();
 
-        _clock = new ServerClock(_timeProvider);
+        _clock = _services.GetRequiredService<ServerClock>();
         _connection.Server.Clock.Returns(_clock);
         _services.GetRequiredService<IServerBase>().Clock.Returns(_clock);
 

@@ -32,7 +32,7 @@ public abstract class ServerBase<T> : BackgroundService, IServerBase
     public IPAddress IpAddress { get; }
 
     public ServerBase(IPacketManager packetManager, ILogger logger, PluginExecutor pluginExecutor,
-        IServiceProvider serviceProvider, TimeProvider timeProvider, string mode)
+        IServiceProvider serviceProvider, ServerClock clock, string mode)
     {
         _logger = logger;
         _pluginExecutor = pluginExecutor;
@@ -44,7 +44,7 @@ public abstract class ServerBase<T> : BackgroundService, IServerBase
         Port = hostingOptions.Port;
 
         // Start server timer
-        Clock = new ServerClock(timeProvider);
+        Clock = clock;
         var desiredIpAddress = IPAddress.TryParse(hostingOptions.IpAddress, out var ipAddress)
             ? ipAddress
             : IPAddress.Loopback;

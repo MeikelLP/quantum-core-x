@@ -33,7 +33,6 @@ public class MapTests
 
     public MapTests(ITestOutputHelper testOutputHelper)
     {
-        _clock = new ServerClock(_timeProvider);
         var npcShopProvider = Substitute.For<INpcShopProvider>();
         npcShopProvider.Shops.Returns([]);
         var provider = new ServiceCollection()
@@ -69,6 +68,7 @@ public class MapTests
                 return mock;
             })
             .AddSingleton<TimeProvider>(_ => _timeProvider)
+            .AddSingleton<ServerClock>(_ => new ServerClock(_timeProvider))
             .AddSingleton<IConfiguration>(_ => new ConfigurationBuilder().Build())
             .AddSingleton<ISpawnGroupProvider>(_ =>
             {
@@ -118,6 +118,7 @@ public class MapTests
             .AddOptions<HostingOptions>().Services
             .AddQuantumCoreTestLogger(testOutputHelper)
             .BuildServiceProvider();
+        _clock = provider.GetRequiredService<ServerClock>();
         ActivatorUtilities.CreateInstance<GameServer>(provider);
         var monsterManager = provider.GetRequiredService<IMonsterManager>();
         var animationManager = provider.GetRequiredService<IAnimationManager>();
