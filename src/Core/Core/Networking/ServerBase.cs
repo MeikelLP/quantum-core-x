@@ -19,7 +19,6 @@ public abstract class ServerBase<T> : BackgroundService, IServerBase
     protected IPacketManager PacketManager { get; }
     private readonly List<Func<IConnection, bool>> _connectionListeners = new();
     protected readonly ConcurrentDictionary<Guid, IConnection> Connections = new();
-    protected ITimeProvider TimeProvider { get;  }
     private readonly CancellationTokenSource _stoppingToken = new();
     protected TcpListener Listener { get; }
 
@@ -28,11 +27,12 @@ public abstract class ServerBase<T> : BackgroundService, IServerBase
     private readonly string _serverMode;
     protected IServiceScope Scope { get; }
 
+    public ServerClock Clock { get; }
     public ushort Port { get; }
     public IPAddress IpAddress { get; }
 
     public ServerBase(IPacketManager packetManager, ILogger logger, PluginExecutor pluginExecutor,
-        IServiceProvider serviceProvider, ITimeProvider timeProvider, string mode)
+        IServiceProvider serviceProvider, TimeProvider timeProvider, string mode)
     {
         _logger = logger;
         _pluginExecutor = pluginExecutor;
@@ -44,15 +44,13 @@ public abstract class ServerBase<T> : BackgroundService, IServerBase
         Port = hostingOptions.Port;
 
         // Start server timer
-        TimeProvider = timeProvider;
+        Clock = new ServerClock(timeProvider);
         var desiredIpAddress = IPAddress.TryParse(hostingOptions.IpAddress, out var ipAddress)
             ? ipAddress
             : IPAddress.Loopback;
         IpAddress = desiredIpAddress;
         Listener = new TcpListener(IpAddress, Port);
     }
-
-    public ServerTimestamp ServerTime => TimeProvider.Now;
 
     public async Task RemoveConnection(IConnection connection)
     {

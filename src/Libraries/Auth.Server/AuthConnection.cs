@@ -33,8 +33,8 @@ public class AuthConnection : Connection, IAuthConnection
         await _server.CallListener(this, packet);
     }
 
-    protected override ServerTimestamp GetServerTime()
+    protected override ServerClock GetClock()
     {
-        return _server.ServerTime;
+        return _server.Clock;
     }
 }

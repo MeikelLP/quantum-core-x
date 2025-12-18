@@ -87,8 +87,8 @@ public class GameConnection : Connection, IGameConnection
         await Server.CallListener(this, packet);
     }
 
-    protected override ServerTimestamp GetServerTime()
+    protected override ServerClock GetClock()
     {
-        return Server.ServerTime;
+        return Server.Clock;
     }
 }

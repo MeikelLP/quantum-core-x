@@ -6,6 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Time.Testing;
 using NSubstitute;
 using QuantumCore;
 using QuantumCore.API;
@@ -17,7 +18,6 @@ using QuantumCore.API.Game.Types.Players;
 using QuantumCore.API.Game.World;
 using QuantumCore.Caching;
 using QuantumCore.Caching.Extensions;
-using QuantumCore.Core.Timekeeping;
 using QuantumCore.Extensions;
 using QuantumCore.Game;
 using QuantumCore.Game.Extensions;
@@ -37,11 +37,13 @@ public class WorldUpdateBenchmark
     [Params(0, 1, 10)] public int _playerAmount;
 
     private World _world = null!;
-    private readonly ManualTimeProvider _timeProvider = new();
+    private readonly FakeTimeProvider _timeProvider = new();
+    private ServerClock _clock = null!;
 
     [GlobalSetup]
     public void GlobalSetup()
     {
+        _clock = new ServerClock(_timeProvider);
         var config = new ConfigurationBuilder()
             .AddInMemoryCollection(new Dictionary<string, string?>())
             .Build();
@@ -114,7 +116,7 @@ public class WorldUpdateBenchmark
                 mock.GetMonster(42).Returns(new MonsterData {Type = (byte)EEntityType.MONSTER});
                 return mock;
             }, ServiceLifetime.Singleton))
-            .Replace(new ServiceDescriptor(typeof(ITimeProvider), _ => _timeProvider, ServiceLifetime.Singleton))
+            .Replace(new ServiceDescriptor(typeof(TimeProvider), _ => _timeProvider, ServiceLifetime.Singleton))
             .BuildServiceProvider();
         _world = ActivatorUtilities.CreateInstance<World>(services);
         ActivatorUtilities.CreateInstance<GameServer>(services); // for setting the singleton GameServer.Instance
@@ -134,7 +136,7 @@ public class WorldUpdateBenchmark
 
         foreach (var e in _world.GetMapAt(0, 0)!.Entities)
         {
-            e?.Goto(0, 0, Tick(0).Now);
+            e?.Goto(0, 0, Tick(0).Timestamp);
         }
 
         _world.Update(Tick(0.2)); // spawn entities
@@ -150,6 +152,7 @@ public class WorldUpdateBenchmark
     {
         var delta = TimeSpan.FromMilliseconds(elapsedMilliseconds);
         _timeProvider.Advance(delta);
-        return new TickContext(delta, _timeProvider.Now);
+        var now = _clock.Now;
+        return new TickContext(_clock, delta, now);
     }
 }

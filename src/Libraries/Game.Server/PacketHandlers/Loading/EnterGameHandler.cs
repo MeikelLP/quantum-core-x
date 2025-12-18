@@ -35,7 +35,7 @@ public class EnterGameHandler : IGamePacketHandler<EnterGame>
         // Enable game phase
         ctx.Connection.SetPhase(EPhase.GAME);
 
-        var uptimeMs = ctx.Connection.Server.ServerTime.TotalMilliseconds;
+        var uptimeMs = ctx.Connection.Server.Clock.Elapsed().TotalMilliseconds;
 
         ctx.Connection.Send(new GameTime {Time = (uint)uptimeMs});
         ctx.Connection.Send(new Channel {ChannelNo = 1}); // todo

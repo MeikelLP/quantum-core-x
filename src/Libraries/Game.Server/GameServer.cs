@@ -37,7 +37,7 @@ public class GameServer : ServerBase<GameConnection>, IGameServer
     public GameServer(
         [FromKeyedServices(HostingOptions.MODE_GAME)]
         IPacketManager packetManager, ILogger<GameServer> logger,
-        PluginExecutor pluginExecutor, IServiceProvider serviceProvider, ITimeProvider timeProvider,
+        PluginExecutor pluginExecutor, IServiceProvider serviceProvider, TimeProvider timeProvider,
         ICommandManager commandManager)
         : base(packetManager, logger, pluginExecutor, serviceProvider, timeProvider, HostingOptions.MODE_GAME)
     {
@@ -46,6 +46,7 @@ public class GameServer : ServerBase<GameConnection>, IGameServer
         _commandManager = commandManager;
         Instance = this;
         _world = Scope.ServiceProvider.GetRequiredService<IWorld>();
+        _lastTick = Clock.Now;
         Meter.CreateObservableGauge("Connections", () => Connections.Length);
     }
 
@@ -78,7 +79,7 @@ public class GameServer : ServerBase<GameConnection>, IGameServer
 
         StartListening();
 
-        _lastTick = TimeProvider.Now;
+        _lastTick = Clock.Now;
 
         _logger.LogDebug("Start!");
 
@@ -88,7 +89,7 @@ public class GameServer : ServerBase<GameConnection>, IGameServer
             {
                 await _pluginExecutor.ExecutePlugins<IGameTickListener>(_logger,
                     x => x.PreUpdateAsync(stoppingToken));
-                await Tick();
+                await Tick(stoppingToken);
                 await _pluginExecutor.ExecutePlugins<IGameTickListener>(_logger,
                     x => x.PostUpdateAsync(stoppingToken));
             }
@@ -99,23 +100,19 @@ public class GameServer : ServerBase<GameConnection>, IGameServer
         }
     }
 
-    private async ValueTask Tick()
+    private async ValueTask Tick(CancellationToken stoppingToken)
     {
-        var now = TimeProvider.Now;
-        var elapsedTime = now - _lastTick;
-        _lastTick = now;
+        var currentTick = Clock.Now;
+        var elapsedTime = Clock.ElapsedBetween(_lastTick, currentTick);
+        _lastTick = currentTick;
 
-        if (elapsedTime < TimeSpan.Zero)
-        {
-            elapsedTime = TimeSpan.Zero;
-        }
         _serverTimes.Record(elapsedTime.TotalMilliseconds);
         _accumulatedElapsedTime += elapsedTime;
 
         if (_accumulatedElapsedTime < _targetElapsedTime)
         {
             var sleepTime = _targetElapsedTime - _accumulatedElapsedTime;
-            await TimeProvider.DelayAsync(sleepTime).ConfigureAwait(false);
+            await Task.Delay(sleepTime, Clock.GetTimeProvider(), stoppingToken).ConfigureAwait(false);
             return;
         }
 
@@ -136,10 +133,10 @@ public class GameServer : ServerBase<GameConnection>, IGameServer
             _accumulatedElapsedTime -= _targetElapsedTime;
             ++stepCount;
 
-            var stepTimestamp = now - _accumulatedElapsedTime;
+            var stepTimestamp = Clock.Rewind(currentTick, _accumulatedElapsedTime);
 
             //_logger.LogDebug($"Update... ({stepCount})");
-            Update(new TickContext(_targetElapsedTime, stepTimestamp));
+            Update(new TickContext(Clock, _targetElapsedTime, stepTimestamp));
         }
 
         // todo detect lags

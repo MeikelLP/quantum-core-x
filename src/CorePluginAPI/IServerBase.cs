@@ -8,7 +8,7 @@ public interface IServerBase
 {
     Task RemoveConnection(IConnection connection);
     Task CallListener(IConnection connection, IPacketSerializable packet);
-    ServerTimestamp ServerTime { get; }
+    ServerClock Clock { get; }
     IPAddress IpAddress { get; }
     ushort Port { get; }
     void CallConnectionListener(IConnection connection);

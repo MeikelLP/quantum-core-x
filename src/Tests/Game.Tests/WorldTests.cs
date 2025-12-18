@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Time.Testing;
 using NSubstitute;
 using QuantumCore;
 using QuantumCore.API;
@@ -14,7 +15,6 @@ using QuantumCore.API.Game.Types.Entities;
 using QuantumCore.API.Game.Types.Players;
 using QuantumCore.API.Game.World;
 using QuantumCore.Caching;
-using QuantumCore.Core.Timekeeping;
 using QuantumCore.Extensions;
 using QuantumCore.Game;
 using QuantumCore.Game.Extensions;
@@ -29,7 +29,8 @@ public class WorldTests
 {
     private World _world = null!;
     private readonly PlayerEntity _playerEntity;
-    private readonly ManualTimeProvider _timeProvider = new();
+    private readonly FakeTimeProvider _timeProvider = new();
+    private readonly ServerClock _clock;
 
     public WorldTests()
     {
@@ -109,9 +110,12 @@ public class WorldTests
                 ]);
                 return mock;
             }, ServiceLifetime.Singleton))
-            .Replace(new ServiceDescriptor(typeof(ITimeProvider), _ => _timeProvider, ServiceLifetime.Singleton))
+            .Replace(new ServiceDescriptor(typeof(TimeProvider), _ => _timeProvider, ServiceLifetime.Singleton))
             .AddSingleton(Substitute.For<IFileProvider>())
             .BuildServiceProvider();
+        _clock = new ServerClock(_timeProvider);
+        var server = services.GetRequiredService<IServerBase>();
+        server.Clock.Returns(_clock);
         _world = ActivatorUtilities.CreateInstance<World>(services);
         ActivatorUtilities.CreateInstance<GameServer>(services); // for setting the singleton GameServer.Instance
         Task.WhenAll(services.GetServices<ILoadable>().Select(x => x.LoadAsync())).Wait();
@@ -119,6 +123,7 @@ public class WorldTests
 
         var conn = Substitute.For<IGameConnection>();
         conn.BoundIpAddress.Returns(IPAddress.Loopback);
+        conn.Server.Returns(server);
         var playerData = new PlayerData
         {
             Name = "TestPlayer", PlayerClass = EPlayerClassGendered.NINJA_FEMALE, PositionX = 1, PositionY = 1
@@ -146,6 +151,7 @@ public class WorldTests
     {
         var delta = TimeSpan.FromMilliseconds(elapsedMilliseconds);
         _timeProvider.Advance(delta);
-        return new TickContext(delta, _timeProvider.Now);
+        var now = _clock.Now;
+        return new TickContext(_clock, delta, now);
     }
 }

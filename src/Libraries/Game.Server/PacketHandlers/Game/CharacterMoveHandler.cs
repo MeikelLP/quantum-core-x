@@ -40,7 +40,7 @@ public class CharacterMoveHandler : IGamePacketHandler<CharacterMove>
         if (ctx.Packet.MovementType == CharacterMovementType.MOVE)
         {
             ctx.Connection.Player.Rotation = ctx.Packet.Rotation * 5;
-            ctx.Connection.Player.Goto(ctx.Packet.PositionX, ctx.Packet.PositionY, ctx.Connection.Server.ServerTime);
+            ctx.Connection.Player.Goto(ctx.Packet.PositionX, ctx.Packet.PositionY, ctx.Connection.Server.Clock.Now);
         }
         else
         {

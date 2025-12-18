@@ -116,9 +116,9 @@ public class MonsterEntity : Entity
         {
             if (!_diedAt.HasValue)
             {
-                _diedAt = ctx.Now;
+                _diedAt = ctx.Timestamp;
             }
-            else if (ctx.Now.Since(_diedAt.Value) >= TimeSpan.FromSeconds(5))
+            else if (ctx.ElapsedSince(_diedAt.Value) >= TimeSpan.FromSeconds(5))
             {
                 Map.DespawnEntity(this);
             }
@@ -138,12 +138,13 @@ public class MonsterEntity : Entity
         base.Update(ctx);
     }
 
-    public override void Goto(int x, int y, ServerTimestamp? startAt = null)
+    public override void Goto(int x, int y, ServerTimestamp startAt)
     {
         Rotation = (float)MathUtils.Rotation(x - PositionX, y - PositionY);
 
         base.Goto(x, y, startAt);
         // Send movement to nearby players
+        var startTime = (Map as Map)!.Clock.ElapsedAt(startAt);
         var movement = new CharacterMoveOut
         {
             Vid = Vid,
@@ -151,7 +152,7 @@ public class MonsterEntity : Entity
             Argument = (byte)CharacterMovementType.WAIT,
             PositionX = TargetPositionX,
             PositionY = TargetPositionY,
-            Time = (uint)(startAt ?? GameServer.Instance.ServerTime).TotalMilliseconds,
+            Time = (uint)startTime.TotalMilliseconds,
             Duration = MovementDuration
         };
 

@@ -2,9 +2,7 @@ using System.Reflection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using QuantumCore.API.Core.Timekeeping;
 using QuantumCore.API.PluginTypes;
-using QuantumCore.Core.Timekeeping;
 using QuantumCore.Networking;
 using Serilog;
 using Serilog.Events;
@@ -84,7 +82,7 @@ public static class ServiceExtensions
                 .ToArray();
             return ActivatorUtilities.CreateInstance<PacketManager>(provider, [packetTypes, handlerTypes]);
         });
-        services.AddSingleton<ITimeProvider, StopwatchTimeProvider>();
+        services.AddSingleton(_ => TimeProvider.System);
         services.AddSingleton<PluginExecutor>();
         services.AddPluginFramework()
             .AddPluginCatalog(pluginCatalog)

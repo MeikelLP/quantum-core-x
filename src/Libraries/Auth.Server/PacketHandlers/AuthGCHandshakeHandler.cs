@@ -1,6 +1,5 @@
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
-using QuantumCore.API.Core.Timekeeping;
 using QuantumCore.API.PluginTypes;
 using QuantumCore.Core.Packets;
 
@@ -14,7 +13,7 @@ public class AuthGcHandshakeHandler : IAuthPacketHandler<GcHandshake>
         {
             Delta = TimeSpan.FromMilliseconds(ctx.Packet.Delta),
             Handshake = ctx.Packet.Handshake,
-            Time = new ServerTimestamp(TimeSpan.FromMilliseconds(ctx.Packet.Time))
+            Time = TimeSpan.FromMilliseconds(ctx.Packet.Time)
         });
         return Task.CompletedTask;
     }

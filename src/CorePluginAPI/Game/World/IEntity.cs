@@ -54,7 +54,7 @@ public interface IEntity
     public int GetMaxDamage();
     public int GetBonusDamage();
 
-    public void Goto(int x, int y, ServerTimestamp? startAt = null);
+    public void Goto(int x, int y, ServerTimestamp startAt);
     public void Wait(int x, int y);
 
     public void Attack(IEntity victim);

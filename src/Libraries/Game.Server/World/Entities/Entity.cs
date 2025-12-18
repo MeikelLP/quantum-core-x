@@ -103,7 +103,7 @@ public abstract class Entity : IEntity
     {
         if (State == EEntityState.MOVING)
         {
-            var elapsed = ctx.Now.Since(MovementStart);
+            var elapsed = ctx.ElapsedSince(MovementStart);
             var rate = MovementDuration == 0 ? 1 : elapsed.TotalMilliseconds / (float)MovementDuration;
             if (rate > 1) rate = 1;
 
@@ -129,10 +129,10 @@ public abstract class Entity : IEntity
         PositionChanged = true;
     }
 
-    public void Goto(Coordinates position, ServerTimestamp? startAt = null) =>
+    public void Goto(Coordinates position, ServerTimestamp startAt) =>
         Goto((int)position.X, (int)position.Y, startAt);
 
-    public virtual void Goto(int x, int y, ServerTimestamp? startAt = null)
+    public virtual void Goto(int x, int y, ServerTimestamp startAt)
     {
         if (PositionX == x && PositionY == y) return;
         if (TargetPositionX == x && TargetPositionY == y) return;
@@ -145,7 +145,7 @@ public abstract class Entity : IEntity
         TargetPositionY = y;
         StartPositionX = PositionX;
         StartPositionY = PositionY;
-        MovementStart = startAt ?? GameServer.Instance.ServerTime;
+        MovementStart = startAt;
 
         var distance = MathUtils.Distance(StartPositionX, StartPositionY, TargetPositionX, TargetPositionY);
         if (animation is null)

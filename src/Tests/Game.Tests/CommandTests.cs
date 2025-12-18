@@ -10,6 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Time.Testing;
 using NSubstitute;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
@@ -24,7 +25,6 @@ using QuantumCore.API.Game.Types.Skills;
 using QuantumCore.API.Game.World;
 using QuantumCore.Caching;
 using QuantumCore.Core.Packets;
-using QuantumCore.Core.Timekeeping;
 using QuantumCore.Extensions;
 using QuantumCore.Game;
 using QuantumCore.Game.Commands;
@@ -103,7 +103,8 @@ public class CommandTests : IAsyncLifetime
     private readonly ISkillManager _skillManager;
     private readonly AsyncServiceScope _scope;
     private readonly GameDbContext _db;
-    private readonly ManualTimeProvider _timeProvider = new();
+    private readonly FakeTimeProvider _timeProvider = new();
+    private readonly ServerClock _clock;
 
     public CommandTests(ITestOutputHelper testOutputHelper)
     {
@@ -180,7 +181,7 @@ public class CommandTests : IAsyncLifetime
             .AddGameServices()
             .AddSingleton(Substitute.For<IServerBase>())
             .AddQuantumCoreTestLogger(testOutputHelper)
-            .Replace(new ServiceDescriptor(typeof(ITimeProvider), _ => _timeProvider, ServiceLifetime.Singleton))
+            .Replace(new ServiceDescriptor(typeof(TimeProvider), _ => _timeProvider, ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(IItemRepository), _ => Substitute.For<IItemRepository>(),
                 ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(ICommandPermissionRepository),
@@ -226,6 +227,11 @@ public class CommandTests : IAsyncLifetime
         _commandManager = _services.GetRequiredService<ICommandManager>();
         _commandManager.Register("QuantumCore.Game.Commands", typeof(SpawnCommand).Assembly);
         _connection = _services.GetRequiredService<IGameConnection>();
+
+        _clock = new ServerClock(_timeProvider);
+        _connection.Server.Clock.Returns(_clock);
+        _services.GetRequiredService<IServerBase>().Clock.Returns(_clock);
+
         _player = _services.GetRequiredService<IPlayerEntity>();
         _player.Player.PlayTime = 0;
         _connection.Player = _player;
@@ -505,7 +511,7 @@ public class CommandTests : IAsyncLifetime
         world.GetPlayer(_player.Name).Should().NotBeNull();
 
         _player.Player.PlayTime = 0;
-        _connection.Server.ServerTime.Returns(new ServerTimestamp(TimeSpan.FromMinutes(1)));
+        _timeProvider.Advance(TimeSpan.FromMinutes(1));
 
         await _commandManager.Handle(_connection, "/logout");
 
@@ -524,7 +530,7 @@ public class CommandTests : IAsyncLifetime
             .NotContainEquivalentOf(new GcPhase { Phase = EPhase.SELECT });
 
         _player.Player.PlayTime = 0;
-        _connection.Server.ServerTime.Returns(new ServerTimestamp(TimeSpan.FromMinutes(1)));
+        _timeProvider.Advance(TimeSpan.FromMinutes(1));
 
         await _commandManager.Handle(_connection, "/phase_select");
 
@@ -853,6 +859,7 @@ public class CommandTests : IAsyncLifetime
     {
         var delta = TimeSpan.FromMilliseconds(elapsedMilliseconds);
         _timeProvider.Advance(delta);
-        return new TickContext(delta, _timeProvider.Now);
+        var now = _clock.Now;
+        return new TickContext(_clock, delta, now);
     }
 }

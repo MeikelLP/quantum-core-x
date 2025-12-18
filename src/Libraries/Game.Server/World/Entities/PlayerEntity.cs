@@ -89,7 +89,7 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
     private uint _defence;
 
     private const int PERSIST_INTERVAL = 30 * 1000; // 30s
-    private ServerTimestamp _lastPersistTime = new(TimeSpan.Zero);
+    private ServerTimestamp? _lastPersistTime;
     private const int HEALTH_REGEN_INTERVAL = 3 * 1000;
     private const int MANA_REGEN_INTERVAL = 3 * 1000;
     private ServerTimestamp? _lastHealthRegenTime;
@@ -518,15 +518,15 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
             if (!_lastHealthRegenTime.HasValue)
             {
                 // start counting interval only from first viable reset
-                _lastHealthRegenTime = ctx.Now;
+                _lastHealthRegenTime = ctx.Timestamp;
             } 
-            else if (ctx.Now.Since(_lastHealthRegenTime.Value) > TimeSpan.FromMilliseconds(HEALTH_REGEN_INTERVAL))
+            else if (ctx.ElapsedSince(_lastHealthRegenTime.Value) > TimeSpan.FromMilliseconds(HEALTH_REGEN_INTERVAL))
             {
                 var factor = State == EEntityState.IDLE ? 0.05 : 0.01;
                 Health = Math.Min((int)maxHp, Health + 15 + (int)(maxHp * factor));
                 hpOrSpChanged = true;
 
-                _lastHealthRegenTime = ctx.Now;
+                _lastHealthRegenTime = ctx.Timestamp;
             }
         }
 
@@ -536,15 +536,15 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
             if (!_lastManaRegenTime.HasValue)
             {
                 // start counting interval only from first viable reset
-                _lastManaRegenTime = ctx.Now;
+                _lastManaRegenTime = ctx.Timestamp;
             }
-            else if (ctx.Now.Since(_lastManaRegenTime.Value) > TimeSpan.FromMilliseconds(MANA_REGEN_INTERVAL))
+            else if (ctx.ElapsedSince(_lastManaRegenTime.Value) > TimeSpan.FromMilliseconds(MANA_REGEN_INTERVAL))
             {
                 var factor = State == EEntityState.IDLE ? 0.05 : 0.01;
                 Mana = Math.Min((int)maxSp, Mana + 15 + (int)(maxSp * factor));
                 hpOrSpChanged = true;
 
-                _lastManaRegenTime = ctx.Now;
+                _lastManaRegenTime = ctx.Timestamp;
             }
         }
 
@@ -553,10 +553,14 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
             SendPoints();
         }
 
-        if (ctx.Now.Since(_lastPersistTime) > TimeSpan.FromMilliseconds(PERSIST_INTERVAL))
+        if (!_lastPersistTime.HasValue)
+        {
+            _lastPersistTime = ctx.Timestamp;
+        }
+        else if (ctx.ElapsedSince(_lastPersistTime.Value) > TimeSpan.FromMilliseconds(PERSIST_INTERVAL))
         {
             Persist().Wait(); // TODO
-            _lastPersistTime = ctx.Now;
+            _lastPersistTime = ctx.Timestamp;
         }
     }
 
@@ -1021,10 +1025,11 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
     public async Task CalculatePlayedTimeAsync()
     {
         var key = $"player:{Player.Id}:loggedInTime";
-        var startSessionTime = new ServerTimestamp(TimeSpan.FromMilliseconds(
+        var startSessionElapsed = TimeSpan.FromMilliseconds(
             await _cacheManager.Server.Get<long>(key)
-        ));
-        var totalSessionTime = Connection.Server.ServerTime - startSessionTime;
+        );
+        var currentElapsed = Connection.Server.Clock.Elapsed();
+        var totalSessionTime = currentElapsed - startSessionElapsed;
         if (totalSessionTime <= TimeSpan.Zero) return;
 
         AddPoint(EPoint.PLAY_TIME, (int)totalSessionTime.TotalMilliseconds);

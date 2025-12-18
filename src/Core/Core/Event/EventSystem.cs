@@ -26,7 +26,7 @@ public class EventSystem
         {
             foreach (var (id, evt) in PendingEvents)
             {
-                evt.Time -= ctx.Elapsed;
+                evt.Time -= ctx.Delta;
                 if (evt.Time > TimeSpan.Zero)
                 {
                     continue;

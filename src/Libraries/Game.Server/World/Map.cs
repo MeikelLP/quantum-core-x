@@ -34,6 +34,7 @@ public class Map : IMap
     public uint Width { get; private set; }
     public uint Height { get; private set; }
     public TownCoordinates? TownCoordinates { get; private set; }
+    public ServerClock Clock => _server.Clock;
 
     public IWorld World => _world;
     public IReadOnlyCollection<IEntity> Entities => _entities;
