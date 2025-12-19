@@ -1,10 +1,10 @@
 using System.Collections.Immutable;
-using System.Diagnostics;
 using System.Diagnostics.Metrics;
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
+using QuantumCore.API.Core.Timekeeping;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.World;
 using QuantumCore.API.PluginTypes;
@@ -24,12 +24,10 @@ public class GameServer : ServerBase<GameConnection>, IGameServer
     private readonly ICommandManager _commandManager;
     private readonly IWorld _world;
 
-    private readonly Stopwatch _gameTime = new Stopwatch();
-    private long _previousTicks = 0;
+    private ServerTimestamp _lastTick;
     private TimeSpan _accumulatedElapsedTime;
-    private TimeSpan _targetElapsedTime = TimeSpan.FromTicks(100000); // 100hz
-    private TimeSpan _maxElapsedTime = TimeSpan.FromMilliseconds(500);
-    private readonly Stopwatch _serverTimer = new();
+    private readonly TimeSpan _targetElapsedTime = TimeSpan.FromTicks(100000); // 100hz
+    private readonly TimeSpan _maxElapsedTime = TimeSpan.FromMilliseconds(500);
 
     public new ImmutableArray<IGameConnection> Connections =>
         [..base.Connections.Values.Cast<IGameConnection>()];
@@ -39,23 +37,24 @@ public class GameServer : ServerBase<GameConnection>, IGameServer
     public GameServer(
         [FromKeyedServices(HostingOptions.MODE_GAME)]
         IPacketManager packetManager, ILogger<GameServer> logger,
-        PluginExecutor pluginExecutor, IServiceProvider serviceProvider,
+        PluginExecutor pluginExecutor, IServiceProvider serviceProvider, ServerClock clock,
         ICommandManager commandManager)
-        : base(packetManager, logger, pluginExecutor, serviceProvider, HostingOptions.MODE_GAME)
+        : base(packetManager, logger, pluginExecutor, serviceProvider, clock, HostingOptions.MODE_GAME)
     {
         _logger = logger;
         _pluginExecutor = pluginExecutor;
         _commandManager = commandManager;
         Instance = this;
         _world = Scope.ServiceProvider.GetRequiredService<IWorld>();
+        _lastTick = Clock.Now;
         Meter.CreateObservableGauge("Connections", () => Connections.Length);
     }
 
-    private void Update(double elapsedTime)
+    private void Update(TickContext ctx)
     {
-        EventSystem.Update(elapsedTime);
+        EventSystem.Update(ctx);
 
-        _world.Update(elapsedTime);
+        _world.Update(ctx);
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -76,14 +75,11 @@ public class GameServer : ServerBase<GameConnection>, IGameServer
             return true;
         });
 
-        // Start server timer
-        _serverTimer.Start();
-
         _logger.LogInformation("Start listening for connections...");
 
         StartListening();
 
-        _gameTime.Start();
+        _lastTick = Clock.Now;
 
         _logger.LogDebug("Start!");
 
@@ -93,7 +89,7 @@ public class GameServer : ServerBase<GameConnection>, IGameServer
             {
                 await _pluginExecutor.ExecutePlugins<IGameTickListener>(_logger,
                     x => x.PreUpdateAsync(stoppingToken));
-                await Tick();
+                await Tick(stoppingToken);
                 await _pluginExecutor.ExecutePlugins<IGameTickListener>(_logger,
                     x => x.PostUpdateAsync(stoppingToken));
             }
@@ -104,35 +100,43 @@ public class GameServer : ServerBase<GameConnection>, IGameServer
         }
     }
 
-    private async ValueTask Tick()
+    private async ValueTask Tick(CancellationToken stoppingToken)
     {
-        var currentTicks = _gameTime.Elapsed.Ticks;
-        var elapsedTime = TimeSpan.FromTicks(currentTicks - _previousTicks);
+        var currentTick = Clock.Now;
+        var elapsedTime = Clock.ElapsedBetween(_lastTick, currentTick);
+        _lastTick = currentTick;
+
         _serverTimes.Record(elapsedTime.TotalMilliseconds);
         _accumulatedElapsedTime += elapsedTime;
-        _previousTicks = currentTicks;
 
         if (_accumulatedElapsedTime < _targetElapsedTime)
         {
-            var sleepTime = (_targetElapsedTime - _accumulatedElapsedTime).TotalMilliseconds;
-            await Task.Delay((int) sleepTime).ConfigureAwait(false);
+            var sleepTime = _targetElapsedTime - _accumulatedElapsedTime;
+            await Task.Delay(sleepTime, Clock.TimeProvider, stoppingToken).ConfigureAwait(false);
             return;
         }
 
+        // Spiral of death prevention: https://gafferongames.com/post/fix_your_timestep/
+        // clamp at a maximum elapsed interval per tick
         if (_accumulatedElapsedTime > _maxElapsedTime)
         {
-            _logger.LogWarning($"Server is running slow");
+            _logger.LogWarning("Server is running slow: tick delayed by {TotalMilliseconds:F2}ms",
+                (_accumulatedElapsedTime - _maxElapsedTime).TotalMilliseconds);
             _accumulatedElapsedTime = _maxElapsedTime;
         }
 
         var stepCount = 0;
+
+        // Catch-up loop: may run multiple fixed updates if we fell behind
         while (_accumulatedElapsedTime >= _targetElapsedTime)
         {
             _accumulatedElapsedTime -= _targetElapsedTime;
             ++stepCount;
 
+            var stepTimestamp = Clock.Rewind(currentTick, _accumulatedElapsedTime);
+
             //_logger.LogDebug($"Update... ({stepCount})");
-            Update(_targetElapsedTime.TotalMilliseconds);
+            Update(new TickContext(Clock, _targetElapsedTime, stepTimestamp));
         }
 
         // todo detect lags

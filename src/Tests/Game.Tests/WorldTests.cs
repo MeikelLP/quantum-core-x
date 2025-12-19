@@ -4,10 +4,12 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Time.Testing;
 using NSubstitute;
 using QuantumCore;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
+using QuantumCore.API.Core.Timekeeping;
 using QuantumCore.API.Game.Types.Monsters;
 using QuantumCore.API.Game.Types.Entities;
 using QuantumCore.API.Game.Types.Players;
@@ -27,6 +29,8 @@ public class WorldTests
 {
     private World _world = null!;
     private readonly PlayerEntity _playerEntity;
+    private readonly FakeTimeProvider _timeProvider = new();
+    private readonly ServerClock _clock;
 
     public WorldTests()
     {
@@ -106,8 +110,12 @@ public class WorldTests
                 ]);
                 return mock;
             }, ServiceLifetime.Singleton))
+            .Replace(new ServiceDescriptor(typeof(TimeProvider), _ => _timeProvider, ServiceLifetime.Singleton))
             .AddSingleton(Substitute.For<IFileProvider>())
             .BuildServiceProvider();
+        _clock = services.GetRequiredService<ServerClock>();
+        var server = services.GetRequiredService<IServerBase>();
+        server.Clock.Returns(_clock);
         _world = ActivatorUtilities.CreateInstance<World>(services);
         ActivatorUtilities.CreateInstance<GameServer>(services); // for setting the singleton GameServer.Instance
         Task.WhenAll(services.GetServices<ILoadable>().Select(x => x.LoadAsync())).Wait();
@@ -115,26 +123,35 @@ public class WorldTests
 
         var conn = Substitute.For<IGameConnection>();
         conn.BoundIpAddress.Returns(IPAddress.Loopback);
+        conn.Server.Returns(server);
         var playerData = new PlayerData
         {
             Name = "TestPlayer", PlayerClass = EPlayerClassGendered.NINJA_FEMALE, PositionX = 1, PositionY = 1
         };
         _playerEntity = ActivatorUtilities.CreateInstance<PlayerEntity>(services, _world, playerData, conn);
         _world.SpawnEntity(_playerEntity);
-        _world.Update(0.2); // spawn all entities
+        _world.Update(Tick(0.2)); // spawn all entities
     }
 
     [Fact]
     public void World_Update()
     {
-        _world.Update(0.2);
+        _world.Update(Tick(0.2));
         Assert.True(true);
     }
 
     [Fact]
     public void Player_Update()
     {
-        _playerEntity.Update(1);
+        _playerEntity.Update(Tick(1));
         Assert.True(true);
+    }
+
+    private TickContext Tick(double elapsedMilliseconds)
+    {
+        var delta = TimeSpan.FromMilliseconds(elapsedMilliseconds);
+        _timeProvider.Advance(delta);
+        var now = _clock.Now;
+        return new TickContext(_clock, delta, now);
     }
 }

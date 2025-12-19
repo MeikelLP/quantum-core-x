@@ -1,4 +1,5 @@
 using QuantumCore.API.Core.Models;
+using QuantumCore.API.Core.Timekeeping;
 
 namespace QuantumCore.API.Game.World;
 
@@ -23,7 +24,7 @@ public interface IMap
 
     public bool IsPositionInside(int x, int y);
 
-    public void Update(double elapsedTime);
+    public void Update(TickContext ctx);
 
     /// <summary>
     /// Add a ground item which will automatically get destroyed after configured time

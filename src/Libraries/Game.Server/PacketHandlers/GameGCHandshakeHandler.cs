@@ -11,9 +11,9 @@ public class GameGcHandshakeHandler : IGamePacketHandler<GcHandshake>
     {
         ctx.Connection.HandleHandshake(new GcHandshakeData
         {
-            Delta = ctx.Packet.Delta,
+            Delta = TimeSpan.FromMilliseconds(ctx.Packet.Delta),
             Handshake = ctx.Packet.Handshake,
-            Time = ctx.Packet.Time
+            Time = TimeSpan.FromMilliseconds(ctx.Packet.Time)
         });
         return Task.CompletedTask;
     }

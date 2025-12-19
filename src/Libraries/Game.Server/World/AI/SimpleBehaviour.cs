@@ -4,6 +4,7 @@ using System.Security.Cryptography;
 using EnumsNET;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
+using QuantumCore.API.Core.Timekeeping;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.Types.Combat;
 using QuantumCore.API.Game.Types.Entities;
@@ -23,16 +24,16 @@ public class SimpleBehaviour : IBehaviour
     private readonly IMonsterManager _monsterManager;
     private MonsterData? _proto;
     private IEntity? _entity;
-    private long _nextMovementIn;
+    private TimeSpan _nextMovementIn;
 
     private int _spawnX;
     private int _spawnY;
 
-    private double _attackCooldown;
+    private TimeSpan _attackCooldown;
     private int _lastAttackX;
     private int _lastAttackY;
-    private long _lastAttackTime;
-    private long _lastChangeAttackPositionTime;
+    private ServerTimestamp? _lastAttackTime;
+    private ServerTimestamp? _lastChangeAttackPositionTime;
 
     public IEntity? Target { get; set; }
     private readonly Dictionary<uint, uint> _damageMap = new();
@@ -72,16 +73,17 @@ public class SimpleBehaviour : IBehaviour
         _spawnX = entity.PositionX;
         _spawnY = entity.PositionY;
         IsAggressive = entity is MonsterEntity mob && mob.Proto.AiFlag.HasAnyFlags(EAiFlags.AGGRESSIVE);
-        _lastAttackTime = 0;
-        ResetChangeAttackPositionTimer();
+        _lastAttackTime = null;
+        _lastChangeAttackPositionTime = null;
     }
 
     private void CalculateNextMovement()
     {
-        _nextMovementIn = RandomNumberGenerator.GetInt32(10000, 20000);
+        var delayMs = RandomNumberGenerator.GetInt32(10000, 20000);
+        _nextMovementIn = TimeSpan.FromMilliseconds(delayMs);
     }
 
-    private void MoveToRandomLocation()
+    private void MoveToRandomLocation(ServerTimestamp startAt)
     {
         if (_entity is null) return;
 
@@ -92,7 +94,7 @@ public class SimpleBehaviour : IBehaviour
 
             var delta = new Vector2((float)(distance * angleDx), (float)(distance * angleDy));
 
-            if (TryGoto(_entity.Coordinates() + delta))
+            if (TryGoto(_entity.Coordinates() + delta, startAt))
             {
                 return;
             }
@@ -103,7 +105,8 @@ public class SimpleBehaviour : IBehaviour
     /// Moves the monster in attack range to the given target
     /// </summary>
     /// <param name="target"></param>
-    private void MoveTo(IEntity target)
+    /// <param name="ctx"></param>
+    private void MoveTo(IEntity target, TickContext ctx)
     {
         if (_entity is null || _proto is null) return;
 
@@ -119,10 +122,10 @@ public class SimpleBehaviour : IBehaviour
         directionX /= directionLength;
         directionY /= directionLength;
 
-        if (_entity is MonsterEntity monster && monster.Rank < EMonsterLevel.BOSS &&
-            ShouldChangeAttackPosition(directionLength))
+        if (_entity is MonsterEntity { Rank: < EMonsterLevel.BOSS } &&
+            ShouldChangeAttackPosition(directionLength, ctx))
         {
-            if (TryChangeAttackPosition(target, directionLength, minDistance))
+            if (TryChangeAttackPosition(target, directionLength, minDistance, ctx.Timestamp))
             {
                 return;
             }
@@ -131,16 +134,16 @@ public class SimpleBehaviour : IBehaviour
         var baseRange = Math.Max(_proto.AttackRange * 0.75, 50);
 
         var targetDelta = new Vector2((float)(directionX * baseRange), (float)(directionY * baseRange));
-        if (TryGoto(target.Coordinates() + targetDelta))
+        if (TryGoto(target.Coordinates() + targetDelta, ctx.Timestamp))
         {
             return;
         }
 
         var stepDelta = new Vector2((float)(directionX * (directionLength - minDistance)), (float)(directionY * (directionLength - minDistance)));
-        TryGoto(target.Coordinates() + stepDelta);
+        TryGoto(target.Coordinates() + stepDelta, ctx.Timestamp);
     }
 
-    public void Update(double elapsedTime)
+    public void Update(TickContext ctx)
     {
         if (_entity is null || _proto is null)
         {
@@ -157,13 +160,11 @@ public class SimpleBehaviour : IBehaviour
                 targetLost = true;
             }
 
-            if (!targetLost && _lastAttackTime > 0)
+            if (!targetLost && _lastAttackTime.HasValue)
             {
-                var elapsedSinceAttack = GameServer.Instance.ServerTime - _lastAttackTime;
-                if (elapsedSinceAttack >= RETURN_TIMEOUT_MS)
+                if (ctx.ElapsedSince(_lastAttackTime.Value) > TimeSpan.FromMilliseconds(RETURN_TIMEOUT_MS))
                 {
-                    if (_proto.AttackRange < MathUtils.Distance(_entity.PositionX, _entity.PositionY,
-                            Target.PositionX, Target.PositionY))
+                    if (_proto.AttackRange < _entity.DistanceTo(Target))
                     {
                         targetLost = true;
                     }
@@ -188,9 +189,9 @@ public class SimpleBehaviour : IBehaviour
 
                 if (Target is null)
                 {
-                    _lastAttackTime = 0;
-                    ResetChangeAttackPositionTimer();
-                    TryGoto(new Coordinates((uint)_spawnX, (uint)_spawnY));
+                    _lastAttackTime = null;
+                    ResetChangeAttackPositionTimer(ctx);
+                    TryGoto(new Coordinates((uint)_spawnX, (uint)_spawnY), ctx.Timestamp);
                 }
             }
 
@@ -203,25 +204,23 @@ public class SimpleBehaviour : IBehaviour
                         Target.PositionX, Target.PositionY);
                     if (movementDistance > _proto.AttackRange)
                     {
-                        MoveTo(Target);
+                        MoveTo(Target, ctx);
                     }
                 }
                 else
                 {
                     // Check if we can potentially attack or not
-                    var distance = MathUtils.Distance(_entity.PositionX, _entity.PositionY, Target.PositionX,
-                        Target.PositionY);
-                    if (distance > _proto.AttackRange)
+                    if (_proto.AttackRange < _entity.DistanceTo(Target))
                     {
-                        MoveTo(Target);
+                        MoveTo(Target, ctx);
                     }
                     else
                     {
-                        _attackCooldown -= elapsedTime;
-                        if (_attackCooldown <= 0)
+                        _attackCooldown -= ctx.Delta;
+                        if (_attackCooldown <= TimeSpan.Zero)
                         {
-                            Attack(Target);
-                            _attackCooldown += 2000; // todo use attack speed
+                            Attack(Target, ctx);
+                            _attackCooldown += TimeSpan.FromSeconds(2); // todo use attack speed
                         }
                     }
                 }
@@ -230,18 +229,18 @@ public class SimpleBehaviour : IBehaviour
 
         if (_entity.State == EEntityState.IDLE)
         {
-            _nextMovementIn -= (int)elapsedTime;
+            _nextMovementIn -= ctx.Delta;
 
-            if (_nextMovementIn <= 0)
+            if (_nextMovementIn <= TimeSpan.Zero)
             {
                 // Move to random location
-                MoveToRandomLocation();
+                MoveToRandomLocation(ctx.Timestamp);
                 CalculateNextMovement();
             }
         }
     }
 
-    private bool TryGoto(Coordinates target)
+    private bool TryGoto(Coordinates target, ServerTimestamp startAt)
     {
         if (_entity is null)
         {
@@ -250,7 +249,7 @@ public class SimpleBehaviour : IBehaviour
 
         if (_entity.Map is not Map localMap)
         {
-            _entity.Goto((int)target.X, (int)target.Y);
+            _entity.Goto((int)target.X, (int)target.Y, startAt);
             return true;
         }
 
@@ -269,18 +268,19 @@ public class SimpleBehaviour : IBehaviour
             return false;
         }
 
-        _entity.Goto((int)target.X, (int)target.Y);
+        _entity.Goto((int)target.X, (int)target.Y, startAt);
         return true;
     }
 
-    private bool TryChangeAttackPosition(IEntity target, double currentDistance, double approachDistance)
+    private bool TryChangeAttackPosition(IEntity target, double currentDistance, double approachDistance,
+        ServerTimestamp now)
     {
         if (_entity is null)
         {
             return false;
         }
 
-        _lastChangeAttackPositionTime = GameServer.Instance.ServerTime;
+        _lastChangeAttackPositionTime = now;
 
         var rotationFromTarget = MathUtils.Rotation(_entity.PositionX - target.PositionX,
             _entity.PositionY - target.PositionY);
@@ -301,7 +301,7 @@ public class SimpleBehaviour : IBehaviour
             var (angleDx, angleDy) = MathUtils.GetDeltaByDegree(angle);
             var delta = new Vector2((float)(approachDistance * angleDx), (float)(approachDistance * angleDy));
 
-            if (TryGoto(target.Coordinates() + delta))
+            if (TryGoto(target.Coordinates() + delta, now))
             {
                 return true;
             }
@@ -310,20 +310,24 @@ public class SimpleBehaviour : IBehaviour
         return false;
     }
 
-    private bool ShouldChangeAttackPosition(double currentDistance)
+    private bool ShouldChangeAttackPosition(double currentDistance, TickContext ctx)
     {
         if (_entity is not MonsterEntity mob)
         {
             return true;
         }
 
-        var changeInterval = CHANGE_ATTACK_POSITION_TIME_NEAR_MS;
+        TimeSpan changeInterval;
         if (currentDistance > CHANGE_ATTACK_POSITION_DISTANCE + mob.Proto.AttackRange)
         {
-            changeInterval = CHANGE_ATTACK_POSITION_TIME_FAR_MS;
+            changeInterval = TimeSpan.FromMilliseconds(CHANGE_ATTACK_POSITION_TIME_FAR_MS);
+        }
+        else
+        {
+            changeInterval = TimeSpan.FromMilliseconds(CHANGE_ATTACK_POSITION_TIME_NEAR_MS);
         }
 
-        return GameServer.Instance.ServerTime - _lastChangeAttackPositionTime > changeInterval;
+        return ctx.ElapsedSince(_lastChangeAttackPositionTime) > changeInterval;
     }
 
     private double GetPreferredApproachDistance()
@@ -341,12 +345,13 @@ public class SimpleBehaviour : IBehaviour
         return _proto.AttackRange * multiplier;
     }
 
-    private void ResetChangeAttackPositionTimer()
+    private void ResetChangeAttackPositionTimer(TickContext ctx)
     {
-        _lastChangeAttackPositionTime = GameServer.Instance.ServerTime - CHANGE_ATTACK_POSITION_TIME_NEAR_MS;
+        _lastChangeAttackPositionTime =
+            ctx.Rewind(TimeSpan.FromMilliseconds(CHANGE_ATTACK_POSITION_TIME_NEAR_MS));
     }
 
-    private void Attack(IEntity victim)
+    private void Attack(IEntity victim, TickContext ctx)
     {
         if (_entity is not MonsterEntity monster)
         {
@@ -366,7 +371,7 @@ public class SimpleBehaviour : IBehaviour
             Vid = monster.Vid,
             PositionX = monster.PositionX,
             PositionY = monster.PositionY,
-            Time = (uint)GameServer.Instance.ServerTime
+            Time = (uint)ctx.TotalElapsed.TotalMilliseconds
         };
         foreach (var entity in monster.NearbyEntities)
         {
@@ -403,7 +408,7 @@ public class SimpleBehaviour : IBehaviour
     {
         if (_entity is null) return;
 
-        _lastAttackTime = GameServer.Instance.ServerTime;
+        _lastAttackTime = (_entity.Map as Map)!.Clock.Now;
         _lastAttackX = _entity.PositionX;
         _lastAttackY = _entity.PositionY;
 

@@ -31,7 +31,7 @@ public class PullCommand : ICommandHandler
                 // not correct - moves to the wrong side of the player
                 // sadly my math skills are too low to implement it correctly
                 // good enough for now
-                e.Goto((int)targetX, (int)targetY);
+                e.Goto((int)targetX, (int)targetY, context.Player.Connection.Server.Clock.Now);
             }
         });
         return Task.CompletedTask;

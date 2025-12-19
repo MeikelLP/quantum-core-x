@@ -1,5 +1,4 @@
 using System.Collections.Concurrent;
-using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
 using Microsoft.Extensions.DependencyInjection;
@@ -7,6 +6,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using QuantumCore.API;
+using QuantumCore.API.Core.Timekeeping;
 using QuantumCore.API.PluginTypes;
 using QuantumCore.Networking;
 
@@ -19,7 +19,6 @@ public abstract class ServerBase<T> : BackgroundService, IServerBase
     protected IPacketManager PacketManager { get; }
     private readonly List<Func<IConnection, bool>> _connectionListeners = new();
     protected readonly ConcurrentDictionary<Guid, IConnection> Connections = new();
-    private readonly Stopwatch _serverTimer = new();
     private readonly CancellationTokenSource _stoppingToken = new();
     protected TcpListener Listener { get; }
 
@@ -28,11 +27,12 @@ public abstract class ServerBase<T> : BackgroundService, IServerBase
     private readonly string _serverMode;
     protected IServiceScope Scope { get; }
 
+    public ServerClock Clock { get; }
     public ushort Port { get; }
     public IPAddress IpAddress { get; }
 
     public ServerBase(IPacketManager packetManager, ILogger logger, PluginExecutor pluginExecutor,
-        IServiceProvider serviceProvider, string mode)
+        IServiceProvider serviceProvider, ServerClock clock, string mode)
     {
         _logger = logger;
         _pluginExecutor = pluginExecutor;
@@ -44,15 +44,13 @@ public abstract class ServerBase<T> : BackgroundService, IServerBase
         Port = hostingOptions.Port;
 
         // Start server timer
-        _serverTimer.Start();
+        Clock = clock;
         var desiredIpAddress = IPAddress.TryParse(hostingOptions.IpAddress, out var ipAddress)
             ? ipAddress
             : IPAddress.Loopback;
         IpAddress = desiredIpAddress;
         Listener = new TcpListener(IpAddress, Port);
     }
-
-    public long ServerTime => _serverTimer.ElapsedMilliseconds;
 
     public async Task RemoveConnection(IConnection connection)
     {

@@ -1,11 +1,12 @@
 ﻿using QuantumCore.API.Core.Models;
+using QuantumCore.API.Core.Timekeeping;
 
 namespace QuantumCore.API.Game.World;
 
 public interface IWorld : ILoadable
 {
     Task InitAsync();
-    void Update(double elapsedTime);
+    void Update(TickContext ctx);
 #nullable enable
     IMap? GetMapAt(uint x, uint y);
     IMap? GetMapByName(string name);

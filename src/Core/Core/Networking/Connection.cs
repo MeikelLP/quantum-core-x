@@ -7,6 +7,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
+using QuantumCore.API.Core.Timekeeping;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.PluginTypes;
 using QuantumCore.Core.Packets;
@@ -25,7 +26,7 @@ public abstract class Connection : BackgroundService, IConnection
 
     private TcpClient? _client;
     private Stream? _stream;
-    private long _lastHandshakeTime;
+    private ServerTimestamp _lastHandshakeTime;
     private CancellationTokenSource? _cts;
 
     public IPAddress BoundIpAddress { get; private set; }
@@ -57,7 +58,7 @@ public abstract class Connection : BackgroundService, IConnection
 
     protected abstract Task OnReceive(IPacketSerializable packet);
 
-    protected abstract long GetServerTime();
+    protected abstract ServerClock GetClock();
 
     protected async override Task ExecuteAsync(CancellationToken stoppingToken)
     {
@@ -203,7 +204,7 @@ public abstract class Connection : BackgroundService, IConnection
         Handshake = CoreRandom.GenerateUInt32();
         Handshaking = true;
         this.SetPhase(EPhase.HANDSHAKE);
-        SendHandshake();
+        SendHandshake(GetClock().Now, TimeSpan.Zero);
     }
 
     public bool HandleHandshake(GcHandshakeData handshake)
@@ -225,9 +226,11 @@ public abstract class Connection : BackgroundService, IConnection
             return false;
         }
 
-        var time = GetServerTime();
-        var difference = time - (handshake.Time + handshake.Delta);
-        if (difference >= 0 && difference <= 50)
+        var clock = GetClock();
+        var nowTimestamp = clock.Now;
+        var uptime = clock.ElapsedAt(nowTimestamp);
+        var difference = uptime - (handshake.Time + handshake.Delta);
+        if (difference >= TimeSpan.Zero && difference <= TimeSpan.FromMilliseconds(50))
         {
             // if we difference is less than or equal to 50ms the handshake is done and client time is synced enough
             _logger.LogInformation("Handshake done");
@@ -238,29 +241,23 @@ public abstract class Connection : BackgroundService, IConnection
         else
         {
             // calculate new delta
-            var delta = (time - handshake.Time) / 2;
-            if (delta < 0)
+            var delta = (uptime - handshake.Time) / 2;
+            if (delta < TimeSpan.Zero)
             {
-                delta = (time - _lastHandshakeTime) / 2;
-                _logger.LogDebug($"Delta is too low, retry with last send time");
+                delta = (clock.ElapsedAt(nowTimestamp) - clock.ElapsedAt(_lastHandshakeTime)) / 2;
+                _logger.LogDebug("Delta is too low, retry with last send time");
             }
 
-            SendHandshake((uint) time, (uint) delta);
+            SendHandshake(nowTimestamp, delta);
         }
 
         return true;
     }
 
-    private void SendHandshake()
-    {
-        var time = GetServerTime();
-        _lastHandshakeTime = time;
-        Send(new GcHandshake(Handshake, (uint) time, 0));
-    }
-
-    private void SendHandshake(uint time, uint delta)
+    private void SendHandshake(ServerTimestamp time, TimeSpan delta)
     {
         _lastHandshakeTime = time;
-        Send(new GcHandshake(Handshake, time, delta));
+        var uptime = GetClock().ElapsedAt(time);
+        Send(new GcHandshake(Handshake, (uint)uptime.TotalMilliseconds, (uint)delta.TotalMilliseconds));
     }
 }

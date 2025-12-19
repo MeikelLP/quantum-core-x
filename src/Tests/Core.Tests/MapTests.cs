@@ -3,10 +3,12 @@ using Core.Tests.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Time.Testing;
 using NSubstitute;
 using QuantumCore;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
+using QuantumCore.API.Core.Timekeeping;
 using QuantumCore.API.Game.Types.Monsters;
 using QuantumCore.API.Game.World;
 using QuantumCore.Caching;
@@ -24,6 +26,8 @@ namespace Core.Tests;
 public class MapTests
 {
     private SpawnPoint[] _spawnPoints = Array.Empty<SpawnPoint>();
+    private readonly FakeTimeProvider _timeProvider = new();
+    private readonly ServerClock _clock;
     private readonly Map _map;
     private readonly IWorld _world;
 
@@ -63,6 +67,8 @@ public class MapTests
                 mock.GetAsync(Arg.Any<IWorld>()).Returns(_ => new[] { _map }!);
                 return mock;
             })
+            .AddSingleton<TimeProvider>(_ => _timeProvider)
+            .AddSingleton<ServerClock>(_ => new ServerClock(_timeProvider))
             .AddSingleton<IConfiguration>(_ => new ConfigurationBuilder().Build())
             .AddSingleton<ISpawnGroupProvider>(_ =>
             {
@@ -112,6 +118,7 @@ public class MapTests
             .AddOptions<HostingOptions>().Services
             .AddQuantumCoreTestLogger(testOutputHelper)
             .BuildServiceProvider();
+        _clock = provider.GetRequiredService<ServerClock>();
         ActivatorUtilities.CreateInstance<GameServer>(provider);
         var monsterManager = provider.GetRequiredService<IMonsterManager>();
         var animationManager = provider.GetRequiredService<IAnimationManager>();
@@ -121,6 +128,7 @@ public class MapTests
         var dropProvider = provider.GetRequiredService<IDropProvider>();
         var itemManager = provider.GetRequiredService<IItemManager>();
         var server = provider.GetRequiredService<IServerBase>();
+        server.Clock.Returns(_clock);
         var logger = provider.GetRequiredService<ILogger<MapTests>>();
         _world = provider.GetRequiredService<IWorld>();
         _map = new Map(monsterManager, animationManager, cacheManager, _world, logger, spawnPointProvider,
@@ -144,8 +152,9 @@ public class MapTests
         };
         await _world.LoadAsync();
         await _world.InitAsync();
-        EventSystem.Update(0);
-        _world.Update(0); // spawn entities
+        var ctx = Tick();
+        EventSystem.Update(ctx);
+        _world.Update(ctx); // spawn entities
 
         _map.Entities.Should().HaveCount(1);
         var entity = _map.Entities.ElementAt(0);
@@ -169,8 +178,9 @@ public class MapTests
         };
         await _world.LoadAsync();
         await _world.InitAsync();
-        EventSystem.Update(0);
-        _world.Update(0); // spawn entities
+        var ctx = Tick();
+        EventSystem.Update(ctx);
+        _world.Update(ctx); // spawn entities
 
         _map.Entities.Should().HaveCount(3);
         var mobs = _map.Entities.Should().AllBeOfType<MonsterEntity>().Subject;
@@ -193,11 +203,20 @@ public class MapTests
         };
         await _world.LoadAsync();
         await _world.InitAsync();
-        EventSystem.Update(0);
-        _world.Update(0); // spawn entities
+        var ctx = Tick();
+        EventSystem.Update(ctx);
+        _world.Update(ctx); // spawn entities
 
         _map.Entities.Should().HaveCount(3);
         var mobs = _map.Entities.Should().AllBeOfType<MonsterEntity>().Subject;
         mobs.Should().AllSatisfy(x => x.Proto.Id.Should().Be(101));
+    }
+
+    private TickContext Tick(double elapsedMilliseconds = 0)
+    {
+        var delta = TimeSpan.FromMilliseconds(elapsedMilliseconds);
+        _timeProvider.Advance(delta);
+        var now = _clock.Now;
+        return new TickContext(_clock, delta, now);
     }
 }

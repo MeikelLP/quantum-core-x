@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
+using QuantumCore.API.Core.Timekeeping;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.World;
 using QuantumCore.Caching;
@@ -40,7 +41,7 @@ public class GameConnection : Connection, IGameConnection
     protected override void OnHandshakeFinished()
     {
         GameServer.Instance.CallConnectionListener(this);
-        var pingInterval = NetworkingConstants.PingIntervalInSeconds * 1000;
+        var pingInterval = TimeSpan.FromSeconds(NetworkingConstants.PingIntervalInSeconds);
         var ping = new Ping();
         EventSystem.EnqueueEvent(() =>
         {
@@ -86,8 +87,8 @@ public class GameConnection : Connection, IGameConnection
         await Server.CallListener(this, packet);
     }
 
-    protected override long GetServerTime()
+    protected override ServerClock GetClock()
     {
-        return Server.ServerTime;
+        return Server.Clock;
     }
 }
