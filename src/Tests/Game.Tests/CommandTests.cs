@@ -13,6 +13,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Time.Testing;
 using NSubstitute;
 using QuantumCore.API;
+using QuantumCore.API.Core.Event;
 using QuantumCore.API.Core.Models;
 using QuantumCore.API.Core.Timekeeping;
 using QuantumCore.API.Game;
@@ -24,10 +25,12 @@ using QuantumCore.API.Game.Types.Players;
 using QuantumCore.API.Game.Types.Skills;
 using QuantumCore.API.Game.World;
 using QuantumCore.Caching;
+using QuantumCore.Core.Event;
 using QuantumCore.Core.Packets;
 using QuantumCore.Extensions;
 using QuantumCore.Game;
 using QuantumCore.Game.Commands;
+using QuantumCore.Game.Constants;
 using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Packets;
 using QuantumCore.Game.Packets.Skills;
@@ -89,6 +92,11 @@ internal class MockedGameConnection : IGameConnection
     {
         return true;
     }
+}
+
+internal sealed class DeterministicScheduler : IJobScheduler
+{
+    public void Schedule(Func<Task> work) => work().GetAwaiter().GetResult();
 }
 
 public class CommandTests : IAsyncLifetime
@@ -182,6 +190,8 @@ public class CommandTests : IAsyncLifetime
             .AddSingleton(Substitute.For<IServerBase>())
             .AddQuantumCoreTestLogger(testOutputHelper)
             .Replace(new ServiceDescriptor(typeof(TimeProvider), _ => _timeProvider, ServiceLifetime.Singleton))
+            .Replace(new ServiceDescriptor(typeof(IJobScheduler), _ => new DeterministicScheduler(), 
+                ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(IItemRepository), _ => Substitute.For<IItemRepository>(),
                 ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(ICommandPermissionRepository),
@@ -268,6 +278,7 @@ public class CommandTests : IAsyncLifetime
     {
         var world = await PrepareWorldAsync();
         var player2 = ActivatorUtilities.CreateInstance<PlayerEntity>(_services, _playerDataFaker.Generate());
+        await player2.Load();
         world.SpawnEntity(_player);
         world.SpawnEntity(player2);
         world.Update(Tick()); // spawn entities
@@ -287,6 +298,7 @@ public class CommandTests : IAsyncLifetime
     {
         var world = await PrepareWorldAsync();
         var player2 = ActivatorUtilities.CreateInstance<PlayerEntity>(_services, _playerDataFaker.Generate());
+        await player2.Load();
         world.SpawnEntity(_player);
         world.SpawnEntity(player2);
         world.Update(Tick()); // spawn entities
@@ -511,11 +523,19 @@ public class CommandTests : IAsyncLifetime
         world.GetPlayer(_player.Name).Should().NotBeNull();
 
         _player.Player.PlayTime = 0;
-        _timeProvider.Advance(TimeSpan.FromMinutes(1));
+        _timeProvider.Advance(TimeSpan.FromMinutes(37));
 
         await _commandManager.Handle(_connection, "/logout");
 
-        _player.GetPoint(EPoint.PLAY_TIME).Should().Be(1);
+        // fast forward the logout safety countdown
+        // (eventually EventSystem should be reworked so that it reuses the same source _timeProvider and not require this anymore)
+        EventSystem.Update(Tick());
+        for (var i = 0; i < SchedulingConstants.LOGOUT_WAIT_SECONDS; i++)
+        {
+            EventSystem.Update(Tick(1000));
+        }
+
+        _player.GetPoint(EPoint.PLAY_TIME).Should().Be(37);
         world.GetPlayer(_player.Name).Should().BeNull();
     }
 
@@ -530,11 +550,18 @@ public class CommandTests : IAsyncLifetime
             .NotContainEquivalentOf(new GcPhase { Phase = EPhase.SELECT });
 
         _player.Player.PlayTime = 0;
-        _timeProvider.Advance(TimeSpan.FromMinutes(1));
+        _timeProvider.Advance(TimeSpan.FromMinutes(37));
 
         await _commandManager.Handle(_connection, "/phase_select");
 
-        _player.GetPoint(EPoint.PLAY_TIME).Should().Be(1);
+        // fast forward the logout safety countdown
+        EventSystem.Update(Tick());
+        for (var i = 0; i < SchedulingConstants.LOGOUT_WAIT_SECONDS; i++)
+        {
+            EventSystem.Update(Tick(1000));
+        }
+
+        _player.GetPoint(EPoint.PLAY_TIME).Should().Be(37);
         _player.Connection.Phase.Should().Be(EPhase.SELECT);
         (_connection as MockedGameConnection).SentPhases.Should()
             .ContainEquivalentOf(new GcPhase { Phase = EPhase.SELECT });
@@ -551,6 +578,13 @@ public class CommandTests : IAsyncLifetime
 
         await _commandManager.Handle(_connection, "/quit");
 
+        // fast forward the logout safety countdown
+        EventSystem.Update(Tick());
+        for (var i = 0; i < SchedulingConstants.LOGOUT_WAIT_SECONDS; i++)
+        {
+            EventSystem.Update(Tick(1000));
+        }
+
         world.GetPlayer(_player.Name).Should().BeNull();
     }
 
@@ -566,6 +600,7 @@ public class CommandTests : IAsyncLifetime
         _player.PositionY.Should().Be(665600);
         _player.Die();
 
+        _timeProvider.Advance(SchedulingConstants.RestartHereMinWait);
         await _commandManager.Handle(_connection, "/restart_here");
 
         _player.Health.Should().Be(PlayerConstants.RESPAWN_HEALTH);
@@ -588,6 +623,7 @@ public class CommandTests : IAsyncLifetime
         _player.PositionY.Should().Be(665600);
         _player.Die();
 
+        _timeProvider.Advance(SchedulingConstants.RestartTownMinWait);
         await _commandManager.Handle(_connection, "/restart_town");
 
         _player.Health.Should().Be(PlayerConstants.RESPAWN_HEALTH);

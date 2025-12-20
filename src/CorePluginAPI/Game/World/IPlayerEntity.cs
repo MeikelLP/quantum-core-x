@@ -1,4 +1,5 @@
 using QuantumCore.API.Core.Models;
+using QuantumCore.API.Core.Timekeeping;
 using QuantumCore.API.Game.Skills;
 using QuantumCore.API.Game.Types.Entities;
 using QuantumCore.API.Game.Types.Items;
@@ -24,6 +25,7 @@ public interface IPlayerEntity : IEntity
     Dictionary<string, IQuest> Quests { get; }
     EAntiFlags AntiFlagClass { get; }
     EAntiFlags AntiFlagGender { get; }
+    TimestampRegistry<PlayerTimestampKind> Timeline { get; }
 
     Task Load();
     Task ReloadPermissions();

@@ -24,8 +24,16 @@ public class EventSystem
     {
         lock (Lock)
         {
-            foreach (var (id, evt) in PendingEvents)
+            // hackish fix which needs refactoring: events can schedule other events, which would otherwise
+            // throw System.InvalidOperationException: Collection was modified; enumeration operation may not execute.
+            var pendingSnapshot = new List<KeyValuePair<long, Event>>(PendingEvents);
+            foreach (var (id, evt) in pendingSnapshot)
             {
+                if (!PendingEvents.TryGetValue(id, out var current) || !ReferenceEquals(current, evt))
+                {
+                    continue;
+                }
+
                 evt.Time -= ctx.Delta;
                 if (evt.Time > TimeSpan.Zero)
                 {

@@ -87,11 +87,12 @@ public class StoneBehaviour : IBehaviour
             {
                 if (spawnedEntity.Health > 0)
                 {
-                    spawnedEntity.Die();
+                    spawnedEntity.TryScheduleKnockout();
                 }
             }
 
             _spawnedEntities.Clear();
+            _entity.TryScheduleKnockout();
         }
     }
 

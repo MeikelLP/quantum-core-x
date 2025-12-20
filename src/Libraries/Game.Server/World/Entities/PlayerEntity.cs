@@ -2,6 +2,7 @@ using System.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
+using QuantumCore.API.Core.Event;
 using QuantumCore.API.Core.Models;
 using QuantumCore.API.Core.Timekeeping;
 using QuantumCore.API.Extensions;
@@ -17,18 +18,25 @@ using QuantumCore.API.Game.Types.Skills;
 using QuantumCore.API.Game.World;
 using QuantumCore.Caching;
 using QuantumCore.Extensions;
+using QuantumCore.Game.Constants;
 using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Packets;
 using QuantumCore.Game.Packets.Guild;
 using QuantumCore.Game.Persistence;
 using QuantumCore.Game.PlayerUtils;
 using QuantumCore.Game.Skills;
+using QuantumCore.Game.Systems.Events;
 
 namespace QuantumCore.Game.World.Entities;
 
-public class PlayerEntity : Entity, IPlayerEntity, IDisposable
+public class PlayerEntity : Entity, IPlayerEntity
 {
     public override EEntityType Type => EEntityType.PLAYER;
+
+    public PlayerEventRegistry Events { get; }
+    protected override EntityEventRegistryBase BaseEvents => Events;
+
+    public TimestampRegistry<PlayerTimestampKind> Timeline { get; } = new();
 
     public string Name => Player.Name;
     public IGameConnection Connection { get; }
@@ -88,12 +96,6 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
 
     private uint _defence;
 
-    private const int PERSIST_INTERVAL = 30 * 1000; // 30s
-    private ServerTimestamp? _lastPersistTime;
-    private const int HEALTH_REGEN_INTERVAL = 3 * 1000;
-    private const int MANA_REGEN_INTERVAL = 3 * 1000;
-    private ServerTimestamp? _lastHealthRegenTime;
-    private ServerTimestamp? _lastManaRegenTime;
     private readonly IItemManager _itemManager;
     private readonly IJobManager _jobManager;
     private readonly IExperienceManager _experienceManager;
@@ -105,7 +107,7 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
     private readonly IItemRepository _itemRepository;
 
     public PlayerEntity(PlayerData player, IGameConnection connection, IItemManager itemManager,
-        IJobManager jobManager,
+        IJobManager jobManager, IJobScheduler jobScheduler,
         IExperienceManager experienceManager, IAnimationManager animationManager,
         IQuestManager questManager, ICacheManager cacheManager, IWorld world, ILogger<PlayerEntity> logger,
         IServiceProvider serviceProvider)
@@ -137,6 +139,7 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
         EntityClass = (uint)player.PlayerClass;
 
         Groups = new List<Guid>();
+        Events = new PlayerEventRegistry(this, jobScheduler);
     }
 
     private static uint GetMaxSp(IJobManager jobManager, EPlayerClassGendered playerClass, byte level, uint point)
@@ -324,6 +327,8 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
         }
 
         base.Die();
+        Timeline[PlayerTimestampKind.DIED] = Connection.Server.Clock.Now;
+        Events.Schedule(Events.AutoRespawnInTown);
 
         var dead = new CharacterDead {Vid = Vid};
         foreach (var entity in NearbyEntities)
@@ -365,15 +370,18 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
             return;
         }
 
+        Events.Cancel(Events.AutoRespawnInTown);
         Shop?.Close(this);
 
         Dead = false;
+        Timeline[PlayerTimestampKind.RESPAWNED] = Connection.Server.Clock.Now;
 
         if (town)
         {
             var townCoordinates = Map!.TownCoordinates;
             if (townCoordinates is not null)
             {
+                // TODO: show map loading screen in client (it's jarring to be TPed instantly across the map)
                 Move(Player.Empire switch
                 {
                     EEmpire.CHUNJO => townCoordinates.Chunjo,
@@ -383,9 +391,15 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
                         $"Can't get empire coordinates for empire {Player.Empire}")
                 });
             }
+            else
+            {
+                _logger.LogDebug("Cannot get {TownCoordinates} for {Respawn} in town, will fallback to here.",
+                    nameof(Map.TownCoordinates), nameof(Respawn));
+            }
         }
 
         // todo spawn with invisible affect
+        // TODO: penalize death by removing some EXP
 
         SendChatCommand("CloseRestartWindow");
         Connection.SetPhase(EPhase.GAME);
@@ -513,38 +527,26 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
         var hpOrSpChanged = false;
 
         var maxHp = GetPoint(EPoint.MAX_HP);
-        if (Health < maxHp && !Dead)
+        if (Health < maxHp && !IsIncapacitated)
         {
-            if (!_lastHealthRegenTime.HasValue)
-            {
-                // start counting interval only from first viable reset
-                _lastHealthRegenTime = ctx.Timestamp;
-            } 
-            else if (ctx.ElapsedSince(_lastHealthRegenTime.Value) > TimeSpan.FromMilliseconds(HEALTH_REGEN_INTERVAL))
+            if (Timeline.UpdateIfElapsed(ctx,
+                    PlayerTimestampKind.RESTORED_HEALTH, SchedulingConstants.PlayerHealthRegenInterval))
             {
                 var factor = State == EEntityState.IDLE ? 0.05 : 0.01;
                 Health = Math.Min((int)maxHp, Health + 15 + (int)(maxHp * factor));
                 hpOrSpChanged = true;
-
-                _lastHealthRegenTime = ctx.Timestamp;
             }
         }
 
         var maxSp = GetPoint(EPoint.MAX_SP);
-        if (Mana < maxSp && !Dead)
+        if (Mana < maxSp && !IsIncapacitated)
         {
-            if (!_lastManaRegenTime.HasValue)
-            {
-                // start counting interval only from first viable reset
-                _lastManaRegenTime = ctx.Timestamp;
-            }
-            else if (ctx.ElapsedSince(_lastManaRegenTime.Value) > TimeSpan.FromMilliseconds(MANA_REGEN_INTERVAL))
+            if (Timeline.UpdateIfElapsed(ctx,
+                    PlayerTimestampKind.RESTORED_MANA, SchedulingConstants.PlayerManaRegenInterval))
             {
                 var factor = State == EEntityState.IDLE ? 0.05 : 0.01;
                 Mana = Math.Min((int)maxSp, Mana + 15 + (int)(maxSp * factor));
                 hpOrSpChanged = true;
-
-                _lastManaRegenTime = ctx.Timestamp;
             }
         }
 
@@ -553,14 +555,10 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
             SendPoints();
         }
 
-        if (!_lastPersistTime.HasValue)
-        {
-            _lastPersistTime = ctx.Timestamp;
-        }
-        else if (ctx.ElapsedSince(_lastPersistTime.Value) > TimeSpan.FromMilliseconds(PERSIST_INTERVAL))
+        if (Timeline.UpdateIfElapsed(ctx,
+                PlayerTimestampKind.AUTOSAVED, SchedulingConstants.PlayerAutosaveInterval))
         {
             Persist().Wait(); // TODO
-            _lastPersistTime = ctx.Timestamp;
         }
     }
 
@@ -981,7 +979,7 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
         // todo: implement server rates, and premium server rates
         if (GetPremiumRemainSeconds(EPremiumType.ITEM) > 0)
             return 100;
-        return 100_000_000;
+        return 1_000_000;
     }
 
     public int GetPremiumRemainSeconds(EPremiumType type)
@@ -1374,8 +1372,9 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
         return Player.Name + "(Player)";
     }
 
-    public void Dispose()
+    public override void Dispose()
     {
+        base.Dispose();
         _scope.Dispose();
     }
 }
