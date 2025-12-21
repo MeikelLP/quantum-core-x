@@ -247,7 +247,7 @@ public class MonsterEntity : Entity
         base.Die();
         Events.Schedule(Events.DespawnAfterDeath);
 
-        this.SafeBroadcastNearby(new CharacterDead { Vid = Vid });
+        this.BroadcastNearby(new CharacterDead { Vid = Vid });
         // clear target UI for all players targeting this entity
         var clearTargetPacket = new SetTarget { TargetVid = 0 };
         foreach (var targetingPlayer in TargetedBy)

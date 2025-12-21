@@ -203,26 +203,31 @@ public abstract class Entity : IEntity, IDisposable
     public abstract void SetPoint(EPoint point, uint value);
     public abstract uint GetPoint(EPoint point);
 
-    public void Attack(IEntity victim)
+    protected virtual bool TryBeginAttack(IEntity victim)
     {
         if (IsIncapacitated)
         {
-            return;
+            return false;
         }
         
         if (this.PositionIsAttr(EMapAttributes.NON_PVP))
         {
-            return;
+            return false;
         }
 
         if (victim.PositionIsAttr(EMapAttributes.NON_PVP))
         {
-            return;
+            return false;
         }
 
-        if (this is PlayerEntity { Timeline: var attackerTimeline} attacker)
+        return true;
+    }
+    
+    public void Attack(IEntity victim)
+    {
+        if (!TryBeginAttack(victim))
         {
-            attackerTimeline[PlayerTimestampKind.ATTACK_INITIATED] = attacker.Connection.Server.Clock.Now;
+            return;
         }
 
         switch (GetBattleType())
@@ -469,13 +474,13 @@ public abstract class Entity : IEntity, IDisposable
 
         if (Health <= 0)
         {
-            TryScheduleKnockout();
+            TryKnockout();
         }
 
         return damage;
     }
     
-    public bool TryScheduleKnockout()
+    public bool TryKnockout()
     {
         // already dead
         if (IsScheduled(BaseEvents.KnockoutDeath) || Dead)
@@ -485,7 +490,7 @@ public abstract class Entity : IEntity, IDisposable
 
         Health = 0;
         Stop();
-        this.SafeBroadcastNearby(new KnockoutCharacter { Vid = Vid });
+        this.BroadcastNearby(new KnockoutCharacter { Vid = Vid });
         BaseEvents.Schedule(BaseEvents.KnockoutDeath);
 
         return true;

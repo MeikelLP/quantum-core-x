@@ -30,7 +30,7 @@ public static class PaketExtensions
         };
     }
     
-    public static void SafeBroadcastNearby<T>(this IEntity entity, T packet, bool includeSelf = true) where T : IPacketSerializable
+    public static void BroadcastNearby<T>(this IEntity entity, T packet, bool includeSelf = true) where T : IPacketSerializable
     {
         if (includeSelf && entity is IPlayerEntity player)
         {
@@ -40,9 +40,7 @@ public static class PaketExtensions
         // take a snapshot to avoid enumeration failure if the nearby list is being mutated while we send
         var nearbySnapshot = entity.NearbyEntities.AsEnumerable().ToArray();
 
-        foreach (var nearbyPlayer in nearbySnapshot
-                     .Where(x => x is IPlayerEntity)
-                     .Cast<IPlayerEntity>())
+        foreach (var nearbyPlayer in nearbySnapshot.OfType<IPlayerEntity>())
         {
             nearbyPlayer.Connection.Send(packet);
         }

@@ -36,7 +36,7 @@ public class SyncPositionsHandler : IGamePacketHandler<SyncPositions>
             return Task.CompletedTask;
         }
 
-        player.SafeBroadcastNearby(new SyncPositionsOut { Positions = positions.ToArray() }, false);
+        player.BroadcastNearby(new SyncPositionsOut { Positions = positions.ToArray() }, includeSelf: false);
 
         return Task.CompletedTask;
     }

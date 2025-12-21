@@ -70,7 +70,7 @@ public class GroundItem : Entity, IGroundItem
 
         _ownerName = null;
         var clearOwnerPacket = new ItemOwnership { Vid = Vid, Player = "" };
-        this.SafeBroadcastNearby(clearOwnerPacket);
+        this.BroadcastNearby(clearOwnerPacket);
 
         return hadOwner;
     }

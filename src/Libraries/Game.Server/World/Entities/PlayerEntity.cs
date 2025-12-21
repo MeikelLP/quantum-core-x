@@ -847,6 +847,17 @@ public class PlayerEntity : Entity, IPlayerEntity
         }
     }
 
+    protected override bool TryBeginAttack(IEntity victim)
+    {
+        var canAttack = base.TryBeginAttack(victim);
+        if (canAttack)
+        {
+            Timeline[PlayerTimestampKind.ATTACK_INITIATED] = Connection.Server.Clock.Now;
+        }
+
+        return canAttack;
+    }
+
     private async Task Persist()
     {
         await QuickSlotBar.Persist();

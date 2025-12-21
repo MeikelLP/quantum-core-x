@@ -84,7 +84,7 @@ public class CharacterMoveHandler : IGamePacketHandler<CharacterMove>
                 : 0
         };
 
-        ctx.Connection.Player.SafeBroadcastNearby(movement, includeSelf: false);
+        ctx.Connection.Player.BroadcastNearby(movement, includeSelf: false);
         
         return Task.CompletedTask;
     }
