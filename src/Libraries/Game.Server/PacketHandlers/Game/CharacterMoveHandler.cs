@@ -4,8 +4,8 @@ using QuantumCore.API;
 using QuantumCore.API.Game.Types.Players;
 using QuantumCore.API.Game.Types.Skills;
 using QuantumCore.API.PluginTypes;
+using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Packets;
-using QuantumCore.Game.World.Entities;
 
 namespace QuantumCore.Game.PacketHandlers.Game;
 
@@ -84,14 +84,8 @@ public class CharacterMoveHandler : IGamePacketHandler<CharacterMove>
                 : 0
         };
 
-        foreach (var entity in ctx.Connection.Player.NearbyEntities)
-        {
-            if (entity is PlayerEntity player)
-            {
-                player.Connection.Send(movement);
-            }
-        }
-
+        ctx.Connection.Player.BroadcastNearby(movement, includeSelf: false);
+        
         return Task.CompletedTask;
     }
 }

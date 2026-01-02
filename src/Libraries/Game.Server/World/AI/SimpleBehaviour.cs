@@ -16,6 +16,7 @@ using QuantumCore.Core.Utils;
 using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Packets;
 using QuantumCore.Game.World.Entities;
+using static QuantumCore.Game.World.AI.SimpleBehaviourUtils.CombatEvent;
 
 namespace QuantumCore.Game.World.AI;
 
@@ -29,11 +30,10 @@ public class SimpleBehaviour : IBehaviour
     private int _spawnX;
     private int _spawnY;
 
-    private TimeSpan _attackCooldown;
     private int _lastAttackX;
     private int _lastAttackY;
-    private ServerTimestamp? _lastAttackTime;
-    private ServerTimestamp? _lastChangeAttackPositionTime;
+
+    private readonly TimestampRegistry<SimpleBehaviourUtils.CombatEvent> _timeline = new();
 
     public IEntity? Target { get; set; }
     private readonly Dictionary<uint, uint> _damageMap = new();
@@ -73,8 +73,6 @@ public class SimpleBehaviour : IBehaviour
         _spawnX = entity.PositionX;
         _spawnY = entity.PositionY;
         IsAggressive = entity is MonsterEntity mob && mob.Proto.AiFlag.HasAnyFlags(EAiFlags.AGGRESSIVE);
-        _lastAttackTime = null;
-        _lastChangeAttackPositionTime = null;
     }
 
     private void CalculateNextMovement()
@@ -160,9 +158,9 @@ public class SimpleBehaviour : IBehaviour
                 targetLost = true;
             }
 
-            if (!targetLost && _lastAttackTime.HasValue)
+            if (!targetLost && _timeline[LAST_TOOK_DAMAGE] is { } lastTookDamage)
             {
-                if (ctx.ElapsedSince(_lastAttackTime.Value) > TimeSpan.FromMilliseconds(RETURN_TIMEOUT_MS))
+                if (ctx.ElapsedSince(lastTookDamage) > TimeSpan.FromMilliseconds(RETURN_TIMEOUT_MS))
                 {
                     if (_proto.AttackRange < _entity.DistanceTo(Target))
                     {
@@ -189,7 +187,7 @@ public class SimpleBehaviour : IBehaviour
 
                 if (Target is null)
                 {
-                    _lastAttackTime = null;
+                    _timeline[LAST_TOOK_DAMAGE] = null;
                     ResetChangeAttackPositionTimer(ctx);
                     TryGoto(new Coordinates((uint)_spawnX, (uint)_spawnY), ctx.Timestamp);
                 }
@@ -216,11 +214,10 @@ public class SimpleBehaviour : IBehaviour
                     }
                     else
                     {
-                        _attackCooldown -= ctx.Delta;
-                        if (_attackCooldown <= TimeSpan.Zero)
+                        if (_timeline.UpdateIfElapsed(ctx, 
+                                LAST_ATTACK, TimeSpan.FromSeconds(2))) // todo use attack speed
                         {
                             Attack(Target, ctx);
-                            _attackCooldown += TimeSpan.FromSeconds(2); // todo use attack speed
                         }
                     }
                 }
@@ -280,7 +277,7 @@ public class SimpleBehaviour : IBehaviour
             return false;
         }
 
-        _lastChangeAttackPositionTime = now;
+        _timeline[LAST_CHANGE_ATTACK_POSITION] = now;
 
         var rotationFromTarget = MathUtils.Rotation(_entity.PositionX - target.PositionX,
             _entity.PositionY - target.PositionY);
@@ -327,7 +324,7 @@ public class SimpleBehaviour : IBehaviour
             changeInterval = TimeSpan.FromMilliseconds(CHANGE_ATTACK_POSITION_TIME_NEAR_MS);
         }
 
-        return ctx.ElapsedSince(_lastChangeAttackPositionTime) > changeInterval;
+        return ctx.ElapsedSince(_timeline[LAST_CHANGE_ATTACK_POSITION]) > changeInterval;
     }
 
     private double GetPreferredApproachDistance()
@@ -347,7 +344,7 @@ public class SimpleBehaviour : IBehaviour
 
     private void ResetChangeAttackPositionTimer(TickContext ctx)
     {
-        _lastChangeAttackPositionTime =
+        _timeline[LAST_CHANGE_ATTACK_POSITION] =
             ctx.Rewind(TimeSpan.FromMilliseconds(CHANGE_ATTACK_POSITION_TIME_NEAR_MS));
     }
 
@@ -408,7 +405,7 @@ public class SimpleBehaviour : IBehaviour
     {
         if (_entity is null) return;
 
-        _lastAttackTime = (_entity.Map as Map)!.Clock.Now;
+        _timeline[LAST_TOOK_DAMAGE] = (_entity.Map as Map)!.Clock.Now;
         _lastAttackX = _entity.PositionX;
         _lastAttackY = _entity.PositionY;
 
@@ -449,4 +446,16 @@ public class SimpleBehaviour : IBehaviour
             Target = entity;
         }
     }
+}
+
+internal static class SimpleBehaviourUtils
+{
+    // located here as a workaround for readability - omitting qualifiers in main class
+    internal enum CombatEvent
+    {
+        LAST_ATTACK,
+        LAST_CHANGE_ATTACK_POSITION,
+        LAST_TOOK_DAMAGE
+    }
+
 }

@@ -2,8 +2,10 @@ using System.Reflection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using QuantumCore.API.Core.Event;
 using QuantumCore.API.Core.Timekeeping;
 using QuantumCore.API.PluginTypes;
+using QuantumCore.Core.Event;
 using QuantumCore.Networking;
 using Serilog;
 using Serilog.Events;
@@ -85,6 +87,7 @@ public static class ServiceExtensions
         });
         services.AddSingleton(_ => TimeProvider.System);
         services.AddSingleton<ServerClock>();
+        services.AddSingleton<IJobScheduler, ThreadPoolScheduler>();
         services.AddSingleton<PluginExecutor>();
         services.AddPluginFramework()
             .AddPluginCatalog(pluginCatalog)

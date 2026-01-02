@@ -9,9 +9,12 @@ using QuantumCore.API.Game.Types.Monsters;
 using QuantumCore.API.Game.Types.Players;
 using QuantumCore.API.Game.World;
 using QuantumCore.API.Game.World.AI;
+using QuantumCore.Core.Constants;
 using QuantumCore.Core.Utils;
+using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Packets;
 using QuantumCore.Game.Services;
+using QuantumCore.Game.Systems.Events;
 using QuantumCore.Game.World.AI;
 
 namespace QuantumCore.Game.World.Entities;
@@ -23,6 +26,9 @@ public class MonsterEntity : Entity
     public override EEntityType Type => EEntityType.MONSTER;
     public bool IsStone => Proto.Type == (byte)EEntityType.METIN_STONE;
     public EMonsterLevel Rank => (EMonsterLevel)Proto.Rank;
+    private MonsterEventRegistry Events { get; }
+    protected override EntityEventRegistryBase BaseEvents => Events;
+
 
     public override IEntity? Target
     {
@@ -60,7 +66,6 @@ public class MonsterEntity : Entity
 
     private IBehaviour? _behaviour;
     private bool _behaviourInitialized;
-    private ServerTimestamp? _diedAt;
     private readonly IMap _map;
     private readonly IItemManager _itemManager;
     private IServiceProvider _serviceProvider;
@@ -84,6 +89,7 @@ public class MonsterEntity : Entity
         _serviceProvider = serviceProvider;
         _logger = logger;
         _itemManager = itemManager;
+        Events = new MonsterEventRegistry(this);
         Proto = proto;
         PositionX = x;
         PositionY = y;
@@ -112,22 +118,17 @@ public class MonsterEntity : Entity
     public override void Update(TickContext ctx)
     {
         if (Map is null) return;
-        if (Dead)
-        {
-            if (!_diedAt.HasValue)
-            {
-                _diedAt = ctx.Timestamp;
-            }
-            else if (ctx.ElapsedSince(_diedAt.Value) >= TimeSpan.FromSeconds(5))
-            {
-                Map.DespawnEntity(this);
-            }
-        }
 
         if (!_behaviourInitialized)
         {
             _behaviour?.Init(this);
             _behaviourInitialized = true;
+        }
+        
+        if (IsIncapacitated)
+        {
+            Stop();
+            return;
         }
 
         if (!Dead)
@@ -240,20 +241,43 @@ public class MonsterEntity : Entity
             return;
         }
 
+        CalculateExperience();
         CalculateDrops();
 
         base.Die();
+        Events.Schedule(Events.DespawnAfterDeath);
 
-        var dead = new CharacterDead {Vid = Vid};
-        foreach (var entity in NearbyEntities)
+        this.BroadcastNearby(new CharacterDead { Vid = Vid });
+        // clear target UI for all players targeting this entity
+        var clearTargetPacket = new SetTarget { TargetVid = 0 };
+        foreach (var targetingPlayer in TargetedBy)
         {
-            if (entity is PlayerEntity player)
-            {
-                player.Connection.Send(dead);
-            }
+            targetingPlayer.Connection.Send(clearTargetPacket);
         }
+        TargetedBy.Clear();
     }
+    
+    private void CalculateExperience()
+    {
+        // no exp if no killer
+        if (LastAttacker is not { } killer)
+        {
+            return;
+        }
 
+        var baseExp = GetPoint(EPoint.EXPERIENCE);
+        var entityLevel = GetPoint(EPoint.LEVEL);
+
+        var percentage = ExperienceConstants.GetExperiencePercentageByLevelDifference(
+            killer.GetPoint(EPoint.LEVEL), entityLevel);
+
+        var exp = (int)(baseExp * percentage);
+            
+        // TODO: send animation packet for flying exp orbs
+        killer.AddPoint(EPoint.EXPERIENCE, exp);
+        killer.SendPoints();
+    }
+    
     private void CalculateDrops()
     {
         // no drops if no killer

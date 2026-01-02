@@ -1,6 +1,8 @@
 ﻿using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game.Types.Players;
+using QuantumCore.API.Game.World;
 using QuantumCore.Game.Packets;
+using QuantumCore.Networking;
 
 namespace QuantumCore.Game.Extensions;
 
@@ -26,5 +28,21 @@ public static class PaketExtensions
             PositionY = player.PositionY,
             SkillGroup = player.SkillGroup
         };
+    }
+    
+    public static void BroadcastNearby<T>(this IEntity entity, T packet, bool includeSelf = true) where T : IPacketSerializable
+    {
+        if (includeSelf && entity is IPlayerEntity player)
+        {
+            player.Connection.Send(packet);
+        }
+
+        // take a snapshot to avoid enumeration failure if the nearby list is being mutated while we send
+        var nearbySnapshot = entity.NearbyEntities.AsEnumerable().ToArray();
+
+        foreach (var nearbyPlayer in nearbySnapshot.OfType<IPlayerEntity>())
+        {
+            nearbyPlayer.Connection.Send(packet);
+        }
     }
 }

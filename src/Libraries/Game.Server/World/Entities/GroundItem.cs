@@ -3,7 +3,9 @@ using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game.Types.Combat;
 using QuantumCore.API.Game.Types.Entities;
 using QuantumCore.API.Game.World;
+using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Packets;
+using QuantumCore.Game.Systems.Events;
 
 namespace QuantumCore.Game.World.Entities;
 
@@ -11,11 +13,15 @@ public class GroundItem : Entity, IGroundItem
 {
     private readonly ItemInstance _item;
     private readonly uint _amount;
-    private readonly string? _ownerName;
+    private string? _ownerName;
 
     public ItemInstance Item => _item;
     public uint Amount => _amount;
     public string? OwnerName => _ownerName;
+
+    private GroundItemEventRegistry Events { get; }
+    protected override EntityEventRegistryBase BaseEvents => Events;
+
 
     public GroundItem(IAnimationManager animationManager, uint vid, ItemInstance item, uint amount,
         string? ownerName = null) : base(animationManager, vid)
@@ -23,6 +29,9 @@ public class GroundItem : Entity, IGroundItem
         _item = item;
         _amount = amount;
         _ownerName = ownerName;
+        Events = new GroundItemEventRegistry(this);
+        Events.Schedule(Events.OwnershipExpiry);
+        Events.Schedule(Events.LifetimeExpiry);
     }
 
     public override EEntityType Type { get; }
@@ -53,6 +62,17 @@ public class GroundItem : Entity, IGroundItem
     public override void HideEntity(IConnection connection)
     {
         connection.Send(new GroundItemRemove {Vid = Vid});
+    }
+
+    public bool ReleaseOwnership()
+    {
+        var hadOwner = _ownerName is not null;
+
+        _ownerName = null;
+        var clearOwnerPacket = new ItemOwnership { Vid = Vid, Player = "" };
+        this.BroadcastNearby(clearOwnerPacket);
+
+        return hadOwner;
     }
 
     public override uint GetPoint(EPoint point)

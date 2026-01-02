@@ -8,7 +8,7 @@ public class RestartTownCommand : ICommandHandler
 {
     public Task ExecuteAsync(CommandContext context)
     {
-        context.Player.Respawn(true);
+        context.Player.RestartWithCooldown(true);
         return Task.CompletedTask;
     }
 }

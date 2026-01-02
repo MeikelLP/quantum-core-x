@@ -5,14 +5,15 @@ using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.Types.Combat;
 using QuantumCore.API.Game.Types.Entities;
 using QuantumCore.API.Game.World;
-using QuantumCore.Core.Constants;
 using QuantumCore.Core.Utils;
 using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Packets;
+using QuantumCore.Game.Systems.Events;
+using static QuantumCore.Game.Systems.Events.EntityEventRegistryBase;
 
 namespace QuantumCore.Game.World.Entities;
 
-public abstract class Entity : IEntity
+public abstract class Entity : IEntity, IDisposable
 {
     private readonly IAnimationManager _animationManager;
     public uint Vid { get; }
@@ -21,6 +22,7 @@ public abstract class Entity : IEntity
     public uint EntityClass { get; protected set; }
     public EEntityState State { get; protected set; }
     public virtual IEntity? Target { get; set; }
+    protected abstract EntityEventRegistryBase BaseEvents { get; }
 
     public int PositionX
     {
@@ -87,6 +89,8 @@ public abstract class Entity : IEntity
     private bool _positionChanged;
     protected PlayerEntity? LastAttacker { get; private set; }
 
+    protected bool IsIncapacitated => Dead || Health <= 0 || IsScheduled(BaseEvents.KnockoutDeath);
+    
     public Entity(IAnimationManager animationManager, uint vid)
     {
         _animationManager = animationManager;
@@ -136,6 +140,10 @@ public abstract class Entity : IEntity
     {
         if (PositionX == x && PositionY == y) return;
         if (TargetPositionX == x && TargetPositionY == y) return;
+        if (IsIncapacitated)
+        {
+            return;
+        }
 
         var animation =
             _animationManager.GetAnimation(EntityClass, AnimationType.RUN, AnimationSubType.GENERAL);
@@ -195,14 +203,29 @@ public abstract class Entity : IEntity
     public abstract void SetPoint(EPoint point, uint value);
     public abstract uint GetPoint(EPoint point);
 
-    public void Attack(IEntity victim)
+    protected virtual bool TryBeginAttack(IEntity victim)
     {
+        if (IsIncapacitated)
+        {
+            return false;
+        }
+        
         if (this.PositionIsAttr(EMapAttributes.NON_PVP))
         {
-            return;
+            return false;
         }
 
         if (victim.PositionIsAttr(EMapAttributes.NON_PVP))
+        {
+            return false;
+        }
+
+        return true;
+    }
+    
+    public void Attack(IEntity victim)
+    {
+        if (!TryBeginAttack(victim))
         {
             return;
         }
@@ -329,16 +352,6 @@ public abstract class Entity : IEntity
         return attack;
     }
 
-    private int CalculateExperience(uint playerLevel)
-    {
-        var baseExp = GetPoint(EPoint.EXPERIENCE);
-        var entityLevel = GetPoint(EPoint.LEVEL);
-
-        var percentage = ExperienceConstants.GetExperiencePercentageByLevelDifference(playerLevel, entityLevel);
-
-        return (int)(baseExp * percentage);
-    }
-
     private void SendDebugDamage(IEntity other, string text)
     {
         if (this is PlayerEntity thisPlayer)
@@ -354,6 +367,10 @@ public abstract class Entity : IEntity
 
     public virtual int Damage(IEntity attacker, EDamageType damageType, int damage)
     {
+        if (IsIncapacitated)
+        {
+            return -1;
+        }
 
         if (this.PositionIsAttr(EMapAttributes.NON_PVP))
         {
@@ -423,18 +440,22 @@ public abstract class Entity : IEntity
         var attackerPlayer = attacker as PlayerEntity;
         if (victimPlayer is not null || attackerPlayer is not null)
         {
-            var damageInfo = new DamageInfo();
-            damageInfo.Vid = Vid;
-            damageInfo.Damage = damage;
-            damageInfo.DamageFlags = damageFlags;
-
-            if (victimPlayer is not null)
+            var damageInfo = new DamageInfo
             {
+                Vid = Vid,
+                Damage = damage,
+                DamageFlags = damageFlags
+            };
+
+            if (victimPlayer is { Timeline: var victimTimeline })
+            {
+                victimTimeline[PlayerTimestampKind.DAMAGE_TAKEN] = victimPlayer.Connection.Server.Clock.Now;
                 victimPlayer.Connection.Send(damageInfo);
             }
 
-            if (attackerPlayer is not null)
+            if (attackerPlayer is { Timeline: var attackerTimeline })
             {
+                attackerTimeline[PlayerTimestampKind.DAMAGE_DEALT] = attackerPlayer.Connection.Server.Clock.Now;
                 attackerPlayer.Connection.Send(damageInfo);
                 LastAttacker = attackerPlayer;
             }
@@ -453,22 +474,34 @@ public abstract class Entity : IEntity
 
         if (Health <= 0)
         {
-            Die();
-            if (Type != EEntityType.PLAYER && attackerPlayer is not null)
-            {
-                var exp = CalculateExperience(attackerPlayer.GetPoint(EPoint.LEVEL));
-                attackerPlayer.AddPoint(EPoint.EXPERIENCE, exp);
-                attackerPlayer.SendPoints();
-            }
+            TryKnockout();
         }
 
         return damage;
+    }
+    
+    public bool TryKnockout()
+    {
+        // already dead
+        if (IsScheduled(BaseEvents.KnockoutDeath) || Dead)
+        {
+            return false;
+        }
+
+        Health = 0;
+        Stop();
+        this.BroadcastNearby(new KnockoutCharacter { Vid = Vid });
+        BaseEvents.Schedule(BaseEvents.KnockoutDeath);
+
+        return true;
     }
 
     public virtual void Die()
     {
         Dead = true;
+        Cancel(BaseEvents.KnockoutDeath);
     }
+
 
     public void AddNearbyEntity(IEntity entity)
     {
@@ -490,5 +523,10 @@ public abstract class Entity : IEntity
         {
             action(entity);
         }
+    }
+
+    public virtual void Dispose()
+    {
+        BaseEvents.Dispose();
     }
 }

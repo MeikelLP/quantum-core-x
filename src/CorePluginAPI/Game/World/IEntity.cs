@@ -63,4 +63,5 @@ public interface IEntity
     public void Move(int x, int y);
     public void Stop();
     public void Die();
+    public bool TryKnockout();
 }

@@ -1,6 +1,8 @@
 using QuantumCore.API.Game;
 using QuantumCore.API.Game.World;
 using QuantumCore.Caching;
+using QuantumCore.Game.Systems.Events;
+using QuantumCore.Game.World.Entities;
 
 namespace QuantumCore.Game.Commands;
 
@@ -18,12 +20,31 @@ public class LogoutCommand : ICommandHandler
         _cacheManager = cacheManager;
     }
 
-    public async Task ExecuteAsync(CommandContext context)
+    public Task ExecuteAsync(CommandContext context)
     {
-        context.Player.SendChatInfo("Logging out. Please wait.");
-        await context.Player.CalculatePlayedTimeAsync();
-        await _world.DespawnPlayerAsync(context.Player);
-        await _cacheManager.Del("account:token:" + context.Player.Player.AccountId);
-        context.Player.Disconnect();
+        if (context.Player is not PlayerEntity { Events: var events } player)
+        {
+            throw new NotImplementedException();
+        }
+
+        // toggle mechanism
+        if (events.Cancel(events.SafeLogoutCountdown))
+        {
+            player.SendChatInfo("Your logout has been cancelled.");
+            return Task.CompletedTask;
+        }
+
+        player.SendChatInfo("Logging out. Please wait.");
+
+        events.Schedule(events.SafeLogoutCountdown, new SafeLogoutCountdownEvent.Args(
+            "{0} seconds until logout.",
+            async () =>
+            {
+                await player.CalculatePlayedTimeAsync();
+                await _world.DespawnPlayerAsync(player);
+                await _cacheManager.Del("account:token:" + player.Player.AccountId);
+                player.Disconnect();
+            }));
+        return Task.CompletedTask;
     }
 }

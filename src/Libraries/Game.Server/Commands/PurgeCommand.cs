@@ -13,7 +13,9 @@ public class PurgeCommand : ICommandHandler<PurgeCommandOptions>
         const int MAX_DISTANCE = 10000;
         var p = context.Player;
         var all = context.Arguments.Argument == PurgeCommandOption.ALL;
-        foreach (var e in context.Player.Map!.Entities)
+        // hack to avoid System.InvalidOperationException: Collection was modified; enumeration operation may not execute.
+        var mapEntitiesSnapshot = context.Player.Map!.Entities.AsEnumerable().ToArray();
+        foreach (var e in mapEntitiesSnapshot)
         {
             if (e is IPlayerEntity) continue;
             var distance = MathUtils.Distance(e.PositionX, e.PositionY, p.PositionX, p.PositionY);
