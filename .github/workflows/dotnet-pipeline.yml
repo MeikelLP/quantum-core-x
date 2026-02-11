@@ -95,7 +95,7 @@ jobs:
             type=ref,event=tag
             type=raw,latest,enable=${{ github.ref == format('refs/heads/{0}', 'main') }}
       - name: Build and push game image
-        uses: docker/build-push-action@v6.18.0
+        uses: docker/build-push-action@v6.19.0
         with:
           context: src/
           file: src/Executables/Game/Dockerfile
@@ -115,7 +115,7 @@ jobs:
             type=ref,event=tag
             type=raw,latest,enable=${{ github.ref == format('refs/heads/{0}', 'main') }}
       - name: Build and push auth image
-        uses: docker/build-push-action@v6.18.0
+        uses: docker/build-push-action@v6.19.0
         with:
           context: src/
           images: ghcr.io/meikellp/quantum-core-x/auth
