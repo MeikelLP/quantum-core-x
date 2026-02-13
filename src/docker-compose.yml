@@ -39,7 +39,7 @@ services:
 
   # persistent storage
   db-mysql:
-    image: mariadb:12.1
+    image: mariadb:12.2
     hostname: db
     ports:
     - "3306:3306"
