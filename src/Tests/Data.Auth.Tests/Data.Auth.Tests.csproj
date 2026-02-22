@@ -6,7 +6,7 @@
 
     <ItemGroup>
       <PackageReference Include="AwesomeAssertions" Version="9.4.0"/>
-      <PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.12"/>
+      <PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.13"/>
       <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.1"/>
         <PackageReference Include="NSubstitute" Version="5.3.0"/>
         <PackageReference Include="Serilog.Extensions.Hosting" Version="10.0.0"/>
