@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="BCrypt.Net-Next" Version="4.2.0" />
+    <PackageReference Include="BCrypt.Net-Next" Version="4.2.1" />
     <PackageReference Include="lzo.net" Version="0.0.6" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.16"/>
     <PackageReference Include="Scrutor" Version="6.1.0" />
