@@ -7,7 +7,7 @@
 
     <ItemGroup>
         <PackageReference Include="AutoBogus" Version="2.13.1"/>
-      <PackageReference Include="AwesomeAssertions" Version="9.4.0"/>
+      <PackageReference Include="AwesomeAssertions" Version="9.5.0"/>
       <PackageReference Include="Microsoft.Extensions.Configuration" Version="9.0.18"/>
       <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.8.1"/>
         <PackageReference Include="NSubstitute" Version="6.0.0"/>
