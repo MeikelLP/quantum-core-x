@@ -10,8 +10,8 @@ using QuantumCore;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
 using QuantumCore.API.Core.Timekeeping;
-using QuantumCore.API.Game.Types.Monsters;
 using QuantumCore.API.Game.Types.Entities;
+using QuantumCore.API.Game.Types.Monsters;
 using QuantumCore.API.Game.Types.Players;
 using QuantumCore.API.Game.World;
 using QuantumCore.Caching;
@@ -35,7 +35,7 @@ public class WorldTests
     public WorldTests()
     {
         var config = new ConfigurationBuilder()
-            .AddInMemoryCollection(new Dictionary<string, string?> {{"Hosting:IpAddress", "0.0.0.0"}})
+            .AddInMemoryCollection(new Dictionary<string, string?> { { "Hosting:IpAddress", "0.0.0.0" } })
             .Build();
         var services = new ServiceCollection()
             .AddLogging()
@@ -56,7 +56,7 @@ public class WorldTests
                 {
                     new Map(provider.GetRequiredService<IMonsterManager>(),
                         provider.GetRequiredService<IAnimationManager>(),
-                        provider.GetRequiredService<ICacheManager>(), info.Arg<IWorld>(),
+                        provider.GetRequiredService<ICacheManager>(), info.Arg<IWorld>()!,
                         provider.GetRequiredService<ILogger<Map>>(),
                         provider.GetRequiredService<ISpawnPointProvider>(),
                         provider.GetRequiredService<IMapAttributeProvider>(),
@@ -70,7 +70,7 @@ public class WorldTests
             .Replace(new ServiceDescriptor(typeof(ICacheManager), _ =>
             {
                 var mock = Substitute.For<ICacheManager>();
-                mock.Keys("maps:*").Returns(new[] {"maps:test_map"});
+                mock.Keys("maps:*").Returns(new[] { "maps:test_map" });
                 mock.Subscribe().Returns(Substitute.For<IRedisSubscriber>());
                 return mock;
             }, ServiceLifetime.Singleton))
@@ -104,9 +104,9 @@ public class WorldTests
             .Replace(new ServiceDescriptor(typeof(IMonsterManager), _ =>
             {
                 var mock = Substitute.For<IMonsterManager>();
-                mock.GetMonster(42).Returns(new MonsterData {Type = (byte)EEntityType.MONSTER});
+                mock.GetMonster(42).Returns(new MonsterData { Type = (byte)EEntityType.MONSTER });
                 mock.GetMonsters().Returns([
-                    new MonsterData {Type = (byte)EEntityType.MONSTER}
+                    new MonsterData { Type = (byte)EEntityType.MONSTER }
                 ]);
                 return mock;
             }, ServiceLifetime.Singleton))

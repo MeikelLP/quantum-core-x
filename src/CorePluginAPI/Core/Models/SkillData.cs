@@ -7,7 +7,7 @@ namespace QuantumCore.API.Core.Models;
 public class SkillData
 {
     public required ESkill Id { get; set; }
-    public string Name { get; set; }
+    public string Name { get; set; } = "";
     public ESkillCategoryType Type { get; set; }
     public short LevelStep { get; set; }
     public short MaxLevel { get; set; }

@@ -8,7 +8,7 @@ public class RedisFixture : IAsyncLifetime
 
     public async Task InitializeAsync()
     {
-        Container = new RedisBuilder().Build();
+        Container = new RedisBuilder("valkey:9.1.1-alpne3.24").Build();
         await Container.StartAsync();
     }
 

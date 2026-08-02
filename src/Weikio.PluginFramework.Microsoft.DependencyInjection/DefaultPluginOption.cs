@@ -2,6 +2,6 @@
 
 public class DefaultPluginOption
 {
-    public Func<IServiceProvider, IEnumerable<Type>, Type> DefaultType { get; set; }
+    public Func<IServiceProvider, IEnumerable<Type>, Type?> DefaultType { get; set; }
         = (serviceProvider, implementingTypes) => implementingTypes.FirstOrDefault();
 }

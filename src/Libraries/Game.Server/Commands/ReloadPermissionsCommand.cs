@@ -44,5 +44,5 @@ public class ReloadPermissionsCommand : ICommandHandler<ReloadPermissionsCommand
 
 public class ReloadPermissionsCommandOptions
 {
-    [Value(0)] public string Target { get; set; }
+    [Value(0)] public string Target { get; set; } = "";
 }

@@ -95,6 +95,11 @@ public class PlayerManager : IPlayerManager
     {
         var job = _jobManager.Get(@class);
 
+        if (job is null)
+        {
+            throw new InvalidOperationException($"Job was not found for class {@class}");
+        }
+
         var existingPlayers = await _dbPlayerRepository.GetPlayersAsync(accountId);
 
         if (existingPlayers.Length >= PlayerConstants.MAX_PLAYERS_PER_ACCOUNT)

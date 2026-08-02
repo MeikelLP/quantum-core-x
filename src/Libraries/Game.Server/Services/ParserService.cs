@@ -136,7 +136,7 @@ public partial class ParserService : IParserService
 
         _logger.LogInformation("Loaded {Count} skills", list.Count);
 
-        return [..list];
+        return [.. list];
     }
 
     public async Task<List<DataFileGroup>> ParseFileGroups(StreamReader sr, CancellationToken token = default)
@@ -161,7 +161,7 @@ public partial class ParserService : IParserService
 
                 // remove empty or whitespace entries
                 line = SplitByWhitespaceOrTabRegex().Replace(line, " ");
-                currentGroup = new DataFileGroup {Name = line.Split()[1]};
+                currentGroup = new DataFileGroup { Name = line.Split()[1] };
             }
             else if (!string.IsNullOrWhiteSpace(line) && currentGroup is not null)
             {
@@ -242,7 +242,7 @@ public partial class ParserService : IParserService
 
         if (type.Equals("Kill", INV_CUL)) // MobItemGroup
         {
-            var entry = new MonsterItemGroup {MonsterProtoId = monsterProtoId, MinKillCount = minKillCount,};
+            var entry = new MonsterItemGroup { MonsterProtoId = monsterProtoId, MinKillCount = minKillCount, };
 
             foreach (var dropData in group.Data)
             {
@@ -281,7 +281,7 @@ public partial class ParserService : IParserService
 
         if (type.Equals("Drop", INV_CUL)) // DropItemGroup
         {
-            var entry = new DropItemGroup {MonsterProtoId = monsterProtoId,};
+            var entry = new DropItemGroup { MonsterProtoId = monsterProtoId, };
 
             foreach (var dropData in group.Data)
             {
@@ -305,7 +305,7 @@ public partial class ParserService : IParserService
 
                 chance *= 10000.0f; // to make it 0-1000
 
-                entry.Drops.Add(new DropItemGroup.Drop {ItemProtoId = itemProtoId, Amount = count, Chance = chance});
+                entry.Drops.Add(new DropItemGroup.Drop { ItemProtoId = itemProtoId, Amount = count, Chance = chance });
             }
 
             return entry;
@@ -313,7 +313,7 @@ public partial class ParserService : IParserService
 
         if (type.Equals("Limit", INV_CUL)) // LevelItemGroup
         {
-            var entry = new LevelItemGroup {LevelLimit = levelLimit};
+            var entry = new LevelItemGroup { LevelLimit = levelLimit };
 
             foreach (var dropData in group.Data)
             {
@@ -343,7 +343,7 @@ public partial class ParserService : IParserService
 
                 chance *= 10000.0f; // to make it 0-1000
 
-                entry.Drops.Add(new LevelItemGroup.Drop {ItemProtoId = itemProtoId, Amount = count, Chance = chance});
+                entry.Drops.Add(new LevelItemGroup.Drop { ItemProtoId = itemProtoId, Amount = count, Chance = chance });
             }
 
             return entry;
@@ -511,7 +511,7 @@ public partial class ParserService : IParserService
     [DebuggerDisplay("{Name} | {Fields.Count} - {Data.Count}")]
     public class DataFileGroup
     {
-        public string Name { get; set; }
+        public string Name { get; set; } = "";
         public Dictionary<string, string> Fields { get; } = new(StringComparer.InvariantCultureIgnoreCase);
         public List<List<string>> Data { get; } = new();
 

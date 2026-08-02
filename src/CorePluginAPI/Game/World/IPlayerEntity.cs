@@ -2,8 +2,8 @@ using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game.Skills;
 using QuantumCore.API.Game.Types.Entities;
 using QuantumCore.API.Game.Types.Items;
-using QuantumCore.API.Game.Types.Players;
 using QuantumCore.API.Game.Types.Monsters;
+using QuantumCore.API.Game.Types.Players;
 using QuantumCore.API.Game.Types.Skills;
 
 namespace QuantumCore.API.Game.World;
@@ -15,7 +15,6 @@ public interface IPlayerEntity : IEntity
     IGameConnection Connection { get; }
     PlayerData Player { get; }
     IInventory Inventory { get; }
-    IEntity? Target { get; set; }
     IList<Guid> Groups { get; }
     IShop? Shop { get; set; }
     IQuickSlotBar QuickSlotBar { get; }

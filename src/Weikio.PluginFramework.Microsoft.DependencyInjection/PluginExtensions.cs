@@ -7,11 +7,12 @@ public static class PluginExtensions
 {
     public static object Create(this Plugin plugin, IServiceProvider serviceProvider, params object[] parameters)
     {
-        return ActivatorUtilities.CreateInstance(serviceProvider, plugin, parameters);
+        return (ActivatorUtilities.CreateInstance(serviceProvider, plugin, parameters))!;
     }
-        
-    public static T Create<T>(this Plugin plugin, IServiceProvider serviceProvider, params object[] parameters) where T : class
+
+    public static T Create<T>(this Plugin plugin, IServiceProvider serviceProvider, params object[] parameters)
+        where T : class
     {
-        return ActivatorUtilities.CreateInstance(serviceProvider, plugin, parameters) as T;
+        return (ActivatorUtilities.CreateInstance(serviceProvider, plugin, parameters) as T)!;
     }
 }

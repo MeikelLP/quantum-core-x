@@ -92,7 +92,10 @@ public abstract class ServerBase<T> : BackgroundService, IServerBase
         Listener.BeginAcceptTcpClient(OnClientAccepted, Listener);
 
         await connection.StartAsync(_stoppingToken.Token);
-        await connection.ExecuteTask.ConfigureAwait(false);
+        if (connection.ExecuteTask is not null)
+        {
+            await connection.ExecuteTask.ConfigureAwait(false);
+        }
     }
 
     public void ForAllConnections(Action<IConnection> callback)
@@ -136,7 +139,7 @@ public abstract class ServerBase<T> : BackgroundService, IServerBase
 
             var packetHandler = ActivatorUtilities.CreateInstance(scope.ServiceProvider, details.PacketHandlerType);
             var handlerExecuteMethod = details.PacketHandlerType.GetMethod("ExecuteAsync")!;
-            await (Task) handlerExecuteMethod.Invoke(packetHandler, new[] {context, new CancellationToken()})!;
+            await (Task) handlerExecuteMethod.Invoke(packetHandler, new[] { context, new CancellationToken() })!;
         }
         catch (Exception e)
         {

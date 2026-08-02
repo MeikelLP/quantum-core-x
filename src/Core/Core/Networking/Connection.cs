@@ -29,7 +29,7 @@ public abstract class Connection : BackgroundService, IConnection
     private ServerTimestamp _lastHandshakeTime;
     private CancellationTokenSource? _cts;
 
-    public IPAddress BoundIpAddress { get; private set; }
+    public IPAddress BoundIpAddress { get; private set; } = IPAddress.Any;
 
     public Guid Id { get; }
     public uint Handshake { get; private set; }
@@ -47,7 +47,7 @@ public abstract class Connection : BackgroundService, IConnection
     public void Init(TcpClient client)
     {
         _client = client;
-        BoundIpAddress = ((IPEndPoint)_client.Client.LocalEndPoint!).Address;
+        BoundIpAddress = ((IPEndPoint) _client.Client.LocalEndPoint!).Address;
         _cts = new CancellationTokenSource();
         Task.Factory.StartNew(SendPacketsWhenAvailable, TaskCreationOptions.LongRunning);
     }
@@ -258,6 +258,6 @@ public abstract class Connection : BackgroundService, IConnection
     {
         _lastHandshakeTime = time;
         var uptime = GetClock().ElapsedAt(time);
-        Send(new GcHandshake(Handshake, (uint)uptime.TotalMilliseconds, (uint)delta.TotalMilliseconds));
+        Send(new GcHandshake(Handshake, (uint) uptime.TotalMilliseconds, (uint) delta.TotalMilliseconds));
     }
 }

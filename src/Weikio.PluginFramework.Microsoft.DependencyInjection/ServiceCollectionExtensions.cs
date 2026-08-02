@@ -110,11 +110,6 @@ public static class ServiceCollectionExtensions
                 // Load the catalog configurations.
                 var catalogConfigs = loader.GetCatalogConfigurations(configuration);
 
-                if (catalogConfigs?.Any() != true)
-                {
-                    continue;
-                }
-
                 for (var i = 0; i < catalogConfigs.Count; i++)
                 {
                     var item = catalogConfigs[i];
@@ -156,7 +151,7 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddPluginType<T>(this IServiceCollection services,
         ServiceLifetime serviceLifetime = ServiceLifetime.Transient,
-        Action<DefaultPluginOption> configureDefault = null)
+        Action<DefaultPluginOption>? configureDefault = null)
         where T : class
     {
         var serviceDescriptorEnumerable = new ServiceDescriptor(typeof(IEnumerable<T>), sp =>
@@ -176,7 +171,7 @@ public static class ServiceCollectionExtensions
 
             var defaultType = defaultPluginOption.DefaultType(sp, result.Select(r => r.GetType()));
 
-            return result.FirstOrDefault(r => r.GetType() == defaultType);
+            return result.First(r => r.GetType() == defaultType);
         }, serviceLifetime);
 
         services.Add(serviceDescriptorEnumerable);
@@ -185,7 +180,7 @@ public static class ServiceCollectionExtensions
         return services;
     }
 
-    private static DefaultPluginOption GetDefaultPluginOptions<T>(Action<DefaultPluginOption> configureDefault,
+    private static DefaultPluginOption GetDefaultPluginOptions<T>(Action<DefaultPluginOption>? configureDefault,
         IServiceProvider sp) where T : class
     {
         var defaultPluginOption = new DefaultPluginOption();
@@ -194,7 +189,7 @@ public static class ServiceCollectionExtensions
         if (configureDefault is null)
         {
             var optionsFromMonitor =
-                sp.GetService<IOptionsMonitor<DefaultPluginOption>>().Get(typeof(T).Name);
+                sp.GetService<IOptionsMonitor<DefaultPluginOption>>()?.Get(typeof(T).Name);
 
             if (optionsFromMonitor is not null)
             {

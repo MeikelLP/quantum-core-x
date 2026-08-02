@@ -68,7 +68,7 @@ internal partial class AtlasProvider : IAtlasProvider
         var fileInfo = _fileProvider.GetFileInfo("atlasinfo.txt");
         if (!fileInfo.Exists)
         {
-            atlasValues = [..DefaultAtlasValues];
+            atlasValues = [.. DefaultAtlasValues];
             _logger.LogWarning("Not atlasinfo.txt found. Using default values.");
         }
         else
@@ -154,7 +154,7 @@ internal partial class AtlasProvider : IAtlasProvider
             {
                 while (!sr.EndOfStream)
                 {
-                    var line = await sr.ReadLineAsync();
+                    var line = await sr.ReadLineAsync() ?? "";
 
                     var splitted = line.Split(' ');
                     list.Add(new Coordinates(uint.Parse(splitted[0]), uint.Parse(splitted[1])));
@@ -169,11 +169,11 @@ internal partial class AtlasProvider : IAtlasProvider
 
         if (list.Count >= 4)
         {
-            return new TownCoordinates {Jinno = list[0], Shinsoo = list[1], Chunjo = list[2], Common = list[3]};
+            return new TownCoordinates { Jinno = list[0], Shinsoo = list[1], Chunjo = list[2], Common = list[3] };
         }
         else if (list.Count == 1)
         {
-            return new TownCoordinates {Jinno = list[0], Shinsoo = list[0], Chunjo = list[0], Common = list[0]};
+            return new TownCoordinates { Jinno = list[0], Shinsoo = list[0], Chunjo = list[0], Common = list[0] };
         }
         else
         {

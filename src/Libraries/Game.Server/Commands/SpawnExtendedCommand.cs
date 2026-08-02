@@ -43,6 +43,11 @@ public class SpawnExtendedCommand : ICommandHandler<SpawnExtendedCommandOptions>
             return Task.CompletedTask;
         }
 
+        if (context.Player.Map is null)
+        {
+            throw new InvalidOperationException("Player map should not be null here");
+        }
+
         // Calculate random spawn position close by the player
         var map = context.Player.Map;
         var x = context.Arguments.PositionX is not null
@@ -55,7 +60,7 @@ public class SpawnExtendedCommand : ICommandHandler<SpawnExtendedCommandOptions>
 
         // Create entity instance
         var monster = new MonsterEntity(_monsterManager, _dropProvider, _animationManager, _serviceProvider, map,
-            _logger, _itemManager, context.Arguments.MonsterId, (int)x, (int)y) {Rotation = rotation};
+            _logger, _itemManager, context.Arguments.MonsterId, (int)x, (int)y) { Rotation = rotation };
         _world.SpawnEntity(monster);
 
         return Task.CompletedTask;

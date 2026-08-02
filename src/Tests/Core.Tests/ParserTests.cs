@@ -27,7 +27,7 @@ public class ParserTests
     {
         var fileProvider = Substitute.For<IFileProvider>();
         fileProvider.GetFileInfo(Arg.Any<string>())
-            .Returns(call => new PhysicalFileInfo(new FileInfo(call.Arg<string>())));
+            .Returns(call => new PhysicalFileInfo(new FileInfo(call.Arg<string>()!)));
         _parserService = new ParserService(Substitute.For<ILoggerFactory>(), fileProvider);
         Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
     }

@@ -38,7 +38,7 @@ public class PluginProvider
         return result;
     }
 
-    public Plugin Get(string name, Version version)
+    public Plugin? Get(string name, Version version)
     {
         foreach (var pluginCatalog in _catalogs)
         {

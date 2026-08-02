@@ -71,7 +71,7 @@ public static class ItemExtensions
     {
         return (EItemType)item.Type == type;
     }
-    
+
     public static bool IsSubtype(this ItemData item, EItemSubtype subtype)
     {
         return (EItemSubtype)item.Subtype == subtype;
@@ -83,13 +83,13 @@ public static class ItemExtensions
         {
             return 0;
         }
-       
+
         var itemId = itemInstance.ItemId;
         if (itemId < HairPartIdOffsets.WAR_OFFSET_BASE)
         {
             return 0;
         }
-        
+
         switch (playerClass)
         {
             case EPlayerClass.WARRIOR:
@@ -124,6 +124,7 @@ public static class ItemExtensions
             {
                 return EquipmentSlot.COSTUME;
             }
+
             if (proto.IsSubtype(EItemSubtype.COSTUME_HAIR))
             {
                 return EquipmentSlot.HAIR;
@@ -189,7 +190,11 @@ public static class ItemExtensions
         }
 
         var item = await repository.GetItemAsync(id);
-        await cacheManager.Server.Set(key, item);
+        if (item is not null)
+        {
+            await cacheManager.Server.Set(key, item);
+        }
+
         return item;
     }
 

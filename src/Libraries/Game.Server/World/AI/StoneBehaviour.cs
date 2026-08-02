@@ -14,7 +14,7 @@ namespace QuantumCore.Game.World.AI;
 public class StoneBehaviour : IBehaviour
 {
     private readonly IWorld _world;
-    private IEntity _entity;
+    private IEntity? _entity;
     private readonly IMonsterManager _monsterManager;
     private readonly IDropProvider _dropProvider;
     private readonly IAnimationManager _animationManager;
@@ -54,7 +54,7 @@ public class StoneBehaviour : IBehaviour
         var groupsTo = mob.Proto.MoveSpeed;
         _groups =
         [
-            ..Enumerable.Range(groupsFrom, groupsTo - groupsFrom)
+            .. Enumerable.Range(groupsFrom, groupsTo - groupsFrom)
                 .Select(x => _world.GetGroup((uint)x))
                 .Where(x => x is not null)
                 .Cast<SpawnGroup>()
@@ -74,6 +74,11 @@ public class StoneBehaviour : IBehaviour
 
     public void TookDamage(IEntity attacker, uint damage)
     {
+        if (_entity is null)
+        {
+            throw new InvalidOperationException("Please call Init first");
+        }
+
         var chunk = (uint)(_entity.Health / (float)_chunkSize);
         if (chunk < _lastChunk && _entity.Health >= 0)
         {
@@ -97,6 +102,11 @@ public class StoneBehaviour : IBehaviour
 
     private void SpawnMonsters(IEntity attacker)
     {
+        if (_entity is null)
+        {
+            throw new InvalidOperationException("Please call Init first");
+        }
+
         foreach (var group in _groups)
         {
             foreach (var member in group.Members.Select(x => x.Id).Prepend(group.Leader))

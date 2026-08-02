@@ -24,7 +24,7 @@ public class MigrateTests
     [Fact]
     public async Task Mysql()
     {
-        var container = new MySqlBuilder()
+        var container = new MySqlBuilder("mariadb:12.3.2-noble")
             .WithDatabase("game")
             .WithUsername("metin2")
             .WithPassword("metin2")
@@ -37,7 +37,7 @@ public class MigrateTests
     [Fact]
     public async Task Postgresql()
     {
-        var container = new PostgreSqlBuilder()
+        var container = new PostgreSqlBuilder("postgres:18.4-alpine3.24")
             .WithDatabase("game")
             .WithUsername("metin2")
             .WithPassword("metin2")

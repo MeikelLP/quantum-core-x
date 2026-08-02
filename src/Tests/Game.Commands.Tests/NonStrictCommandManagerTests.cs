@@ -25,7 +25,7 @@ public class NonStrictCommandManagerTests
             {
                 var player = Substitute.For<IPlayerEntity>();
                 player.Groups.Returns([PermGroup.OperatorGroup]);
-                player.When(x => x.SendChatInfo(Arg.Any<string>())).Do(info => _chatInfos.Add(info.Arg<string>()));
+                player.When(x => x.SendChatInfo(Arg.Any<string>())).Do(info => _chatInfos.Add(info.Arg<string>()!));
                 var conn = Substitute.For<IGameConnection>();
                 conn.Player.Returns(player);
                 conn.BoundIpAddress.Returns(IPAddress.Loopback);

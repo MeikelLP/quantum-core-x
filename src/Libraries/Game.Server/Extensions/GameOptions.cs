@@ -44,8 +44,8 @@ public class DropOptions
 
 public class DeltaChances
 {
-    public IReadOnlyList<uint> Boss { get; set; }
-    public IReadOnlyList<uint> Normal { get; set; }
+    public IReadOnlyList<uint> Boss { get; set; } = [];
+    public IReadOnlyList<uint> Normal { get; set; } = [];
 }
 
 public class SkillsOptions

@@ -21,7 +21,7 @@ public class DatabaseFixture : IAsyncLifetime
     public DatabaseFixture(IMessageSink messageSink)
     {
         _messageSink = messageSink;
-        Container = new MySqlBuilder()
+        Container = new MySqlBuilder("mariadb:12.3.2-noble")
             .WithDatabase(DATABASE)
             .WithPassword(PASSWORD)
             .WithUsername(USER_NAME)

@@ -12,8 +12,8 @@ using QuantumCore;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
 using QuantumCore.API.Core.Timekeeping;
-using QuantumCore.API.Game.Types.Monsters;
 using QuantumCore.API.Game.Types.Entities;
+using QuantumCore.API.Game.Types.Monsters;
 using QuantumCore.API.Game.Types.Players;
 using QuantumCore.API.Game.World;
 using QuantumCore.Caching;
@@ -57,28 +57,27 @@ public class WorldUpdateBenchmark
             .Replace(new ServiceDescriptor(typeof(IAtlasProvider), provider =>
             {
                 var mock = Substitute.For<IAtlasProvider>();
-                mock.GetAsync(Arg.Any<IWorld>()).Returns(
-                    callInfo => new[]
-                    {
-                        new Map(provider.GetRequiredService<IMonsterManager>(),
-                            provider.GetRequiredService<IAnimationManager>(),
-                            provider.GetRequiredService<ICacheManager>(), callInfo.Arg<IWorld>(),
-                            provider.GetRequiredService<ILogger<Map>>(),
-                            provider.GetRequiredService<ISpawnPointProvider>(),
-                            provider.GetRequiredService<IMapAttributeProvider>(),
-                            provider.GetRequiredService<IDropProvider>(),
-                            provider.GetRequiredService<IItemManager>(),
-                            provider.GetRequiredService<IServerBase>(),
-                            "test_map", new Coordinates(), 1024, 1024, null, provider
-                        )
-                    });
+                mock.GetAsync(Arg.Any<IWorld>()).Returns(callInfo => new[]
+                {
+                    new Map(provider.GetRequiredService<IMonsterManager>(),
+                        provider.GetRequiredService<IAnimationManager>(),
+                        provider.GetRequiredService<ICacheManager>(), callInfo.Arg<IWorld>()!,
+                        provider.GetRequiredService<ILogger<Map>>(),
+                        provider.GetRequiredService<ISpawnPointProvider>(),
+                        provider.GetRequiredService<IMapAttributeProvider>(),
+                        provider.GetRequiredService<IDropProvider>(),
+                        provider.GetRequiredService<IItemManager>(),
+                        provider.GetRequiredService<IServerBase>(),
+                        "test_map", new Coordinates(), 1024, 1024, null, provider
+                    )
+                });
 
                 return mock;
             }, ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(ICacheManager), _ =>
             {
                 var mock = Substitute.For<ICacheManager>();
-                mock.Keys("maps:*").Returns(new[] {"maps:test_map"});
+                mock.Keys("maps:*").Returns(new[] { "maps:test_map" });
                 mock.Subscribe().Returns(Substitute.For<IRedisSubscriber>());
                 return mock;
             }, ServiceLifetime.Singleton))
@@ -112,7 +111,7 @@ public class WorldUpdateBenchmark
             .Replace(new ServiceDescriptor(typeof(IMonsterManager), _ =>
             {
                 var mock = Substitute.For<IMonsterManager>();
-                mock.GetMonster(42).Returns(new MonsterData {Type = (byte)EEntityType.MONSTER});
+                mock.GetMonster(42).Returns(new MonsterData { Type = (byte)EEntityType.MONSTER });
                 return mock;
             }, ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(TimeProvider), _ => _timeProvider, ServiceLifetime.Singleton))

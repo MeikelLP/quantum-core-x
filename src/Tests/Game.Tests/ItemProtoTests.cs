@@ -25,7 +25,7 @@ public class ItemProtoTests
             {
                 var mock = Substitute.For<IFileProvider>();
                 mock.GetFileInfo(Arg.Any<string>()).ReturnsForAnyArgs(call =>
-                    new PhysicalFileInfo(new FileInfo(Path.Combine("Fixtures", call.Arg<string>()))));
+                    new PhysicalFileInfo(new FileInfo(Path.Combine("Fixtures", call.Arg<string>()!))));
                 return mock;
             })
             .BuildServiceProvider()
