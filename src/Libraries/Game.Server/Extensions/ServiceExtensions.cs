@@ -48,7 +48,7 @@ public static class ServiceExtensions
         services.AddSingleton<IMapAttributeProvider, MapAttributeProvider>();
         services.AddSingleton<IJobManager, JobManager>();
         services.AddSingleton<IStructuredFileProvider, StructuredFileProvider>();
-        services.AddScoped<IAtlasProvider, AtlasProvider>();
+        services.AddSingleton<IAtlasProvider, AtlasProvider>();
         services.AddScoped<IGuildManager, GuildManager>();
         services.AddScoped<IPlayerFactory, PlayerFactory>();
         services.AddScoped<IPlayerManager, PlayerManager>();
