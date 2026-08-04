@@ -7,17 +7,13 @@ public interface IWorld : ILoadable
 {
     Task InitAsync();
     void Update(TickContext ctx);
-#nullable enable
     IMap? GetMapAt(uint x, uint y);
     IMap? GetMapByName(string name);
-#nullable restore
     List<IMap> FindMapsByName(string needle);
     CoreHost GetMapHost(int x, int y);
-#nullable enable
     SpawnGroup? GetGroup(uint id);
     SpawnGroup GetRandomGroup();
     SpawnGroupCollection? GetGroupCollection(uint id);
-#nullable restore
     void SpawnEntity(IEntity e);
 
     /// <summary>

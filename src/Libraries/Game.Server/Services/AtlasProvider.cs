@@ -69,7 +69,7 @@ internal partial class AtlasProvider : IAtlasProvider
         if (!fileInfo.Exists)
         {
             atlasValues = [.. DefaultAtlasValues];
-            _logger.LogWarning("Not atlasinfo.txt found. Using default values.");
+            _logger.LogWarning("Not atlasinfo.txt found. Using default values");
         }
         else
         {

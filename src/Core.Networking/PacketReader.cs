@@ -38,7 +38,7 @@ public class PacketReader : IPacketReader
             }
             catch (ObjectDisposedException)
             {
-                _logger.LogDebug("Connection was disposed while waiting or reading new packages. This may be fine.");
+                _logger.LogDebug("Connection was disposed while waiting or reading new packages. This may be fine");
                 break;
             }
             catch (IOException)
@@ -62,7 +62,7 @@ public class PacketReader : IPacketReader
             }
             catch (ObjectDisposedException)
             {
-                _logger.LogDebug("Connection was disposed while waiting or reading new packages. This may be fine.");
+                _logger.LogDebug("Connection was disposed while waiting or reading new packages. This may be fine");
                 break;
             }
             catch (IOException)
@@ -107,7 +107,7 @@ public class PacketReader : IPacketReader
             }
             catch (ObjectDisposedException)
             {
-                _logger.LogDebug("Connection was disposed while waiting or reading new packages. This may be fine.");
+                _logger.LogDebug("Connection was disposed while waiting or reading new packages. This may be fine");
                 break;
             }
             catch (IOException)
@@ -128,7 +128,7 @@ public class PacketReader : IPacketReader
             }
             catch (ObjectDisposedException)
             {
-                _logger.LogDebug("Connection was disposed while waiting or reading new packages. This may be fine.");
+                _logger.LogDebug("Connection was disposed while waiting or reading new packages. This may be fine");
                 break;
             }
             catch (IOException)

@@ -268,11 +268,6 @@ public static class ItemExtensions
     /// Sets the item position, window, and owner.
     /// Refresh the cache lists if needed, and persists the item
     /// </summary>
-    /// <param name="item"></param>
-    /// <param name="cacheManager"></param>
-    /// <param name="owner">Owner the item is given to</param>
-    /// <param name="window">Window the item is placed in</param>
-    /// <param name="pos">Position of the item in the window</param>
     public static async Task Set(this ItemInstance item, ICacheManager cacheManager, uint owner, WindowType window,
         uint pos, IItemRepository itemRepository)
     {

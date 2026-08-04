@@ -1,5 +1,3 @@
-#nullable enable
-
 using Microsoft.EntityFrameworkCore;
 using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game.Types.Items;

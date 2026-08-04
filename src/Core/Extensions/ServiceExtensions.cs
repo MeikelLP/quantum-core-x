@@ -15,7 +15,7 @@ namespace QuantumCore.Extensions;
 public static class ServiceExtensions
 {
     private const string MESSAGE_TEMPLATE = "[{Timestamp:HH:mm:ss.fff}][{Level:u3}]{Message:lj} " +
-                                           "{NewLine:1}{Exception:1}";
+                                            "{NewLine:1}{Exception:1}";
 
     /// <summary>
     /// Used to register a packet provider per application type.
@@ -56,9 +56,6 @@ public static class ServiceExtensions
     /// <summary>
     /// Services required by Auth & Game
     /// </summary>
-    /// <param name="services"></param>
-    /// <param name="pluginCatalog"></param>
-    /// <returns></returns>
     public static IServiceCollection AddCoreServices(this IServiceCollection services, IPluginCatalog pluginCatalog,
         IConfiguration configuration)
     {
