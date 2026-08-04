@@ -66,7 +66,6 @@ public class WorldUpdateBenchmark
                         provider.GetRequiredService<ISpawnPointProvider>(),
                         provider.GetRequiredService<IMapAttributeProvider>(),
                         provider.GetRequiredService<IDropProvider>(),
-                        provider.GetRequiredService<IItemManager>(),
                         provider.GetRequiredService<IServerBase>(),
                         "test_map", new Coordinates(), 1024, 1024, null, provider
                     )
@@ -135,7 +134,7 @@ public class WorldUpdateBenchmark
 
         foreach (var e in _world.GetMapAt(0, 0)!.Entities)
         {
-            e?.Goto(0, 0, Tick(0).Timestamp);
+            e.Goto(0, 0, Tick(0).Timestamp);
         }
 
         _world.Update(Tick(0.2)); // spawn entities

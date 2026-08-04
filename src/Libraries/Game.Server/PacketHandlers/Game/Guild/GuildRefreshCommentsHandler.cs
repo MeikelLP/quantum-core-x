@@ -3,18 +3,15 @@ using QuantumCore.API.Game.Guild;
 using QuantumCore.API.PluginTypes;
 using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Packets.Guild;
-using QuantumCore.Game.Persistence;
 
 namespace QuantumCore.Game.PacketHandlers.Game.Guild;
 
 public class GuildRefreshCommentsHandler : IGamePacketHandler<GuildRefreshComments>
 {
-    private readonly GameDbContext _db;
     private readonly IGuildManager _guildManager;
 
-    public GuildRefreshCommentsHandler(GameDbContext db, IGuildManager guildManager)
+    public GuildRefreshCommentsHandler(IGuildManager guildManager)
     {
-        _db = db;
         _guildManager = guildManager;
     }
 

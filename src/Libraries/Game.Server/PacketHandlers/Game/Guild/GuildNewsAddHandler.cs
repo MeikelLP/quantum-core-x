@@ -10,10 +10,10 @@ namespace QuantumCore.Game.PacketHandlers.Game.Guild;
 
 public class GuildNewsAddHandler : IGamePacketHandler<GuildNewsAddPacket>
 {
-    private readonly ILogger<GuildNewsAddPacket> _logger;
+    private readonly ILogger<GuildNewsAddHandler> _logger;
     private readonly IGuildManager _guildManager;
 
-    public GuildNewsAddHandler(ILogger<GuildNewsAddPacket> logger, IGuildManager guildManager)
+    public GuildNewsAddHandler(ILogger<GuildNewsAddHandler> logger, IGuildManager guildManager)
     {
         _logger = logger;
         _guildManager = guildManager;

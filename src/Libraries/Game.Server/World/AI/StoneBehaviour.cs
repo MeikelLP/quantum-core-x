@@ -18,7 +18,6 @@ public class StoneBehaviour : IBehaviour
     private readonly IMonsterManager _monsterManager;
     private readonly IDropProvider _dropProvider;
     private readonly IAnimationManager _animationManager;
-    private readonly IItemManager _itemManager;
     private readonly ILogger<StoneBehaviour> _logger;
     private readonly IServiceProvider _serviceProvider;
     private ImmutableArray<SpawnGroup> _groups;
@@ -28,14 +27,13 @@ public class StoneBehaviour : IBehaviour
     private readonly List<IEntity> _spawnedEntities = new();
 
     public StoneBehaviour(IWorld world, IMonsterManager monsterManager, IDropProvider dropProvider,
-        IAnimationManager animationManager, IItemManager itemManager, ILogger<StoneBehaviour> logger,
+        IAnimationManager animationManager, ILogger<StoneBehaviour> logger,
         IServiceProvider serviceProvider)
     {
         _world = world;
         _monsterManager = monsterManager;
         _dropProvider = dropProvider;
         _animationManager = animationManager;
-        _itemManager = itemManager;
         _logger = logger;
         _serviceProvider = serviceProvider;
     }
@@ -117,7 +115,7 @@ public class StoneBehaviour : IBehaviour
                 // Create entity instance
                 var monster = new MonsterEntity(_monsterManager, _dropProvider, _animationManager, _serviceProvider,
                     _entity.Map!, _logger,
-                    _itemManager, member, x, y);
+                    member, x, y);
                 _world.SpawnEntity(monster);
                 _spawnedEntities.Add(monster);
                 if (monster.Behaviour is SimpleBehaviour simple)

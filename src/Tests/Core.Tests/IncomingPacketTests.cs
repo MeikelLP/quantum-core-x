@@ -144,8 +144,7 @@ public class IncomingPacketTests
     public void EnterGame()
     {
         // var expected = new AutoFaker<EnterGame>().Generate();
-        var bytes = Array.Empty<byte>()
-            .ToArray();
+        var bytes = Array.Empty<byte>();
         var result = _serializer.Deserialize<EnterGame>(bytes);
 
         var ex = Assert.Throws<InvalidOperationException>(() => result.Should().BeEquivalentTo(new EnterGame()));

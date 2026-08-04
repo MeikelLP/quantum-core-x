@@ -214,14 +214,14 @@ internal class CommandManager : ICommandManager, ILoadable
                     {
                         var resultType = typeof(ParserResult<>).MakeGenericType(commandCache.OptionsType);
                         var errors =
-                            (IEnumerable<Error>)resultType.GetProperty(nameof(ParserResult<object>.Errors))!.GetValue(
+                            (IEnumerable<Error>)resultType.GetProperty(nameof(ParserResult<>.Errors))!.GetValue(
                                 parserResult)!;
 
                         if (_options.Value.StrictMode)
                         {
                             throw new CommandValidationException(command)
                             {
-                                Errors = [..errors.Select(e => e.GetType().Name)]
+                                Errors = [.. errors.Select(e => e.GetType().Name)]
                             };
                         }
                         else
@@ -239,7 +239,7 @@ internal class CommandManager : ICommandManager, ILoadable
                             var maxDisplayWidth = 80;
                             var helpTextMethod = typeof(HelpText)
                                 .GetMethods(BindingFlags.Static | BindingFlags.Public)
-                                .First(x => x.Name == nameof(HelpText.AutoBuild) && x.GetParameters().Length == 5)!
+                                .First(x => x.Name == nameof(HelpText.AutoBuild) && x.GetParameters().Length == 5)
                                 .MakeGenericMethod(commandCache.OptionsType);
                             var help = (HelpText)helpTextMethod.Invoke(null,
                                 [parserResult, helpTextFunc, exampleFunc, verbsIndex, maxDisplayWidth])!;
@@ -272,7 +272,7 @@ internal class CommandManager : ICommandManager, ILoadable
                                param3.IsGenericType &&
                                param3.GetGenericTypeDefinition() == typeof(Func<,>) &&
                                param3.GenericTypeArguments[0] == typeof(IEnumerable<Error>);
-                    })!;
+                    });
                     var genericMethod =
                         methodInfo.MakeGenericMethod(commandCache.OptionsType, commandCache.OptionsType);
                     var successParam = Expression.Parameter(commandCache.OptionsType, "x");
@@ -282,19 +282,19 @@ internal class CommandManager : ICommandManager, ILoadable
                     var errorExpression = Expression.Lambda(errorConstant, errorParam);
                     var options =
                         genericMethod.Invoke(null,
-                            new object[] {parserResult, successExpression.Compile(), errorExpression.Compile()})!;
+                            [parserResult, successExpression.Compile(), errorExpression.Compile()])!;
 
                     var ctx = Activator.CreateInstance(
                         typeof(CommandContext<>).MakeGenericType(commandCache.OptionsType),
-                        new object[] {connection.Player, options})!;
+                        new[] { connection.Player, options })!;
                     var cmdExecuteMethodInfo = typeof(ICommandHandler<>).MakeGenericType(commandCache.OptionsType)
-                        .GetMethod(nameof(ICommandHandler<object>.ExecuteAsync))!;
+                        .GetMethod(nameof(ICommandHandler<>.ExecuteAsync))!;
                     await using var scope = _serviceProvider.CreateAsyncScope();
                     var cmd = ActivatorUtilities.CreateInstance(scope.ServiceProvider, commandCache.Type);
 
                     try
                     {
-                        await (Task)cmdExecuteMethodInfo.Invoke(cmd, new object[] {ctx})!;
+                        await (Task)cmdExecuteMethodInfo.Invoke(cmd, [ctx])!;
                     }
                     catch (Exception e)
                     {

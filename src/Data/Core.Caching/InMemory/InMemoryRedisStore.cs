@@ -109,7 +109,7 @@ public class InMemoryRedisStore : IRedisStore
         foreach (var callback in callbacks)
         {
             var actionType = typeof(Action<>).MakeGenericType(obj.GetType());
-            var methodInfo = actionType.GetMethod(nameof(Action<object>.Invoke))!;
+            var methodInfo = actionType.GetMethod(nameof(Action<>.Invoke))!;
 
             foreach (var action in (IEnumerable)callback)
             {
@@ -130,7 +130,7 @@ public class InMemoryRedisStore : IRedisStore
     public ValueTask<string[]> Keys(string key)
     {
         var regex = RedisPatternToRegex(key);
-        var matchedKeys = _dict.Keys.Where(x => regex.IsMatch(key)).ToArray();
+        var matchedKeys = _dict.Keys.Where(x => regex.IsMatch(x)).ToArray();
         return ValueTask.FromResult(matchedKeys);
     }
 

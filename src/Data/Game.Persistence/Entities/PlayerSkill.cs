@@ -14,7 +14,7 @@ public class PlayerSkill
 
     public required uint PlayerId { get; init; }
     public required uint SkillId { get; set; }
-    public required uint ReadsRequired { get; set; } = 0;
+    public required uint ReadsRequired { get; set; }
 
     [DefaultValue(ESkillMasterType.NORMAL)]
     public required ESkillMasterType MasterType { get; set; }
@@ -24,7 +24,7 @@ public class PlayerSkill
 
     public static void Configure(EntityTypeBuilder<PlayerSkill> builder, DatabaseFacade database)
     {
-        builder.HasKey(x => new {x.Id});
+        builder.HasKey(x => new { x.Id });
 
         if (database.IsSqlite() || database.IsNpgsql())
         {

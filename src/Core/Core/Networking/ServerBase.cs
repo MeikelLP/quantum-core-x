@@ -82,7 +82,7 @@ public abstract class ServerBase<T> : BackgroundService, IServerBase
         await using var scope = _serviceProvider.CreateAsyncScope();
 
         // cannot inject tcp client here
-        var connection = ActivatorUtilities.CreateInstance<T>(scope.ServiceProvider, client, (IServerBase) this);
+        var connection = ActivatorUtilities.CreateInstance<T>(scope.ServiceProvider, client, this);
         Connections.TryAdd(connection.Id, connection);
 
         await _pluginExecutor.ExecutePlugins<IConnectionLifetimeListener>(_logger,
@@ -152,9 +152,9 @@ public abstract class ServerBase<T> : BackgroundService, IServerBase
     {
         // TODO caching
         var contextPacketProperty = typeof(GamePacketContext<>).MakeGenericType(packetType)
-            .GetProperty(nameof(GamePacketContext<object>.Packet))!;
+            .GetProperty(nameof(GamePacketContext<>.Packet))!;
         var contextConnectionProperty = typeof(GamePacketContext<>).MakeGenericType(packetType)
-            .GetProperty(nameof(GamePacketContext<object>.Connection))!;
+            .GetProperty(nameof(GamePacketContext<>.Connection))!;
 
         var context = Activator.CreateInstance(typeof(GamePacketContext<>).MakeGenericType(packetType))!;
         contextPacketProperty.SetValue(context, packet);
@@ -166,9 +166,9 @@ public abstract class ServerBase<T> : BackgroundService, IServerBase
     {
         // TODO caching
         var contextPacketProperty = typeof(AuthPacketContext<>).MakeGenericType(packetType)
-            .GetProperty(nameof(AuthPacketContext<object>.Packet))!;
+            .GetProperty(nameof(AuthPacketContext<>.Packet))!;
         var contextConnectionProperty = typeof(AuthPacketContext<>).MakeGenericType(packetType)
-            .GetProperty(nameof(AuthPacketContext<object>.Connection))!;
+            .GetProperty(nameof(AuthPacketContext<>.Connection))!;
 
         var context = Activator.CreateInstance(typeof(AuthPacketContext<>).MakeGenericType(packetType))!;
         contextPacketProperty.SetValue(context, packet);

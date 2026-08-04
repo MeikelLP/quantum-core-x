@@ -62,13 +62,11 @@ public class MonsterEntity : Entity
     private bool _behaviourInitialized;
     private ServerTimestamp? _diedAt;
     private readonly IMap _map;
-    private readonly IItemManager _itemManager;
-    private IServiceProvider _serviceProvider;
 
     public MonsterEntity(IMonsterManager monsterManager, IDropProvider dropProvider,
         IAnimationManager animationManager,
         IServiceProvider serviceProvider,
-        IMap map, ILogger logger, IItemManager itemManager, uint id, int x, int y, float rotation = 0)
+        IMap map, ILogger logger, uint id, int x, int y, float rotation = 0)
         : base(animationManager, map.World.GenerateVid())
     {
         var proto = monsterManager.GetMonster(id);
@@ -81,9 +79,7 @@ public class MonsterEntity : Entity
 
         _map = map;
         _dropProvider = dropProvider;
-        _serviceProvider = serviceProvider;
         _logger = logger;
-        _itemManager = itemManager;
         Proto = proto;
         PositionX = x;
         PositionY = y;
@@ -105,7 +101,7 @@ public class MonsterEntity : Entity
         }
         else if (Proto.Type == (byte)EEntityType.METIN_STONE)
         {
-            _behaviour = ActivatorUtilities.CreateInstance<StoneBehaviour>(_serviceProvider);
+            _behaviour = ActivatorUtilities.CreateInstance<StoneBehaviour>(serviceProvider);
         }
     }
 
@@ -244,7 +240,7 @@ public class MonsterEntity : Entity
 
         base.Die();
 
-        var dead = new CharacterDead {Vid = Vid};
+        var dead = new CharacterDead { Vid = Vid };
         foreach (var entity in NearbyEntities)
         {
             if (entity is PlayerEntity player)
@@ -349,12 +345,12 @@ public class MonsterEntity : Entity
 
     public override void HideEntity(IConnection connection)
     {
-        connection.Send(new RemoveCharacter {Vid = Vid});
+        connection.Send(new RemoveCharacter { Vid = Vid });
     }
 
 
     public override string ToString()
     {
-        return $"{Proto.TranslatedName?.Trim((char)0x00)} ({Proto.Id})";
+        return $"{Proto.TranslatedName.Trim((char)0x00)} ({Proto.Id})";
     }
 }

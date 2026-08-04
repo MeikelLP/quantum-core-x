@@ -7,7 +7,6 @@ using QuantumCore.Core.Utils;
 using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Persistence;
 using Serilog;
-using ILogger = Microsoft.Extensions.Logging.ILogger;
 
 namespace QuantumCore.Game.PlayerUtils;
 
@@ -42,8 +41,8 @@ public class Inventory : IInventory
             if (position < 0) return null;
             if (position >= _width * _height) return null;
 
-            var x = (uint) (position % _width);
-            var y = (uint) (position / _width);
+            var x = (uint)(position % _width);
+            var y = (uint)(position / _width);
 
             return _grid.Get(x, y);
         }
@@ -53,8 +52,8 @@ public class Inventory : IInventory
             if (position < 0) return false;
             if (position >= _width * _height) return false;
 
-            var x = (uint) (position % _width);
-            var y = (uint) (position / _width);
+            var x = (uint)(position % _width);
+            var y = (uint)(position / _width);
 
             var item = _grid.Get(x, y);
             if (item is null) return false;
@@ -112,8 +111,8 @@ public class Inventory : IInventory
             if (position < 0) return false;
             if (position >= _width * _height) return false;
 
-            var x = (uint) (position % _width);
-            var y = (uint) (position / _width);
+            var x = (uint)(position % _width);
+            var y = (uint)(position / _width);
 
             return Place(item, x, y);
         }
@@ -123,8 +122,8 @@ public class Inventory : IInventory
             if (position < 0) return false;
             if (position >= _width * _height) return false;
 
-            var x = (uint) (position % _width);
-            var y = (uint) (position / _width);
+            var x = (uint)(position % _width);
+            var y = (uint)(position / _width);
 
             var proto = _itemManager.GetItem(item.ItemId);
             if (proto is null) return false;
@@ -171,10 +170,9 @@ public class Inventory : IInventory
     private ushort _height;
     private readonly List<ItemInstance> _items = new List<ItemInstance>();
     private readonly ICacheManager _cacheManager;
-    private readonly ILogger _logger;
     private readonly IItemRepository _itemRepository;
 
-    public Inventory(IItemManager itemManager, ICacheManager cacheManager, ILogger logger,
+    public Inventory(IItemManager itemManager, ICacheManager cacheManager,
         IItemRepository itemRepository, uint owner, WindowType window, ushort width, ushort height, ushort pages)
     {
         Owner = owner;
@@ -182,7 +180,6 @@ public class Inventory : IInventory
 
         _itemManager = itemManager;
         _cacheManager = cacheManager;
-        _logger = logger;
         _itemRepository = itemRepository;
         _width = width;
         _height = height;
@@ -244,7 +241,7 @@ public class Inventory : IInventory
             var position = page.Place(item);
             if (position != -1)
             {
-                await item.Set(_cacheManager, Owner, Window, (uint) (position + i * _width * _height),
+                await item.Set(_cacheManager, Owner, Window, (uint)(position + i * _width * _height),
                     _itemRepository);
                 _items.Add(item);
 
@@ -365,7 +362,7 @@ public class Inventory : IInventory
             OnSlotChanged?.Invoke(this, new SlotChangedEventArgs(item, _itemManager.GetWearSlot(item.ItemId)!.Value));
         }
     }
-        
+
     public void RemoveEquipment(ItemInstance item)
     {
         var removedSuccessfully = EquipmentWindow.RemoveItem(item);
@@ -375,5 +372,4 @@ public class Inventory : IInventory
             OnSlotChanged?.Invoke(this, new SlotChangedEventArgs(null, _itemManager.GetWearSlot(item.ItemId)!.Value));
         }
     }
-
 }

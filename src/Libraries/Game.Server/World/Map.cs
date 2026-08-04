@@ -1,14 +1,13 @@
 using System.Collections.Concurrent;
-using System.Diagnostics.Metrics;
 using System.Security.Cryptography;
 using EnumsNET;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
 using QuantumCore.API.Core.Timekeeping;
-using QuantumCore.API.Game.Types.Monsters;
-using QuantumCore.API.Game.Types.Entities;
 using QuantumCore.API.Game.Types;
+using QuantumCore.API.Game.Types.Entities;
+using QuantumCore.API.Game.Types.Monsters;
 using QuantumCore.API.Game.World;
 using QuantumCore.Caching;
 using QuantumCore.Core.Event;
@@ -39,7 +38,6 @@ public class Map : IMap
     public IWorld World => _world;
     public IReadOnlyCollection<IEntity> Entities => _entities;
 
-    private readonly ObservableGauge<int> _entityGauge;
     private readonly List<IEntity> _entities = new();
     private readonly QuadTree _quadTree;
     private readonly List<SpawnPoint> _spawnPoints = new();
@@ -56,14 +54,13 @@ public class Map : IMap
     private readonly ISpawnPointProvider _spawnPointProvider;
     private readonly IMapAttributeProvider _attributeProvider;
     private readonly IDropProvider _dropProvider;
-    private readonly IItemManager _itemManager;
     private readonly IServerBase _server;
     private readonly IServiceProvider _serviceProvider;
     private IMapAttributeSet? _attributes;
 
     public Map(IMonsterManager monsterManager, IAnimationManager animationManager, ICacheManager cacheManager,
         IWorld world, ILogger logger, ISpawnPointProvider spawnPointProvider,
-        IMapAttributeProvider attributeProvider, IDropProvider dropProvider, IItemManager itemManager,
+        IMapAttributeProvider attributeProvider, IDropProvider dropProvider,
         IServerBase server, string name, Coordinates position, uint width, uint height,
         TownCoordinates? townCoordinates, IServiceProvider serviceProvider)
     {
@@ -75,7 +72,6 @@ public class Map : IMap
         _spawnPointProvider = spawnPointProvider;
         _attributeProvider = attributeProvider;
         _dropProvider = dropProvider;
-        _itemManager = itemManager;
         _server = server;
         _serviceProvider = serviceProvider;
         Name = name;
@@ -95,7 +91,7 @@ public class Map : IMap
 
         _quadTree = new QuadTree((int)position.X, (int)position.Y, (int)(width * MAP_UNIT),
             (int)(height * MAP_UNIT), 20);
-        _entityGauge = GameServer.Meter.CreateObservableGauge($"Map:{name}:EntityCount", () => Entities.Count);
+        GameServer.Meter.CreateObservableGauge($"Map:{name}:EntityCount", () => Entities.Count);
     }
 
     public async Task Initialize()
@@ -107,7 +103,7 @@ public class Map : IMap
 
         var loadAttributesTask = _attributeProvider.GetAttributesAsync(Name, Position, Width, Height);
         var loadSpawnPointsTask = _spawnPointProvider.GetSpawnPointsForMap(Name);
-            
+
         await Task.WhenAll(loadAttributesTask, loadSpawnPointsTask);
 
         _attributes = loadAttributesTask.Result;
@@ -118,7 +114,7 @@ public class Map : IMap
         // Populate map
         foreach (var spawnPoint in _spawnPoints)
         {
-            var monsterGroup = new MonsterGroup {SpawnPoint = spawnPoint};
+            var monsterGroup = new MonsterGroup { SpawnPoint = spawnPoint };
             SpawnGroup(monsterGroup);
         }
     }
@@ -321,14 +317,14 @@ public class Map : IMap
     {
         monster = new MonsterEntity(_monsterManager, _dropProvider, _animationManager, _serviceProvider, this,
             _logger,
-            _itemManager,
             id,
             0,
             0
         );
 
         var ignoreAttrCheck =
-            (EEntityType)monster.Proto.Type is EEntityType.NPC or EEntityType.WARP or EEntityType.GOTO; // TODO: mining ore
+            (EEntityType)monster.Proto.Type is EEntityType.NPC or EEntityType.WARP
+            or EEntityType.GOTO; // TODO: mining ore
 
         var foundValidPositionAttr = ignoreAttrCheck;
 
@@ -357,11 +353,13 @@ public class Map : IMap
 
         if (!foundValidPositionAttr)
         {
-            _logger.LogWarning("Cannot spawn mob on {Map}: failed to find spawn position with valid attr for {MonsterName} (id={MonsterId} {SpawnPointSummary})",
-                Name, monster.Proto.TranslatedName, id, $"x={spawnPoint.X} y={spawnPoint.Y}, rangeX={spawnPoint.RangeX} rangeY={spawnPoint.RangeY}");
+            _logger.LogWarning(
+                "Cannot spawn mob on {Map}: failed to find spawn position with valid attr for {MonsterName} (id={MonsterId} {SpawnPointSummary})",
+                Name, monster.Proto.TranslatedName, id,
+                $"x={spawnPoint.X} y={spawnPoint.Y}, rangeX={spawnPoint.RangeX} rangeY={spawnPoint.RangeY}");
             return false;
         }
-            
+
         if (monster.Proto.AiFlag.HasFlag(EAiFlags.NO_MOVE))
         {
             var compassDirection = (int)spawnPoint.Direction - 1;
@@ -447,6 +445,6 @@ public class Map : IMap
 
     public IEntity? GetEntity(uint vid)
     {
-        return _entities?.Find(e => e.Vid == vid);
+        return _entities.Find(e => e.Vid == vid);
     }
 }

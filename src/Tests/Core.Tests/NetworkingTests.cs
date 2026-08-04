@@ -104,7 +104,7 @@ public class NetworkingTests
         var obj = new ChatIncoming
         {
             MessageType = ChatMessageType.NORMAL,
-            Message = new string(Enumerable.Range(0, 5000).Select(x => 'i').ToArray())
+            Message = new string(Enumerable.Range(0, 5000).Select(_ => 'i').ToArray())
         };
         var size = obj.GetSize();
         var bytes = new byte[size];
@@ -182,7 +182,7 @@ public class NetworkingTests
         attackObj.Serialize(bytes, charDeadSize);
 
         using var stream = new MemoryStream(bytes);
-        var results = await GetReader(32).EnumerateAsync(stream).ToArrayAsync();
+        var results = await GetReader().EnumerateAsync(stream).ToArrayAsync();
 
         results.Should().HaveCount(2);
         results[0].Should().BeEquivalentTo(charDeadObj);

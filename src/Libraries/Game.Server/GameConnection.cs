@@ -16,7 +16,6 @@ namespace QuantumCore.Game;
 public class GameConnection : Connection, IGameConnection
 {
     private readonly IWorld _world;
-    private readonly ILogger<GameConnection> _logger;
     private readonly ICacheManager _cacheManager;
     public IServerBase Server { get; }
     public Guid? AccountId { get; set; }
@@ -32,7 +31,6 @@ public class GameConnection : Connection, IGameConnection
         : base(logger, pluginExecutor, packetReader)
     {
         _world = world;
-        _logger = logger;
         Server = server;
         _cacheManager = cacheManager;
         Init(client);

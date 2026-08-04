@@ -13,7 +13,6 @@ using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Services;
 using QuantumCore.Game.World;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace Core.Tests;
 
@@ -23,7 +22,7 @@ public class ParserTests
 
     private readonly ParserService _parserService;
 
-    public ParserTests(ITestOutputHelper outputHelper)
+    public ParserTests()
     {
         var fileProvider = Substitute.For<IFileProvider>();
         fileProvider.GetFileInfo(Arg.Any<string>())

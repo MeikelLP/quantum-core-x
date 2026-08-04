@@ -69,7 +69,7 @@ public class ItemUseHandler : IGamePacketHandler<ItemUse>
 
             if (wearSlot <= ushort.MaxValue)
             {
-                var item2 = player.Inventory.EquipmentWindow.GetItem((ushort) wearSlot);
+                var item2 = player.Inventory.EquipmentWindow.GetItem((ushort)wearSlot);
 
                 if (item2 is not null)
                 {
@@ -77,9 +77,9 @@ public class ItemUseHandler : IGamePacketHandler<ItemUse>
                     player.RemoveItem(item2);
                     if (await player.Inventory.PlaceItem(item2))
                     {
-                        player.SendRemoveItem(ctx.Packet.Window, (ushort) wearSlot);
+                        player.SendRemoveItem(ctx.Packet.Window, (ushort)wearSlot);
                         player.SendRemoveItem(ctx.Packet.Window, ctx.Packet.Position);
-                        player.SetItem(item, ctx.Packet.Window, (ushort) wearSlot);
+                        player.SetItem(item, ctx.Packet.Window, (ushort)wearSlot);
                         player.SetItem(item2, ctx.Packet.Window, ctx.Packet.Position);
                         player.SendItem(item);
                         player.SendItem(item2);
@@ -87,14 +87,14 @@ public class ItemUseHandler : IGamePacketHandler<ItemUse>
                     else
                     {
                         player.SetItem(item, ctx.Packet.Window, ctx.Packet.Position);
-                        player.SetItem(item2, ctx.Packet.Window, (ushort) wearSlot);
+                        player.SetItem(item2, ctx.Packet.Window, (ushort)wearSlot);
                         player.SendChatInfo("Cannot swap item if the inventory is full");
                     }
                 }
                 else
                 {
                     player.RemoveItem(item);
-                    player.SetItem(item, WindowType.INVENTORY, (ushort) wearSlot);
+                    player.SetItem(item, WindowType.INVENTORY, (ushort)wearSlot);
                     player.SendRemoveItem(ctx.Packet.Window, ctx.Packet.Position);
                     player.SendItem(item);
                 }
@@ -104,9 +104,7 @@ public class ItemUseHandler : IGamePacketHandler<ItemUse>
         // note: Should maybe create an ItemUseHandler<ItemId> for this ? Similarly to the commands and packet handlers
         else if (itemProto.IsType(EItemType.SKILLBOOK))
         {
-            var skillId = 0;
-
-            skillId = itemProto.Id == _skillsOptions.GenericSkillBookId
+            var skillId = itemProto.Id == _skillsOptions.GenericSkillBookId
                 ? itemProto.Sockets[0]
                 : itemProto.Values[0];
 
@@ -122,7 +120,7 @@ public class ItemUseHandler : IGamePacketHandler<ItemUse>
             var delay = CoreRandom.GenerateInt32(_skillsOptions.SkillBookDelayMin,
                 _skillsOptions.SkillBookDelayMax + 1);
 
-            player.Skills.SetSkillNextReadTime(skill, (int) currentTime + delay);
+            player.Skills.SetSkillNextReadTime(skill, (int)currentTime + delay);
             player.RemoveItem(item);
             player.SendRemoveItem(ctx.Packet.Window, ctx.Packet.Position);
         }

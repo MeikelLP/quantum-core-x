@@ -1,5 +1,4 @@
 ﻿using AwesomeAssertions;
-using Microsoft.Extensions.Logging;
 using NSubstitute;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
@@ -20,7 +19,7 @@ public class InventoryTests
             .GetItem(Arg.Any<uint>())
             .Returns(new ItemData { WearFlags = (uint)EWearFlags.BODY, Size = 1 });
         var inv = new Inventory(itemManager,
-            Substitute.For<ICacheManager>(), Substitute.For<ILogger>(), Substitute.For<IItemRepository>(), 0, WindowType.INVENTORY, 1, 1,
+            Substitute.For<ICacheManager>(), Substitute.For<IItemRepository>(), 0, WindowType.INVENTORY, 1, 1,
             1);
         var changed = 0;
         inv.OnSlotChanged += (_, _) => changed++;
@@ -31,7 +30,7 @@ public class InventoryTests
         inv.EquipmentWindow.Body!.ItemId.Should().Be(1);
         changed.Should().Be(1);
     }
-    
+
     [Fact]
     public void RemoveEquipment_TriggersWearEvent()
     {
@@ -41,7 +40,7 @@ public class InventoryTests
             .Returns(new ItemData { WearFlags = (uint)EWearFlags.BODY, Size = 1 });
 
         var inv = new Inventory(itemManager,
-            Substitute.For<ICacheManager>(), Substitute.For<ILogger>(), Substitute.For<IItemRepository>(), 0, WindowType.INVENTORY, 1, 1,
+            Substitute.For<ICacheManager>(), Substitute.For<IItemRepository>(), 0, WindowType.INVENTORY, 1, 1,
             1);
         var changed = 0;
         inv.OnSlotChanged += (_, _) => changed++;

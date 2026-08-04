@@ -21,7 +21,7 @@ internal class GeneratorContext
         if (type is RecordDeclarationSyntax record)
         {
             fields.AddRange(record.ParameterList!.Parameters
-                .Select(x => BuildFieldData(type, x.Type!, x.Identifier, ref fieldIndex, null, null, true, false))
+                .Select(x => BuildFieldData(type, x.Type!, x.Identifier, ref fieldIndex, null, null, true))
             );
         }
 
@@ -52,7 +52,7 @@ internal class GeneratorContext
 
                 var arrayLength = GetArrayLength(x);
                 return BuildFieldData(type, x.Type, x.Identifier, ref fieldIndex, arrayLength, orderStr, false,
-                    x is {ExpressionBody: not null}, stringLengthAttr);
+                    x is { ExpressionBody: not null }, stringLengthAttr);
             })
         );
 
@@ -104,11 +104,7 @@ internal class GeneratorContext
         if (expression is BinaryExpressionSyntax binaryExpressionSyntax)
         {
             // simple a + b recursion
-            return new[]
-                {
-                    binaryExpressionSyntax.Left,
-                    binaryExpressionSyntax.Right
-                }
+            return new[] { binaryExpressionSyntax.Left, binaryExpressionSyntax.Right }
                 .Select(exp => GetConstantValue(type, exp))
                 .Sum();
         }
@@ -117,7 +113,7 @@ internal class GeneratorContext
             .GetSemanticModel(type.SyntaxTree)
             .GetConstantValue(expression);
         int? stringLengthAttr;
-        if (value is {HasValue: true})
+        if (value is { HasValue: true })
         {
             stringLengthAttr = value.Value switch
             {
@@ -125,9 +121,9 @@ internal class GeneratorContext
                 ushort ushortValue => ushortValue,
                 short shortValue => shortValue,
                 int intValue => intValue,
-                uint uintValue => (int?) uintValue,
-                long longValue => (int) longValue,
-                ulong longValue => (int) longValue,
+                uint uintValue => (int?)uintValue,
+                long longValue => (int)longValue,
+                ulong longValue => (int)longValue,
                 _ => null
             };
         }
@@ -152,7 +148,7 @@ internal class GeneratorContext
             arrayCreationExpressionSyntax.Type.RankSpecifiers.Any() &&
             arrayCreationExpressionSyntax.Type.RankSpecifiers.First().Sizes.OfType<LiteralExpressionSyntax>().Any())
         {
-            return (int?) arrayCreationExpressionSyntax.Type.RankSpecifiers
+            return (int?)arrayCreationExpressionSyntax.Type.RankSpecifiers
                 .First().Sizes.OfType<LiteralExpressionSyntax>()
                 .First().Token.Value;
         }
@@ -167,7 +163,7 @@ internal class GeneratorContext
     {
         var isArray = type is ArrayTypeSyntax;
         var fieldType = GetTypeInfo(type)!;
-        var enumType = isArray ? null : (INamedTypeSymbol) fieldType;
+        var enumType = isArray ? null : (INamedTypeSymbol)fieldType;
         var isEnum = enumType?.TypeKind is TypeKind.Enum;
         string? sizeFieldName = null;
 
@@ -308,7 +304,7 @@ internal class GeneratorContext
         var typeKeyWords = type switch
         {
             StructDeclarationSyntax => "struct",
-            RecordDeclarationSyntax {ClassOrStructKeyword.Text: "struct"} => "record struct",
+            RecordDeclarationSyntax { ClassOrStructKeyword.Text: "struct" } => "record struct",
             RecordDeclarationSyntax => "record",
             _ => "class"
         };
@@ -366,6 +362,6 @@ internal class GeneratorContext
         var attr = type.AttributeLists.SelectMany(x => x.Attributes).FirstOrDefault(x => x.Name.ToString() == "Packet");
         return attr?.ArgumentList?.Arguments.Any(x =>
             x.NameEquals?.Name.Identifier.Text == "Sequence" &&
-            ((LiteralExpressionSyntax) x.Expression).Token.Text == "true") ?? false;
+            ((LiteralExpressionSyntax)x.Expression).Token.Text == "true") ?? false;
     }
 }

@@ -415,7 +415,7 @@ public class CommandTests : IAsyncLifetime
         Assert.Equal((int)(10 * Map.MAP_UNIT), _player.PositionX);
         Assert.Equal((int)(26 * Map.MAP_UNIT), _player.PositionY);
 
-        await _commandManager.Handle(_connection, $"/goto {11} {27}");
+        await _commandManager.Handle(_connection, "/goto 11 27");
 
         Assert.Equal((int)(_player.Map.Position.X + 11 * 100), _player.PositionX);
         Assert.Equal((int)(_player.Map.Position.Y + 27 * 100), _player.PositionY);
@@ -826,7 +826,7 @@ public class CommandTests : IAsyncLifetime
         // Assert
         var skill = _player.Skills[skillId];
         skill.Should().NotBeNull();
-        skill?.Level.Should().Be(ESkillLevel.NORMAL01);
+        skill.Level.Should().Be(ESkillLevel.NORMAL01);
     }
 
     [Fact]
@@ -851,8 +851,8 @@ public class CommandTests : IAsyncLifetime
         // Assert
         var skill = _player.Skills[SKILL_ID];
         skill.Should().NotBeNull();
-        skill?.Level.Should().Be(ESkillLevel.MASTER_M1);
-        skill?.MasterType.Should().Be(ESkillMasterType.MASTER);
+        skill.Level.Should().Be(ESkillLevel.MASTER_M1);
+        skill.MasterType.Should().Be(ESkillMasterType.MASTER);
     }
 
     private TickContext Tick(double elapsedMilliseconds = 0)

@@ -16,19 +16,17 @@ public class SpawnMapRandomCommand : ICommandHandler<SpawnMapRandomCommandOption
     private readonly IAnimationManager _animationManager;
     private readonly IWorld _world;
     private readonly ILogger<SpawnMapRandomCommand> _logger;
-    private readonly IItemManager _itemManager;
     private readonly IDropProvider _dropProvider;
     private readonly IServiceProvider _serviceProvider;
 
     public SpawnMapRandomCommand(IMonsterManager monsterManager, IAnimationManager animationManager, IWorld world,
-        ILogger<SpawnMapRandomCommand> logger, IItemManager itemManager, IDropProvider dropProvider,
+        ILogger<SpawnMapRandomCommand> logger, IDropProvider dropProvider,
         IServiceProvider serviceProvider)
     {
         _monsterManager = monsterManager;
         _animationManager = animationManager;
         _world = world;
         _logger = logger;
-        _itemManager = itemManager;
         _dropProvider = dropProvider;
         _serviceProvider = serviceProvider;
     }
@@ -48,7 +46,7 @@ public class SpawnMapRandomCommand : ICommandHandler<SpawnMapRandomCommandOption
 
         // Create entity instance
         var monster = new MonsterEntity(_monsterManager, _dropProvider, _animationManager, _serviceProvider, map,
-            _logger, _itemManager, context.Arguments.MonsterId, x, y);
+            _logger, context.Arguments.MonsterId, x, y);
         _world.SpawnEntity(monster);
 
         var localX = (uint)((x - map.Position.X) / (float)Map.SPAWN_POSITION_MULTIPLIER);

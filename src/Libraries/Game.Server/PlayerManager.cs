@@ -80,7 +80,7 @@ public class PlayerManager : IPlayerManager
         var players = await _dbPlayerRepository.GetPlayersAsync(accountId);
 
         // update cache
-        await Task.WhenAll(players.Select((x, i) => _cachePlayerRepository.SetPlayerAsync(x)));
+        await Task.WhenAll(players.Select((x, _) => _cachePlayerRepository.SetPlayerAsync(x)));
 
         return players;
     }

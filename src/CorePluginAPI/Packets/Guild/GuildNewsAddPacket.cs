@@ -24,7 +24,7 @@ public partial class GuildNewsAddPacket : IPacketSerializable
         bytes[offset + 0] = 0x50;
         bytes[offset + 1] = 0x05;
         bytes[offset + 2] = (byte)this.GetSize();
-        bytes.WriteString(this.Message, offset + 3, (int)this.Size + 1);
+        bytes.WriteString(this.Message, offset + 3, this.Size + 1);
     }
 
     public ushort GetSize()
@@ -35,7 +35,7 @@ public partial class GuildNewsAddPacket : IPacketSerializable
     public static GuildNewsAddPacket Deserialize(ReadOnlySpan<byte> bytes, in int offset = 0)
     {
         var size = bytes[(offset + 0)] + 1;
-        var message = (bytes[(offset + 1)..(Index)(offset + 1 + size)]).ReadNullTerminatedString();
+        var message = (bytes[(offset + 1)..(offset + 1 + size)]).ReadNullTerminatedString();
         var obj = new GuildNewsAddPacket { Message = message };
         return obj;
     }
@@ -52,13 +52,9 @@ public partial class GuildNewsAddPacket : IPacketSerializable
         try
         {
             var size = await stream.ReadValueFromStreamAsync<Byte>(buffer) + 1;
-            var message = await stream.ReadStringFromStreamAsync(buffer, (int)size);
+            var message = await stream.ReadStringFromStreamAsync(buffer, size);
             var obj = new GuildNewsAddPacket { Message = message };
             return obj;
-        }
-        catch (Exception)
-        {
-            throw;
         }
         finally
         {

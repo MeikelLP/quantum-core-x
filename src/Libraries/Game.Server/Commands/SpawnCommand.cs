@@ -18,21 +18,19 @@ public class SpawnCommand : ICommandHandler<SpawnCommandOptions>
     private readonly IAnimationManager _animationManager;
     private readonly IWorld _world;
     private readonly ILogger<SpawnCommand> _logger;
-    private readonly IItemManager _itemManager;
     private readonly IDropProvider _dropProvider;
-        private readonly IServiceProvider _serviceProvider;
+    private readonly IServiceProvider _serviceProvider;
 
     public SpawnCommand(IMonsterManager monsterManager, IAnimationManager animationManager, IWorld world,
-        ILogger<SpawnCommand> logger, IItemManager itemManager, IDropProvider dropProvider, IServiceProvider serviceProvider)
+        ILogger<SpawnCommand> logger, IDropProvider dropProvider, IServiceProvider serviceProvider)
     {
         _monsterManager = monsterManager;
         _animationManager = animationManager;
         _world = world;
         _logger = logger;
-        _itemManager = itemManager;
         _dropProvider = dropProvider;
-    _serviceProvider = serviceProvider;
-        }
+        _serviceProvider = serviceProvider;
+    }
 
     public Task ExecuteAsync(CommandContext<SpawnCommandOptions> context)
     {
@@ -58,8 +56,9 @@ public class SpawnCommand : ICommandHandler<SpawnCommandOptions>
             }
 
             // Create entity instance
-            var monster = new MonsterEntity(_monsterManager, _dropProvider, _animationManager, _serviceProvider, map, _logger,
-                _itemManager, context.Arguments.MonsterId, x, y);
+            var monster = new MonsterEntity(_monsterManager, _dropProvider, _animationManager, _serviceProvider, map,
+                _logger,
+                context.Arguments.MonsterId, x, y);
             _world.SpawnEntity(monster);
         }
 

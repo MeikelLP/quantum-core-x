@@ -4,16 +4,14 @@ namespace QuantumCore.Core.Types;
 
 public class LzoXtea
 {
-    private uint[] _key;
-    private uint _size;
-    private uint _xteaSize;
+    private readonly uint[] _key;
+    private readonly uint _xteaSize;
 
     private readonly Lzo _lzoInstance;
 
     public LzoXtea(uint size, uint xteaSize, params uint[] key)
     {
         _key = key;
-        _size = size;
         _xteaSize = xteaSize;
         _lzoInstance = new Lzo(size);
     }

@@ -15,19 +15,17 @@ public class GroupRandomCommand : ICommandHandler
     private readonly IAnimationManager _animationManager;
     private readonly IWorld _world;
     private readonly ILogger<GroupRandomCommand> _logger;
-    private readonly IItemManager _itemManager;
     private readonly IDropProvider _dropProvider;
     private readonly IServiceProvider _serviceProvider;
 
     public GroupRandomCommand(IMonsterManager monsterManager, IAnimationManager animationManager, IWorld world,
-        ILogger<GroupRandomCommand> logger, IItemManager itemManager, IDropProvider dropProvider,
+        ILogger<GroupRandomCommand> logger, IDropProvider dropProvider,
         IServiceProvider serviceProvider)
     {
         _monsterManager = monsterManager;
         _animationManager = animationManager;
         _world = world;
         _logger = logger;
-        _itemManager = itemManager;
         _dropProvider = dropProvider;
         _serviceProvider = serviceProvider;
     }
@@ -60,7 +58,7 @@ public class GroupRandomCommand : ICommandHandler
 
             // Create entity instance
             var monster = new MonsterEntity(_monsterManager, _dropProvider, _animationManager, _serviceProvider, map,
-                _logger, _itemManager, monsterId, x, y);
+                _logger, monsterId, x, y);
             _world.SpawnEntity(monster);
         }
 

@@ -352,8 +352,6 @@ public class PlayerSkills : IPlayerSkills
                     return;
             }
 
-            if ((int)idx == 0) return;
-
             if (_player.GetPoint(idx) < 1) return;
 
             _player.AddPoint(idx, -1);

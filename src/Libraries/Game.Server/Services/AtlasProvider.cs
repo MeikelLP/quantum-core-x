@@ -27,7 +27,6 @@ internal partial class AtlasProvider : IAtlasProvider
     private readonly ISpawnPointProvider _spawnPointProvider;
     private readonly ICacheManager _cacheManager;
     private readonly ILogger<AtlasProvider> _logger;
-    private readonly IItemManager _itemManager;
     private readonly IFileProvider _fileProvider;
     private readonly IServerBase _server;
     private readonly IServiceProvider _serviceProvider;
@@ -42,7 +41,7 @@ internal partial class AtlasProvider : IAtlasProvider
 
     public AtlasProvider(IConfiguration configuration, IMonsterManager monsterManager,
         IAnimationManager animationManager, ISpawnPointProvider spawnPointProvider,
-        ICacheManager cacheManager, ILogger<AtlasProvider> logger, IItemManager itemManager,
+        ICacheManager cacheManager, ILogger<AtlasProvider> logger,
         IFileProvider fileProvider, IServerBase server, IServiceProvider serviceProvider,
         IMapAttributeProvider attributeProvider)
     {
@@ -52,7 +51,6 @@ internal partial class AtlasProvider : IAtlasProvider
         _spawnPointProvider = spawnPointProvider;
         _cacheManager = cacheManager;
         _logger = logger;
-        _itemManager = itemManager;
         _fileProvider = fileProvider;
         _server = server;
         _serviceProvider = serviceProvider;
@@ -125,7 +123,7 @@ internal partial class AtlasProvider : IAtlasProvider
                 townCoordsDict.TryGetValue(mapName, out var coords);
 
                 map = new Map(_monsterManager, _animationManager, _cacheManager, world, _logger, _spawnPointProvider,
-                    _attributeProvider, _serviceProvider.GetRequiredService<IDropProvider>(), _itemManager, _server,
+                    _attributeProvider, _serviceProvider.GetRequiredService<IDropProvider>(), _server,
                     mapName, position,
                     width,
                     height, coords, _serviceProvider);

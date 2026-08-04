@@ -18,11 +18,10 @@ public class SpawnExtendedCommand : ICommandHandler<SpawnExtendedCommandOptions>
     private readonly IDropProvider _dropProvider;
     private readonly IAnimationManager _animationManager;
     private readonly ILogger<SpawnExtendedCommand> _logger;
-    private readonly IItemManager _itemManager;
     private readonly IServiceProvider _serviceProvider;
 
     public SpawnExtendedCommand(IMonsterManager monsterManager, IWorld world, IDropProvider dropProvider,
-        IAnimationManager animationManager, ILogger<SpawnExtendedCommand> logger, IItemManager itemManager,
+        IAnimationManager animationManager, ILogger<SpawnExtendedCommand> logger,
         IServiceProvider serviceProvider)
     {
         _monsterManager = monsterManager;
@@ -30,7 +29,6 @@ public class SpawnExtendedCommand : ICommandHandler<SpawnExtendedCommandOptions>
         _dropProvider = dropProvider;
         _animationManager = animationManager;
         _logger = logger;
-        _itemManager = itemManager;
         _serviceProvider = serviceProvider;
     }
 
@@ -60,7 +58,7 @@ public class SpawnExtendedCommand : ICommandHandler<SpawnExtendedCommandOptions>
 
         // Create entity instance
         var monster = new MonsterEntity(_monsterManager, _dropProvider, _animationManager, _serviceProvider, map,
-            _logger, _itemManager, context.Arguments.MonsterId, (int)x, (int)y) { Rotation = rotation };
+            _logger, context.Arguments.MonsterId, (int)x, (int)y) { Rotation = rotation };
         _world.SpawnEntity(monster);
 
         return Task.CompletedTask;

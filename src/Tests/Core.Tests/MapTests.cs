@@ -126,13 +126,12 @@ public class MapTests
         var spawnPointProvider = provider.GetRequiredService<ISpawnPointProvider>();
         var attributeProvider = provider.GetRequiredService<IMapAttributeProvider>();
         var dropProvider = provider.GetRequiredService<IDropProvider>();
-        var itemManager = provider.GetRequiredService<IItemManager>();
         var server = provider.GetRequiredService<IServerBase>();
         server.Clock.Returns(_clock);
         var logger = provider.GetRequiredService<ILogger<MapTests>>();
         _world = provider.GetRequiredService<IWorld>();
         _map = new Map(monsterManager, animationManager, cacheManager, _world, logger, spawnPointProvider,
-            attributeProvider, dropProvider, itemManager, server,
+            attributeProvider, dropProvider, server,
             "Test", new Coordinates(), 4096, 4096, null, provider);
     }
 

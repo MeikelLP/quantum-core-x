@@ -232,7 +232,7 @@ public class World : IWorld, ILoadable
         if (map is null)
         {
             _logger.LogWarning("No available host for map at {X}|{Y}", x, y);
-            return new CoreHost {_ip = IPAddress.None, _port = 0};
+            return new CoreHost { _ip = IPAddress.None, _port = 0 };
         }
 
         if (map is RemoteMap remoteMap)
@@ -244,13 +244,13 @@ public class World : IWorld, ILoadable
                 throw new InvalidOperationException("Cannot handle this situation. See logs.");
             }
 
-            return new CoreHost {_ip = remoteMap.Host, _port = remoteMap.Port};
+            return new CoreHost { _ip = remoteMap.Host, _port = remoteMap.Port };
         }
 
         return new CoreHost
         {
             _ip = _serviceProvider.GetRequiredService<IServerBase>().IpAddress, // lazy because of dependency loop
-            _port = (ushort)GameServer.Instance.Port
+            _port = GameServer.Instance.Port
         };
     }
 
@@ -267,7 +267,7 @@ public class World : IWorld, ILoadable
     public SpawnGroup GetRandomGroup()
     {
         var span = new Span<uint>([0], 0, 1);
-        RandomNumberGenerator.GetItems([.._groups.Keys], span);
+        RandomNumberGenerator.GetItems([.. _groups.Keys], span);
 
         return _groups[span[0]];
     }

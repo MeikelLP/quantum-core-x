@@ -1,5 +1,4 @@
 ﻿using System.Collections.Immutable;
-using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game.Types.Skills;
@@ -12,13 +11,11 @@ namespace QuantumCore.Game;
 /// </summary>
 public class SkillManager : ISkillManager, ILoadable
 {
-    private readonly ILogger<SkillManager> _logger;
     private readonly IParserService _parserService;
     private ImmutableArray<SkillData> _skills = ImmutableArray<SkillData>.Empty;
 
-    public SkillManager(ILogger<SkillManager> logger, IParserService parserService)
+    public SkillManager(IParserService parserService)
     {
-        _logger = logger;
         _parserService = parserService;
     }
 

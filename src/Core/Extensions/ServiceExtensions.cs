@@ -48,7 +48,7 @@ public static class ServiceExtensions
                 .OrderBy(x => x.FullName)
                 .ToArray();
             return ActivatorUtilities.CreateInstance<PacketManager>(provider,
-                new object[] { (IEnumerable<Type>) packetTypes, handlerTypes });
+                new object[] { packetTypes, handlerTypes });
         });
         return services;
     }

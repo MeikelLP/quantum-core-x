@@ -119,7 +119,7 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
         _logger = logger;
         _scope = serviceProvider.CreateScope();
         _itemRepository = _scope.ServiceProvider.GetRequiredService<IItemRepository>();
-        Inventory = new Inventory(itemManager, _cacheManager, _logger, _itemRepository, player.Id,
+        Inventory = new Inventory(itemManager, _cacheManager, _itemRepository, player.Id,
             WindowType.INVENTORY, InventoryConstants.DEFAULT_INVENTORY_WIDTH,
             InventoryConstants.DEFAULT_INVENTORY_HEIGHT, InventoryConstants.DEFAULT_INVENTORY_PAGES);
         Inventory.OnSlotChanged += Inventory_OnSlotChanged;
@@ -958,7 +958,7 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
         AddPoint(EPoint.GOLD, -(int)amount);
         this.SendPoints();
 
-        var item = _itemManager.CreateItem(proto, 1); // count will be overwritten as it's gold
+        var item = _itemManager.CreateItem(proto); // count will be overwritten as it's gold
         (Map as Map)?.AddGroundItem(item, PositionX, PositionY,
             amount); // todo add method to IMap interface when we have an item interface...
     }
@@ -1067,14 +1067,10 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
                     {
                         return Inventory.EquipmentWindow.GetItem(position) is null;
                     }
+                }
 
-                    return false;
-                }
-                else
-                {
-                    // Inventory
-                    return Inventory.IsSpaceAvailable(item, position);
-                }
+                // Inventory
+                return Inventory.IsSpaceAvailable(item, position);
         }
 
         return false;
