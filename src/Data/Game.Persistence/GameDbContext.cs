@@ -1,4 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Diagnostics;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using QuantumCore.Game.Persistence.Entities;
 using QuantumCore.Game.Persistence.Entities.Guilds;
 
@@ -6,6 +9,15 @@ namespace QuantumCore.Game.Persistence;
 
 public abstract class GameDbContext : DbContext
 {
+    private readonly ILoggerFactory _loggerFactory;
+    private readonly IHostEnvironment _hostEnvironment;
+
+    protected GameDbContext(ILoggerFactory loggerFactory, IHostEnvironment hostEnvironment)
+    {
+        _loggerFactory = loggerFactory;
+        _hostEnvironment = hostEnvironment;
+    }
+
     public DbSet<Player> Players { get; set; } = null!;
     public DbSet<PlayerSkill> PlayerSkills { get; set; } = null!;
     public DbSet<PlayerQuickSlot> PlayerQuickSlots { get; set; } = null!;
@@ -34,5 +46,15 @@ public abstract class GameDbContext : DbContext
         GuildMember.Configure(modelBuilder.Entity<GuildMember>(), Database);
         GuildRank.Configure(modelBuilder.Entity<GuildRank>(), Database);
         Entities.Guilds.GuildNews.Configure(modelBuilder.Entity<GuildNews>(), Database);
+    }
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+    {
+        if (_hostEnvironment.IsDevelopment())
+        {
+            optionsBuilder.ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning));
+        }
+
+        optionsBuilder.UseLoggerFactory(_loggerFactory);
     }
 }
