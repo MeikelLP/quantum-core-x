@@ -234,7 +234,7 @@ public abstract class Entity : IEntity
         var attackerRating = Math.Min(90, (GetPoint(EPoint.DX) * 4 + GetPoint(EPoint.LEVEL) * 2) / 6);
         var victimRating = Math.Min(90, (victim.GetPoint(EPoint.DX) * 4 + victim.GetPoint(EPoint.LEVEL) * 2) / 6);
         var attackRating = (attackerRating + 210.0) / 300.0 -
-                           (victimRating * 2 + 5) / (victimRating + 95) * 3.0 / 10.0;
+                           (victimRating * 2 + 5f) / (victimRating + 95) * 3.0 / 10.0;
 
         var minDamage = GetMinDamage();
         var maxDamage = GetMaxDamage();
@@ -275,7 +275,7 @@ public abstract class Entity : IEntity
         var attackerRating = Math.Min(90, (GetPoint(EPoint.DX) * 4 + GetPoint(EPoint.LEVEL) * 2) / 6);
         var victimRating = Math.Min(90, (victim.GetPoint(EPoint.DX) * 4 + victim.GetPoint(EPoint.LEVEL) * 2) / 6);
         var attackRating = (attackerRating + 210.0) / 300.0 -
-                           (victimRating * 2 + 5) / (victimRating + 95) * 3.0 / 10.0;
+                           (victimRating * 2 + 5f) / (victimRating + 95) * 3.0 / 10.0;
 
         var minDamage = GetMinDamage();
         var maxDamage = GetMaxDamage();
@@ -354,14 +354,13 @@ public abstract class Entity : IEntity
 
     public virtual int Damage(IEntity attacker, EDamageType damageType, int damage)
     {
-
         if (this.PositionIsAttr(EMapAttributes.NON_PVP))
         {
             SendDebugDamage(attacker,
                 $"{attacker}->{this} Ignoring damage inside NoPvP zone -> {damage} (should never happen)");
             return -1;
         }
-            
+
         if (damageType is not EDamageType.NORMAL and not EDamageType.NORMAL_RANGE)
         {
             throw new NotImplementedException();
