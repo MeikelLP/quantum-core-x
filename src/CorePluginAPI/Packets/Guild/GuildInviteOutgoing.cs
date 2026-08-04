@@ -8,7 +8,7 @@ namespace QuantumCore.Game.Packets.Guild;
 [PacketGenerator]
 public partial class GuildInviteOutgoing
 {
-    [Field(0)] public ushort Size => (byte) GuildName.Length;
+    [Field(0)] public ushort Size => (byte)GuildName.Length;
 
     [Field(1)] public uint GuildId { get; set; }
 

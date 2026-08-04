@@ -20,7 +20,7 @@ public partial class SetItem
     [Field(8, ArrayLength = 7)]
     public ItemBonus[] Bonuses { get; set; } = new ItemBonus[7]
     {
-        new ItemBonus(), new ItemBonus(), new ItemBonus(), new ItemBonus(),
-        new ItemBonus(), new ItemBonus(), new ItemBonus()
+        new ItemBonus(), new ItemBonus(), new ItemBonus(), new ItemBonus(), new ItemBonus(), new ItemBonus(),
+        new ItemBonus()
     };
 }

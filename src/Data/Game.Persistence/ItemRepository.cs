@@ -9,15 +9,6 @@ using QuantumCore.Game.Persistence.Extensions;
 
 namespace QuantumCore.Game.Persistence;
 
-public interface IItemRepository
-{
-    Task<IEnumerable<Guid>> GetItemIdsForPlayerAsync(uint playerId, WindowType window);
-    Task<ItemInstance?> GetItemAsync(Guid id);
-    Task DeletePlayerItemsAsync(uint playerId);
-    Task DeletePlayerItemAsync(uint playerId, uint itemId);
-    Task SaveItemAsync(ItemInstance item);
-}
-
 public class ItemRepository : IItemRepository
 {
     private readonly IRedisStore _cacheManager;

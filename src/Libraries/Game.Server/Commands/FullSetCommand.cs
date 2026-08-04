@@ -1,5 +1,4 @@
 ﻿using QuantumCore.API.Core.Models;
-using QuantumCore.API.Extensions;
 using QuantumCore.API.Game;
 using QuantumCore.API.Game.Types.Players;
 using QuantumCore.Game.Extensions;
@@ -13,7 +12,7 @@ public class FullSetCommand : ICommandHandler
     private readonly IItemRepository _itemRepository;
 
     private static readonly uint HairBaseId = 73001;
-    
+
     private static readonly uint[] SharedItems = [13069, 17209, 14209, 15229, 16209];
     private static readonly uint[] WarriorItems = [12249, 189, 3169, 11299, HairBaseId];
     private static readonly uint[] NinjaItems = [12389, 189, 1139, 2189, 11499, HairBaseId + 250];
@@ -29,7 +28,7 @@ public class FullSetCommand : ICommandHandler
     {
         foreach (var item in SharedItems)
         {
-            var instance = new ItemInstance {ItemId = item, Count = 1, PlayerId = context.Player.Player.Id};
+            var instance = new ItemInstance { ItemId = item, Count = 1, PlayerId = context.Player.Player.Id };
             if (!await context.Player.Inventory.PlaceItem(instance))
             {
                 context.Player.SendChatInfo("No place in inventory");
@@ -51,7 +50,7 @@ public class FullSetCommand : ICommandHandler
         };
         foreach (var item in jobItems)
         {
-            var instance = new ItemInstance {ItemId = item, Count = 1, PlayerId = context.Player.Player.Id};
+            var instance = new ItemInstance { ItemId = item, Count = 1, PlayerId = context.Player.Player.Id };
             if (!await context.Player.Inventory.PlaceItem(instance))
             {
                 context.Player.SendChatInfo("No place in inventory");

@@ -9,7 +9,7 @@ namespace QuantumCore.Game.Packets.Guild;
 [PacketGenerator]
 public partial class GuildRankPacket
 {
-    [Field(0)] public ushort Size => (ushort) Ranks.Length;
+    [Field(0)] public ushort Size => (ushort)Ranks.Length;
     [Field(1)] public byte Length { get; set; } = GuildConstants.RANKS_LENGTH;
 
     [Field(2, ArrayLength = GuildConstants.RANKS_LENGTH)]

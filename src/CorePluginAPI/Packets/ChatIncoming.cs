@@ -7,7 +7,7 @@ namespace QuantumCore.Game.Packets;
 [PacketGenerator]
 public partial class ChatIncoming
 {
-    [Field(0)] public ushort Size => (ushort) Message.Length;
+    [Field(0)] public ushort Size => (ushort)Message.Length;
     [Field(1)] public ChatMessageType MessageType { get; set; }
     public string Message { get; set; } = "";
 

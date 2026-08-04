@@ -10,10 +10,10 @@ public partial class GuildNewsPacket
 {
     [Field(0)]
     public ushort Size =>
-        (ushort) ((sizeof(uint) + PlayerConstants.PLAYER_NAME_MAX_LENGTH + 1 + GuildConstants.NEWS_COUNT_MAX + 1) *
-                  News.Length);
+        (ushort)((sizeof(uint) + PlayerConstants.PLAYER_NAME_MAX_LENGTH + 1 + GuildConstants.NEWS_COUNT_MAX + 1) *
+                 News.Length);
 
-    [Field(1)] public byte Count => (byte) News.Length;
+    [Field(1)] public byte Count => (byte)News.Length;
     [Field(2)] public GuildNews[] News { get; set; } = [];
 }
 

@@ -14,4 +14,8 @@
       <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="9.0.18"/>
     </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\CorePluginAPI\CorePluginAPI.csproj"/>
+  </ItemGroup>
+
 </Project>

@@ -4,7 +4,6 @@ using EnumsNET;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using QuantumCore.API;
-using QuantumCore.API.Extensions;
 using QuantumCore.API.Game.Skills;
 using QuantumCore.API.Game.Types.Entities;
 using QuantumCore.API.Game.Types.Players;
@@ -45,46 +44,44 @@ public class PlayerSkills : IPlayerSkills
         // Warrior
         {
             {
-                ESkill.THREE_WAY_CUT, ESkill.SWORD_SPIN, ESkill.BERSERKER_FURY,
-                ESkill.AURA_OF_THE_SWORD, ESkill.DASH, ESkill.LIFE
+                ESkill.THREE_WAY_CUT, ESkill.SWORD_SPIN, ESkill.BERSERKER_FURY, ESkill.AURA_OF_THE_SWORD, ESkill.DASH,
+                ESkill.LIFE
             },
-            {
-                ESkill.SHOCKWAVE, ESkill.BASH, ESkill.STUMP, ESkill.STRONG_BODY,
-                ESkill.SWORD_STRIKE, ESkill.SWORD_ORB
-            }
+            { ESkill.SHOCKWAVE, ESkill.BASH, ESkill.STUMP, ESkill.STRONG_BODY, ESkill.SWORD_STRIKE, ESkill.SWORD_ORB }
         },
         // Ninja
         {
             {
-                ESkill.AMBUSH, ESkill.FAST_ATTACK, ESkill.ROLLING_DAGGER, ESkill.STEALTH,
-                ESkill.POISONOUS_CLOUD, ESkill.INSIDIOUS_POISON
+                ESkill.AMBUSH, ESkill.FAST_ATTACK, ESkill.ROLLING_DAGGER, ESkill.STEALTH, ESkill.POISONOUS_CLOUD,
+                ESkill.INSIDIOUS_POISON
             },
             {
-                ESkill.REPETITIVE_SHOT, ESkill.ARROW_SHOWER, ESkill.FIRE_ARROW,
-                ESkill.FEATHER_WALK,
-                ESkill.POISON_ARROW, ESkill.SPARK
+                ESkill.REPETITIVE_SHOT, ESkill.ARROW_SHOWER, ESkill.FIRE_ARROW, ESkill.FEATHER_WALK,
+                ESkill.POISON_ARROW,
+                ESkill.SPARK
             }
         },
         // Sura
         {
             {
-                ESkill.FINGER_STRIKE, ESkill.DRAGON_SWIRL, ESkill.ENCHANTED_BLADE, ESkill.FEAR,
-                ESkill.ENCHANTED_ARMOR, ESkill.DISPEL
+                ESkill.FINGER_STRIKE, ESkill.DRAGON_SWIRL, ESkill.ENCHANTED_BLADE, ESkill.FEAR, ESkill.ENCHANTED_ARMOR,
+                ESkill.DISPEL
             },
             {
-                ESkill.DARK_STRIKE, ESkill.FLAME_STRIKE, ESkill.FLAME_SPIRIT,
-                ESkill.DARK_PROTECTION, ESkill.SPIRIT_STRIKE, ESkill.DARK_ORB
+                ESkill.DARK_STRIKE, ESkill.FLAME_STRIKE, ESkill.FLAME_SPIRIT, ESkill.DARK_PROTECTION,
+                ESkill.SPIRIT_STRIKE,
+                ESkill.DARK_ORB
             }
         },
         // Shaman
         {
             {
-                ESkill.FLYING_TALISMAN, ESkill.SHOOTING_DRAGON, ESkill.DRAGON_ROAR,
-                ESkill.BLESSING, ESkill.REFLECT, ESkill.DRAGON_AID
+                ESkill.FLYING_TALISMAN, ESkill.SHOOTING_DRAGON, ESkill.DRAGON_ROAR, ESkill.BLESSING, ESkill.REFLECT,
+                ESkill.DRAGON_AID
             },
             {
-                ESkill.LIGHTNING_THROW, ESkill.SUMMON_LIGHTNING, ESkill.LIGHTNING_CLAW,
-                ESkill.CURE, ESkill.SWIFTNESS, ESkill.ATTACK_UP
+                ESkill.LIGHTNING_THROW, ESkill.SUMMON_LIGHTNING, ESkill.LIGHTNING_CLAW, ESkill.CURE, ESkill.SWIFTNESS,
+                ESkill.ATTACK_UP
             }
         }
     };
@@ -158,7 +155,7 @@ public class PlayerSkills : IPlayerSkills
 
         AssignDefaultActiveSkills();
 
-        _player.Connection.Send(new ChangeSkillGroup {SkillGroup = skillGroup});
+        _player.Connection.Send(new ChangeSkillGroup { SkillGroup = skillGroup });
     }
 
     public void ClearSkills()
@@ -226,7 +223,7 @@ public class PlayerSkills : IPlayerSkills
             : MINIMUM_SKILL_LEVEL_UPGRADE;
 
         _player.AddPoint(EPoint.SKILL, (byte)effectiveLevelForRestore);
-        
+
         skill.Level = ESkillLevel.UNLEARNED;
         skill.MasterType = ESkillMasterType.NORMAL;
         skill.NextReadTime = 0;
@@ -256,8 +253,8 @@ public class PlayerSkills : IPlayerSkills
         // Reset reads required when new master type is learned
         switch (skill)
         {
-            case {Level: ESkillLevel.MASTER_M1, ReadsRequired: 0, MasterType: ESkillMasterType.MASTER}:
-            case {Level: ESkillLevel.GRAND_MASTER_G1, ReadsRequired: 0, MasterType: ESkillMasterType.GRAND_MASTER}:
+            case { Level: ESkillLevel.MASTER_M1, ReadsRequired: 0, MasterType: ESkillMasterType.MASTER }:
+            case { Level: ESkillLevel.GRAND_MASTER_G1, ReadsRequired: 0, MasterType: ESkillMasterType.GRAND_MASTER }:
                 skill.ReadsRequired = 1;
                 break;
         }
@@ -312,7 +309,8 @@ public class PlayerSkills : IPlayerSkills
         switch (method)
         {
             case ESkillLevelMethod.POINT when skill.MasterType != ESkillMasterType.NORMAL:
-            case ESkillLevelMethod.POINT when (proto.Flags & ESkillFlags.DISABLE_BY_POINT_UP) == ESkillFlags.DISABLE_BY_POINT_UP:
+            case ESkillLevelMethod.POINT
+                when (proto.Flags & ESkillFlags.DISABLE_BY_POINT_UP) == ESkillFlags.DISABLE_BY_POINT_UP:
             case ESkillLevelMethod.BOOK when proto.Type != 0 && skill.MasterType != ESkillMasterType.MASTER:
                 return;
         }
@@ -429,7 +427,7 @@ public class PlayerSkills : IPlayerSkills
         if (proto.Type == ESkillCategoryType.HORSE_SKILLS)
         {
             return skillId != ESkill.HORSE_WILD_ATTACK_RANGE ||
-                   _player.Player.PlayerClass.GetClass()== EPlayerClass.NINJA;
+                   _player.Player.PlayerClass.GetClass() == EPlayerClass.NINJA;
         }
 
         if (!_player.Player.SkillGroup.IsDefined()) return false;
@@ -605,7 +603,10 @@ public class PlayerSkills : IPlayerSkills
         var levels = new SkillLevels();
         for (var i = 0; i < SKILL_MAX_NUM; i++)
         {
-            levels.Skills[i] = new PlayerSkill {Level = ESkillLevel.UNLEARNED, MasterType = ESkillMasterType.NORMAL, NextReadTime = 0};
+            levels.Skills[i] = new PlayerSkill
+            {
+                Level = ESkillLevel.UNLEARNED, MasterType = ESkillMasterType.NORMAL, NextReadTime = 0
+            };
         }
 
         for (var i = 0; i < _skills.Count; i++)

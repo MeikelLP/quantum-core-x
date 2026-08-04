@@ -7,7 +7,7 @@ namespace QuantumCore.Game.Packets;
 [PacketGenerator]
 public partial class ServerStatusPacket
 {
-    [Field(0)] public uint Size => (uint) Statuses.Length;
+    [Field(0)] public uint Size => (uint)Statuses.Length;
 
     [Field(1)] public ServerStatus[] Statuses { get; set; } = Array.Empty<ServerStatus>();
 

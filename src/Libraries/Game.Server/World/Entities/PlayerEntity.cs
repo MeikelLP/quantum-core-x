@@ -1,10 +1,8 @@
-using System.Diagnostics;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
 using QuantumCore.API.Core.Timekeeping;
-using QuantumCore.API.Extensions;
 using QuantumCore.API.Game.Guild;
 using QuantumCore.API.Game.Skills;
 using QuantumCore.API.Game.Types;
@@ -249,7 +247,9 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
         if (Map is Map localMap &&
             localMap.IsAttr(new Coordinates((uint)x, (uint)y), EMapAttributes.BLOCK | EMapAttributes.OBJECT))
         {
-            _logger.LogDebug("Not allowed to move character {Name} to map position ({X}, {Y}) with attributes Block or Object", Name, x, y);
+            _logger.LogDebug(
+                "Not allowed to move character {Name} to map position ({X}, {Y}) with attributes Block or Object", Name,
+                x, y);
             return;
         }
 
@@ -325,7 +325,7 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
 
         base.Die();
 
-        var dead = new CharacterDead {Vid = Vid};
+        var dead = new CharacterDead { Vid = Vid };
         foreach (var entity in NearbyEntities)
         {
             if (entity is PlayerEntity player)
@@ -345,7 +345,7 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
             Connection.SendGuildMembers(Guild.Members, onlineMemberIds);
             Connection.SendGuildRanks(Guild.Ranks);
             Connection.SendGuildInfo(Guild);
-            Connection.Send(new GuildName {Id = Guild.Id, Name = Guild.Name});
+            Connection.Send(new GuildName { Id = Guild.Id, Name = Guild.Name });
         }
     }
 
@@ -355,7 +355,7 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
         Guild = await guildManager.GetGuildForPlayerAsync(Player.Id);
         Player.GuildId = Guild?.Id;
         SendGuildInfo();
-        SendCharacterUpdate();
+        this.SendCharacterUpdate();
     }
 
     public void Respawn(bool town)
@@ -387,10 +387,10 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
 
         // todo spawn with invisible affect
 
-        SendChatCommand("CloseRestartWindow");
+        this.SendChatCommand("CloseRestartWindow");
         Connection.SetPhase(EPhase.GAME);
 
-        var remove = new RemoveCharacter {Vid = Vid};
+        var remove = new RemoveCharacter { Vid = Vid };
 
         Connection.Send(remove);
         ShowEntity(Connection);
@@ -407,7 +407,7 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
 
         Health = PlayerConstants.RESPAWN_HEALTH;
         Mana = PlayerConstants.RESPAWN_MANA;
-        SendPoints();
+        this.SendPoints();
     }
 
     public void RecalculateStatusPoints()
@@ -448,7 +448,7 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
 
             if (!CheckLevelUp())
             {
-                SendPoints();
+                this.SendPoints();
             }
 
             return true;
@@ -475,11 +475,11 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
         foreach (var entity in NearbyEntities)
         {
             if (entity is not IPlayerEntity other) continue;
-            SendCharacterAdditional(other.Connection);
+            this.SendCharacterAdditional(other.Connection);
         }
 
         RecalculateStatusPoints();
-        SendPoints();
+        this.SendPoints();
     }
 
     public uint CalculateAttackDamage(uint baseDamage)
@@ -519,7 +519,7 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
             {
                 // start counting interval only from first viable reset
                 _lastHealthRegenTime = ctx.Timestamp;
-            } 
+            }
             else if (ctx.ElapsedSince(_lastHealthRegenTime.Value) > TimeSpan.FromMilliseconds(HEALTH_REGEN_INTERVAL))
             {
                 var factor = State == EEntityState.IDLE ? 0.05 : 0.01;
@@ -550,7 +550,7 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
 
         if (hpOrSpChanged)
         {
-            SendPoints();
+            this.SendPoints();
         }
 
         if (!_lastPersistTime.HasValue)
@@ -771,7 +771,7 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
                 {
                     Player.BodyPart = 0;
                 }
-                
+
                 break;
             case EquipmentSlot.HAIR:
                 if (args.ItemInstance is not null)
@@ -782,9 +782,8 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
                 {
                     Player.HairPart = 0;
                 }
-                
+
                 break;
-                    
         }
     }
 
@@ -882,7 +881,7 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
         if (item.Count == count)
         {
             RemoveItem(item);
-            SendRemoveItem(item.Window, (ushort)item.Position);
+            this.SendRemoveItem(item.Window, (ushort)item.Position);
             _itemRepository.DeletePlayerItemAsync(_cacheManager, item.PlayerId, item.ItemId).Wait(); // TODO
         }
         else
@@ -890,7 +889,7 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
             item.Count -= count;
             item.Persist(_itemRepository).Wait(); // TODO
 
-            SendItem(item);
+            this.SendItem(item);
 
             var proto = _itemManager.GetItem(item.ItemId);
             if (proto is null)
@@ -914,7 +913,7 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
         if (item.ItemId == 1)
         {
             AddPoint(EPoint.GOLD, (int)groundItem.Amount);
-            SendPoints();
+            this.SendPoints();
             Map.DespawnEntity(groundItem);
 
             return;
@@ -922,20 +921,20 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
 
         if (groundItem.OwnerName is not null && !string.Equals(groundItem.OwnerName, Name))
         {
-            SendChatInfo("This item is not yours");
+            this.SendChatInfo("This item is not yours");
             return;
         }
 
         if (!Inventory.PlaceItem(item).Result) // TODO
         {
-            SendChatInfo("No inventory space left");
+            this.SendChatInfo("No inventory space left");
             return;
         }
 
         var itemName = _itemManager.GetItem(item.ItemId)?.TranslatedName ?? "Unknown";
-        SendChatInfo($"You picked up {groundItem.Amount}x {itemName}");
+        this.SendChatInfo($"You picked up {groundItem.Amount}x {itemName}");
 
-        SendItem(item);
+        this.SendItem(item);
         Map.DespawnEntity(groundItem);
     }
 
@@ -957,7 +956,7 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
         }
 
         AddPoint(EPoint.GOLD, -(int)amount);
-        SendPoints();
+        this.SendPoints();
 
         var item = _itemManager.CreateItem(proto, 1); // count will be overwritten as it's gold
         (Map as Map)?.AddGroundItem(item, PositionX, PositionY,
@@ -1131,7 +1130,7 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
             return false;
         }
 
-        SendRemoveItem(item.Window, (ushort)item.Position);
+        this.SendRemoveItem(item.Window, (ushort)item.Position);
         return true;
     }
 
@@ -1147,8 +1146,8 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
                     CalculateDefence();
                     CalculateMovement();
                     CalculateAttackSpeed();
-                    SendCharacterUpdate();
-                    SendPoints();
+                    this.SendCharacterUpdate();
+                    this.SendPoints();
                 }
                 else
                 {
@@ -1175,8 +1174,8 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
                         CalculateDefence();
                         CalculateMovement();
                         CalculateAttackSpeed();
-                        SendCharacterUpdate();
-                        SendPoints();
+                        this.SendCharacterUpdate();
+                        this.SendPoints();
                     }
                 }
                 else
@@ -1192,13 +1191,13 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
     public override void ShowEntity(IConnection connection)
     {
         SendGuildInfo();
-        SendCharacter(connection);
-        SendCharacterAdditional(connection);
+        this.SendCharacter(connection);
+        this.SendCharacterAdditional(connection);
     }
 
     public override void HideEntity(IConnection connection)
     {
-        connection.Send(new RemoveCharacter {Vid = Vid});
+        connection.Send(new RemoveCharacter { Vid = Vid });
         SendOfflineNotice(connection);
     }
 
@@ -1208,159 +1207,8 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
         if (guildId is not null && connection is IGameConnection gameConnection &&
             gameConnection.Player!.Player.GuildId == guildId)
         {
-            connection.Send(new GuildMemberOfflinePacket {PlayerId = Player.Id});
+            connection.Send(new GuildMemberOfflinePacket { PlayerId = Player.Id });
         }
-    }
-
-    public void SendBasicData()
-    {
-        var details = new CharacterDetails
-        {
-            Vid = Vid,
-            Name = Player.Name,
-            Class = Player.PlayerClass,
-            PositionX = PositionX,
-            PositionY = PositionY,
-            Empire = Empire,
-            SkillGroup = Player.SkillGroup
-        };
-        Connection.Send(details);
-    }
-
-    public void SendPoints()
-    {
-        var points = new CharacterPoints();
-        for (var i = 0; i < points.Points.Length; i++)
-        {
-            points.Points[i] = GetPoint((EPoint)i);
-        }
-
-        Connection.Send(points);
-    }
-
-    public void SendInventory()
-    {
-        foreach (var item in Inventory.Items)
-        {
-            SendItem(item);
-        }
-
-        Inventory.EquipmentWindow.Send(this);
-    }
-
-    public void SendItem(ItemInstance item)
-    {
-        Debug.Assert(item.PlayerId == Player.Id);
-
-        var p = new SetItem
-        {
-            Window = item.Window, Position = (ushort)item.Position, ItemId = item.ItemId, Count = item.Count
-        };
-        Connection.Send(p);
-    }
-
-    public void SendRemoveItem(WindowType window, ushort position)
-    {
-        Connection.Send(new SetItem {Window = window, Position = position, ItemId = 0, Count = 0});
-    }
-
-    public void SendCharacter(IConnection connection)
-    {
-        connection.Send(new SpawnCharacter
-        {
-            Vid = Vid,
-            CharacterType = EEntityType.PLAYER,
-            Angle = 0,
-            PositionX = PositionX,
-            PositionY = PositionY,
-            Class = (ushort)Player.PlayerClass,
-            MoveSpeed = MovementSpeed,
-            AttackSpeed = AttackSpeed
-        });
-    }
-
-    public void SendCharacterAdditional(IConnection connection)
-    {
-        connection.Send(new CharacterInfo
-        {
-            Vid = Vid,
-            Name = Player.Name,
-            Empire = Player.Empire,
-            Level = Player.Level,
-            GuildId = Guild?.Id ?? 0,
-            Parts = new ushort[]
-            {
-                (ushort)(Inventory.EquipmentWindow.Body?.ItemId ?? 0),
-                (ushort)(Inventory.EquipmentWindow.Weapon?.ItemId ?? 0), 0,
-                (ushort)Inventory.EquipmentWindow.Hair.GetHairPartOffsetForClient(Player.PlayerClass.GetClass())
-            }
-        });
-    }
-
-    public void SendCharacterUpdate()
-    {
-        var packet = new CharacterUpdate
-        {
-            Vid = Vid,
-            Parts = new ushort[]
-            {
-                (ushort)(Inventory.EquipmentWindow.Body?.ItemId ?? 0),
-                (ushort)(Inventory.EquipmentWindow.Weapon?.ItemId ?? 0), 0,
-                (ushort)Inventory.EquipmentWindow.Hair.GetHairPartOffsetForClient(Player.PlayerClass.GetClass())
-            },
-            MoveSpeed = MovementSpeed,
-            AttackSpeed = AttackSpeed,
-            GuildId = Guild?.Id ?? 0
-        };
-
-        Connection.Send(packet);
-
-        foreach (var entity in NearbyEntities)
-        {
-            if (entity is PlayerEntity p)
-            {
-                p.Connection.Send(packet);
-            }
-        }
-    }
-
-    public void SendChatMessage(string message)
-    {
-        var chat = new ChatOutcoming
-        {
-            MessageType = ChatMessageType.NORMAL, Vid = Vid, Empire = Empire, Message = message
-        };
-        Connection.Send(chat);
-    }
-
-    public void SendChatCommand(string message)
-    {
-        var chat = new ChatOutcoming
-        {
-            MessageType = ChatMessageType.COMMAND, Vid = 0, Empire = Empire, Message = message
-        };
-        Connection.Send(chat);
-    }
-
-    public void SendChatInfo(string message)
-    {
-        var chat = new ChatOutcoming
-        {
-            MessageType = ChatMessageType.INFO, Vid = 0, Empire = Empire, Message = message
-        };
-        Connection.Send(chat);
-    }
-
-    public void SendTarget()
-    {
-        var packet = new SetTarget();
-        if (Target is not null)
-        {
-            packet.TargetVid = Target.Vid;
-            packet.Percentage = Target.HealthPercentage;
-        }
-
-        Connection.Send(packet);
     }
 
     public void Disconnect()

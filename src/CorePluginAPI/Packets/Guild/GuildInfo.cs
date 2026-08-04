@@ -7,7 +7,7 @@ namespace QuantumCore.Game.Packets.Guild;
 [PacketGenerator]
 public partial class GuildInfo
 {
-    [Field(0)] public ushort Size => (ushort) Name.Length;
+    [Field(0)] public ushort Size => (ushort)Name.Length;
     [Field(1)] public ushort MemberCount { get; set; }
     [Field(2)] public ushort MaxMemberCount { get; set; }
     [Field(3)] public uint GuildId { get; set; }

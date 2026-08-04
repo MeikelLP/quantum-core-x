@@ -7,7 +7,7 @@ namespace QuantumCore.Game.Packets.Shop;
 [PacketGenerator]
 public partial class ShopOpen
 {
-    [Field(0)] public ushort Size => (ushort) Items.Length;
+    [Field(0)] public ushort Size => (ushort)Items.Length;
     [Field(1)] public uint Vid { get; set; }
 
     [Field(2)] public ShopItem[] Items { get; set; } = new ShopItem[40];

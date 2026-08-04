@@ -7,6 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
 using QuantumCore.API;
 using QuantumCore.API.Game.World;
+using QuantumCore.Game;
 using QuantumCore.Game.Commands;
 using QuantumCore.Game.Persistence.Entities;
 using Xunit.Abstractions;

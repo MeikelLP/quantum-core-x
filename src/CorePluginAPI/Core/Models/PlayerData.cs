@@ -4,7 +4,7 @@ using QuantumCore.API.Game.Types.Skills;
 
 namespace QuantumCore.API.Core.Models;
 
-public class PlayerData
+public sealed class PlayerData
 {
     public uint Id { get; set; }
     public Guid AccountId { get; set; }
