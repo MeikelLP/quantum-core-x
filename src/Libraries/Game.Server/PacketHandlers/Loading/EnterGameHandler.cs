@@ -2,10 +2,9 @@
 using QuantumCore.API;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.World;
+using QuantumCore.API.Packets;
 using QuantumCore.API.PluginTypes;
-using QuantumCore.Caching;
 using QuantumCore.Extensions;
-using QuantumCore.Game.Packets;
 
 namespace QuantumCore.Game.PacketHandlers.Loading;
 
@@ -37,8 +36,8 @@ public class EnterGameHandler : IGamePacketHandler<EnterGame>
 
         var uptimeMs = ctx.Connection.Server.Clock.Elapsed.TotalMilliseconds;
 
-        ctx.Connection.Send(new GameTime {Time = (uint)uptimeMs});
-        ctx.Connection.Send(new Channel {ChannelNo = 1}); // todo
+        ctx.Connection.Send(new GameTime { Time = (uint)uptimeMs });
+        ctx.Connection.Send(new Channel { ChannelNo = 1 }); // todo
 
         var key = $"player:{player.Player.Id}:loggedInTime";
         await _cache.Server.Set(key, (long)uptimeMs);

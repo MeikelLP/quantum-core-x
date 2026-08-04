@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace QuantumCore;
+namespace Core.Persistence;
 
 public class DatabaseOptions
 {

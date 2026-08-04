@@ -1,6 +1,6 @@
 ﻿using QuantumCore.Networking;
 
-namespace QuantumCore.Game.Packets;
+namespace QuantumCore.API.Packets;
 
 [Packet(0x0e, EDirection.OUTGOING)]
 [PacketGenerator]

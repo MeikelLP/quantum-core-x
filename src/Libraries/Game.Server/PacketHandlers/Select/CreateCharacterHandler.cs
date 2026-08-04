@@ -1,9 +1,9 @@
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.Game.World;
+using QuantumCore.API.Packets;
 using QuantumCore.API.PluginTypes;
 using QuantumCore.Game.Extensions;
-using QuantumCore.Game.Packets;
 
 namespace QuantumCore.Game.PacketHandlers.Select;
 
@@ -49,6 +49,6 @@ public class CreateCharacterHandler : IGamePacketHandler<CreateCharacter>
         var character = player.ToCharacter();
         character.Ip = BitConverter.ToInt32(host._ip.GetAddressBytes());
         character.Port = host._port;
-        ctx.Connection.Send(new CreateCharacterSuccess {Slot = player.Slot, Character = character});
+        ctx.Connection.Send(new CreateCharacterSuccess { Slot = player.Slot, Character = character });
     }
 }

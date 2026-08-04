@@ -1,12 +1,9 @@
-using QuantumCore.API;
 using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game.Types.Items;
 using QuantumCore.API.Game.Types.Players;
-using QuantumCore.Caching;
-using QuantumCore.Game.Persistence;
-using static QuantumCore.Game.Extensions.ItemConstants;
+using static QuantumCore.API.ItemConstants;
 
-namespace QuantumCore.Game.Extensions;
+namespace QuantumCore.API.Extensions;
 
 public static class ItemExtensions
 {

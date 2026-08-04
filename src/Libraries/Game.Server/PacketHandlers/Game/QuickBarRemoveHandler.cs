@@ -1,6 +1,6 @@
 ﻿using QuantumCore.API;
+using QuantumCore.API.Packets.QuickBar;
 using QuantumCore.API.PluginTypes;
-using QuantumCore.Game.Packets.QuickBar;
 
 namespace QuantumCore.Game.PacketHandlers.Game;
 

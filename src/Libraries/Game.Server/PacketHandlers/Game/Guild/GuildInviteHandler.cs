@@ -1,9 +1,9 @@
 ﻿using QuantumCore.API;
 using QuantumCore.API.Game.Guild;
 using QuantumCore.API.Game.Types.Guild;
+using QuantumCore.API.Packets.Guild;
 using QuantumCore.API.PluginTypes;
 using QuantumCore.Game.Extensions;
-using QuantumCore.Game.Packets.Guild;
 
 namespace QuantumCore.Game.PacketHandlers.Game.Guild;
 
@@ -63,10 +63,6 @@ public class GuildInviteHandler : IGamePacketHandler<GuildInviteIncoming>
 
         // TODO track invite
 
-        invitee.Connection.Send(new GuildInviteOutgoing
-        {
-            GuildId = guildId,
-            GuildName = guild!.Name
-        });
+        invitee.Connection.Send(new GuildInviteOutgoing { GuildId = guildId, GuildName = guild!.Name });
     }
 }

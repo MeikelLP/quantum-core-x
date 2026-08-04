@@ -3,8 +3,8 @@ using EnumsNET;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
 using QuantumCore.API.PluginTypes;
-using QuantumCore.Auth.Cache;
 using QuantumCore.Auth.Packets;
+using QuantumCore.Cache;
 using QuantumCore.Caching;
 using QuantumCore.Core.Utils;
 
@@ -100,10 +100,7 @@ public class LoginRequestHandler : IAuthPacketHandler<LoginRequest>
         // If the status is not empty send a failed login response to the client
         if (status != "")
         {
-            ctx.Connection.Send(new LoginFailed
-            {
-                Status = status
-            });
+            ctx.Connection.Send(new LoginFailed { Status = status });
 
             return;
         }
@@ -112,11 +109,8 @@ public class LoginRequestHandler : IAuthPacketHandler<LoginRequest>
         var authToken = CoreRandom.GenerateUInt32();
 
         // Store auth token
-        await _cacheManager.Server.Set($"token:{authToken}", new Token
-        {
-            Username = account.Username,
-            AccountId = account.Id
-        });
+        await _cacheManager.Server.Set($"token:{authToken}",
+            new Token { Username = account.Username, AccountId = account.Id });
         // Set expiration on token
         await _cacheManager.Server.Expire($"token:{authToken}", ExpiresIn.ThirtySeconds);
 
@@ -126,11 +120,7 @@ public class LoginRequestHandler : IAuthPacketHandler<LoginRequest>
         await _cacheManager.Shared.Expire($"account:token:{account.Id}", ExpiresIn.ThirtySeconds);
 
         // Send the auth token to the client and let it connect to our game server
-        ctx.Connection.Send(new LoginSuccess
-        {
-            Key = authToken,
-            Result = 1
-        });
+        ctx.Connection.Send(new LoginSuccess { Key = authToken, Result = 1 });
     }
 
     private async Task<bool> CheckExistingConnectionOfAsync(AccountData account)

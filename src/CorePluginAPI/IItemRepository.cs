@@ -1,7 +1,7 @@
 ﻿using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game.Types.Items;
 
-namespace QuantumCore.Game.Persistence;
+namespace QuantumCore.API;
 
 public interface IItemRepository
 {

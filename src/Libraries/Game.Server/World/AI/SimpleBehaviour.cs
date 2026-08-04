@@ -12,9 +12,9 @@ using QuantumCore.API.Game.Types.Monsters;
 using QuantumCore.API.Game.Types.Players;
 using QuantumCore.API.Game.World;
 using QuantumCore.API.Game.World.AI;
+using QuantumCore.API.Packets;
 using QuantumCore.Core.Utils;
 using QuantumCore.Game.Extensions;
-using QuantumCore.Game.Packets;
 using QuantumCore.Game.World.Entities;
 
 namespace QuantumCore.Game.World.AI;
@@ -43,17 +43,17 @@ public class SimpleBehaviour : IBehaviour
     // mob idle wander
     private const int MOVE_MIN_DISTANCE = 300;
     private const int MOVE_MAX_DISTANCE = 700;
-        
+
     private const int MAX_POSITION_ATTEMPTS = 16;
-        
+
     private const long RETURN_TIMEOUT_MS = 15000;
     private const double RETURN_DISTANCE = 5000; // return to spawn if last attack >50m away
     private const double GIVE_UP_DISTANCE = 4000; // stop chase if target >40m away
-        
+
     private const long CHANGE_ATTACK_POSITION_TIME_NEAR_MS = 10000;
     private const long CHANGE_ATTACK_POSITION_TIME_FAR_MS = 1000;
     private const double CHANGE_ATTACK_POSITION_DISTANCE = 100;
-        
+
     private const double PREFERRED_ATTACK_RANGE_PERCENTAGE_RANGED = 0.8;
     private const double PREFERRED_ATTACK_RANGE_PERCENTAGE = 0.9;
 
@@ -139,7 +139,8 @@ public class SimpleBehaviour : IBehaviour
             return;
         }
 
-        var stepDelta = new Vector2((float)(directionX * (directionLength - minDistance)), (float)(directionY * (directionLength - minDistance)));
+        var stepDelta = new Vector2((float)(directionX * (directionLength - minDistance)),
+            (float)(directionY * (directionLength - minDistance)));
         TryGoto(target.Coordinates() + stepDelta, ctx.Timestamp);
     }
 
@@ -291,7 +292,8 @@ public class SimpleBehaviour : IBehaviour
             if (currentDistance < 500.0)
             {
                 // apply a slight rotation by summing two random numbers (statistically they should be close)
-                angle = rotationFromTarget + RandomNumberGenerator.GetInt32(-90, 91) + RandomNumberGenerator.GetInt32(-90, 91);
+                angle = rotationFromTarget + RandomNumberGenerator.GetInt32(-90, 91) +
+                        RandomNumberGenerator.GetInt32(-90, 91);
             }
             else
             {
@@ -339,7 +341,9 @@ public class SimpleBehaviour : IBehaviour
 
         var multiplier = _proto.BattleType switch
         {
-            EBattleType.RANGE or EBattleType.MAGIC => PREFERRED_ATTACK_RANGE_PERCENTAGE_RANGED, // archers and wizards attack from 80% of their range
+            EBattleType.RANGE
+                or EBattleType.MAGIC =>
+                PREFERRED_ATTACK_RANGE_PERCENTAGE_RANGED, // archers and wizards attack from 80% of their range
             _ => PREFERRED_ATTACK_RANGE_PERCENTAGE
         };
         return _proto.AttackRange * multiplier;

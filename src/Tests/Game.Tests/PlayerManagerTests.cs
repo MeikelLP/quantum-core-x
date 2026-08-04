@@ -1,4 +1,5 @@
 using AwesomeAssertions;
+using Core.Persistence;
 using Game.Caching;
 using Game.Tests.Fixtures;
 using Microsoft.EntityFrameworkCore;
@@ -7,6 +8,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using QuantumCore;
+using QuantumCore.API;
 using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game.Types;
 using QuantumCore.Caching;
@@ -226,9 +228,16 @@ public class PlayerManagerTests : IClassFixture<RedisFixture>, IClassFixture<Dat
         var accountId = Guid.NewGuid();
 
         const uint FIRST_ID = 100u, SECOND_ID = 200u, THIRD_ID = 300u;
-        await _dbPlayerRepository.CreateAsync(new PlayerData { Id = FIRST_ID, AccountId = accountId, Name = "PlayerA" });
-        await _dbPlayerRepository.CreateAsync(new PlayerData { Id = SECOND_ID, AccountId = accountId, Name = "PlayerB" });
-        await _dbPlayerRepository.CreateAsync(new PlayerData { Id = THIRD_ID, AccountId = accountId, Name = "PlayerC" });
+        await _dbPlayerRepository.CreateAsync(new PlayerData
+        {
+            Id = FIRST_ID, AccountId = accountId, Name = "PlayerA"
+        });
+        await _dbPlayerRepository.CreateAsync(
+            new PlayerData { Id = SECOND_ID, AccountId = accountId, Name = "PlayerB" });
+        await _dbPlayerRepository.CreateAsync(new PlayerData
+        {
+            Id = THIRD_ID, AccountId = accountId, Name = "PlayerC"
+        });
 
         var fetched = await _playerManager.GetPlayer(SECOND_ID);
 
@@ -280,7 +289,8 @@ public class PlayerManagerTests : IClassFixture<RedisFixture>, IClassFixture<Dat
         for (uint i = 0; i < charactersCount; i++)
         {
             var id = basePlayerId + i;
-            await _dbPlayerRepository.CreateAsync(new PlayerData { Id = id, AccountId = accountId, Name = $"Player{i}" });
+            await _dbPlayerRepository.CreateAsync(
+                new PlayerData { Id = id, AccountId = accountId, Name = $"Player{i}" });
         }
 
         var players = await _playerManager.GetPlayers(accountId);
@@ -290,7 +300,7 @@ public class PlayerManagerTests : IClassFixture<RedisFixture>, IClassFixture<Dat
         {
             players[i].Slot.Should().Be((byte)i);
 
-            var expectedId = basePlayerId + (uint)i; 
+            var expectedId = basePlayerId + (uint)i;
             players[i].Id.Should().Be(expectedId);
         }
 
@@ -298,7 +308,7 @@ public class PlayerManagerTests : IClassFixture<RedisFixture>, IClassFixture<Dat
         keys.Should().HaveCount(charactersCount * 2);
         for (var i = 0; i < charactersCount; i++)
         {
-            var expectedId = basePlayerId + i; 
+            var expectedId = basePlayerId + i;
             keys.Should().Contain($"player:{expectedId}");
             keys.Should().Contain($"players:{accountId}:{i}");
         }

@@ -1,6 +1,6 @@
 ﻿using QuantumCore.API;
+using QuantumCore.API.Packets;
 using QuantumCore.API.PluginTypes;
-using QuantumCore.Game.Packets;
 using QuantumCore.Game.World.Entities;
 
 namespace QuantumCore.Game.PacketHandlers.Game;

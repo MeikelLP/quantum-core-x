@@ -3,7 +3,7 @@ using QuantumCore.API;
 using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game.Types.Quest;
 using QuantumCore.API.Game.World;
-using QuantumCore.Game.Packets.Quest;
+using QuantumCore.API.Packets.Quest;
 using QuantumCore.Game.World.Entities;
 
 namespace QuantumCore.Game.Quest;
@@ -24,18 +24,14 @@ public abstract class Quest : IQuest
     {
         State = state;
         Player = player;
-        _player = (PlayerEntity) player;
+        _player = (PlayerEntity)player;
     }
 
     public abstract void Init();
 
     protected void SendScript()
     {
-        _player.Connection.Send(new QuestScript
-        {
-            Skin = (byte) _currentSkin,
-            Source = _questScript
-        });
+        _player.Connection.Send(new QuestScript { Skin = (byte)_currentSkin, Source = _questScript });
 
         _currentSkin = QuestSkin.NORMAL;
         _questScript = "";

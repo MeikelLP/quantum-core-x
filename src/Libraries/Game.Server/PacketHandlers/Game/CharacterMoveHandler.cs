@@ -3,8 +3,8 @@ using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.Game.Types.Players;
 using QuantumCore.API.Game.Types.Skills;
+using QuantumCore.API.Packets;
 using QuantumCore.API.PluginTypes;
-using QuantumCore.Game.Packets;
 using QuantumCore.Game.World.Entities;
 
 namespace QuantumCore.Game.PacketHandlers.Game;
@@ -22,7 +22,8 @@ public class CharacterMoveHandler : IGamePacketHandler<CharacterMove>
 
     public Task ExecuteAsync(GamePacketContext<CharacterMove> ctx, CancellationToken token = default)
     {
-        if (!ctx.Packet.MovementType.IsDefined() && !ctx.Packet.MovementType.HasAnyFlags(CharacterMovementType.SKILL_FLAG))
+        if (!ctx.Packet.MovementType.IsDefined() &&
+            !ctx.Packet.MovementType.HasAnyFlags(CharacterMovementType.SKILL_FLAG))
         {
             _logger.LogError("Received unknown movement type ({MovementType})", ctx.Packet.MovementType);
             ctx.Connection.Close();

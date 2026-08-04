@@ -7,11 +7,10 @@ using QuantumCore.API.Game.Guild;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.Types.Players;
 using QuantumCore.API.Game.World;
-using QuantumCore.Auth.Cache;
-using QuantumCore.Caching;
+using QuantumCore.API.Packets;
+using QuantumCore.Cache;
 using QuantumCore.Game;
 using QuantumCore.Game.PacketHandlers;
-using QuantumCore.Game.Packets;
 
 namespace Game.Tests;
 
@@ -72,8 +71,7 @@ public class TokenLoginHandlerTests
             serverStore.Exists(tokenCacheKey).Returns(new ValueTask<long>(1));
             serverStore.Get<Token>(tokenCacheKey).Returns(new ValueTask<Token>(new Token
             {
-                AccountId = accountId,
-                Username = USERNAME
+                AccountId = accountId, Username = USERNAME
             }));
             sharedStore.Get<uint>(accountTokenKey).Returns(new ValueTask<uint>(0));
             serverStore.Persist(tokenCacheKey).Returns(new ValueTask<long>(1));
@@ -92,11 +90,11 @@ public class TokenLoginHandlerTests
                 Empire = EEmpire.SHINSOO
             };
 
-            playerManager.GetPlayers(accountId).Returns(Task.FromResult(new[] {player}));
+            playerManager.GetPlayers(accountId).Returns(Task.FromResult(new[] { player }));
             guildManager.GetGuildForPlayerAsync(player.Id, Arg.Any<CancellationToken>())
                 .Returns(Task.FromResult<GuildData?>(null));
 
-            var coreHost = new CoreHost {_ip = mapHostIp, _port = 13000};
+            var coreHost = new CoreHost { _ip = mapHostIp, _port = 13000 };
             world.GetMapHost(Arg.Any<int>(), Arg.Any<int>()).Returns(coreHost);
 
             var serverBase = Substitute.For<IServerBase>();
@@ -104,7 +102,7 @@ public class TokenLoginHandlerTests
             serverBase.Port.Returns(coreHost._port);
 
             var phase = EPhase.HANDSHAKE;
-            var assignedAccountId = (Guid?) null;
+            var assignedAccountId = (Guid?)null;
             var assignedUsername = string.Empty;
 
             var connection = Substitute.For<IGameConnection>();
@@ -119,17 +117,14 @@ public class TokenLoginHandlerTests
             connection.Send(Arg.Do<Characters>(packet => _characters = packet));
 
             _connection = connection;
-            _tokenLogin = new TokenLogin {Username = USERNAME, Key = TOKEN_KEY};
-            _handler = new TokenLoginHandler(Substitute.For<ILogger<TokenLoginHandler>>(), cacheManager, world, playerManager, guildManager);
+            _tokenLogin = new TokenLogin { Username = USERNAME, Key = TOKEN_KEY };
+            _handler = new TokenLoginHandler(Substitute.For<ILogger<TokenLoginHandler>>(), cacheManager, world,
+                playerManager, guildManager);
         }
 
         public async Task<Characters> ExecuteAsync()
         {
-            var context = new GamePacketContext<TokenLogin>
-            {
-                Packet = _tokenLogin,
-                Connection = _connection
-            };
+            var context = new GamePacketContext<TokenLogin> { Packet = _tokenLogin, Connection = _connection };
 
             await _handler.ExecuteAsync(context);
 

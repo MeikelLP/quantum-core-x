@@ -1,4 +1,4 @@
-﻿namespace QuantumCore.Game;
+﻿namespace QuantumCore.API;
 
 public static class PlayerConstants
 {

@@ -1,4 +1,4 @@
-namespace QuantumCore.Core.Types;
+namespace QuantumCore.Game.Types;
 
 /// <summary>
 /// LZO1Z implementation based on lzokay.
@@ -44,7 +44,7 @@ public class Lzo
 
         src.Seek(-1, SeekOrigin.Current);
 
-        return (int) src.Position - (int) pos;
+        return (int)src.Position - (int)pos;
     }
 
     private void Decompress(MemoryStream src, byte[] dest)
@@ -72,7 +72,7 @@ public class Lzo
             var length = src.ReadByte() - 17;
             for (var i = 0; i < length; i++)
             {
-                dest[destPos++] = (byte) src.ReadByte();
+                dest[destPos++] = (byte)src.ReadByte();
             }
 
             state = 4;
@@ -87,7 +87,7 @@ public class Lzo
             state = nstate;
             for (var i = 0; i < nstate; i++)
             {
-                dest[destPos++] = (byte) src.ReadByte();
+                dest[destPos++] = (byte)src.ReadByte();
             }
         }
 
@@ -192,7 +192,7 @@ public class Lzo
 
                     for (var i = 0; i < len; i++)
                     {
-                        dest[destPos++] = (byte) src.ReadByte();
+                        dest[destPos++] = (byte)src.ReadByte();
                     }
 
                     state = 4;
@@ -252,7 +252,7 @@ public class Lzo
             /* Copy literal */
             for (var i = 0; i < nstate; ++i)
             {
-                dest[destPos++] = (byte) src.ReadByte();
+                dest[destPos++] = (byte)src.ReadByte();
             }
         }
 

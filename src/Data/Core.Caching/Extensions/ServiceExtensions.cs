@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using QuantumCore.API;
 
 namespace QuantumCore.Caching.Extensions;
 

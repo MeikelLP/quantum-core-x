@@ -3,7 +3,7 @@ using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game.Types.Combat;
 using QuantumCore.API.Game.Types.Entities;
 using QuantumCore.API.Game.World;
-using QuantumCore.Game.Packets;
+using QuantumCore.API.Packets;
 
 namespace QuantumCore.Game.World.Entities;
 
@@ -47,12 +47,12 @@ public class GroundItem : Entity, IGroundItem
         {
             PositionX = PositionX, PositionY = PositionY, Vid = Vid, ItemId = _item.ItemId
         });
-        connection.Send(new ItemOwnership {Vid = Vid, Player = OwnerName ?? ""});
+        connection.Send(new ItemOwnership { Vid = Vid, Player = OwnerName ?? "" });
     }
 
     public override void HideEntity(IConnection connection)
     {
-        connection.Send(new GroundItemRemove {Vid = Vid});
+        connection.Send(new GroundItemRemove { Vid = Vid });
     }
 
     public override uint GetPoint(EPoint point)

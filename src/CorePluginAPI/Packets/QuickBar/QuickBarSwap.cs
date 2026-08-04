@@ -1,6 +1,6 @@
 using QuantumCore.Networking;
 
-namespace QuantumCore.Game.Packets.QuickBar;
+namespace QuantumCore.API.Packets.QuickBar;
 
 [Packet(0x12, EDirection.INCOMING, Sequence = true)]
 [PacketGenerator]

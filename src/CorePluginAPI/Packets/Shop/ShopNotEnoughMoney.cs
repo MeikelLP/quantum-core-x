@@ -1,6 +1,6 @@
 using QuantumCore.Networking;
 
-namespace QuantumCore.Game.Packets.Shop;
+namespace QuantumCore.API.Packets.Shop;
 
 [Packet(0x26, EDirection.OUTGOING)]
 [SubPacket(0x05, 0)]

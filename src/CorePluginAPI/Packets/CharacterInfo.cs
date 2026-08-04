@@ -2,7 +2,7 @@
 using QuantumCore.API.Game.Types.Entities;
 using QuantumCore.Networking;
 
-namespace QuantumCore.Game.Packets;
+namespace QuantumCore.API.Packets;
 
 [Packet(0x88, EDirection.OUTGOING)]
 [PacketGenerator]

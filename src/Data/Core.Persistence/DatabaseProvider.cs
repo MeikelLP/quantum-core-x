@@ -1,4 +1,4 @@
-﻿namespace QuantumCore;
+﻿namespace Core.Persistence;
 
 public enum DatabaseProvider
 {

@@ -2,8 +2,8 @@ using System.Net.Http.Json;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
+using QuantumCore.API.Packets;
 using QuantumCore.API.PluginTypes;
-using QuantumCore.Game.Packets;
 
 namespace QuantumCore.Game.PacketHandlers.Select;
 
@@ -41,10 +41,7 @@ public class DeleteCharacterHandler : IGamePacketHandler<DeleteCharacter>
             return;
         }
 
-        ctx.Connection.Send(new DeleteCharacterSuccess
-        {
-            Slot = ctx.Packet.Slot
-        });
+        ctx.Connection.Send(new DeleteCharacterSuccess { Slot = ctx.Packet.Slot });
 
         var player = await _playerManager.GetPlayer(accountId.Value, ctx.Packet.Slot);
         if (player is null)
@@ -66,9 +63,6 @@ public class DeleteCharacterHandler : IGamePacketHandler<DeleteCharacter>
 
         await _playerManager.DeletePlayerAsync(player);
 
-        ctx.Connection.Send(new DeleteCharacterSuccess
-        {
-            Slot = ctx.Packet.Slot
-        });
+        ctx.Connection.Send(new DeleteCharacterSuccess { Slot = ctx.Packet.Slot });
     }
 }

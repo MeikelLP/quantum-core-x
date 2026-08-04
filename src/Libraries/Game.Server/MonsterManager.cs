@@ -5,7 +5,7 @@ using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
-using QuantumCore.Core.Types;
+using QuantumCore.Game.Types;
 
 namespace QuantumCore.Game;
 
@@ -17,7 +17,7 @@ public class MonsterManager : IMonsterManager, ILoadable
     private readonly ILogger<MonsterManager> _logger;
     private readonly IFileProvider _fileProvider;
     private ImmutableArray<MonsterData> _proto = [];
-        
+
     private readonly Lazy<Task> _loader;
 
     static MonsterManager()
@@ -32,7 +32,7 @@ public class MonsterManager : IMonsterManager, ILoadable
 
         _loader = new Lazy<Task>(LoadMobProtoAsync, LazyThreadSafetyMode.ExecutionAndPublication);
     }
-        
+
     /// <summary>
     /// Try to load mob_proto file - idempotent and thread-safe due to Lazy usage
     /// </summary>
@@ -54,15 +54,12 @@ public class MonsterManager : IMonsterManager, ILoadable
         _logger.LogInformation("Loading mob_proto");
 
         await using var fs = file.CreateReadStream();
-        var bs = new BinarySerializer
-        {
-            Options = SerializationOptions.ThrowOnEndOfStream
-        };
+        var bs = new BinarySerializer { Options = SerializationOptions.ThrowOnEndOfStream };
         var result = await bs.DeserializeAsync<MonsterDataContainer>(fs);
         var items = new LzoXtea(result.Payload.RealSize, result.Payload.EncryptedSize, 0x497446, 0x4A0B, 0x86EB7,
             0x68189D);
         var itemsRaw = items.Decode(result.Payload.EncryptedPayload);
-        _proto = [..bs.Deserialize<MonsterData[]>(itemsRaw)];
+        _proto = [.. bs.Deserialize<MonsterData[]>(itemsRaw)];
         _logger.LogDebug("Loaded {Count} monsters", _proto.Length);
     }
 

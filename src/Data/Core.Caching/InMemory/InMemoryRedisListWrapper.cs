@@ -1,3 +1,5 @@
+using QuantumCore.API;
+
 namespace QuantumCore.Caching.InMemory;
 
 public class InMemoryRedisListWrapper<T> : IRedisListWrapper<T>

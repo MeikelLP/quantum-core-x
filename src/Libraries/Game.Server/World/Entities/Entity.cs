@@ -5,10 +5,10 @@ using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.Types.Combat;
 using QuantumCore.API.Game.Types.Entities;
 using QuantumCore.API.Game.World;
+using QuantumCore.API.Packets;
 using QuantumCore.Core.Constants;
 using QuantumCore.Core.Utils;
 using QuantumCore.Game.Extensions;
-using QuantumCore.Game.Packets;
 
 namespace QuantumCore.Game.World.Entities;
 

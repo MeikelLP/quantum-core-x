@@ -1,8 +1,8 @@
 ﻿using QuantumCore.API;
 using QuantumCore.API.Game.Guild;
+using QuantumCore.API.Packets.Guild;
 using QuantumCore.API.PluginTypes;
 using QuantumCore.Game.Extensions;
-using QuantumCore.Game.Packets.Guild;
 
 namespace QuantumCore.Game.PacketHandlers.Game.Guild;
 

@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
+using QuantumCore.API.Extensions;
 using QuantumCore.API.Game.Types.Entities;
 using QuantumCore.API.Game.Types.Items;
 using QuantumCore.API.Game.Types.Monsters;
@@ -202,7 +203,7 @@ public class DropProvider : IDropProvider, ILoadable
             _itemDrops[dropItem.MonsterProtoId] = dropItem;
         }
 
-        LevelDrops = [..parsedGroups.OfType<LevelItemGroup>()];
+        LevelDrops = [.. parsedGroups.OfType<LevelItemGroup>()];
 
         _logger.LogDebug("Found {Count:D} group drops", parsedGroups.Count());
     }

@@ -1,7 +1,7 @@
 ﻿using QuantumCore.API.Game.Types.Players;
 using QuantumCore.Networking;
 
-namespace QuantumCore.Game.Packets;
+namespace QuantumCore.API.Packets;
 
 [Packet(0x07, EDirection.INCOMING, Sequence = true)]
 [PacketGenerator]

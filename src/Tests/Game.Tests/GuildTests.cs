@@ -1,4 +1,5 @@
 ﻿using AwesomeAssertions;
+using Core.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;

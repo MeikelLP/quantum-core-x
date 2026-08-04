@@ -1,8 +1,8 @@
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
+using QuantumCore.API.Extensions;
 using QuantumCore.API.Game.Types.Items;
 using QuantumCore.API.Game.World;
-using QuantumCore.Game.Extensions;
 
 namespace QuantumCore.Game.PlayerUtils;
 

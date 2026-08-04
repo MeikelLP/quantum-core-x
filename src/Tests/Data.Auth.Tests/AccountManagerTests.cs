@@ -1,4 +1,5 @@
 ﻿using AwesomeAssertions;
+using Core.Persistence;
 using Data.Auth.Tests.Fixtures;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;

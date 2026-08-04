@@ -2,7 +2,7 @@
 using QuantumCore.API.Game.Types.Skills;
 using QuantumCore.Networking;
 
-namespace QuantumCore.Game.Packets;
+namespace QuantumCore.API.Packets;
 
 public class Character
 {

@@ -2,7 +2,7 @@
 using QuantumCore.API;
 using QuantumCore.API.Game.Guild;
 using QuantumCore.API.Game.Types.Guild;
-using QuantumCore.Game.Packets.Guild;
+using QuantumCore.API.Packets.Guild;
 
 namespace QuantumCore.Game.Extensions;
 
@@ -12,12 +12,8 @@ public static class GuildPacketExtensions
     {
         connection.Send(new GuildNewsPacket
         {
-            News = news.Select(x => new GuildNews
-            {
-                NewsId = x.Id,
-                PlayerName = x.PlayerName,
-                Message = x.Message
-            }).ToArray()
+            News = news.Select(x => new GuildNews { NewsId = x.Id, PlayerName = x.PlayerName, Message = x.Message })
+                .ToArray()
         });
     }
 
@@ -28,9 +24,7 @@ public static class GuildPacketExtensions
             Ranks = ranks
                 .Select(rank => new GuildRankDataPacket
                 {
-                    Rank = rank.Position,
-                    Name = rank.Name,
-                    Permissions = rank.Permissions
+                    Rank = rank.Position, Name = rank.Name, Permissions = rank.Permissions
                 })
                 .Take(GuildConstants.RANKS_LENGTH)
                 .ToArray()
@@ -40,11 +34,7 @@ public static class GuildPacketExtensions
     public static void SendGuildRankPermissions(this IConnection connection, byte position,
         GuildRankPermissions permissions)
     {
-        connection.Send(new GuildRankPermissionPacket
-        {
-            Position = position,
-            Permissions = permissions
-        });
+        connection.Send(new GuildRankPermissionPacket { Position = position, Permissions = permissions });
     }
 
     public static void SendGuildInfo(this IConnection connection, GuildData guild)
@@ -58,7 +48,7 @@ public static class GuildPacketExtensions
             Exp = guild.Experience / 100, // client displays exp * 100
             HasLand = false,
             LeaderId = guild.OwnerId,
-            MemberCount = (ushort) guild.Members.Length,
+            MemberCount = (ushort)guild.Members.Length,
             MaxMemberCount = guild.MaxMemberCount
         });
     }
@@ -84,10 +74,7 @@ public static class GuildPacketExtensions
         });
         foreach (var onlinePlayer in onlineMemberIds)
         {
-            connection.Send(new GuildMemberOnlinePacket
-            {
-                PlayerId = onlinePlayer
-            });
+            connection.Send(new GuildMemberOnlinePacket { PlayerId = onlinePlayer });
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using Core.Persistence.Extensions;
+﻿using Core.Persistence;
+using Core.Persistence.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using QuantumCore.API;
@@ -15,7 +16,8 @@ public static class ServiceExtensions
         services.AddDbContext<SqliteAuthDbContext>();
         services.AddScoped<AuthDbContext>(provider =>
         {
-            var options = provider.GetRequiredService<IOptionsSnapshot<DatabaseOptions>>().Get(HostingOptions.MODE_AUTH);
+            var options = provider.GetRequiredService<IOptionsSnapshot<DatabaseOptions>>()
+                .Get(HostingOptions.MODE_AUTH);
             return options.Provider switch
             {
                 DatabaseProvider.MYSQL => provider.GetRequiredService<MySqlAuthDbContext>(),

@@ -1,5 +1,7 @@
 using QuantumCore.API.Core.Models;
 
+namespace QuantumCore.API;
+
 public interface IAccountRepository
 {
     Task<AccountData?> FindByNameAsync(string name);

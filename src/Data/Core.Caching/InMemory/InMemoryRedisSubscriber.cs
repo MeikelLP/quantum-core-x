@@ -1,3 +1,5 @@
+using QuantumCore.API;
+
 namespace QuantumCore.Caching.InMemory;
 
 public class InMemoryRedisSubscriber : IRedisSubscriber
@@ -13,7 +15,7 @@ public class InMemoryRedisSubscriber : IRedisSubscriber
             Callbacks.Add(channel, list);
         }
 
-        ((List<Action<T>>) list).Add(action);
+        ((List<Action<T>>)list).Add(action);
     }
 
     public void Listen()

@@ -2,9 +2,8 @@
 using Game.Caching;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
+using QuantumCore.API.Packets;
 using QuantumCore.API.PluginTypes;
-using QuantumCore.Caching;
-using QuantumCore.Game.Packets;
 
 namespace QuantumCore.Game.PacketHandlers.Select;
 

@@ -1,7 +1,7 @@
 ﻿using QuantumCore.API;
 using QuantumCore.API.Core.Models;
+using QuantumCore.API.Packets.QuickBar;
 using QuantumCore.API.PluginTypes;
-using QuantumCore.Game.Packets.QuickBar;
 
 namespace QuantumCore.Game.PacketHandlers.Game;
 
@@ -17,7 +17,7 @@ public class QuickBarAddHandler : IGamePacketHandler<QuickBarAdd>
         }
 
         player.QuickSlotBar.Add(ctx.Packet.Position,
-            new QuickSlotData {Position = ctx.Packet.Slot.Position, Type = ctx.Packet.Slot.Type});
+            new QuickSlotData { Position = ctx.Packet.Slot.Position, Type = ctx.Packet.Slot.Type });
         return Task.CompletedTask;
     }
 }

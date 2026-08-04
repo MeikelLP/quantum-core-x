@@ -1,6 +1,6 @@
 using QuantumCore.Core.Utils;
 
-namespace QuantumCore.Core.Types;
+namespace QuantumCore.Game.Types;
 
 public class LzoXtea
 {

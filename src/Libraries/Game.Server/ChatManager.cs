@@ -1,8 +1,7 @@
 ﻿using QuantumCore.API;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.World;
-using QuantumCore.Caching;
-using QuantumCore.Game.Packets;
+using QuantumCore.API.Packets;
 using QuantumCore.Game.World.Entities;
 
 namespace QuantumCore.Game;
@@ -111,6 +110,6 @@ public class ChatManager : IChatManager, ILoadable
 
         // Broadcast message to all cores
         await _cacheManager.Publish("chat",
-            new ChatMessage {Type = ChatMessageType.SHOUT, Message = message, OwnerCore = _id});
+            new ChatMessage { Type = ChatMessageType.SHOUT, Message = message, OwnerCore = _id });
     }
 }

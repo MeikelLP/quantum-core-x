@@ -1,7 +1,7 @@
 using QuantumCore.API.Game.Types.Combat;
 using QuantumCore.Networking;
 
-namespace QuantumCore.Game.Packets;
+namespace QuantumCore.API.Packets;
 
 [Packet(0x87, EDirection.OUTGOING)]
 [PacketGenerator]

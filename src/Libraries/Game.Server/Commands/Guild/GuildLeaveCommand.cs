@@ -1,7 +1,7 @@
 ﻿using QuantumCore.API.Game;
 using QuantumCore.API.Game.Guild;
+using QuantumCore.API.Packets.Guild;
 using QuantumCore.Game.Extensions;
-using QuantumCore.Game.Packets.Guild;
 
 namespace QuantumCore.Game.Commands.Guild;
 
@@ -43,14 +43,11 @@ public class GuildLeaveCommand : ICommandHandler
         }
 
         await _guildManager.RemoveMemberAsync(playerId);
-        guild.Members = [..guild.Members.Except(guild.Members.Where(x => x.Id == playerId))];
+        guild.Members = [.. guild.Members.Except(guild.Members.Where(x => x.Id == playerId))];
         foreach (var member in guild.Members)
         {
             // remove guild members from friend list
-            context.Player.Connection.Send(new GuildMemberRemovePacket
-            {
-                PlayerId = member.Id
-            });
+            context.Player.Connection.Send(new GuildMemberRemovePacket { PlayerId = member.Id });
         }
 
         await context.Player.RefreshGuildAsync();
@@ -59,10 +56,7 @@ public class GuildLeaveCommand : ICommandHandler
             if (p.Player.GuildId == guild.Id)
             {
                 // send member update to guild colleagues
-                p.Connection.Send(new GuildMemberRemovePacket
-                {
-                    PlayerId = playerId
-                });
+                p.Connection.Send(new GuildMemberRemovePacket { PlayerId = playerId });
                 // update members count
                 p.Connection.SendGuildInfo(guild);
             }

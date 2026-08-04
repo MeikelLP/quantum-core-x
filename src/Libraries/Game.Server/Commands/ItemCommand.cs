@@ -2,11 +2,11 @@ using CommandLine;
 using Microsoft.Extensions.Options;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
+using QuantumCore.API.Extensions;
 using QuantumCore.API.Game;
 using QuantumCore.API.Game.Types.Skills;
 using QuantumCore.Core.Utils;
 using QuantumCore.Game.Extensions;
-using QuantumCore.Game.Persistence;
 
 namespace QuantumCore.Game.Commands;
 

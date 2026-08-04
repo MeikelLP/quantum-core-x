@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using QuantumCore.API;
 
 namespace QuantumCore.Caching;
 
@@ -9,7 +10,7 @@ public class CacheManager : ICacheManager
 
     public IRedisStore Shared { get; }
     public IRedisStore Server { get; }
-    
+
     private IRedisStore _defaultRedisStore;
 
     public CacheManager(ILogger<CacheManager> logger, IServiceProvider serviceProvider)
@@ -22,6 +23,7 @@ public class CacheManager : ICacheManager
 
         _defaultRedisStore = Shared;
     }
+
     public IRedisListWrapper<T> CreateList<T>(string name) => _defaultRedisStore.CreateList<T>(name);
     public ValueTask<long> Del(string key) => _defaultRedisStore.Del(key);
     public ValueTask<string> Set(string key, object item) => _defaultRedisStore.Set(key, item);

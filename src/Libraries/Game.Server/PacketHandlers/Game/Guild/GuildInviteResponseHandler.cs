@@ -1,9 +1,9 @@
 ﻿using QuantumCore.API;
 using QuantumCore.API.Game.Guild;
 using QuantumCore.API.Game.Types.Guild;
+using QuantumCore.API.Packets.Guild;
 using QuantumCore.API.PluginTypes;
 using QuantumCore.Game.Extensions;
-using QuantumCore.Game.Packets.Guild;
 
 namespace QuantumCore.Game.PacketHandlers.Game.Guild;
 
@@ -70,10 +70,7 @@ public class GuildInviteResponseHandler : IGamePacketHandler<GuildInviteResponse
                         IsLeader = false
                     }
                 ], [invitee.Player.Id]);
-                player.Connection.Send(new GuildMemberOnlinePacket
-                {
-                    PlayerId = invitee.Player.Id
-                });
+                player.Connection.Send(new GuildMemberOnlinePacket { PlayerId = invitee.Player.Id });
             }
         }
         // TODO what to do when rejected?

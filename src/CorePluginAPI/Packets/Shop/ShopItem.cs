@@ -1,7 +1,7 @@
 ﻿using QuantumCore.Game.Packets.General;
 using QuantumCore.Networking;
 
-namespace QuantumCore.Game.Packets.Shop;
+namespace QuantumCore.API.Packets.Shop;
 
 public class ShopItem
 {

@@ -1,4 +1,4 @@
-using QuantumCore.Core.Types;
+using QuantumCore.Game.Types;
 
 namespace QuantumCore.Game;
 

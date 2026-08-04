@@ -6,7 +6,7 @@ using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
-using QuantumCore.Core.Types;
+using QuantumCore.Game.Types;
 
 namespace QuantumCore.Game;
 
@@ -75,7 +75,7 @@ public class ItemManager : IItemManager, ILoadable
         _logger.LogInformation("Loading item_proto");
 
         await using var fs = file.CreateReadStream();
-        var bs = new BinarySerializer {Options = SerializationOptions.ThrowOnEndOfStream};
+        var bs = new BinarySerializer { Options = SerializationOptions.ThrowOnEndOfStream };
         var result = await bs.DeserializeAsync<ItemDataContainer>(fs);
         var items = new LzoXtea(result.Payload.RealSize, result.Payload.EncryptedSize, 0x2A4A1, 0x45415AA,
             0x185A8BE7,
@@ -85,10 +85,10 @@ public class ItemManager : IItemManager, ILoadable
 
         _items = data.Select(proto => new ItemData
         {
-            Applies = proto.Applies.Select(x => new ItemApplyData {Type = x.Type, Value = x.Value}).ToList(),
+            Applies = proto.Applies.Select(x => new ItemApplyData { Type = x.Type, Value = x.Value }).ToList(),
             Flags = proto.Flags,
             Id = proto.Id,
-            Limits = proto.Limits.Select(x => new ItemLimitData {Type = x.Type, Value = x.Value}).ToList(),
+            Limits = proto.Limits.Select(x => new ItemLimitData { Type = x.Type, Value = x.Value }).ToList(),
             Name = proto.Name,
             Size = proto.Size,
             Sockets = proto.Sockets,
@@ -121,6 +121,6 @@ public class ItemManager : IItemManager, ILoadable
     /// <returns>Item instance</returns>
     public ItemInstance CreateItem(ItemData proto, byte count = 1)
     {
-        return new ItemInstance {ItemId = proto.Id, Count = count};
+        return new ItemInstance { ItemId = proto.Id, Count = count };
     }
 }

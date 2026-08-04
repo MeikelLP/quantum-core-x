@@ -1,4 +1,5 @@
 ﻿using BeetleX.Redis;
+using QuantumCore.API;
 
 namespace QuantumCore.Caching;
 

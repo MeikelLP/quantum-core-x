@@ -3,7 +3,7 @@ using QuantumCore.API.Game.Types.Players;
 using QuantumCore.API.Game.Types.Skills;
 using QuantumCore.Networking;
 
-namespace QuantumCore.Game.Packets;
+namespace QuantumCore.API.Packets;
 
 [Packet(0x71, EDirection.OUTGOING)]
 [PacketGenerator]

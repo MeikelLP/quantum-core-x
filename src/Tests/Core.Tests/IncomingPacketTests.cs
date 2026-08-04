@@ -4,17 +4,17 @@ using AwesomeAssertions;
 using Core.Tests.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using QuantumCore.API.Packets;
+using QuantumCore.API.Packets.Quest;
+using QuantumCore.API.Packets.QuickBar;
+using QuantumCore.API.Packets.Shop;
 using QuantumCore.Core.Packets;
 using QuantumCore.Extensions;
-using QuantumCore.Game.Packets;
-using QuantumCore.Game.Packets.Quest;
-using QuantumCore.Game.Packets.QuickBar;
-using QuantumCore.Game.Packets.Shop;
 using QuantumCore.Networking;
 using Weikio.PluginFramework.Catalogs;
 using Xunit;
 using Xunit.Abstractions;
-using Version = QuantumCore.Game.Packets.Version;
+using Version = QuantumCore.API.Packets.Version;
 
 namespace Core.Tests;
 
@@ -72,7 +72,7 @@ public class IncomingPacketTests
 
         result.Should().BeEquivalentTo(expected);
 
-        QuantumCore.Game.Packets.ChatIncoming.HasSequence.Should().BeTrue();
+        QuantumCore.API.Packets.ChatIncoming.HasSequence.Should().BeTrue();
     }
 
     [Fact]

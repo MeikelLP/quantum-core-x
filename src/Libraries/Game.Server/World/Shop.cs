@@ -2,9 +2,9 @@ using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.Game.Types.Entities;
 using QuantumCore.API.Game.World;
+using QuantumCore.API.Packets.Shop;
 using QuantumCore.Core.Utils;
 using QuantumCore.Game.Packets.General;
-using QuantumCore.Game.Packets.Shop;
 using QuantumCore.Game.World.Entities;
 using ShopItem = QuantumCore.API.Core.Models.ShopItem;
 
@@ -51,13 +51,13 @@ public class Shop : IShop
             return;
         }
 
-        var position = (byte) (x + y * _grid.Width);
+        var position = (byte)(x + y * _grid.Width);
         var item = new ShopItem
         {
             ItemId = itemId, Count = count, Price = price == 0 ? proto.BuyPrice * count : price, Position = position
         };
         _items.Add(item);
-        _grid.SetBlock((uint) x, (uint) y, 1, proto.Size, item);
+        _grid.SetBlock((uint)x, (uint)y, 1, proto.Size, item);
     }
 
     public void Open(IPlayerEntity player)
@@ -70,16 +70,13 @@ public class Shop : IShop
         p.Shop = this;
         Visitors.Add(p);
 
-        var shopStart = new ShopOpen {Vid = Vid};
+        var shopStart = new ShopOpen { Vid = Vid };
         foreach (var item in _items)
         {
             // For some reason the item also contains the position while the client uses the array index as position
-            shopStart.Items[item.Position] = new Packets.Shop.ShopItem
+            shopStart.Items[item.Position] = new API.Packets.Shop.ShopItem
             {
-                Position = item.Position,
-                ItemId = item.ItemId,
-                Count = item.Count,
-                Price = item.Price
+                Position = item.Position, ItemId = item.ItemId, Count = item.Count, Price = item.Price
             };
         }
 
@@ -89,7 +86,7 @@ public class Shop : IShop
             // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
             if (shopStart.Items[i] is null)
             {
-                shopStart.Items[i] = new Packets.Shop.ShopItem();
+                shopStart.Items[i] = new API.Packets.Shop.ShopItem();
             }
 
             for (var ii = 0; ii < shopStart.Items[i].Bonuses.Length; ii++)
@@ -143,7 +140,7 @@ public class Shop : IShop
             p.Connection.Send(new ShopNoSpaceLeft());
         }
 
-        p.AddPoint(EPoint.GOLD, -(int) item.Price);
+        p.AddPoint(EPoint.GOLD, -(int)item.Price);
 
         p.SendPoints();
         p.SendItem(playerItem);
@@ -170,7 +167,7 @@ public class Shop : IShop
 
         if (p.DestroyItem(item))
         {
-            p.AddPoint(EPoint.GOLD, (int) proto.SellPrice);
+            p.AddPoint(EPoint.GOLD, (int)proto.SellPrice);
             p.SendPoints();
         }
     }

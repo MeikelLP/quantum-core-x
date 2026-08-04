@@ -1,4 +1,4 @@
-﻿namespace QuantumCore.Auth.Cache;
+﻿namespace QuantumCore.Cache;
 
 public class Token
 {

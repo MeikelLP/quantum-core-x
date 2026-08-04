@@ -7,8 +7,8 @@ using Microsoft.Extensions.Logging;
 using QuantumCore;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.Types.Skills;
-using QuantumCore.Game.Packets;
-using QuantumCore.Game.Packets.Shop;
+using QuantumCore.API.Packets;
+using QuantumCore.API.Packets.Shop;
 using QuantumCore.Networking;
 using Xunit;
 

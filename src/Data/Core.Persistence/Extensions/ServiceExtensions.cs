@@ -1,5 +1,4 @@
 using Microsoft.Extensions.DependencyInjection;
-using QuantumCore;
 
 namespace Core.Persistence.Extensions;
 

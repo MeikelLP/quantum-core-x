@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 using System.Text;
 using EnumsNET;
-using QuantumCore.Game.Packets;
+using QuantumCore.API.Packets;
 using QuantumCore.Networking;
 
 namespace DocsGenerator;
@@ -10,12 +10,12 @@ public static class PacketDocsGenerator
 {
     public static async Task GenerateAsync(string targetDir)
     {
-        var packetTypes = new[] {typeof(Attack).Assembly} // ensure assembly is loaded into AppDomain
+        var packetTypes = new[] { typeof(Attack).Assembly } // ensure assembly is loaded into AppDomain
             .Concat(AppDomain.CurrentDomain.GetAssemblies())
             .Distinct()
             .SelectMany(a => a.GetTypes()
                 .Where(x => typeof(IPacketSerializable).IsAssignableFrom(x) &&
-                            x is {IsClass: true, IsAbstract: false} &&
+                            x is { IsClass: true, IsAbstract: false } &&
                             x.GetCustomAttribute<PacketAttribute>() is not null))
             .OrderBy(x => x.Name)
             .Select(x => new

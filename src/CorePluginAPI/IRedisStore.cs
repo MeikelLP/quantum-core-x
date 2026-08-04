@@ -1,4 +1,4 @@
-﻿namespace QuantumCore.Caching;
+﻿namespace QuantumCore.API;
 
 public interface IRedisStore
 {

@@ -3,9 +3,8 @@ using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
 using QuantumCore.API.Game.World;
-using QuantumCore.Caching;
+using QuantumCore.API.Packets.QuickBar;
 using QuantumCore.Game.Packets.General;
-using QuantumCore.Game.Packets.QuickBar;
 using QuantumCore.Game.Persistence;
 using QuantumCore.Game.Persistence.Entities;
 using QuantumCore.Game.World.Entities;
@@ -59,7 +58,7 @@ public class QuickSlotBar : IQuickSlotBar
         for (var i = 0; i < Slots.Length; i++)
         {
             Slots[i] = dbSlots.TryGetValue((byte)i, out var dbSlot)
-                ? new QuickSlotData {Type = dbSlot.Type, Position = dbSlot.Value}
+                ? new QuickSlotData { Type = dbSlot.Type, Position = dbSlot.Value }
                 : null;
         }
 
@@ -79,7 +78,7 @@ public class QuickSlotBar : IQuickSlotBar
         {
             var slot = Slots[i];
             if (slot is null) continue;
-            dbPlayer.QuickSlots.Add(new PlayerQuickSlot {Slot = (byte)i, Type = slot.Type, Value = slot.Position});
+            dbPlayer.QuickSlots.Add(new PlayerQuickSlot { Slot = (byte)i, Type = slot.Type, Value = slot.Position });
         }
 
         await _db.SaveChangesAsync();
@@ -97,7 +96,7 @@ public class QuickSlotBar : IQuickSlotBar
 
             Player.Connection.Send(new QuickBarAddOut
             {
-                Position = (byte)i, Slot = new QuickSlot {Position = slot.Position, Type = slot.Type}
+                Position = (byte)i, Slot = new QuickSlot { Position = slot.Position, Type = slot.Type }
             });
         }
     }
@@ -114,7 +113,7 @@ public class QuickSlotBar : IQuickSlotBar
         Slots[position] = slot;
         Player.Connection.Send(new QuickBarAddOut
         {
-            Position = position, Slot = new QuickSlot {Position = slot.Position, Type = slot.Type}
+            Position = position, Slot = new QuickSlot { Position = slot.Position, Type = slot.Type }
         });
     }
 
@@ -129,7 +128,7 @@ public class QuickSlotBar : IQuickSlotBar
         var slot2 = Slots[position2];
         Slots[position1] = slot2;
         Slots[position2] = slot1;
-        Player.Connection.Send(new QuickBarSwapOut {Position1 = position1, Position2 = position2});
+        Player.Connection.Send(new QuickBarSwapOut { Position1 = position1, Position2 = position2 });
     }
 
     public void Remove(byte position)
@@ -140,6 +139,6 @@ public class QuickSlotBar : IQuickSlotBar
         }
 
         Slots[position] = null;
-        Player.Connection.Send(new QuickBarRemoveOut {Position = position});
+        Player.Connection.Send(new QuickBarRemoveOut { Position = position });
     }
 }

@@ -1,5 +1,5 @@
 using Microsoft.Extensions.FileProviders;
-using QuantumCore.Core.Types;
+using QuantumCore.Game.Types;
 
 namespace QuantumCore.Game;
 
@@ -25,7 +25,7 @@ public class StructuredFileProvider : IStructuredFileProvider
             line = line.Trim();
             if (string.IsNullOrWhiteSpace(line)) continue;
 
-            var i = line.IndexOfAny(new[] {' ', '\t'});
+            var i = line.IndexOfAny(new[] { ' ', '\t' });
             if (i < 0) continue;
 
             var keyword = line.Substring(0, i);
@@ -41,7 +41,7 @@ public class StructuredFileProvider : IStructuredFileProvider
                     "Line does not contain ' ' or '\t' char. One of those are required");
             }
 
-            var value = line.Substring(startIndex).Split(new[] {' ', '\t'}).Select(s => s.Trim())
+            var value = line.Substring(startIndex).Split(new[] { ' ', '\t' }).Select(s => s.Trim())
                 .Where(s => !string.IsNullOrWhiteSpace(s)).ToArray();
             values[keyword] = string.Join(' ', value);
         }

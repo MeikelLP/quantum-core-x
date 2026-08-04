@@ -1,4 +1,4 @@
-﻿namespace QuantumCore.Game.Extensions;
+﻿namespace QuantumCore.API;
 
 public static class ItemConstants
 {

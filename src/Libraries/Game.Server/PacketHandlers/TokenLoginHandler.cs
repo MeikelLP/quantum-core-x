@@ -4,12 +4,12 @@ using QuantumCore.API;
 using QuantumCore.API.Game.Guild;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.World;
+using QuantumCore.API.Packets;
 using QuantumCore.API.PluginTypes;
-using QuantumCore.Auth.Cache;
+using QuantumCore.Cache;
 using QuantumCore.Caching;
 using QuantumCore.Extensions;
 using QuantumCore.Game.Extensions;
-using QuantumCore.Game.Packets;
 
 namespace QuantumCore.Game.PacketHandlers;
 
@@ -107,7 +107,7 @@ public class TokenLoginHandler : IGamePacketHandler<TokenLogin>
         }
 
         // TODO:: set player id to character?
-        ctx.Connection.Send(new Empire {EmpireId = empire});
+        ctx.Connection.Send(new Empire { EmpireId = empire });
         ctx.Connection.SetPhase(EPhase.SELECT);
         ctx.Connection.Send(characters);
     }
