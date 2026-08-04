@@ -41,6 +41,7 @@ public class GuildManager : IGuildManager
     public async Task<GuildData?> GetGuildForPlayerAsync(uint playerId, CancellationToken token = default)
     {
         return await _db.Guilds
+            .AsSplitQuery()
             .Where(x => x.Members.Any(m => m.PlayerId == playerId))
             .SelectData()
             .FirstOrDefaultAsync(token);
@@ -48,12 +49,7 @@ public class GuildManager : IGuildManager
 
     public async Task<GuildData> CreateGuildAsync(string name, uint leaderId, CancellationToken token = default)
     {
-        var leaderRank = new GuildRank
-        {
-            Position = 1,
-            Name = "Leader",
-            Permissions = GuildRankPermissions.ALL
-        };
+        var leaderRank = new GuildRank { Position = 1, Name = "Leader", Permissions = GuildRankPermissions.ALL };
         var guild = new Guild
         {
             Name = name,
@@ -61,19 +57,10 @@ public class GuildManager : IGuildManager
             Level = 1,
             Members = new List<GuildMember>
             {
-                new GuildMember
-                {
-                    PlayerId = leaderId,
-                    IsLeader = true,
-                    Rank = leaderRank
-                }
+                new GuildMember { PlayerId = leaderId, IsLeader = true, Rank = leaderRank }
             },
             Ranks = Enumerable.Range(2, GuildConstants.RANKS_LENGTH - 1)
-                .Select(rank => new GuildRank
-                {
-                    Position = (byte) rank,
-                    Name = "Member"
-                })
+                .Select(rank => new GuildRank { Position = (byte)rank, Name = "Member" })
                 .Prepend(leaderRank)
                 .ToList(),
             MaxMemberCount = GuildConstants.MEMBERS_MAX_DEFAULT
@@ -100,10 +87,7 @@ public class GuildManager : IGuildManager
     {
         var guildNews = new GuildNews
         {
-            Message = message,
-            PlayerId = playerId,
-            CreatedAt = DateTime.UtcNow,
-            GuildId = guildId
+            Message = message, PlayerId = playerId, CreatedAt = DateTime.UtcNow, GuildId = guildId
         };
         _db.GuildNews.Add(guildNews);
         await _db.SaveChangesAsync(token);
@@ -125,7 +109,7 @@ public class GuildManager : IGuildManager
     {
         return
         [
-            ..await _db.GuildNews
+            .. await _db.GuildNews
                 .OrderByDescending(x => x.CreatedAt)
                 .Where(x => x.GuildId == guildId)
                 .Take(GuildConstants.MAX_NEWS_LOAD)
@@ -152,16 +136,11 @@ public class GuildManager : IGuildManager
     {
         return
         [
-            ..await _db.GuildRanks
+            .. await _db.GuildRanks
                 .Where(x => x.GuildId == guildId)
                 .OrderBy(x => x.Position)
                 .Take(GuildConstants.RANKS_LENGTH)
-                .Select(x => new GuildRankData
-                {
-                    Name = x.Name,
-                    Permissions = x.Permissions,
-                    Position = x.Position
-                })
+                .Select(x => new GuildRankData { Name = x.Name, Permissions = x.Permissions, Position = x.Position })
                 .ToArrayAsync(token)
         ];
     }
@@ -190,12 +169,7 @@ public class GuildManager : IGuildManager
 
     public async Task AddMemberAsync(uint guildId, uint inviteeId, byte rank, CancellationToken token = default)
     {
-        _db.GuildMembers.Add(new GuildMember
-        {
-            PlayerId = inviteeId,
-            GuildId = guildId,
-            RankPosition = rank
-        });
+        _db.GuildMembers.Add(new GuildMember { PlayerId = inviteeId, GuildId = guildId, RankPosition = rank });
         await _db.SaveChangesAsync(token);
     }
 

@@ -13,7 +13,8 @@ public class RedisStore : IRedisStore
     {
         _redis = new RedisDB((int)db, new JsonFormater());
         logger.LogInformation("Initialize {Store} Cache Store", db.AsString(EnumFormat.EnumMemberValue));
-        _redis.Host.AddWriteHost(options.Host, options.Port);
+        var host = _redis.Host.AddWriteHost(options.Host, options.Port);
+        host.Password = options.Password;
     }
 
     public IRedisListWrapper<T> CreateList<T>(string name) => new RedisListWrapper<T>(_redis.CreateList<T>(name));
