@@ -15,6 +15,7 @@ using Weikio.PluginFramework.Catalogs;
 
 var hostBuilder = WebApplication.CreateBuilder(args);
 
+hostBuilder.AddServiceDefaults();
 hostBuilder.Services.Configure<ConsoleLifetimeOptions>(opts => opts.SuppressStatusMessages = true);
 hostBuilder.Services.AddCoreServices(new EmptyPluginCatalog(), hostBuilder.Configuration);
 hostBuilder.Services.AddAuthServices();
@@ -42,5 +43,7 @@ await using (var scope = host.Services.CreateAsyncScope())
     logger.LogInformation("Migrating database if necessary...");
     await db.Database.MigrateAsync();
 }
+
+host.MapDefaultEndpoints();
 
 await QuantumCoreHostBuilder.RunAsync<Program>(host);

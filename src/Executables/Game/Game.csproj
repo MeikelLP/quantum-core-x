@@ -13,6 +13,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\..\Libraries\Game.Server\Game.Server.csproj"/>
+      <ProjectReference Include="..\..\ServiceDefaults\ServiceDefaults.csproj"/>
     </ItemGroup>
 
     <ItemGroup>

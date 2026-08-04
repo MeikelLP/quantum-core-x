@@ -10,6 +10,7 @@ using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Persistence;
 
 var hostBuilder = await QuantumCoreHostBuilder.CreateHostAsync(args);
+hostBuilder.AddServiceDefaults();
 hostBuilder.Configuration.AddQuantumCoreDefaults();
 hostBuilder.Services.AddGameServices();
 hostBuilder.Services.AddHostedService<GameServer>();

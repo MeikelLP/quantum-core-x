@@ -30,11 +30,13 @@
         <Project Path="Tests/Game.Commands.Tests/Game.Commands.Tests.csproj"/>
         <Project Path="Tests/Game.Tests/Game.Tests.csproj"/>
     </Folder>
+    <Project Path="AppHost/AppHost.csproj"/>
     <Project Path="Core.Networking.Generators/Core.Networking.Generators.csproj"/>
     <Project Path="Core.Networking/Core.Networking.csproj"/>
     <Project Path="Core/Core.csproj"/>
     <Project Path="CorePluginAPI/CorePluginAPI.csproj"/>
     <Project Path="Game.Benchmarks/Game.Benchmarks.csproj"/>
+    <Project Path="ServiceDefaults/ServiceDefaults.csproj"/>
     <Project
             Path="Weikio.PluginFramework.Microsoft.DependencyInjection/Weikio.PluginFramework.Microsoft.DependencyInjection.csproj"/>
 </Solution>
