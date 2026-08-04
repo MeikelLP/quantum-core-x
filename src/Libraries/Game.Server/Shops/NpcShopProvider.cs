@@ -8,6 +8,13 @@ namespace QuantumCore.Game.Shops;
 
 internal class NpcShopProvider : INpcShopProvider, ILoadable
 {
+    private static readonly JsonSerializerOptions _jsonSerializerOptions = new JsonSerializerOptions
+    {
+        ReadCommentHandling = JsonCommentHandling.Skip,
+        AllowTrailingCommas = true,
+        PropertyNameCaseInsensitive = true,
+    };
+
     private readonly IFileProvider _fileProvider;
     private readonly ILogger<NpcShopProvider> _logger;
     public ImmutableArray<ShopMonsterInfo> Shops { get; private set; }
@@ -32,12 +39,8 @@ internal class NpcShopProvider : INpcShopProvider, ILoadable
         await using var fs = file.CreateReadStream();
         Shops =
         [
-            ..await JsonSerializer.DeserializeAsync<ShopMonsterInfo[]>(fs, new JsonSerializerOptions
-            {
-                ReadCommentHandling = JsonCommentHandling.Skip,
-                AllowTrailingCommas = true,
-                PropertyNameCaseInsensitive = true,
-            }, cancellationToken: token) ?? []
+            .. await JsonSerializer.DeserializeAsync<ShopMonsterInfo[]>(fs, _jsonSerializerOptions,
+                cancellationToken: token) ?? []
         ];
     }
 }

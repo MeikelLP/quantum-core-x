@@ -45,14 +45,14 @@ public class GiveItemCommand : ICommandHandler<GiveCommandOptions>
                 ItemId = item.Id, Count = context.Arguments.Count, PlayerId = context.Player.Player.Id,
             };
             // Add item to players inventory
-            if (!await target.Inventory.PlaceItem(instance))
+            if (!await target.Inventory.PlaceItemAsync(instance))
             {
                 // No space left in inventory, drop item with player name
                 context.Player.SendChatInfo("No place in inventory");
                 return;
             }
 
-            await instance.Persist(_itemRepository);
+            await instance.PersistAsync(_itemRepository);
 
             // Send item to client
             target.SendItem(instance);

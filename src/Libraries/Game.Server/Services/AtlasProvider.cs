@@ -149,10 +149,8 @@ internal partial class AtlasProvider : IAtlasProvider
             var i = 0;
             try
             {
-                while (!sr.EndOfStream)
+                while (await sr.ReadLineAsync() is { } line)
                 {
-                    var line = await sr.ReadLineAsync() ?? "";
-
                     var splitted = line.Split(' ');
                     list.Add(new Coordinates(uint.Parse(splitted[0]), uint.Parse(splitted[1])));
                     i++;

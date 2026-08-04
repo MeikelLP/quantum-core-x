@@ -47,13 +47,13 @@ public class AnimationManager : IAnimationManager, ILoadable
             var pc1 = Path.Join("pc", characterClass);
             var pc2 = Path.Join("pc2", characterClass);
 
-            await LoadAnimation(i, AnimationType.WALK, AnimationSubType.GENERAL,
+            await LoadAnimationAsync(i, AnimationType.WALK, AnimationSubType.GENERAL,
                 Path.Join(pc1, "general", "walk.msa"));
-            await LoadAnimation(i, AnimationType.RUN, AnimationSubType.GENERAL,
+            await LoadAnimationAsync(i, AnimationType.RUN, AnimationSubType.GENERAL,
                 Path.Join(pc1, "general", "run.msa"));
-            await LoadAnimation(i + 4, AnimationType.WALK, AnimationSubType.GENERAL,
+            await LoadAnimationAsync(i + 4, AnimationType.WALK, AnimationSubType.GENERAL,
                 Path.Join(pc2, "general", "walk.msa"));
-            await LoadAnimation(i + 4, AnimationType.RUN, AnimationSubType.GENERAL,
+            await LoadAnimationAsync(i + 4, AnimationType.RUN, AnimationSubType.GENERAL,
                 Path.Join(pc2, "general", "run.msa"));
         }
 
@@ -71,11 +71,11 @@ public class AnimationManager : IAnimationManager, ILoadable
 
             if (_fileProvider.GetDirectoryContents(monster1).Exists)
             {
-                await LoadMonsterAnimation(monster, monster1);
+                await LoadMonsterAnimationAsync(monster, monster1);
             }
             else if (_fileProvider.GetDirectoryContents(monster2).Exists)
             {
-                await LoadMonsterAnimation(monster, monster2);
+                await LoadMonsterAnimationAsync(monster, monster2);
             }
             else
             {
@@ -86,7 +86,7 @@ public class AnimationManager : IAnimationManager, ILoadable
         }
     }
 
-    private async Task LoadMonsterAnimation(MonsterData monster, string folder)
+    private async Task LoadMonsterAnimationAsync(MonsterData monster, string folder)
     {
         var file = _fileProvider.GetFileInfo(Path.Combine(folder, "motlist.txt"));
         if (!file.Exists)
@@ -97,21 +97,20 @@ public class AnimationManager : IAnimationManager, ILoadable
 
         await using var fs = file.CreateReadStream();
         using var sr = new StreamReader(fs);
-        while (!sr.EndOfStream)
+        while (await sr.ReadLineAsync() is { } line)
         {
-            var line = await sr.ReadLineAsync();
-            var parts = line!.Split('\t', ' ');
+            var parts = line.Split('\t', ' ');
             if (parts.Length != 4) continue;
             if (!parts[0].Equals("general", StringComparison.InvariantCultureIgnoreCase)) continue;
 
             if (parts[1].Equals("run", StringComparison.InvariantCultureIgnoreCase))
             {
-                await LoadAnimation(monster.Id, AnimationType.RUN, AnimationSubType.GENERAL,
+                await LoadAnimationAsync(monster.Id, AnimationType.RUN, AnimationSubType.GENERAL,
                     Path.Join(folder, parts[2]));
             }
             else if (parts[1].Equals("walk", StringComparison.InvariantCultureIgnoreCase))
             {
-                await LoadAnimation(monster.Id, AnimationType.WALK, AnimationSubType.GENERAL,
+                await LoadAnimationAsync(monster.Id, AnimationType.WALK, AnimationSubType.GENERAL,
                     Path.Join(folder, parts[2]));
             }
         }
@@ -144,7 +143,7 @@ public class AnimationManager : IAnimationManager, ILoadable
     /// <param name="subType">The sub animation type</param>
     /// <param name="path">The path to the msa file</param>
     /// <returns>True if the animation was loaded successfully</returns>
-    private async Task<bool> LoadAnimation(uint id, AnimationType type, AnimationSubType subType, string path)
+    private async Task<bool> LoadAnimationAsync(uint id, AnimationType type, AnimationSubType subType, string path)
     {
         var file = _fileProvider.GetFileInfo(path);
         if (!file.Exists) return false;

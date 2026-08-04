@@ -2,7 +2,7 @@
 
 namespace QuantumCore.API.Core.Models;
 
-public class ItemDataContainer
+public sealed class ItemDataContainer
 {
     [FieldOrder(0), FieldLength(4), FieldEncoding("EUC-KR")]
     public string Header { get; set; } = "MIPX";

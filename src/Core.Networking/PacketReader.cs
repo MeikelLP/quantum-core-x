@@ -144,7 +144,7 @@ public class PacketReader : IPacketReader
     /// <summary>
     /// Tries to read as many bytes as possible in 1s
     /// </summary>
-    private async Task<byte[]> GetAsMuchDataAsPossibleAsync(Stream stream)
+    private static async Task<byte[]> GetAsMuchDataAsPossibleAsync(Stream stream)
     {
         var bytes = new byte[1024];
         var waiter = Task.Delay(1000);

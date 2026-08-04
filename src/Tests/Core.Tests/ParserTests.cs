@@ -89,19 +89,19 @@ public class ParserTests
     }
 
     [Fact]
-    public async Task Group_Regular()
+    public async Task Group_RegularAsync()
     {
-        var input = GetStreamReader("""
-                                    Group	Test
-                                    {
-                                        Vnum	101
-                                        Leader	Test	101
-                                        1	Test	101
-                                        2	Test	101
-                                    }
-                                    """);
+        using var input = GetStreamReader("""
+                                          Group	Test
+                                          {
+                                              Vnum	101
+                                              Leader	Test	101
+                                              1	Test	101
+                                              2	Test	101
+                                          }
+                                          """);
 
-        var groups = await _parserService.ParseFileGroups(input);
+        var groups = await _parserService.ParseFileGroupsAsync(input);
 
         var result = groups.Select(x => x.ToSpawnGroup()).FirstOrDefault();
 
@@ -110,28 +110,28 @@ public class ParserTests
             Name = "Test",
             Id = 101,
             Leader = 101,
-            Members = { new SpawnMember { Id = 101 }, new SpawnMember { Id = 101 } }
+            Members = [new SpawnMember { Id = 101 }, new SpawnMember { Id = 101 }]
         });
     }
 
     [Fact]
-    public async Task Group_Whitespace()
+    public async Task Group_WhitespaceAsync()
     {
-        var input = GetStreamReader("""
-                                    Group   GroupName
-                                    {
-                                    	Vnum    2430
-                                    		Leader  Leader    2493
-                                    		1   Mob1  2492
-                                    		2   Mob2  2414
-                                    		3   Mob2  2414
-                                    		4   Mob3  2411
-                                    		5   Mob3  2411
-                                    		6   Mob3  2411
-                                    }
-                                    """);
+        using var input = GetStreamReader("""
+                                          Group   GroupName
+                                          {
+                                          	Vnum    2430
+                                          		Leader  Leader    2493
+                                          		1   Mob1  2492
+                                          		2   Mob2  2414
+                                          		3   Mob2  2414
+                                          		4   Mob3  2411
+                                          		5   Mob3  2411
+                                          		6   Mob3  2411
+                                          }
+                                          """);
 
-        var groups = await _parserService.ParseFileGroups(input);
+        var groups = await _parserService.ParseFileGroupsAsync(input);
 
         var result = groups.Select(x => x.ToSpawnGroup()).FirstOrDefault();
 
@@ -141,32 +141,32 @@ public class ParserTests
             Id = 2430,
             Leader = 2493,
             Members =
-            {
+            [
                 new SpawnMember { Id = 2492 },
                 new SpawnMember { Id = 2414 },
                 new SpawnMember { Id = 2414 },
                 new SpawnMember { Id = 2411 },
                 new SpawnMember { Id = 2411 },
                 new SpawnMember { Id = 2411 }
-            }
+            ]
         });
     }
 
     [Fact]
-    public async Task Group_WhitespaceInsteadOfTab()
+    public async Task Group_WhitespaceInsteadOfTabAsync()
     {
-        var input = GetStreamReader("""
-                                    Group	GroupName
-                                    {
-                                    	Vnum	2430
-                                    	Leader	Leader	2493
-                                    	1	Mob1	2447
-                                    	2	Mob2 2447
-                                    	3	Mob 3	2513
-                                    }
-                                    """);
+        using var input = GetStreamReader("""
+                                          Group	GroupName
+                                          {
+                                          	Vnum	2430
+                                          	Leader	Leader	2493
+                                          	1	Mob1	2447
+                                          	2	Mob2 2447
+                                          	3	Mob 3	2513
+                                          }
+                                          """);
 
-        var groups = await _parserService.ParseFileGroups(input);
+        var groups = await _parserService.ParseFileGroupsAsync(input);
 
         var result = groups.Select(x => x.ToSpawnGroup()).FirstOrDefault();
 
@@ -176,25 +176,25 @@ public class ParserTests
             Id = 2430,
             Leader = 2493,
             Members =
-            {
+            [
                 new SpawnMember { Id = 2447 }, new SpawnMember { Id = 2447 }, new SpawnMember { Id = 2513 }
-            }
+            ]
         });
     }
 
     [Fact]
-    public async Task GroupCollection_Regular()
+    public async Task GroupCollection_RegularAsync()
     {
-        var input = GetStreamReader("""
-                                    Group	a1_01
-                                    {
-                                    	Vnum	101
-                                    	1	101	1
-                                    	2	171	1
-                                    }
-                                    """);
+        using var input = GetStreamReader("""
+                                          Group	a1_01
+                                          {
+                                          	Vnum	101
+                                          	1	101	1
+                                          	2	171	1
+                                          }
+                                          """);
 
-        var groups = await _parserService.ParseFileGroups(input);
+        var groups = await _parserService.ParseFileGroupsAsync(input);
 
         var result = groups.Select(x => x.ToSpawnGroupCollection()).FirstOrDefault();
 
@@ -203,33 +203,33 @@ public class ParserTests
             Name = "a1_01",
             Id = 101,
             Groups =
-            {
+            [
                 new SpawnGroupCollectionMember { Id = 101, Probability = 1 },
                 new SpawnGroupCollectionMember { Id = 171, Probability = 1 }
-            }
+            ]
         });
     }
 
     [Fact]
-    public async Task GroupCollection_Multiple()
+    public async Task GroupCollection_MultipleAsync()
     {
-        var input = GetStreamReader("""
-                                    Group	a1_01
-                                    {
-                                    	Vnum	101
-                                    	1	101	1
-                                    	2	171	1
-                                    }
-                                    			
-                                    Group	a1_02
-                                    {
-                                    	Vnum	102
-                                    	1	102	1
-                                    	2	171	1
-                                    }
-                                    """);
+        using var input = GetStreamReader("""
+                                          Group	a1_01
+                                          {
+                                          	Vnum	101
+                                          	1	101	1
+                                          	2	171	1
+                                          }
 
-        var groups = await _parserService.ParseFileGroups(input);
+                                          Group	a1_02
+                                          {
+                                          	Vnum	102
+                                          	1	102	1
+                                          	2	171	1
+                                          }
+                                          """);
+
+        var groups = await _parserService.ParseFileGroupsAsync(input);
 
         var result = groups.Select(x => x.ToSpawnGroupCollection()).FirstOrDefault();
 
@@ -238,28 +238,28 @@ public class ParserTests
             Name = "a1_01",
             Id = 101,
             Groups =
-            {
+            [
                 new SpawnGroupCollectionMember { Id = 101, Probability = 1 },
                 new SpawnGroupCollectionMember { Id = 171, Probability = 1 }
-            }
+            ]
         });
     }
 
     [Fact]
-    public async Task GroupCollection_EmptyLines()
+    public async Task GroupCollection_EmptyLinesAsync()
     {
-        var input = GetStreamReader("""
-                                    Group	a1_01
-                                    {
-                                    	Vnum	101
-                                    	1	101	1
-                                    	2	171	1
-                                    }
-                                    			
-                                    			
-                                    """);
+        using var input = GetStreamReader("""
+                                          Group	a1_01
+                                          {
+                                          	Vnum	101
+                                          	1	101	1
+                                          	2	171	1
+                                          }
 
-        var groups = await _parserService.ParseFileGroups(input);
+
+                                          """);
+
+        var groups = await _parserService.ParseFileGroupsAsync(input);
 
         var result = groups.Select(x => x.ToSpawnGroupCollection()).FirstOrDefault();
 
@@ -268,27 +268,27 @@ public class ParserTests
             Name = "a1_01",
             Id = 101,
             Groups =
-            {
+            [
                 new SpawnGroupCollectionMember { Id = 101, Probability = 1 },
                 new SpawnGroupCollectionMember { Id = 171, Probability = 1 }
-            }
+            ]
         });
     }
 
     [Fact]
-    public async Task GroupCollection_EmptyLinesInside()
+    public async Task GroupCollection_EmptyLinesInsideAsync()
     {
-        var input = GetStreamReader("""
-                                    Group	a1_05
-                                    {
-                                    	Vnum	105
-                                    			
-                                    	1	112	1
-                                    	2	113	1
-                                    }
-                                    """);
+        using var input = GetStreamReader("""
+                                          Group	a1_05
+                                          {
+                                          	Vnum	105
 
-        var groups = await _parserService.ParseFileGroups(input);
+                                          	1	112	1
+                                          	2	113	1
+                                          }
+                                          """);
+
+        var groups = await _parserService.ParseFileGroupsAsync(input);
 
         var result = groups.Select(x => x.ToSpawnGroupCollection()).FirstOrDefault();
 
@@ -297,42 +297,45 @@ public class ParserTests
             Name = "a1_05",
             Id = 105,
             Groups =
-            {
+            [
                 new SpawnGroupCollectionMember { Id = 112, Probability = 1 },
                 new SpawnGroupCollectionMember { Id = 113, Probability = 1 }
-            }
+            ]
         });
     }
 
     [Fact]
-    public async Task GroupCollection_WithoutAmount()
+    public async Task GroupCollection_WithoutAmountAsync()
     {
-        var input = GetStreamReader("""
-                                    Group	a1_05
-                                    {
-                                    	Vnum	105
-                                    	1	112
-                                    }
-                                    """);
+        using var input = GetStreamReader("""
+                                          Group	a1_05
+                                          {
+                                          	Vnum	105
+                                          	1	112
+                                          }
+                                          """);
 
-        var groups = await _parserService.ParseFileGroups(input);
+        var groups = await _parserService.ParseFileGroupsAsync(input);
 
         var result = groups.Select(x => x.ToSpawnGroupCollection()).FirstOrDefault();
 
         result.Should().BeEquivalentTo(new SpawnGroupCollection
         {
-            Name = "a1_05", Id = 105, Groups = { new SpawnGroupCollectionMember { Id = 112, Probability = 1 } }
+            Name = "a1_05", Id = 105, Groups =
+            [
+                new SpawnGroupCollectionMember { Id = 112, Probability = 1 }
+            ]
         });
     }
 
     [Fact]
-    public async Task GroupCollection_NoContent()
+    public async Task GroupCollection_NoContentAsync()
     {
-        var input = GetStreamReader("""
-                                    			
-                                    """);
+        using var input = GetStreamReader("""
 
-        var groups = await _parserService.ParseFileGroups(input);
+                                          """);
+
+        var groups = await _parserService.ParseFileGroupsAsync(input);
 
         var result = groups.Select(x => x.ToSpawnGroup()).FirstOrDefault();
 
@@ -345,20 +348,20 @@ public class ParserTests
     }
 
     [Fact]
-    public async Task Drop_MobGroupItem_SingleDrop_SingleGroup()
+    public async Task Drop_MobGroupItem_SingleDrop_SingleGroupAsync()
     {
-        var input = GetStreamReader("""
-                                    Group	Abc
-                                    {
-                                    	Mob	101
-                                    	Type	drop
-                                    	1	10	1	0.09
-                                    }
-                                    """);
+        using var input = GetStreamReader("""
+                                          Group	Abc
+                                          {
+                                          	Mob	101
+                                          	Type	drop
+                                          	1	10	1	0.09
+                                          }
+                                          """);
 
         var itemManager = Substitute.For<IItemManager>();
 
-        var groups = await _parserService.ParseFileGroups(input);
+        var groups = await _parserService.ParseFileGroupsAsync(input);
 
         var mobDrops = groups.Select(x => _parserService.ParseMobGroup(x, itemManager)).ToList();
 
@@ -374,34 +377,34 @@ public class ParserTests
         mobDrops[0].Should().BeEquivalentTo(new DropItemGroup
         {
             MonsterProtoId = 101,
-            Drops = new List<DropItemGroup.Drop>
-            {
-                new() { ItemProtoId = 10, Amount = 1, Chance = 0.09f * 10000.0f }
-            }
+            Drops =
+            [
+                new DropItemGroup.Drop { ItemProtoId = 10, Amount = 1, Chance = 0.09f * 10000.0f }
+            ]
         });
     }
 
     [Fact]
-    public async Task Drop_MobGroupItem_SingleDrop_MultipleGroup()
+    public async Task Drop_MobGroupItem_SingleDrop_MultipleGroupAsync()
     {
-        var input = GetStreamReader("""
-                                    Group	Abc
-                                    {
-                                    	Mob	101
-                                    	Type	drop
-                                    	1	10	1	0.09
-                                    }
-                                    Group	Def
-                                    {
-                                    	Mob	102
-                                    	Type	drop
-                                    	1	11	2	0.05
-                                    }
-                                    """);
+        using var input = GetStreamReader("""
+                                          Group	Abc
+                                          {
+                                          	Mob	101
+                                          	Type	drop
+                                          	1	10	1	0.09
+                                          }
+                                          Group	Def
+                                          {
+                                          	Mob	102
+                                          	Type	drop
+                                          	1	11	2	0.05
+                                          }
+                                          """);
 
         var itemManager = Substitute.For<IItemManager>();
 
-        var groups = await _parserService.ParseFileGroups(input);
+        var groups = await _parserService.ParseFileGroupsAsync(input);
 
         var mobDrops = groups.Select(x => _parserService.ParseMobGroup(x, itemManager)).ToList();
 
@@ -424,38 +427,38 @@ public class ParserTests
         mobDrops[0].Should().BeEquivalentTo(new DropItemGroup
         {
             MonsterProtoId = 101,
-            Drops = new List<DropItemGroup.Drop>
-            {
-                new() { ItemProtoId = 10, Amount = 1, Chance = 0.09f * 10000.0f }
-            }
+            Drops =
+            [
+                new DropItemGroup.Drop { ItemProtoId = 10, Amount = 1, Chance = 0.09f * 10000.0f }
+            ]
         });
         mobDrops[1].Should().NotBeNull();
         mobDrops[1].Should().BeEquivalentTo(new DropItemGroup
         {
             MonsterProtoId = 102,
-            Drops = new List<DropItemGroup.Drop>
-            {
-                new() { ItemProtoId = 11, Amount = 2, Chance = 0.05f * 10000.0f }
-            }
+            Drops =
+            [
+                new DropItemGroup.Drop { ItemProtoId = 11, Amount = 2, Chance = 0.05f * 10000.0f }
+            ]
         });
     }
 
     [Fact]
-    public async Task Drop_MobGroupItem_MultipleDrop_SingleGroup()
+    public async Task Drop_MobGroupItem_MultipleDrop_SingleGroupAsync()
     {
-        var input = GetStreamReader("""
-                                    Group	Abc
-                                    {
-                                    	Mob	101
-                                    	Type	drop
-                                    	1	10	1	0.09
-                                    	2	11	2	1
-                                    }
-                                    """);
+        using var input = GetStreamReader("""
+                                          Group	Abc
+                                          {
+                                          	Mob	101
+                                          	Type	drop
+                                          	1	10	1	0.09
+                                          	2	11	2	1
+                                          }
+                                          """);
 
         var itemManager = Substitute.For<IItemManager>();
 
-        var groups = await _parserService.ParseFileGroups(input);
+        var groups = await _parserService.ParseFileGroupsAsync(input);
 
         var mobDrops = groups.Select(x => _parserService.ParseMobGroup(x, itemManager)).ToList();
 
@@ -471,37 +474,37 @@ public class ParserTests
         mobDrops[0].Should().BeEquivalentTo(new DropItemGroup
         {
             MonsterProtoId = 101,
-            Drops = new List<DropItemGroup.Drop>
-            {
-                new() { ItemProtoId = 10, Amount = 1, Chance = 0.09f * 10000.0f },
-                new() { ItemProtoId = 11, Amount = 2, Chance = 1.0f * 10000.0f }
-            }
+            Drops =
+            [
+                new DropItemGroup.Drop { ItemProtoId = 10, Amount = 1, Chance = 0.09f * 10000.0f },
+                new DropItemGroup.Drop { ItemProtoId = 11, Amount = 2, Chance = 1.0f * 10000.0f }
+            ]
         });
     }
 
     [Fact]
-    public async Task Drop_MobGroupItem_MultipleDrop_MultipleGroup()
+    public async Task Drop_MobGroupItem_MultipleDrop_MultipleGroupAsync()
     {
-        var input = GetStreamReader("""
-                                    Group	Abc
-                                    {
-                                    	Mob	101
-                                    	Type	drop
-                                    	1	10	1	0.09
-                                    	2	11	2	0.05
-                                    }
-                                    Group	Def
-                                    {
-                                    	Mob	102
-                                    	Type	drop
-                                    	1	11	2	0.05
-                                    	2	10	1	0.09
-                                    }
-                                    """);
+        using var input = GetStreamReader("""
+                                          Group	Abc
+                                          {
+                                          	Mob	101
+                                          	Type	drop
+                                          	1	10	1	0.09
+                                          	2	11	2	0.05
+                                          }
+                                          Group	Def
+                                          {
+                                          	Mob	102
+                                          	Type	drop
+                                          	1	11	2	0.05
+                                          	2	10	1	0.09
+                                          }
+                                          """);
 
         var itemManager = Substitute.For<IItemManager>();
 
-        var groups = await _parserService.ParseFileGroups(input);
+        var groups = await _parserService.ParseFileGroupsAsync(input);
 
         var mobDrops = groups.Select(x => _parserService.ParseMobGroup(x, itemManager)).ToList();
 
@@ -524,40 +527,40 @@ public class ParserTests
         mobDrops[0].Should().BeEquivalentTo(new DropItemGroup
         {
             MonsterProtoId = 101,
-            Drops = new List<DropItemGroup.Drop>
-            {
-                new() { ItemProtoId = 10, Amount = 1, Chance = 0.09f * 10000.0f },
-                new() { ItemProtoId = 11, Amount = 2, Chance = 0.05f * 10000.0f }
-            }
+            Drops =
+            [
+                new DropItemGroup.Drop { ItemProtoId = 10, Amount = 1, Chance = 0.09f * 10000.0f },
+                new DropItemGroup.Drop { ItemProtoId = 11, Amount = 2, Chance = 0.05f * 10000.0f }
+            ]
         });
         mobDrops[1].Should().NotBeNull();
         mobDrops[1].Should().BeEquivalentTo(new DropItemGroup
         {
             MonsterProtoId = 102,
-            Drops = new List<DropItemGroup.Drop>
-            {
-                new() { ItemProtoId = 11, Amount = 2, Chance = 0.05f * 10000.0f },
-                new() { ItemProtoId = 10, Amount = 1, Chance = 0.09f * 10000.0f }
-            }
+            Drops =
+            [
+                new DropItemGroup.Drop { ItemProtoId = 11, Amount = 2, Chance = 0.05f * 10000.0f },
+                new DropItemGroup.Drop { ItemProtoId = 10, Amount = 1, Chance = 0.09f * 10000.0f }
+            ]
         });
     }
 
     [Fact]
-    public async Task Drop_LevelItem_SingleDrop_SingleGroup()
+    public async Task Drop_LevelItem_SingleDrop_SingleGroupAsync()
     {
-        var input = GetStreamReader("""
-                                    Group	Abc
-                                    {
-                                        Level_limit	75
-                                    	Mob	101
-                                    	Type	limit
-                                    	1	10	1	0.09
-                                    }
-                                    """);
+        using var input = GetStreamReader("""
+                                          Group	Abc
+                                          {
+                                              Level_limit	75
+                                          	Mob	101
+                                          	Type	limit
+                                          	1	10	1	0.09
+                                          }
+                                          """);
 
         var itemManager = Substitute.For<IItemManager>();
 
-        var groups = await _parserService.ParseFileGroups(input);
+        var groups = await _parserService.ParseFileGroupsAsync(input);
 
         var mobDrops = groups.Select(x => _parserService.ParseMobGroup(x, itemManager)).ToList();
 
@@ -573,36 +576,36 @@ public class ParserTests
         mobDrops[0].Should().BeEquivalentTo(new LevelItemGroup
         {
             LevelLimit = 75,
-            Drops = new List<LevelItemGroup.Drop>
-            {
-                new() { ItemProtoId = 10, Amount = 1, Chance = 0.09f * 10000.0f }
-            }
+            Drops =
+            [
+                new LevelItemGroup.Drop { ItemProtoId = 10, Amount = 1, Chance = 0.09f * 10000.0f }
+            ]
         });
     }
 
     [Fact]
-    public async Task Drop_LevelItem_SingleDrop_MultipleGroup()
+    public async Task Drop_LevelItem_SingleDrop_MultipleGroupAsync()
     {
-        var input = GetStreamReader("""
-                                    Group	Abc
-                                    {
-                                        Level_limit	75
-                                    	Mob	101
-                                    	Type	limit
-                                    	1	10	1	0.09
-                                    }
-                                    Group	Def
-                                    {
-                                        Level_limit	75
-                                    	Mob	102
-                                    	Type	limit
-                                    	1	11	2	0.05
-                                    }
-                                    """);
+        using var input = GetStreamReader("""
+                                          Group	Abc
+                                          {
+                                              Level_limit	75
+                                          	Mob	101
+                                          	Type	limit
+                                          	1	10	1	0.09
+                                          }
+                                          Group	Def
+                                          {
+                                              Level_limit	75
+                                          	Mob	102
+                                          	Type	limit
+                                          	1	11	2	0.05
+                                          }
+                                          """);
 
         var itemManager = Substitute.For<IItemManager>();
 
-        var groups = await _parserService.ParseFileGroups(input);
+        var groups = await _parserService.ParseFileGroupsAsync(input);
 
         var mobDrops = groups.Select(x => _parserService.ParseMobGroup(x, itemManager)).ToList();
 
@@ -624,39 +627,39 @@ public class ParserTests
         mobDrops[0].Should().BeEquivalentTo(new LevelItemGroup
         {
             LevelLimit = 75,
-            Drops = new List<LevelItemGroup.Drop>
-            {
-                new() { ItemProtoId = 10, Amount = 1, Chance = 0.09f * 10000.0f }
-            }
+            Drops =
+            [
+                new LevelItemGroup.Drop { ItemProtoId = 10, Amount = 1, Chance = 0.09f * 10000.0f }
+            ]
         });
         mobDrops[1].Should().NotBeNull();
         mobDrops[1].Should().BeEquivalentTo(new LevelItemGroup
         {
             LevelLimit = 75,
-            Drops = new List<LevelItemGroup.Drop>
-            {
-                new() { ItemProtoId = 11, Amount = 2, Chance = 0.05f * 10000.0f }
-            }
+            Drops =
+            [
+                new LevelItemGroup.Drop { ItemProtoId = 11, Amount = 2, Chance = 0.05f * 10000.0f }
+            ]
         });
     }
 
     [Fact]
-    public async Task Drop_LevelItem_MultipleDrop_SingleGroup()
+    public async Task Drop_LevelItem_MultipleDrop_SingleGroupAsync()
     {
-        var input = GetStreamReader("""
-                                    Group	Abc
-                                    {
-                                        Level_limit	75
-                                    	Mob	101
-                                    	Type	limit
-                                    	1	10	1	0.09
-                                    	2	11	2	1
-                                    }
-                                    """);
+        using var input = GetStreamReader("""
+                                          Group	Abc
+                                          {
+                                              Level_limit	75
+                                          	Mob	101
+                                          	Type	limit
+                                          	1	10	1	0.09
+                                          	2	11	2	1
+                                          }
+                                          """);
 
         var itemManager = Substitute.For<IItemManager>();
 
-        var groups = await _parserService.ParseFileGroups(input);
+        var groups = await _parserService.ParseFileGroupsAsync(input);
 
         var mobDrops = groups.Select(x => _parserService.ParseMobGroup(x, itemManager)).ToList();
 
@@ -672,39 +675,39 @@ public class ParserTests
         mobDrops[0].Should().BeEquivalentTo(new LevelItemGroup()
         {
             LevelLimit = 75,
-            Drops = new List<LevelItemGroup.Drop>
-            {
-                new() { ItemProtoId = 10, Amount = 1, Chance = 0.09f * 10000.0f },
-                new() { ItemProtoId = 11, Amount = 2, Chance = 1.0f * 10000.0f }
-            }
+            Drops =
+            [
+                new LevelItemGroup.Drop { ItemProtoId = 10, Amount = 1, Chance = 0.09f * 10000.0f },
+                new LevelItemGroup.Drop { ItemProtoId = 11, Amount = 2, Chance = 1.0f * 10000.0f }
+            ]
         });
     }
 
     [Fact]
-    public async Task Drop_LevelItem_MultipleDrop_MultipleGroup()
+    public async Task Drop_LevelItem_MultipleDrop_MultipleGroupAsync()
     {
-        var input = GetStreamReader("""
-                                    Group	Abc
-                                    {
-                                        Level_limit	75
-                                    	Mob	101
-                                    	Type	limit
-                                    	1	10	1	0.09
-                                    	2	11	2	1
-                                    }
-                                    Group	Def
-                                    {
-                                        Level_limit	75
-                                    	Mob	102
-                                    	Type	limit
-                                    	1	11	2	0.05
-                                    	2	10	1	0.09
-                                    }
-                                    """);
+        using var input = GetStreamReader("""
+                                          Group	Abc
+                                          {
+                                              Level_limit	75
+                                          	Mob	101
+                                          	Type	limit
+                                          	1	10	1	0.09
+                                          	2	11	2	1
+                                          }
+                                          Group	Def
+                                          {
+                                              Level_limit	75
+                                          	Mob	102
+                                          	Type	limit
+                                          	1	11	2	0.05
+                                          	2	10	1	0.09
+                                          }
+                                          """);
 
         var itemManager = Substitute.For<IItemManager>();
 
-        var groups = await _parserService.ParseFileGroups(input);
+        var groups = await _parserService.ParseFileGroupsAsync(input);
 
         var mobDrops = groups.Select(x => _parserService.ParseMobGroup(x, itemManager)).ToList();
 
@@ -726,40 +729,40 @@ public class ParserTests
         mobDrops[0].Should().BeEquivalentTo(new LevelItemGroup()
         {
             LevelLimit = 75,
-            Drops = new List<LevelItemGroup.Drop>
-            {
-                new() { ItemProtoId = 10, Amount = 1, Chance = 0.09f * 10000.0f },
-                new() { ItemProtoId = 11, Amount = 2, Chance = 1.0f * 10000.0f }
-            }
+            Drops =
+            [
+                new LevelItemGroup.Drop { ItemProtoId = 10, Amount = 1, Chance = 0.09f * 10000.0f },
+                new LevelItemGroup.Drop { ItemProtoId = 11, Amount = 2, Chance = 1.0f * 10000.0f }
+            ]
         });
         mobDrops[1].Should().NotBeNull();
         mobDrops[1].Should().BeEquivalentTo(new LevelItemGroup()
         {
             LevelLimit = 75,
-            Drops = new List<LevelItemGroup.Drop>
-            {
-                new() { ItemProtoId = 11, Amount = 2, Chance = 0.05f * 10000.0f },
-                new() { ItemProtoId = 10, Amount = 1, Chance = 0.09f * 10000.0f }
-            }
+            Drops =
+            [
+                new LevelItemGroup.Drop { ItemProtoId = 11, Amount = 2, Chance = 0.05f * 10000.0f },
+                new LevelItemGroup.Drop { ItemProtoId = 10, Amount = 1, Chance = 0.09f * 10000.0f }
+            ]
         });
     }
 
     [Fact]
-    public async Task Drop_MonsterItem_SingleDrop_SingleGroup()
+    public async Task Drop_MonsterItem_SingleDrop_SingleGroupAsync()
     {
-        var input = GetStreamReader("""
-                                    Group	Abc
-                                    {
-                                        Kill_drop	75
-                                    	Mob	101
-                                    	Type	kill
-                                    	1	10	1	20	30
-                                    }
-                                    """);
+        using var input = GetStreamReader("""
+                                          Group	Abc
+                                          {
+                                              Kill_drop	75
+                                          	Mob	101
+                                          	Type	kill
+                                          	1	10	1	20	30
+                                          }
+                                          """);
 
         var itemManager = Substitute.For<IItemManager>();
 
-        var groups = await _parserService.ParseFileGroups(input);
+        var groups = await _parserService.ParseFileGroupsAsync(input);
 
         var mobDrops = groups.Select(x => _parserService.ParseMobGroup(x, itemManager)).ToList();
 
@@ -786,34 +789,34 @@ public class ParserTests
         {
             MonsterProtoId = 101,
             MinKillCount = 75,
-            Probabilities = new List<uint>() { 20 },
-            Drops = new List<MonsterItemGroup.Drop> { new() { ItemProtoId = 10, Amount = 1, Chance = 30 } }
+            Probabilities = [20],
+            Drops = [new MonsterItemGroup.Drop { ItemProtoId = 10, Amount = 1, Chance = 30 }]
         });
     }
 
     [Fact]
-    public async Task Drop_MonsterItem_SingleDrop_MultipleGroup()
+    public async Task Drop_MonsterItem_SingleDrop_MultipleGroupAsync()
     {
-        var input = GetStreamReader("""
-                                    Group	Abc
-                                    {
-                                        Kill_drop	75
-                                    	Mob	101
-                                    	Type	kill
-                                    	1	10	1	20	30
-                                    }
-                                    Group	Def
-                                    {
-                                        Kill_drop	75
-                                    	Mob	102
-                                    	Type	kill
-                                    	1	11	2	20	30
-                                    }
-                                    """);
+        using var input = GetStreamReader("""
+                                          Group	Abc
+                                          {
+                                              Kill_drop	75
+                                          	Mob	101
+                                          	Type	kill
+                                          	1	10	1	20	30
+                                          }
+                                          Group	Def
+                                          {
+                                              Kill_drop	75
+                                          	Mob	102
+                                          	Type	kill
+                                          	1	11	2	20	30
+                                          }
+                                          """);
 
         var itemManager = Substitute.For<IItemManager>();
 
-        var groups = await _parserService.ParseFileGroups(input);
+        var groups = await _parserService.ParseFileGroupsAsync(input);
 
         var mobDrops = groups.Select(x => _parserService.ParseMobGroup(x, itemManager)).ToList();
 
@@ -856,36 +859,36 @@ public class ParserTests
         {
             MonsterProtoId = 101,
             MinKillCount = 75,
-            Probabilities = new List<uint>() { 20 },
-            Drops = new List<MonsterItemGroup.Drop> { new() { ItemProtoId = 10, Amount = 1, Chance = 30 } }
+            Probabilities = [20],
+            Drops = [new MonsterItemGroup.Drop { ItemProtoId = 10, Amount = 1, Chance = 30 }]
         });
         mobDrops[1].Should().NotBeNull();
         mobDrops[1].Should().BeEquivalentTo(new MonsterItemGroup()
         {
             MonsterProtoId = 102,
             MinKillCount = 75,
-            Probabilities = new List<uint>() { 20 },
-            Drops = new List<MonsterItemGroup.Drop> { new() { ItemProtoId = 11, Amount = 2, Chance = 30 } }
+            Probabilities = [20],
+            Drops = [new MonsterItemGroup.Drop { ItemProtoId = 11, Amount = 2, Chance = 30 }]
         });
     }
 
     [Fact]
-    public async Task Drop_MonsterItem_MultipleDrop_SingleGroup()
+    public async Task Drop_MonsterItem_MultipleDrop_SingleGroupAsync()
     {
-        var input = GetStreamReader("""
-                                    Group	Abc
-                                    {
-                                        Kill_drop	75
-                                    	Mob	101
-                                    	Type	kill
-                                    	1	10	1	20	30
-                                    	2	11	2	25	35
-                                    }
-                                    """);
+        using var input = GetStreamReader("""
+                                          Group	Abc
+                                          {
+                                              Kill_drop	75
+                                          	Mob	101
+                                          	Type	kill
+                                          	1	10	1	20	30
+                                          	2	11	2	25	35
+                                          }
+                                          """);
 
         var itemManager = Substitute.For<IItemManager>();
 
-        var groups = await _parserService.ParseFileGroups(input);
+        var groups = await _parserService.ParseFileGroupsAsync(input);
 
         var mobDrops = groups.Select(x => _parserService.ParseMobGroup(x, itemManager)).ToList();
 
@@ -920,40 +923,40 @@ public class ParserTests
         {
             MonsterProtoId = 101,
             MinKillCount = 75,
-            Probabilities = new List<uint>() { 20, 25 },
-            Drops = new List<MonsterItemGroup.Drop>
-            {
-                new() { ItemProtoId = 10, Amount = 1, Chance = 30 },
-                new() { ItemProtoId = 11, Amount = 2, Chance = 35 }
-            }
+            Probabilities = [20, 25],
+            Drops =
+            [
+                new MonsterItemGroup.Drop { ItemProtoId = 10, Amount = 1, Chance = 30 },
+                new MonsterItemGroup.Drop { ItemProtoId = 11, Amount = 2, Chance = 35 }
+            ]
         });
     }
 
     [Fact]
-    public async Task Drop_MonsterItem_MultipleDrop_MultipleGroup()
+    public async Task Drop_MonsterItem_MultipleDrop_MultipleGroupAsync()
     {
-        var input = GetStreamReader("""
-                                    Group	Abc
-                                    {
-                                        Kill_drop	75
-                                    	Mob	101
-                                    	Type	kill
-                                    	1	10	1	20	30
-                                    	2	11	2	25	35
-                                    }
-                                    Group	Def
-                                    {
-                                        Kill_drop	75
-                                    	Mob	102
-                                    	Type	kill
-                                    	1	11	2	20	30
-                                    	2	11	2	25	35
-                                    }
-                                    """);
+        using var input = GetStreamReader("""
+                                          Group	Abc
+                                          {
+                                              Kill_drop	75
+                                          	Mob	101
+                                          	Type	kill
+                                          	1	10	1	20	30
+                                          	2	11	2	25	35
+                                          }
+                                          Group	Def
+                                          {
+                                              Kill_drop	75
+                                          	Mob	102
+                                          	Type	kill
+                                          	1	11	2	20	30
+                                          	2	11	2	25	35
+                                          }
+                                          """);
 
         var itemManager = Substitute.For<IItemManager>();
 
-        var groups = await _parserService.ParseFileGroups(input);
+        var groups = await _parserService.ParseFileGroupsAsync(input);
 
         var mobDrops = groups.Select(x => _parserService.ParseMobGroup(x, itemManager)).ToList();
 
@@ -1012,24 +1015,24 @@ public class ParserTests
         {
             MonsterProtoId = 101,
             MinKillCount = 75,
-            Probabilities = new List<uint>() { 20, 25 },
-            Drops = new List<MonsterItemGroup.Drop>
-            {
-                new() { ItemProtoId = 10, Amount = 1, Chance = 30 },
-                new() { ItemProtoId = 11, Amount = 2, Chance = 35 }
-            }
+            Probabilities = [20, 25],
+            Drops =
+            [
+                new MonsterItemGroup.Drop { ItemProtoId = 10, Amount = 1, Chance = 30 },
+                new MonsterItemGroup.Drop { ItemProtoId = 11, Amount = 2, Chance = 35 }
+            ]
         });
         mobDrops[1].Should().NotBeNull();
         mobDrops[1].Should().BeEquivalentTo(new MonsterItemGroup()
         {
             MonsterProtoId = 102,
             MinKillCount = 75,
-            Probabilities = new List<uint>() { 20, 25 },
-            Drops = new List<MonsterItemGroup.Drop>
-            {
-                new() { ItemProtoId = 11, Amount = 2, Chance = 30 },
-                new() { ItemProtoId = 11, Amount = 2, Chance = 35 }
-            }
+            Probabilities = [20, 25],
+            Drops =
+            [
+                new MonsterItemGroup.Drop { ItemProtoId = 11, Amount = 2, Chance = 30 },
+                new MonsterItemGroup.Drop { ItemProtoId = 11, Amount = 2, Chance = 35 }
+            ]
         });
     }
 
@@ -1114,11 +1117,11 @@ public class ParserTests
     }
 
     [Fact]
-    public async Task CommonDrop_SingleLine_SingleDrop()
+    public async Task CommonDrop_SingleLine_SingleDropAsync()
     {
-        var input = new StringReader("""
-                                     ABC	1	15	0.08	11	5000
-                                     """);
+        using var input = new StringReader("""
+                                           ABC	1	15	0.08	11	5000
+                                           """);
 
         var result = await _parserService.GetCommonDropsAsync(input);
 
@@ -1130,11 +1133,11 @@ public class ParserTests
     }
 
     [Fact]
-    public async Task CommonDrop_SingleLineNoLabel_SingleDrop()
+    public async Task CommonDrop_SingleLineNoLabel_SingleDropAsync()
     {
-        var input = new StringReader("""
-                                     	1	15	0.08	11	5000
-                                     """);
+        using var input = new StringReader("""
+                                           	1	15	0.08	11	5000
+                                           """);
 
         var result = await _parserService.GetCommonDropsAsync(input);
 
@@ -1146,11 +1149,11 @@ public class ParserTests
     }
 
     [Fact]
-    public async Task CommonDrop_SingleLineInvalid_SingleDrop()
+    public async Task CommonDrop_SingleLineInvalid_SingleDropAsync()
     {
-        var input = new StringReader("""
-                                     					
-                                     """);
+        using var input = new StringReader("""
+
+                                           """);
 
         var result = await _parserService.GetCommonDropsAsync(input);
 
@@ -1158,11 +1161,11 @@ public class ParserTests
     }
 
     [Fact]
-    public async Task CommonDrop_SingleLine_MultipleDrop_WithLabels()
+    public async Task CommonDrop_SingleLine_MultipleDrop_WithLabelsAsync()
     {
-        var input = new StringReader("""
-                                     ABC	1	15	0.08	11	5000	DEF	1	15	0.104	11	3846	GHI	1	15	0.12	11	3333	JKL	1	15	0.32	11	1250
-                                     """);
+        using var input = new StringReader("""
+                                           ABC	1	15	0.08	11	5000	DEF	1	15	0.104	11	3846	GHI	1	15	0.12	11	3333	JKL	1	15	0.32	11	1250
+                                           """);
 
         var result = await _parserService.GetCommonDropsAsync(input);
 
@@ -1189,11 +1192,11 @@ public class ParserTests
     }
 
     [Fact]
-    public async Task CommonDrop_SingleLine_MultipleDrop()
+    public async Task CommonDrop_SingleLine_MultipleDropAsync()
     {
-        var input = new StringReader("""
-                                     1	15	0.04	12	10000		1	15	0.052	12	7692		1	15	0.06	12	6666		1	15	0.16	12	2500
-                                     """);
+        using var input = new StringReader("""
+                                           1	15	0.04	12	10000		1	15	0.052	12	7692		1	15	0.06	12	6666		1	15	0.16	12	2500
+                                           """);
 
         var result = await _parserService.GetCommonDropsAsync(input);
 

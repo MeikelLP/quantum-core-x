@@ -80,15 +80,15 @@ public class ItemManager : IItemManager, ILoadable
         var items = new LzoXtea(result.Payload.RealSize, result.Payload.EncryptedSize, 0x2A4A1, 0x45415AA,
             0x185A8BE7,
             0x1AAD6AB);
-        var itemsRaw = items.Decode(result.Payload.EncryptedPayload);
-        var data = bs.Deserialize<ItemData[]>(itemsRaw);
+        var itemsRaw = items.Decode([.. result.Payload.EncryptedPayload]);
+        var data = await bs.DeserializeAsync<ItemData[]>(itemsRaw);
 
         _items = data.Select(proto => new ItemData
         {
-            Applies = proto.Applies.Select(x => new ItemApplyData { Type = x.Type, Value = x.Value }).ToList(),
+            Applies = [.. proto.Applies.Select(x => new ItemApplyData { Type = x.Type, Value = x.Value })],
             Flags = proto.Flags,
             Id = proto.Id,
-            Limits = proto.Limits.Select(x => new ItemLimitData { Type = x.Type, Value = x.Value }).ToList(),
+            Limits = [.. proto.Limits.Select(x => new ItemLimitData { Type = x.Type, Value = x.Value })],
             Name = proto.Name,
             Size = proto.Size,
             Sockets = proto.Sockets,

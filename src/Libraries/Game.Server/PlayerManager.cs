@@ -28,7 +28,7 @@ public class PlayerManager : IPlayerManager
         _gameOptions = gameOptions.Value;
     }
 
-    public async Task<PlayerData?> GetPlayer(Guid accountId, byte slot)
+    public async Task<PlayerData?> GetPlayerAsync(Guid accountId, byte slot)
     {
         var cachedPlayer = await _cachePlayerRepository.GetPlayerAsync(accountId, slot);
         if (cachedPlayer is null)
@@ -47,7 +47,7 @@ public class PlayerManager : IPlayerManager
         return cachedPlayer;
     }
 
-    public async Task<PlayerData?> GetPlayer(uint playerId)
+    public async Task<PlayerData?> GetPlayerAsync(uint playerId)
     {
         var cachedPlayer = await _cachePlayerRepository.GetPlayerAsync(playerId);
         if (cachedPlayer is null)
@@ -73,7 +73,7 @@ public class PlayerManager : IPlayerManager
         await _dbPlayerRepository.SetPlayerAsync(data);
     }
 
-    public async Task<PlayerData[]> GetPlayers(Guid accountId)
+    public async Task<PlayerData[]> GetPlayersAsync(Guid accountId)
     {
         // get players always from db not from cache
 

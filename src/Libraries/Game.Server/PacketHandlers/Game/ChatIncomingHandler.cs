@@ -33,7 +33,7 @@ public class ChatIncomingHandler : IGamePacketHandler<ChatIncoming>
         {
             if (ctx.Packet.Message.StartsWith('/'))
             {
-                await _commandManager.Handle(ctx.Connection, ctx.Packet.Message);
+                await _commandManager.HandleAsync(ctx.Connection, ctx.Packet.Message);
             }
             else
             {
@@ -48,7 +48,7 @@ public class ChatIncomingHandler : IGamePacketHandler<ChatIncoming>
             // todo check 15 seconds cooldown
             var message = ctx.Connection.Player.Name + ": " + ctx.Packet.Message;
 
-            await _chatManager.Shout(message);
+            await _chatManager.ShoutAsync(message);
         }
     }
 }

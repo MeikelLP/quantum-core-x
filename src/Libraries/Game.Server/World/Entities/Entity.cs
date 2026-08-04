@@ -87,7 +87,7 @@ public abstract class Entity : IEntity
     private bool _positionChanged;
     protected PlayerEntity? LastAttacker { get; private set; }
 
-    public Entity(IAnimationManager animationManager, uint vid)
+    protected Entity(IAnimationManager animationManager, uint vid)
     {
         _animationManager = animationManager;
         Vid = vid;
@@ -319,7 +319,7 @@ public abstract class Entity : IEntity
     /// <param name="victim">The victim of the damage</param>
     /// <param name="attack">The current attack value</param>
     /// <returns>The new attack value with the bonus</returns>
-    private int CalculateAttackBonus(IEntity victim, int attack)
+    private static int CalculateAttackBonus(IEntity victim, int attack)
     {
         // todo implement bonus attack against animals etc...
         // todo implement bonus attack against warriors etc...

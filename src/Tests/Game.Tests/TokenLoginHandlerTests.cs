@@ -22,7 +22,7 @@ public class TokenLoginHandlerTests
     [InlineData("127.0.0.1", "127.0.0.1", "127.0.0.1")]
     [InlineData("198.51.100.10", "198.51.100.10", "198.51.100.10")]
     [InlineData("93.184.216.34", "93.184.216.34", "93.184.216.34")]
-    public async Task ExecuteAsync_AdvertisesExpectedCharacterHost(
+    public async Task ExecuteAsync_AdvertisesExpectedCharacterHostAsync(
         string mapHostIp,
         string connectionInterfaceIp,
         string expectedAdvertisedIp)
@@ -68,15 +68,17 @@ public class TokenLoginHandlerTests
             var tokenCacheKey = $"token:{TOKEN_KEY}";
             var accountTokenKey = $"account:token:{accountId}";
 
-            serverStore.Exists(tokenCacheKey).Returns(new ValueTask<long>(1));
-            serverStore.Get<Token>(tokenCacheKey).Returns(new ValueTask<Token>(new Token
+#pragma warning disable CA2012 // await - not needed here
+            serverStore.ExistsAsync(tokenCacheKey).Returns(new ValueTask<long>(1));
+            serverStore.GetAsync<Token>(tokenCacheKey).Returns(new ValueTask<Token>(new Token
             {
                 AccountId = accountId, Username = USERNAME
             }));
-            sharedStore.Get<uint>(accountTokenKey).Returns(new ValueTask<uint>(0));
-            serverStore.Persist(tokenCacheKey).Returns(new ValueTask<long>(1));
-            sharedStore.Expire(accountTokenKey, Arg.Any<TimeSpan>()).Returns(new ValueTask<long>(1));
-            serverStore.Set(Arg.Any<string>(), Arg.Any<object>()).Returns(new ValueTask<string>("OK"));
+            sharedStore.GetAsync<uint>(accountTokenKey).Returns(new ValueTask<uint>(0));
+            serverStore.PersistAsync(tokenCacheKey).Returns(new ValueTask<long>(1));
+            sharedStore.ExpireAsync(accountTokenKey, Arg.Any<TimeSpan>()).Returns(new ValueTask<long>(1));
+            serverStore.SetAsync(Arg.Any<string>(), Arg.Any<object>()).Returns(new ValueTask<string>("OK"));
+#pragma warning restore CA2012
 
             var player = new PlayerData
             {
@@ -90,16 +92,16 @@ public class TokenLoginHandlerTests
                 Empire = EEmpire.SHINSOO
             };
 
-            playerManager.GetPlayers(accountId).Returns(Task.FromResult(new[] { player }));
+            playerManager.GetPlayersAsync(accountId).Returns(Task.FromResult(new[] { player }));
             guildManager.GetGuildForPlayerAsync(player.Id, Arg.Any<CancellationToken>())
                 .Returns(Task.FromResult<GuildData?>(null));
 
-            var coreHost = new CoreHost { _ip = mapHostIp, _port = 13000 };
+            var coreHost = new CoreHost { Ip = mapHostIp, Port = 13000 };
             world.GetMapHost(Arg.Any<int>(), Arg.Any<int>()).Returns(coreHost);
 
             var serverBase = Substitute.For<IServerBase>();
             serverBase.IpAddress.Returns(connectionInterfaceIp);
-            serverBase.Port.Returns(coreHost._port);
+            serverBase.Port.Returns(coreHost.Port);
 
             var phase = EPhase.HANDSHAKE;
             var assignedAccountId = (Guid?)null;

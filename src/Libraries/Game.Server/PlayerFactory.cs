@@ -21,7 +21,7 @@ public class PlayerFactory : IPlayerFactory
     public async Task<IPlayerEntity> CreatePlayerAsync(IGameConnection connection, PlayerData player)
     {
         var entity = ActivatorUtilities.CreateInstance<PlayerEntity>(_provider, [connection, player]);
-        await entity.Load();
+        await entity.LoadAsync();
 
         return entity;
     }

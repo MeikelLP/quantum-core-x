@@ -17,15 +17,12 @@ public class TestQuest : Quest
     public override void Init()
     {
         // todo invent api for register npc click event on player
-        GameEventManager.RegisterNpcClickEvent("Test Quest", 20354, Test, player => player.Vid == Player.Vid);
-        GameEventManager.RegisterNpcGiveEvent("Test Quest", 20016, (player, item) =>
-        {
-            TestGive(player, item);
-            return Task.CompletedTask;
-        }, (player, _) => player.Vid == Player.Vid);
+        GameEventManager.RegisterNpcClickEvent("Test Quest", 20354, TestAsync, player => player.Vid == Player.Vid);
+        GameEventManager.RegisterNpcGiveEvent("Test Quest", 20016,
+            async (player, item) => { await TestGiveAsync(player, item); }, (player, _) => player.Vid == Player.Vid);
     }
 
-    private async Task Test(IPlayerEntity player)
+    private async Task TestAsync(IPlayerEntity player)
     {
         Text("Hello World from QuantumCore!");
         Text("This is using the current work in progress");
@@ -34,13 +31,13 @@ public class TestQuest : Quest
 
         Text("This is the second page showing how to easily");
         Text("using await to wait for user response");
-        var choice = await Choice(false, "1st option", "2nd option");
+        var choice = await ChoiceAsync(false, "1st option", "2nd option");
 
         Text($"You've chosen: {choice}");
         Done();
     }
 
-    private void TestGive(IPlayerEntity player, ItemInstance item)
+    private async Task TestGiveAsync(IPlayerEntity player, ItemInstance item)
     {
         var proto = _itemManager.GetItem(item.ItemId);
 
@@ -51,7 +48,7 @@ public class TestQuest : Quest
         else
         {
             Text($"Thanks for giving me the item {proto.TranslatedName}.");
-            player.Inventory.PlaceItem(item);
+            await player.Inventory.PlaceItemAsync(item);
         }
 
         Done();

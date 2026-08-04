@@ -35,5 +35,6 @@ public class PurgeCommandOptions
 
 public enum PurgeCommandOption
 {
+    UNKNOWN = 0,
     ALL = 1
 }

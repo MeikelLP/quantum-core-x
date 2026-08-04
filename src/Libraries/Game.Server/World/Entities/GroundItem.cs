@@ -27,7 +27,7 @@ public class GroundItem : Entity, IGroundItem
 
     public override EEntityType Type { get; }
 
-    public override byte HealthPercentage { get; } = 0;
+    public override byte HealthPercentage { get; }
 
     protected override void OnNewNearbyEntity(IEntity entity)
     {

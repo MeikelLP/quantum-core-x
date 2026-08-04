@@ -24,23 +24,23 @@ public interface IPlayerEntity : IEntity
     EAntiFlags AntiFlagClass { get; }
     EAntiFlags AntiFlagGender { get; }
 
-    Task Load();
-    Task ReloadPermissions();
+    Task LoadAsync();
+    Task ReloadPermissionsAsync();
     T? GetQuestInstance<T>() where T : class, IQuest;
     void Respawn(bool town);
     uint CalculateAttackDamage(uint baseDamage);
     uint GetHitRate();
     void AddPoint(EPoint point, int value);
     void SetPoint(EPoint point, uint value);
-    void DropItem(ItemInstance item, byte count);
-    void Pickup(IGroundItem groundItem);
+    Task DropItemAsync(ItemInstance item, byte count);
+    Task PickupAsync(IGroundItem groundItem);
     void DropGold(uint amount);
     ItemInstance? GetItem(WindowType window, ushort position);
     bool IsSpaceAvailable(ItemInstance item, WindowType window, ushort position);
     bool IsEquippable(ItemInstance item);
-    bool DestroyItem(ItemInstance item);
+    Task<bool> DestroyItemAsync(ItemInstance item);
     void RemoveItem(ItemInstance item);
-    void SetItem(ItemInstance item, WindowType window, ushort position);
+    Task SetItemAsync(ItemInstance item, WindowType window, ushort position);
     void Disconnect();
     Task OnDespawnAsync();
     Task CalculatePlayedTimeAsync();

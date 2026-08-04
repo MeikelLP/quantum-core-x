@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
@@ -159,15 +160,15 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
         return info.StartHp + info.HpPerHt * point + info.HpPerLevel * level;
     }
 
-    public async Task Load()
+    public async Task LoadAsync()
     {
-        await Inventory.Load();
-        await QuickSlotBar.Load();
+        await Inventory.LoadAsync();
+        await QuickSlotBar.LoadAsync();
         Player.MaxHp = GetMaxHp(_jobManager, Player.PlayerClass, Player.Level, Player.Ht);
         Player.MaxSp = GetMaxSp(_jobManager, Player.PlayerClass, Player.Level, Player.Iq);
         Health = (int)GetPoint(EPoint.MAX_HP); // todo: cache hp of player
         Mana = (int)GetPoint(EPoint.MAX_SP);
-        await LoadPermGroups();
+        await LoadPermGroupsAsync();
         await Skills.LoadAsync();
         var guildManager = _scope.ServiceProvider.GetRequiredService<IGuildManager>();
         Guild = await guildManager.GetGuildForPlayerAsync(Player.Id);
@@ -179,18 +180,18 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
         CalculateAttackSpeed();
     }
 
-    public async Task ReloadPermissions()
+    public async Task ReloadPermissionsAsync()
     {
         Groups.Clear();
-        await LoadPermGroups();
+        await LoadPermGroupsAsync();
     }
 
-    private async Task LoadPermGroups()
+    private async Task LoadPermGroupsAsync()
     {
         var commandPermissionRepository = _scope.ServiceProvider.GetRequiredService<ICommandPermissionRepository>();
         var playerId = Player.Id;
 
-        var groups = await commandPermissionRepository.GetGroupsForPlayer(playerId);
+        var groups = await commandPermissionRepository.GetGroupsForPlayerAsync(playerId);
 
         foreach (var group in groups)
         {
@@ -225,8 +226,8 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
         {
             PositionX = PositionX,
             PositionY = PositionY,
-            ServerAddress = BitConverter.ToInt32(host._ip.GetAddressBytes()),
-            ServerPort = host._port
+            ServerAddress = BitConverter.ToInt32(host.Ip.GetAddressBytes()),
+            ServerPort = host.Port
         };
         Connection.Send(packet);
     }
@@ -369,20 +370,9 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
 
         Dead = false;
 
-        if (town)
+        if (town && TryGetTownCoordinates(Player.Empire, Map!, out var coordinates))
         {
-            var townCoordinates = Map!.TownCoordinates;
-            if (townCoordinates is not null)
-            {
-                Move(Player.Empire switch
-                {
-                    EEmpire.CHUNJO => townCoordinates.Chunjo,
-                    EEmpire.JINNO => townCoordinates.Jinno,
-                    EEmpire.SHINSOO => townCoordinates.Shinsoo,
-                    _ => throw new ArgumentOutOfRangeException(nameof(Player.Empire),
-                        $"Can't get empire coordinates for empire {Player.Empire}")
-                });
-            }
+            Move(coordinates.Value);
         }
 
         // todo spawn with invisible affect
@@ -408,6 +398,27 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
         Health = PlayerConstants.RESPAWN_HEALTH;
         Mana = PlayerConstants.RESPAWN_MANA;
         this.SendPoints();
+    }
+
+    private static bool TryGetTownCoordinates(EEmpire playerEmpire, IMap map,
+        [NotNullWhen(true)] out Coordinates? coordinates)
+    {
+        coordinates = null;
+        var townCoordinates = map.TownCoordinates;
+        if (townCoordinates is not null)
+        {
+            coordinates = playerEmpire switch
+            {
+                EEmpire.CHUNJO => townCoordinates.Chunjo,
+                EEmpire.JINNO => townCoordinates.Jinno,
+                EEmpire.SHINSOO => townCoordinates.Shinsoo,
+                _ => throw new ArgumentOutOfRangeException(nameof(playerEmpire),
+                    $"Can't get empire coordinates for empire {playerEmpire}")
+            };
+            return true;
+        }
+
+        return false;
     }
 
     public void RecalculateStatusPoints()
@@ -559,8 +570,7 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
         }
         else if (ctx.ElapsedSince(_lastPersistTime.Value) > TimeSpan.FromMilliseconds(PERSIST_INTERVAL))
         {
-            Persist().Wait(); // TODO
-            _lastPersistTime = ctx.Timestamp;
+            _ = PersistAsync().ContinueWith(_ => { _lastPersistTime = ctx.Timestamp; }, TaskScheduler.Current);
         }
     }
 
@@ -848,9 +858,9 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
         }
     }
 
-    private async Task Persist()
+    private async Task PersistAsync()
     {
-        await QuickSlotBar.Persist();
+        await QuickSlotBar.PersistAsync();
 
         Player.PositionX = PositionX;
         Player.PositionY = PositionY;
@@ -871,7 +881,7 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
         entity.HideEntity(Connection);
     }
 
-    public void DropItem(ItemInstance item, byte count)
+    public async Task DropItemAsync(ItemInstance item, byte count)
     {
         if (count > item.Count)
         {
@@ -882,12 +892,12 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
         {
             RemoveItem(item);
             this.SendRemoveItem(item.Window, (ushort)item.Position);
-            _itemRepository.DeletePlayerItemAsync(_cacheManager, item.PlayerId, item.ItemId).Wait(); // TODO
+            await _itemRepository.DeletePlayerItemAsync(_cacheManager, item.PlayerId, item.ItemId);
         }
         else
         {
             item.Count -= count;
-            item.Persist(_itemRepository).Wait(); // TODO
+            await item.PersistAsync(_itemRepository);
 
             this.SendItem(item);
 
@@ -905,7 +915,7 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
         (Map as Map)?.AddGroundItem(item, PositionX, PositionY);
     }
 
-    public void Pickup(IGroundItem groundItem)
+    public async Task PickupAsync(IGroundItem groundItem)
     {
         if (Map is null) return;
 
@@ -925,7 +935,7 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
             return;
         }
 
-        if (!Inventory.PlaceItem(item).Result) // TODO
+        if (!await Inventory.PlaceItemAsync(item)) // TODO
         {
             this.SendChatInfo("No inventory space left");
             return;
@@ -972,7 +982,7 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
 
     public async Task OnDespawnAsync()
     {
-        await Persist();
+        await PersistAsync();
     }
 
     public int GetMobItemRate()
@@ -1025,7 +1035,7 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
     {
         var key = $"player:{Player.Id}:loggedInTime";
         var startSessionElapsed = TimeSpan.FromMilliseconds(
-            await _cacheManager.Server.Get<long>(key)
+            await _cacheManager.Server.GetAsync<long>(key)
         );
         var currentElapsed = Connection.Server.Clock.Elapsed;
         var totalSessionTime = currentElapsed - startSessionElapsed;
@@ -1118,10 +1128,10 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
         return true;
     }
 
-    public bool DestroyItem(ItemInstance item)
+    public async Task<bool> DestroyItemAsync(ItemInstance item)
     {
         RemoveItem(item);
-        if (!item.Destroy(_cacheManager).Result) // TODO
+        if (!await item.DestroyAsync(_cacheManager))
         {
             return false;
         }
@@ -1155,7 +1165,7 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
         }
     }
 
-    public void SetItem(ItemInstance item, WindowType window, ushort position)
+    public async Task SetItemAsync(ItemInstance item, WindowType window, ushort position)
     {
         switch (window)
         {
@@ -1166,7 +1176,7 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
                     if (Inventory.EquipmentWindow.GetItem(position) is null)
                     {
                         Inventory.SetEquipment(item, position);
-                        item.Set(_cacheManager, Player.Id, window, position, _itemRepository).Wait(); // TODO
+                        await item.SetAsync(_cacheManager, Player.Id, window, position, _itemRepository);
                         CalculateDefence();
                         CalculateMovement();
                         CalculateAttackSpeed();
@@ -1177,7 +1187,7 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
                 else
                 {
                     // Inventory
-                    Inventory.PlaceItem(item, position);
+                    await Inventory.PlaceItemAsync(item, position);
                 }
 
                 break;

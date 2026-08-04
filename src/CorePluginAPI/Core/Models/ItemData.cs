@@ -27,10 +27,12 @@ public class ItemData
     [FieldOrder(11)] public uint ImmuneFlags { get; set; }
     [FieldOrder(12)] public uint BuyPrice { get; set; }
     [FieldOrder(13)] public uint SellPrice { get; set; }
-    [FieldOrder(14), FieldLength(5 * 2)] public List<ItemLimitData> Limits { get; set; } = [];
-    [FieldOrder(15), FieldLength(5 * 3)] public List<ItemApplyData> Applies { get; set; } = [];
-    [FieldOrder(16), FieldLength(6 * 4)] public List<int> Values { get; set; } = [];
-    [FieldOrder(17), FieldLength(3 * 4)] public List<int> Sockets { get; set; } = [];
+#pragma warning disable CA1002
+    [FieldOrder(14), FieldLength(5 * 2)] public List<ItemLimitData> Limits { get; init; } = [];
+    [FieldOrder(15), FieldLength(5 * 3)] public List<ItemApplyData> Applies { get; init; } = [];
+    [FieldOrder(16), FieldLength(6 * 4)] public List<int> Values { get; init; } = [];
+    [FieldOrder(17), FieldLength(3 * 4)] public List<int> Sockets { get; init; } = [];
+#pragma warning restore CA1002
     [FieldOrder(18)] public uint UpgradeId { get; set; }
     [FieldOrder(19)] public ushort UpgradeSet { get; set; }
     [FieldOrder(20)] public byte MagicItemPercentage { get; set; }

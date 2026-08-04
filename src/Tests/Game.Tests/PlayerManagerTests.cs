@@ -1,3 +1,4 @@
+using System.Security.Cryptography;
 using AwesomeAssertions;
 using Core.Persistence;
 using Game.Caching;
@@ -77,7 +78,7 @@ public class PlayerManagerTests : IClassFixture<RedisFixture>, IClassFixture<Dat
 
     public async Task DisposeAsync()
     {
-        await _cacheManager.FlushAll();
+        await _cacheManager.FlushAllAsync();
         await _db.Players.ExecuteDeleteAsync();
         await _scope.DisposeAsync();
     }
@@ -86,7 +87,7 @@ public class PlayerManagerTests : IClassFixture<RedisFixture>, IClassFixture<Dat
     [InlineData(EEmpire.SHINSOO)]
     [InlineData(EEmpire.CHUNJO)]
     [InlineData(EEmpire.JINNO)]
-    public async Task CreateCharacter(EEmpire empire)
+    public async Task CreateCharacterAsync(EEmpire empire)
     {
         var accountId = Guid.NewGuid();
         await _cachePlayer.SetTempEmpireAsync(accountId, empire);
@@ -110,15 +111,15 @@ public class PlayerManagerTests : IClassFixture<RedisFixture>, IClassFixture<Dat
 
         var playerKey = $"player:{player.Id.ToString()}";
         var accountKey = $"players:{accountId.ToString()}:0";
-        (await _cacheManager.Server.Keys("*")).Should().HaveCount(3)
+        (await _cacheManager.Server.KeysAsync("*")).Should().HaveCount(3)
             .And.Contain(playerKey)
             .And.Contain(accountKey)
             .And.Contain($"temp:empire-selection:{accountId}");
-        (await _cacheManager.Server.Get<PlayerData>(playerKey)).Should().BeEquivalentTo(player);
+        (await _cacheManager.Server.GetAsync<PlayerData>(playerKey)).Should().BeEquivalentTo(player);
     }
 
     [Fact]
-    public async Task IsNameInUseOtherAccount()
+    public async Task IsNameInUseOtherAccountAsync()
     {
         var accountId = Guid.NewGuid();
         await _cachePlayer.SetTempEmpireAsync(accountId, EEmpire.CHUNJO);
@@ -132,35 +133,35 @@ public class PlayerManagerTests : IClassFixture<RedisFixture>, IClassFixture<Dat
     }
 
     [Fact]
-    public async Task GetPlayerById()
+    public async Task GetPlayerByIdAsync()
     {
-        var playerId = (uint)Random.Shared.Next();
+        var playerId = (uint)RandomNumberGenerator.GetInt32(0, 100);
         var input = new PlayerData { Id = playerId, Name = "1234" };
-        await _cacheManager.Server.Set($"player:{playerId}", input);
+        await _cacheManager.Server.SetAsync($"player:{playerId}", input);
 
-        var output = await _playerManager.GetPlayer(playerId);
+        var output = await _playerManager.GetPlayerAsync(playerId);
 
         output.Should().BeEquivalentTo(input);
     }
 
     [Fact]
-    public async Task GetPlayer_OnlyInDb_CreatesCache()
+    public async Task GetPlayer_OnlyInDb_CreatesCacheAsync()
     {
-        var playerId = (uint)Random.Shared.Next();
+        var playerId = (uint)RandomNumberGenerator.GetInt32(0, 100);
         await _dbPlayerRepository.CreateAsync(new PlayerData
         {
             Id = playerId, Name = "1234", AccountId = new Guid("AB79A4E3-21E3-4A7A-AB84-C9A94C3DC041")
         });
-        var player = await _playerManager.GetPlayer(playerId);
+        var player = await _playerManager.GetPlayerAsync(playerId);
 
-        var keys = await _cacheManager.Server.Keys("*");
+        var keys = await _cacheManager.Server.KeysAsync("*");
         keys.Should().HaveCount(2);
         keys.Should().Contain($"player:{playerId}");
         keys.Should().Contain($"players:{player!.AccountId}:0");
     }
 
     [Fact]
-    public async Task GetPlayerByAccountIdAndSlot()
+    public async Task GetPlayerByAccountIdAndSlotAsync()
     {
         var empire = EEmpire.JINNO;
         var accountId = Guid.NewGuid();
@@ -186,8 +187,8 @@ public class PlayerManagerTests : IClassFixture<RedisFixture>, IClassFixture<Dat
         await _cachePlayer.SetTempEmpireAsync(accountId, empire);
         await _playerManager.CreateAsync(accountId, input1.Name, 0, 0);
         await _playerManager.CreateAsync(accountId, input2.Name, 0, 0);
-        var output1 = await _playerManager.GetPlayer(accountId, 0);
-        var output2 = await _playerManager.GetPlayer(accountId, 1);
+        var output1 = await _playerManager.GetPlayerAsync(accountId, 0);
+        var output2 = await _playerManager.GetPlayerAsync(accountId, 1);
 
         output1.Should().BeEquivalentTo(input1, cfg => cfg.Excluding(x => x.Id));
         output2.Should().BeEquivalentTo(input2, cfg => cfg.Excluding(x => x.Id));
@@ -197,33 +198,33 @@ public class PlayerManagerTests : IClassFixture<RedisFixture>, IClassFixture<Dat
     }
 
     [Fact]
-    public async Task GetPlayerByAccountIdAndSlot_OnlyInDb_CreatesCache()
+    public async Task GetPlayerByAccountIdAndSlot_OnlyInDb_CreatesCacheAsync()
     {
-        var playerId = (uint)Random.Shared.Next();
+        var playerId = (uint)RandomNumberGenerator.GetInt32(0, 100);
         var accountId = Guid.NewGuid();
         await _dbPlayerRepository.CreateAsync(new PlayerData { AccountId = accountId, Id = playerId, Name = "1234" });
-        var player = await _playerManager.GetPlayer(accountId, 0);
+        var player = await _playerManager.GetPlayerAsync(accountId, 0);
 
         player.Should().NotBeNull();
 
-        var keys = await _cacheManager.Server.Keys("*");
+        var keys = await _cacheManager.Server.KeysAsync("*");
         keys.Should().HaveCount(2).And
             .Contain($"player:{playerId}").And
             .Contain($"players:{accountId}:0");
     }
 
     [Fact]
-    public async Task GetPlayerById_NotFound()
+    public async Task GetPlayerById_NotFoundAsync()
     {
-        var output = await _playerManager.GetPlayer((uint)Random.Shared.Next());
+        var output = await _playerManager.GetPlayerAsync((uint)RandomNumberGenerator.GetInt32(0, 100));
 
         output.Should().BeNull();
     }
 
     [Fact]
-    public async Task GetPlayerById_WithMultiplePlayers_CachesUnderCorrectSlot()
+    public async Task GetPlayerById_WithMultiplePlayers_CachesUnderCorrectSlotAsync()
     {
-        await _cacheManager.FlushAll();
+        await _cacheManager.FlushAllAsync();
 
         var accountId = Guid.NewGuid();
 
@@ -239,12 +240,12 @@ public class PlayerManagerTests : IClassFixture<RedisFixture>, IClassFixture<Dat
             Id = THIRD_ID, AccountId = accountId, Name = "PlayerC"
         });
 
-        var fetched = await _playerManager.GetPlayer(SECOND_ID);
+        var fetched = await _playerManager.GetPlayerAsync(SECOND_ID);
 
         fetched.Should().NotBeNull();
         fetched.Id.Should().Be(SECOND_ID);
 
-        var keys = await _cacheManager.Server.Keys("*");
+        var keys = await _cacheManager.Server.KeysAsync("*");
         keys.Should().HaveCount(2)
             .And.Contain($"player:{SECOND_ID}")
             .And.Contain($"players:{accountId}:1");
@@ -253,22 +254,22 @@ public class PlayerManagerTests : IClassFixture<RedisFixture>, IClassFixture<Dat
     }
 
     [Fact]
-    public async Task GetPlayerByAccountIdAndSlot_NotFound()
+    public async Task GetPlayerByAccountIdAndSlot_NotFoundAsync()
     {
-        var output = await _playerManager.GetPlayer(Guid.NewGuid(), 0);
+        var output = await _playerManager.GetPlayerAsync(Guid.NewGuid(), 0);
 
         output.Should().BeNull();
     }
 
     [Fact]
-    public async Task DeleteCharacter()
+    public async Task DeleteCharacterAsync()
     {
         var accountId = Guid.NewGuid();
         await _cachePlayer.SetTempEmpireAsync(accountId, EEmpire.CHUNJO);
         var player = await _playerManager.CreateAsync(accountId, "Testificate", 0, 1);
         await _playerManager.DeletePlayerAsync(player);
 
-        (await _cacheManager.Server.Keys("*")).Should().BeEquivalentTo([$"temp:empire-selection:{accountId}"]);
+        (await _cacheManager.Server.KeysAsync("*")).Should().BeEquivalentTo([$"temp:empire-selection:{accountId}"]);
         (await _dbPlayerRepository.GetPlayersAsync(accountId)).Should().BeEmpty();
     }
 
@@ -278,9 +279,9 @@ public class PlayerManagerTests : IClassFixture<RedisFixture>, IClassFixture<Dat
     [InlineData(2)]
     [InlineData(3)]
     [InlineData(4)]
-    public async Task GetPlayers_ReturnsOrderedAndCachesWithSlots(int charactersCount)
+    public async Task GetPlayers_ReturnsOrderedAndCachesWithSlotsAsync(int charactersCount)
     {
-        await _cacheManager.FlushAll();
+        await _cacheManager.FlushAllAsync();
         await _db.Players.ExecuteDeleteAsync();
 
         var accountId = Guid.NewGuid();
@@ -293,7 +294,7 @@ public class PlayerManagerTests : IClassFixture<RedisFixture>, IClassFixture<Dat
                 new PlayerData { Id = id, AccountId = accountId, Name = $"Player{i}" });
         }
 
-        var players = await _playerManager.GetPlayers(accountId);
+        var players = await _playerManager.GetPlayersAsync(accountId);
 
         players.Should().HaveCount(charactersCount);
         for (var i = 0; i < charactersCount; i++)
@@ -304,7 +305,7 @@ public class PlayerManagerTests : IClassFixture<RedisFixture>, IClassFixture<Dat
             players[i].Id.Should().Be(expectedId);
         }
 
-        var keys = await _cacheManager.Server.Keys("*");
+        var keys = await _cacheManager.Server.KeysAsync("*");
         keys.Should().HaveCount(charactersCount * 2);
         for (var i = 0; i < charactersCount; i++)
         {

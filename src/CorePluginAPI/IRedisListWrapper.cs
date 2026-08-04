@@ -2,13 +2,13 @@
 
 public interface IRedisListWrapper
 {
-    ValueTask<long> Len();
+    ValueTask<long> LenAsync();
 }
 
 public interface IRedisListWrapper<T> : IRedisListWrapper
 {
-    ValueTask<T> Index(int slot);
-    ValueTask<T[]> Range(int start, int stop);
-    ValueTask<long> Push(params T[] arr);
-    ValueTask<long> Rem(int count, T obj);
+    ValueTask<T> IndexAsync(int slot);
+    ValueTask<T[]> RangeAsync(int start, int stop);
+    ValueTask<long> PushAsync(params T[] arr);
+    ValueTask<long> RemAsync(int count, T obj);
 }

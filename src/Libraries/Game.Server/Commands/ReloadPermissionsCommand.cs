@@ -30,12 +30,12 @@ public class ReloadPermissionsCommand : ICommandHandler<ReloadPermissionsCommand
         // Reload permissions for target player or all players
         if (target is not null)
         {
-            await target.ReloadPermissions();
+            await target.ReloadPermissionsAsync();
         }
         else
         {
             var players = _world.GetPlayers();
-            await Task.WhenAll(players.Select(x => x.ReloadPermissions()));
+            await Task.WhenAll(players.Select(x => x.ReloadPermissionsAsync()));
         }
 
         context.Player.SendChatInfo("Permissions reloaded");

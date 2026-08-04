@@ -20,7 +20,7 @@ public abstract class Quest : IQuest
     private TaskCompletionSource? _currentNextTask;
     private TaskCompletionSource<byte>? _currentChoiceTask;
 
-    public Quest(QuestState state, IPlayerEntity player)
+    protected Quest(QuestState state, IPlayerEntity player)
     {
         State = state;
         Player = player;
@@ -69,7 +69,7 @@ public abstract class Quest : IQuest
         _player.CurrentQuest = this;
     }
 
-    protected async Task<byte> Choice(bool done = false, params string[] options)
+    protected async Task<byte> ChoiceAsync(bool done = false, params string[] options)
     {
         Debug.Assert(options.Length > 0);
 

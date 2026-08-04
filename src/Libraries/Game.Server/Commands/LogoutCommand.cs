@@ -23,7 +23,7 @@ public class LogoutCommand : ICommandHandler
         context.Player.SendChatInfo("Logging out. Please wait.");
         await context.Player.CalculatePlayedTimeAsync();
         await _world.DespawnPlayerAsync(context.Player);
-        await _cacheManager.Del("account:token:" + context.Player.Player.AccountId);
+        await _cacheManager.DelAsync("account:token:" + context.Player.Player.AccountId);
         context.Player.Disconnect();
     }
 }

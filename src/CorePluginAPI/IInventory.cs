@@ -12,9 +12,9 @@ public interface IInventory
     IEquipment EquipmentWindow { get; }
     long Size { get; }
     event EventHandler<SlotChangedEventArgs> OnSlotChanged;
-    Task Load();
-    Task<bool> PlaceItem(ItemInstance item);
-    Task<bool> PlaceItem(ItemInstance item, ushort position);
+    Task LoadAsync();
+    Task<bool> PlaceItemAsync(ItemInstance item);
+    Task<bool> PlaceItemAsync(ItemInstance item, ushort position);
     void RemoveItem(ItemInstance item);
     ItemInstance? GetItem(ushort position);
     bool IsSpaceAvailable(ItemInstance item, ushort position);

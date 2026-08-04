@@ -50,7 +50,9 @@ internal sealed class MapAttributeProvider : IMapAttributeProvider
                 attrPath, sectreesWidth, sectreesHeight, expectedSectreesWidth, expectedSectreesHeight);
         }
 
+#pragma warning disable CA1814 // no multi dimensional arrays - is okay we want a grid here
         var sectrees = new MapAttributeSectree?[sectreesHeight, sectreesWidth];
+#pragma warning restore CA1814
         var lzoDecompressor = new Lzo(MapAttributeSet.CELLS_PER_SECTREE * sizeof(uint));
         var intBuffer = new byte[4];
 
@@ -160,13 +162,17 @@ internal sealed class MapAttributeProvider : IMapAttributeProvider
         internal const int CELLS_PER_AXIS = SECTREE_SIZE / CELL_SIZE;
         internal const int CELLS_PER_SECTREE = CELLS_PER_AXIS * CELLS_PER_AXIS;
 
+#pragma warning disable CA1814 // no multi dimensional arrays - is okay we want a grid here
         private readonly MapAttributeSectree?[,] _sectreesAttrs;
+#pragma warning restore CA1814
         private readonly int _sectreesWidth;
         private readonly int _sectreesHeight;
         private readonly Coordinates _baseCoords;
 
         public MapAttributeSet(int sectreesWidth, int sectreesHeight, Coordinates basePosition,
+#pragma warning disable CA1814 // no multi dimensional arrays - is okay we want a grid here
             MapAttributeSectree?[,] sectreesAttrs)
+#pragma warning restore CA1814
         {
             _sectreesWidth = sectreesWidth;
             _sectreesHeight = sectreesHeight;

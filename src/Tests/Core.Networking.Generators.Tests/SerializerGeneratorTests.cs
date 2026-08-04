@@ -10,7 +10,7 @@ namespace Core.Networking.Generators.Tests;
 
 public class SerializerGeneratorTests
 {
-    private static Compilation CreateCompilation(params string[] source)
+    private static CSharpCompilation CreateCompilation(params string[] source)
         => CSharpCompilation.Create("compilation",
             source.Select(x => CSharpSyntaxTree.ParseText(x)).ToArray(),
             new[]
@@ -60,7 +60,7 @@ using System.Threading.Tasks;
 using QuantumCore.Networking;
 
 // no async warning if no properties
-#pragma warning disable CS1998 
+#pragma warning disable CS1998
 
 namespace QuantumCore.Core.Packets {
 
@@ -178,7 +178,7 @@ using System.Threading.Tasks;
 using QuantumCore.Networking;
 
 // no async warning if no properties
-#pragma warning disable CS1998 
+#pragma warning disable CS1998
 
 namespace QuantumCore.Core.Packets {
 
@@ -269,7 +269,7 @@ using QuantumCore.Networking;
 namespace QuantumCore.Core.Packets;
 
 public enum HandshakeType : byte {
-    
+
 }
 
 [Packet(0xff, EDirection.INCOMING | EDirection.OUTGOING)]
@@ -300,7 +300,7 @@ using System.Threading.Tasks;
 using QuantumCore.Networking;
 
 // no async warning if no properties
-#pragma warning disable CS1998 
+#pragma warning disable CS1998
 
 namespace QuantumCore.Core.Packets {
 
@@ -380,7 +380,7 @@ using QuantumCore.Networking;
 namespace QuantumCore.Core.Packets;
 
 public enum HandshakeType : int {
-    
+
 }
 
 [Packet(0xff, EDirection.INCOMING | EDirection.OUTGOING)]
@@ -411,7 +411,7 @@ using System.Threading.Tasks;
 using QuantumCore.Networking;
 
 // no async warning if no properties
-#pragma warning disable CS1998 
+#pragma warning disable CS1998
 
 namespace QuantumCore.Core.Packets {
 
@@ -497,7 +497,7 @@ namespace QuantumCore.Core.Packets;
 [PacketGenerator]
 public partial record struct GCHandshake(uint Handshake, uint Time) {
     [Field(0)]
-    public uint Size => 15; 
+    public uint Size => 15;
 }
 ".Trim());
 
@@ -524,7 +524,7 @@ using System.Threading.Tasks;
 using QuantumCore.Networking;
 
 // no async warning if no properties
-#pragma warning disable CS1998 
+#pragma warning disable CS1998
 
 namespace QuantumCore.Core.Packets {
 
@@ -643,7 +643,7 @@ using System.Threading.Tasks;
 using QuantumCore.Networking;
 
 // no async warning if no properties
-#pragma warning disable CS1998 
+#pragma warning disable CS1998
 
 namespace QuantumCore.Core.Packets {
 
@@ -756,7 +756,7 @@ using System.Threading.Tasks;
 using QuantumCore.Networking;
 
 // no async warning if no properties
-#pragma warning disable CS1998 
+#pragma warning disable CS1998
 
 namespace QuantumCore.Core.Packets {
 
@@ -869,7 +869,7 @@ using System.Threading.Tasks;
 using QuantumCore.Networking;
 
 // no async warning if no properties
-#pragma warning disable CS1998 
+#pragma warning disable CS1998
 
 namespace QuantumCore.Core.Packets {
 
@@ -980,7 +980,7 @@ using System.Threading.Tasks;
 using QuantumCore.Networking;
 
 // no async warning if no properties
-#pragma warning disable CS1998 
+#pragma warning disable CS1998
 
 namespace QuantumCore.Core.Packets {
 
@@ -1102,7 +1102,7 @@ using System.Threading.Tasks;
 using QuantumCore.Networking;
 
 // no async warning if no properties
-#pragma warning disable CS1998 
+#pragma warning disable CS1998
 
 namespace QuantumCore.Core.Packets {
 
@@ -1214,7 +1214,7 @@ using System.Threading.Tasks;
 using QuantumCore.Networking;
 
 // no async warning if no properties
-#pragma warning disable CS1998 
+#pragma warning disable CS1998
 
 namespace QuantumCore.Core.Packets {
 
@@ -1334,7 +1334,7 @@ using System.Threading.Tasks;
 using QuantumCore.Networking;
 
 // no async warning if no properties
-#pragma warning disable CS1998 
+#pragma warning disable CS1998
 
 namespace QuantumCore.Game.Packets {
 
@@ -1443,7 +1443,7 @@ using System.Threading.Tasks;
 using QuantumCore.Networking;
 
 // no async warning if no properties
-#pragma warning disable CS1998 
+#pragma warning disable CS1998
 
 namespace QuantumCore.Core.Packets {
 
@@ -1544,7 +1544,7 @@ using System.Threading.Tasks;
 using QuantumCore.Networking;
 
 // no async warning if no properties
-#pragma warning disable CS1998 
+#pragma warning disable CS1998
 
 namespace QuantumCore.Core.Packets {
 
@@ -1650,7 +1650,7 @@ using System.Threading.Tasks;
 using QuantumCore.Networking;
 
 // no async warning if no properties
-#pragma warning disable CS1998 
+#pragma warning disable CS1998
 
 namespace QuantumCore.Core.Packets {
 
@@ -1751,7 +1751,7 @@ using System.Threading.Tasks;
 using QuantumCore.Networking;
 
 // no async warning if no properties
-#pragma warning disable CS1998 
+#pragma warning disable CS1998
 
 namespace QuantumCore.Core.Packets {
 
@@ -1884,7 +1884,7 @@ using System.Threading.Tasks;
 using QuantumCore.Networking;
 
 // no async warning if no properties
-#pragma warning disable CS1998 
+#pragma warning disable CS1998
 
 namespace QuantumCore.Core.Packets {
 
@@ -1996,7 +1996,7 @@ using System.Threading.Tasks;
 using QuantumCore.Networking;
 
 // no async warning if no properties
-#pragma warning disable CS1998 
+#pragma warning disable CS1998
 
 namespace QuantumCore.Core.Packets {
 
@@ -2147,7 +2147,7 @@ using System.Threading.Tasks;
 using QuantumCore.Networking;
 
 // no async warning if no properties
-#pragma warning disable CS1998 
+#pragma warning disable CS1998
 
 namespace QuantumCore.Core.Packets {
 
@@ -2267,7 +2267,7 @@ using System.Threading.Tasks;
 using QuantumCore.Networking;
 
 // no async warning if no properties
-#pragma warning disable CS1998 
+#pragma warning disable CS1998
 
 namespace QuantumCore.Core.Packets {
 
@@ -2356,7 +2356,7 @@ using System.Threading.Tasks;
 using QuantumCore.Networking;
 
 // no async warning if no properties
-#pragma warning disable CS1998 
+#pragma warning disable CS1998
 
 namespace QuantumCore.Core.Packets {
 
@@ -2458,7 +2458,7 @@ using System.Threading.Tasks;
 using QuantumCore.Networking;
 
 // no async warning if no properties
-#pragma warning disable CS1998 
+#pragma warning disable CS1998
 
 namespace QuantumCore.Core.Packets {
 
@@ -2579,7 +2579,7 @@ using System.Threading.Tasks;
 using QuantumCore.Networking;
 
 // no async warning if no properties
-#pragma warning disable CS1998 
+#pragma warning disable CS1998
 
 namespace QuantumCore.Core.Packets {
 
@@ -2698,7 +2698,7 @@ using System.Threading.Tasks;
 using QuantumCore.Networking;
 
 // no async warning if no properties
-#pragma warning disable CS1998 
+#pragma warning disable CS1998
 
 namespace QuantumCore.Core.Packets {
 
@@ -2802,7 +2802,7 @@ using System.Threading.Tasks;
 using QuantumCore.Networking;
 
 // no async warning if no properties
-#pragma warning disable CS1998 
+#pragma warning disable CS1998
 
 namespace QuantumCore.Core.Packets {
 
@@ -2916,7 +2916,7 @@ using System.Threading.Tasks;
 using QuantumCore.Networking;
 
 // no async warning if no properties
-#pragma warning disable CS1998 
+#pragma warning disable CS1998
 
 namespace QuantumCore.Core.Packets {
 
@@ -3019,7 +3019,7 @@ using System.Threading.Tasks;
 using QuantumCore.Networking;
 
 // no async warning if no properties
-#pragma warning disable CS1998 
+#pragma warning disable CS1998
 
 namespace QuantumCore.Core.Packets {
 
@@ -3153,7 +3153,7 @@ using System.Threading.Tasks;
 using QuantumCore.Networking;
 
 // no async warning if no properties
-#pragma warning disable CS1998 
+#pragma warning disable CS1998
 
 namespace QuantumCore.Core.Packets {
 
@@ -3284,7 +3284,7 @@ using System.Threading.Tasks;
 using QuantumCore.Networking;
 
 // no async warning if no properties
-#pragma warning disable CS1998 
+#pragma warning disable CS1998
 
 namespace QuantumCore.Core.Packets {
 
@@ -3492,7 +3492,7 @@ using System.Threading.Tasks;
 using QuantumCore.Networking;
 
 // no async warning if no properties
-#pragma warning disable CS1998 
+#pragma warning disable CS1998
 
 namespace QuantumCore.Core.Packets {
 
@@ -3646,7 +3646,7 @@ using System.Threading.Tasks;
 using QuantumCore.Networking;
 
 // no async warning if no properties
-#pragma warning disable CS1998 
+#pragma warning disable CS1998
 
 namespace QuantumCore.Core.Packets {
 
@@ -3816,7 +3816,7 @@ using System.Threading.Tasks;
 using QuantumCore.Networking;
 
 // no async warning if no properties
-#pragma warning disable CS1998 
+#pragma warning disable CS1998
 
 namespace QuantumCore.Game.Packets {
 
@@ -3945,7 +3945,7 @@ using System.Threading.Tasks;
 using QuantumCore.Networking;
 
 // no async warning if no properties
-#pragma warning disable CS1998 
+#pragma warning disable CS1998
 
 namespace QuantumCore.Game.Packets {
 

@@ -6,8 +6,8 @@ namespace QuantumCore.API;
 
 public interface IServerBase
 {
-    Task RemoveConnection(IConnection connection);
-    Task CallListener(IConnection connection, IPacketSerializable packet);
+    Task RemoveConnectionAsync(IConnection connection);
+    Task CallListenerAsync(IConnection connection, IPacketSerializable packet);
     ServerClock Clock { get; }
     IPAddress IpAddress { get; }
     ushort Port { get; }

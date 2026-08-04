@@ -33,7 +33,7 @@ public class ItemProtoTests
     }
 
     [Fact]
-    public async Task CanRead()
+    public async Task CanReadAsync()
     {
         await _itemManager.LoadAsync();
         var item = _itemManager.GetItem(10);
@@ -76,7 +76,7 @@ public class ItemProtoTests
     }
 
     [Fact]
-    public async Task CanGetApplyValue()
+    public async Task CanGetApplyValueAsync()
     {
         await _itemManager.LoadAsync();
         var item = _itemManager.GetItem(10);

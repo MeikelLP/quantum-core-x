@@ -39,7 +39,7 @@ public class PhaseSelectCommand : ICommandHandler
         await using var scope = _serviceProvider.CreateAsyncScope();
         var playerManager = scope.ServiceProvider.GetRequiredService<IPlayerManager>();
         var guildManager = scope.ServiceProvider.GetRequiredService<IGuildManager>();
-        var charactersFromCacheOrDb = await playerManager.GetPlayers(context.Player.Connection.AccountId.Value);
+        var charactersFromCacheOrDb = await playerManager.GetPlayersAsync(context.Player.Connection.AccountId.Value);
         foreach (var player in charactersFromCacheOrDb)
         {
             var host = _world.GetMapHost(player.PositionX, player.PositionY);
@@ -47,8 +47,8 @@ public class PhaseSelectCommand : ICommandHandler
 
             var slot = (int)player.Slot;
             characters.CharacterList[slot] = player.ToCharacter();
-            characters.CharacterList[slot].Ip = BitConverter.ToInt32(host._ip.GetAddressBytes());
-            characters.CharacterList[slot].Port = host._port;
+            characters.CharacterList[slot].Ip = BitConverter.ToInt32(host.Ip.GetAddressBytes());
+            characters.CharacterList[slot].Port = host.Port;
             characters.GuildIds[slot] = guild?.Id ?? 0;
             characters.GuildNames[slot] = guild?.Name ?? "";
         }

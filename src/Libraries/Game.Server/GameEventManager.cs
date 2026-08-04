@@ -25,14 +25,14 @@ public static class GameEventManager
     private static readonly Dictionary<uint, List<NpcClickEvent>> NpcClickEvents = new();
     private static readonly Dictionary<uint, List<NpcGiveEvent>> NpcGiveEvents = new();
 
-    public static async Task OnNpcClick(uint npcId, IPlayerEntity player)
+    public static async Task OnNpcClickAsync(uint npcId, IPlayerEntity player)
     {
-        if (!NpcClickEvents.ContainsKey(npcId))
+        if (!NpcClickEvents.TryGetValue(npcId, out var value))
         {
             return;
         }
 
-        var events = NpcClickEvents[npcId].Where(e => e.Condition is null || e.Condition(player)).ToList();
+        var events = value.Where(e => e.Condition is null || e.Condition(player)).ToList();
         if (events.Count > 1)
         {
             // todo make sure interface IPlayerEntity is enough
@@ -43,7 +43,7 @@ public static class GameEventManager
                 return;
             }
 
-            var selected = await internalQuest.SelectQuest(events.Select(e => e.Name));
+            var selected = await internalQuest.SelectQuestAsync(events.Select(e => e.Name));
             if (events[selected].Callback.Target is not Quest.Quest)
             {
                 internalQuest.EndQuest();
@@ -54,7 +54,7 @@ public static class GameEventManager
             return;
         }
 
-        if (!events.Any())
+        if (events.Count == 0)
         {
             return;
         }
@@ -62,14 +62,14 @@ public static class GameEventManager
         await events[0].Callback(player);
     }
 
-    public static async Task OnNpcGive(uint npcId, IPlayerEntity player, ItemInstance item)
+    public static async Task OnNpcGiveAsync(uint npcId, IPlayerEntity player, ItemInstance item)
     {
-        if (!NpcGiveEvents.ContainsKey(npcId))
+        if (!NpcGiveEvents.TryGetValue(npcId, out var value))
         {
             return;
         }
 
-        var events = NpcGiveEvents[npcId].Where(e => e.Condition is null || e.Condition(player, item)).ToList();
+        var events = value.Where(e => e.Condition is null || e.Condition(player, item)).ToList();
         if (events.Count > 1)
         {
             // todo make sure interface IPlayerEntity is enough
@@ -77,7 +77,7 @@ public static class GameEventManager
 
             if (internalQuest is null) return;
 
-            var selected = await internalQuest.SelectQuest(events.Select(e => e.Name));
+            var selected = await internalQuest.SelectQuestAsync(events.Select(e => e.Name));
             if (events[selected].Callback.Target is not Quest.Quest)
             {
                 internalQuest.EndQuest();
@@ -88,7 +88,7 @@ public static class GameEventManager
             return;
         }
 
-        if (!events.Any())
+        if (events.Count == 0)
         {
             return;
         }
@@ -99,12 +99,13 @@ public static class GameEventManager
     public static void RegisterNpcClickEvent(string name, uint npcId, Func<IPlayerEntity, Task> callback,
         Func<IPlayerEntity, bool>? condition = null)
     {
-        if (!NpcClickEvents.ContainsKey(npcId))
+        if (!NpcClickEvents.TryGetValue(npcId, out var value))
         {
-            NpcClickEvents[npcId] = new List<NpcClickEvent>();
+            value = new List<NpcClickEvent>();
+            NpcClickEvents[npcId] = value;
         }
 
-        NpcClickEvents[npcId].Add(new NpcClickEvent
+        value.Add(new NpcClickEvent
         {
             Name = name,
             NpcId = npcId,
@@ -116,12 +117,13 @@ public static class GameEventManager
     public static void RegisterNpcGiveEvent(string name, uint npcId, Func<IPlayerEntity, ItemInstance, Task> callback,
         Func<IPlayerEntity, ItemInstance, bool>? condition = null)
     {
-        if (!NpcGiveEvents.ContainsKey(npcId))
+        if (!NpcGiveEvents.TryGetValue(npcId, out var value))
         {
-            NpcGiveEvents[npcId] = new List<NpcGiveEvent>();
+            value = new List<NpcGiveEvent>();
+            NpcGiveEvents[npcId] = value;
         }
 
-        NpcGiveEvents[npcId].Add(new NpcGiveEvent
+        value.Add(new NpcGiveEvent
         {
             Name = name,
             NpcId = npcId,

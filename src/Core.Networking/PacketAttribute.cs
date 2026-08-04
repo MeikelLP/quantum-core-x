@@ -1,7 +1,7 @@
 ﻿namespace QuantumCore.Networking;
 
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Struct, Inherited = false)]
-public class PacketAttribute : Attribute
+public sealed class PacketAttribute : Attribute
 {
     public PacketAttribute(byte header, EDirection direction)
     {
@@ -9,7 +9,7 @@ public class PacketAttribute : Attribute
         Direction = direction;
     }
 
-    public byte Header { get; set; }
-    public EDirection Direction { get; set; }
+    public byte Header { get; }
+    public EDirection Direction { get; }
     public bool Sequence { get; set; }
 }

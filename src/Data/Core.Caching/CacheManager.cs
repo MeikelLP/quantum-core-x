@@ -4,19 +4,16 @@ using QuantumCore.API;
 
 namespace QuantumCore.Caching;
 
-public class CacheManager : ICacheManager
+public sealed class CacheManager : ICacheManager
 {
-    private readonly ILogger<CacheManager> _logger;
-
     public IRedisStore Shared { get; }
     public IRedisStore Server { get; }
 
-    private IRedisStore _defaultRedisStore;
+    private readonly IRedisStore _defaultRedisStore;
 
     public CacheManager(ILogger<CacheManager> logger, IServiceProvider serviceProvider)
     {
-        _logger = logger;
-        _logger.LogInformation("Initialize Cache Manager");
+        logger.LogInformation("Initialize Cache Manager");
 
         Shared = serviceProvider.GetRequiredKeyedService<IRedisStore>(CacheStoreType.SHARED);
         Server = serviceProvider.GetRequiredKeyedService<IRedisStore>(CacheStoreType.SERVER);
@@ -25,17 +22,17 @@ public class CacheManager : ICacheManager
     }
 
     public IRedisListWrapper<T> CreateList<T>(string name) => _defaultRedisStore.CreateList<T>(name);
-    public ValueTask<long> Del(string key) => _defaultRedisStore.Del(key);
-    public ValueTask<string> Set(string key, object item) => _defaultRedisStore.Set(key, item);
-    public ValueTask<T> Get<T>(string key) => _defaultRedisStore.Get<T>(key);
-    public ValueTask<long> Exists(string key) => _defaultRedisStore.Exists(key);
-    public ValueTask<long> Expire(string key, TimeSpan seconds) => _defaultRedisStore.Expire(key, seconds);
-    public ValueTask<bool> Ping() => _defaultRedisStore.Ping();
-    public ValueTask<long> Publish(string key, object obj) => _defaultRedisStore.Publish(key, obj);
+    public ValueTask<long> DelAsync(string key) => _defaultRedisStore.DelAsync(key);
+    public ValueTask<string> SetAsync(string key, object item) => _defaultRedisStore.SetAsync(key, item);
+    public ValueTask<T> GetAsync<T>(string key) => _defaultRedisStore.GetAsync<T>(key);
+    public ValueTask<long> ExistsAsync(string key) => _defaultRedisStore.ExistsAsync(key);
+    public ValueTask<long> ExpireAsync(string key, TimeSpan seconds) => _defaultRedisStore.ExpireAsync(key, seconds);
+    public ValueTask<bool> PingAsync() => _defaultRedisStore.PingAsync();
+    public ValueTask<long> PublishAsync(string key, object obj) => _defaultRedisStore.PublishAsync(key, obj);
     public IRedisSubscriber Subscribe() => _defaultRedisStore.Subscribe();
-    public ValueTask<string[]> Keys(string key) => _defaultRedisStore.Keys(key);
-    public ValueTask<long> Persist(string key) => _defaultRedisStore.Persist(key);
-    public ValueTask<string> FlushAll() => _defaultRedisStore.FlushAll();
-    public void DelAllAsync(string pattern) => _defaultRedisStore.DelAllAsync(pattern);
-    public ValueTask<long> Incr(string key) => _defaultRedisStore.Incr(key);
+    public ValueTask<string[]> KeysAsync(string key) => _defaultRedisStore.KeysAsync(key);
+    public ValueTask<long> PersistAsync(string key) => _defaultRedisStore.PersistAsync(key);
+    public ValueTask<string> FlushAllAsync() => _defaultRedisStore.FlushAllAsync();
+    public ValueTask DelAllAsync(string pattern) => _defaultRedisStore.DelAllAsync(pattern);
+    public ValueTask<long> IncrAsync(string key) => _defaultRedisStore.IncrAsync(key);
 }

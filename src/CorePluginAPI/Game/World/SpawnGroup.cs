@@ -1,3 +1,5 @@
+using System.Collections.Immutable;
+
 namespace QuantumCore.API.Game.World;
 
 public class SpawnMember
@@ -20,12 +22,12 @@ public class SpawnGroup
     public uint Id { get; set; }
     public string Name { get; set; } = "";
     public uint Leader { get; set; }
-    public List<SpawnMember> Members { get; init; } = [];
+    public ImmutableArray<SpawnMember> Members { get; init; } = [];
 }
 
 public class SpawnGroupCollection
 {
     public uint Id { get; set; }
     public string Name { get; set; } = "";
-    public List<SpawnGroupCollectionMember> Groups { get; init; } = [];
+    public ImmutableArray<SpawnGroupCollectionMember> Groups { get; init; } = [];
 }

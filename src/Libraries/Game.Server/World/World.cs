@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.Immutable;
+using System.Diagnostics;
 using System.Net;
 using System.Security.Cryptography;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,7 +14,7 @@ using QuantumCore.Game.Services;
 
 namespace QuantumCore.Game.World;
 
-public class World : IWorld, ILoadable
+public class World : IWorld
 {
     private readonly ILogger<World> _logger;
     private readonly PluginExecutor _pluginExecutor;
@@ -84,7 +85,7 @@ public class World : IWorld, ILoadable
             }
         }
 
-        await LoadRemoteMaps();
+        await LoadRemoteMapsAsync();
     }
 
     /// <summary>
@@ -97,7 +98,7 @@ public class World : IWorld, ILoadable
         {
             if (map is Map m)
             {
-                await m.Initialize();
+                await m.InitializeAsync();
             }
         }
 
@@ -131,9 +132,9 @@ public class World : IWorld, ILoadable
         }
     }
 
-    private async Task LoadRemoteMaps()
+    private async Task LoadRemoteMapsAsync()
     {
-        var keys = await _cacheManager.Keys("maps:*");
+        var keys = await _cacheManager.KeysAsync("maps:*");
 
         foreach (var key in keys)
         {
@@ -144,7 +145,7 @@ public class World : IWorld, ILoadable
                 continue;
             }
 
-            var address = await _cacheManager.Get<string>(key);
+            var address = await _cacheManager.GetAsync<string>(key);
             var parts = address.Split(":");
             Debug.Assert(parts.Length == 2);
 
@@ -204,7 +205,7 @@ public class World : IWorld, ILoadable
         return _maps.TryGetValue(name, out var map) ? map : null;
     }
 
-    public List<IMap> FindMapsByName(string needle)
+    public ImmutableArray<IMap> FindMapsByName(string needle)
     {
         var list = new List<IMap>();
         foreach (var (name, map) in _maps)
@@ -213,7 +214,7 @@ public class World : IWorld, ILoadable
             {
                 list.Clear();
                 list.Add(map);
-                return list;
+                return [.. list];
             }
 
             if (name.Contains(needle, StringComparison.InvariantCultureIgnoreCase))
@@ -222,7 +223,7 @@ public class World : IWorld, ILoadable
             }
         }
 
-        return list;
+        return [.. list];
     }
 
     public CoreHost GetMapHost(int x, int y)
@@ -231,7 +232,7 @@ public class World : IWorld, ILoadable
         if (map is null)
         {
             _logger.LogWarning("No available host for map at {X}|{Y}", x, y);
-            return new CoreHost { _ip = IPAddress.None, _port = 0 };
+            return new CoreHost { Ip = IPAddress.None, Port = 0 };
         }
 
         if (map is RemoteMap remoteMap)
@@ -243,24 +244,24 @@ public class World : IWorld, ILoadable
                 throw new InvalidOperationException("Cannot handle this situation. See logs.");
             }
 
-            return new CoreHost { _ip = remoteMap.Host, _port = remoteMap.Port };
+            return new CoreHost { Ip = remoteMap.Host, Port = remoteMap.Port };
         }
 
         return new CoreHost
         {
-            _ip = _serviceProvider.GetRequiredService<IServerBase>().IpAddress, // lazy because of dependency loop
-            _port = GameServer.Instance.Port
+            Ip = _serviceProvider.GetRequiredService<IServerBase>().IpAddress, // lazy because of dependency loop
+            Port = GameServer.Instance.Port
         };
     }
 
     public SpawnGroup? GetGroup(uint id)
     {
-        if (!_groups.ContainsKey(id))
+        if (!_groups.TryGetValue(id, out var value))
         {
             return null;
         }
 
-        return _groups[id];
+        return value;
     }
 
     public SpawnGroup GetRandomGroup()
@@ -273,12 +274,12 @@ public class World : IWorld, ILoadable
 
     public SpawnGroupCollection? GetGroupCollection(uint id)
     {
-        if (!_groupCollections.ContainsKey(id))
+        if (!_groupCollections.TryGetValue(id, out var value))
         {
             return null;
         }
 
-        return _groupCollections[id];
+        return value;
     }
 
     public void SpawnEntity(IEntity e)
@@ -304,10 +305,12 @@ public class World : IWorld, ILoadable
                 player.Vid, map.Name);
         }
 
-        _pluginExecutor.ExecutePlugins<IGameEntityLifetimeListener>(_logger, x => x.OnPreCreatedAsync()).Wait();
+#pragma warning disable VSTHRD002 // use await - TODO
+        _pluginExecutor.ExecutePluginsAsync<IGameEntityLifetimeListener>(_logger, x => x.OnPreCreatedAsync()).Wait();
         map.SpawnEntity(e);
 
-        _pluginExecutor.ExecutePlugins<IGameEntityLifetimeListener>(_logger, x => x.OnPostCreatedAsync()).Wait();
+        _pluginExecutor.ExecutePluginsAsync<IGameEntityLifetimeListener>(_logger, x => x.OnPostCreatedAsync()).Wait();
+#pragma warning restore VSTHRD002
     }
 
     public void DespawnEntity(IEntity entity)
@@ -317,9 +320,11 @@ public class World : IWorld, ILoadable
             RemovePlayer(player);
         }
 
-        _pluginExecutor.ExecutePlugins<IGameEntityLifetimeListener>(_logger, x => x.OnPreDeletedAsync()).Wait();
+#pragma warning disable VSTHRD002 // use await - TODO
+        _pluginExecutor.ExecutePluginsAsync<IGameEntityLifetimeListener>(_logger, x => x.OnPreDeletedAsync()).Wait();
         entity.Map?.DespawnEntity(entity);
-        _pluginExecutor.ExecutePlugins<IGameEntityLifetimeListener>(_logger, x => x.OnPostDeletedAsync()).Wait();
+        _pluginExecutor.ExecutePluginsAsync<IGameEntityLifetimeListener>(_logger, x => x.OnPostDeletedAsync()).Wait();
+#pragma warning restore VSTHRD002
     }
 
     public async Task DespawnPlayerAsync(IPlayerEntity player)
@@ -327,9 +332,9 @@ public class World : IWorld, ILoadable
         RemovePlayer(player);
         await player.OnDespawnAsync();
 
-        _pluginExecutor.ExecutePlugins<IGameEntityLifetimeListener>(_logger, x => x.OnPreDeletedAsync()).Wait();
+        await _pluginExecutor.ExecutePluginsAsync<IGameEntityLifetimeListener>(_logger, x => x.OnPreDeletedAsync());
         player.Map?.DespawnEntity(player);
-        _pluginExecutor.ExecutePlugins<IGameEntityLifetimeListener>(_logger, x => x.OnPostDeletedAsync()).Wait();
+        await _pluginExecutor.ExecutePluginsAsync<IGameEntityLifetimeListener>(_logger, x => x.OnPostDeletedAsync());
     }
 
     public uint GenerateVid()
@@ -339,10 +344,8 @@ public class World : IWorld, ILoadable
 
     private void AddPlayer(IPlayerEntity e)
     {
-        if (_players.ContainsKey(e.Name))
+        if (!_players.TryAdd(e.Name, e))
             _players[e.Name] = e;
-        else
-            _players.Add(e.Name, e);
     }
 
     public void RemovePlayer(IPlayerEntity e)

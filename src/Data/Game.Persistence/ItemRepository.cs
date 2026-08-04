@@ -75,6 +75,6 @@ public class ItemRepository : IItemRepository
         }
 
         var key = $"item:{item.Id}";
-        await _cacheManager.Set(key, item);
+        await _cacheManager.SetAsync(key, item);
     }
 }

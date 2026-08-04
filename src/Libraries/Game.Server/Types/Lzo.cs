@@ -6,8 +6,6 @@ namespace QuantumCore.Game.Types;
 /// </summary>
 public class Lzo
 {
-    private const uint M1_MARKER = 0x0;
-    private const uint M2_MARKER = 0x40;
     private const uint M3_MARKER = 0x20;
     private const uint M4_MARKER = 0x10;
 
@@ -35,7 +33,7 @@ public class Lzo
         return buffer;
     }
 
-    private int ConsumeZeroByteLength(MemoryStream src)
+    private static int ConsumeZeroByteLength(MemoryStream src)
     {
         var pos = src.Position;
         while (src.ReadByte() == 0)
@@ -47,7 +45,7 @@ public class Lzo
         return (int)src.Position - (int)pos;
     }
 
-    private void Decompress(MemoryStream src, byte[] dest)
+    private static void Decompress(MemoryStream src, byte[] dest)
     {
         var srcSize = src.Length;
         var destSize = src.Length;

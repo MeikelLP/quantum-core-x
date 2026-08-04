@@ -72,13 +72,13 @@ public class ItemCommand : ICommandHandler<ItemCommandOptions>
         {
             ItemId = item.Id, Count = context.Arguments.Count, PlayerId = context.Player.Player.Id,
         };
-        if (!await context.Player.Inventory.PlaceItem(instance))
+        if (!await context.Player.Inventory.PlaceItemAsync(instance))
         {
             context.Player.SendChatInfo("No place in inventory");
             return;
         }
 
-        await instance.Persist(_itemRepository);
+        await instance.PersistAsync(_itemRepository);
         context.Player.SendItem(instance);
     }
 }

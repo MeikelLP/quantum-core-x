@@ -30,7 +30,7 @@ public class GameServer : ServerBase<GameConnection>, IGameServer
     private readonly TimeSpan _maxElapsedTime = TimeSpan.FromMilliseconds(500);
 
     public new ImmutableArray<IGameConnection> Connections =>
-        [..base.Connections.Values.Cast<IGameConnection>()];
+        [.. base.Connections.Values.Cast<IGameConnection>()];
 
     public static GameServer Instance { get; private set; } = null!; // singleton
 
@@ -87,10 +87,10 @@ public class GameServer : ServerBase<GameConnection>, IGameServer
         {
             try
             {
-                await _pluginExecutor.ExecutePlugins<IGameTickListener>(_logger,
+                await _pluginExecutor.ExecutePluginsAsync<IGameTickListener>(_logger,
                     x => x.PreUpdateAsync(stoppingToken));
-                await Tick(stoppingToken);
-                await _pluginExecutor.ExecutePlugins<IGameTickListener>(_logger,
+                await TickAsync(stoppingToken);
+                await _pluginExecutor.ExecutePluginsAsync<IGameTickListener>(_logger,
                     x => x.PostUpdateAsync(stoppingToken));
             }
             catch (Exception e)
@@ -100,7 +100,7 @@ public class GameServer : ServerBase<GameConnection>, IGameServer
         }
     }
 
-    private async ValueTask Tick(CancellationToken stoppingToken)
+    private async ValueTask TickAsync(CancellationToken stoppingToken)
     {
         var currentTick = Clock.Now;
         var elapsedTime = Clock.ElapsedBetween(_lastTick, currentTick);

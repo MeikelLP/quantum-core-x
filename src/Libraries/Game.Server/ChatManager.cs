@@ -87,7 +87,7 @@ public class ChatManager : IChatManager, ILoadable
         }
     }
 
-    public async Task Shout(string message)
+    public async Task ShoutAsync(string message)
     {
         var chat = new ChatOutcoming
         {
@@ -109,7 +109,7 @@ public class ChatManager : IChatManager, ILoadable
         });
 
         // Broadcast message to all cores
-        await _cacheManager.Publish("chat",
+        await _cacheManager.PublishAsync("chat",
             new ChatMessage { Type = ChatMessageType.SHOUT, Message = message, OwnerCore = _id });
     }
 }

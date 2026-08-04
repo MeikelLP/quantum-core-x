@@ -39,7 +39,9 @@ public class PlayerSkills : IPlayerSkills
 
     #region Static Skill Data
 
+#pragma warning disable CA1814 // no multi dimensional arrays - is okay here
     private static readonly ESkill[,,] SkillList = new ESkill[JOB_MAX_NUM, SKILL_GROUP_MAX_NUM, SKILL_COUNT]
+#pragma warning restore CA1814
     {
         // Warrior
         {

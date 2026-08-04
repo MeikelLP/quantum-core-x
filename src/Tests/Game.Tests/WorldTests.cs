@@ -25,19 +25,22 @@ using Weikio.PluginFramework.Catalogs;
 
 namespace Game.Tests;
 
-public class WorldTests
+public class WorldTests : IAsyncLifetime
 {
     private World _world = null!;
-    private readonly PlayerEntity _playerEntity;
+    private PlayerEntity _playerEntity = null!;
     private readonly FakeTimeProvider _timeProvider = new();
     private readonly ServerClock _clock;
+    private readonly GameServer _gameServer;
+    private readonly ServiceProvider _services;
+    private static readonly string[] returnThis = new[] { "maps:test_map" };
 
     public WorldTests()
     {
         var config = new ConfigurationBuilder()
             .AddInMemoryCollection(new Dictionary<string, string?> { { "Hosting:IpAddress", "0.0.0.0" } })
             .Build();
-        var services = new ServiceCollection()
+        _services = new ServiceCollection()
             .AddLogging()
             .AddSingleton<IConfiguration>(_ => config)
             .AddCoreServices(new EmptyPluginCatalog(), config)
@@ -69,14 +72,14 @@ public class WorldTests
             .Replace(new ServiceDescriptor(typeof(ICacheManager), _ =>
             {
                 var mock = Substitute.For<ICacheManager>();
-                mock.Keys("maps:*").Returns(new[] { "maps:test_map" });
+                mock.KeysAsync("maps:*").Returns(returnThis);
                 mock.Subscribe().Returns(Substitute.For<IRedisSubscriber>());
                 return mock;
             }, ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(ISpawnPointProvider), _ =>
             {
                 var mock = Substitute.For<ISpawnPointProvider>();
-                mock.GetSpawnPointsForMap("test_map").Returns(Enumerable
+                mock.GetSpawnPointsForMapAsync("test_map").Returns(Enumerable
                     .Range(0, 1)
                     .Select(_ =>
                         new SpawnPoint
@@ -112,25 +115,32 @@ public class WorldTests
             .Replace(new ServiceDescriptor(typeof(TimeProvider), _ => _timeProvider, ServiceLifetime.Singleton))
             .AddSingleton(Substitute.For<IFileProvider>())
             .BuildServiceProvider();
-        _clock = services.GetRequiredService<ServerClock>();
-        var server = services.GetRequiredService<IServerBase>();
+        _clock = _services.GetRequiredService<ServerClock>();
+        var server = _services.GetRequiredService<IServerBase>();
         server.Clock.Returns(_clock);
-        _world = ActivatorUtilities.CreateInstance<World>(services);
-        ActivatorUtilities.CreateInstance<GameServer>(services); // for setting the singleton GameServer.Instance
-        Task.WhenAll(services.GetServices<ILoadable>().Select(x => x.LoadAsync())).Wait();
-        _world.InitAsync().Wait();
+        _world = ActivatorUtilities.CreateInstance<World>(_services);
+        _gameServer =
+            ActivatorUtilities.CreateInstance<GameServer>(_services); // for setting the singleton GameServer.Instance
+    }
+
+    public async Task InitializeAsync()
+    {
+        await Task.WhenAll(_services.GetServices<ILoadable>().Select(x => x.LoadAsync()));
+        await _world.InitAsync();
 
         var conn = Substitute.For<IGameConnection>();
         conn.BoundIpAddress.Returns(IPAddress.Loopback);
-        conn.Server.Returns(server);
+        conn.Server.Returns(_gameServer);
         var playerData = new PlayerData
         {
             Name = "TestPlayer", PlayerClass = EPlayerClassGendered.NINJA_FEMALE, PositionX = 1, PositionY = 1
         };
-        _playerEntity = ActivatorUtilities.CreateInstance<PlayerEntity>(services, _world, playerData, conn);
+        _playerEntity = ActivatorUtilities.CreateInstance<PlayerEntity>(_services, _world, playerData, conn);
         _world.SpawnEntity(_playerEntity);
         _world.Update(Tick(0.2)); // spawn all entities
     }
+
+    public Task DisposeAsync() => throw new NotImplementedException();
 
     [Fact]
     public void World_Update()

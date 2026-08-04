@@ -26,11 +26,11 @@ public class SkillData
     public string PointPoly2 { get; set; } = "";
     public string DurationPoly2 { get; set; } = "";
     public EAffectFlags AffectFlag2 { get; set; } = EAffectFlags.YMIR;
-    public int PrerequisiteSkillVnum { get; set; } = 0;
-    public int PrerequisiteSkillLevel { get; set; } = 0;
+    public int PrerequisiteSkillVnum { get; set; }
+    public int PrerequisiteSkillLevel { get; set; }
     public ESkillType SkillType { get; set; } = ESkillType.NORMAL;
-    public short MaxHit { get; set; } = 0;
+    public short MaxHit { get; set; }
     public string SplashAroundDamageAdjustPoly { get; set; } = "1";
     public int TargetRange { get; set; } = 1000;
-    public uint SplashRange { get; set; } = 0;
+    public uint SplashRange { get; set; }
 }

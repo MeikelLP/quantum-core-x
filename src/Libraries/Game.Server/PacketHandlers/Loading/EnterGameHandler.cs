@@ -40,7 +40,7 @@ public class EnterGameHandler : IGamePacketHandler<EnterGame>
         ctx.Connection.Send(new Channel { ChannelNo = 1 }); // todo
 
         var key = $"player:{player.Player.Id}:loggedInTime";
-        await _cache.Server.Set(key, (long)uptimeMs);
+        await _cache.Server.SetAsync(key, (long)uptimeMs);
 
         player.ShowEntity(ctx.Connection);
         _world.SpawnEntity(player);

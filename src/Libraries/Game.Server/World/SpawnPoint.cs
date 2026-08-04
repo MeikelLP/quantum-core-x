@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using QuantumCore.API.Game.Types.Monsters;
 
 namespace QuantumCore.Game.World;
@@ -12,7 +13,7 @@ public class SpawnPoint
     public int RangeY { get; set; }
     public ESpawnPointDirection Direction { get; set; }
     public int RespawnTime { get; set; }
-    public List<int> Groups { get; } = new List<int>();
+    public ImmutableArray<int> Groups { get; } = [];
     public uint Monster { get; set; }
     public MonsterGroup? CurrentGroup { get; set; }
     public short Chance { get; set; }

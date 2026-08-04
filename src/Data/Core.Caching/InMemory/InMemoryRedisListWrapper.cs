@@ -6,12 +6,12 @@ public class InMemoryRedisListWrapper<T> : IRedisListWrapper<T>
 {
     private readonly List<T> _list = new();
 
-    public ValueTask<T> Index(int slot)
+    public ValueTask<T> IndexAsync(int slot)
     {
         return ValueTask.FromResult(_list[slot]);
     }
 
-    public ValueTask<T[]> Range(int start, int stop)
+    public ValueTask<T[]> RangeAsync(int start, int stop)
     {
         var range = stop > 0
             ? start..stop
@@ -20,19 +20,19 @@ public class InMemoryRedisListWrapper<T> : IRedisListWrapper<T>
         return ValueTask.FromResult(_list[range].ToArray());
     }
 
-    public ValueTask<long> Push(params T[] arr)
+    public ValueTask<long> PushAsync(params T[] arr)
     {
         _list.AddRange(arr);
         return ValueTask.FromResult<long>(arr.Length);
     }
 
-    public ValueTask<long> Rem(int count, T obj)
+    public ValueTask<long> RemAsync(int count, T obj)
     {
         _list.Remove(obj);
         return ValueTask.FromResult<long>(count);
     }
 
-    public ValueTask<long> Len()
+    public ValueTask<long> LenAsync()
     {
         return ValueTask.FromResult<long>(_list.Count);
     }

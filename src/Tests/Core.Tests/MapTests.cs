@@ -29,6 +29,7 @@ public class MapTests
     private readonly ServerClock _clock;
     private readonly Map _map;
     private readonly IWorld _world;
+    private readonly GameServer _gameServer;
 
     public MapTests(ITestOutputHelper testOutputHelper)
     {
@@ -51,7 +52,7 @@ public class MapTests
             {
                 var mock = Substitute.For<ICacheManager>();
                 mock.Subscribe().Returns(Substitute.For<IRedisSubscriber>());
-                mock.Keys(Arg.Any<string>()).Returns(_ => Array.Empty<string>());
+                mock.KeysAsync(Arg.Any<string>()).Returns(_ => Array.Empty<string>());
                 return mock;
             })
             .AddSingleton(npcShopProvider)
@@ -79,7 +80,7 @@ public class MapTests
                         Id = 101,
                         Name = "TestGroup1",
                         Leader = 101,
-                        Members = { new SpawnMember { Id = 101 }, new SpawnMember { Id = 101 } }
+                        Members = [new SpawnMember { Id = 101 }, new SpawnMember { Id = 101 }]
                     }
                 });
                 mock.GetSpawnGroupCollectionsAsync().Returns(_ => new[]
@@ -89,13 +90,13 @@ public class MapTests
                     {
                         Id = 101,
                         Name = "TestGroupCollection",
-                        Groups = { new SpawnGroupCollectionMember { Id = 101, Probability = 1 } }
+                        Groups = [new SpawnGroupCollectionMember { Id = 101, Probability = 1 }]
                     },
                     new SpawnGroupCollection
                     {
                         Id = 101,
                         Name = "TestGroupCollection",
-                        Groups = { new SpawnGroupCollectionMember { Id = 101, Probability = 1 } }
+                        Groups = [new SpawnGroupCollectionMember { Id = 101, Probability = 1 }]
                     }
                 });
                 return mock;
@@ -104,7 +105,7 @@ public class MapTests
             .AddSingleton<ISpawnPointProvider>(_ =>
             {
                 var mock = Substitute.For<ISpawnPointProvider>();
-                mock.GetSpawnPointsForMap(Arg.Any<string>()).Returns(_ => Task.FromResult(_spawnPoints));
+                mock.GetSpawnPointsForMapAsync(Arg.Any<string>()).Returns(_ => Task.FromResult(_spawnPoints));
                 return mock;
             })
             .AddOptions<HostingOptions>(HostingOptions.MODE_GAME)
@@ -118,7 +119,7 @@ public class MapTests
             .AddQuantumCoreTestLogger(testOutputHelper)
             .BuildServiceProvider();
         _clock = provider.GetRequiredService<ServerClock>();
-        ActivatorUtilities.CreateInstance<GameServer>(provider);
+        _gameServer = ActivatorUtilities.CreateInstance<GameServer>(provider);
         var monsterManager = provider.GetRequiredService<IMonsterManager>();
         var animationManager = provider.GetRequiredService<IAnimationManager>();
         var cacheManager = provider.GetRequiredService<ICacheManager>();
@@ -135,7 +136,7 @@ public class MapTests
     }
 
     [Fact]
-    public async Task Spawn_SingleEntity()
+    public async Task Spawn_SingleEntityAsync()
     {
         _spawnPoints = new[]
         {
@@ -161,7 +162,7 @@ public class MapTests
     }
 
     [Fact]
-    public async Task Spawn_Group()
+    public async Task Spawn_GroupAsync()
     {
         _spawnPoints = new[]
         {
@@ -186,7 +187,7 @@ public class MapTests
     }
 
     [Fact]
-    public async Task Spawn_GroupCollection()
+    public async Task Spawn_GroupCollectionAsync()
     {
         _spawnPoints = new[]
         {

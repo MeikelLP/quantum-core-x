@@ -38,7 +38,7 @@ public class SelectGameCharacterHandler : IGamePacketHandler<SelectCharacter>
         ctx.Connection.SetPhase(EPhase.LOADING);
 
         // Load player
-        var player = await _playerManager.GetPlayer(accountId, ctx.Packet.Slot);
+        var player = await _playerManager.GetPlayerAsync(accountId, ctx.Packet.Slot);
         if (player is null)
         {
             throw new InvalidOperationException("Player was not found. This should never happen at this point");

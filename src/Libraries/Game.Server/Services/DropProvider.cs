@@ -166,7 +166,7 @@ public class DropProvider : IDropProvider, ILoadable
         await using var fs = file.CreateReadStream();
         using var sr = new StreamReader(fs, FileEncoding);
         var parsedGroups = new List<MonsterDropContainer>();
-        var mobGroups = await _parserService.ParseFileGroups(sr, token);
+        var mobGroups = await _parserService.ParseFileGroupsAsync(sr, token);
 
         foreach (var mobGroup in mobGroups)
         {
@@ -205,7 +205,7 @@ public class DropProvider : IDropProvider, ILoadable
 
         LevelDrops = [.. parsedGroups.OfType<LevelItemGroup>()];
 
-        _logger.LogDebug("Found {Count:D} group drops", parsedGroups.Count());
+        _logger.LogDebug("Found {Count:D} group drops", parsedGroups.Count);
     }
 
     #endregion
@@ -276,7 +276,7 @@ public class DropProvider : IDropProvider, ILoadable
 
     #region Drop Calculations
 
-    public List<ItemInstance> CalculateCommonDropItems(IPlayerEntity player, MonsterEntity monster, int delta,
+    public ImmutableArray<ItemInstance> CalculateCommonDropItems(IPlayerEntity player, MonsterEntity monster, int delta,
         int range)
     {
         var items = new List<ItemInstance>();
@@ -320,10 +320,10 @@ public class DropProvider : IDropProvider, ILoadable
             }
         }
 
-        return items;
+        return [.. items];
     }
 
-    public List<ItemInstance> CalculateDropItemGroupItems(MonsterEntity monster, int delta, int range)
+    public ImmutableArray<ItemInstance> CalculateDropItemGroupItems(MonsterEntity monster, int delta, int range)
     {
         var items = new List<ItemInstance>();
 
@@ -368,17 +368,17 @@ public class DropProvider : IDropProvider, ILoadable
             }
         }
 
-        return items;
+        return [.. items];
     }
 
-    public List<ItemInstance> CalculateMobDropItemGroupItems(IPlayerEntity player, MonsterEntity monster, int delta,
+    public ImmutableArray<ItemInstance> CalculateMobDropItemGroupItems(IPlayerEntity player, MonsterEntity monster,
+        int delta,
         int range)
     {
-        var items = new List<ItemInstance>();
-
         var mobDrops = this.GetPossibleMobDropsForPlayer(monster.Proto.Id);
-        if (mobDrops is not { IsEmpty: false }) return items;
+        if (mobDrops is not { IsEmpty: false }) return [];
 
+        var items = new List<ItemInstance>();
         var percent = 40000 * delta / mobDrops.MinKillCount;
         var target = CoreRandom.GenerateInt32(1, range + 1);
 
@@ -406,10 +406,11 @@ public class DropProvider : IDropProvider, ILoadable
             }
         }
 
-        return items;
+        return [.. items];
     }
 
-    public List<ItemInstance> CalculateLevelDropItems(IPlayerEntity player, MonsterEntity monster, int delta, int range)
+    public ImmutableArray<ItemInstance> CalculateLevelDropItems(IPlayerEntity player, MonsterEntity monster, int delta,
+        int range)
     {
         var items = new List<ItemInstance>();
 
@@ -447,10 +448,10 @@ public class DropProvider : IDropProvider, ILoadable
             }
         }
 
-        return items;
+        return [.. items];
     }
 
-    public List<ItemInstance> CalculateEtcDropItems(MonsterEntity monster, int delta, int range)
+    public ImmutableArray<ItemInstance> CalculateEtcDropItems(MonsterEntity monster, int delta, int range)
     {
         var items = new List<ItemInstance>();
         var etcDrops = EtcDrops.Where(x => x.ItemProtoId == monster.Proto.DropItemId);
@@ -483,7 +484,7 @@ public class DropProvider : IDropProvider, ILoadable
             }
         }
 
-        return items;
+        return [.. items];
     }
 
     private (int SpiritStoneId, int Chance) DetermineDropMetinStone(MonsterEntity monster)
@@ -532,7 +533,7 @@ public class DropProvider : IDropProvider, ILoadable
         return (spiritStoneId, stoneInfo.DropChance);
     }
 
-    public List<ItemInstance> CalculateMetinDropItems(MonsterEntity monster, int delta, int range)
+    public ImmutableArray<ItemInstance> CalculateMetinDropItems(MonsterEntity monster, int delta, int range)
     {
         if (!monster.IsStone) return [];
 

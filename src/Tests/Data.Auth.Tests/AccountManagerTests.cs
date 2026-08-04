@@ -64,10 +64,10 @@ public class AccountManagerTests : IClassFixture<RedisFixture>, IClassFixture<Da
 
     public async Task DisposeAsync()
     {
-        var keys = await _cacheManager.Keys("*");
+        var keys = await _cacheManager.KeysAsync("*");
         foreach (var key in keys)
         {
-            await _cacheManager.Del(key);
+            await _cacheManager.DelAsync(key);
         }
 
         var db = _scope.ServiceProvider.GetRequiredService<AuthDbContext>();
@@ -76,7 +76,7 @@ public class AccountManagerTests : IClassFixture<RedisFixture>, IClassFixture<Da
     }
 
     [Fact]
-    public async Task CreateAccount()
+    public async Task CreateAccountAsync()
     {
         var account = await _accountManager.CreateAsync("testificate", "testificate", "some@gmail.com", "1234567");
 
@@ -114,7 +114,7 @@ public class AccountManagerTests : IClassFixture<RedisFixture>, IClassFixture<Da
     }
 
     [Fact]
-    public async Task CreateAccount_DuplicateUserName()
+    public async Task CreateAccount_DuplicateUserNameAsync()
     {
         var accountRepositoryMock = Substitute.For<IAccountRepository>();
         accountRepositoryMock.FindByNameAsync("testificate").Returns(new AccountData());

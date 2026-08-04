@@ -47,7 +47,7 @@ public class GameConnection : Connection, IGameConnection
         }, pingInterval);
     }
 
-    protected override async Task OnClose(bool expected = true)
+    protected override async Task OnCloseAsync(bool expected = true)
     {
         if (Player is not null)
         {
@@ -70,18 +70,18 @@ public class GameConnection : Connection, IGameConnection
             }
 
 
-            _cacheManager.Server.DelAllAsync($"player:{Player!.Player.Id}");
-            await _cacheManager.Del($"account:token:{Player.Player.AccountId}");
+            await _cacheManager.Server.DelAllAsync($"player:{Player!.Player.Id}");
+            await _cacheManager.DelAsync($"account:token:{Player.Player.AccountId}");
         }
 
-        await Server.RemoveConnection(this);
+        await Server.RemoveConnectionAsync(this);
 
         // todo enable expiry on auth token
     }
 
-    protected override async Task OnReceive(IPacketSerializable packet)
+    protected override async Task OnReceiveAsync(IPacketSerializable packet)
     {
-        await Server.CallListener(this, packet);
+        await Server.CallListenerAsync(this, packet);
     }
 
     protected override ServerClock GetClock()

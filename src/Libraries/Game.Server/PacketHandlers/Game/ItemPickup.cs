@@ -7,23 +7,22 @@ namespace QuantumCore.Game.PacketHandlers.Game;
 
 public class ItemPickupHandler : IGamePacketHandler<ItemPickup>
 {
-    public Task ExecuteAsync(GamePacketContext<ItemPickup> ctx, CancellationToken token = default)
+    public async Task ExecuteAsync(GamePacketContext<ItemPickup> ctx, CancellationToken token = default)
     {
         var player = ctx.Connection.Player;
         if (player is null)
         {
             ctx.Connection.Close();
-            return Task.CompletedTask;
+            return;
         }
 
         var entity = player.Map?.GetEntity(ctx.Packet.Vid);
         if (entity is not GroundItem groundItem)
         {
             // we can only pick up ground items
-            return Task.CompletedTask;
+            return;
         }
 
-        player.Pickup(groundItem);
-        return Task.CompletedTask;
+        await player.PickupAsync(groundItem);
     }
 }

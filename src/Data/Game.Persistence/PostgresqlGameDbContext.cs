@@ -1,5 +1,6 @@
 ﻿using Core.Persistence;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 
@@ -9,8 +10,9 @@ internal class PostgresqlGameDbContext : GameDbContext
 {
     private readonly IOptionsSnapshot<DatabaseOptions> _options;
 
-    public PostgresqlGameDbContext(IOptionsSnapshot<DatabaseOptions> options, ILoggerFactory loggerFactory) :
-        base(loggerFactory)
+    public PostgresqlGameDbContext(IOptionsSnapshot<DatabaseOptions> options, ILoggerFactory loggerFactory,
+        IHostEnvironment hostEnvironment) :
+        base(loggerFactory, hostEnvironment)
     {
         _options = options;
     }

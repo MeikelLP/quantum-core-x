@@ -1,7 +1,6 @@
 using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Globalization;
-using System.Text;
 using System.Text.RegularExpressions;
 using EnumsNET;
 using Microsoft.Extensions.FileProviders;
@@ -20,7 +19,6 @@ public partial class ParserService : IParserService
 {
     private readonly IFileProvider _fileProvider;
     private static readonly NumberFormatInfo InvNum = NumberFormatInfo.InvariantInfo;
-    private static readonly Encoding DefaultEncoding = Encoding.GetEncoding("EUC-KR");
     private const StringComparison INV_CUL = StringComparison.InvariantCultureIgnoreCase;
 
     private readonly ILogger<ParserService> _logger;
@@ -63,7 +61,7 @@ public partial class ParserService : IParserService
             ParseCommonDropAndAdd(line, list);
         }
 
-        return list.ToImmutableArray();
+        return [.. list];
     }
 
     public async Task<ImmutableArray<SkillData>> GetSkillsAsync(string path, CancellationToken token = default)
@@ -78,9 +76,8 @@ public partial class ParserService : IParserService
         var list = new List<SkillData>();
         await using var fs = file.CreateReadStream();
         using var sr = new StreamReader(fs);
-        while (!sr.EndOfStream)
+        while (await sr.ReadLineAsync(token).ConfigureAwait(false) is { } line)
         {
-            var line = await sr.ReadLineAsync(token).ConfigureAwait(false);
             if (string.IsNullOrWhiteSpace(line) || !StartsWithNumberRegex().IsMatch(line)) continue;
 
             // parse line
@@ -139,12 +136,13 @@ public partial class ParserService : IParserService
         return [.. list];
     }
 
-    public async Task<List<DataFileGroup>> ParseFileGroups(StreamReader sr, CancellationToken token = default)
+    public async Task<ImmutableArray<DataFileGroup>> ParseFileGroupsAsync(StreamReader sr,
+        CancellationToken token = default)
     {
         var groups = new List<DataFileGroup>();
         DataFileGroup? currentGroup = null;
 
-        while (await sr.ReadLineAsync(token) is { } line && sr.EndOfStream == false)
+        while (await sr.ReadLineAsync(token) is { } line)
         {
             if (line.Trim().All(c => c == '\t') || string.IsNullOrWhiteSpace(line.Trim()))
             {
@@ -193,7 +191,7 @@ public partial class ParserService : IParserService
             groups.Add(currentGroup);
         }
 
-        return groups;
+        return [.. groups];
     }
 
     public MonsterDropContainer? ParseMobGroup(DataFileGroup group, IItemManager itemManager)
@@ -413,7 +411,7 @@ public partial class ParserService : IParserService
         return result;
     }
 
-    private static void ParseCommonDropAndAdd(ReadOnlySpan<char> line, ICollection<CommonDropEntry> list)
+    private static void ParseCommonDropAndAdd(ReadOnlySpan<char> line, List<CommonDropEntry> list)
     {
         var trimmedLine = line.Trim();
         if (trimmedLine.StartsWith("PAWN")) return; // skip if first line - headers
@@ -502,10 +500,10 @@ public partial class ParserService : IParserService
     private static bool IsEmptyOrContainsNewlineOrTab(string str)
     {
         return string.IsNullOrEmpty(str)
-               || str.Contains("\n")
-               || str.Contains("\t")
-               || str.Contains("{")
-               || str.Contains("}");
+               || str.Contains('\n')
+               || str.Contains('\t')
+               || str.Contains('{')
+               || str.Contains('}');
     }
 
     [DebuggerDisplay("{Name} | {Fields.Count} - {Data.Count}")]
@@ -513,7 +511,9 @@ public partial class ParserService : IParserService
     {
         public string Name { get; set; } = "";
         public Dictionary<string, string> Fields { get; } = new(StringComparer.InvariantCultureIgnoreCase);
+#pragma warning disable CA1002 // do not use lists - hard to implement correctly right now
         public List<List<string>> Data { get; } = new();
+#pragma warning restore CA1002
 
         public T? GetField<T>(string key)
         {

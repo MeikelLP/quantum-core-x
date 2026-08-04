@@ -35,7 +35,7 @@ public class ClearInventoryCommand : ICommandHandler
         {
             ctx.Player.RemoveItem(item);
             ctx.Player.SendRemoveItem(item.Window, (ushort)item.Position);
-            await item.Destroy(_cacheManager);
+            await item.DestroyAsync(_cacheManager);
         }
 
         ctx.Player.SendInventory();

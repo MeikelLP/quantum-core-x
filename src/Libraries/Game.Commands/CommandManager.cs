@@ -95,11 +95,11 @@ internal class CommandManager : ICommandManager, ILoadable
     public async Task LoadAsync(CancellationToken token = default)
     {
         _logger.LogInformation("Initialize permissions");
-        var permissionKeys = await _cacheManager.Keys("perm:*");
+        var permissionKeys = await _cacheManager.KeysAsync("perm:*");
 
         foreach (var p in permissionKeys)
         {
-            await _cacheManager.Del(p);
+            await _cacheManager.DelAsync(p);
         }
 
         await using (var scope = _serviceProvider.CreateAsyncScope())
@@ -122,12 +122,10 @@ internal class CommandManager : ICommandManager, ILoadable
 
     public bool HavePerm(Guid group, string cmd)
     {
-        if (!Groups.ContainsKey(group))
+        if (!Groups.TryGetValue(group, out var g))
         {
             return false;
         }
-
-        var g = Groups[group];
 
         foreach (var p in g.Permissions)
         {
@@ -162,7 +160,7 @@ internal class CommandManager : ICommandManager, ILoadable
         return false;
     }
 
-    public async Task Handle(IGameConnection connection, string chatline)
+    public async Task HandleAsync(IGameConnection connection, string chatline)
     {
         if (connection.Player is null)
         {

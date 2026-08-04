@@ -23,7 +23,7 @@ public class SpawnGroupProvider : ISpawnGroupProvider
         await using var fs = file.CreateReadStream();
         using var sr = new StreamReader(fs);
 
-        var groups = await _parserService.ParseFileGroups(sr);
+        var groups = await _parserService.ParseFileGroupsAsync(sr);
 
         var spawnGroups = groups.Select(g => g.ToSpawnGroup());
 
@@ -37,7 +37,7 @@ public class SpawnGroupProvider : ISpawnGroupProvider
 
         await using var fs = file.CreateReadStream();
         using var sr = new StreamReader(fs);
-        var groups = await _parserService.ParseFileGroups(sr);
+        var groups = await _parserService.ParseFileGroupsAsync(sr);
 
         var collections = groups.Select(x => x.ToSpawnGroupCollection());
 

@@ -1,3 +1,4 @@
+using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Drawing;
 using QuantumCore.API.Core.Utils;
@@ -17,12 +18,14 @@ public class QuadTree : IQuadTree
     public uint Capacity { get; private set; }
     public Rectangle Bounds { get; private set; }
     public bool Subdivided { get; private set; }
-    public List<IEntity> Objects { get; } = new List<IEntity>();
+
+    public ImmutableArray<IEntity> Objects => [.. _objects];
 
     private QuadTree _nw = null!;
     private QuadTree _ne = null!;
     private QuadTree _sw = null!;
     private QuadTree _se = null!;
+    private readonly List<IEntity> _objects = [];
 
     public QuadTree(int x, int y, int width, int height, uint capacity)
     {
@@ -38,14 +41,14 @@ public class QuadTree : IQuadTree
     {
         if (!Bounds.Contains(obj.PositionX, obj.PositionY)) return false;
 
-        if (Objects.Count < Capacity && !Subdivided)
+        if (_objects.Count < Capacity && !Subdivided)
         {
             // We still have places in the quad and are not subdivided yet
             obj.LastPositionX = obj.PositionX;
             obj.LastPositionY = obj.PositionY;
             obj.LastQuadTree = this;
 
-            Objects.Add(obj);
+            _objects.Add(obj);
             return true;
         }
 
@@ -75,7 +78,7 @@ public class QuadTree : IQuadTree
             return _nw.Remove(obj) || _ne.Remove(obj) || _sw.Remove(obj) || _se.Remove(obj);
         }
 
-        if (Objects.Remove(obj))
+        if (_objects.Remove(obj))
         {
             obj.LastQuadTree = null;
             return true;
@@ -84,8 +87,11 @@ public class QuadTree : IQuadTree
         return false;
     }
 
+#pragma warning disable CA1002 // do not expose lists - okay because we want to reuse existing lists not return new ones
     public void QueryAround(List<IEntity> objects, int x, int y, int radius, EEntityType? filter = null)
+#pragma warning restore CA1002
     {
+        ArgumentNullException.ThrowIfNull(objects);
         // Check if the circle is in our bounds
         if (!CircleIntersects(x, y, radius)) return;
 
@@ -100,7 +106,7 @@ public class QuadTree : IQuadTree
         else
         {
             // Go through all objects and check if their position is inside the circle
-            foreach (var obj in Objects)
+            foreach (var obj in _objects)
             {
                 if (filter is not null && obj.Type != filter)
                 {
@@ -155,7 +161,7 @@ public class QuadTree : IQuadTree
         Subdivided = true;
 
         // Move our own objects to our children
-        foreach (var entity in Objects)
+        foreach (var entity in _objects)
         {
             entity.LastQuadTree = null;
             var addedOnNw = false;
@@ -181,7 +187,7 @@ public class QuadTree : IQuadTree
             Debug.Assert(addedOnNw || addedOnNe || addedOnSw || addedOnSe, "Entity must be added to any quadrant");
         }
 
-        Objects.Clear();
+        _objects.Clear();
     }
 
     public void UpdatePosition(IEntity entity)

@@ -34,19 +34,19 @@ public class InMemoryRedisStore : IRedisStore
         return list;
     }
 
-    public ValueTask<long> Del(string key)
+    public ValueTask<long> DelAsync(string key)
     {
         _dict.Remove(key);
         return ValueTask.FromResult(1L);
     }
 
-    public ValueTask<string> Set(string key, object item)
+    public ValueTask<string> SetAsync(string key, object item)
     {
         _dict[key] = (item, null);
         return ValueTask.FromResult(key);
     }
 
-    public ValueTask<T> Get<T>(string key)
+    public ValueTask<T> GetAsync<T>(string key)
     {
         if (_dict.TryGetValue(key, out var value))
         {
@@ -62,7 +62,7 @@ public class InMemoryRedisStore : IRedisStore
         return default;
     }
 
-    public async ValueTask<long> Exists(string key)
+    public async ValueTask<long> ExistsAsync(string key)
     {
         if (_dict.TryGetValue(key, out var value))
         {
@@ -72,7 +72,7 @@ public class InMemoryRedisStore : IRedisStore
                 return 0;
             }
 
-            if (value.Value is IRedisListWrapper enumerable && await enumerable.Len() == 0)
+            if (value.Value is IRedisListWrapper enumerable && await enumerable.LenAsync() == 0)
             {
                 // empty list equals no result
                 return 0;
@@ -84,7 +84,7 @@ public class InMemoryRedisStore : IRedisStore
         return 0;
     }
 
-    public ValueTask<long> Expire(string key, TimeSpan seconds)
+    public ValueTask<long> ExpireAsync(string key, TimeSpan seconds)
     {
         if (_dict.TryGetValue(key, out var tuple))
         {
@@ -95,12 +95,12 @@ public class InMemoryRedisStore : IRedisStore
         return ValueTask.FromResult(1L);
     }
 
-    public ValueTask<bool> Ping()
+    public ValueTask<bool> PingAsync()
     {
         return ValueTask.FromResult(true);
     }
 
-    public ValueTask<long> Publish(string key, object obj)
+    public ValueTask<long> PublishAsync(string key, object obj)
     {
         var callbacks = _subscribers
             .SelectMany(x => x.Callbacks)
@@ -128,27 +128,27 @@ public class InMemoryRedisStore : IRedisStore
         return sub;
     }
 
-    public ValueTask<string[]> Keys(string key)
+    public ValueTask<string[]> KeysAsync(string key)
     {
         var regex = RedisPatternToRegex(key);
         var matchedKeys = _dict.Keys.Where(x => regex.IsMatch(x)).ToArray();
         return ValueTask.FromResult(matchedKeys);
     }
 
-    public ValueTask<long> Persist(string key)
+    public ValueTask<long> PersistAsync(string key)
     {
         // TODO implement persistence
         return ValueTask.FromResult(1L);
     }
 
-    public ValueTask<string> FlushAll()
+    public ValueTask<string> FlushAllAsync()
     {
         _dict.Clear();
 
         return ValueTask.FromResult("");
     }
 
-    public void DelAllAsync(string pattern)
+    public ValueTask DelAllAsync(string pattern)
     {
         var regex = RedisPatternToRegex(pattern);
 
@@ -157,9 +157,11 @@ public class InMemoryRedisStore : IRedisStore
         {
             _dict.Remove(key);
         }
+
+        return ValueTask.CompletedTask;
     }
 
-    public ValueTask<long> Incr(string key)
+    public ValueTask<long> IncrAsync(string key)
     {
         if (!_dict.TryGetValue(key, out var tuple) || tuple.Expiry is not null && tuple.Expiry < DateTime.UtcNow)
         {

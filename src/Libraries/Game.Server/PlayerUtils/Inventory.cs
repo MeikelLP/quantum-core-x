@@ -193,12 +193,12 @@ public class Inventory : IInventory
         EquipmentWindow = new Equipment(Owner, Size);
     }
 
-    public async Task Load()
+    public async Task LoadAsync()
     {
         _items.Clear();
 
         var pageSize = _width * _height;
-        await foreach (var item in _itemRepository.GetItems(_cacheManager, Owner, Window))
+        await foreach (var item in _itemRepository.GetItemsAsync(_cacheManager, Owner, Window))
         {
             // Calculate page
             var page = item.Position / pageSize;
@@ -230,7 +230,7 @@ public class Inventory : IInventory
     /// </summary>
     /// <param name="item"></param>
     /// <returns>True if placement was successful. False if no space is available</returns>
-    public async Task<bool> PlaceItem(ItemInstance item)
+    public async Task<bool> PlaceItemAsync(ItemInstance item)
     {
         for (var i = 0; i < _pages.Length; i++)
         {
@@ -239,7 +239,7 @@ public class Inventory : IInventory
             var position = page.Place(item);
             if (position != -1)
             {
-                await item.Set(_cacheManager, Owner, Window, (uint)(position + i * _width * _height),
+                await item.SetAsync(_cacheManager, Owner, Window, (uint)(position + i * _width * _height),
                     _itemRepository);
                 _items.Add(item);
 
@@ -266,7 +266,7 @@ public class Inventory : IInventory
     /// <param name="item">Instance to place in inventory</param>
     /// <param name="position">Where to place it</param>
     /// <returns>True if placement was successful. May be false if the slot is occupied</returns>
-    public async Task<bool> PlaceItem(ItemInstance item, ushort position)
+    public async Task<bool> PlaceItemAsync(ItemInstance item, ushort position)
     {
         var pageSize = _width * _height;
         var page = position / pageSize;
@@ -278,7 +278,7 @@ public class Inventory : IInventory
         if (_pages[page].Place(item, position - page * pageSize))
         {
             _items.Add(item);
-            await item.Set(_cacheManager, Owner, Window, position, _itemRepository);
+            await item.SetAsync(_cacheManager, Owner, Window, position, _itemRepository);
             return true;
         }
 

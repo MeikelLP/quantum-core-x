@@ -52,7 +52,7 @@ public class ItemUseHandler : IGamePacketHandler<ItemUse>
         if (ctx.Packet.Window == WindowType.INVENTORY && ctx.Packet.Position >= player.Inventory.Size)
         {
             player.RemoveItem(item);
-            if (await player.Inventory.PlaceItem(item))
+            if (await player.Inventory.PlaceItemAsync(item))
             {
                 player.SendRemoveItem(ctx.Packet.Window, ctx.Packet.Position);
                 player.SendItem(item);
@@ -60,7 +60,7 @@ public class ItemUseHandler : IGamePacketHandler<ItemUse>
             }
             else
             {
-                player.SetItem(item, ctx.Packet.Window, ctx.Packet.Position);
+                await player.SetItemAsync(item, ctx.Packet.Window, ctx.Packet.Position);
                 player.SendChatInfo("Cannot unequip item if the inventory is full");
             }
         }
@@ -76,26 +76,26 @@ public class ItemUseHandler : IGamePacketHandler<ItemUse>
                 {
                     player.RemoveItem(item);
                     player.RemoveItem(item2);
-                    if (await player.Inventory.PlaceItem(item2))
+                    if (await player.Inventory.PlaceItemAsync(item2))
                     {
                         player.SendRemoveItem(ctx.Packet.Window, (ushort)wearSlot);
                         player.SendRemoveItem(ctx.Packet.Window, ctx.Packet.Position);
-                        player.SetItem(item, ctx.Packet.Window, (ushort)wearSlot);
-                        player.SetItem(item2, ctx.Packet.Window, ctx.Packet.Position);
+                        await player.SetItemAsync(item, ctx.Packet.Window, (ushort)wearSlot);
+                        await player.SetItemAsync(item2, ctx.Packet.Window, ctx.Packet.Position);
                         player.SendItem(item);
                         player.SendItem(item2);
                     }
                     else
                     {
-                        player.SetItem(item, ctx.Packet.Window, ctx.Packet.Position);
-                        player.SetItem(item2, ctx.Packet.Window, (ushort)wearSlot);
+                        await player.SetItemAsync(item, ctx.Packet.Window, ctx.Packet.Position);
+                        await player.SetItemAsync(item2, ctx.Packet.Window, (ushort)wearSlot);
                         player.SendChatInfo("Cannot swap item if the inventory is full");
                     }
                 }
                 else
                 {
                     player.RemoveItem(item);
-                    player.SetItem(item, WindowType.INVENTORY, (ushort)wearSlot);
+                    await player.SetItemAsync(item, WindowType.INVENTORY, (ushort)wearSlot);
                     player.SendRemoveItem(ctx.Packet.Window, ctx.Packet.Position);
                     player.SendItem(item);
                 }

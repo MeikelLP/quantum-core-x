@@ -1,24 +1,24 @@
 namespace QuantumCore.API.Core.Timekeeping;
 
-public readonly struct TickContext(
-    ServerClock clock,
-    TimeSpan delta,
-    ServerTimestamp timestamp)
+public readonly record struct TickContext(
+    ServerClock Clock,
+    TimeSpan Delta,
+    ServerTimestamp Timestamp)
 {
     // Used as a sentinel for "no past event" when comparing deltas
     // Must stay tiny compared to TimeSpan.MaxValue to avoid overflow if used in arithmetic
-    private static readonly TimeSpan EffectivelyInfinite = TimeSpan.FromDays(365 * 100);
+    private static readonly TimeSpan _effectivelyInfinite = TimeSpan.FromDays(365 * 100);
 
-    public TimeSpan Delta { get; } = delta;
-    public ServerTimestamp Timestamp { get; } = timestamp;
+    public TimeSpan Delta { get; } = Delta;
+    public ServerTimestamp Timestamp { get; } = Timestamp;
 
-    public TimeSpan ElapsedSince(ServerTimestamp past) => clock.ElapsedBetween(past, Timestamp);
+    public TimeSpan ElapsedSince(ServerTimestamp past) => Clock.ElapsedBetween(past, Timestamp);
 
     public TimeSpan ElapsedSince(ServerTimestamp? past) =>
-        past.HasValue ? ElapsedSince(past.Value) : EffectivelyInfinite;
+        past.HasValue ? ElapsedSince(past.Value) : _effectivelyInfinite;
 
-    public TimeSpan TotalElapsed => clock.ElapsedAt(Timestamp);
+    public TimeSpan TotalElapsed => Clock.ElapsedAt(Timestamp);
 
-    public ServerTimestamp Advance(TimeSpan delta) => clock.Advance(Timestamp, delta);
-    public ServerTimestamp Rewind(TimeSpan delta) => clock.Rewind(Timestamp, delta);
+    public ServerTimestamp Advance(TimeSpan delta) => Clock.Advance(Timestamp, delta);
+    public ServerTimestamp Rewind(TimeSpan delta) => Clock.Rewind(Timestamp, delta);
 }

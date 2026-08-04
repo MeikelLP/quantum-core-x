@@ -33,7 +33,7 @@ public class MobProtoTests
     }
 
     [Fact]
-    public async Task CanRead()
+    public async Task CanReadAsync()
     {
         await _monsterManager.LoadAsync();
         var monsters = _monsterManager.GetMonsters();
@@ -81,7 +81,7 @@ public class MobProtoTests
             DrainSp = monsters[0].DrainSp,
             MonsterColor = monsters[0].MonsterColor,
             PolymorphItemId = monsters[0].PolymorphItemId,
-            Skills = monsters[0].Skills.Select(x => new MonsterSkillData { Id = x.Id, Level = x.Level }).ToList(),
+            Skills = [.. monsters[0].Skills.Select(x => new MonsterSkillData { Id = x.Id, Level = x.Level })],
             BerserkPoint = monsters[0].BerserkPoint,
             StoneSkinPoint = monsters[0].StoneSkinPoint,
             GodSpeedPoint = monsters[0].GodSpeedPoint,

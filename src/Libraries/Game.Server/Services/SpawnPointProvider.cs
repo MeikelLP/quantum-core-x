@@ -18,39 +18,38 @@ internal class SpawnPointProvider : ISpawnPointProvider
         _fileProvider = fileProvider;
     }
 
-    public async Task<SpawnPoint[]> GetSpawnPointsForMap(string name)
+    public async Task<SpawnPoint[]> GetSpawnPointsForMapAsync(string name)
     {
         var list = new List<SpawnPoint>();
 
         _logger.LogDebug("Loading spawn points for map {Map}", name);
 
-        await AddSpawnPointsFromFile($"maps/{name}/regen.txt", list);
-        await AddSpawnPointsFromFile($"maps/{name}/npc.txt", list);
-        await AddSpawnPointsFromFile($"maps/{name}/stone.txt", list);
-        await AddSpawnPointsFromFile($"maps/{name}/boss.txt", list);
+        await AddSpawnPointsFromFileAsync($"maps/{name}/regen.txt", list);
+        await AddSpawnPointsFromFileAsync($"maps/{name}/npc.txt", list);
+        await AddSpawnPointsFromFileAsync($"maps/{name}/stone.txt", list);
+        await AddSpawnPointsFromFileAsync($"maps/{name}/boss.txt", list);
 
         _logger.LogDebug("Found {Count:D} spawn points for map {Map}", list.Count, name);
 
         return list.ToArray();
     }
 
-    private async Task AddSpawnPointsFromFile(string filePath, List<SpawnPoint> list)
+    private async Task AddSpawnPointsFromFileAsync(string filePath, List<SpawnPoint> list)
     {
         var file = _fileProvider.GetFileInfo(filePath);
         if (!file.Exists) return;
 
         await using var fs = file.CreateReadStream();
         using var sr = new StreamReader(fs);
-        do
+        while (await sr.ReadLineAsync() is { } line)
         {
-            var line = await sr.ReadLineAsync();
-            if (line is null) break;
-
             var spawn = _parserService.GetSpawnFromLine(line);
             if (spawn is not null)
             {
                 list.Add(spawn);
             }
-        } while (!sr.EndOfStream);
+        }
+
+        ;
     }
 }

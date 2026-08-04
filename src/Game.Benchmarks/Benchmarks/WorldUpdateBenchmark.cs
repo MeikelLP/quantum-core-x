@@ -38,6 +38,8 @@ public class WorldUpdateBenchmark
     private World _world = null!;
     private readonly FakeTimeProvider _timeProvider = new();
     private ServerClock _clock = null!;
+    private GameServer _server;
+    private static readonly string[] returnThis = new[] { "maps:test_map" };
 
     [GlobalSetup]
     public void GlobalSetup()
@@ -75,14 +77,14 @@ public class WorldUpdateBenchmark
             .Replace(new ServiceDescriptor(typeof(ICacheManager), _ =>
             {
                 var mock = Substitute.For<ICacheManager>();
-                mock.Keys("maps:*").Returns(new[] { "maps:test_map" });
+                mock.KeysAsync("maps:*").Returns(returnThis);
                 mock.Subscribe().Returns(Substitute.For<IRedisSubscriber>());
                 return mock;
             }, ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(ISpawnPointProvider), _ =>
             {
                 var mock = Substitute.For<ISpawnPointProvider>();
-                mock.GetSpawnPointsForMap("test_map").Returns(Enumerable
+                mock.GetSpawnPointsForMapAsync("test_map").Returns(Enumerable
                     .Range(0, _mobAmount)
                     .Select(_ =>
                         new SpawnPoint
@@ -116,8 +118,11 @@ public class WorldUpdateBenchmark
             .BuildServiceProvider();
         _clock = services.GetRequiredService<ServerClock>();
         _world = ActivatorUtilities.CreateInstance<World>(services);
-        ActivatorUtilities.CreateInstance<GameServer>(services); // for setting the singleton GameServer.Instance
+        _server = ActivatorUtilities
+            .CreateInstance<GameServer>(services); // for setting the singleton GameServer.Instance
+#pragma warning disable VSTHRD002 // await
         _world.LoadAsync().Wait();
+#pragma warning restore VSTHRD002
 
         foreach (var i in Enumerable.Range(0, _playerAmount))
         {
@@ -127,7 +132,9 @@ public class WorldUpdateBenchmark
             };
             var conn = Substitute.For<IGameConnection>();
             conn.BoundIpAddress.Returns(IPAddress.Loopback);
+#pragma warning disable CA2000 // dispose
             var entity = ActivatorUtilities.CreateInstance<PlayerEntity>(services, _world, player, conn);
+#pragma warning restore CA2000
             _world.SpawnEntity(entity);
         }
 

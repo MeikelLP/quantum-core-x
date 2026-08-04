@@ -10,6 +10,6 @@ public interface ICommandManager
     Task ReloadAsync(CancellationToken token = default);
     bool HavePerm(Guid group, string cmd);
     bool CanUseCommand(IPlayerEntity player, string cmd);
-    Task Handle(IGameConnection connection, string chatline);
+    Task HandleAsync(IGameConnection connection, string chatline);
     Dictionary<Guid, PermissionGroup> Groups { get; }
 }

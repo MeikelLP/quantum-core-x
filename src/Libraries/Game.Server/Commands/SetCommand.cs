@@ -52,6 +52,7 @@ public class SetCommandOptions
 
 public enum SetCommandType
 {
+    UNKNOWN = 0,
     GOLD = 1,
     EXP = 2,
     ALIGN = 3

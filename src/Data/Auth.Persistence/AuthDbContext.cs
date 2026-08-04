@@ -10,7 +10,7 @@ public abstract class AuthDbContext : DbContext
     public DbSet<Account> Accounts { get; set; } = null!;
     public DbSet<AccountStatus> AccountStatus { get; set; } = null!;
 
-    public AuthDbContext(ILoggerFactory loggerFactory)
+    protected AuthDbContext(ILoggerFactory loggerFactory)
     {
         _loggerFactory = loggerFactory;
     }
@@ -23,6 +23,6 @@ public abstract class AuthDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         Account.Configure(modelBuilder.Entity<Account>(), Database);
-        Auth.Persistence.Entities.AccountStatus.Configure(modelBuilder.Entity<AccountStatus>(), Database);
+        Entities.AccountStatus.Configure(modelBuilder.Entity<AccountStatus>(), Database);
     }
 }

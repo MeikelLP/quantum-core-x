@@ -4,7 +4,7 @@ using QuantumCore.API.Core.Timekeeping;
 
 namespace QuantumCore.Core.Event;
 
-public class EventSystem
+public static class EventSystem
 {
     private static readonly Lock Lock = new();
 
@@ -12,7 +12,7 @@ public class EventSystem
     private static long NextEventId = 1;
 
     private static readonly List<long> Remove = new();
-        
+
     // private static readonly Gauge EventsGauge = Metrics.CreateGauge("events", "Currently queued events");
 
     /// <summary>
@@ -47,12 +47,13 @@ public class EventSystem
             {
                 PendingEvents.Remove(r);
             }
+
             Remove.Clear();
 
             // EventsGauge.Set(PendingEvents.Count);
         }
     }
-        
+
     /// <summary>
     /// Enqueues the given function to be executed in the event loop.
     /// </summary>
@@ -78,7 +79,7 @@ public class EventSystem
             return id;
         }
     }
-        
+
     /// <summary>
     /// Cancels the given event for further execution.
     /// </summary>

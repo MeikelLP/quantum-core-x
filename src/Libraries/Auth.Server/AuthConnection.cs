@@ -23,14 +23,14 @@ public class AuthConnection : Connection, IAuthConnection
         _server.CallConnectionListener(this);
     }
 
-    protected override async Task OnClose(bool expected = true)
+    protected override async Task OnCloseAsync(bool expected = true)
     {
-        await _server.RemoveConnection(this);
+        await _server.RemoveConnectionAsync(this);
     }
 
-    protected override async Task OnReceive(IPacketSerializable packet)
+    protected override async Task OnReceiveAsync(IPacketSerializable packet)
     {
-        await _server.CallListener(this, packet);
+        await _server.CallListenerAsync(this, packet);
     }
 
     protected override ServerClock GetClock()

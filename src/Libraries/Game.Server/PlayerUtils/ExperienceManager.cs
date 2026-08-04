@@ -11,7 +11,7 @@ public class ExperienceManager : IExperienceManager, ILoadable
     private readonly IFileProvider _fileProvider;
     private readonly List<uint> _experienceTable = new();
 
-    public byte MaxLevel => (byte) _experienceTable.Count;
+    public byte MaxLevel => (byte)_experienceTable.Count;
 
     public uint GetNeededExperience(byte level)
     {
@@ -38,14 +38,8 @@ public class ExperienceManager : IExperienceManager, ILoadable
         await using var fs = file.CreateReadStream();
         using var sr = new StreamReader(fs);
         var i = 0;
-        while (!sr.EndOfStream)
+        while (await sr.ReadLineAsync(token).ConfigureAwait(false) is { } line)
         {
-            var line = await sr.ReadLineAsync(token).ConfigureAwait(false);
-            if (string.IsNullOrWhiteSpace(line))
-            {
-                break;
-            }
-
             if (!uint.TryParse(line, out var experience))
             {
                 _logger.LogError("Failed to parse experience table!. Invalid value on line {Line}: {Value}", i + 1,

@@ -1,4 +1,5 @@
-﻿using CommandLine;
+﻿using System.Security.Cryptography;
+using CommandLine;
 using Microsoft.Extensions.Logging;
 using QuantumCore.API;
 using QuantumCore.API.Game;
@@ -41,8 +42,10 @@ public class SpawnMapRandomCommand : ICommandHandler<SpawnMapRandomCommandOption
         }
 
         var map = context.Player.Map!;
-        var x = Random.Shared.Next((int)map.Position.X, (int)(map.Position.X + (map.Width * Map.MAP_UNIT) + 1));
-        var y = Random.Shared.Next((int)map.Position.Y, (int)(map.Position.Y + (map.Height * Map.MAP_UNIT) + 1));
+        var x = RandomNumberGenerator.GetInt32((int)map.Position.X,
+            (int)(map.Position.X + (map.Width * Map.MAP_UNIT) + 1));
+        var y = RandomNumberGenerator.GetInt32((int)map.Position.Y,
+            (int)(map.Position.Y + (map.Height * Map.MAP_UNIT) + 1));
 
         // Create entity instance
         var monster = new MonsterEntity(_monsterManager, _dropProvider, _animationManager, _serviceProvider, map,

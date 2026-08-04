@@ -35,7 +35,7 @@ public class TokenLoginHandler : IGamePacketHandler<TokenLogin>
     {
         var key = $"token:{ctx.Packet.Key}";
 
-        if (await _cacheManager.Server.Exists(key) <= 0)
+        if (await _cacheManager.Server.ExistsAsync(key) <= 0)
         {
             _logger.LogWarning("Received invalid auth token {Key} / {Username}", ctx.Packet.Key,
                 ctx.Packet.Username);
@@ -44,7 +44,7 @@ public class TokenLoginHandler : IGamePacketHandler<TokenLogin>
         }
 
         // Verify that the given token is for the given user
-        var token = await _cacheManager.Server.Get<Token>(key);
+        var token = await _cacheManager.Server.GetAsync<Token>(key);
         var accountTokenKey = $"account:token:{token.AccountId}";
         if (!string.Equals(token.Username, ctx.Packet.Username, StringComparison.OrdinalIgnoreCase))
         {
@@ -56,7 +56,7 @@ public class TokenLoginHandler : IGamePacketHandler<TokenLogin>
         }
 
         // Prevent cross client token forgery
-        var validSession = await _cacheManager.Shared.Get<uint>(accountTokenKey);
+        var validSession = await _cacheManager.Shared.GetAsync<uint>(accountTokenKey);
         if (validSession != 0 && validSession != ctx.Packet.Key)
         {
             _logger.LogWarning(
@@ -71,8 +71,8 @@ public class TokenLoginHandler : IGamePacketHandler<TokenLogin>
         _logger.LogDebug("Received valid auth token");
 
         // Remove TTL from token so we can use it for another game core transition
-        await _cacheManager.Server.Persist(key);
-        await _cacheManager.Shared.Expire(accountTokenKey, ExpiresIn.OneDay);
+        await _cacheManager.Server.PersistAsync(key);
+        await _cacheManager.Shared.ExpireAsync(accountTokenKey, ExpiresIn.OneDay);
 
         // Store the username and id for later reference
         ctx.Connection.Username = token.Username;
@@ -82,7 +82,7 @@ public class TokenLoginHandler : IGamePacketHandler<TokenLogin>
 
         // Load players of account
         var characters = new Characters();
-        var charactersFromCacheOrDb = await _playerManager.GetPlayers(token.AccountId);
+        var charactersFromCacheOrDb = await _playerManager.GetPlayersAsync(token.AccountId);
         foreach (var player in charactersFromCacheOrDb)
         {
             var host = _world.GetMapHost(player.PositionX, player.PositionY);
@@ -90,9 +90,9 @@ public class TokenLoginHandler : IGamePacketHandler<TokenLogin>
             var guild = await _guildManager.GetGuildForPlayerAsync(player.Id, cancellationToken);
             var slot = (int)player.Slot;
             characters.CharacterList[slot] = player.ToCharacter();
-            var advertisedIp = ResolveAdvertisedAddress(host._ip, ctx.Connection.BoundIpAddress);
+            var advertisedIp = ResolveAdvertisedAddress(host.Ip, ctx.Connection.BoundIpAddress);
             characters.CharacterList[slot].Ip = BitConverter.ToInt32(advertisedIp.GetAddressBytes());
-            characters.CharacterList[slot].Port = host._port;
+            characters.CharacterList[slot].Port = host.Port;
             characters.GuildIds[slot] = guild?.Id ?? 0;
             characters.GuildNames[slot] = guild?.Name ?? "";
         }
@@ -102,7 +102,7 @@ public class TokenLoginHandler : IGamePacketHandler<TokenLogin>
         if (charactersFromCacheOrDb.Length > 0)
         {
             empire = charactersFromCacheOrDb[0].Empire;
-            await _cacheManager.Server.Set($"account:{ctx.Connection.AccountId}:game:select:selected-player",
+            await _cacheManager.Server.SetAsync($"account:{ctx.Connection.AccountId}:game:select:selected-player",
                 charactersFromCacheOrDb[0].Id);
         }
 

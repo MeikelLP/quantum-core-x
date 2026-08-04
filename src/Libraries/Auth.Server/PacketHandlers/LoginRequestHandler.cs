@@ -98,7 +98,7 @@ public class LoginRequestHandler : IAuthPacketHandler<LoginRequest>
 
 
         // If the status is not empty send a failed login response to the client
-        if (status != "")
+        if (!string.IsNullOrWhiteSpace(status))
         {
             ctx.Connection.Send(new LoginFailed { Status = status });
 
@@ -109,15 +109,15 @@ public class LoginRequestHandler : IAuthPacketHandler<LoginRequest>
         var authToken = CoreRandom.GenerateUInt32();
 
         // Store auth token
-        await _cacheManager.Server.Set($"token:{authToken}",
+        await _cacheManager.Server.SetAsync($"token:{authToken}",
             new Token { Username = account.Username, AccountId = account.Id });
         // Set expiration on token
-        await _cacheManager.Server.Expire($"token:{authToken}", ExpiresIn.ThirtySeconds);
+        await _cacheManager.Server.ExpireAsync($"token:{authToken}", ExpiresIn.ThirtySeconds);
 
         // Relate the account ID to the token
-        await _cacheManager.Shared.Set($"account:token:{account.Id}", authToken);
+        await _cacheManager.Shared.SetAsync($"account:token:{account.Id}", authToken);
         // Set expiration on account token
-        await _cacheManager.Shared.Expire($"account:token:{account.Id}", ExpiresIn.ThirtySeconds);
+        await _cacheManager.Shared.ExpireAsync($"account:token:{account.Id}", ExpiresIn.ThirtySeconds);
 
         // Send the auth token to the client and let it connect to our game server
         ctx.Connection.Send(new LoginSuccess { Key = authToken, Result = 1 });
@@ -125,7 +125,7 @@ public class LoginRequestHandler : IAuthPacketHandler<LoginRequest>
 
     private async Task<bool> CheckExistingConnectionOfAsync(AccountData account)
     {
-        var isLoggedIn = await _cacheManager.Shared.Exists($"account:token:{account.Id}");
+        var isLoggedIn = await _cacheManager.Shared.ExistsAsync($"account:token:{account.Id}");
 
         return isLoggedIn == 1;
     }
@@ -135,9 +135,9 @@ public class LoginRequestHandler : IAuthPacketHandler<LoginRequest>
         var attemptKey = $"account:attempt:success:{account.Id}";
         var accountKey = $"account:token:{account.Id}";
         // increment the attempts in Shared cache
-        var attempts = await _cacheManager.Shared.Incr(attemptKey);
+        var attempts = await _cacheManager.Shared.IncrAsync(attemptKey);
         // set expiration on the key
-        await _cacheManager.Shared.Expire(attemptKey, ExpiresIn.OneMinute);
+        await _cacheManager.Shared.ExpireAsync(attemptKey, ExpiresIn.OneMinute);
 
         // check if the attempts are less than the limit
         if (attempts <= DROP_CONNECTION_AFTER_ATTEMPTS)
@@ -146,10 +146,10 @@ public class LoginRequestHandler : IAuthPacketHandler<LoginRequest>
         }
 
         // publish a message through redis to drop the connection
-        await _cacheManager.Publish("account:drop-connection", account.Id);
+        await _cacheManager.PublishAsync("account:drop-connection", account.Id);
         // delete the account key
-        await _cacheManager.Shared.Del(accountKey);
-        await _cacheManager.Shared.Del(attemptKey);
+        await _cacheManager.Shared.DelAsync(accountKey);
+        await _cacheManager.Shared.DelAsync(attemptKey);
 
         return "";
     }

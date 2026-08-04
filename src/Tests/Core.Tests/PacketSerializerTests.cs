@@ -14,7 +14,9 @@ public partial class MyPacket
 {
     [Field(0)] public uint Size => (uint)MyArray.Length;
 
+#pragma warning disable CA1819 // no arrays
     [Field(1)] public ComplexSubType[] MyArray { get; set; } = Array.Empty<ComplexSubType>();
+#pragma warning restore CA1819
 
     [Field(2)] public int AnotherProperty { get; set; }
 }

@@ -29,12 +29,12 @@ public class EmpireHandler : IGamePacketHandler<Empire>
         {
             _logger.LogInformation("Empire selected: {Empire}", ctx.Packet.EmpireId);
             var cacheKey = $"account:{ctx.Connection.AccountId}:game:select:selected-player";
-            var player = await _cacheManager.Get<uint?>(cacheKey);
+            var player = await _cacheManager.GetAsync<uint?>(cacheKey);
             if (player is not null)
             {
                 await _playerManager.SetPlayerEmpireAsync(ctx.Connection.AccountId!.Value, player.Value,
                     ctx.Packet.EmpireId);
-                await _cacheManager.Del(cacheKey);
+                await _cacheManager.DelAsync(cacheKey);
             }
             else
             {

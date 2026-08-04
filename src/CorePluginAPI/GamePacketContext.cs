@@ -1,8 +1,3 @@
 namespace QuantumCore.API;
 
-public struct GamePacketContext<TPacket>
-{
-    public TPacket Packet { get; set; }
-
-    public IGameConnection Connection { get; set; }
-}
+public record struct GamePacketContext<TPacket>(TPacket Packet, IGameConnection Connection);

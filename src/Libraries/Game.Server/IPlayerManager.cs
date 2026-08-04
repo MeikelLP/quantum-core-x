@@ -11,19 +11,19 @@ public interface IPlayerManager
     /// First tries to load player from cache then from database.
     /// If player is not found in cache but in database: The cache will be updated.
     /// </summary>
-    Task<PlayerData?> GetPlayer(Guid accountId, byte slot);
+    Task<PlayerData?> GetPlayerAsync(Guid accountId, byte slot);
 
     /// <summary>
     /// Tries to get a player by player ID
     /// First tries to load player from cache then from database.
     /// If player is not found in cache but in database: The cache will be updated.
     /// </summary>
-    Task<PlayerData?> GetPlayer(uint playerId);
+    Task<PlayerData?> GetPlayerAsync(uint playerId);
 
     /// <summary>
     /// Gets all players for account ID
     /// </summary>
-    Task<PlayerData[]> GetPlayers(Guid accountId);
+    Task<PlayerData[]> GetPlayersAsync(Guid accountId);
 
     Task<bool> IsNameInUseAsync(string name);
 

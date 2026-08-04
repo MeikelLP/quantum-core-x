@@ -1,4 +1,6 @@
-﻿using System.Diagnostics;
+﻿#pragma warning disable CA1814 // prefer jagged array - no we want a grid
+
+using System.Diagnostics;
 
 namespace QuantumCore.Core.Utils;
 
@@ -13,14 +15,14 @@ public class Grid<T> where T : class?
     {
         Width = width;
         Height = height;
-        _grid = new T[Width,Height];
+        _grid = new T[Width, Height];
     }
 
     public void Resize(uint width, uint height)
     {
         Width = width;
         Height = height;
-        _grid = new T[Width,Height];
+        _grid = new T[Width, Height];
     }
 
     public T? Get(uint x, uint y)

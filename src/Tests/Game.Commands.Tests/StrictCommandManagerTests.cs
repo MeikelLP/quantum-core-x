@@ -44,29 +44,29 @@ public class StrictCommandManagerTests
     }
 
     [Fact]
-    public async Task StrictMode()
+    public async Task StrictModeAsync()
     {
         var ex = await Assert.ThrowsAsync<CommandHandlerNotFoundException>(() =>
-            _commandManager.Handle(_connection, "/some_command"));
+            _commandManager.HandleAsync(_connection, "/some_command"));
         ex.Command.Should().BeEquivalentTo("some_command");
     }
 
     [Fact]
-    public async Task ValidateCommand_ArgumentMissing()
+    public async Task ValidateCommand_ArgumentMissingAsync()
     {
         _commandManager.Register(typeof(SetJobCommand).Namespace!, typeof(SetJobCommand).Assembly);
         var ex = await Assert.ThrowsAsync<CommandValidationException>(() =>
-            _commandManager.Handle(_connection, "/setjob"));
+            _commandManager.HandleAsync(_connection, "/setjob"));
         ex.Command.Should().BeEquivalentTo("setjob");
         ex.Errors.Should().BeEquivalentTo([nameof(MissingRequiredOptionError)]);
     }
 
     [Fact]
-    public async Task ValidateCommand_ArgumentInvalidType()
+    public async Task ValidateCommand_ArgumentInvalidTypeAsync()
     {
         _commandManager.Register(typeof(SetJobCommand).Namespace!, typeof(SetJobCommand).Assembly);
         var ex = await Assert.ThrowsAsync<CommandValidationException>(() =>
-            _commandManager.Handle(_connection, "/setjob a"));
+            _commandManager.HandleAsync(_connection, "/setjob a"));
         ex.Command.Should().BeEquivalentTo("setjob");
         ex.Errors.Should().BeEquivalentTo([nameof(BadFormatConversionError), nameof(MissingRequiredOptionError)]);
     }

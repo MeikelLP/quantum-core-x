@@ -3,7 +3,7 @@ using QuantumCore.API;
 
 namespace QuantumCore.Caching;
 
-internal class RedisSubscriber : IRedisSubscriber
+internal sealed class RedisSubscriber : IRedisSubscriber
 {
     private readonly Subscriber _subscribe;
 

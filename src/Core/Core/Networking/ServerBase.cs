@@ -18,7 +18,7 @@ public abstract class ServerBase<T> : BackgroundService, IServerBase
     private readonly ILogger _logger;
     protected IPacketManager PacketManager { get; }
     private readonly List<Func<IConnection, bool>> _connectionListeners = new();
-    protected readonly ConcurrentDictionary<Guid, IConnection> Connections = new();
+    protected ConcurrentDictionary<Guid, IConnection> Connections { get; } = new();
     private readonly CancellationTokenSource _stoppingToken = new();
     protected TcpListener Listener { get; }
 
@@ -31,7 +31,7 @@ public abstract class ServerBase<T> : BackgroundService, IServerBase
     public ushort Port { get; }
     public IPAddress IpAddress { get; }
 
-    public ServerBase(IPacketManager packetManager, ILogger logger, PluginExecutor pluginExecutor,
+    protected ServerBase(IPacketManager packetManager, ILogger logger, PluginExecutor pluginExecutor,
         IServiceProvider serviceProvider, ServerClock clock, string mode)
     {
         _logger = logger;
@@ -52,49 +52,56 @@ public abstract class ServerBase<T> : BackgroundService, IServerBase
         Listener = new TcpListener(IpAddress, Port);
     }
 
-    public async Task RemoveConnection(IConnection connection)
+    public async Task RemoveConnectionAsync(IConnection connection)
     {
         Connections.Remove(connection.Id, out _);
 
-        await _pluginExecutor.ExecutePlugins<IConnectionLifetimeListener>(_logger,
+        await _pluginExecutor.ExecutePluginsAsync<IConnectionLifetimeListener>(_logger,
             x => x.OnDisconnectedAsync(_stoppingToken.Token));
     }
 
-    public override Task StartAsync(CancellationToken token)
+    public async override Task StartAsync(CancellationToken token)
     {
-        base.StartAsync(token);
+        await base.StartAsync(token);
 
         Listener.Start();
         Listener.BeginAcceptTcpClient(OnClientAccepted, Listener);
 
         _logger.LogInformation("Start listening for connections on {IP}:{Port} ({Mode})", IpAddress, Port,
             _serverMode);
-
-        return Task.CompletedTask;
     }
 
+#pragma warning disable VSTHRD100 // do not use async void - how to use async Task with tcp accept tcp client?
     private async void OnClientAccepted(IAsyncResult ar)
+#pragma warning restore VSTHRD100
     {
-        var listener = (TcpListener) ar.AsyncState!;
-        var client = listener.EndAcceptTcpClient(ar);
-
-        // will dispose once connection finished executing (canceled or disconnect)
-        await using var scope = _serviceProvider.CreateAsyncScope();
-
-        // cannot inject tcp client here
-        var connection = ActivatorUtilities.CreateInstance<T>(scope.ServiceProvider, client, this);
-        Connections.TryAdd(connection.Id, connection);
-
-        await _pluginExecutor.ExecutePlugins<IConnectionLifetimeListener>(_logger,
-            x => x.OnConnectedAsync(_stoppingToken.Token));
-
-        // accept new connections on another thread
-        Listener.BeginAcceptTcpClient(OnClientAccepted, Listener);
-
-        await connection.StartAsync(_stoppingToken.Token);
-        if (connection.ExecuteTask is not null)
+        try
         {
-            await connection.ExecuteTask.ConfigureAwait(false);
+            var listener = (TcpListener) ar.AsyncState!;
+            var client = listener.EndAcceptTcpClient(ar);
+
+            // will dispose once connection finished executing (canceled or disconnect)
+            await using var scope = _serviceProvider.CreateAsyncScope();
+
+            // cannot inject tcp client here
+            var connection = ActivatorUtilities.CreateInstance<T>(scope.ServiceProvider, client, this);
+            Connections.TryAdd(connection.Id, connection);
+
+            await _pluginExecutor.ExecutePluginsAsync<IConnectionLifetimeListener>(_logger,
+                x => x.OnConnectedAsync(_stoppingToken.Token));
+
+            // accept new connections on another thread
+            Listener.BeginAcceptTcpClient(OnClientAccepted, Listener);
+
+            await connection.StartAsync(_stoppingToken.Token);
+            if (connection.ExecuteTask is not null)
+            {
+                await connection.ExecuteTask.ConfigureAwait(false);
+            }
+        }
+        catch (Exception e)
+        {
+            _logger.LogError(e, "Failed to accept TCP connection");
         }
     }
 
@@ -111,7 +118,7 @@ public abstract class ServerBase<T> : BackgroundService, IServerBase
         _connectionListeners.Add(listener);
     }
 
-    public async Task CallListener(IConnection connection, IPacketSerializable packet)
+    public async Task CallListenerAsync(IConnection connection, IPacketSerializable packet)
     {
         if (!PacketManager.TryGetPacketInfo(packet, out var details) || details.PacketHandlerType is null)
         {
@@ -193,5 +200,12 @@ public abstract class ServerBase<T> : BackgroundService, IServerBase
         await base.StopAsync(cancellationToken);
         _stoppingToken.Dispose();
         Scope.Dispose();
+    }
+
+    public override void Dispose()
+    {
+        GC.SuppressFinalize(this);
+        base.Dispose();
+        _stoppingToken.Dispose();
     }
 }

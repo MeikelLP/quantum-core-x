@@ -5,6 +5,6 @@
 /// The type must be declared as partial and must be a top level class/struct/... - no sub-classes
 /// </summary>
 [AttributeUsage(AttributeTargets.Struct | AttributeTargets.Class)]
-public class PacketGeneratorAttribute : Attribute
+public sealed class PacketGeneratorAttribute : Attribute
 {
 }

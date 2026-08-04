@@ -3,6 +3,7 @@ using System.Text;
 using BinarySerialization;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
+using Microsoft.VisualStudio.Threading;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
 using QuantumCore.Game.Types;
@@ -18,7 +19,7 @@ public class MonsterManager : IMonsterManager, ILoadable
     private readonly IFileProvider _fileProvider;
     private ImmutableArray<MonsterData> _proto = [];
 
-    private readonly Lazy<Task> _loader;
+    private readonly AsyncLazy<Task> _loader;
 
     static MonsterManager()
     {
@@ -30,7 +31,11 @@ public class MonsterManager : IMonsterManager, ILoadable
         _logger = logger;
         _fileProvider = fileProvider;
 
-        _loader = new Lazy<Task>(LoadMobProtoAsync, LazyThreadSafetyMode.ExecutionAndPublication);
+        _loader = new AsyncLazy<Task>(async delegate
+        {
+            await Task.Yield();
+            return LoadMobProtoAsync();
+        }, null);
     }
 
     /// <summary>
@@ -38,7 +43,8 @@ public class MonsterManager : IMonsterManager, ILoadable
     /// </summary>
     public async Task LoadAsync(CancellationToken token = default)
     {
-        await _loader.Value.WaitAsync(token);
+        var task = await _loader.GetValueAsync(token);
+        await task.WaitAsync(token);
     }
 
     private async Task LoadMobProtoAsync()
@@ -58,8 +64,8 @@ public class MonsterManager : IMonsterManager, ILoadable
         var result = await bs.DeserializeAsync<MonsterDataContainer>(fs);
         var items = new LzoXtea(result.Payload.RealSize, result.Payload.EncryptedSize, 0x497446, 0x4A0B, 0x86EB7,
             0x68189D);
-        var itemsRaw = items.Decode(result.Payload.EncryptedPayload);
-        _proto = [.. bs.Deserialize<MonsterData[]>(itemsRaw)];
+        var itemsRaw = items.Decode([.. result.Payload.EncryptedPayload]);
+        _proto = [.. await bs.DeserializeAsync<MonsterData[]>(itemsRaw)];
         _logger.LogDebug("Loaded {Count} monsters", _proto.Length);
     }
 

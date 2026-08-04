@@ -5,10 +5,10 @@
 /// HAVE to match with all other packets of the same header!
 /// </summary>
 [AttributeUsage(AttributeTargets.Class, Inherited = false)]
-public class SubPacketAttribute : Attribute
+public sealed class SubPacketAttribute : Attribute
 {
-    public byte SubHeader { get; set; }
-    public int Position { get; set; }
+    public byte SubHeader { get; }
+    public int Position { get; }
 
     public SubPacketAttribute(byte subHeader, int position)
     {

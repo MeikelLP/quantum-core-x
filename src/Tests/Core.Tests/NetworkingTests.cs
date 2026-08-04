@@ -38,7 +38,7 @@ public class NetworkingTests
     }
 
     [Fact]
-    public async Task Simple()
+    public async Task SimpleAsync()
     {
         var obj = new Attack { Unknown = new byte[] { 0, 0 }, Vid = 1_000_000, SkillMotion = (ESkill)53 };
         var size = obj.GetSize();
@@ -53,7 +53,7 @@ public class NetworkingTests
     }
 
     [Fact]
-    public async Task SubPacket()
+    public async Task SubPacketAsync()
     {
         var obj = new ShopBuy { Position = 24, Count = 10 };
         var size = obj.GetSize();
@@ -68,7 +68,7 @@ public class NetworkingTests
     }
 
     [Fact]
-    public async Task MultipleWithSequence()
+    public async Task MultipleWithSequenceAsync()
     {
         var obj = new Attack { Vid = 1_000_000, SkillMotion = (ESkill)5, Unknown = new byte[] { 0, 0 } };
         var size = obj.GetSize();
@@ -84,7 +84,7 @@ public class NetworkingTests
     }
 
     [Fact]
-    public async Task Dynamic()
+    public async Task DynamicAsync()
     {
         var obj = new ChatIncoming { MessageType = ChatMessageType.NORMAL, Message = "Hello New World!" };
         var size = obj.GetSize();
@@ -99,7 +99,7 @@ public class NetworkingTests
     }
 
     [Fact]
-    public async Task BufferToSmall()
+    public async Task BufferToSmallAsync()
     {
         var obj = new ChatIncoming
         {
@@ -117,7 +117,7 @@ public class NetworkingTests
     }
 
     [Fact]
-    public async Task Multiple()
+    public async Task MultipleAsync()
     {
         var obj = new Attack { Unknown = new byte[] { 0, 0 }, Vid = 1_000_000, SkillMotion = (ESkill)53 };
         var size = obj.GetSize();
@@ -134,7 +134,7 @@ public class NetworkingTests
     }
 
     [Fact]
-    public async Task MoreThanBuffer()
+    public async Task MoreThanBufferAsync()
     {
         var obj = new Attack { Unknown = new byte[] { 0, 0 }, Vid = 1_000_000, SkillMotion = (ESkill)53 };
         var size = obj.GetSize();
@@ -153,7 +153,7 @@ public class NetworkingTests
     }
 
     [Fact]
-    public async Task OddSize()
+    public async Task OddSizeAsync()
     {
         var obj = new CharacterDead { Vid = 1_000_000 };
         var size = obj.GetSize();
@@ -171,7 +171,7 @@ public class NetworkingTests
     }
 
     [Fact]
-    public async Task DifferentPackets()
+    public async Task DifferentPacketsAsync()
     {
         var charDeadObj = new CharacterDead { Vid = 1_000_000 };
         var attackObj = new Attack { Unknown = new byte[] { 0, 0 }, Vid = 1_000_000, SkillMotion = (ESkill)53 };

@@ -1,7 +1,7 @@
 ﻿namespace QuantumCore.API.Game;
 
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
-public class CommandAttribute : Attribute
+public sealed class CommandAttribute : Attribute
 {
     public CommandAttribute(string name, string description)
     {
@@ -14,7 +14,7 @@ public class CommandAttribute : Attribute
 }
 
 [AttributeUsage(AttributeTargets.Method)]
-public class CommandMethodAttribute : Attribute
+public sealed class CommandMethodAttribute : Attribute
 {
     public CommandMethodAttribute(string description = "")
     {
@@ -25,4 +25,4 @@ public class CommandMethodAttribute : Attribute
 }
 
 [AttributeUsage(AttributeTargets.Class)]
-public class CommandNoPermissionAttribute : Attribute {}
+public sealed class CommandNoPermissionAttribute : Attribute;

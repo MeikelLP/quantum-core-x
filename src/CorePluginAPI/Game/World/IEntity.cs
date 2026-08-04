@@ -8,59 +8,61 @@ namespace QuantumCore.API.Game.World;
 
 public interface IEntity
 {
-    public uint Vid { get; }
-    public uint EntityClass { get; }
+    uint Vid { get; }
+    uint EntityClass { get; }
     EEmpire Empire { get; }
     long Health { get; set; }
-    public EEntityType Type { get; }
-    public EEntityState State { get; }
-    public bool PositionChanged { get; set; }
-    public int PositionX { get; }
-    public int PositionY { get; }
-    public float Rotation { get; set; }
-    public IMap? Map { get; set; }
-    public byte HealthPercentage { get; }
-    public IEntity? Target { get; set; }
-    public List<IPlayerEntity> TargetedBy { get; }
-    public bool Dead { get; }
+    EEntityType Type { get; }
+    EEntityState State { get; }
+    bool PositionChanged { get; set; }
+    int PositionX { get; }
+    int PositionY { get; }
+    float Rotation { get; set; }
+    IMap? Map { get; set; }
+    byte HealthPercentage { get; }
+    IEntity? Target { get; set; }
+#pragma warning disable CA1002 // do not expose lists - is ok for now
+    List<IPlayerEntity> TargetedBy { get; }
+#pragma warning restore CA1002
+    bool Dead { get; }
 
     // QuadTree cache
-    public int LastPositionX { get; set; }
-    public int LastPositionY { get; set; }
-    public IQuadTree? LastQuadTree { get; set; }
+    int LastPositionX { get; set; }
+    int LastPositionY { get; set; }
+    IQuadTree? LastQuadTree { get; set; }
 
     // Movement related
-    public ServerTimestamp MovementStart { get; }
-    public int TargetPositionX { get; }
-    public int StartPositionX { get; }
-    public int TargetPositionY { get; }
-    public int StartPositionY { get; }
-    public uint MovementDuration { get; }
+    ServerTimestamp MovementStart { get; }
+    int TargetPositionX { get; }
+    int StartPositionX { get; }
+    int TargetPositionY { get; }
+    int StartPositionY { get; }
+    uint MovementDuration { get; }
 
-    public void Update(TickContext ctx);
+    void Update(TickContext ctx);
 
-    public void OnDespawn();
-    public void AddNearbyEntity(IEntity entity);
-    public void RemoveNearbyEntity(IEntity entity);
-    public void ForEachNearbyEntity(Action<IEntity> action);
-    public void ShowEntity(IConnection connection);
-    public void HideEntity(IConnection connection);
+    void OnDespawn();
+    void AddNearbyEntity(IEntity entity);
+    void RemoveNearbyEntity(IEntity entity);
+    void ForEachNearbyEntity(Action<IEntity> action);
+    void ShowEntity(IConnection connection);
+    void HideEntity(IConnection connection);
     IReadOnlyCollection<IEntity> NearbyEntities { get; }
     byte MovementSpeed { get; set; }
     byte AttackSpeed { get; set; }
 
-    public uint GetPoint(EPoint point);
-    public int GetMinDamage();
-    public int GetMaxDamage();
-    public int GetBonusDamage();
+    uint GetPoint(EPoint point);
+    int GetMinDamage();
+    int GetMaxDamage();
+    int GetBonusDamage();
 
-    public void Goto(int x, int y, ServerTimestamp startAt);
-    public void Wait(int x, int y);
+    void Goto(int x, int y, ServerTimestamp startAt);
+    void Wait(int x, int y);
 
-    public void Attack(IEntity victim);
-    public int Damage(IEntity attacker, EDamageType damageType, int damage);
+    void Attack(IEntity victim);
+    int Damage(IEntity attacker, EDamageType damageType, int damage);
 
-    public void Move(int x, int y);
-    public void Stop();
-    public void Die();
+    void Move(int x, int y);
+    void Stop();
+    void Die();
 }

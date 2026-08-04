@@ -15,8 +15,10 @@ public class RemoteMap : IMap
     public uint Width { get; }
     public uint Height { get; }
     public IWorld World { get; }
+#pragma warning disable CA1065
     public IReadOnlyCollection<IEntity> Entities => throw new NotImplementedException();
     public TownCoordinates? TownCoordinates => throw new NotImplementedException();
+#pragma warning restore CA1065
 
     public IPAddress? Host { get; set; }
     public ushort Port { get; set; }
@@ -28,11 +30,6 @@ public class RemoteMap : IMap
         Position = position;
         Width = width;
         Height = height;
-    }
-
-    public List<IEntity> GetEntities()
-    {
-        throw new NotImplementedException();
     }
 
     public IEntity GetEntity(uint vid)

@@ -37,6 +37,6 @@ public class ItemGiveHandler : IGamePacketHandler<ItemGive>
         }
 
         _logger.LogInformation("Item give to {Entity}", entity);
-        await GameEventManager.OnNpcGive(entity.EntityClass, player, item);
+        await GameEventManager.OnNpcGiveAsync(entity.EntityClass, player, item);
     }
 }

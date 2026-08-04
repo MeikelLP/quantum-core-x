@@ -17,12 +17,12 @@ public class RedisListWrapper<T> : IRedisListWrapper<T>
         _list = list;
     }
 
-    public ValueTask<T> Index(int slot) => _list.Index(slot);
+    public ValueTask<T> IndexAsync(int slot) => _list.Index(slot);
 
-    public ValueTask<T[]> Range(int start, int stop) => _list.Range(start, stop);
+    public ValueTask<T[]> RangeAsync(int start, int stop) => _list.Range(start, stop);
 
-    public ValueTask<long> Push(params T[] arr) => _list.Push(arr);
+    public ValueTask<long> PushAsync(params T[] arr) => _list.Push(arr);
 
-    public ValueTask<long> Rem(int count, T obj) => _list.Rem(count, obj);
-    public ValueTask<long> Len() => _list.Len();
+    public ValueTask<long> RemAsync(int count, T obj) => _list.Rem(count, obj);
+    public ValueTask<long> LenAsync() => _list.Len();
 }

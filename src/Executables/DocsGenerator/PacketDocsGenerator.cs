@@ -111,14 +111,14 @@ public static class PacketDocsGenerator
                             type.Namespace,
                             packetInfo.Namespace
                         );
-                        if (relativePath == "") relativePath = ".";
+                        if (string.IsNullOrWhiteSpace(relativePath)) relativePath = ".";
                         sb.AppendLine($"* [{type.Name}]({relativePath}/{type.Name}.md)");
                     }
                 }
 
                 var mermaid = sb.ToString();
 
-                await WriteFile(targetDir, packetInfo.Namespace, packetInfo.Name, mermaid);
+                await WriteFileAsync(targetDir, packetInfo.Namespace, packetInfo.Name, mermaid);
             }
             catch (Exception)
             {
@@ -219,7 +219,7 @@ public static class PacketDocsGenerator
         throw new InvalidOperationException($"{type.FullName} is not a primitive type");
     }
 
-    private static async Task WriteFile(string baseDir, string directory, string name, string content)
+    private static async Task WriteFileAsync(string baseDir, string directory, string name, string content)
     {
         var packetsDir = Path.Combine(baseDir, "Packets");
         var relativeDir = Path.Combine(packetsDir, directory);

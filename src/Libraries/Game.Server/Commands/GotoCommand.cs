@@ -23,7 +23,7 @@ public class GotoCommand : ICommandHandler<GotoCommandOptions>
         if (!string.IsNullOrWhiteSpace(context.Arguments.Map))
         {
             var maps = _world.FindMapsByName(context.Arguments.Map);
-            if (maps.Count > 1)
+            if (maps.Length > 1)
             {
                 context.Player.SendChatInfo("Map name is ambiguous:");
                 foreach (var map in maps)
@@ -34,7 +34,7 @@ public class GotoCommand : ICommandHandler<GotoCommandOptions>
                 return Task.CompletedTask;
             }
 
-            if (maps.Count == 0)
+            if (maps.Length == 0)
             {
                 context.Player.SendChatInfo("Unknown map");
                 return Task.CompletedTask;

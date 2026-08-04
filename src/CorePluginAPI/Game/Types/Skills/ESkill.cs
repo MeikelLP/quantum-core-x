@@ -2,6 +2,8 @@
 
 public enum ESkill : byte
 {
+    UNKNOWN = 0,
+
     // Warrior Body
     THREE_WAY_CUT = 1,
     SWORD_SPIN = 2,
@@ -9,6 +11,7 @@ public enum ESkill : byte
     AURA_OF_THE_SWORD = 4,
     DASH = 5,
     LIFE = 6,
+
     // Warrior Mind
     SHOCKWAVE = 16,
     BASH = 17,
@@ -16,6 +19,7 @@ public enum ESkill : byte
     STRONG_BODY = 19,
     SWORD_STRIKE = 20,
     SWORD_ORB = 21,
+
     // Ninja Dagger
     AMBUSH = 31,
     FAST_ATTACK = 32,
@@ -23,6 +27,7 @@ public enum ESkill : byte
     STEALTH = 34,
     POISONOUS_CLOUD = 35,
     INSIDIOUS_POISON = 36,
+
     // Ninja Bow
     REPETITIVE_SHOT = 46,
     ARROW_SHOWER = 47,
@@ -30,6 +35,7 @@ public enum ESkill : byte
     FEATHER_WALK = 49,
     POISON_ARROW = 50,
     SPARK = 51,
+
     // Sura Weapons
     FINGER_STRIKE = 61,
     DRAGON_SWIRL = 62,
@@ -37,6 +43,7 @@ public enum ESkill : byte
     FEAR = 64,
     ENCHANTED_ARMOR = 65,
     DISPEL = 66,
+
     // Sura Magic
     DARK_STRIKE = 76,
     FLAME_STRIKE = 77,
@@ -44,6 +51,7 @@ public enum ESkill : byte
     DARK_PROTECTION = 79,
     SPIRIT_STRIKE = 80,
     DARK_ORB = 81,
+
     // Shaman Dragon
     FLYING_TALISMAN = 91,
     SHOOTING_DRAGON = 92,
@@ -51,6 +59,7 @@ public enum ESkill : byte
     BLESSING = 94,
     REFLECT = 95,
     DRAGON_AID = 96,
+
     // Shaman Lightning
     LIGHTNING_THROW = 106,
     SUMMON_LIGHTNING = 107,
@@ -58,6 +67,7 @@ public enum ESkill : byte
     CURE = 109,
     SWIFTNESS = 110,
     ATTACK_UP = 111,
+
     // Passive Skills
     LEADERSHIP = 121,
     COMBO = 122,
@@ -67,17 +77,17 @@ public enum ESkill : byte
     LANGUAGE_CHUNJO = 127,
     LANGUAGE_JINNO = 128,
     POLYMORPH = 129,
-    
+
     HORSE_RIDING = 130,
     HORSE_SUMMON = 131,
     HORSE_WILD_ATTACK = 137,
     HORSE_CHARGE = 138,
     HORSE_ESCAPE = 139,
     HORSE_WILD_ATTACK_RANGE = 140,
-    
+
     ADD_HP = 141,
     PENETRATION_RESISTANCE = 142,
-    
+
     GUILD_EYE = 151,
     GUILD_BLOOD = 152,
     GUILD_BLESS = 153,

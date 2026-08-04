@@ -43,7 +43,7 @@ public class DeleteCharacterHandler : IGamePacketHandler<DeleteCharacter>
 
         ctx.Connection.Send(new DeleteCharacterSuccess { Slot = ctx.Packet.Slot });
 
-        var player = await _playerManager.GetPlayer(accountId.Value, ctx.Packet.Slot);
+        var player = await _playerManager.GetPlayerAsync(accountId.Value, ctx.Packet.Slot);
         if (player is null)
         {
             ctx.Connection.Close();

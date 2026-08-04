@@ -16,9 +16,9 @@ namespace Game.Tests;
 public class GuildTests
 {
     [Fact]
-    public async Task AddExperience_Clean()
+    public async Task AddExperience_CleanAsync()
     {
-        var gm = await SetupGuild();
+        var gm = await SetupGuildAsync();
         var guild = await gm.AddExperienceAsync(1, 600_000);
         guild.Should().BeEquivalentTo(new GuildData
         {
@@ -46,9 +46,9 @@ public class GuildTests
     }
 
     [Fact]
-    public async Task AddExperience_Existing()
+    public async Task AddExperience_ExistingAsync()
     {
-        var gm = await SetupGuild();
+        var gm = await SetupGuildAsync();
         await gm.AddExperienceAsync(1, 300_000);
         var guild = await gm.AddExperienceAsync(1, 600_000);
         guild.Should().BeEquivalentTo(new GuildData
@@ -77,9 +77,9 @@ public class GuildTests
     }
 
     [Fact]
-    public async Task AddExperience_Existing_AddPerfect()
+    public async Task AddExperience_Existing_AddPerfectAsync()
     {
-        var gm = await SetupGuild();
+        var gm = await SetupGuildAsync();
         await gm.AddExperienceAsync(1, 300_000);
         var guild = await gm.AddExperienceAsync(1, 300_000);
         guild.Should().BeEquivalentTo(new GuildData
@@ -107,7 +107,7 @@ public class GuildTests
             .Including(x => x.Members));
     }
 
-    private static async Task<IGuildManager> SetupGuild()
+    private static async Task<IGuildManager> SetupGuildAsync()
     {
         var serviceCollection = new ServiceCollection();
         serviceCollection.AddOptions<DatabaseOptions>(HostingOptions.MODE_GAME).Configure(x =>

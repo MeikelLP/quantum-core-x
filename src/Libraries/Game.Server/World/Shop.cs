@@ -19,10 +19,7 @@ public class Shop : IShop
     public uint Vid { get; set; }
     public string Name { get; set; } = "";
 
-    public IReadOnlyList<ShopItem> Items
-    {
-        get { return _items; }
-    }
+    public IReadOnlyList<ShopItem> Items => _items;
 
     public List<IPlayerEntity> Visitors { get; } = new();
 
@@ -98,7 +95,7 @@ public class Shop : IShop
         p.Connection.Send(shopStart);
     }
 
-    public async Task Buy(IPlayerEntity player, byte position, byte count)
+    public async Task BuyAsync(IPlayerEntity player, byte position, byte count)
     {
         if (player is not PlayerEntity p)
         {
@@ -135,7 +132,7 @@ public class Shop : IShop
         // todo set bonuses and sockets
 
         // Try to place item into players inventory
-        if (!await p.Inventory.PlaceItem(playerItem))
+        if (!await p.Inventory.PlaceItemAsync(playerItem))
         {
             p.Connection.Send(new ShopNoSpaceLeft());
         }
@@ -146,7 +143,7 @@ public class Shop : IShop
         p.SendItem(playerItem);
     }
 
-    public void Sell(IPlayerEntity player, byte position)
+    public async Task SellAsync(IPlayerEntity player, byte position)
     {
         if (player is not PlayerEntity p)
         {
@@ -165,7 +162,7 @@ public class Shop : IShop
             return;
         }
 
-        if (p.DestroyItem(item))
+        if (await p.DestroyItemAsync(item))
         {
             p.AddPoint(EPoint.GOLD, (int)proto.SellPrice);
             p.SendPoints();

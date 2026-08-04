@@ -9,13 +9,13 @@ namespace QuantumCore.Game.Commands;
 public static class HelpCommand
 {
     [CommandMethod]
-    public static Task Help(IPlayerEntity player, ICommandManager commandManager, int page = 1)
+    public static Task HelpAsync(IPlayerEntity player, ICommandManager commandManager, int page = 1)
     {
         throw new NotImplementedException();
     }
 
     [CommandMethod("Shows an help with a specific command")]
-    public static Task HelpWithCommand(IPlayerEntity player, ICommandManager commandManager, string command)
+    public static Task HelpWithCommandAsync(IPlayerEntity player, ICommandManager commandManager, string command)
     {
         throw new NotImplementedException();
     }

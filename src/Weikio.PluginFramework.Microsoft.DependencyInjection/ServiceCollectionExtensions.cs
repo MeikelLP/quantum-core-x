@@ -24,9 +24,9 @@ public static class ServiceCollectionExtensions
         services.AddHostedService<PluginFrameworkInitializer>();
         services.AddTransient<PluginProvider>();
 
-        services.TryAddTransient(typeof(IPluginCatalogConfigurationLoader), typeof(PluginCatalogConfigurationLoader));
-        services.AddTransient(typeof(IConfigurationToCatalogConverter), typeof(FolderCatalogConfigurationConverter));
-        services.AddTransient(typeof(IConfigurationToCatalogConverter), typeof(AssemblyCatalogConfigurationCoverter));
+        services.TryAddTransient<IPluginCatalogConfigurationLoader, PluginCatalogConfigurationLoader>();
+        services.AddTransient<IConfigurationToCatalogConverter, FolderCatalogConfigurationConverter>();
+        services.AddTransient<IConfigurationToCatalogConverter, AssemblyCatalogConfigurationCoverter>();
 
         services.AddConfiguration();
 
@@ -144,7 +144,7 @@ public static class ServiceCollectionExtensions
 
     public static IServiceCollection AddPluginCatalog(this IServiceCollection services, IPluginCatalog pluginCatalog)
     {
-        services.TryAddEnumerable(ServiceDescriptor.Singleton(typeof(IPluginCatalog), pluginCatalog));
+        services.TryAddEnumerable(ServiceDescriptor.Singleton(pluginCatalog));
 
         return services;
     }

@@ -1,4 +1,5 @@
-﻿using QuantumCore.API.Core.Models;
+﻿using System.Collections.Immutable;
+using QuantumCore.API.Core.Models;
 using QuantumCore.API.Core.Timekeeping;
 
 namespace QuantumCore.API.Game.World;
@@ -9,7 +10,7 @@ public interface IWorld : ILoadable
     void Update(TickContext ctx);
     IMap? GetMapAt(uint x, uint y);
     IMap? GetMapByName(string name);
-    List<IMap> FindMapsByName(string needle);
+    ImmutableArray<IMap> FindMapsByName(string needle);
     CoreHost GetMapHost(int x, int y);
     SpawnGroup? GetGroup(uint id);
     SpawnGroup GetRandomGroup();

@@ -2,6 +2,7 @@ namespace QuantumCore.API.Game.Types.Entities;
 
 public enum EPoint
 {
+    UNKNOWN = 0,
     LEVEL = 1,
     EXPERIENCE = 3,
     NEEDED_EXPERIENCE = 4,

@@ -15,26 +15,24 @@ public class KickCommand : ICommandHandler<KickCommandOptions>
         _world = world;
     }
 
-    public Task ExecuteAsync(CommandContext<KickCommandOptions> context)
+    public async Task ExecuteAsync(CommandContext<KickCommandOptions> context)
     {
         if (context.Arguments.Target is null)
         {
             context.Player.SendChatMessage("No target given");
-            return Task.CompletedTask;
+            return;
         }
 
         var target = _world.GetPlayer(context.Arguments.Target);
         if (target is not null)
         {
-            _world.DespawnPlayerAsync(target);
+            await _world.DespawnPlayerAsync(target);
             target.Disconnect();
         }
         else
         {
             context.Player.SendChatMessage("Target not found");
         }
-
-        return Task.CompletedTask;
     }
 }
 

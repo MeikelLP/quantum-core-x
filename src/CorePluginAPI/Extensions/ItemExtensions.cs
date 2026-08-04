@@ -176,20 +176,20 @@ public static class ItemExtensions
         throw new NotImplementedException($"No equipment slot for wear flags: {wearFlags}");
     }
 
-    public static async Task<ItemInstance?> GetItem(this IItemRepository repository, ICacheManager cacheManager,
+    public static async Task<ItemInstance?> GetItemAsync(this IItemRepository repository, ICacheManager cacheManager,
         Guid id)
     {
         var key = "item:" + id;
 
-        if (await cacheManager.Server.Exists(key) > 0)
+        if (await cacheManager.Server.ExistsAsync(key) > 0)
         {
-            return await cacheManager.Server.Get<ItemInstance>(key);
+            return await cacheManager.Server.GetAsync<ItemInstance>(key);
         }
 
         var item = await repository.GetItemAsync(id);
         if (item is not null)
         {
-            await cacheManager.Server.Set(key, item);
+            await cacheManager.Server.SetAsync(key, item);
         }
 
         return item;
@@ -200,12 +200,12 @@ public static class ItemExtensions
     {
         var key = $"item:{itemId}";
 
-        await cacheManager.Del(key);
+        await cacheManager.DelAsync(key);
 
         await repository.DeletePlayerItemAsync(playerId, itemId);
     }
 
-    public static async IAsyncEnumerable<ItemInstance> GetItems(this IItemRepository repository,
+    public static async IAsyncEnumerable<ItemInstance> GetItemsAsync(this IItemRepository repository,
         ICacheManager cacheManager, uint player, WindowType window)
     {
         var key = "items:" + player + ":" + (byte)window;
@@ -213,13 +213,13 @@ public static class ItemExtensions
         var list = cacheManager.Server.CreateList<Guid>(key);
 
         // Check if the window list exists
-        if (await cacheManager.Server.Exists(key) > 0)
+        if (await cacheManager.Server.ExistsAsync(key) > 0)
         {
-            var itemIds = await list.Range(0, -1);
+            var itemIds = await list.RangeAsync(0, -1);
 
             foreach (var id in itemIds)
             {
-                var item = await GetItem(repository, cacheManager, id);
+                var item = await GetItemAsync(repository, cacheManager, id);
                 if (item is not null)
                 {
                     yield return item;
@@ -232,9 +232,9 @@ public static class ItemExtensions
 
             foreach (var id in ids)
             {
-                await list.Push(id);
+                await list.PushAsync(id);
 
-                var item = await GetItem(repository, cacheManager, id);
+                var item = await GetItemAsync(repository, cacheManager, id);
                 if (item is not null)
                 {
                     yield return item;
@@ -243,20 +243,20 @@ public static class ItemExtensions
         }
     }
 
-    public static async Task<bool> Destroy(this ItemInstance item, ICacheManager cacheManager)
+    public static async Task<bool> DestroyAsync(this ItemInstance item, ICacheManager cacheManager)
     {
         var key = "item:" + item.Id;
 
         if (item.PlayerId != default)
         {
             var oldList = cacheManager.Server.CreateList<Guid>($"items:{item.PlayerId}:{item.Window}");
-            await oldList.Rem(1, item.Id);
+            await oldList.RemAsync(1, item.Id);
         }
 
-        return await cacheManager.Server.Del(key) != 0;
+        return await cacheManager.Server.DelAsync(key) != 0;
     }
 
-    public static Task Persist(this ItemInstance item, IItemRepository itemRepository)
+    public static Task PersistAsync(this ItemInstance item, IItemRepository itemRepository)
     {
         return itemRepository.SaveItemAsync(item);
     }
@@ -265,7 +265,7 @@ public static class ItemExtensions
     /// Sets the item position, window, and owner.
     /// Refresh the cache lists if needed, and persists the item
     /// </summary>
-    public static async Task Set(this ItemInstance item, ICacheManager cacheManager, uint owner, WindowType window,
+    public static async Task SetAsync(this ItemInstance item, ICacheManager cacheManager, uint owner, WindowType window,
         uint pos, IItemRepository itemRepository)
     {
         var isPlayerDifferent = item.PlayerId != owner;
@@ -274,7 +274,7 @@ public static class ItemExtensions
         item.PlayerId = owner;
         item.Window = window;
         item.Position = pos;
-        await Persist(item, itemRepository);
+        await PersistAsync(item, itemRepository);
 
         if (isPlayerDifferent || isWindowDifferent)
         {
@@ -282,13 +282,13 @@ public static class ItemExtensions
             {
                 // Remove from last list
                 var oldList = cacheManager.Server.CreateList<Guid>($"items:{item.PlayerId}:{item.Window}");
-                await oldList.Rem(1, item.Id);
+                await oldList.RemAsync(1, item.Id);
             }
 
             if (owner != default)
             {
                 var newList = cacheManager.Server.CreateList<Guid>($"items:{owner}:{window}");
-                await newList.Push(item.Id);
+                await newList.PushAsync(item.Id);
             }
         }
     }

@@ -21,13 +21,18 @@ public interface IDropProvider
 
     ImmutableArray<LevelItemGroup> LevelDrops { get; }
     (int deltaPercentage, int dropRange) CalculateDropPercentages(IPlayerEntity player, MonsterEntity monster);
-    List<ItemInstance> CalculateCommonDropItems(IPlayerEntity player, MonsterEntity monster, int delta, int range);
-    List<ItemInstance> CalculateDropItemGroupItems(MonsterEntity monster, int delta, int range);
 
-    List<ItemInstance>
+    ImmutableArray<ItemInstance> CalculateCommonDropItems(IPlayerEntity player, MonsterEntity monster, int delta,
+        int range);
+
+    ImmutableArray<ItemInstance> CalculateDropItemGroupItems(MonsterEntity monster, int delta, int range);
+
+    ImmutableArray<ItemInstance>
         CalculateMobDropItemGroupItems(IPlayerEntity player, MonsterEntity monster, int delta, int range);
 
-    List<ItemInstance> CalculateLevelDropItems(IPlayerEntity player, MonsterEntity monster, int delta, int range);
-    List<ItemInstance> CalculateEtcDropItems(MonsterEntity monster, int delta, int range);
-    List<ItemInstance> CalculateMetinDropItems(MonsterEntity monsterEntity, int delta, int range);
+    ImmutableArray<ItemInstance> CalculateLevelDropItems(IPlayerEntity player, MonsterEntity monster, int delta,
+        int range);
+
+    ImmutableArray<ItemInstance> CalculateEtcDropItems(MonsterEntity monster, int delta, int range);
+    ImmutableArray<ItemInstance> CalculateMetinDropItems(MonsterEntity monsterEntity, int delta, int range);
 }

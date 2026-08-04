@@ -8,6 +8,7 @@
     <ItemGroup>
         <PackageReference Include="Enums.NET" Version="5.0.0"/>
       <PackageReference Include="Microsoft.Extensions.Http" Version="9.0.18"/>
+      <PackageReference Include="Microsoft.VisualStudio.Threading.Only" Version="17.14.15"/>
     </ItemGroup>
 
     <ItemGroup>

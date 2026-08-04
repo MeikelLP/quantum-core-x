@@ -16,31 +16,29 @@ public class SessionManager : ILoadable
         _server = server;
     }
 
-    private void OnAuthDropAsync(Guid accountId)
+    private void OnAuthDrop(Guid accountId)
     {
         var connection = _server.Connections.FirstOrDefault(x => x.AccountId == accountId);
 
         connection?.Close();
     }
 
-    public Task LoadAsync(CancellationToken token = default)
+    public async Task LoadAsync(CancellationToken token = default)
     {
         _logger.LogInformation("Initialize session manager");
         var sharedSubscriber = _cacheManager.Shared.Subscribe();
         var serverSubscriber = _cacheManager.Server.Subscribe();
 
         // Drop all pre-existing tokens
-        _cacheManager.Shared.DelAllAsync("account:*");
-        _cacheManager.Server.DelAllAsync("account:*");
-        _cacheManager.Server.DelAllAsync("token:*");
+        await _cacheManager.Shared.DelAllAsync("account:*");
+        await _cacheManager.Server.DelAllAsync("account:*");
+        await _cacheManager.Server.DelAllAsync("token:*");
 
         // Register the session message handlers
-        sharedSubscriber.Register<Guid>("account:drop-connection", OnAuthDropAsync);
+        sharedSubscriber.Register<Guid>("account:drop-connection", OnAuthDrop);
 
         // Listen for session messages
         sharedSubscriber.Listen();
         serverSubscriber.Listen();
-
-        return Task.CompletedTask;
     }
 }

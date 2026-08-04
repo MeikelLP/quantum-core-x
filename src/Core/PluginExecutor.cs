@@ -32,10 +32,11 @@ public class PluginExecutor
                 dict[intf].Add(ActivatorUtilities.CreateInstance(provider, type));
             }
         }
+
         _allPlugins = dict.ToImmutableDictionary(x => x.Key, x => x.Value.ToArray());
     }
 
-    public async Task ExecutePlugins<T>(ILogger logger, Func<T, Task> action)
+    public async Task ExecutePluginsAsync<T>(ILogger logger, Func<T, Task> action)
     {
         if (_allPlugins.TryGetValue(typeof(T), out var plugins) && plugins.Length > 0)
         {
@@ -49,7 +50,8 @@ public class PluginExecutor
                 }
                 catch (Exception e)
                 {
-                    logger.LogError(e, "The plugin {PluginType} for {Interface} failed executing", plugins[i], typeof(T));
+                    logger.LogError(e, "The plugin {PluginType} for {Interface} failed executing", plugins[i],
+                        typeof(T));
                     // exception is thrown before any await
                     taskArr[i] = Task.CompletedTask;
                 }

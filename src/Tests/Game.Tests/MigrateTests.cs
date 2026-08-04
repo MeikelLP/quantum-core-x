@@ -23,7 +23,7 @@ public class MigrateTests
     }
 
     [Fact]
-    public async Task Mysql()
+    public async Task MysqlAsync()
     {
         var container = new MySqlBuilder("mariadb:12.3.2-noble")
             .WithDatabase("game")
@@ -31,12 +31,12 @@ public class MigrateTests
             .WithPassword("metin2")
             .Build();
         await container.StartAsync();
-        await ExecuteMigrate(DatabaseProvider.MYSQL, container.GetConnectionString());
+        await ExecuteMigrateAsync(DatabaseProvider.MYSQL, container.GetConnectionString());
         Assert.True(true);
     }
 
     [Fact]
-    public async Task Postgresql()
+    public async Task PostgresqlAsync()
     {
         var container = new PostgreSqlBuilder("postgres:18.4-alpine3.24")
             .WithDatabase("game")
@@ -44,19 +44,19 @@ public class MigrateTests
             .WithPassword("metin2")
             .Build();
         await container.StartAsync();
-        await ExecuteMigrate(DatabaseProvider.POSTGRESQL, container.GetConnectionString());
+        await ExecuteMigrateAsync(DatabaseProvider.POSTGRESQL, container.GetConnectionString());
         Assert.True(true);
     }
 
     [Fact]
-    public async Task Sqlite()
+    public async Task SqliteAsync()
     {
         var fileName = $"{Guid.NewGuid()}.testdb";
-        await ExecuteMigrate(DatabaseProvider.SQLITE, $"Data Source={fileName};");
+        await ExecuteMigrateAsync(DatabaseProvider.SQLITE, $"Data Source={fileName};");
         Assert.True(true);
     }
 
-    private async Task ExecuteMigrate(DatabaseProvider provider, string connectionString)
+    private async Task ExecuteMigrateAsync(DatabaseProvider provider, string connectionString)
     {
         var services = new ServiceCollection()
             .AddLogging(cfg =>

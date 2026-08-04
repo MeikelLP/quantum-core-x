@@ -41,10 +41,10 @@ public class NonStrictCommandManagerTests
     }
 
     [Fact]
-    public async Task InvalidCommand_NonStrictMode()
+    public async Task InvalidCommand_NonStrictModeAsync()
     {
         _commandManager.Register(typeof(SetJobCommand).Namespace!, typeof(SetJobCommand).Assembly);
-        await _commandManager.Handle(_connection, "/setjob b");
+        await _commandManager.HandleAsync(_connection, "/setjob b");
 
         _chatInfos.Should().BeEquivalentTo(["Comannd validation failed:", "  value pos. 0    Required."]);
     }

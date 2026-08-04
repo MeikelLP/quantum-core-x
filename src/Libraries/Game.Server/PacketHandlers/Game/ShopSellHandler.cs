@@ -6,17 +6,18 @@ namespace QuantumCore.Game.PacketHandlers.Game;
 
 public class ShopSellHandler : IGamePacketHandler<ShopSell>
 {
-    public Task ExecuteAsync(GamePacketContext<ShopSell> ctx, CancellationToken token = default)
+    public async Task ExecuteAsync(GamePacketContext<ShopSell> ctx, CancellationToken token = default)
     {
         var player = ctx.Connection.Player;
         if (player is null)
         {
             ctx.Connection.Close();
-            return Task.CompletedTask;
+            return;
         }
 
-        player.Shop?.Sell(player, ctx.Packet.Position);
-
-        return Task.CompletedTask;
+        if (player.Shop is not null)
+        {
+            await player.Shop.SellAsync(player, ctx.Packet.Position);
+        }
     }
 }

@@ -68,4 +68,4 @@ await Parser.Default.ParseArguments<SingleRunArgs>(args)
         await QuantumCoreHostBuilder.RunAsync<Program>(host);
     });
 
-internal class SingleRunArgs;
+internal sealed class SingleRunArgs;

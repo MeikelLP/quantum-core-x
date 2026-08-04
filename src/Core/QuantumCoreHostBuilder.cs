@@ -48,7 +48,7 @@ public static class QuantumCoreHostBuilder
         }
 
         var contentRoot = Path.Combine(preferredDir, "data");
-        var host = new HostApplicationBuilder(args) {Environment = {ContentRootPath = contentRoot}};
+        var host = new HostApplicationBuilder(args) { Environment = { ContentRootPath = contentRoot } };
         if (!host.Environment.IsDevelopment())
         {
             host.Services.Configure<ConsoleLifetimeOptions>(opts => opts.SuppressStatusMessages = true);
@@ -92,7 +92,7 @@ public static class QuantumCoreHostBuilder
             .Select(x => x.Initialize()));
         var pluginExecutor = host.Services.GetRequiredService<PluginExecutor>();
         var logger = host.Services.GetRequiredService<ILogger<T>>();
-        await pluginExecutor.ExecutePlugins<ISingletonPlugin>(logger, x => x.InitializeAsync());
+        await pluginExecutor.ExecutePluginsAsync<ISingletonPlugin>(logger, x => x.InitializeAsync());
         await host.RunAsync();
     }
 }

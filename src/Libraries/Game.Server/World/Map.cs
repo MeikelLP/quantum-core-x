@@ -93,20 +93,20 @@ public class Map : IMap
         GameServer.Meter.CreateObservableGauge($"Map:{name}:EntityCount", () => Entities.Count);
     }
 
-    public async Task Initialize()
+    public async Task InitializeAsync()
     {
         _logger.LogDebug("Load map {Name} at {Position} (size {Width}x{Height})", Name, Position, Width, Height);
 
-        await _cacheManager.Set($"maps:{Name}", $"{_server.IpAddress}:{_server.Port}");
-        await _cacheManager.Publish("maps", $"{Name} {_server.IpAddress}:{_server.Port}");
+        await _cacheManager.SetAsync($"maps:{Name}", $"{_server.IpAddress}:{_server.Port}");
+        await _cacheManager.PublishAsync("maps", $"{Name} {_server.IpAddress}:{_server.Port}");
 
         var loadAttributesTask = _attributeProvider.GetAttributesAsync(Name, Position, Width, Height);
-        var loadSpawnPointsTask = _spawnPointProvider.GetSpawnPointsForMap(Name);
+        var loadSpawnPointsTask = _spawnPointProvider.GetSpawnPointsForMapAsync(Name);
 
         await Task.WhenAll(loadAttributesTask, loadSpawnPointsTask);
 
-        _attributes = loadAttributesTask.Result;
-        _spawnPoints.AddRange(loadSpawnPointsTask.Result);
+        _attributes = await loadAttributesTask;
+        _spawnPoints.AddRange(await loadSpawnPointsTask);
 
         _logger.LogDebug("Loaded {SpawnPointsCount} spawn points for map {MapName}", _spawnPoints.Count, Name);
 
@@ -245,14 +245,14 @@ public class Map : IMap
                 var groupCollection = _world.GetGroupCollection(spawnPoint.Monster);
                 if (groupCollection is not null)
                 {
-                    var index = Random.Shared.Next(0, groupCollection.Groups.Count);
+                    var index = RandomNumberGenerator.GetInt32(0, groupCollection.Groups.Length);
                     var collectionGroup = groupCollection.Groups[index];
                     var group = _world.GetGroup(collectionGroup.Id);
                     if (group is not null)
                     {
                         if (collectionGroup.Probability < 1)
                         {
-                            var rand = Random.Shared.NextSingle();
+                            var rand = RandomNumberGenerator.GetInt32(1, 100_000_001) / 100_000_000f;
                             if (rand > collectionGroup.Probability)
                             {
                                 SpawnGroup(groupInstance, spawnPoint, group);
@@ -267,26 +267,26 @@ public class Map : IMap
 
                 break;
             case ESpawnPointType.GROUP:
+            {
+                var group = _world.GetGroup(spawnPoint.Monster);
+                if (group is not null)
                 {
-                    var group = _world.GetGroup(spawnPoint.Monster);
-                    if (group is not null)
-                    {
-                        SpawnGroup(groupInstance, spawnPoint, group);
-                    }
-
-                    break;
+                    SpawnGroup(groupInstance, spawnPoint, group);
                 }
+
+                break;
+            }
             case ESpawnPointType.MONSTER:
-                {
-                    if (!TrySpawnMonster(spawnPoint.Monster, spawnPoint, out var monster))
-                        break;
-
-                    spawnPoint.CurrentGroup = groupInstance;
-                    groupInstance.Monsters.Add(monster);
-                    monster.Group = groupInstance;
-
+            {
+                if (!TrySpawnMonster(spawnPoint.Monster, spawnPoint, out var monster))
                     break;
-                }
+
+                spawnPoint.CurrentGroup = groupInstance;
+                groupInstance.Monsters.Add(monster);
+                monster.Group = groupInstance;
+
+                break;
+            }
             default:
                 _logger.LogWarning("Unknown spawn point type: {SpawnPointType}", spawnPoint.Type);
                 break;

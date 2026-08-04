@@ -18,7 +18,7 @@ public class StructuredFile
     /// <returns>The normalized value or null if the key wasn't found</returns>
     public string? GetValue(string key)
     {
-        return !_values.ContainsKey(key) ? null : _values[key];
+        return !_values.TryGetValue(key, out var value) ? null : value;
     }
 
     /// <summary>

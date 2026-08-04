@@ -49,14 +49,15 @@ public abstract class Connection : BackgroundService, IConnection
         _client = client;
         BoundIpAddress = ((IPEndPoint) _client.Client.LocalEndPoint!).Address;
         _cts = new CancellationTokenSource();
-        Task.Factory.StartNew(SendPacketsWhenAvailable, TaskCreationOptions.LongRunning);
+        _ = Task.Factory.StartNew(SendPacketsWhenAvailableAsync, _cts.Token, TaskCreationOptions.LongRunning,
+            TaskScheduler.Current);
     }
 
     protected abstract void OnHandshakeFinished();
 
-    protected abstract Task OnClose(bool expected = true);
+    protected abstract Task OnCloseAsync(bool expected = true);
 
-    protected abstract Task OnReceive(IPacketSerializable packet);
+    protected abstract Task OnReceiveAsync(IPacketSerializable packet);
 
     protected abstract ServerClock GetClock();
 
@@ -78,12 +79,12 @@ public abstract class Connection : BackgroundService, IConnection
             await foreach (var packet in _packetReader.EnumerateAsync(_stream, stoppingToken))
             {
                 // _logger.LogDebug(" IN: {Type} {Data}", packet.GetType(), JsonSerializer.Serialize(packet));
-                await _pluginExecutor.ExecutePlugins<IPacketOperationListener>(_logger,
+                await _pluginExecutor.ExecutePluginsAsync<IPacketOperationListener>(_logger,
                     x => x.OnPrePacketReceivedAsync(packet, Array.Empty<byte>(), stoppingToken));
 
-                await OnReceive((IPacketSerializable) packet);
+                await OnReceiveAsync((IPacketSerializable) packet);
 
-                await _pluginExecutor.ExecutePlugins<IPacketOperationListener>(_logger,
+                await _pluginExecutor.ExecutePluginsAsync<IPacketOperationListener>(_logger,
                     x => x.OnPostPacketReceivedAsync(packet, Array.Empty<byte>(), stoppingToken));
             }
         }
@@ -105,7 +106,7 @@ public abstract class Connection : BackgroundService, IConnection
     {
         _cts?.Cancel();
         _client?.Close();
-        OnClose(expected);
+        _ = OnCloseAsync(expected);
     }
 
     protected virtual void Dispose(bool disposing)
@@ -130,7 +131,7 @@ public abstract class Connection : BackgroundService, IConnection
         _packetsToSend.Enqueue(packet);
     }
 
-    private async Task SendPacketsWhenAvailable()
+    private async Task SendPacketsWhenAvailableAsync()
     {
         if (_client?.Connected != true)
         {
@@ -155,17 +156,21 @@ public abstract class Connection : BackgroundService, IConnection
                     {
                         if (_stream is null)
                         {
-                            _cts?.Cancel();
+                            if (_cts is not null)
+                            {
+                                await _cts.CancelAsync();
+                            }
+
                             _logger.LogCritical("Stream unexpectedly became null. This shouldn't happen");
                             break;
                         }
 
                         await _pluginExecutor
-                            .ExecutePlugins<IPacketOperationListener>(_logger,
+                            .ExecutePluginsAsync<IPacketOperationListener>(_logger,
                                 x => x.OnPrePacketSentAsync(obj, CancellationToken.None)).ConfigureAwait(false);
                         await _stream.WriteAsync(bytesToSend).ConfigureAwait(false);
                         await _stream.FlushAsync().ConfigureAwait(false);
-                        await _pluginExecutor.ExecutePlugins<IPacketOperationListener>(_logger,
+                        await _pluginExecutor.ExecutePluginsAsync<IPacketOperationListener>(_logger,
                                 x => x.OnPostPacketSentAsync(obj, bytes, CancellationToken.None))
                             .ConfigureAwait(false);
                     }
@@ -174,9 +179,13 @@ public abstract class Connection : BackgroundService, IConnection
                         _logger.LogError(e, "Failed to send packet");
                     }
 
-                    _logger.LogDebug("OUT: {Type} => {Packet} (0x{Bytes})", packet.GetType(),
-                        JsonSerializer.Serialize(obj),
-                        string.Join("", bytesToSend.ToArray().Select(x => x.ToString("X2"))));
+                    if (_logger.IsEnabled(LogLevel.Debug))
+                    {
+                        _logger.LogDebug("OUT: {Type} => {Packet} (0x{Bytes})", packet.GetType(),
+                            JsonSerializer.Serialize(obj),
+                            string.Join("", bytesToSend.ToArray().Select(x => x.ToString("X2"))));
+                    }
+
                     ArrayPool<byte>.Shared.Return(bytes);
                 }
                 else

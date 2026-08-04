@@ -5,7 +5,7 @@ using QuantumCore.API.PluginTypes;
 
 namespace PrometheusPlugin;
 
-public class Server : ISingletonPlugin
+public sealed class Server : ISingletonPlugin, IDisposable
 {
     private readonly ILogger<Server> _logger;
     private readonly IConfiguration _config;
@@ -19,7 +19,7 @@ public class Server : ISingletonPlugin
         _port = _config.GetValue<int>("PrometheusPort");
         _server = new MetricServer(_port);
     }
-        
+
     public Task InitializeAsync(CancellationToken token = default)
     {
         if (_config.GetValue<bool>("Prometheus"))
@@ -27,7 +27,12 @@ public class Server : ISingletonPlugin
             _logger.LogInformation("Starting prometheus metric source on: {Port}", _port);
             _server.Start();
         }
-            
+
         return Task.CompletedTask;
+    }
+
+    public void Dispose()
+    {
+        _server.Dispose();
     }
 }

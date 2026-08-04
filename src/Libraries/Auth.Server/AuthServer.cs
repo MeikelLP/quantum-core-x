@@ -26,7 +26,7 @@ public class AuthServer : ServerBase<AuthConnection>
         // Register auth server features
         RegisterNewConnectionListener(NewConnection);
 
-        var pong = await _cacheManager.Ping();
+        var pong = await _cacheManager.PingAsync();
         if (!pong)
         {
             _logger.LogError("Failed to ping redis server");

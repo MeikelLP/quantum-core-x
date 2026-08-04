@@ -3,7 +3,7 @@ using System.Security.Cryptography;
 
 namespace QuantumCore.Core.Utils;
 
-public class CoreRandom
+public static class CoreRandom
 {
     public static uint GenerateUInt32()
     {
