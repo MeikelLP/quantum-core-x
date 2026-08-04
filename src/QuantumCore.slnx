@@ -1,0 +1,40 @@
+﻿<Solution>
+    <Folder Name="/Data/">
+        <Project Path="Data/Auth.Persistence/Auth.Persistence.csproj"/>
+        <Project Path="Data/Core.Caching/Core.Caching.csproj"/>
+        <Project Path="Data/Core.Persistence/Core.Persistence.csproj"/>
+        <Project Path="Data/Game.Caching/Game.Caching.csproj"/>
+        <Project Path="Data/Game.Persistence/Game.Persistence.csproj"/>
+    </Folder>
+    <Folder Name="/Executables/">
+        <Project Path="Executables/Auth/Auth.csproj"/>
+        <Project Path="Executables/DocsGenerator/DocsGenerator.csproj"/>
+        <Project Path="Executables/Game/Game.csproj"/>
+        <Project Path="Executables/Single/Single.csproj"/>
+    </Folder>
+    <Folder Name="/Libraries/">
+        <Project Path="Libraries/Auth.Server/Auth.Server.csproj"/>
+        <Project Path="Libraries/Game.Commands/Game.Commands.csproj"/>
+        <Project Path="Libraries/Game.Server/Game.Server.csproj"/>
+    </Folder>
+    <Folder Name="/Plugins/">
+        <Project Path="Plugins/ExamplePlugin/ExamplePlugin.csproj"/>
+        <Project Path="Plugins/PrometheusPlugin/PrometheusPlugin.csproj"/>
+    </Folder>
+    <Folder Name="/Tests/">
+        <Project Path="Tests/Auth.Tests/Auth.Tests.csproj"/>
+        <Project Path="Tests/Core.Caching.Tests/Core.Caching.Tests.csproj"/>
+        <Project Path="Tests/Core.Networking.Generators.Tests/Core.Networking.Generators.Tests.csproj"/>
+        <Project Path="Tests/Core.Tests/Core.Tests.csproj"/>
+        <Project Path="Tests/Data.Auth.Tests/Data.Auth.Tests.csproj"/>
+        <Project Path="Tests/Game.Commands.Tests/Game.Commands.Tests.csproj"/>
+        <Project Path="Tests/Game.Tests/Game.Tests.csproj"/>
+    </Folder>
+    <Project Path="Core.Networking.Generators/Core.Networking.Generators.csproj"/>
+    <Project Path="Core.Networking/Core.Networking.csproj"/>
+    <Project Path="Core/Core.csproj"/>
+    <Project Path="CorePluginAPI/CorePluginAPI.csproj"/>
+    <Project Path="Game.Benchmarks/Game.Benchmarks.csproj"/>
+    <Project
+            Path="Weikio.PluginFramework.Microsoft.DependencyInjection/Weikio.PluginFramework.Microsoft.DependencyInjection.csproj"/>
+</Solution>
