@@ -93,6 +93,11 @@ public abstract class Connection : BackgroundService, IConnection
             _logger.LogDebug(e, "Connection was closed. Probably by the other party");
             Close(false);
         }
+        catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+        {
+            // Normal shutdown, don't log as error
+            Close(false);
+        }
         catch (Exception e)
         {
             _logger.LogError(e, "Failed to read from stream");

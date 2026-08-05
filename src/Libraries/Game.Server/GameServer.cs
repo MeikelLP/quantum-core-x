@@ -93,6 +93,11 @@ public class GameServer : ServerBase<GameConnection>, IGameServer
                 await _pluginExecutor.ExecutePluginsAsync<IGameTickListener>(_logger,
                     x => x.PostUpdateAsync(stoppingToken));
             }
+            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+            {
+                // Normal shutdown, don't log as error
+                break;
+            }
             catch (Exception e)
             {
                 _logger.LogError(e, "Tick failed");
