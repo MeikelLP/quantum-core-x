@@ -217,6 +217,8 @@ public class MonsterEntity : Entity
                 return 0;
             case EPoint.EXPERIENCE:
                 return Proto.Experience;
+            case EPoint.MAX_HP:
+                return Proto.Hp;
         }
 
         _logger.LogWarning("Point {Point} is not implemented on monster", point);
