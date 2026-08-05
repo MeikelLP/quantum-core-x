@@ -5,7 +5,7 @@ using QuantumCore.Game;
 namespace ExamplePlugin;
 
 [Command("test", "This is an example command")]
-public static class TestCommand
+internal static class TestCommand
 {
     [CommandMethod("Plain command without any parameter")]
     public static void Run(IPlayerEntity player)

@@ -43,6 +43,7 @@ public class GroundItem : Entity, IGroundItem
 
     public override void ShowEntity(IConnection connection)
     {
+        ArgumentNullException.ThrowIfNull(connection);
         connection.Send(new GroundItemAdd
         {
             PositionX = PositionX, PositionY = PositionY, Vid = Vid, ItemId = _item.ItemId
@@ -52,6 +53,7 @@ public class GroundItem : Entity, IGroundItem
 
     public override void HideEntity(IConnection connection)
     {
+        ArgumentNullException.ThrowIfNull(connection);
         connection.Send(new GroundItemRemove { Vid = Vid });
     }
 

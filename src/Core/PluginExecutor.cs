@@ -38,6 +38,7 @@ public class PluginExecutor
 
     public async Task ExecutePluginsAsync<T>(ILogger logger, Func<T, Task> action)
     {
+        ArgumentNullException.ThrowIfNull(action);
         if (_allPlugins.TryGetValue(typeof(T), out var plugins) && plugins.Length > 0)
         {
             // prevent allocations as much as possible

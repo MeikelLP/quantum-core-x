@@ -44,6 +44,7 @@ public class DropProvider : IDropProvider, ILoadable
     public DropProvider(ILogger<DropProvider> logger, IOptions<GameOptions> gameOptions, IItemManager itemManager,
         IParserService parserService, IFileProvider fileProvider)
     {
+        ArgumentNullException.ThrowIfNull(gameOptions);
         _logger = logger;
         _options = gameOptions.Value.Drops;
         _itemManager = itemManager;
@@ -212,12 +213,12 @@ public class DropProvider : IDropProvider, ILoadable
 
     public (int deltaPercentage, int dropRange) CalculateDropPercentages(IPlayerEntity player, MonsterEntity monster)
     {
-        var deltaPercentage = 0;
-        var dropRange = 0;
+        ArgumentNullException.ThrowIfNull(monster);
+        ArgumentNullException.ThrowIfNull(player);
 
         var levelDropDelta = (int)(monster.GetPoint(EPoint.LEVEL) + 15 - player.GetPoint(EPoint.LEVEL));
 
-        deltaPercentage = monster is { IsStone: false, Rank: >= EMonsterLevel.BOSS }
+        var deltaPercentage = monster is { IsStone: false, Rank: >= EMonsterLevel.BOSS }
             ? (int)_options.Delta.Boss[MathUtils.MinMax(0, levelDropDelta, _options.Delta.Boss.Count - 1)]
             : (int)_options.Delta.Normal[MathUtils.MinMax(0, levelDropDelta, _options.Delta.Normal.Count - 1)];
 
@@ -268,7 +269,7 @@ public class DropProvider : IDropProvider, ILoadable
 
         var empireBonusDrop = 0; // todo: implement server / empire rates
 
-        dropRange = 4_000_000;
+        var dropRange = 4_000_000;
         dropRange = dropRange * 100 / (100 + empireBonusDrop + bonus + itemDropBonus);
 
         return (deltaPercentage, dropRange);
@@ -279,6 +280,8 @@ public class DropProvider : IDropProvider, ILoadable
     public ImmutableArray<ItemInstance> CalculateCommonDropItems(IPlayerEntity player, MonsterEntity monster, int delta,
         int range)
     {
+        ArgumentNullException.ThrowIfNull(player);
+        ArgumentNullException.ThrowIfNull(monster);
         var items = new List<ItemInstance>();
 
         var commonDrops = this.GetPossibleCommonDropsForPlayer(player);
@@ -325,6 +328,7 @@ public class DropProvider : IDropProvider, ILoadable
 
     public ImmutableArray<ItemInstance> CalculateDropItemGroupItems(MonsterEntity monster, int delta, int range)
     {
+        ArgumentNullException.ThrowIfNull(monster);
         var items = new List<ItemInstance>();
 
         var mobItemGroupDrops = GetDropItemsGroupForMob(monster.Proto.Id);
@@ -375,6 +379,7 @@ public class DropProvider : IDropProvider, ILoadable
         int delta,
         int range)
     {
+        ArgumentNullException.ThrowIfNull(monster);
         var mobDrops = this.GetPossibleMobDropsForPlayer(monster.Proto.Id);
         if (mobDrops is not { IsEmpty: false }) return [];
 
@@ -412,6 +417,7 @@ public class DropProvider : IDropProvider, ILoadable
     public ImmutableArray<ItemInstance> CalculateLevelDropItems(IPlayerEntity player, MonsterEntity monster, int delta,
         int range)
     {
+        ArgumentNullException.ThrowIfNull(monster);
         var items = new List<ItemInstance>();
 
         var levelDrops = this.GetPossibleLevelDropsForPlayer(player);
@@ -453,6 +459,7 @@ public class DropProvider : IDropProvider, ILoadable
 
     public ImmutableArray<ItemInstance> CalculateEtcDropItems(MonsterEntity monster, int delta, int range)
     {
+        ArgumentNullException.ThrowIfNull(monster);
         var items = new List<ItemInstance>();
         var etcDrops = EtcDrops.Where(x => x.ItemProtoId == monster.Proto.DropItemId);
         foreach (var drop in etcDrops)
@@ -535,6 +542,7 @@ public class DropProvider : IDropProvider, ILoadable
 
     public ImmutableArray<ItemInstance> CalculateMetinDropItems(MonsterEntity monster, int delta, int range)
     {
+        ArgumentNullException.ThrowIfNull(monster);
         if (!monster.IsStone) return [];
 
         var (spiritStoneId, chance) = DetermineDropMetinStone(monster);

@@ -51,7 +51,7 @@ public class GuildLeaveCommand : ICommandHandler
         }
 
         await context.Player.RefreshGuildAsync();
-        foreach (var p in context.Player.GetNearbyPlayers())
+        foreach (var p in context.Player.NearbyPlayers)
         {
             if (p.Player.GuildId == guild.Id)
             {

@@ -22,6 +22,7 @@ public class ChatManager : IChatManager, ILoadable
 
     public ChatManager(ICacheManager cacheManager)
     {
+        ArgumentNullException.ThrowIfNull(cacheManager);
         _cacheManager = cacheManager.Server;
     }
 
@@ -68,6 +69,7 @@ public class ChatManager : IChatManager, ILoadable
 
     public void Talk(IEntity entity, string message)
     {
+        ArgumentNullException.ThrowIfNull(entity);
         var packet = new ChatOutcoming
         {
             MessageType = ChatMessageType.NORMAL, Vid = entity.Vid, Empire = entity.Empire, Message = message

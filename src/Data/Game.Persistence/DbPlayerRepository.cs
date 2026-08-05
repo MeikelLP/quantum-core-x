@@ -35,6 +35,7 @@ public class DbPlayerRepository : IDbPlayerRepository
 
     public async Task CreateAsync(PlayerData player)
     {
+        ArgumentNullException.ThrowIfNull(player);
         var entity = new Player
         {
             Id = player.Id,
@@ -83,6 +84,7 @@ public class DbPlayerRepository : IDbPlayerRepository
 
     public async Task SetPlayerAsync(PlayerData data)
     {
+        ArgumentNullException.ThrowIfNull(data);
         var entity = await _db.Players.FirstOrDefaultAsync(x => x.Id == data.Id);
         if (entity is null) return;
 

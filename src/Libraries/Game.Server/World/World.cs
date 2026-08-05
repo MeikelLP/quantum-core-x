@@ -284,6 +284,7 @@ public class World : IWorld
 
     public void SpawnEntity(IEntity e)
     {
+        ArgumentNullException.ThrowIfNull(e);
         var map = GetMapAt((uint)e.PositionX, (uint)e.PositionY);
         if (map is null)
         {
@@ -315,6 +316,7 @@ public class World : IWorld
 
     public void DespawnEntity(IEntity entity)
     {
+        ArgumentNullException.ThrowIfNull(entity);
         if (entity is IPlayerEntity player)
         {
             RemovePlayer(player);
@@ -329,6 +331,7 @@ public class World : IWorld
 
     public async Task DespawnPlayerAsync(IPlayerEntity player)
     {
+        ArgumentNullException.ThrowIfNull(player);
         RemovePlayer(player);
         await player.OnDespawnAsync();
 
@@ -350,6 +353,7 @@ public class World : IWorld
 
     public void RemovePlayer(IPlayerEntity e)
     {
+        ArgumentNullException.ThrowIfNull(e);
         _players.Remove(e.Name);
     }
 

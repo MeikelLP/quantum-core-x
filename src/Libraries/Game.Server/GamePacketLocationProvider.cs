@@ -8,6 +8,6 @@ public class GamePacketLocationProvider : IPacketLocationProvider
 {
     public IReadOnlyCollection<Assembly> GetPacketAssemblies()
     {
-        return new[] { typeof(Attack).Assembly, typeof(GameServer).Assembly, typeof(GcHandshake).Assembly };
+        return [typeof(Attack).Assembly, typeof(GameServer).Assembly, typeof(GcHandshake).Assembly];
     }
 }

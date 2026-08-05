@@ -197,6 +197,7 @@ public abstract class Entity : IEntity
 
     public void Attack(IEntity victim)
     {
+        ArgumentNullException.ThrowIfNull(victim);
         if (this.PositionIsAttr(EMapAttributes.NON_PVP))
         {
             return;
@@ -354,6 +355,7 @@ public abstract class Entity : IEntity
 
     public virtual int Damage(IEntity attacker, EDamageType damageType, int damage)
     {
+        ArgumentNullException.ThrowIfNull(attacker);
         if (this.PositionIsAttr(EMapAttributes.NON_PVP))
         {
             SendDebugDamage(attacker,
@@ -439,7 +441,7 @@ public abstract class Entity : IEntity
             }
         }
 
-        this.Health -= damage;
+        Health -= damage;
         if (victimPlayer is not null)
         {
             victimPlayer.SendPoints();
@@ -485,6 +487,7 @@ public abstract class Entity : IEntity
 
     public void ForEachNearbyEntity(Action<IEntity> action)
     {
+        ArgumentNullException.ThrowIfNull(action);
         foreach (var entity in _nearbyEntities)
         {
             action(entity);

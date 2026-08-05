@@ -36,14 +36,14 @@ public class IncomingPacketTests
     [Fact]
     public void WrongLengthThrowsArgumentException()
     {
-        Assert.Throws<ArgumentOutOfRangeException>(() => _serializer.Deserialize<GcHandshake>(Array.Empty<byte>()));
+        Assert.Throws<ArgumentOutOfRangeException>(() => _serializer.Deserialize<GcHandshake>([]));
     }
 
     [Fact]
     public void Attack()
     {
         var expected = new AutoFaker<Attack>()
-            .RuleFor(x => x.Unknown, faker => new[] { faker.Random.Byte(), faker.Random.Byte() })
+            .RuleFor(x => x.Unknown, faker => [faker.Random.Byte(), faker.Random.Byte()])
             .Generate();
         var bytes = Array.Empty<byte>()
             .Append((byte)expected.SkillMotion)
@@ -81,7 +81,7 @@ public class IncomingPacketTests
         var expected = new AutoFaker<CreateCharacter>()
             .RuleFor(x => x.Name, faker => faker.Lorem.Letter(25))
             .RuleFor(x => x.Unknown,
-                faker => new[] { faker.Random.Byte(), faker.Random.Byte(), faker.Random.Byte(), faker.Random.Byte() })
+                faker => [faker.Random.Byte(), faker.Random.Byte(), faker.Random.Byte(), faker.Random.Byte()])
             .Generate();
         var bytes = Array.Empty<byte>()
             .Append(expected.Slot)
@@ -358,7 +358,7 @@ public class IncomingPacketTests
         var expected = new AutoFaker<TokenLogin>()
             .RuleFor(x => x.Username, faker => faker.Lorem.Letter(31))
             .RuleFor(x => x.Xteakeys,
-                faker => new[] { faker.Random.UInt(), faker.Random.UInt(), faker.Random.UInt(), faker.Random.UInt() })
+                faker => [faker.Random.UInt(), faker.Random.UInt(), faker.Random.UInt(), faker.Random.UInt()])
             .Generate();
         var bytes = Array.Empty<byte>()
             .Concat(Encoding.ASCII.GetBytes(expected.Username))

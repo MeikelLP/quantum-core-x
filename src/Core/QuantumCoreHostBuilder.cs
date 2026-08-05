@@ -88,6 +88,7 @@ public static class QuantumCoreHostBuilder
 
     public static async Task RunAsync<T>(IHost host)
     {
+        ArgumentNullException.ThrowIfNull(host);
         await Task.WhenAll(host.Services.GetRequiredService<IEnumerable<IPluginCatalog>>()
             .Select(x => x.Initialize()));
         var pluginExecutor = host.Services.GetRequiredService<PluginExecutor>();

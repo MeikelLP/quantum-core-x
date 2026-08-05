@@ -6,7 +6,7 @@ namespace QuantumCore.Game;
 public class StructuredFileProvider : IStructuredFileProvider
 {
     private readonly IFileProvider _fileProvider;
-    private static readonly char[] separator = new[] { ' ', '\t' };
+    private static readonly char[] separator = [' ', '\t'];
 
     public StructuredFileProvider(IFileProvider fileProvider)
     {

@@ -11,6 +11,7 @@ public sealed class RedisStore : IRedisStore, IDisposable
 
     public RedisStore(CacheStoreType db, ILogger logger, CacheOptions options)
     {
+        ArgumentNullException.ThrowIfNull(options);
         _redis = new RedisDB((int)db, new JsonFormater());
         logger.LogInformation("Initialize {Store} Cache Store", db.AsString(EnumFormat.EnumMemberValue));
         var host = _redis.Host.AddWriteHost(options.Host, options.Port);

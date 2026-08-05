@@ -29,7 +29,8 @@ namespace Game.Benchmarks.Benchmarks;
 
 [MemoryDiagnoser]
 [MediumRunJob]
-public class WorldUpdateBenchmark
+#pragma warning disable CA1063 // implement IDisposable correctly - not requried here
+public class WorldUpdateBenchmark : IDisposable
 {
     [Params(0, 100, 1000)] public int _mobAmount;
 
@@ -38,8 +39,8 @@ public class WorldUpdateBenchmark
     private World _world = null!;
     private readonly FakeTimeProvider _timeProvider = new();
     private ServerClock _clock = null!;
-    private GameServer _server;
-    private static readonly string[] returnThis = new[] { "maps:test_map" };
+    private GameServer _server = null!;
+    private static readonly string[] returnThis = ["maps:test_map"];
 
     [GlobalSetup]
     public void GlobalSetup()
@@ -58,8 +59,8 @@ public class WorldUpdateBenchmark
             .Replace(new ServiceDescriptor(typeof(IAtlasProvider), provider =>
             {
                 var mock = Substitute.For<IAtlasProvider>();
-                mock.GetAsync(Arg.Any<IWorld>()).Returns(callInfo => new[]
-                {
+                mock.GetAsync(Arg.Any<IWorld>()).Returns(callInfo =>
+                [
                     new Map(provider.GetRequiredService<IMonsterManager>(),
                         provider.GetRequiredService<IAnimationManager>(),
                         provider.GetRequiredService<ICacheManager>(), callInfo.Arg<IWorld>()!,
@@ -70,7 +71,7 @@ public class WorldUpdateBenchmark
                         provider.GetRequiredService<IServerBase>(),
                         "test_map", new Coordinates(), 1024, 1024, null, provider
                     )
-                });
+                ]);
 
                 return mock;
             }, ServiceLifetime.Singleton))
@@ -84,21 +85,22 @@ public class WorldUpdateBenchmark
             .Replace(new ServiceDescriptor(typeof(ISpawnPointProvider), _ =>
             {
                 var mock = Substitute.For<ISpawnPointProvider>();
-                mock.GetSpawnPointsForMapAsync("test_map").Returns(Enumerable
-                    .Range(0, _mobAmount)
-                    .Select(_ =>
-                        new SpawnPoint
-                        {
-                            Chance = 100,
-                            Type = ESpawnPointType.MONSTER,
-                            Monster = 42,
-                            X = 1,
-                            Y = 1,
-                            RangeX = 0,
-                            RangeY = 0
-                        }
-                    )
-                    .ToArray()
+                mock.GetSpawnPointsForMapAsync("test_map").Returns([
+                        .. Enumerable
+                            .Range(0, _mobAmount)
+                            .Select(_ =>
+                                new SpawnPoint
+                                {
+                                    Chance = 100,
+                                    Type = ESpawnPointType.MONSTER,
+                                    Monster = 42,
+                                    X = 1,
+                                    Y = 1,
+                                    RangeX = 0,
+                                    RangeY = 0
+                                }
+                            )
+                    ]
                 );
                 return mock;
             }, ServiceLifetime.Singleton))
@@ -159,4 +161,6 @@ public class WorldUpdateBenchmark
         var now = _clock.Now;
         return new TickContext(_clock, delta, now);
     }
+
+    public void Dispose() => _server.Dispose();
 }

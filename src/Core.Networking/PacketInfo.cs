@@ -28,12 +28,12 @@ public readonly record struct PacketInfo
         // Deserialize
         var bytesParam = Expression.Parameter(typeof(ReadOnlySpan<byte>));
         var offsetParam = Expression.Parameter(typeof(int));
-        var methodCall = Expression.Call(packetType, "Deserialize", new[] { packetType }, bytesParam, offsetParam);
+        var methodCall = Expression.Call(packetType, "Deserialize", [packetType], bytesParam, offsetParam);
         _deserializeDelegate = Expression.Lambda<DeserializeMethod>(methodCall, bytesParam, offsetParam).Compile();
 
         var streamParam = Expression.Parameter(typeof(Stream));
         var deserializeFromStreamCall = Expression.Call(packetType,
-            nameof(IPacketSerializable.DeserializeFromStreamAsync), Array.Empty<Type>(), streamParam);
+            nameof(IPacketSerializable.DeserializeFromStreamAsync), [], streamParam);
         _deserializeFromStreamMethod =
             Expression.Lambda<DeserializeFromStreamMethod>(deserializeFromStreamCall, streamParam).Compile();
     }

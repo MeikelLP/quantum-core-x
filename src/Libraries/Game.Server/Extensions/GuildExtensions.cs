@@ -8,6 +8,8 @@ public static class GuildExtensions
 {
     public static EGuildJoinStatusCode CanJoinGuild(this GuildData guild, IPlayerEntity invitee)
     {
+        ArgumentNullException.ThrowIfNull(guild);
+        ArgumentNullException.ThrowIfNull(invitee);
         // TODO check if player has recently left any guild
         // TODO check if player has recently dissolved any guild
         if (invitee.Player.GuildId is not null)
@@ -26,6 +28,7 @@ public static class GuildExtensions
     // TODO cache
     public static IEnumerable<IPlayerEntity> GetGuildMembers(this IWorld world, uint guildId)
     {
+        ArgumentNullException.ThrowIfNull(world);
         var allPlayers = world.GetPlayers();
         return allPlayers
             .Where(p => p.Player.GuildId == guildId);

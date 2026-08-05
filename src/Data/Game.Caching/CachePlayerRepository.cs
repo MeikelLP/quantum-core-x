@@ -11,6 +11,7 @@ public class CachePlayerRepository : ICachePlayerRepository
 
     public CachePlayerRepository(ICacheManager cacheManager)
     {
+        ArgumentNullException.ThrowIfNull(cacheManager);
         _cacheManager = cacheManager.Server;
     }
 
@@ -33,12 +34,14 @@ public class CachePlayerRepository : ICachePlayerRepository
 
     public async Task SetPlayerAsync(PlayerData player)
     {
+        ArgumentNullException.ThrowIfNull(player);
         await _cacheManager.SetAsync($"player:{player.Id.ToString()}", player);
         await _cacheManager.SetAsync($"players:{player.AccountId.ToString()}:{player.Slot}", player);
     }
 
     public async Task CreateAsync(PlayerData player)
     {
+        ArgumentNullException.ThrowIfNull(player);
         // Add player to cache
         await _cacheManager.SetAsync($"player:{player.Id.ToString()}", player);
 
@@ -49,6 +52,7 @@ public class CachePlayerRepository : ICachePlayerRepository
 
     public async Task DeletePlayerAsync(PlayerData player)
     {
+        ArgumentNullException.ThrowIfNull(player);
         // Delete player redis data
         var key = $"player:{player.Id.ToString()}";
         await _cacheManager.DelAsync(key);

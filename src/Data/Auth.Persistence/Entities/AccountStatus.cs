@@ -15,10 +15,10 @@ public class AccountStatus
     [StringLength(255)] public required string Description { get; init; }
     public ICollection<Account> Accounts { get; init; } = null!;
 
-    public static void Configure(EntityTypeBuilder<AccountStatus> builder, DatabaseFacade database)
+    internal static void Configure(EntityTypeBuilder<AccountStatus> builder, DatabaseFacade database)
     {
         builder.HasData([
-            new AccountStatus {Id = 1, Description = "Default Status", AllowLogin = true, ClientStatus = "OK"}
+            new AccountStatus { Id = 1, Description = "Default Status", AllowLogin = true, ClientStatus = "OK" }
         ]);
     }
 }

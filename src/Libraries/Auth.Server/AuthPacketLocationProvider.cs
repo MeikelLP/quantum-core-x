@@ -7,10 +7,10 @@ public class AuthPacketLocationProvider : IPacketLocationProvider
 {
     public IReadOnlyCollection<Assembly> GetPacketAssemblies()
     {
-        return new[]
-        {
+        return
+        [
             typeof(AuthServer).Assembly,
             typeof(GcHandshake).Assembly
-        };
+        ];
     }
 }

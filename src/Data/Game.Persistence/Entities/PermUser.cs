@@ -11,9 +11,9 @@ public class PermUser
     public PermGroup Group { get; set; } = null!;
     public Player Player { get; set; } = null!;
 
-    public static void Configure(EntityTypeBuilder<PermUser> builder, DatabaseFacade database)
+    internal static void Configure(EntityTypeBuilder<PermUser> builder, DatabaseFacade database)
     {
-        builder.HasKey(x => new {x.GroupId, x.PlayerId});
+        builder.HasKey(x => new { x.GroupId, x.PlayerId });
         builder.HasData([
             new PermUser
             {

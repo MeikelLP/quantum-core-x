@@ -26,10 +26,7 @@ public class MonsterEntity : Entity
 
     public override IEntity? Target
     {
-        get
-        {
-            return (_behaviour as SimpleBehaviour)?.Target;
-        }
+        get { return (_behaviour as SimpleBehaviour)?.Target; }
         set
         {
             if (_behaviour is SimpleBehaviour sb)
@@ -67,20 +64,17 @@ public class MonsterEntity : Entity
         IAnimationManager animationManager,
         IServiceProvider serviceProvider,
         IMap map, ILogger logger, uint id, int x, int y, float rotation = 0)
+#pragma warning disable CA1062 // validate parameters - impossible here
         : base(animationManager, map.World.GenerateVid())
+#pragma warning restore CA1062
     {
-        var proto = monsterManager.GetMonster(id);
-
-        if (proto is null)
-        {
-            // todo handle better
-            throw new InvalidOperationException($"Could not find mob proto for ID {id}. Cannot create mob entity");
-        }
-
+        ArgumentNullException.ThrowIfNull(monsterManager);
+        Proto = monsterManager.GetMonster(id)
+                ?? throw new InvalidOperationException(
+                    $"Could not find mob proto for ID {id}. Cannot create mob entity");
         _map = map;
         _dropProvider = dropProvider;
         _logger = logger;
-        Proto = proto;
         PositionX = x;
         PositionY = y;
         Rotation = rotation;
@@ -316,6 +310,7 @@ public class MonsterEntity : Entity
 
     public override void ShowEntity(IConnection connection)
     {
+        ArgumentNullException.ThrowIfNull(connection);
         if (Dead)
         {
             return; // no need to send dead entities to new players
@@ -345,6 +340,7 @@ public class MonsterEntity : Entity
 
     public override void HideEntity(IConnection connection)
     {
+        ArgumentNullException.ThrowIfNull(connection);
         connection.Send(new RemoveCharacter { Vid = Vid });
     }
 

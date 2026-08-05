@@ -8,13 +8,15 @@ public class PacketManager : IPacketManager
     private readonly Dictionary<(byte Header, byte? SubHeader), PacketInfo> _infos = new();
     private readonly Dictionary<Type, (byte Header, byte? SubHeader)> _typeCache = new();
 
-    public PacketManager(ILogger<PacketManager> logger, IEnumerable<Type> packetTypes, Type[]? packetHandlerTypes = null)
+    public PacketManager(ILogger<PacketManager> logger, IEnumerable<Type> packetTypes,
+        Type[]? packetHandlerTypes = null)
     {
-        const BindingFlags FLAGS = BindingFlags.Static | BindingFlags.Public;
+        ArgumentNullException.ThrowIfNull(packetTypes);
+        const BindingFlags flags = BindingFlags.Static | BindingFlags.Public;
         foreach (var packetType in packetTypes)
         {
-            var header = (byte)packetType.GetProperty(nameof(IPacketSerializable.Header), FLAGS)!.GetValue(null)!;
-            var subHeader = (byte?)packetType.GetProperty(nameof(IPacketSerializable.SubHeader), FLAGS)!.GetValue(null);
+            var header = (byte)packetType.GetProperty(nameof(IPacketSerializable.Header), flags)!.GetValue(null)!;
+            var subHeader = (byte?)packetType.GetProperty(nameof(IPacketSerializable.SubHeader), flags)!.GetValue(null);
 
             // last or default so it can be overriden via plugins - last one is chosen
             var packetHandlerType = packetHandlerTypes?
@@ -45,7 +47,8 @@ public class PacketManager : IPacketManager
 
     public bool TryGetPacketInfo(IPacketSerializable packet, out PacketInfo packetInfo)
     {
-        if(!_typeCache.TryGetValue(packet.GetType(), out var pair))
+        ArgumentNullException.ThrowIfNull(packet);
+        if (!_typeCache.TryGetValue(packet.GetType(), out var pair))
         {
             pair.Header = (byte)packet.GetType()
                 .GetProperty(nameof(IPacketSerializable.Header), BindingFlags.Public | BindingFlags.Static)!
@@ -55,6 +58,7 @@ public class PacketManager : IPacketManager
                 .GetValue(null);
             _typeCache.Add(packet.GetType(), (pair.Header, pair.SubHeader));
         }
+
         return _infos.TryGetValue((pair.Header, pair.SubHeader), out packetInfo);
     }
 

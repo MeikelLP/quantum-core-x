@@ -11,14 +11,14 @@ public class StateCheckPacketHandler : IGamePacketHandler<StateCheckPacket>
     {
         ctx.Connection.Send(new ServerStatusPacket
         {
-            Statuses = new[]
-            {
+            Statuses =
+            [
                 new ServerStatus
                 {
                     Port = 13001, // TODO: this should be based on `Hosting:Port` config
                     Status = EServerStatus.ONLINE
                 }
-            },
+            ],
             IsSuccess = 1
         });
         return Task.CompletedTask;

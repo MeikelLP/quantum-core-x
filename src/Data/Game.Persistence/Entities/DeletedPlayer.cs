@@ -32,7 +32,7 @@ public class DeletedPlayer
     public required DateTime DeletedAt { get; init; }
     [StringLength(24)] public required string Name { get; init; }
 
-    public static void Configure(EntityTypeBuilder<DeletedPlayer> builder, DatabaseFacade database)
+    internal static void Configure(EntityTypeBuilder<DeletedPlayer> builder, DatabaseFacade database)
     {
         if (database.IsSqlite() || database.IsNpgsql())
         {

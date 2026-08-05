@@ -27,6 +27,7 @@ public static class GameEventManager
 
     public static async Task OnNpcClickAsync(uint npcId, IPlayerEntity player)
     {
+        ArgumentNullException.ThrowIfNull(player);
         if (!NpcClickEvents.TryGetValue(npcId, out var value))
         {
             return;
@@ -64,6 +65,7 @@ public static class GameEventManager
 
     public static async Task OnNpcGiveAsync(uint npcId, IPlayerEntity player, ItemInstance item)
     {
+        ArgumentNullException.ThrowIfNull(player);
         if (!NpcGiveEvents.TryGetValue(npcId, out var value))
         {
             return;

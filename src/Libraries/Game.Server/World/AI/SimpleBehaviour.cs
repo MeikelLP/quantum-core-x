@@ -1,4 +1,3 @@
-using System.Diagnostics;
 using System.Numerics;
 using System.Security.Cryptography;
 using EnumsNET;
@@ -65,7 +64,7 @@ public class SimpleBehaviour : IBehaviour
 
     public void Init(IEntity entity)
     {
-        Debug.Assert(_entity is null);
+        ArgumentNullException.ThrowIfNull(entity);
         _entity = entity;
 
         _proto = _monsterManager.GetMonster(_entity.EntityClass);
@@ -410,17 +409,14 @@ public class SimpleBehaviour : IBehaviour
 
     public void TookDamage(IEntity attacker, uint damage)
     {
+        ArgumentNullException.ThrowIfNull(attacker);
         if (_entity is null) return;
 
         _lastAttackTime = (_entity.Map as Map)!.Clock.Now;
         _lastAttackX = _entity.PositionX;
         _lastAttackY = _entity.PositionY;
 
-        if (!_damageMap.ContainsKey(attacker.Vid))
-        {
-            _damageMap[attacker.Vid] = damage;
-        }
-        else
+        if (!_damageMap.TryAdd(attacker.Vid, damage))
         {
             _damageMap[attacker.Vid] += damage;
         }

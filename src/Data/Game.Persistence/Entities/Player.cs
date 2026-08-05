@@ -50,7 +50,7 @@ public class Player
     public ICollection<GuildNews> WrittenGuildNews { get; set; } = null!;
     public ICollection<PlayerQuickSlot> QuickSlots { get; set; } = null!;
 
-    public static void Configure(EntityTypeBuilder<Player> builder, DatabaseFacade database)
+    internal static void Configure(EntityTypeBuilder<Player> builder, DatabaseFacade database)
     {
         if (database.IsSqlite() || database.IsNpgsql())
         {

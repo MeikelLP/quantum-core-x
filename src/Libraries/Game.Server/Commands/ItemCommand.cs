@@ -11,7 +11,7 @@ using QuantumCore.Game.Extensions;
 namespace QuantumCore.Game.Commands;
 
 [Command("item", "Puts the given item in the inventory")]
-public class ItemCommand : ICommandHandler<ItemCommandOptions>
+internal class ItemCommand : ICommandHandler<ItemCommandOptions>
 {
     private readonly IItemManager _itemManager;
     private readonly IItemRepository _itemRepository;

@@ -39,7 +39,7 @@ public class GuildCreateCommand : ICommandHandler<GuildCreateCommandOptions>
 
         var player = context.Player.Player;
         var guild = await _guildManager.CreateGuildAsync(context.Arguments.Name, player.Id);
-        foreach (var nearbyPlayer in context.Player.GetNearbyPlayers())
+        foreach (var nearbyPlayer in context.Player.NearbyPlayers)
         {
             nearbyPlayer.Connection.Send(new GuildName { Id = guild.Id, Name = guild.Name });
         }

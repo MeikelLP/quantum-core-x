@@ -71,6 +71,7 @@ public abstract class Quest : IQuest
 
     protected async Task<byte> ChoiceAsync(bool done = false, params string[] options)
     {
+        ArgumentNullException.ThrowIfNull(options);
         Debug.Assert(options.Length > 0);
 
         _currentChoiceTask?.TrySetCanceled();
@@ -101,7 +102,9 @@ public abstract class Quest : IQuest
         SendScript();
 
         _player.CurrentQuest = this;
+#pragma warning disable VSTHRD003 // avoid awaiting foreign tasks - is ok here
         return await _currentChoiceTask.Task;
+#pragma warning restore VSTHRD003
     }
 
     protected void Done(bool silent = false)

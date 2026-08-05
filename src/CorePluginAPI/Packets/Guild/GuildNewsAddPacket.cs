@@ -1,4 +1,5 @@
 ﻿using System.Buffers;
+using System.Diagnostics.CodeAnalysis;
 using QuantumCore.Networking;
 
 namespace QuantumCore.API.Packets.Guild;
@@ -12,6 +13,8 @@ public partial class GuildNewsAddPacket
 }
 
 // workaround because the packet serializer currently does not support GetSize with 2byte size or bigger
+[SuppressMessage("ReSharper", "ArrangeThisQualifier")]
+#pragma warning disable CA1062 // validate parameters
 public partial class GuildNewsAddPacket : IPacketSerializable
 {
     public static byte Header => 0x50;

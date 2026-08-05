@@ -19,8 +19,8 @@ public class StatResetCommand : ICommandHandler
 
         if (job is null)
         {
-            throw new ApplicationException(
-                $"Job {context.Player.Player.PlayerClass} not found. This should never happen.");
+            throw new InvalidOperationException(
+                $"No job for class {context.Player.Player.PlayerClass} found. Ensure you added a job config for it");
         }
 
         context.Player.Player.Ht = job.Ht;

@@ -17,7 +17,7 @@ public abstract class ServerBase<T> : BackgroundService, IServerBase
 {
     private readonly ILogger _logger;
     protected IPacketManager PacketManager { get; }
-    private readonly List<Func<IConnection, bool>> _connectionListeners = new();
+    private readonly List<Func<IConnection, bool>> _connectionListeners = [];
     protected ConcurrentDictionary<Guid, IConnection> Connections { get; } = new();
     private readonly CancellationTokenSource _stoppingToken = new();
     protected TcpListener Listener { get; }
@@ -54,6 +54,7 @@ public abstract class ServerBase<T> : BackgroundService, IServerBase
 
     public async Task RemoveConnectionAsync(IConnection connection)
     {
+        ArgumentNullException.ThrowIfNull(connection);
         Connections.Remove(connection.Id, out _);
 
         await _pluginExecutor.ExecutePluginsAsync<IConnectionLifetimeListener>(_logger,
@@ -107,6 +108,7 @@ public abstract class ServerBase<T> : BackgroundService, IServerBase
 
     public void ForAllConnections(Action<IConnection> callback)
     {
+        ArgumentNullException.ThrowIfNull(callback);
         foreach (var connection in Connections.Values)
         {
             callback(connection);
@@ -120,6 +122,8 @@ public abstract class ServerBase<T> : BackgroundService, IServerBase
 
     public async Task CallListenerAsync(IConnection connection, IPacketSerializable packet)
     {
+        ArgumentNullException.ThrowIfNull(connection);
+        ArgumentNullException.ThrowIfNull(packet);
         if (!PacketManager.TryGetPacketInfo(packet, out var details) || details.PacketHandlerType is null)
         {
             _logger.LogWarning("Could not find a handler for packet {PacketType}", packet.GetType());
@@ -146,7 +150,7 @@ public abstract class ServerBase<T> : BackgroundService, IServerBase
 
             var packetHandler = ActivatorUtilities.CreateInstance(scope.ServiceProvider, details.PacketHandlerType);
             var handlerExecuteMethod = details.PacketHandlerType.GetMethod("ExecuteAsync")!;
-            await (Task) handlerExecuteMethod.Invoke(packetHandler, new[] { context, new CancellationToken() })!;
+            await (Task) handlerExecuteMethod.Invoke(packetHandler, [context, new CancellationToken()])!;
         }
         catch (Exception e)
         {

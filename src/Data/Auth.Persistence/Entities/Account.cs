@@ -22,7 +22,7 @@ public class Account
 
     public AccountStatus AccountStatus { get; init; } = null!;
 
-    public static void Configure(EntityTypeBuilder<Account> builder, DatabaseFacade database)
+    internal static void Configure(EntityTypeBuilder<Account> builder, DatabaseFacade database)
     {
         builder
             .HasOne(x => x.AccountStatus)

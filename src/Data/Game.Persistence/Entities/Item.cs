@@ -17,7 +17,7 @@ public class Item
 
     public Player Player { get; set; } = null!;
 
-    public static void Configure(EntityTypeBuilder<Item> builder, DatabaseFacade database)
+    internal static void Configure(EntityTypeBuilder<Item> builder, DatabaseFacade database)
     {
         if (database.IsSqlite() || database.IsNpgsql())
         {

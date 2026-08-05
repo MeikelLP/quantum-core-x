@@ -29,7 +29,8 @@ public class QuestManager : IQuestManager, ILoadable
             return Task.CompletedTask;
         }
 
-        foreach (var questType in assembly.GetTypes().Where(type => type.GetCustomAttribute<QuestAttribute>() is not null))
+        foreach (var questType in assembly.GetTypes()
+                     .Where(type => type.GetCustomAttribute<QuestAttribute>() is not null))
         {
             RegisterQuest(questType);
         }
@@ -51,7 +52,7 @@ public class QuestManager : IQuestManager, ILoadable
             Quest quest;
             try
             {
-                quest = (Quest) ActivatorUtilities.CreateInstance(_serviceProvider, questType, state, player);
+                quest = (Quest)ActivatorUtilities.CreateInstance(_serviceProvider, questType, state, player);
             }
             catch (Exception e)
             {
@@ -66,6 +67,7 @@ public class QuestManager : IQuestManager, ILoadable
 
     public void RegisterQuest(Type questType)
     {
+        ArgumentNullException.ThrowIfNull(questType);
         var id = questType.FullName ?? Guid.NewGuid().ToString();
         if (_quests.ContainsKey(id))
         {

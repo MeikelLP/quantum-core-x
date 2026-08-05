@@ -24,7 +24,7 @@ namespace Core.Tests;
 
 public class MapTests
 {
-    private SpawnPoint[] _spawnPoints = Array.Empty<SpawnPoint>();
+    private SpawnPoint[] _spawnPoints = [];
     private readonly FakeTimeProvider _timeProvider = new();
     private readonly ServerClock _clock;
     private readonly Map _map;
@@ -52,7 +52,7 @@ public class MapTests
             {
                 var mock = Substitute.For<ICacheManager>();
                 mock.Subscribe().Returns(Substitute.For<IRedisSubscriber>());
-                mock.KeysAsync(Arg.Any<string>()).Returns(_ => Array.Empty<string>());
+                mock.KeysAsync(Arg.Any<string>()).Returns(_ => []);
                 return mock;
             })
             .AddSingleton(npcShopProvider)
@@ -64,7 +64,7 @@ public class MapTests
             .AddSingleton<IAtlasProvider>(_ =>
             {
                 var mock = Substitute.For<IAtlasProvider>();
-                mock.GetAsync(Arg.Any<IWorld>()).Returns(_ => new[] { _map }!);
+                mock.GetAsync(Arg.Any<IWorld>()).Returns(_ => [_map!]);
                 return mock;
             })
             .AddSingleton<TimeProvider>(_ => _timeProvider)
@@ -73,8 +73,8 @@ public class MapTests
             .AddSingleton<ISpawnGroupProvider>(_ =>
             {
                 var mock = Substitute.For<ISpawnGroupProvider>();
-                mock.GetSpawnGroupsAsync().Returns(_ => new[]
-                {
+                mock.GetSpawnGroupsAsync().Returns(_ =>
+                [
                     new SpawnGroup
                     {
                         Id = 101,
@@ -82,9 +82,9 @@ public class MapTests
                         Leader = 101,
                         Members = [new SpawnMember { Id = 101 }, new SpawnMember { Id = 101 }]
                     }
-                });
-                mock.GetSpawnGroupCollectionsAsync().Returns(_ => new[]
-                {
+                ]);
+                mock.GetSpawnGroupCollectionsAsync().Returns(_ =>
+                [
                     // equal items but only one will be spawned
                     new SpawnGroupCollection
                     {
@@ -98,7 +98,7 @@ public class MapTests
                         Name = "TestGroupCollection",
                         Groups = [new SpawnGroupCollectionMember { Id = 101, Probability = 1 }]
                     }
-                });
+                ]);
                 return mock;
             })
             .AddSingleton<IWorld, World>()
@@ -138,8 +138,8 @@ public class MapTests
     [Fact]
     public async Task Spawn_SingleEntityAsync()
     {
-        _spawnPoints = new[]
-        {
+        _spawnPoints =
+        [
             new SpawnPoint
             {
                 Type = ESpawnPointType.MONSTER,
@@ -148,7 +148,7 @@ public class MapTests
                 Y = 500,
                 RespawnTime = 0,
             }
-        };
+        ];
         await _world.LoadAsync();
         await _world.InitAsync();
         var ctx = Tick();
@@ -164,8 +164,8 @@ public class MapTests
     [Fact]
     public async Task Spawn_GroupAsync()
     {
-        _spawnPoints = new[]
-        {
+        _spawnPoints =
+        [
             new SpawnPoint
             {
                 Type = ESpawnPointType.GROUP,
@@ -174,7 +174,7 @@ public class MapTests
                 Y = 500,
                 RespawnTime = 0,
             }
-        };
+        ];
         await _world.LoadAsync();
         await _world.InitAsync();
         var ctx = Tick();
@@ -189,8 +189,8 @@ public class MapTests
     [Fact]
     public async Task Spawn_GroupCollectionAsync()
     {
-        _spawnPoints = new[]
-        {
+        _spawnPoints =
+        [
             new SpawnPoint
             {
                 Type = ESpawnPointType.GROUP_COLLECTION,
@@ -199,7 +199,7 @@ public class MapTests
                 Y = 500,
                 RespawnTime = 0,
             }
-        };
+        ];
         await _world.LoadAsync();
         await _world.InitAsync();
         var ctx = Tick();

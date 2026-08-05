@@ -7,7 +7,7 @@ using QuantumCore.API.PluginTypes;
 
 namespace QuantumCore.Game.PacketHandlers.Select;
 
-public class EmpireHandler : IGamePacketHandler<Empire>
+internal class EmpireHandler : IGamePacketHandler<Empire>
 {
     private readonly ILogger<EmpireHandler> _logger;
     private readonly IPlayerManager _playerManager;

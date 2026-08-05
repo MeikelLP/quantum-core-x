@@ -4,7 +4,7 @@ namespace QuantumCore.Caching.InMemory;
 
 public class InMemoryRedisListWrapper<T> : IRedisListWrapper<T>
 {
-    private readonly List<T> _list = new();
+    private readonly List<T> _list = [];
 
     public ValueTask<T> IndexAsync(int slot)
     {
@@ -22,6 +22,7 @@ public class InMemoryRedisListWrapper<T> : IRedisListWrapper<T>
 
     public ValueTask<long> PushAsync(params T[] arr)
     {
+        ArgumentNullException.ThrowIfNull(arr);
         _list.AddRange(arr);
         return ValueTask.FromResult<long>(arr.Length);
     }

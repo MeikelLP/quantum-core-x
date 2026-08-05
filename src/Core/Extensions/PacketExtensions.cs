@@ -6,6 +6,7 @@ public static class PacketExtensions
 {
     public static Type GetPacketType(this Type type)
     {
+        ArgumentNullException.ThrowIfNull(type);
         var baseInterface = type.GetInterfaces()
             .FirstOrDefault(x => typeof(IPacketHandler).IsAssignableFrom(x) && x != typeof(IPacketHandler));
 

@@ -43,9 +43,10 @@ public static class QueryExtensions
             GuildId = x.GuildId
         });
     }
-    
+
     public static PlayerData[] AssignIncrementalSlots(this PlayerData[] players)
     {
+        ArgumentNullException.ThrowIfNull(players);
         for (var i = 0; i < players.Length; i++)
         {
             players[i].Slot = (byte)i;

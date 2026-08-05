@@ -86,6 +86,7 @@ public static class PlayerExtensions
 
         public void SendItem(ItemInstance item)
         {
+            ArgumentNullException.ThrowIfNull(item);
             Debug.Assert(item.PlayerId == player.Player.Id);
 
             var p = new SetItem
@@ -102,6 +103,7 @@ public static class PlayerExtensions
 
         public void SendCharacter(IConnection connection)
         {
+            ArgumentNullException.ThrowIfNull(connection);
             connection.Send(new SpawnCharacter
             {
                 Vid = player.Vid,
@@ -117,6 +119,7 @@ public static class PlayerExtensions
 
         public void SendCharacterAdditional(IConnection connection)
         {
+            ArgumentNullException.ThrowIfNull(connection);
             connection.Send(new CharacterInfo
             {
                 Vid = player.Vid,
@@ -124,13 +127,13 @@ public static class PlayerExtensions
                 Empire = player.Player.Empire,
                 Level = player.Player.Level,
                 GuildId = player.Player.GuildId ?? 0,
-                Parts = new ushort[]
-                {
+                Parts =
+                [
                     (ushort)(player.Inventory.EquipmentWindow.Body?.ItemId ?? 0),
                     (ushort)(player.Inventory.EquipmentWindow.Weapon?.ItemId ?? 0), 0,
                     (ushort)player.Inventory.EquipmentWindow.Hair.GetHairPartOffsetForClient(player.Player.PlayerClass
                         .GetClass())
-                }
+                ]
             });
         }
 
@@ -139,13 +142,13 @@ public static class PlayerExtensions
             var packet = new CharacterUpdate
             {
                 Vid = player.Vid,
-                Parts = new ushort[]
-                {
+                Parts =
+                [
                     (ushort)(player.Inventory.EquipmentWindow.Body?.ItemId ?? 0),
                     (ushort)(player.Inventory.EquipmentWindow.Weapon?.ItemId ?? 0), 0,
                     (ushort)player.Inventory.EquipmentWindow.Hair.GetHairPartOffsetForClient(player.Player.PlayerClass
                         .GetClass())
-                },
+                ],
                 MoveSpeed = player.MovementSpeed,
                 AttackSpeed = player.AttackSpeed,
                 GuildId = player.Player.GuildId ?? 0

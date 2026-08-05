@@ -83,7 +83,7 @@ public partial class AddGuild : Migration
             },
             constraints: table =>
             {
-                table.PrimaryKey("PK_GuildRanks", x => new {x.GuildId, x.Position});
+                table.PrimaryKey("PK_GuildRanks", x => new { x.GuildId, x.Position });
                 table.ForeignKey(
                     name: "FK_GuildRanks_Guilds_GuildId",
                     column: x => x.GuildId,
@@ -104,12 +104,12 @@ public partial class AddGuild : Migration
             },
             constraints: table =>
             {
-                table.PrimaryKey("PK_GuildMembers", x => new {x.GuildId, x.PlayerId});
+                table.PrimaryKey("PK_GuildMembers", x => new { x.GuildId, x.PlayerId });
                 table.ForeignKey(
                     name: "FK_GuildMembers_GuildRanks_GuildId_RankPosition",
-                    columns: x => new {x.GuildId, x.RankPosition},
+                    columns: x => new { x.GuildId, x.RankPosition },
                     principalTable: "GuildRanks",
-                    principalColumns: new[] {"GuildId", "Position"},
+                    principalColumns: ["GuildId", "Position"],
                     onDelete: ReferentialAction.Cascade);
                 table.ForeignKey(
                     name: "FK_GuildMembers_Guilds_GuildId",
@@ -140,7 +140,7 @@ public partial class AddGuild : Migration
         migrationBuilder.CreateIndex(
             name: "IX_GuildMembers_GuildId_RankPosition",
             table: "GuildMembers",
-            columns: new[] {"GuildId", "RankPosition"});
+            columns: ["GuildId", "RankPosition"]);
 
         migrationBuilder.CreateIndex(
             name: "IX_GuildMembers_PlayerId",

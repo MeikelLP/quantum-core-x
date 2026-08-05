@@ -15,7 +15,7 @@ public partial class MyPacket
     [Field(0)] public uint Size => (uint)MyArray.Length;
 
 #pragma warning disable CA1819 // no arrays
-    [Field(1)] public ComplexSubType[] MyArray { get; set; } = Array.Empty<ComplexSubType>();
+    [Field(1)] public ComplexSubType[] MyArray { get; set; } = [];
 #pragma warning restore CA1819
 
     [Field(2)] public int AnotherProperty { get; set; }
@@ -39,7 +39,7 @@ public class PacketSerializerTests
                 .AddInMemoryCollection(new Dictionary<string, string?> { { "Mode", HostingOptions.MODE_GAME } })
                 .Build())
             .AddSingleton<IPacketManager>(provider => new PacketManager(
-                provider.GetRequiredService<ILogger<PacketManager>>(), new[] { typeof(MyPacket) }))
+                provider.GetRequiredService<ILogger<PacketManager>>(), [typeof(MyPacket)]))
             .AddSingleton<IPacketSerializer, DefaultPacketSerializer>()
             .AddLogging()
             .BuildServiceProvider();
@@ -53,11 +53,11 @@ public class PacketSerializerTests
     {
         var data = new MyPacket
         {
-            MyArray = new[]
-            {
+            MyArray =
+            [
                 new ComplexSubType { SubHeader = 0x18, Value = 0x0675 },
                 new ComplexSubType { SubHeader = 0x43, Value = 0x306E }
-            },
+            ],
             AnotherProperty = 0x000004D2
         };
 

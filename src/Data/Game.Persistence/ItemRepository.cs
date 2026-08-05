@@ -14,6 +14,7 @@ public class ItemRepository : IItemRepository
 
     public ItemRepository(ICacheManager cacheManager, GameDbContext db)
     {
+        ArgumentNullException.ThrowIfNull(cacheManager);
         _cacheManager = cacheManager.Server;
         _db = db;
     }
@@ -46,6 +47,7 @@ public class ItemRepository : IItemRepository
 
     public async Task SaveItemAsync(ItemInstance item)
     {
+        ArgumentNullException.ThrowIfNull(item);
         if (item.Id != Guid.Empty)
         {
             await _db.Items.Where(x => x.Id == item.Id)
@@ -69,7 +71,9 @@ public class ItemRepository : IItemRepository
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow,
             };
+#pragma warning disable VSTHRD103 // use async overload - no because efcore
             _db.Items.Add(dbItem);
+#pragma warning restore VSTHRD103
             await _db.SaveChangesAsync();
             item.Id = dbItem.Id;
         }

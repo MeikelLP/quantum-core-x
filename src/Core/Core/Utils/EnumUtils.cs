@@ -4,6 +4,7 @@ public static class EnumUtils
 {
     public static bool TryParseEnum<TEnum>(string value, out TEnum result) where TEnum : struct, Enum
     {
+        ArgumentNullException.ThrowIfNull(value);
         // Check if the value is a single word
         if (!value.Contains('_'))
         {

@@ -39,6 +39,7 @@ public class QuadTree : IQuadTree
 
     public bool Insert(IEntity obj)
     {
+        ArgumentNullException.ThrowIfNull(obj);
         if (!Bounds.Contains(obj.PositionX, obj.PositionY)) return false;
 
         if (_objects.Count < Capacity && !Subdivided)
@@ -73,6 +74,7 @@ public class QuadTree : IQuadTree
 
     public bool Remove(IEntity obj)
     {
+        ArgumentNullException.ThrowIfNull(obj);
         if (Subdivided)
         {
             return _nw.Remove(obj) || _ne.Remove(obj) || _sw.Remove(obj) || _se.Remove(obj);
@@ -192,6 +194,7 @@ public class QuadTree : IQuadTree
 
     public void UpdatePosition(IEntity entity)
     {
+        ArgumentNullException.ThrowIfNull(entity);
         if (entity.LastQuadTree is null)
         {
             Insert(entity);

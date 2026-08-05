@@ -386,6 +386,7 @@ public class Map : IMap
 
     public void EnqueueGroupRespawn(MonsterGroup group)
     {
+        ArgumentNullException.ThrowIfNull(group);
         if (group.SpawnPoint is null) return;
 
         EventSystem.EnqueueEvent(() =>

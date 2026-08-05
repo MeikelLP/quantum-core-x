@@ -8,15 +8,20 @@ public static class SerializerExtensions
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static async ValueTask<T> ReadEnumFromStreamAsync<T>(this Stream stream, byte[] buffer)
     {
+        ArgumentNullException.ThrowIfNull(stream);
+        ArgumentNullException.ThrowIfNull(buffer);
         await stream.ReadExactlyAsync(buffer.AsMemory(0, 1));
-        return (T) (object)buffer[0];
+        return (T)(object)buffer[0];
     }
 
     [MethodImpl(MethodImplOptions.AggressiveOptimization)]
     public static async ValueTask<T> ReadValueFromStreamAsync<T>(this Stream stream, byte[] buffer)
         where T : ISpanParsable<T> // should match all relevant types
     {
-        var length = typeof(T) switch {
+        ArgumentNullException.ThrowIfNull(stream);
+        ArgumentNullException.ThrowIfNull(buffer);
+        var length = typeof(T) switch
+        {
             { } type when type == typeof(Half) || type == typeof(short) || type == typeof(ushort) => 2,
             { } type when type == typeof(int) || type == typeof(uint) || type == typeof(float) => 4,
             { } type when type == typeof(long) || type == typeof(ulong) || type == typeof(double) => 8,
@@ -24,19 +29,20 @@ public static class SerializerExtensions
             _ => throw new ArgumentOutOfRangeException(nameof(T), $"Type {typeof(T)} cannot be handled")
         };
         await stream.ReadExactlyAsync(buffer.AsMemory(0, length));
-        return typeof(T) switch {
-            { } type when type == typeof(int) => (T) (object) BitConverter.ToInt32(buffer.AsSpan(0, length)),
-            { } type when type == typeof(uint) => (T) (object) BitConverter.ToUInt32(buffer.AsSpan(0, length)),
-            { } type when type == typeof(float) => (T) (object) BitConverter.ToSingle(buffer.AsSpan(0, length)),
-            { } type when type == typeof(Half) => (T) (object) BitConverter.ToHalf(buffer.AsSpan(0, length)),
-            { } type when type == typeof(short) => (T) (object) BitConverter.ToInt16(buffer.AsSpan(0, length)),
-            { } type when type == typeof(ushort) => (T) (object) BitConverter.ToUInt16(buffer.AsSpan(0, length)),
-            { } type when type == typeof(long) => (T) (object) BitConverter.ToInt64(buffer.AsSpan(0, length)),
-            { } type when type == typeof(ulong) => (T) (object) BitConverter.ToUInt64(buffer.AsSpan(0, length)),
-            { } type when type == typeof(double) => (T) (object) BitConverter.ToDouble(buffer.AsSpan(0, length)),
-            { } type when type == typeof(bool) => (T) (object) BitConverter.ToBoolean(buffer.AsSpan(0, length)),
-            { } type when type == typeof(byte) => (T) (object) buffer[0],
-            { } type when type == typeof(sbyte) => (T) (object) buffer[0],
+        return typeof(T) switch
+        {
+            { } type when type == typeof(int) => (T)(object)BitConverter.ToInt32(buffer.AsSpan(0, length)),
+            { } type when type == typeof(uint) => (T)(object)BitConverter.ToUInt32(buffer.AsSpan(0, length)),
+            { } type when type == typeof(float) => (T)(object)BitConverter.ToSingle(buffer.AsSpan(0, length)),
+            { } type when type == typeof(Half) => (T)(object)BitConverter.ToHalf(buffer.AsSpan(0, length)),
+            { } type when type == typeof(short) => (T)(object)BitConverter.ToInt16(buffer.AsSpan(0, length)),
+            { } type when type == typeof(ushort) => (T)(object)BitConverter.ToUInt16(buffer.AsSpan(0, length)),
+            { } type when type == typeof(long) => (T)(object)BitConverter.ToInt64(buffer.AsSpan(0, length)),
+            { } type when type == typeof(ulong) => (T)(object)BitConverter.ToUInt64(buffer.AsSpan(0, length)),
+            { } type when type == typeof(double) => (T)(object)BitConverter.ToDouble(buffer.AsSpan(0, length)),
+            { } type when type == typeof(bool) => (T)(object)BitConverter.ToBoolean(buffer.AsSpan(0, length)),
+            { } type when type == typeof(byte) => (T)(object)buffer[0],
+            { } type when type == typeof(sbyte) => (T)(object)buffer[0],
             _ => throw new ArgumentOutOfRangeException(nameof(T), $"Type {typeof(T)} cannot be handled")
         };
     }
@@ -44,8 +50,10 @@ public static class SerializerExtensions
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static async ValueTask<string> ReadStringFromStreamAsync(this Stream stream, byte[] buffer, int size)
     {
+        ArgumentNullException.ThrowIfNull(stream);
+        ArgumentNullException.ThrowIfNull(buffer);
         await stream.ReadExactlyAsync(buffer.AsMemory(0, size));
-        var length = buffer.AsSpan().IndexOf((byte) 0);
+        var length = buffer.AsSpan().IndexOf((byte)0);
 
         // the string ends with the first null byte, after that garbage could be in the string
         if (length == -1)
@@ -59,6 +67,8 @@ public static class SerializerExtensions
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static async ValueTask<byte[]> ReadByteArrayFromStreamAsync(this Stream stream, byte[] buffer, int size)
     {
+        ArgumentNullException.ThrowIfNull(stream);
+        ArgumentNullException.ThrowIfNull(buffer);
         await stream.ReadExactlyAsync(buffer.AsMemory(0, size));
         return buffer[..size];
     }
@@ -66,7 +76,7 @@ public static class SerializerExtensions
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static string ReadNullTerminatedString(this ReadOnlySpan<byte> span)
     {
-        var length = span.IndexOf((byte) 0);
+        var length = span.IndexOf((byte)0);
         if (length == -1)
         {
             return Encoding.ASCII.GetString(span);
@@ -77,6 +87,7 @@ public static class SerializerExtensions
 
     public static void WriteString(this byte[] bytes, string? str, in int index, in int length)
     {
+        ArgumentNullException.ThrowIfNull(bytes);
         if (!string.IsNullOrWhiteSpace(str))
         {
             var asciiBytes = Encoding.ASCII.GetBytes(str, 0, Math.Min(str.Length, length));

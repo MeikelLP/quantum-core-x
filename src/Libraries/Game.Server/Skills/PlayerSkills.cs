@@ -112,6 +112,7 @@ public class PlayerSkills : IPlayerSkills
     public PlayerSkills(ILogger<PlayerSkills> logger, PlayerEntity player, IDbPlayerSkillsRepository repository,
         ISkillManager skillManager, IOptions<SkillsOptions> skillsOptions)
     {
+        ArgumentNullException.ThrowIfNull(skillsOptions);
         _logger = logger;
         _player = player;
         _repository = repository;

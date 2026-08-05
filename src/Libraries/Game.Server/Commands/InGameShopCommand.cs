@@ -6,7 +6,7 @@ namespace QuantumCore.Game.Commands;
 
 [Command("in_game_mall", "Opens the in-game item shop webpage")]
 [CommandNoPermission]
-public class InGameShopCommand : ICommandHandler
+internal class InGameShopCommand : ICommandHandler
 {
     private readonly GameOptions _options;
 

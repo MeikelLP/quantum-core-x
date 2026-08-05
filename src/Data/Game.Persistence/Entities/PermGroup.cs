@@ -15,7 +15,7 @@ public class PermGroup
     public ICollection<PermUser> Users { get; set; } = null!;
 
 
-    public static void Configure(EntityTypeBuilder<PermGroup> builder, DatabaseFacade database)
+    internal static void Configure(EntityTypeBuilder<PermGroup> builder, DatabaseFacade database)
     {
         builder.HasIndex(x => x.Name).IsUnique();
         if (database.IsNpgsql())
@@ -24,7 +24,7 @@ public class PermGroup
         }
 
         builder.HasData([
-            new PermGroup {Id = OperatorGroup, Name = "Operator"}
+            new PermGroup { Id = OperatorGroup, Name = "Operator" }
         ]);
     }
 }

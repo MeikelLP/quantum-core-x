@@ -14,7 +14,7 @@ public class PermAuth
 
     public PermGroup Group { get; set; } = null!;
 
-    public static void Configure(EntityTypeBuilder<PermAuth> builder, DatabaseFacade database)
+    internal static void Configure(EntityTypeBuilder<PermAuth> builder, DatabaseFacade database)
     {
         if (database.IsNpgsql())
         {

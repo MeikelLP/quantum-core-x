@@ -10,6 +10,7 @@ public sealed class ServerClock
 
     public ServerClock(TimeProvider provider)
     {
+        ArgumentNullException.ThrowIfNull(provider);
         TimeProvider = provider;
         _originTimestampRaw = provider.GetTimestamp();
     }

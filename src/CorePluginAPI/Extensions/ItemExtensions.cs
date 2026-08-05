@@ -7,128 +7,103 @@ namespace QuantumCore.API.Extensions;
 
 public static class ItemExtensions
 {
-    public static uint GetMinWeaponBaseDamage(this ItemData item)
+    extension(ItemData item)
     {
-        return (uint)item.Values[3];
-    }
+        public uint MinWeaponBaseDamage => (uint)item.Values[3];
+        public uint MaxWeaponBaseDamage => (uint)item.Values[4];
+        public uint MinMagicWeaponBaseDamage => (uint)item.Values[1];
+        public uint MaxMagicWeaponBaseDamage => (uint)item.Values[2];
 
-    public static uint GetMaxWeaponBaseDamage(this ItemData item)
-    {
-        return (uint)item.Values[4];
-    }
+        /// <summary>
+        /// Weapon damage added additionally to the base damage
+        /// </summary>
+        /// <returns></returns>
+        public uint AdditionalWeaponDamage => (uint)item.Values[5];
 
-    public static uint GetMinMagicWeaponBaseDamage(this ItemData item)
-    {
-        return (uint)item.Values[1];
-    }
+        public uint MinWeaponDamage => item.MinWeaponBaseDamage + item.AdditionalWeaponDamage;
+        public uint MaxWeaponDamage => item.MaxWeaponBaseDamage + item.AdditionalWeaponDamage;
+        public uint MinMagicWeaponDamage => item.MinMagicWeaponBaseDamage + item.AdditionalWeaponDamage;
+        public uint MaxMagicWeaponDamage => item.MaxMagicWeaponBaseDamage + item.AdditionalWeaponDamage;
 
-    public static uint GetMaxMagicWeaponBaseDamage(this ItemData item)
-    {
-        return (uint)item.Values[2];
-    }
-
-    public static int GetApplyValue(this ItemData item, EApplyType type)
-    {
-        var apply = item.Applies.FirstOrDefault(x => (EApplyType)x.Type == type);
-
-        return (int)(apply?.Value ?? 0);
-    }
-
-    /// <summary>
-    /// Weapon damage added additionally to the base damage
-    /// </summary>
-    /// <param name="item"></param>
-    /// <returns></returns>
-    public static uint GetAdditionalWeaponDamage(this ItemData item)
-    {
-        return (uint)item.Values[5];
-    }
-
-    public static uint GetMinWeaponDamage(this ItemData item)
-    {
-        return item.GetMinWeaponBaseDamage() + item.GetAdditionalWeaponDamage();
-    }
-
-    public static uint GetMaxWeaponDamage(this ItemData item)
-    {
-        return item.GetMaxWeaponBaseDamage() + item.GetAdditionalWeaponDamage();
-    }
-
-    public static uint GetMinMagicWeaponDamage(this ItemData item)
-    {
-        return item.GetMinMagicWeaponBaseDamage() + item.GetAdditionalWeaponDamage();
-    }
-
-    public static uint GetMaxMagicWeaponDamage(this ItemData item)
-    {
-        return item.GetMaxMagicWeaponBaseDamage() + item.GetAdditionalWeaponDamage();
-    }
-
-    public static bool IsType(this ItemData item, EItemType type)
-    {
-        return (EItemType)item.Type == type;
-    }
-
-    public static bool IsSubtype(this ItemData item, EItemSubtype subtype)
-    {
-        return (EItemSubtype)item.Subtype == subtype;
-    }
-
-    public static uint GetHairPartOffsetForClient(this ItemInstance? itemInstance, EPlayerClass playerClass)
-    {
-        if (itemInstance is null)
+        public int GetApplyValue(EApplyType type)
         {
-            return 0;
+            var apply = item.Applies.FirstOrDefault(x => (EApplyType)x.Type == type);
+
+            return (int)(apply?.Value ?? 0);
         }
 
-        var itemId = itemInstance.ItemId;
-        if (itemId < HairPartIdOffsets.WAR_OFFSET_BASE)
+        public bool IsType(EItemType type)
         {
-            return 0;
+            return (EItemType)item.Type == type;
         }
 
-        switch (playerClass)
+        public bool IsSubtype(EItemSubtype subtype)
         {
-            case EPlayerClass.WARRIOR:
-                return itemId - HairPartIdOffsets.WAR_OFFSET_BASE; // 73001 - 72000 = 1001 start hair number from
-            case EPlayerClass.NINJA:
-                return itemId - HairPartIdOffsets.NINJA_OFFSET_BASE;
-            case EPlayerClass.SURA:
-                return itemId - HairPartIdOffsets.SURA_OFFSET_BASE;
-            case EPlayerClass.SHAMAN:
-                return itemId - HairPartIdOffsets.SHAMAN_OFFSET_BASE;
-            default:
-                throw new NotImplementedException();
-        }
-    }
-
-    public static EquipmentSlot? GetWearSlot(this IItemManager itemManager, uint itemId)
-    {
-        var proto = itemManager.GetItem(itemId);
-        if (proto is null)
-        {
-            return null;
+            return (EItemSubtype)item.Subtype == subtype;
         }
 
-        return proto.GetWearSlot();
-    }
-
-    public static EquipmentSlot? GetWearSlot(this ItemData proto)
-    {
-        if (proto.IsType(EItemType.COSTUME))
+        public EquipmentSlot? GetWearSlot()
         {
-            if (proto.IsSubtype(EItemSubtype.COSTUME_BODY))
+            if (item.IsType(EItemType.COSTUME))
             {
-                return EquipmentSlot.COSTUME;
+                if (item.IsSubtype(EItemSubtype.COSTUME_BODY))
+                {
+                    return EquipmentSlot.COSTUME;
+                }
+
+                if (item.IsSubtype(EItemSubtype.COSTUME_HAIR))
+                {
+                    return EquipmentSlot.HAIR;
+                }
             }
 
-            if (proto.IsSubtype(EItemSubtype.COSTUME_HAIR))
+            return ((EWearFlags)item.WearFlags).GetWearSlot();
+        }
+    }
+
+    extension(ItemInstance? itemInstance)
+    {
+        public uint GetHairPartOffsetForClient(EPlayerClass playerClass)
+        {
+            if (itemInstance is null)
             {
-                return EquipmentSlot.HAIR;
+                return 0;
+            }
+
+            var itemId = itemInstance.ItemId;
+            if (itemId < HairPartIdOffsets.WAR_OFFSET_BASE)
+            {
+                return 0;
+            }
+
+            switch (playerClass)
+            {
+                case EPlayerClass.WARRIOR:
+                    return itemId - HairPartIdOffsets.WAR_OFFSET_BASE; // 73001 - 72000 = 1001 start hair number from
+                case EPlayerClass.NINJA:
+                    return itemId - HairPartIdOffsets.NINJA_OFFSET_BASE;
+                case EPlayerClass.SURA:
+                    return itemId - HairPartIdOffsets.SURA_OFFSET_BASE;
+                case EPlayerClass.SHAMAN:
+                    return itemId - HairPartIdOffsets.SHAMAN_OFFSET_BASE;
+                default:
+                    throw new NotImplementedException();
             }
         }
+    }
 
-        return ((EWearFlags)proto.WearFlags).GetWearSlot();
+    extension(IItemManager itemManager)
+    {
+        public EquipmentSlot? GetWearSlot(uint itemId)
+        {
+            var proto = itemManager.GetItem(itemId);
+            if (proto is null)
+            {
+                return null;
+            }
+
+            return proto.GetWearSlot();
+        }
     }
 
     private static EquipmentSlot? GetWearSlot(this EWearFlags wearFlags)
@@ -176,119 +151,131 @@ public static class ItemExtensions
         throw new NotImplementedException($"No equipment slot for wear flags: {wearFlags}");
     }
 
-    public static async Task<ItemInstance?> GetItemAsync(this IItemRepository repository, ICacheManager cacheManager,
-        Guid id)
+    extension(IItemRepository repository)
     {
-        var key = "item:" + id;
-
-        if (await cacheManager.Server.ExistsAsync(key) > 0)
+        public async Task<ItemInstance?> GetItemAsync(ICacheManager cacheManager,
+            Guid id)
         {
-            return await cacheManager.Server.GetAsync<ItemInstance>(key);
-        }
+            ArgumentNullException.ThrowIfNull(cacheManager);
+            var key = "item:" + id;
 
-        var item = await repository.GetItemAsync(id);
-        if (item is not null)
-        {
-            await cacheManager.Server.SetAsync(key, item);
-        }
-
-        return item;
-    }
-
-    public static async Task DeletePlayerItemAsync(this IItemRepository repository, ICacheManager cacheManager,
-        uint playerId, uint itemId)
-    {
-        var key = $"item:{itemId}";
-
-        await cacheManager.DelAsync(key);
-
-        await repository.DeletePlayerItemAsync(playerId, itemId);
-    }
-
-    public static async IAsyncEnumerable<ItemInstance> GetItemsAsync(this IItemRepository repository,
-        ICacheManager cacheManager, uint player, WindowType window)
-    {
-        var key = "items:" + player + ":" + (byte)window;
-
-        var list = cacheManager.Server.CreateList<Guid>(key);
-
-        // Check if the window list exists
-        if (await cacheManager.Server.ExistsAsync(key) > 0)
-        {
-            var itemIds = await list.RangeAsync(0, -1);
-
-            foreach (var id in itemIds)
+            if (await cacheManager.Server.ExistsAsync(key) > 0)
             {
-                var item = await GetItemAsync(repository, cacheManager, id);
-                if (item is not null)
+                return await cacheManager.Server.GetAsync<ItemInstance>(key);
+            }
+
+            var item = await repository.GetItemAsync(id);
+            if (item is not null)
+            {
+                await cacheManager.Server.SetAsync(key, item);
+            }
+
+            return item;
+        }
+
+        public async Task DeletePlayerItemAsync(ICacheManager cacheManager,
+            uint playerId, uint itemId)
+        {
+            ArgumentNullException.ThrowIfNull(cacheManager);
+            var key = $"item:{itemId}";
+
+            await cacheManager.DelAsync(key);
+
+            await repository.DeletePlayerItemAsync(playerId, itemId);
+        }
+
+        public async IAsyncEnumerable<ItemInstance> GetItemsAsync(ICacheManager cacheManager, uint player,
+            WindowType window)
+        {
+            ArgumentNullException.ThrowIfNull(cacheManager);
+            var key = "items:" + player + ":" + (byte)window;
+
+            var list = cacheManager.Server.CreateList<Guid>(key);
+
+            // Check if the window list exists
+            if (await cacheManager.Server.ExistsAsync(key) > 0)
+            {
+                var itemIds = await list.RangeAsync(0, -1);
+
+                foreach (var id in itemIds)
                 {
-                    yield return item;
+                    var item = await GetItemAsync(repository, cacheManager, id);
+                    if (item is not null)
+                    {
+                        yield return item;
+                    }
+                }
+            }
+            else
+            {
+                var ids = await repository.GetItemIdsForPlayerAsync(player, window);
+
+                foreach (var id in ids)
+                {
+                    await list.PushAsync(id);
+
+                    var item = await GetItemAsync(repository, cacheManager, id);
+                    if (item is not null)
+                    {
+                        yield return item;
+                    }
                 }
             }
         }
-        else
-        {
-            var ids = await repository.GetItemIdsForPlayerAsync(player, window);
+    }
 
-            foreach (var id in ids)
+    extension(ItemInstance item)
+    {
+        public async Task<bool> DestroyAsync(ICacheManager cacheManager)
+        {
+            ArgumentNullException.ThrowIfNull(cacheManager);
+            var key = "item:" + item.Id;
+
+            if (item.PlayerId != 0)
             {
-                await list.PushAsync(id);
-
-                var item = await GetItemAsync(repository, cacheManager, id);
-                if (item is not null)
-                {
-                    yield return item;
-                }
-            }
-        }
-    }
-
-    public static async Task<bool> DestroyAsync(this ItemInstance item, ICacheManager cacheManager)
-    {
-        var key = "item:" + item.Id;
-
-        if (item.PlayerId != default)
-        {
-            var oldList = cacheManager.Server.CreateList<Guid>($"items:{item.PlayerId}:{item.Window}");
-            await oldList.RemAsync(1, item.Id);
-        }
-
-        return await cacheManager.Server.DelAsync(key) != 0;
-    }
-
-    public static Task PersistAsync(this ItemInstance item, IItemRepository itemRepository)
-    {
-        return itemRepository.SaveItemAsync(item);
-    }
-
-    /// <summary>
-    /// Sets the item position, window, and owner.
-    /// Refresh the cache lists if needed, and persists the item
-    /// </summary>
-    public static async Task SetAsync(this ItemInstance item, ICacheManager cacheManager, uint owner, WindowType window,
-        uint pos, IItemRepository itemRepository)
-    {
-        var isPlayerDifferent = item.PlayerId != owner;
-        var isWindowDifferent = item.Window != window;
-
-        item.PlayerId = owner;
-        item.Window = window;
-        item.Position = pos;
-        await PersistAsync(item, itemRepository);
-
-        if (isPlayerDifferent || isWindowDifferent)
-        {
-            if (item.PlayerId != default)
-            {
-                // Remove from last list
                 var oldList = cacheManager.Server.CreateList<Guid>($"items:{item.PlayerId}:{item.Window}");
                 await oldList.RemAsync(1, item.Id);
             }
 
-            if (owner != default)
+            return await cacheManager.Server.DelAsync(key) != 0;
+        }
+
+        public Task PersistAsync(IItemRepository itemRepository)
+        {
+            ArgumentNullException.ThrowIfNull(itemRepository);
+            return itemRepository.SaveItemAsync(item);
+        }
+
+        /// <summary>
+        /// Sets the item position, window, and owner.
+        /// Refresh the cache lists if needed, and persists the item
+        /// </summary>
+        public async Task SetAsync(ICacheManager cacheManager, uint owner, WindowType window,
+            uint pos, IItemRepository itemRepository)
+        {
+            ArgumentNullException.ThrowIfNull(cacheManager);
+            var isPlayerDifferent = item.PlayerId != owner;
+            var isWindowDifferent = item.Window != window;
+
+            item.PlayerId = owner;
+            item.Window = window;
+            item.Position = pos;
+            await item.PersistAsync(itemRepository);
+
+            if (isPlayerDifferent || isWindowDifferent)
             {
-                var newList = cacheManager.Server.CreateList<Guid>($"items:{owner}:{window}");
-                await newList.PushAsync(item.Id);
+                if (item.PlayerId != 0)
+                {
+                    // Remove from last list
+                    var oldList = cacheManager.Server.CreateList<Guid>($"items:{item.PlayerId}:{item.Window}");
+                    await oldList.RemAsync(1, item.Id);
+                }
+
+                if (owner != 0)
+                {
+                    var newList = cacheManager.Server.CreateList<Guid>($"items:{owner}:{window}");
+                    await newList.PushAsync(item.Id);
+                }
             }
         }
     }

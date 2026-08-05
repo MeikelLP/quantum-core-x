@@ -21,6 +21,7 @@ public class PlayerManager : IPlayerManager
     public PlayerManager(IDbPlayerRepository dbPlayerRepository, ICachePlayerRepository cachePlayerRepository,
         ILogger<PlayerManager> logger, IJobManager jobManager, IOptions<GameOptions> gameOptions)
     {
+        ArgumentNullException.ThrowIfNull(gameOptions);
         _dbPlayerRepository = dbPlayerRepository;
         _cachePlayerRepository = cachePlayerRepository;
         _logger = logger;

@@ -15,9 +15,9 @@ public class GuildRank
     public Guild Guild { get; set; } = null!;
     public ICollection<GuildMember> Members { get; set; } = null!;
 
-    public static void Configure(EntityTypeBuilder<GuildRank> builder, DatabaseFacade database)
+    internal static void Configure(EntityTypeBuilder<GuildRank> builder, DatabaseFacade database)
     {
-        builder.HasKey(x => new {x.GuildId, x.Position});
+        builder.HasKey(x => new { x.GuildId, x.Position });
         builder.HasOne(x => x.Guild).WithMany(x => x.Ranks);
         builder.HasMany(x => x.Members).WithOne(x => x.Rank);
     }

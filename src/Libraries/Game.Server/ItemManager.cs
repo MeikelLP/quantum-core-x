@@ -121,6 +121,7 @@ public class ItemManager : IItemManager, ILoadable
     /// <returns>Item instance</returns>
     public ItemInstance CreateItem(ItemData proto, byte count = 1)
     {
+        ArgumentNullException.ThrowIfNull(proto);
         return new ItemInstance { ItemId = proto.Id, Count = count };
     }
 }

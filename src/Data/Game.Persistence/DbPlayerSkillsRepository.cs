@@ -8,12 +8,12 @@ namespace QuantumCore.Game.Persistence;
 public class DbPlayerSkillsRepository : IDbPlayerSkillsRepository
 {
     private readonly GameDbContext _db;
-    
+
     public DbPlayerSkillsRepository(GameDbContext db)
     {
         _db = db;
     }
-    
+
     public async Task<Skill?> GetPlayerSkillAsync(uint playerId, uint skillId)
     {
         return await _db.PlayerSkills
@@ -34,10 +34,11 @@ public class DbPlayerSkillsRepository : IDbPlayerSkillsRepository
 
     public async Task SavePlayerSkillAsync(Skill skill)
     {
+        ArgumentNullException.ThrowIfNull(skill);
         var existingSkill = await _db.PlayerSkills
-            .Where(x => x.PlayerId == skill.PlayerId && x.SkillId == (uint) skill.SkillId)
+            .Where(x => x.PlayerId == skill.PlayerId && x.SkillId == (uint)skill.SkillId)
             .FirstOrDefaultAsync();
-        
+
         if (existingSkill is not null)
         {
             existingSkill.Level = (byte)skill.Level;
@@ -54,7 +55,7 @@ public class DbPlayerSkillsRepository : IDbPlayerSkillsRepository
         {
             Id = Guid.NewGuid(),
             PlayerId = skill.PlayerId,
-            SkillId = (uint) skill.SkillId,
+            SkillId = (uint)skill.SkillId,
             MasterType = skill.MasterType,
             Level = (byte)skill.Level,
             NextReadTime = skill.NextReadTime,
@@ -62,7 +63,9 @@ public class DbPlayerSkillsRepository : IDbPlayerSkillsRepository
             CreatedAt = DateTime.UtcNow,
             UpdatedAt = DateTime.UtcNow
         };
+#pragma warning disable VSTHRD103 // use async overload - no because efcore
         _db.PlayerSkills.Add(entity);
+#pragma warning restore VSTHRD103
         await _db.SaveChangesAsync();
     }
 }

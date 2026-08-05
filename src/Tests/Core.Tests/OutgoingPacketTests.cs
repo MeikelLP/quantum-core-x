@@ -202,7 +202,7 @@ public class OutgoingPacketTests
     {
         var obj = new AutoFaker<CharacterPoints>()
             .RuleFor(x => x.Points,
-                faker => { return Enumerable.Range(0, 255).Select(_ => faker.Random.UInt()).ToArray(); })
+                faker => { return [.. Enumerable.Range(0, 255).Select(_ => faker.Random.UInt())]; })
             .Generate();
         var bytes = _serializer.Serialize(obj);
 
@@ -217,26 +217,27 @@ public class OutgoingPacketTests
     {
         var obj = new AutoFaker<CharacterUpdate>()
             .RuleFor(x => x.Parts,
-                faker => new[]
-                {
+                faker =>
+                [
                     faker.Random.UShort(), faker.Random.UShort(), faker.Random.UShort(), faker.Random.UShort()
-                })
+                ])
             .Generate();
         var bytes = _serializer.Serialize(obj);
 
         bytes.Should().Equal(
-            new byte[] { 0x13 }
-                .Concat(BitConverter.GetBytes(obj.Vid))
-                .Concat(obj.Parts.SelectMany(BitConverter.GetBytes))
-                .Append(obj.MoveSpeed)
-                .Append(obj.AttackSpeed)
-                .Append((byte)obj.State)
-                .Concat(BitConverter.GetBytes(obj.Affects))
-                .Concat(BitConverter.GetBytes(obj.GuildId))
-                .Concat(BitConverter.GetBytes(obj.RankPoints))
-                .Append((byte)obj.PvpMode)
-                .Concat(BitConverter.GetBytes(obj.MountVnum))
-                .ToArray()
+            [
+                0x13,
+                .. BitConverter.GetBytes(obj.Vid),
+                .. obj.Parts.SelectMany(BitConverter.GetBytes),
+                obj.MoveSpeed,
+                obj.AttackSpeed,
+                (byte)obj.State,
+                .. BitConverter.GetBytes(obj.Affects),
+                .. BitConverter.GetBytes(obj.GuildId),
+                .. BitConverter.GetBytes(obj.RankPoints),
+                (byte)obj.PvpMode,
+                .. BitConverter.GetBytes(obj.MountVnum)
+            ]
         );
     }
 
@@ -245,14 +246,14 @@ public class OutgoingPacketTests
     {
         var itemBonusFaker = new AutoFaker<ItemBonus>();
         var obj = new AutoFaker<SetItem>()
-            .RuleFor(x => x.Sockets, faker => new[] { faker.Random.UInt(), faker.Random.UInt(), faker.Random.UInt() })
+            .RuleFor(x => x.Sockets, faker => [faker.Random.UInt(), faker.Random.UInt(), faker.Random.UInt()])
             .RuleFor(x => x.Bonuses,
-                _ => new[]
-                {
+                _ =>
+                [
                     itemBonusFaker.Generate(), itemBonusFaker.Generate(), itemBonusFaker.Generate(),
                     itemBonusFaker.Generate(), itemBonusFaker.Generate(), itemBonusFaker.Generate(),
-                    itemBonusFaker.Generate(),
-                })
+                    itemBonusFaker.Generate()
+                ])
             .Generate();
         var bytes = _serializer.Serialize(obj);
 
@@ -347,20 +348,20 @@ public class OutgoingPacketTests
             .RuleFor(x => x.Name, faker => faker.Lorem.Letter(24) + '\0');
         var obj = new AutoFaker<Characters>()
             .RuleFor(x => x.GuildIds,
-                faker => new[] { faker.Random.UInt(), faker.Random.UInt(), faker.Random.UInt(), faker.Random.UInt() })
+                faker => [faker.Random.UInt(), faker.Random.UInt(), faker.Random.UInt(), faker.Random.UInt()])
             .RuleFor(x => x.GuildNames,
-                faker => new[]
-                {
+                faker =>
+                [
                     faker.Lorem.Letter(12) + '\0', faker.Lorem.Letter(12) + '\0', faker.Lorem.Letter(12) + '\0',
                     faker.Lorem.Letter(12) + '\0'
-                })
+                ])
             .RuleFor(x => x.CharacterList, _ =>
             {
-                return new[]
-                {
+                return
+                [
                     characterFaker.Generate(), characterFaker.Generate(), characterFaker.Generate(),
                     characterFaker.Generate()
-                };
+                ];
             })
             .Generate();
         var bytes = _serializer.Serialize(obj);
@@ -398,16 +399,16 @@ public class OutgoingPacketTests
     {
         var itemBonusFaker = new AutoFaker<ItemBonus>();
         var shopItemFaker = new AutoFaker<ShopItem>()
-            .RuleFor(x => x.Sockets, faker => new[] { faker.Random.UInt(), faker.Random.UInt(), faker.Random.UInt() })
+            .RuleFor(x => x.Sockets, faker => [faker.Random.UInt(), faker.Random.UInt(), faker.Random.UInt()])
             .RuleFor(x => x.Bonuses,
-                _ => new[]
-                {
+                _ =>
+                [
                     itemBonusFaker.Generate(), itemBonusFaker.Generate(), itemBonusFaker.Generate(),
                     itemBonusFaker.Generate(), itemBonusFaker.Generate(), itemBonusFaker.Generate(),
                     itemBonusFaker.Generate()
-                });
+                ]);
         var obj = new AutoFaker<ShopOpen>()
-            .RuleFor(x => x.Items, _ => Enumerable.Range(0, 40).Select(_ => shopItemFaker.Generate()).ToArray())
+            .RuleFor(x => x.Items, _ => [.. Enumerable.Range(0, 40).Select(_ => shopItemFaker.Generate())])
             .Generate();
         var bytes = _serializer.Serialize(obj);
 
@@ -564,10 +565,10 @@ public class OutgoingPacketTests
         var obj = new AutoFaker<CharacterInfo>()
             .RuleFor(x => x.Name, faker => faker.Lorem.Letter(24) + '\0')
             .RuleFor(x => x.Parts,
-                faker => new[]
-                {
+                faker =>
+                [
                     faker.Random.UShort(), faker.Random.UShort(), faker.Random.UShort(), faker.Random.UShort()
-                })
+                ])
             .Generate();
         var bytes = _serializer.Serialize(obj);
 

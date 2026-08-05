@@ -8,11 +8,10 @@ namespace QuantumCore.Game.PlayerUtils;
 public class JobManager : IJobManager
 {
     private readonly List<Job> _jobs = new();
-    private readonly ILogger<JobManager> _logger;
 
     public JobManager(ILogger<JobManager> logger, IConfiguration configuration)
     {
-        _logger = logger;
+        ArgumentNullException.ThrowIfNull(configuration);
 
         var jobs = configuration.GetSection("job").Get<Job[]>();
 
@@ -22,7 +21,7 @@ public class JobManager : IJobManager
         }
         else
         {
-            _logger.LogWarning("No jobs found. This may cause issues later on");
+            logger.LogWarning("No jobs found. This may cause issues later on");
         }
     }
 

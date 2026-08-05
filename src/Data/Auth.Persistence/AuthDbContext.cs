@@ -17,11 +17,13 @@ public abstract class AuthDbContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
+        ArgumentNullException.ThrowIfNull(optionsBuilder);
         optionsBuilder.UseLoggerFactory(_loggerFactory);
     }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        ArgumentNullException.ThrowIfNull(modelBuilder);
         Account.Configure(modelBuilder.Entity<Account>(), Database);
         Entities.AccountStatus.Configure(modelBuilder.Entity<AccountStatus>(), Database);
     }

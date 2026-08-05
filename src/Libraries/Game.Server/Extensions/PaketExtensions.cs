@@ -6,25 +6,28 @@ namespace QuantumCore.Game.Extensions;
 
 public static class PaketExtensions
 {
-    public static Character ToCharacter(this PlayerData player)
+    extension(PlayerData player)
     {
-        return new Character
+        public Character ToCharacter()
         {
-            Id = player.Id,
-            Name = player.Name,
-            Class = player.PlayerClass,
-            Level = player.Level,
-            Playtime = (uint)TimeSpan.FromMilliseconds(player.PlayTime).TotalMinutes,
-            St = player.St,
-            Ht = player.Ht,
-            Dx = player.Dx,
-            Iq = player.Iq,
-            BodyPart = (ushort)player.BodyPart,
-            NameChange = ENameChangeStatus.DISABLED,
-            HairPart = (ushort)player.HairPart,
-            PositionX = player.PositionX,
-            PositionY = player.PositionY,
-            SkillGroup = player.SkillGroup
-        };
+            return new Character
+            {
+                Id = player.Id,
+                Name = player.Name,
+                Class = player.PlayerClass,
+                Level = player.Level,
+                Playtime = (uint)TimeSpan.FromMilliseconds(player.PlayTime).TotalMinutes,
+                St = player.St,
+                Ht = player.Ht,
+                Dx = player.Dx,
+                Iq = player.Iq,
+                BodyPart = (ushort)player.BodyPart,
+                NameChange = ENameChangeStatus.DISABLED,
+                HairPart = (ushort)player.HairPart,
+                PositionX = player.PositionX,
+                PositionY = player.PositionY,
+                SkillGroup = player.SkillGroup
+            };
+        }
     }
 }

@@ -182,7 +182,9 @@ public abstract class Connection : BackgroundService, IConnection
                     if (_logger.IsEnabled(LogLevel.Debug))
                     {
                         _logger.LogDebug("OUT: {Type} => {Packet} (0x{Bytes})", packet.GetType(),
+#pragma warning disable VSTHRD103 // use async overload - doesn't work here
                             JsonSerializer.Serialize(obj),
+#pragma warning restore VSTHRD103
                             string.Join("", bytesToSend.ToArray().Select(x => x.ToString("X2"))));
                     }
 
@@ -218,6 +220,7 @@ public abstract class Connection : BackgroundService, IConnection
 
     public bool HandleHandshake(GcHandshakeData handshake)
     {
+        ArgumentNullException.ThrowIfNull(handshake);
         if (!Handshaking)
         {
             // We wasn't handshaking!

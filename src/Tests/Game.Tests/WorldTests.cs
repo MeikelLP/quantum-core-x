@@ -33,7 +33,7 @@ public class WorldTests : IAsyncLifetime
     private readonly ServerClock _clock;
     private readonly GameServer _gameServer;
     private readonly ServiceProvider _services;
-    private static readonly string[] returnThis = new[] { "maps:test_map" };
+    private static readonly string[] returnThis = ["maps:test_map"];
 
     public WorldTests()
     {
@@ -55,8 +55,8 @@ public class WorldTests : IAsyncLifetime
             .Replace(new ServiceDescriptor(typeof(IAtlasProvider), provider =>
             {
                 var mock = Substitute.For<IAtlasProvider>();
-                mock.GetAsync(Arg.Any<IWorld>()).Returns(info => new[]
-                {
+                mock.GetAsync(Arg.Any<IWorld>()).Returns(info =>
+                [
                     new Map(provider.GetRequiredService<IMonsterManager>(),
                         provider.GetRequiredService<IAnimationManager>(),
                         provider.GetRequiredService<ICacheManager>(), info.Arg<IWorld>()!,
@@ -66,7 +66,7 @@ public class WorldTests : IAsyncLifetime
                         provider.GetRequiredService<IDropProvider>(),
                         provider.GetRequiredService<IServerBase>(),
                         "test_map", new Coordinates(), 1024, 1024, null, provider)
-                });
+                ]);
                 return mock;
             }, ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(ICacheManager), _ =>
@@ -79,21 +79,22 @@ public class WorldTests : IAsyncLifetime
             .Replace(new ServiceDescriptor(typeof(ISpawnPointProvider), _ =>
             {
                 var mock = Substitute.For<ISpawnPointProvider>();
-                mock.GetSpawnPointsForMapAsync("test_map").Returns(Enumerable
-                    .Range(0, 1)
-                    .Select(_ =>
-                        new SpawnPoint
-                        {
-                            Chance = 100,
-                            Type = ESpawnPointType.MONSTER,
-                            Monster = 42,
-                            X = 1,
-                            Y = 1,
-                            RangeX = 0,
-                            RangeY = 0
-                        }
-                    )
-                    .ToArray()
+                mock.GetSpawnPointsForMapAsync("test_map").Returns([
+                        .. Enumerable
+                            .Range(0, 1)
+                            .Select(_ =>
+                                new SpawnPoint
+                                {
+                                    Chance = 100,
+                                    Type = ESpawnPointType.MONSTER,
+                                    Monster = 42,
+                                    X = 1,
+                                    Y = 1,
+                                    RangeX = 0,
+                                    RangeY = 0
+                                }
+                            )
+                    ]
                 );
                 return mock;
             }, ServiceLifetime.Singleton))

@@ -11,7 +11,7 @@ using QuantumCore.Game.Extensions;
 
 namespace QuantumCore.Game.PacketHandlers.Game;
 
-public class ItemUseHandler : IGamePacketHandler<ItemUse>
+internal class ItemUseHandler : IGamePacketHandler<ItemUse>
 {
     private readonly IItemManager _itemManager;
     private readonly ILogger<ItemUseHandler> _logger;

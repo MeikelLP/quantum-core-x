@@ -30,7 +30,7 @@ public class NetworkingTests
             .AddKeyedSingleton<IPacketManager>(HostingOptions.MODE_GAME, (provider, _) =>
             {
                 return new PacketManager(provider.GetRequiredService<ILogger<PacketManager>>(),
-                    new[] { typeof(Attack), typeof(CharacterDead), typeof(ChatIncoming), typeof(ShopBuy) });
+                    [typeof(Attack), typeof(CharacterDead), typeof(ChatIncoming), typeof(ShopBuy)]);
             })
             .AddKeyedSingleton<IPacketReader, PacketReader>(HostingOptions.MODE_GAME)
             .BuildServiceProvider();
@@ -40,7 +40,7 @@ public class NetworkingTests
     [Fact]
     public async Task SimpleAsync()
     {
-        var obj = new Attack { Unknown = new byte[] { 0, 0 }, Vid = 1_000_000, SkillMotion = (ESkill)53 };
+        var obj = new Attack { Unknown = [0, 0], Vid = 1_000_000, SkillMotion = (ESkill)53 };
         var size = obj.GetSize();
         var bytes = new byte[size];
         obj.Serialize(bytes);
@@ -70,7 +70,7 @@ public class NetworkingTests
     [Fact]
     public async Task MultipleWithSequenceAsync()
     {
-        var obj = new Attack { Vid = 1_000_000, SkillMotion = (ESkill)5, Unknown = new byte[] { 0, 0 } };
+        var obj = new Attack { Vid = 1_000_000, SkillMotion = (ESkill)5, Unknown = [0, 0] };
         var size = obj.GetSize();
         var bytes = new byte[size * 2];
         obj.Serialize(bytes);
@@ -119,7 +119,7 @@ public class NetworkingTests
     [Fact]
     public async Task MultipleAsync()
     {
-        var obj = new Attack { Unknown = new byte[] { 0, 0 }, Vid = 1_000_000, SkillMotion = (ESkill)53 };
+        var obj = new Attack { Unknown = [0, 0], Vid = 1_000_000, SkillMotion = (ESkill)53 };
         var size = obj.GetSize();
         var bytes = new byte[size + size];
         obj.Serialize(bytes);
@@ -136,7 +136,7 @@ public class NetworkingTests
     [Fact]
     public async Task MoreThanBufferAsync()
     {
-        var obj = new Attack { Unknown = new byte[] { 0, 0 }, Vid = 1_000_000, SkillMotion = (ESkill)53 };
+        var obj = new Attack { Unknown = [0, 0], Vid = 1_000_000, SkillMotion = (ESkill)53 };
         var size = obj.GetSize();
         var bytes = new byte[size * 3];
         obj.Serialize(bytes);
@@ -174,7 +174,7 @@ public class NetworkingTests
     public async Task DifferentPacketsAsync()
     {
         var charDeadObj = new CharacterDead { Vid = 1_000_000 };
-        var attackObj = new Attack { Unknown = new byte[] { 0, 0 }, Vid = 1_000_000, SkillMotion = (ESkill)53 };
+        var attackObj = new Attack { Unknown = [0, 0], Vid = 1_000_000, SkillMotion = (ESkill)53 };
         var charDeadSize = charDeadObj.GetSize();
         var attackSize = attackObj.GetSize();
         var bytes = new byte[charDeadSize + attackSize];

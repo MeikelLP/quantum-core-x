@@ -16,14 +16,14 @@ public class GuildMember
     public Player Player { get; set; } = null!;
     public GuildRank Rank { get; set; } = null!;
 
-    public static void Configure(EntityTypeBuilder<GuildMember> builder, DatabaseFacade database)
+    internal static void Configure(EntityTypeBuilder<GuildMember> builder, DatabaseFacade database)
     {
-        builder.HasKey(x => new {x.GuildId, x.PlayerId});
-        builder.HasIndex(x => new {x.PlayerId}).IsUnique();
+        builder.HasKey(x => new { x.GuildId, x.PlayerId });
+        builder.HasIndex(x => new { x.PlayerId }).IsUnique();
         builder.HasOne(x => x.Rank)
             .WithMany(x => x.Members)
-            .HasForeignKey(x => new {x.GuildId, x.RankPosition})
-            .HasPrincipalKey(x => new {x.GuildId, x.Position})
+            .HasForeignKey(x => new { x.GuildId, x.RankPosition })
+            .HasPrincipalKey(x => new { x.GuildId, x.Position })
             .OnDelete(DeleteBehavior.Cascade);
 
         builder.HasOne(x => x.Player)

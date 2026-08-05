@@ -102,6 +102,7 @@ public class InMemoryRedisStore : IRedisStore
 
     public ValueTask<long> PublishAsync(string key, object obj)
     {
+        ArgumentNullException.ThrowIfNull(obj);
         var callbacks = _subscribers
             .SelectMany(x => x.Callbacks)
             .Where(x => x.Key == key)
@@ -178,6 +179,7 @@ public class InMemoryRedisStore : IRedisStore
     /// </summary>
     public static Regex RedisPatternToRegex(string key)
     {
+        ArgumentNullException.ThrowIfNull(key);
         var regexPattern = new StringBuilder();
         var currentIndex = 0;
         int asterixIndex;

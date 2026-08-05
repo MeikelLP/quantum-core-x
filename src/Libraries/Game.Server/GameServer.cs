@@ -141,9 +141,4 @@ public class GameServer : ServerBase<GameConnection>, IGameServer
 
         // todo detect lags
     }
-
-    public void RegisterCommandNamespace(Type t)
-    {
-        _commandManager.Register(t.Namespace!, t.Assembly);
-    }
 }

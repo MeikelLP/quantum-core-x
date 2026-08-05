@@ -29,6 +29,7 @@ public class Equipment : IEquipment
 
     public bool SetItem(ItemInstance item)
     {
+        ArgumentNullException.ThrowIfNull(item);
         return SetItem(item, (ushort)item.Position);
     }
 
@@ -102,6 +103,7 @@ public class Equipment : IEquipment
 
     public bool RemoveItem(ItemInstance item)
     {
+        ArgumentNullException.ThrowIfNull(item);
         switch ((EquipmentSlot)(item.Position - _offset))
         {
             case EquipmentSlot.BODY:
@@ -138,6 +140,7 @@ public class Equipment : IEquipment
 
     public void Send(IPlayerEntity player)
     {
+        ArgumentNullException.ThrowIfNull(player);
         if (Body is not null)
         {
             player.SendItem(Body);
@@ -186,6 +189,8 @@ public class Equipment : IEquipment
 
     public bool IsSuitable(IItemManager itemManager, ItemInstance item, ushort position)
     {
+        ArgumentNullException.ThrowIfNull(itemManager);
+        ArgumentNullException.ThrowIfNull(item);
         var proto = itemManager.GetItem(item.ItemId);
         if (proto is null)
         {
@@ -221,6 +226,7 @@ public class Equipment : IEquipment
 
     public long GetWearPosition(IItemManager itemManager, uint itemId)
     {
+        ArgumentNullException.ThrowIfNull(itemManager);
         var proto = itemManager.GetItem(itemId);
         if (proto is null)
         {

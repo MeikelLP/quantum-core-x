@@ -1,7 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
-using QuantumCore.API.Game.Types;
+﻿#nullable disable
 
-#nullable disable
+using Microsoft.EntityFrameworkCore.Migrations;
+using QuantumCore.API.Game.Types;
 
 namespace QuantumCore.Game.Persistence.Migrations.Sqlite;
 
@@ -39,10 +39,7 @@ public partial class Initial : Migration
                 DeletedAt = table.Column<DateTime>(type: "TEXT", nullable: false),
                 Name = table.Column<string>(type: "TEXT", maxLength: 24, nullable: false)
             },
-            constraints: table =>
-            {
-                table.PrimaryKey("PK_DeletedPlayers", x => x.Id);
-            });
+            constraints: table => { table.PrimaryKey("PK_DeletedPlayers", x => x.Id); });
 
         migrationBuilder.CreateTable(
             name: "PermissionGroups",
@@ -51,10 +48,7 @@ public partial class Initial : Migration
                 Id = table.Column<Guid>(type: "TEXT", nullable: false),
                 Name = table.Column<string>(type: "TEXT", maxLength: 30, nullable: false)
             },
-            constraints: table =>
-            {
-                table.PrimaryKey("PK_PermissionGroups", x => x.Id);
-            });
+            constraints: table => { table.PrimaryKey("PK_PermissionGroups", x => x.Id); });
 
         migrationBuilder.CreateTable(
             name: "Players",
@@ -88,10 +82,7 @@ public partial class Initial : Migration
                 AvailableStatusPoints = table.Column<uint>(type: "INTEGER", nullable: false),
                 AvailableSkillPoints = table.Column<uint>(type: "INTEGER", nullable: false)
             },
-            constraints: table =>
-            {
-                table.PrimaryKey("PK_Players", x => x.Id);
-            });
+            constraints: table => { table.PrimaryKey("PK_Players", x => x.Id); });
 
         migrationBuilder.CreateTable(
             name: "PlayerSkills",
@@ -107,10 +98,7 @@ public partial class Initial : Migration
                 Level = table.Column<byte>(type: "INTEGER", nullable: false),
                 NextReadTime = table.Column<int>(type: "INTEGER", nullable: false)
             },
-            constraints: table =>
-            {
-                table.PrimaryKey("PK_PlayerSkills", x => x.Id);
-            });
+            constraints: table => { table.PrimaryKey("PK_PlayerSkills", x => x.Id); });
 
         migrationBuilder.CreateTable(
             name: "Permissions",
@@ -181,18 +169,29 @@ public partial class Initial : Migration
 
         migrationBuilder.InsertData(
             table: "PermissionGroups",
-            columns: new[] { "Id", "Name" },
-            values: new object[] { new Guid("45bff707-1836-42b7-956d-00b9b69e0ee0"), "Operator" });
+            columns: ["Id", "Name"],
+            values: [new Guid("45bff707-1836-42b7-956d-00b9b69e0ee0"), "Operator"]);
 
         migrationBuilder.InsertData(
             table: "Players",
-            columns: new[] { "Id", "AccountId", "AvailableSkillPoints", "AvailableStatusPoints", "BodyPart", "CreatedAt", "Dx", "Empire", "Experience", "GivenStatusPoints", "Gold", "HairPart", "Health", "Ht", "Iq", "Level", "Mana", "Name", "PlayTime", "PlayerClass", "PositionX", "PositionY", "SkillGroup", "St", "Stamina" },
-            values: new object[] { 1u, new Guid("e34fd5ab-fb3b-428e-935b-7db5bd08a3e5"), 99u, 0u, 0u, new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), (byte)99, (byte)EEmpire.JINNO, 0u, 0u, 2000000000u, 0u, 99999L, (byte)99, (byte)99, (byte)99, 99999L, "Admin", 0ul, (byte)0, 958870, 272788, (byte)0, (byte)99, 0L });
+            columns:
+            [
+                "Id", "AccountId", "AvailableSkillPoints", "AvailableStatusPoints", "BodyPart", "CreatedAt", "Dx",
+                "Empire", "Experience", "GivenStatusPoints", "Gold", "HairPart", "Health", "Ht", "Iq", "Level", "Mana",
+                "Name", "PlayTime", "PlayerClass", "PositionX", "PositionY", "SkillGroup", "St", "Stamina"
+            ],
+            values:
+            [
+                1u, new Guid("e34fd5ab-fb3b-428e-935b-7db5bd08a3e5"), 99u, 0u, 0u,
+                new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc), (byte)99, (byte)EEmpire.JINNO, 0u, 0u,
+                2000000000u, 0u, 99999L, (byte)99, (byte)99, (byte)99, 99999L, "Admin", 0ul, (byte)0, 958870, 272788,
+                (byte)0, (byte)99, 0L
+            ]);
 
         migrationBuilder.InsertData(
             table: "PermissionUsers",
-            columns: new[] { "GroupId", "PlayerId" },
-            values: new object[] { new Guid("45bff707-1836-42b7-956d-00b9b69e0ee0"), 1u });
+            columns: ["GroupId", "PlayerId"],
+            values: [new Guid("45bff707-1836-42b7-956d-00b9b69e0ee0"), 1u]);
 
         migrationBuilder.CreateIndex(
             name: "IX_Items_PlayerId",

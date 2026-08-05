@@ -23,6 +23,7 @@ public class QuickSlotBar : IQuickSlotBar
 
     public QuickSlotBar(ICacheManager cacheManager, ILogger<QuickSlotBar> logger, PlayerEntity player, GameDbContext db)
     {
+        ArgumentNullException.ThrowIfNull(cacheManager);
         _cacheManager = cacheManager.Server;
         _logger = logger;
         _db = db;
@@ -105,6 +106,7 @@ public class QuickSlotBar : IQuickSlotBar
 
     public void Add(byte position, QuickSlotData slot)
     {
+        ArgumentNullException.ThrowIfNull(slot);
         if (position >= 8)
         {
             return;

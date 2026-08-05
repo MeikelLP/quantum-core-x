@@ -65,7 +65,9 @@ public class GuildManager : IGuildManager
                 .ToList(),
             MaxMemberCount = GuildConstants.MEMBERS_MAX_DEFAULT
         };
+#pragma warning disable VSTHRD103 // use async overload - no because efcore
         _db.Guilds.Add(guild);
+#pragma warning restore VSTHRD103
         await _db.SaveChangesAsync(token);
         await _db.Players
             .Where(x => x.Id == leaderId)
@@ -89,7 +91,9 @@ public class GuildManager : IGuildManager
         {
             Message = message, PlayerId = playerId, CreatedAt = DateTime.UtcNow, GuildId = guildId
         };
+#pragma warning disable VSTHRD103 // use async overload - no because efcore
         _db.GuildNews.Add(guildNews);
+#pragma warning restore VSTHRD103
         await _db.SaveChangesAsync(token);
         return guildNews.Id;
     }
@@ -169,7 +173,9 @@ public class GuildManager : IGuildManager
 
     public async Task AddMemberAsync(uint guildId, uint inviteeId, byte rank, CancellationToken token = default)
     {
+#pragma warning disable VSTHRD103 // use async overload - no because efcore
         _db.GuildMembers.Add(new GuildMember { PlayerId = inviteeId, GuildId = guildId, RankPosition = rank });
+#pragma warning restore VSTHRD103
         await _db.SaveChangesAsync(token);
     }
 

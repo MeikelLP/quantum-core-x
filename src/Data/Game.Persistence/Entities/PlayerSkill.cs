@@ -22,7 +22,7 @@ public class PlayerSkill
     [DefaultValue(0)] public required byte Level { get; set; }
     [DefaultValue(0)] public required int NextReadTime { get; set; }
 
-    public static void Configure(EntityTypeBuilder<PlayerSkill> builder, DatabaseFacade database)
+    internal static void Configure(EntityTypeBuilder<PlayerSkill> builder, DatabaseFacade database)
     {
         builder.HasKey(x => new { x.Id });
 

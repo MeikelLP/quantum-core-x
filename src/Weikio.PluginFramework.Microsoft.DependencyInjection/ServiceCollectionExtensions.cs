@@ -154,6 +154,7 @@ public static class ServiceCollectionExtensions
         Action<DefaultPluginOption>? configureDefault = null)
         where T : class
     {
+        ArgumentNullException.ThrowIfNull(services);
         var serviceDescriptorEnumerable = new ServiceDescriptor(typeof(IEnumerable<T>), sp =>
         {
             var pluginProvider = sp.GetRequiredService<PluginProvider>();

@@ -232,6 +232,7 @@ public class Inventory : IInventory
     /// <returns>True if placement was successful. False if no space is available</returns>
     public async Task<bool> PlaceItemAsync(ItemInstance item)
     {
+        ArgumentNullException.ThrowIfNull(item);
         for (var i = 0; i < _pages.Length; i++)
         {
             var page = _pages[i];
@@ -268,6 +269,7 @@ public class Inventory : IInventory
     /// <returns>True if placement was successful. May be false if the slot is occupied</returns>
     public async Task<bool> PlaceItemAsync(ItemInstance item, ushort position)
     {
+        ArgumentNullException.ThrowIfNull(item);
         var pageSize = _width * _height;
         var page = position / pageSize;
         if (page >= _pages.Length)
@@ -287,6 +289,7 @@ public class Inventory : IInventory
 
     public void RemoveItem(ItemInstance item)
     {
+        ArgumentNullException.ThrowIfNull(item);
         var pageSize = _width * _height;
         var page = item.Position / pageSize;
         if (page >= _pages.Length)
@@ -312,6 +315,7 @@ public class Inventory : IInventory
 
     public bool IsSpaceAvailable(ItemInstance item, ushort position)
     {
+        ArgumentNullException.ThrowIfNull(item);
         var pageSize = _width * _height;
         var page = position / pageSize;
         if (page >= _pages.Length)
@@ -353,6 +357,7 @@ public class Inventory : IInventory
 
     public void SetEquipment(ItemInstance item, ushort position)
     {
+        ArgumentNullException.ThrowIfNull(item);
         var equippedSuccesfully = EquipmentWindow.SetItem(item, position);
 
         if (equippedSuccesfully)
@@ -363,6 +368,7 @@ public class Inventory : IInventory
 
     public void RemoveEquipment(ItemInstance item)
     {
+        ArgumentNullException.ThrowIfNull(item);
         var removedSuccessfully = EquipmentWindow.RemoveItem(item);
 
         if (removedSuccessfully)

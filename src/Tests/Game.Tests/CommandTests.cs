@@ -46,9 +46,9 @@ namespace Game.Tests;
 // parameter
 internal sealed class MockedGameConnection : IGameConnection
 {
-    public readonly List<ChatOutcoming> SentMessages = new();
-    public readonly List<GcPhase> SentPhases = new();
-    public readonly List<object> SentPackets = new();
+    public readonly List<ChatOutcoming> SentMessages = [];
+    public readonly List<GcPhase> SentPhases = [];
+    public readonly List<object> SentPackets = [];
     public Guid Id { get; }
     public EPhase Phase { get; set; }
     public Task ExecuteTask { get; } = null!;
@@ -138,22 +138,22 @@ public class CommandTests : IAsyncLifetime
             .RuleFor(x => x.Id, new Func<Faker, ItemData, uint>((faker, data) => call.Arg<uint>()))
             .RuleFor(x => x.Size, _ => (byte)1)
             .RuleFor(x => x.WearFlags, _ => (byte)EWearFlags.WEAPON)
-            .RuleFor(x => x.Values, _ => new List<int>
-            {
+            .RuleFor(x => x.Values, _ =>
+            [
                 0,
                 0,
                 0,
                 10,
                 16,
                 0
-            })
+            ])
             .Generate());
         var cacheManagerMock = Substitute.For<ICacheManager>();
         var redisListWrapperMock = Substitute.For<IRedisListWrapper<Guid>>();
         var redisSubscriberWrapperMock = Substitute.For<IRedisSubscriber>();
         redisListWrapperMock.RangeAsync(Arg.Any<int>(), Arg.Any<int>())
-            .Returns(new[] { PermGroup.OperatorGroup });
-        cacheManagerMock.KeysAsync(Arg.Any<string>()).Returns(Array.Empty<string>());
+            .Returns([PermGroup.OperatorGroup]);
+        cacheManagerMock.KeysAsync(Arg.Any<string>()).Returns([]);
         cacheManagerMock.CreateList<Guid>(Arg.Any<string>()).Returns(redisListWrapperMock);
         cacheManagerMock.Subscribe().Returns(redisSubscriberWrapperMock);
         _skillManager = Substitute.For<ISkillManager>();
@@ -162,7 +162,7 @@ public class CommandTests : IAsyncLifetime
         {
             var fileInfo = Substitute.For<IFileInfo>();
             fileInfo.Exists.Returns(true);
-            fileInfo.CreateReadStream().Returns(new MemoryStream("675 1413"u8.ToArray()));
+            fileInfo.CreateReadStream().Returns(new MemoryStream([.. "675 1413"u8]));
             return fileInfo;
         });
         fileProvider.GetFileInfo("atlasinfo.txt").Returns(_ =>
@@ -662,7 +662,7 @@ public class CommandTests : IAsyncLifetime
         ]);
 
         cacheManager.CreateList<Guid>(Arg.Any<string>())
-            .RangeAsync(0, 0).Returns(new[] { updatedGroup });
+            .RangeAsync(0, 0).Returns([updatedGroup]);
 
         // Act
         await _commandManager.HandleAsync(_connection, "/reload_perms");

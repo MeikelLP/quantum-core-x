@@ -35,6 +35,7 @@ public class AccountRepository : IAccountRepository
 
     public async Task<AccountData> CreateAsync(AccountData account)
     {
+        ArgumentNullException.ThrowIfNull(account);
         var entity = new Account
         {
             Email = account.Email,
@@ -45,7 +46,9 @@ public class AccountRepository : IAccountRepository
             UpdatedAt = account.UpdatedAt,
             DeleteCode = account.DeleteCode,
         };
+#pragma warning disable VSTHRD103 // use async overload - no because efcore
         _db.Accounts.Add(entity);
+#pragma warning restore VSTHRD103
         await _db.SaveChangesAsync();
         await _db.Entry(entity).Reference(x => x.AccountStatus).LoadAsync();
 

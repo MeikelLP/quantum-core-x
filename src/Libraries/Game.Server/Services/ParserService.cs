@@ -55,6 +55,7 @@ public partial class ParserService : IParserService
     public async Task<ImmutableArray<CommonDropEntry>> GetCommonDropsAsync(TextReader sr,
         CancellationToken cancellationToken = default)
     {
+        ArgumentNullException.ThrowIfNull(sr);
         var list = new List<CommonDropEntry>();
         while (await sr.ReadLineAsync(cancellationToken) is { } line)
         {
@@ -139,6 +140,7 @@ public partial class ParserService : IParserService
     public async Task<ImmutableArray<DataFileGroup>> ParseFileGroupsAsync(StreamReader sr,
         CancellationToken token = default)
     {
+        ArgumentNullException.ThrowIfNull(sr);
         var groups = new List<DataFileGroup>();
         DataFileGroup? currentGroup = null;
 
@@ -196,6 +198,8 @@ public partial class ParserService : IParserService
 
     public MonsterDropContainer? ParseMobGroup(DataFileGroup group, IItemManager itemManager)
     {
+        ArgumentNullException.ThrowIfNull(group);
+        ArgumentNullException.ThrowIfNull(itemManager);
         uint minKillCount = 0;
         uint levelLimit = 0;
 
@@ -279,7 +283,7 @@ public partial class ParserService : IParserService
 
         if (type.Equals("Drop", INV_CUL)) // DropItemGroup
         {
-            var entry = new DropItemGroup { MonsterProtoId = monsterProtoId, };
+            var drops = new List<DropItemGroup.Drop>();
 
             foreach (var dropData in group.Data)
             {
@@ -303,16 +307,19 @@ public partial class ParserService : IParserService
 
                 chance *= 10000.0f; // to make it 0-1000
 
-                entry.Drops.Add(new DropItemGroup.Drop { ItemProtoId = itemProtoId, Amount = count, Chance = chance });
+                drops.Add(new DropItemGroup.Drop { ItemProtoId = itemProtoId, Amount = count, Chance = chance });
             }
 
-            return entry;
+            return new DropItemGroup
+            {
+                MonsterProtoId = monsterProtoId,
+                Drops = [.. drops]
+            };
         }
 
         if (type.Equals("Limit", INV_CUL)) // LevelItemGroup
         {
-            var entry = new LevelItemGroup { LevelLimit = levelLimit };
-
+            var drops = new List<LevelItemGroup.Drop>();
             foreach (var dropData in group.Data)
             {
                 uint itemProtoId = uint.TryParse(dropData[1], InvNum, out var id) ? id : 0;
@@ -341,10 +348,14 @@ public partial class ParserService : IParserService
 
                 chance *= 10000.0f; // to make it 0-1000
 
-                entry.Drops.Add(new LevelItemGroup.Drop { ItemProtoId = itemProtoId, Amount = count, Chance = chance });
+                drops.Add(new LevelItemGroup.Drop { ItemProtoId = itemProtoId, Amount = count, Chance = chance });
             }
 
-            return entry;
+            return new LevelItemGroup
+            {
+                LevelLimit = levelLimit,
+                Drops = [.. drops]
+            };
         }
 
         return null;

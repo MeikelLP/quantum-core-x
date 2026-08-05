@@ -12,16 +12,15 @@ public class SerializerGeneratorTests
 {
     private static CSharpCompilation CreateCompilation(params string[] source)
         => CSharpCompilation.Create("compilation",
-            source.Select(x => CSharpSyntaxTree.ParseText(x)).ToArray(),
-            new[]
-            {
+            [.. source.Select(x => CSharpSyntaxTree.ParseText(x))],
+            [
                 MetadataReference.CreateFromFile(typeof(SerializerGeneratorTests).Assembly.Location),
                 MetadataReference.CreateFromFile(typeof(Binder).Assembly.Location),
                 MetadataReference.CreateFromFile(typeof(PacketAttribute).Assembly.Location),
                 MetadataReference.CreateFromFile(typeof(StringLengthAttribute).Assembly.Location),
                 MetadataReference.CreateFromFile(AppDomain.CurrentDomain.GetAssemblies()
-                    .First(x => x.GetName().Name == "System.Runtime").Location),
-            },
+                    .First(x => x.GetName().Name == "System.Runtime").Location)
+            ],
             new CSharpCompilationOptions(OutputKind.DynamicallyLinkedLibrary));
 
     [Fact]

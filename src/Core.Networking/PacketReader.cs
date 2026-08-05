@@ -28,6 +28,7 @@ public class PacketReader : IPacketReader
     public async IAsyncEnumerable<object> EnumerateAsync(Stream stream,
         [EnumeratorCancellation] CancellationToken token = default)
     {
+        ArgumentNullException.ThrowIfNull(stream);
         var buffer = ArrayPool<byte>.Shared.Rent(_bufferSize);
         while (true)
         {
@@ -95,7 +96,9 @@ public class PacketReader : IPacketReader
                     packet.Serialize(buffer);
                     var bytes = string.Join("", buffer[..packet.GetSize()].Select(x => x.ToString("X2")));
                     _logger.LogDebug(" IN: {Type} => {Packet} (0x{Bytes})", packet.GetType(),
+#pragma warning disable VSTHRD103 // use async overload - doesn't work here
                         JsonSerializer.Serialize<object>(packet), bytes);
+#pragma warning restore VSTHRD103
                 }
             }
             catch (ArgumentOutOfRangeException e)

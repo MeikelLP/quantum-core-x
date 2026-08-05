@@ -24,7 +24,7 @@ public class Guild
     public ICollection<GuildNews> News { get; set; } = null!;
     public Player Leader { get; set; } = null!;
 
-    public static void Configure(EntityTypeBuilder<Guild> builder, DatabaseFacade database)
+    internal static void Configure(EntityTypeBuilder<Guild> builder, DatabaseFacade database)
     {
         builder.HasOne(x => x.Leader)
             .WithMany(x => x.GuildsToLead)

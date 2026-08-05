@@ -102,14 +102,18 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
     private readonly ILogger<PlayerEntity> _logger;
     private readonly IServiceScope _scope;
     private readonly IItemRepository _itemRepository;
+    private bool _isDisposed;
 
     public PlayerEntity(PlayerData player, IGameConnection connection, IItemManager itemManager,
         IJobManager jobManager,
         IExperienceManager experienceManager, IAnimationManager animationManager,
         IQuestManager questManager, ICacheManager cacheManager, IWorld world, ILogger<PlayerEntity> logger,
         IServiceProvider serviceProvider)
+#pragma warning disable CA1062 // validate parameter before use - impossible here
         : base(animationManager, world.GenerateVid())
+#pragma warning restore CA1062
     {
+        ArgumentNullException.ThrowIfNull(player);
         Connection = connection;
         _itemManager = itemManager;
         _jobManager = jobManager;
@@ -762,8 +766,8 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
                 if (args.ItemInstance is not null)
                 {
                     var item = _itemManager.GetItem(args.ItemInstance.ItemId);
-                    Player.MinWeaponDamage = item?.GetMinWeaponDamage() ?? 0;
-                    Player.MaxWeaponDamage = item?.GetMaxWeaponDamage() ?? 0;
+                    Player.MinWeaponDamage = item?.MinWeaponDamage ?? 0;
+                    Player.MaxWeaponDamage = item?.MaxWeaponDamage ?? 0;
                 }
                 else
                 {
@@ -873,16 +877,19 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
 
     protected override void OnNewNearbyEntity(IEntity entity)
     {
+        ArgumentNullException.ThrowIfNull(entity);
         entity.ShowEntity(Connection);
     }
 
     protected override void OnRemoveNearbyEntity(IEntity entity)
     {
+        ArgumentNullException.ThrowIfNull(entity);
         entity.HideEntity(Connection);
     }
 
     public async Task DropItemAsync(ItemInstance item, byte count)
     {
+        ArgumentNullException.ThrowIfNull(item);
         if (count > item.Count)
         {
             return;
@@ -917,6 +924,7 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
 
     public async Task PickupAsync(IGroundItem groundItem)
     {
+        ArgumentNullException.ThrowIfNull(groundItem);
         if (Map is null) return;
 
         var item = groundItem.Item;
@@ -1088,6 +1096,7 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
 
     public bool IsEquippable(ItemInstance item)
     {
+        ArgumentNullException.ThrowIfNull(item);
         var proto = _itemManager.GetItem(item.ItemId);
         if (proto is null)
         {
@@ -1130,6 +1139,7 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
 
     public async Task<bool> DestroyItemAsync(ItemInstance item)
     {
+        ArgumentNullException.ThrowIfNull(item);
         RemoveItem(item);
         if (!await item.DestroyAsync(_cacheManager))
         {
@@ -1142,6 +1152,7 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
 
     public void RemoveItem(ItemInstance item)
     {
+        ArgumentNullException.ThrowIfNull(item);
         switch (item.Window)
         {
             case WindowType.INVENTORY:
@@ -1167,6 +1178,7 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
 
     public async Task SetItemAsync(ItemInstance item, WindowType window, ushort position)
     {
+        ArgumentNullException.ThrowIfNull(item);
         switch (window)
         {
             case WindowType.INVENTORY:
@@ -1203,6 +1215,7 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
 
     public override void HideEntity(IConnection connection)
     {
+        ArgumentNullException.ThrowIfNull(connection);
         connection.Send(new RemoveCharacter { Vid = Vid });
         SendOfflineNotice(connection);
     }
@@ -1230,6 +1243,19 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
 
     public void Dispose()
     {
-        _scope.Dispose();
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (_isDisposed) return;
+
+        if (disposing)
+        {
+            _scope.Dispose();
+        }
+
+        _isDisposed = true;
     }
 }

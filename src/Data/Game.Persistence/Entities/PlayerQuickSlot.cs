@@ -16,8 +16,8 @@ public class PlayerQuickSlot
     public byte Value { get; set; }
 
 
-    public static void Configure(EntityTypeBuilder<PlayerQuickSlot> builder, DatabaseFacade database)
+    internal static void Configure(EntityTypeBuilder<PlayerQuickSlot> builder, DatabaseFacade database)
     {
-        builder.HasKey(x => new {x.PlayerId, x.Slot});
+        builder.HasKey(x => new { x.PlayerId, x.Slot });
     }
 }

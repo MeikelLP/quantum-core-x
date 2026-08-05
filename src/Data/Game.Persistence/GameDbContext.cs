@@ -33,6 +33,8 @@ public abstract class GameDbContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        ArgumentNullException.ThrowIfNull(modelBuilder);
+
         DeletedPlayer.Configure(modelBuilder.Entity<DeletedPlayer>(), Database);
         Player.Configure(modelBuilder.Entity<Player>(), Database);
         PlayerSkill.Configure(modelBuilder.Entity<PlayerSkill>(), Database);
@@ -50,6 +52,7 @@ public abstract class GameDbContext : DbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
+        ArgumentNullException.ThrowIfNull(optionsBuilder);
         if (_hostEnvironment.IsDevelopment())
         {
             optionsBuilder.ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning));
