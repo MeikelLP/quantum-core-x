@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 using QuantumCore.API.Game.Types;
+using QuantumCore.API.Game.Types.Skills;
 using QuantumCore.Game.Persistence.Entities.Guilds;
 
 namespace QuantumCore.Game.Persistence.Entities;
@@ -97,7 +98,7 @@ public class Player
                 Id = 1,
                 UpdatedAt = default,
                 Empire = 0,
-                SkillGroup = 0,
+                SkillGroup = (byte)ESkillGroup.BRANCH_A,
                 PlayTime = 0,
                 Stamina = 0,
                 BodyPart = 0,
