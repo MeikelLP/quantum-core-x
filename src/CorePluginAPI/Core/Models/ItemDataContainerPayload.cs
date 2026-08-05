@@ -1,5 +1,4 @@
-﻿using System.Collections.Immutable;
-using BinarySerialization;
+﻿using BinarySerialization;
 
 namespace QuantumCore.API.Core.Models;
 
@@ -13,5 +12,7 @@ public sealed class ItemDataContainerPayload
     [FieldOrder(3)] public uint RealSize { get; set; }
 
     [FieldOrder(4), FieldLength(nameof(EncryptedSize))]
-    public ImmutableArray<byte> EncryptedPayload { get; set; } = [];
+#pragma warning disable CA1819 // do not return arrays - required for BinarySerializer
+    public byte[] EncryptedPayload { get; set; } = [];
+#pragma warning restore CA1819
 }

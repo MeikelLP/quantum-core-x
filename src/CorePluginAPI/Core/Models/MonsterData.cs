@@ -1,4 +1,3 @@
-using System.Collections.Immutable;
 using System.Diagnostics;
 using BinarySerialization;
 using QuantumCore.API.Game.Types;
@@ -7,6 +6,7 @@ using QuantumCore.API.Game.Types.Monsters;
 
 namespace QuantumCore.API.Core.Models;
 
+#pragma warning disable CA1819 // do not return arrays - required for BinarySerializer
 [DebuggerDisplay("{Name} ({Id})")]
 public class MonsterData
 {
@@ -41,14 +41,14 @@ public class MonsterData
     [FieldOrder(19)] public byte Dx { get; set; }
     [FieldOrder(20)] public byte Ht { get; set; }
     [FieldOrder(21)] public byte Iq { get; set; }
-    [FieldOrder(22)] [FieldLength(4 * 2)] public ImmutableArray<uint> DamageRange { get; init; } = [];
+    [FieldOrder(22)] [FieldLength(4 * 2)] public uint[] DamageRange { get; init; } = [];
     [FieldOrder(23)] public short AttackSpeed { get; set; }
     [FieldOrder(24)] public short MoveSpeed { get; set; }
     [FieldOrder(25)] public byte AggressivePct { get; set; }
     [FieldOrder(26)] public ushort AggressiveSight { get; set; }
     [FieldOrder(27)] public ushort AttackRange { get; set; }
-    [FieldOrder(28)] [FieldLength(1 * 6)] public ImmutableArray<byte> Enchantments { get; init; } = [];
-    [FieldOrder(29)] [FieldLength(1 * 11)] public ImmutableArray<byte> Resists { get; init; } = [];
+    [FieldOrder(28)] [FieldLength(1 * 6)] public byte[] Enchantments { get; init; } = [];
+    [FieldOrder(29)] [FieldLength(1 * 11)] public byte[] Resists { get; init; } = [];
     [FieldOrder(30)] public uint ResurrectionId { get; set; }
     [FieldOrder(31)] public uint DropItemId { get; set; }
     [FieldOrder(32)] public byte MountCapacity { get; set; }
@@ -65,7 +65,7 @@ public class MonsterData
     [FieldOrder(38)] public uint DrainSp { get; set; }
     [FieldOrder(39)] public uint MonsterColor { get; set; }
     [FieldOrder(40)] public uint PolymorphItemId { get; set; }
-    [FieldOrder(41)] [FieldLength(5 * 5)] public ImmutableArray<MonsterSkillData> Skills { get; init; } = [];
+    [FieldOrder(41)] [FieldLength(5 * 5)] public MonsterSkillData[] Skills { get; init; } = [];
     [FieldOrder(42)] public byte BerserkPoint { get; set; }
     [FieldOrder(43)] public byte StoneSkinPoint { get; set; }
     [FieldOrder(44)] public byte GodSpeedPoint { get; set; }
