@@ -194,14 +194,16 @@ public static class PlayerExtensions
 
         public void SendTarget()
         {
-            var packet = new SetTarget();
             if (player.Target is not null)
             {
-                packet.TargetVid = player.Target.Vid;
-                packet.Percentage = player.Target.HealthPercentage;
-            }
+                var packet = new SetTarget
+                {
+                    TargetVid = player.Target.Vid,
+                    Percentage = player.Target.HealthPercentage
+                };
 
-            player.Connection.Send(packet);
+                player.Connection.Send(packet);
+            }
         }
     }
 }
