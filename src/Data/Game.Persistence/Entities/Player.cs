@@ -97,7 +97,7 @@ public class Player
                 PositionY = 272788,
                 Id = 1,
                 UpdatedAt = default,
-                Empire = 0,
+                Empire = EEmpire.JINNO,
                 SkillGroup = (byte)ESkillGroup.BRANCH_A,
                 PlayTime = 0,
                 Stamina = 0,
