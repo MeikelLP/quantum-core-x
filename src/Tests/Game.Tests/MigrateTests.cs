@@ -25,7 +25,7 @@ public class MigrateTests
     [Fact]
     public async Task MysqlAsync()
     {
-        var container = new MySqlBuilder("mariadb:12.3.2-noble")
+        var container = new MySqlBuilder("mysql:9.7.2")
             .WithDatabase("game")
             .WithUsername("metin2")
             .WithPassword("metin2")

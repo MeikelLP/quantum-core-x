@@ -9,7 +9,7 @@ public class RedisFixture : IAsyncLifetime
 
     public async Task InitializeAsync()
     {
-        Container = new RedisBuilder("mariadb:12.3.2-noble").Build();
+        Container = new RedisBuilder("mysql:9.7.2").Build();
         await Container.StartAsync();
     }
 
