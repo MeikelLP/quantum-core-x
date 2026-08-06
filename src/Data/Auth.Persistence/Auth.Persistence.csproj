@@ -18,7 +18,7 @@
         <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.10"/>
         <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="9.0.4"/>
       <PackageReference Include="Pomelo.EntityFrameworkCore.MySql" Version="9.0.0"/>
-        <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="2.1.12"/>
+        <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="3.0.5"/>
     </ItemGroup>
 
     <ItemGroup>
