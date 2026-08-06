@@ -34,10 +34,10 @@ jobs:
           dotnet-version: 9.0.x
 
       - name: Build
-        run: dotnet build --verbosity minimal src/QuantumCore.sln
+        run: dotnet build --verbosity minimal src/QuantumCore.slnx
 
       - name: Test
-        run: dotnet test --no-build src/QuantumCore.sln
+        run: dotnet test --no-build src/QuantumCore.slnx
   publish_single:
     needs:
       - test
