@@ -242,7 +242,7 @@ internal class CommandManager : ICommandManager, ILoadable
                                 [parserResult, helpTextFunc, exampleFunc, verbsIndex, maxDisplayWidth])!;
                             var messages = help.ToString().Split(Environment.NewLine)
                                 .Where(x => !string.IsNullOrWhiteSpace(x));
-                            connection.Player.SendChatInfo("Comannd validation failed:");
+                            connection.Player.SendChatInfo("Command validation failed:");
                             foreach (var message in messages)
                             {
                                 connection.Player.SendChatInfo(message);
