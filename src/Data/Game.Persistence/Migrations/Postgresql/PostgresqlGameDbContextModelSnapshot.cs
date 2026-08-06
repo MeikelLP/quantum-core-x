@@ -17,7 +17,7 @@ namespace QuantumCore.Game.Persistence.Migrations.Postgresql
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "9.0.4")
+                .HasAnnotation("ProductVersion", "9.0.18")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -449,7 +449,7 @@ namespace QuantumCore.Game.Persistence.Migrations.Postgresql
                             BodyPart = 0L,
                             CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Dx = (byte)99,
-                            Empire = (byte)0,
+                            Empire = (byte)3,
                             Experience = 0L,
                             GivenStatusPoints = 0L,
                             Gold = 2000000000L,
@@ -464,7 +464,7 @@ namespace QuantumCore.Game.Persistence.Migrations.Postgresql
                             PlayerClass = (byte)0,
                             PositionX = 958870,
                             PositionY = 272788,
-                            SkillGroup = (byte)0,
+                            SkillGroup = (byte)1,
                             St = (byte)99,
                             Stamina = 0L,
                             UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)

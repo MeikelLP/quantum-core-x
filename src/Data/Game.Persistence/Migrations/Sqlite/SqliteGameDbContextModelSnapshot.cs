@@ -15,7 +15,7 @@ namespace QuantumCore.Game.Persistence.Migrations.Sqlite
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "9.0.4");
+            modelBuilder.HasAnnotation("ProductVersion", "9.0.18");
 
             modelBuilder.Entity("QuantumCore.Game.Persistence.Entities.DeletedPlayer", b =>
                 {
@@ -435,7 +435,7 @@ namespace QuantumCore.Game.Persistence.Migrations.Sqlite
                             BodyPart = 0u,
                             CreatedAt = new DateTime(2024, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc),
                             Dx = (byte)99,
-                            Empire = (byte)0,
+                            Empire = (byte)3,
                             Experience = 0u,
                             GivenStatusPoints = 0u,
                             Gold = 2000000000u,
@@ -450,7 +450,7 @@ namespace QuantumCore.Game.Persistence.Migrations.Sqlite
                             PlayerClass = (byte)0,
                             PositionX = 958870,
                             PositionY = 272788,
-                            SkillGroup = (byte)0,
+                            SkillGroup = (byte)1,
                             St = (byte)99,
                             Stamina = 0L,
                             UpdatedAt = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
