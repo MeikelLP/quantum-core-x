@@ -5,8 +5,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="BinarySerializer" Version="8.6.4.1"/>
-      <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.18"/>
+        <PackageReference Include="BinarySerializer" Version="10.1.0"/>
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="10.0.10"/>
     </ItemGroup>
 
     <ItemGroup>
