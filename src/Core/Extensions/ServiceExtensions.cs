@@ -47,12 +47,17 @@ public static class ServiceExtensions
                     x is { IsClass: true, IsAbstract: false, IsInterface: false })
                 .OrderBy(x => x.FullName)
                 .ToArray();
-            provider.GetRequiredService<ILogger<IPacketHandler>>().LogDebug(
-                "Found {Count:d} packet types:\n{PacketTypes}", packetTypes.Length,
-                packetTypes.Select(x => x.FullName));
-            provider.GetRequiredService<ILogger<IPacketHandler>>().LogDebug(
-                "Found {Count:d} packet handler types:\n{PacketHandlerTypes}", handlerTypes.Length,
-                handlerTypes.Select(x => x.FullName));
+            var logger = provider.GetRequiredService<ILogger<IPacketHandler>>();
+            if (logger.IsEnabled(LogLevel.Debug))
+            {
+                logger.LogDebug(
+                    "Found {Count:d} packet types:\n{PacketTypes}", packetTypes.Length,
+                    packetTypes.Select(x => x.FullName));
+                logger.LogDebug(
+                    "Found {Count:d} packet handler types:\n{PacketHandlerTypes}", handlerTypes.Length,
+                    handlerTypes.Select(x => x.FullName));
+            }
+
             return ActivatorUtilities.CreateInstance<PacketManager>(provider, packetTypes, handlerTypes);
         });
         return services;

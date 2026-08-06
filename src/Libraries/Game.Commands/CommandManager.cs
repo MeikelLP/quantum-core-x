@@ -67,6 +67,14 @@ internal class CommandManager : ICommandManager, ILoadable
             }
         }
 
+        if (_logger.IsEnabled(LogLevel.Debug))
+        {
+            _logger.LogDebug(
+                "Found {Count:d} in assembly {Assembly} command handlers:\n{CommandHandlerTypes}", types.Length,
+                assembly.FullName,
+                types.Select(x => x.FullName));
+        }
+
         void ProcessCommandAttribute(Type type, CommandAttribute? cmdAttr)
         {
             if (cmdAttr is null)
