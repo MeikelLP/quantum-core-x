@@ -205,6 +205,11 @@ public abstract class Connection : BackgroundService, IConnection
                 // connection closed. Ignore
                 break;
             }
+            catch (IOException)
+            {
+                // broken pipe / connection reset. Ignore
+                break;
+            }
         }
     }
 
