@@ -87,8 +87,6 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
 
     private uint _defence;
 
-    private const int PERSIST_INTERVAL = 30 * 1000; // 30s
-    private ServerTimestamp? _lastPersistTime;
     private const int HEALTH_REGEN_INTERVAL = 3 * 1000;
     private const int MANA_REGEN_INTERVAL = 3 * 1000;
     private ServerTimestamp? _lastHealthRegenTime;
@@ -566,15 +564,6 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
         if (hpOrSpChanged)
         {
             this.SendPoints();
-        }
-
-        if (!_lastPersistTime.HasValue)
-        {
-            _lastPersistTime = ctx.Timestamp;
-        }
-        else if (ctx.ElapsedSince(_lastPersistTime.Value) > TimeSpan.FromMilliseconds(PERSIST_INTERVAL))
-        {
-            _ = PersistAsync().ContinueWith(_ => { _lastPersistTime = ctx.Timestamp; }, TaskScheduler.Current);
         }
     }
 
