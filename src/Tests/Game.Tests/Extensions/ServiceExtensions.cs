@@ -2,20 +2,18 @@
 using Microsoft.Extensions.Logging;
 using Serilog;
 using Serilog.Events;
-using Xunit.Abstractions;
 
 namespace Game.Tests.Extensions;
 
 public static class ServiceExtensions
 {
-    public static IServiceCollection AddQuantumCoreTestLogger(this IServiceCollection services,
-        ITestOutputHelper testOutputHelper)
+    public static IServiceCollection AddQuantumCoreTestLogger(this IServiceCollection services)
     {
         services.AddLogging(logging =>
         {
             logging.ClearProviders();
             logging.AddSerilog(new LoggerConfiguration()
-                .WriteTo.TestOutput(testOutputHelper)
+                .WriteTo.Console()
                 .MinimumLevel.Override("Microsoft.EntityFrameworkCore.Query", LogEventLevel.Warning)
                 .CreateLogger());
         });

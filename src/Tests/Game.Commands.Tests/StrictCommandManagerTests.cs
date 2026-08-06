@@ -7,10 +7,9 @@ using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
 using QuantumCore.API;
 using QuantumCore.API.Game.World;
-using QuantumCore.Game;
+using QuantumCore.API.Packets;
 using QuantumCore.Game.Commands;
 using QuantumCore.Game.Persistence.Entities;
-using Xunit.Abstractions;
 
 namespace Game.Commands.Tests;
 
@@ -20,15 +19,16 @@ public class StrictCommandManagerTests
     private readonly IGameConnection _connection;
     private readonly List<string> _chatInfos = new();
 
-    public StrictCommandManagerTests(ITestOutputHelper outputHelper)
+    public StrictCommandManagerTests()
     {
         var services = new ServiceCollection()
             .AddSingleton(_ =>
             {
                 var player = Substitute.For<IPlayerEntity>();
                 player.Groups.Returns([PermGroup.OperatorGroup]);
-                player.When(x => x.SendChatInfo(Arg.Any<string>())).Do(info => _chatInfos.Add(info.Arg<string>()!));
                 var conn = Substitute.For<IGameConnection>();
+                conn.When(x => x.Send(Arg.Any<ChatOutcoming>()))
+                    .Do(info => _chatInfos.Add(info.Arg<ChatOutcoming>()!.Message!));
                 conn.Player.Returns(player);
                 conn.BoundIpAddress.Returns(IPAddress.Loopback);
                 return conn;
@@ -37,7 +37,7 @@ public class StrictCommandManagerTests
                 .AddInMemoryCollection(new Dictionary<string, string?> { { "Game:Commands:StrictMode", "true" } })
                 .Build())
             .AddGameCommands()
-            .AddQuantumCoreTestLogger(outputHelper)
+            .AddQuantumCoreTestLogger()
             .BuildServiceProvider();
         _commandManager = services.GetRequiredService<ICommandManager>();
         _connection = services.GetRequiredService<IGameConnection>();

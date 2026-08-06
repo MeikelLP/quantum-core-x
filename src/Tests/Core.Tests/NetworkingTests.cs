@@ -46,7 +46,8 @@ public class NetworkingTests
         obj.Serialize(bytes);
 
         using var stream = new MemoryStream(bytes);
-        var results = await GetReader(16).EnumerateAsync(stream).ToArrayAsync();
+        var results = await GetReader(16).EnumerateAsync(stream, TestContext.Current.CancellationToken)
+            .ToArrayAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         results.Should().HaveCount(1);
         results[0].Should().BeEquivalentTo(obj);
@@ -61,7 +62,8 @@ public class NetworkingTests
         obj.Serialize(bytes);
 
         using var stream = new MemoryStream(bytes);
-        var results = await GetReader().EnumerateAsync(stream).ToArrayAsync();
+        var results = await GetReader().EnumerateAsync(stream, TestContext.Current.CancellationToken)
+            .ToArrayAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         results.Should().HaveCount(1);
         results[0].Should().BeEquivalentTo(obj);
@@ -77,7 +79,8 @@ public class NetworkingTests
         obj.Serialize(bytes, size);
 
         using var stream = new MemoryStream(bytes);
-        var results = await GetReader().EnumerateAsync(stream).ToArrayAsync();
+        var results = await GetReader().EnumerateAsync(stream, TestContext.Current.CancellationToken)
+            .ToArrayAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         results.Should().HaveCount(2);
         results.Should().AllBeEquivalentTo(obj);
@@ -92,7 +95,8 @@ public class NetworkingTests
         obj.Serialize(bytes);
 
         using var stream = new MemoryStream(bytes);
-        var results = await GetReader(4096).EnumerateAsync(stream).ToArrayAsync();
+        var results = await GetReader(4096).EnumerateAsync(stream, TestContext.Current.CancellationToken)
+            .ToArrayAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         results.Should().HaveCount(1);
         results[0].Should().BeEquivalentTo(obj);
@@ -113,7 +117,8 @@ public class NetworkingTests
         using var stream = new MemoryStream(bytes);
 
         await Assert.ThrowsAsync<InvalidOperationException>(() =>
-            GetReader(4).EnumerateAsync(stream).ToArrayAsync().AsTask());
+            GetReader(4).EnumerateAsync(stream, TestContext.Current.CancellationToken)
+                .ToArrayAsync(cancellationToken: TestContext.Current.CancellationToken).AsTask());
     }
 
     [Fact]
@@ -126,7 +131,8 @@ public class NetworkingTests
         obj.Serialize(bytes, size);
 
         using var stream = new MemoryStream(bytes);
-        var results = await GetReader(16).EnumerateAsync(stream).ToArrayAsync();
+        var results = await GetReader(16).EnumerateAsync(stream, TestContext.Current.CancellationToken)
+            .ToArrayAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         results.Should().HaveCount(2);
         results[0].Should().BeEquivalentTo(obj);
@@ -144,7 +150,8 @@ public class NetworkingTests
         obj.Serialize(bytes, size * 2);
 
         using var stream = new MemoryStream(bytes);
-        var results = await GetReader(16).EnumerateAsync(stream).ToArrayAsync();
+        var results = await GetReader(16).EnumerateAsync(stream, TestContext.Current.CancellationToken)
+            .ToArrayAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         results.Should().HaveCount(3);
         results[0].Should().BeEquivalentTo(obj);
@@ -164,7 +171,8 @@ public class NetworkingTests
         }
 
         using var stream = new MemoryStream(bytes);
-        var results = await GetReader(16).EnumerateAsync(stream).ToArrayAsync();
+        var results = await GetReader(16).EnumerateAsync(stream, TestContext.Current.CancellationToken)
+            .ToArrayAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         results.Should().HaveCount(10);
         results.Should().AllBeEquivalentTo(obj);
@@ -182,7 +190,8 @@ public class NetworkingTests
         attackObj.Serialize(bytes, charDeadSize);
 
         using var stream = new MemoryStream(bytes);
-        var results = await GetReader().EnumerateAsync(stream).ToArrayAsync();
+        var results = await GetReader().EnumerateAsync(stream, TestContext.Current.CancellationToken)
+            .ToArrayAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         results.Should().HaveCount(2);
         results[0].Should().BeEquivalentTo(charDeadObj);

@@ -35,7 +35,7 @@ public class ItemProtoTests
     [Fact]
     public async Task CanReadAsync()
     {
-        await _itemManager.LoadAsync();
+        await _itemManager.LoadAsync(TestContext.Current.CancellationToken);
         var item = _itemManager.GetItem(10);
         // map to another type so we don't include any library properties
         item.Should().BeEquivalentTo(new ItemData
@@ -78,7 +78,7 @@ public class ItemProtoTests
     [Fact]
     public async Task CanGetApplyValueAsync()
     {
-        await _itemManager.LoadAsync();
+        await _itemManager.LoadAsync(TestContext.Current.CancellationToken);
         var item = _itemManager.GetItem(10);
         var value = item!.GetApplyValue(EApplyType.ATTACK_SPEED);
         value.Should().Be(22);

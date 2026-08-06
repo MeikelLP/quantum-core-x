@@ -6,8 +6,10 @@ using Game.Tests.Fixtures;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using NSubstitute;
 using QuantumCore;
 using QuantumCore.API;
 using QuantumCore.API.Core.Models;
@@ -17,7 +19,6 @@ using QuantumCore.Game;
 using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Persistence;
 using Serilog;
-using Xunit.Abstractions;
 
 namespace Game.Tests;
 
@@ -31,14 +32,14 @@ public class PlayerManagerTests : IClassFixture<RedisFixture>, IClassFixture<Dat
     private readonly MySqlGameDbContext _db;
     private readonly GameOptions _gameOptions;
 
-    public PlayerManagerTests(ITestOutputHelper outputHelper, RedisFixture redisFixture,
+    public PlayerManagerTests(RedisFixture redisFixture,
         DatabaseFixture databaseFixture)
     {
         var services = new ServiceCollection()
             .AddLogging(cfg => cfg
                 .ClearProviders()
                 .AddSerilog(new LoggerConfiguration()
-                    .WriteTo.TestOutput(outputHelper)
+                    .WriteTo.Console()
                     .CreateLogger()))
             .AddSingleton<IConfiguration>(_ => new ConfigurationBuilder()
                 .AddInMemoryCollection(new Dictionary<string, string?>
@@ -55,6 +56,7 @@ public class PlayerManagerTests : IClassFixture<RedisFixture>, IClassFixture<Dat
                 })
                 .Build())
             .AddGameServices()
+            .AddSingleton(Substitute.For<IHostEnvironment>())
             .Configure<DatabaseOptions>(HostingOptions.MODE_GAME, opts =>
             {
                 opts.ConnectionString = databaseFixture.Container.GetConnectionString();
@@ -71,15 +73,16 @@ public class PlayerManagerTests : IClassFixture<RedisFixture>, IClassFixture<Dat
         _gameOptions = services.GetRequiredService<IOptions<GameOptions>>().Value;
     }
 
-    public Task InitializeAsync()
+    public ValueTask InitializeAsync()
     {
-        return Task.CompletedTask;
+        return ValueTask.CompletedTask;
     }
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         await _cacheManager.FlushAllAsync();
         await _db.Players.ExecuteDeleteAsync();
+        await _db.DisposeAsync();
         await _scope.DisposeAsync();
     }
 
@@ -193,8 +196,8 @@ public class PlayerManagerTests : IClassFixture<RedisFixture>, IClassFixture<Dat
         output1.Should().BeEquivalentTo(input1, cfg => cfg.Excluding(x => x.Id));
         output2.Should().BeEquivalentTo(input2, cfg => cfg.Excluding(x => x.Id));
 
-        output1!.Id.Should().NotBe(0);
-        output2!.Id.Should().NotBe(0);
+        output1.Id.Should().NotBe(0);
+        output2.Id.Should().NotBe(0);
     }
 
     [Fact]
@@ -282,7 +285,7 @@ public class PlayerManagerTests : IClassFixture<RedisFixture>, IClassFixture<Dat
     public async Task GetPlayers_ReturnsOrderedAndCachesWithSlotsAsync(int charactersCount)
     {
         await _cacheManager.FlushAllAsync();
-        await _db.Players.ExecuteDeleteAsync();
+        await _db.Players.ExecuteDeleteAsync(cancellationToken: TestContext.Current.CancellationToken);
 
         var accountId = Guid.NewGuid();
         var basePlayerId = 1000u;

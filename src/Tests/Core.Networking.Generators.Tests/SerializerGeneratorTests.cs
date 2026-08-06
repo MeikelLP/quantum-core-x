@@ -39,11 +39,11 @@ public partial record struct GCHandshake(uint Handshake, uint Time, uint Delta);
         GeneratorDriver driver = CSharpGeneratorDriver.Create(new PacketSerializerGenerator());
 
         driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation,
-            out var diagnostics);
+            out var diagnostics, TestContext.Current.CancellationToken);
 
         var runResult = driver.GetRunResult();
         diagnostics.Should().BeEmpty();
-        outputCompilation.GetDiagnostics().Should().BeEmpty();
+        outputCompilation.GetDiagnostics(TestContext.Current.CancellationToken).Should().BeEmpty();
 
         runResult.GeneratedTrees.Should().HaveCount(1);
         runResult.Diagnostics.Should().BeEmpty();
@@ -157,11 +157,11 @@ public partial record GCHandshake(uint Handshake, uint Time, uint Delta);
         GeneratorDriver driver = CSharpGeneratorDriver.Create(new PacketSerializerGenerator());
 
         driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation,
-            out var diagnostics);
+            out var diagnostics, TestContext.Current.CancellationToken);
 
         var runResult = driver.GetRunResult();
         diagnostics.Should().BeEmpty();
-        outputCompilation.GetDiagnostics().Should().BeEmpty();
+        outputCompilation.GetDiagnostics(TestContext.Current.CancellationToken).Should().BeEmpty();
 
         runResult.GeneratedTrees.Should().HaveCount(1);
         runResult.Diagnostics.Should().BeEmpty();
@@ -279,11 +279,11 @@ public partial record GCHandshake(uint Handshake, HandshakeType Type);
         GeneratorDriver driver = CSharpGeneratorDriver.Create(new PacketSerializerGenerator());
 
         driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation,
-            out var diagnostics);
+            out var diagnostics, TestContext.Current.CancellationToken);
 
         var runResult = driver.GetRunResult();
         diagnostics.Should().BeEmpty();
-        outputCompilation.GetDiagnostics().Should().BeEmpty();
+        outputCompilation.GetDiagnostics(TestContext.Current.CancellationToken).Should().BeEmpty();
 
         runResult.GeneratedTrees.Should().HaveCount(1);
         runResult.Diagnostics.Should().BeEmpty();
@@ -390,11 +390,11 @@ public partial record GCHandshake(uint Handshake, HandshakeType Type);
         GeneratorDriver driver = CSharpGeneratorDriver.Create(new PacketSerializerGenerator());
 
         driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation,
-            out var diagnostics);
+            out var diagnostics, TestContext.Current.CancellationToken);
 
         var runResult = driver.GetRunResult();
         diagnostics.Should().BeEmpty();
-        outputCompilation.GetDiagnostics().Should().BeEmpty();
+        outputCompilation.GetDiagnostics(TestContext.Current.CancellationToken).Should().BeEmpty();
 
         runResult.GeneratedTrees.Should().HaveCount(1);
         runResult.Diagnostics.Should().BeEmpty();
@@ -503,11 +503,11 @@ public partial record struct GCHandshake(uint Handshake, uint Time) {
         GeneratorDriver driver = CSharpGeneratorDriver.Create(new PacketSerializerGenerator());
 
         driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation,
-            out var diagnostics);
+            out var diagnostics, TestContext.Current.CancellationToken);
 
         var runResult = driver.GetRunResult();
         diagnostics.Should().BeEmpty();
-        outputCompilation.GetDiagnostics().Should().BeEmpty();
+        outputCompilation.GetDiagnostics(TestContext.Current.CancellationToken).Should().BeEmpty();
 
         runResult.GeneratedTrees.Should().HaveCount(1);
         runResult.Diagnostics.Should().BeEmpty();
@@ -622,11 +622,11 @@ public partial record struct GCHandshake(byte Type, string Message) {
         GeneratorDriver driver = CSharpGeneratorDriver.Create(new PacketSerializerGenerator());
 
         driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation,
-            out var diagnostics);
+            out var diagnostics, TestContext.Current.CancellationToken);
 
         var runResult = driver.GetRunResult();
         diagnostics.Should().BeEmpty();
-        outputCompilation.GetDiagnostics().Should().BeEmpty();
+        outputCompilation.GetDiagnostics(TestContext.Current.CancellationToken).Should().BeEmpty();
 
         runResult.GeneratedTrees.Should().HaveCount(1);
         runResult.Diagnostics.Should().BeEmpty();
@@ -735,11 +735,11 @@ public partial record struct GCHandshake(byte Type, byte[] Flags) {
         GeneratorDriver driver = CSharpGeneratorDriver.Create(new PacketSerializerGenerator());
 
         driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation,
-            out var diagnostics);
+            out var diagnostics, TestContext.Current.CancellationToken);
 
         var runResult = driver.GetRunResult();
         diagnostics.Should().BeEmpty();
-        outputCompilation.GetDiagnostics().Should().BeEmpty();
+        outputCompilation.GetDiagnostics(TestContext.Current.CancellationToken).Should().BeEmpty();
 
         runResult.GeneratedTrees.Should().HaveCount(1);
         runResult.Diagnostics.Should().BeEmpty();
@@ -848,11 +848,11 @@ public partial record struct GCHandshake(byte Type)
         GeneratorDriver driver = CSharpGeneratorDriver.Create(new PacketSerializerGenerator());
 
         driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation,
-            out var diagnostics);
+            out var diagnostics, TestContext.Current.CancellationToken);
 
         var runResult = driver.GetRunResult();
         diagnostics.Should().BeEmpty();
-        outputCompilation.GetDiagnostics().Should().BeEmpty();
+        outputCompilation.GetDiagnostics(TestContext.Current.CancellationToken).Should().BeEmpty();
 
         runResult.GeneratedTrees.Should().HaveCount(1);
         runResult.Diagnostics.Should().BeEmpty();
@@ -959,11 +959,11 @@ public partial record struct GCHandshake(byte Type)
         GeneratorDriver driver = CSharpGeneratorDriver.Create(new PacketSerializerGenerator());
 
         driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation,
-            out var diagnostics);
+            out var diagnostics, TestContext.Current.CancellationToken);
 
         var runResult = driver.GetRunResult();
         diagnostics.Should().BeEmpty();
-        outputCompilation.GetDiagnostics().Should().BeEmpty();
+        outputCompilation.GetDiagnostics(TestContext.Current.CancellationToken).Should().BeEmpty();
 
         runResult.GeneratedTrees.Should().HaveCount(1);
         runResult.Diagnostics.Should().BeEmpty();
@@ -1081,11 +1081,11 @@ public partial class ShopBuy {
         GeneratorDriver driver = CSharpGeneratorDriver.Create(new PacketSerializerGenerator());
 
         driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation,
-            out var diagnostics);
+            out var diagnostics, TestContext.Current.CancellationToken);
 
         var runResult = driver.GetRunResult();
         diagnostics.Should().BeEmpty();
-        outputCompilation.GetDiagnostics().Should().BeEmpty();
+        outputCompilation.GetDiagnostics(TestContext.Current.CancellationToken).Should().BeEmpty();
 
         runResult.GeneratedTrees.Should().HaveCount(1);
         runResult.Diagnostics.Should().BeEmpty();
@@ -1193,11 +1193,11 @@ public partial class Attack
         GeneratorDriver driver = CSharpGeneratorDriver.Create(new PacketSerializerGenerator());
 
         driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation,
-            out var diagnostics);
+            out var diagnostics, TestContext.Current.CancellationToken);
 
         var runResult = driver.GetRunResult();
         diagnostics.Should().BeEmpty();
-        outputCompilation.GetDiagnostics().Should().BeEmpty();
+        outputCompilation.GetDiagnostics(TestContext.Current.CancellationToken).Should().BeEmpty();
 
         runResult.GeneratedTrees.Should().HaveCount(1);
         runResult.Diagnostics.Should().BeEmpty();
@@ -1313,11 +1313,11 @@ public partial class ChatIncoming
         GeneratorDriver driver = CSharpGeneratorDriver.Create(new PacketSerializerGenerator());
 
         driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation,
-            out var diagnostics);
+            out var diagnostics, TestContext.Current.CancellationToken);
 
         var runResult = driver.GetRunResult();
         diagnostics.Should().BeEmpty();
-        outputCompilation.GetDiagnostics().Should().BeEmpty();
+        outputCompilation.GetDiagnostics(TestContext.Current.CancellationToken).Should().BeEmpty();
 
         runResult.GeneratedTrees.Should().HaveCount(1);
         runResult.Diagnostics.Should().BeEmpty();
@@ -1423,7 +1423,7 @@ public partial class DeleteCharacterFail
         GeneratorDriver driver = CSharpGeneratorDriver.Create(new PacketSerializerGenerator());
 
         driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation,
-            out var diagnostics);
+            out var diagnostics, TestContext.Current.CancellationToken);
 
         var runResult = driver.GetRunResult();
         diagnostics.Should().BeEmpty();
@@ -1524,7 +1524,7 @@ public partial class DeleteCharacterFail
         GeneratorDriver driver = CSharpGeneratorDriver.Create(new PacketSerializerGenerator());
 
         driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation,
-            out var diagnostics);
+            out var diagnostics, TestContext.Current.CancellationToken);
 
         var runResult = driver.GetRunResult();
         diagnostics.Should().BeEmpty();
@@ -1630,7 +1630,7 @@ public partial class DeleteCharacterFail
         GeneratorDriver driver = CSharpGeneratorDriver.Create(new PacketSerializerGenerator());
 
         driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation,
-            out var diagnostics);
+            out var diagnostics, TestContext.Current.CancellationToken);
 
         var runResult = driver.GetRunResult();
         diagnostics.Should().BeEmpty();
@@ -1731,7 +1731,7 @@ public partial class DeleteCharacterFail
         GeneratorDriver driver = CSharpGeneratorDriver.Create(new PacketSerializerGenerator());
 
         driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation,
-            out var diagnostics);
+            out var diagnostics, TestContext.Current.CancellationToken);
 
         var runResult = driver.GetRunResult();
         diagnostics.Should().BeEmpty();
@@ -1834,8 +1834,8 @@ public partial class ShopBuy
 
         GeneratorDriver driver = CSharpGeneratorDriver.Create(new PacketSerializerGenerator());
 
-        driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out _,
-            out var diagnostics);
+        driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out _, out var diagnostics,
+            TestContext.Current.CancellationToken);
 
         driver.GetRunResult();
         diagnostics.Should().HaveCount(1);
@@ -1863,11 +1863,11 @@ public partial record struct GCHandshake()
         GeneratorDriver driver = CSharpGeneratorDriver.Create(new PacketSerializerGenerator());
 
         driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation,
-            out var diagnostics);
+            out var diagnostics, TestContext.Current.CancellationToken);
 
         var runResult = driver.GetRunResult();
         diagnostics.Should().BeEmpty();
-        outputCompilation.GetDiagnostics().Should().BeEmpty();
+        outputCompilation.GetDiagnostics(TestContext.Current.CancellationToken).Should().BeEmpty();
 
         runResult.GeneratedTrees.Should().HaveCount(1);
         runResult.Diagnostics.Should().BeEmpty();
@@ -1975,11 +1975,11 @@ public partial record struct GCHandshake(byte Type, ushort[] Flags)
         GeneratorDriver driver = CSharpGeneratorDriver.Create(new PacketSerializerGenerator());
 
         driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation,
-            out var diagnostics);
+            out var diagnostics, TestContext.Current.CancellationToken);
 
         var runResult = driver.GetRunResult();
         diagnostics.Should().BeEmpty();
-        outputCompilation.GetDiagnostics().Should().BeEmpty();
+        outputCompilation.GetDiagnostics(TestContext.Current.CancellationToken).Should().BeEmpty();
 
         runResult.GeneratedTrees.Should().HaveCount(1);
         runResult.Diagnostics.Should().BeEmpty();
@@ -2099,8 +2099,8 @@ public partial record struct GCHandshake(byte Type, ushort[] Flags)
 
         GeneratorDriver driver = CSharpGeneratorDriver.Create(new PacketSerializerGenerator());
 
-        driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out _,
-            out var diagnostics);
+        driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out _, out var diagnostics,
+            TestContext.Current.CancellationToken);
 
         driver.GetRunResult();
         diagnostics.Should().HaveCount(1);
@@ -2126,11 +2126,11 @@ public partial record struct GCHandshake(byte Type, string Message, byte Locatio
         GeneratorDriver driver = CSharpGeneratorDriver.Create(new PacketSerializerGenerator());
 
         driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation,
-            out var diagnostics);
+            out var diagnostics, TestContext.Current.CancellationToken);
 
         var runResult = driver.GetRunResult();
         diagnostics.Should().BeEmpty();
-        outputCompilation.GetDiagnostics().Should().BeEmpty();
+        outputCompilation.GetDiagnostics(TestContext.Current.CancellationToken).Should().BeEmpty();
 
         runResult.GeneratedTrees.Should().HaveCount(1);
         runResult.Diagnostics.Should().BeEmpty();
@@ -2245,11 +2245,11 @@ public partial record struct GCPhase(byte Phase);
         GeneratorDriver driver = CSharpGeneratorDriver.Create(new PacketSerializerGenerator());
 
         driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation,
-            out var diagnostics);
+            out var diagnostics, TestContext.Current.CancellationToken);
 
         var runResult = driver.GetRunResult();
         diagnostics.Should().BeEmpty();
-        outputCompilation.GetDiagnostics().Should().BeEmpty();
+        outputCompilation.GetDiagnostics(TestContext.Current.CancellationToken).Should().BeEmpty();
 
         runResult.GeneratedTrees.Should().HaveCount(2);
         runResult.Diagnostics.Should().BeEmpty();
@@ -2437,11 +2437,11 @@ public partial struct GCHandshake {
         GeneratorDriver driver = CSharpGeneratorDriver.Create(new PacketSerializerGenerator());
 
         driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation,
-            out var diagnostics);
+            out var diagnostics, TestContext.Current.CancellationToken);
 
         var runResult = driver.GetRunResult();
         diagnostics.Should().BeEmpty();
-        outputCompilation.GetDiagnostics().Should().BeEmpty();
+        outputCompilation.GetDiagnostics(TestContext.Current.CancellationToken).Should().BeEmpty();
 
         runResult.GeneratedTrees.Should().HaveCount(1);
         runResult.Diagnostics.Should().BeEmpty();
@@ -2558,11 +2558,11 @@ public partial class GCHandshake {
         GeneratorDriver driver = CSharpGeneratorDriver.Create(new PacketSerializerGenerator());
 
         driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation,
-            out var diagnostics);
+            out var diagnostics, TestContext.Current.CancellationToken);
 
         var runResult = driver.GetRunResult();
         diagnostics.Should().BeEmpty();
-        outputCompilation.GetDiagnostics().Should().BeEmpty();
+        outputCompilation.GetDiagnostics(TestContext.Current.CancellationToken).Should().BeEmpty();
 
         runResult.GeneratedTrees.Should().HaveCount(1);
         runResult.Diagnostics.Should().BeEmpty();
@@ -2677,11 +2677,11 @@ public partial class Squidward {
         GeneratorDriver driver = CSharpGeneratorDriver.Create(new PacketSerializerGenerator());
 
         driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation,
-            out var diagnostics);
+            out var diagnostics, TestContext.Current.CancellationToken);
 
         var runResult = driver.GetRunResult();
         diagnostics.Should().BeEmpty();
-        outputCompilation.GetDiagnostics().Should().BeEmpty();
+        outputCompilation.GetDiagnostics(TestContext.Current.CancellationToken).Should().BeEmpty();
 
         runResult.GeneratedTrees.Should().HaveCount(1);
         runResult.Diagnostics.Should().BeEmpty();
@@ -2781,11 +2781,11 @@ public partial class GuildName
         GeneratorDriver driver = CSharpGeneratorDriver.Create(new PacketSerializerGenerator());
 
         driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation,
-            out var diagnostics);
+            out var diagnostics, TestContext.Current.CancellationToken);
 
         var runResult = driver.GetRunResult();
         diagnostics.Should().BeEmpty();
-        outputCompilation.GetDiagnostics().Should().BeEmpty();
+        outputCompilation.GetDiagnostics(TestContext.Current.CancellationToken).Should().BeEmpty();
 
         runResult.GeneratedTrees.Should().HaveCount(1);
         runResult.Diagnostics.Should().BeEmpty();
@@ -2895,11 +2895,11 @@ public partial class GuildName
         GeneratorDriver driver = CSharpGeneratorDriver.Create(new PacketSerializerGenerator());
 
         driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation,
-            out var diagnostics);
+            out var diagnostics, TestContext.Current.CancellationToken);
 
         var runResult = driver.GetRunResult();
         diagnostics.Should().BeEmpty();
-        outputCompilation.GetDiagnostics().Should().BeEmpty();
+        outputCompilation.GetDiagnostics(TestContext.Current.CancellationToken).Should().BeEmpty();
 
         runResult.GeneratedTrees.Should().HaveCount(1);
         runResult.Diagnostics.Should().BeEmpty();
@@ -2998,11 +2998,11 @@ public class SomeData {
         GeneratorDriver driver = CSharpGeneratorDriver.Create(new PacketSerializerGenerator());
 
         driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation,
-            out var diagnostics);
+            out var diagnostics, TestContext.Current.CancellationToken);
 
         var runResult = driver.GetRunResult();
         diagnostics.Should().BeEmpty();
-        outputCompilation.GetDiagnostics().Should().BeEmpty();
+        outputCompilation.GetDiagnostics(TestContext.Current.CancellationToken).Should().BeEmpty();
 
         runResult.GeneratedTrees.Should().HaveCount(1);
         runResult.Diagnostics.Should().BeEmpty();
@@ -3132,11 +3132,11 @@ public partial record GCHandshake(uint Handshake, uint Time) {
         GeneratorDriver driver = CSharpGeneratorDriver.Create(new PacketSerializerGenerator());
 
         driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation,
-            out var diagnostics);
+            out var diagnostics, TestContext.Current.CancellationToken);
 
         var runResult = driver.GetRunResult();
         diagnostics.Should().BeEmpty();
-        outputCompilation.GetDiagnostics().Should().BeEmpty();
+        outputCompilation.GetDiagnostics(TestContext.Current.CancellationToken).Should().BeEmpty();
 
         runResult.GeneratedTrees.Should().HaveCount(1);
         runResult.Diagnostics.Should().BeEmpty();
@@ -3263,11 +3263,11 @@ public class SomeData {
         GeneratorDriver driver = CSharpGeneratorDriver.Create(new PacketSerializerGenerator());
 
         driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation,
-            out var diagnostics);
+            out var diagnostics, TestContext.Current.CancellationToken);
 
         var runResult = driver.GetRunResult();
         diagnostics.Should().BeEmpty();
-        outputCompilation.GetDiagnostics().Should().BeEmpty();
+        outputCompilation.GetDiagnostics(TestContext.Current.CancellationToken).Should().BeEmpty();
 
         runResult.GeneratedTrees.Should().HaveCount(1);
         runResult.Diagnostics.Should().BeEmpty();
@@ -3471,11 +3471,11 @@ public class SomeData {
         GeneratorDriver driver = CSharpGeneratorDriver.Create(new PacketSerializerGenerator());
 
         driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation,
-            out var diagnostics);
+            out var diagnostics, TestContext.Current.CancellationToken);
 
         var runResult = driver.GetRunResult();
         diagnostics.Should().BeEmpty();
-        outputCompilation.GetDiagnostics().Should().BeEmpty();
+        outputCompilation.GetDiagnostics(TestContext.Current.CancellationToken).Should().BeEmpty();
 
         runResult.GeneratedTrees.Should().HaveCount(1);
         runResult.Diagnostics.Should().BeEmpty();
@@ -3625,11 +3625,11 @@ public partial class CharacterInfo {
         GeneratorDriver driver = CSharpGeneratorDriver.Create(new PacketSerializerGenerator());
 
         driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation,
-            out var diagnostics);
+            out var diagnostics, TestContext.Current.CancellationToken);
 
         var runResult = driver.GetRunResult();
         diagnostics.Should().BeEmpty();
-        outputCompilation.GetDiagnostics().Should().BeEmpty();
+        outputCompilation.GetDiagnostics(TestContext.Current.CancellationToken).Should().BeEmpty();
 
         runResult.GeneratedTrees.Should().HaveCount(1);
         runResult.Diagnostics.Should().BeEmpty();
@@ -3765,7 +3765,7 @@ namespace QuantumCore.Auth.Packets
         GeneratorDriver driver = CSharpGeneratorDriver.Create(new PacketSerializerGenerator());
 
         driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation,
-            out var diagnostics);
+            out var diagnostics, TestContext.Current.CancellationToken);
 
         driver.GetRunResult();
         diagnostics.Should().HaveCount(1);
@@ -3794,11 +3794,11 @@ public record Character(uint Id);";
         var inputCompilation = CreateCompilation(FILE1, FILE2);
 
         driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation,
-            out var diagnostics);
+            out var diagnostics, TestContext.Current.CancellationToken);
 
         var runResult = driver.GetRunResult();
         diagnostics.Should().BeEmpty();
-        outputCompilation.GetDiagnostics().Should().BeEmpty();
+        outputCompilation.GetDiagnostics(TestContext.Current.CancellationToken).Should().BeEmpty();
 
         runResult.GeneratedTrees.Should().HaveCount(1);
         runResult.Diagnostics.Should().BeEmpty();
@@ -3924,11 +3924,11 @@ public partial record struct StringTest ()
         GeneratorDriver driver = CSharpGeneratorDriver.Create(new PacketSerializerGenerator());
 
         driver = driver.RunGeneratorsAndUpdateCompilation(inputCompilation, out var outputCompilation,
-            out var diagnostics);
+            out var diagnostics, TestContext.Current.CancellationToken);
 
         var runResult = driver.GetRunResult();
         diagnostics.Should().BeEmpty();
-        outputCompilation.GetDiagnostics().Should().BeEmpty();
+        outputCompilation.GetDiagnostics(TestContext.Current.CancellationToken).Should().BeEmpty();
 
         runResult.GeneratedTrees.Should().HaveCount(1);
         runResult.Diagnostics.Should().BeEmpty();

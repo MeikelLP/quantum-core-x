@@ -9,6 +9,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Time.Testing;
 using NSubstitute;
@@ -35,7 +36,6 @@ using QuantumCore.Game.World;
 using QuantumCore.Game.World.Entities;
 using QuantumCore.Networking;
 using Weikio.PluginFramework.Catalogs;
-using Xunit.Abstractions;
 
 // cannot cast MockedGameConnection to IGameConnection ???
 #pragma warning disable CS8602
@@ -104,7 +104,7 @@ public class CommandTests : IAsyncLifetime
     private readonly FakeTimeProvider _timeProvider = new();
     private readonly ServerClock _clock;
 
-    public CommandTests(ITestOutputHelper testOutputHelper)
+    public CommandTests()
     {
         _playerDataFaker = new AutoFaker<PlayerData>()
             .RuleFor(x => x.Name, r => r.Name.FirstName()) // Mostly due to command param handling
@@ -120,7 +120,7 @@ public class CommandTests : IAsyncLifetime
             .RuleFor(x => x.PositionX, _ => (int)(10 * Map.MAP_UNIT))
             .RuleFor(x => x.PositionY, _ => (int)(26 * Map.MAP_UNIT))
             .RuleFor(x => x.PlayTime, _ => 0u)
-            .RuleFor(x => x.SkillGroup, _ => ESkillGroup.UNKNOWN)
+            .RuleFor(x => x.SkillGroup, _ => ESkillGroup.BRANCH_A)
             .RuleFor(x => x.PlayerClass, _ => EPlayerClassGendered.WARRIOR_MALE)
             .Ignore(x => x.Health)
             .Ignore(x => x.Mana);
@@ -178,7 +178,8 @@ public class CommandTests : IAsyncLifetime
             .AddCoreServices(new EmptyPluginCatalog(), new ConfigurationBuilder().Build())
             .AddGameServices()
             .AddSingleton(Substitute.For<IServerBase>())
-            .AddQuantumCoreTestLogger(testOutputHelper)
+            .AddQuantumCoreTestLogger()
+            .AddSingleton(Substitute.For<IHostEnvironment>())
             .Replace(new ServiceDescriptor(typeof(TimeProvider), _ => _timeProvider, ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(IItemRepository), _ => Substitute.For<IItemRepository>(),
                 ServiceLifetime.Singleton))
@@ -238,16 +239,18 @@ public class CommandTests : IAsyncLifetime
         _db = _scope.ServiceProvider.GetRequiredService<GameDbContext>();
     }
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         await _db.Database.EnsureDeletedAsync();
         await _db.Database.EnsureCreatedAsync();
         await _player.LoadAsync();
     }
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
+        await _db.DisposeAsync();
         await _scope.DisposeAsync();
+        await _services.DisposeAsync();
     }
 
     [Fact]
@@ -674,7 +677,7 @@ public class CommandTests : IAsyncLifetime
             Id = updatedGroup, Name = groupName, Permissions = newPermissions
         });
 
-        await _commandManager.ReloadAsync();
+        await _commandManager.ReloadAsync(TestContext.Current.CancellationToken);
 
         await _player.ReloadPermissionsAsync();
 

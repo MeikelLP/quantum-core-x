@@ -16,7 +16,6 @@ using QuantumCore.Caching.Extensions;
 using Serilog;
 using Testcontainers.Redis;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace Data.Auth.Tests;
 
@@ -28,14 +27,13 @@ public class AccountManagerTests : IClassFixture<RedisFixture>, IClassFixture<Da
     private readonly ICacheManager _cacheManager;
     private readonly AsyncServiceScope _scope;
 
-    public AccountManagerTests(ITestOutputHelper outputHelper, RedisFixture redisFixture,
-        DatabaseFixture databaseFixture)
+    public AccountManagerTests(RedisFixture redisFixture, DatabaseFixture databaseFixture)
     {
         var services = new ServiceCollection()
             .AddLogging(cfg => cfg
                 .ClearProviders()
                 .AddSerilog(new LoggerConfiguration()
-                    .WriteTo.TestOutput(outputHelper)
+                    .WriteTo.Console()
                     .CreateLogger()))
             .AddAuthDatabase()
             .AddQuantumCoreCaching()
@@ -57,12 +55,12 @@ public class AccountManagerTests : IClassFixture<RedisFixture>, IClassFixture<Da
         _accountRepository = _scope.ServiceProvider.GetRequiredService<IAccountRepository>();
     }
 
-    public Task InitializeAsync()
+    public ValueTask InitializeAsync()
     {
-        return Task.CompletedTask;
+        return ValueTask.CompletedTask;
     }
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         var keys = await _cacheManager.KeysAsync("*");
         foreach (var key in keys)

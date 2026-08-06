@@ -7,21 +7,18 @@ using QuantumCore.Auth.Persistence;
 using Serilog;
 using Testcontainers.MySql;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace Data.Auth.Tests.Fixtures;
 
 public class DatabaseFixture : IAsyncLifetime
 {
-    private readonly IMessageSink _messageSink;
     public MySqlContainer Container { get; }
     public const string USER_NAME = "root";
     public const string PASSWORD = "supersecure.123";
     public const string DATABASE = "auth";
 
-    public DatabaseFixture(IMessageSink messageSink)
+    public DatabaseFixture()
     {
-        _messageSink = messageSink;
         Container = new MySqlBuilder("mysql:9.7.2")
             .WithDatabase(DATABASE)
             .WithPassword(PASSWORD)
@@ -29,7 +26,7 @@ public class DatabaseFixture : IAsyncLifetime
             .Build();
     }
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         await Container.StartAsync();
         var connectionString = Container.GetConnectionString();
@@ -38,7 +35,7 @@ public class DatabaseFixture : IAsyncLifetime
             {
                 x.ClearProviders();
                 x.AddSerilog(new LoggerConfiguration()
-                    .WriteTo.TestOutput(_messageSink)
+                    .WriteTo.Console()
                     .CreateLogger());
             })
             .Configure<DatabaseOptions>(HostingOptions.MODE_AUTH, opts =>
@@ -58,7 +55,7 @@ public class DatabaseFixture : IAsyncLifetime
         }
     }
 
-    public async Task DisposeAsync()
+    public async ValueTask DisposeAsync()
     {
         await Container.DisposeAsync();
     }

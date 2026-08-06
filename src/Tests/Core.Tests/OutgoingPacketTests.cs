@@ -14,7 +14,6 @@ using QuantumCore.Game.Packets.General;
 using QuantumCore.Networking;
 using Weikio.PluginFramework.Catalogs;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace Core.Tests;
 
@@ -22,12 +21,12 @@ public class OutgoingPacketTests
 {
     private readonly IPacketSerializer _serializer;
 
-    public OutgoingPacketTests(ITestOutputHelper testOutputHelper)
+    public OutgoingPacketTests()
     {
         var services = new ServiceCollection()
             .AddCoreServices(new EmptyPluginCatalog(), new ConfigurationBuilder().Build())
             .AddSingleton<IPacketSerializer, DefaultPacketSerializer>()
-            .AddQuantumCoreTestLogger(testOutputHelper)
+            .AddQuantumCoreTestLogger()
             .BuildServiceProvider();
         _serializer = services.GetRequiredService<IPacketSerializer>();
     }

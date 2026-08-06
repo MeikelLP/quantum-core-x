@@ -9,19 +9,11 @@ using QuantumCore.Auth.Persistence.Extensions;
 using Testcontainers.MySql;
 using Testcontainers.PostgreSql;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace Auth.Tests;
 
 public class MigrateTests
 {
-    private readonly ITestOutputHelper _testOutputHelper;
-
-    public MigrateTests(ITestOutputHelper testOutputHelper)
-    {
-        _testOutputHelper = testOutputHelper;
-    }
-
     [Fact]
     public async Task MysqlAsync()
     {
@@ -30,7 +22,7 @@ public class MigrateTests
             .WithUsername("metin2")
             .WithPassword("metin2")
             .Build();
-        await container.StartAsync();
+        await container.StartAsync(TestContext.Current.CancellationToken);
         await ExecuteMigrateAsync(DatabaseProvider.MYSQL, container.GetConnectionString());
         Assert.True(true);
     }
@@ -43,7 +35,7 @@ public class MigrateTests
             .WithUsername("metin2")
             .WithPassword("metin2")
             .Build();
-        await container.StartAsync();
+        await container.StartAsync(TestContext.Current.CancellationToken);
         await ExecuteMigrateAsync(DatabaseProvider.POSTGRESQL, container.GetConnectionString());
         Assert.True(true);
     }
@@ -56,10 +48,10 @@ public class MigrateTests
         Assert.True(true);
     }
 
-    private async Task ExecuteMigrateAsync(DatabaseProvider provider, string connectionString)
+    private static async Task ExecuteMigrateAsync(DatabaseProvider provider, string connectionString)
     {
         var services = new ServiceCollection()
-            .AddQuantumCoreTestLogger(_testOutputHelper)
+            .AddQuantumCoreTestLogger()
             .AddSingleton<IConfiguration>(_ => new ConfigurationBuilder().Build())
             .AddAuthDatabase()
             .Configure<DatabaseOptions>(HostingOptions.MODE_AUTH, opts =>

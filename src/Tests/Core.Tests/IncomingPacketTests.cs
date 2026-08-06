@@ -13,7 +13,6 @@ using QuantumCore.Extensions;
 using QuantumCore.Networking;
 using Weikio.PluginFramework.Catalogs;
 using Xunit;
-using Xunit.Abstractions;
 using Version = QuantumCore.API.Packets.Version;
 
 namespace Core.Tests;
@@ -22,12 +21,12 @@ public class IncomingPacketTests
 {
     private readonly IPacketSerializer _serializer;
 
-    public IncomingPacketTests(ITestOutputHelper testOutputHelper)
+    public IncomingPacketTests()
     {
         var services = new ServiceCollection()
             .AddCoreServices(new EmptyPluginCatalog(), new ConfigurationBuilder().Build())
             .AddSingleton<IPacketSerializer, DefaultPacketSerializer>()
-            .AddQuantumCoreTestLogger(testOutputHelper)
+            .AddQuantumCoreTestLogger()
             .BuildServiceProvider();
 
         _serializer = services.GetRequiredService<IPacketSerializer>();

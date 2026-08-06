@@ -3,6 +3,7 @@ using Core.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using NSubstitute;
 using QuantumCore;
 using QuantumCore.API;
@@ -19,7 +20,7 @@ public class GuildTests
     public async Task AddExperience_CleanAsync()
     {
         var gm = await SetupGuildAsync();
-        var guild = await gm.AddExperienceAsync(1, 600_000);
+        var guild = await gm.AddExperienceAsync(1, 600_000, TestContext.Current.CancellationToken);
         guild.Should().BeEquivalentTo(new GuildData
         {
             Level = 2,
@@ -49,8 +50,8 @@ public class GuildTests
     public async Task AddExperience_ExistingAsync()
     {
         var gm = await SetupGuildAsync();
-        await gm.AddExperienceAsync(1, 300_000);
-        var guild = await gm.AddExperienceAsync(1, 600_000);
+        await gm.AddExperienceAsync(1, 300_000, TestContext.Current.CancellationToken);
+        var guild = await gm.AddExperienceAsync(1, 600_000, TestContext.Current.CancellationToken);
         guild.Should().BeEquivalentTo(new GuildData
         {
             Level = 2,
@@ -80,8 +81,8 @@ public class GuildTests
     public async Task AddExperience_Existing_AddPerfectAsync()
     {
         var gm = await SetupGuildAsync();
-        await gm.AddExperienceAsync(1, 300_000);
-        var guild = await gm.AddExperienceAsync(1, 300_000);
+        await gm.AddExperienceAsync(1, 300_000, TestContext.Current.CancellationToken);
+        var guild = await gm.AddExperienceAsync(1, 300_000, TestContext.Current.CancellationToken);
         guild.Should().BeEquivalentTo(new GuildData
         {
             Level = 2,
@@ -125,6 +126,7 @@ public class GuildTests
         var services = serviceCollection
             .AddLogging()
             .AddGameDatabase()
+            .AddSingleton(Substitute.For<IHostEnvironment>())
             .AddSingleton<IConfiguration>(new ConfigurationBuilder().Build())
             .AddSingleton(guildExperienceManager)
             .AddSingleton<IGuildManager, GuildManager>()

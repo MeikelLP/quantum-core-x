@@ -35,7 +35,7 @@ public class MobProtoTests
     [Fact]
     public async Task CanReadAsync()
     {
-        await _monsterManager.LoadAsync();
+        await _monsterManager.LoadAsync(TestContext.Current.CancellationToken);
         var monsters = _monsterManager.GetMonsters();
         // map to another type so we don't include any library properties
         new MonsterData

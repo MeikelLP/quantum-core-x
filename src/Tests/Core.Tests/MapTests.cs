@@ -18,7 +18,6 @@ using QuantumCore.Game.World;
 using QuantumCore.Game.World.Entities;
 using QuantumCore.Networking;
 using Xunit;
-using Xunit.Abstractions;
 
 namespace Core.Tests;
 
@@ -31,7 +30,7 @@ public class MapTests
     private readonly IWorld _world;
     private readonly GameServer _gameServer;
 
-    public MapTests(ITestOutputHelper testOutputHelper)
+    public MapTests()
     {
         var npcShopProvider = Substitute.For<INpcShopProvider>();
         npcShopProvider.Shops.Returns([]);
@@ -116,7 +115,7 @@ public class MapTests
             })
             .Services
             .AddOptions<HostingOptions>().Services
-            .AddQuantumCoreTestLogger(testOutputHelper)
+            .AddQuantumCoreTestLogger()
             .BuildServiceProvider();
         _clock = provider.GetRequiredService<ServerClock>();
         _gameServer = ActivatorUtilities.CreateInstance<GameServer>(provider);
@@ -149,7 +148,7 @@ public class MapTests
                 RespawnTime = 0,
             }
         ];
-        await _world.LoadAsync();
+        await _world.LoadAsync(TestContext.Current.CancellationToken);
         await _world.InitAsync();
         var ctx = Tick();
         EventSystem.Update(ctx);
@@ -175,7 +174,7 @@ public class MapTests
                 RespawnTime = 0,
             }
         ];
-        await _world.LoadAsync();
+        await _world.LoadAsync(TestContext.Current.CancellationToken);
         await _world.InitAsync();
         var ctx = Tick();
         EventSystem.Update(ctx);
@@ -200,7 +199,7 @@ public class MapTests
                 RespawnTime = 0,
             }
         ];
-        await _world.LoadAsync();
+        await _world.LoadAsync(TestContext.Current.CancellationToken);
         await _world.InitAsync();
         var ctx = Tick();
         EventSystem.Update(ctx);

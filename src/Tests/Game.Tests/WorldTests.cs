@@ -4,6 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.FileProviders;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Time.Testing;
 using NSubstitute;
@@ -47,6 +48,7 @@ public class WorldTests : IAsyncLifetime
             .AddGameServices()
             .AddSingleton(Substitute.For<IServerBase>())
             .AddSingleton(Substitute.For<IGameServer>())
+            .AddSingleton(Substitute.For<IHostEnvironment>())
             .Configure<DatabaseOptions>(HostingOptions.MODE_GAME, opts =>
             {
                 opts.ConnectionString = "Server:abc;";
@@ -124,7 +126,7 @@ public class WorldTests : IAsyncLifetime
             ActivatorUtilities.CreateInstance<GameServer>(_services); // for setting the singleton GameServer.Instance
     }
 
-    public async Task InitializeAsync()
+    public async ValueTask InitializeAsync()
     {
         await Task.WhenAll(_services.GetServices<ILoadable>().Select(x => x.LoadAsync()));
         await _world.InitAsync();
@@ -141,7 +143,12 @@ public class WorldTests : IAsyncLifetime
         _world.Update(Tick(0.2)); // spawn all entities
     }
 
-    public Task DisposeAsync() => throw new NotImplementedException();
+    public async ValueTask DisposeAsync()
+    {
+        _playerEntity.Dispose();
+        _gameServer.Dispose();
+        await _services.DisposeAsync();
+    }
 
     [Fact]
     public void World_Update()

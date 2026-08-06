@@ -2,26 +2,20 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using NSubstitute;
 using QuantumCore;
 using QuantumCore.Game.Persistence;
 using QuantumCore.Game.Persistence.Extensions;
 using Serilog;
 using Testcontainers.MySql;
 using Testcontainers.PostgreSql;
-using Xunit.Abstractions;
 
 namespace Game.Tests;
 
 public class MigrateTests
 {
-    private readonly ITestOutputHelper _testOutputHelper;
-
-    public MigrateTests(ITestOutputHelper testOutputHelper)
-    {
-        _testOutputHelper = testOutputHelper;
-    }
-
     [Fact]
     public async Task MysqlAsync()
     {
@@ -30,7 +24,7 @@ public class MigrateTests
             .WithUsername("metin2")
             .WithPassword("metin2")
             .Build();
-        await container.StartAsync();
+        await container.StartAsync(TestContext.Current.CancellationToken);
         await ExecuteMigrateAsync(DatabaseProvider.MYSQL, container.GetConnectionString());
         Assert.True(true);
     }
@@ -43,7 +37,7 @@ public class MigrateTests
             .WithUsername("metin2")
             .WithPassword("metin2")
             .Build();
-        await container.StartAsync();
+        await container.StartAsync(TestContext.Current.CancellationToken);
         await ExecuteMigrateAsync(DatabaseProvider.POSTGRESQL, container.GetConnectionString());
         Assert.True(true);
     }
@@ -56,18 +50,19 @@ public class MigrateTests
         Assert.True(true);
     }
 
-    private async Task ExecuteMigrateAsync(DatabaseProvider provider, string connectionString)
+    private static async Task ExecuteMigrateAsync(DatabaseProvider provider, string connectionString)
     {
         var services = new ServiceCollection()
             .AddLogging(cfg =>
             {
                 cfg.ClearProviders();
                 cfg.AddSerilog(new LoggerConfiguration()
-                    .WriteTo.TestOutput(_testOutputHelper)
+                    .WriteTo.Console()
                     .WriteTo.Console()
                     .MinimumLevel.Debug()
                     .CreateLogger());
             })
+            .AddSingleton(Substitute.For<IHostEnvironment>())
             .AddSingleton<IConfiguration>(_ => new ConfigurationBuilder().Build())
             .AddGameDatabase()
             .Configure<DatabaseOptions>(HostingOptions.MODE_GAME, opts =>

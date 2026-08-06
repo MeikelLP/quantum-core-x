@@ -101,7 +101,7 @@ public class ParserTests
                                           }
                                           """);
 
-        var groups = await _parserService.ParseFileGroupsAsync(input);
+        var groups = await _parserService.ParseFileGroupsAsync(input, TestContext.Current.CancellationToken);
 
         var result = groups.Select(x => x.ToSpawnGroup()).FirstOrDefault();
 
@@ -131,7 +131,7 @@ public class ParserTests
                                           }
                                           """);
 
-        var groups = await _parserService.ParseFileGroupsAsync(input);
+        var groups = await _parserService.ParseFileGroupsAsync(input, TestContext.Current.CancellationToken);
 
         var result = groups.Select(x => x.ToSpawnGroup()).FirstOrDefault();
 
@@ -166,7 +166,7 @@ public class ParserTests
                                           }
                                           """);
 
-        var groups = await _parserService.ParseFileGroupsAsync(input);
+        var groups = await _parserService.ParseFileGroupsAsync(input, TestContext.Current.CancellationToken);
 
         var result = groups.Select(x => x.ToSpawnGroup()).FirstOrDefault();
 
@@ -194,7 +194,7 @@ public class ParserTests
                                           }
                                           """);
 
-        var groups = await _parserService.ParseFileGroupsAsync(input);
+        var groups = await _parserService.ParseFileGroupsAsync(input, TestContext.Current.CancellationToken);
 
         var result = groups.Select(x => x.ToSpawnGroupCollection()).FirstOrDefault();
 
@@ -229,7 +229,7 @@ public class ParserTests
                                           }
                                           """);
 
-        var groups = await _parserService.ParseFileGroupsAsync(input);
+        var groups = await _parserService.ParseFileGroupsAsync(input, TestContext.Current.CancellationToken);
 
         var result = groups.Select(x => x.ToSpawnGroupCollection()).FirstOrDefault();
 
@@ -259,7 +259,7 @@ public class ParserTests
 
                                           """);
 
-        var groups = await _parserService.ParseFileGroupsAsync(input);
+        var groups = await _parserService.ParseFileGroupsAsync(input, TestContext.Current.CancellationToken);
 
         var result = groups.Select(x => x.ToSpawnGroupCollection()).FirstOrDefault();
 
@@ -288,7 +288,7 @@ public class ParserTests
                                           }
                                           """);
 
-        var groups = await _parserService.ParseFileGroupsAsync(input);
+        var groups = await _parserService.ParseFileGroupsAsync(input, TestContext.Current.CancellationToken);
 
         var result = groups.Select(x => x.ToSpawnGroupCollection()).FirstOrDefault();
 
@@ -315,7 +315,7 @@ public class ParserTests
                                           }
                                           """);
 
-        var groups = await _parserService.ParseFileGroupsAsync(input);
+        var groups = await _parserService.ParseFileGroupsAsync(input, TestContext.Current.CancellationToken);
 
         var result = groups.Select(x => x.ToSpawnGroupCollection()).FirstOrDefault();
 
@@ -335,7 +335,7 @@ public class ParserTests
 
                                           """);
 
-        var groups = await _parserService.ParseFileGroupsAsync(input);
+        var groups = await _parserService.ParseFileGroupsAsync(input, TestContext.Current.CancellationToken);
 
         var result = groups.Select(x => x.ToSpawnGroup()).FirstOrDefault();
 
@@ -361,7 +361,7 @@ public class ParserTests
 
         var itemManager = Substitute.For<IItemManager>();
 
-        var groups = await _parserService.ParseFileGroupsAsync(input);
+        var groups = await _parserService.ParseFileGroupsAsync(input, TestContext.Current.CancellationToken);
 
         var mobDrops = groups.Select(x => _parserService.ParseMobGroup(x, itemManager)).ToList();
 
@@ -404,7 +404,7 @@ public class ParserTests
 
         var itemManager = Substitute.For<IItemManager>();
 
-        var groups = await _parserService.ParseFileGroupsAsync(input);
+        var groups = await _parserService.ParseFileGroupsAsync(input, TestContext.Current.CancellationToken);
 
         var mobDrops = groups.Select(x => _parserService.ParseMobGroup(x, itemManager)).ToList();
 
@@ -458,7 +458,7 @@ public class ParserTests
 
         var itemManager = Substitute.For<IItemManager>();
 
-        var groups = await _parserService.ParseFileGroupsAsync(input);
+        var groups = await _parserService.ParseFileGroupsAsync(input, TestContext.Current.CancellationToken);
 
         var mobDrops = groups.Select(x => _parserService.ParseMobGroup(x, itemManager)).ToList();
 
@@ -504,7 +504,7 @@ public class ParserTests
 
         var itemManager = Substitute.For<IItemManager>();
 
-        var groups = await _parserService.ParseFileGroupsAsync(input);
+        var groups = await _parserService.ParseFileGroupsAsync(input, TestContext.Current.CancellationToken);
 
         var mobDrops = groups.Select(x => _parserService.ParseMobGroup(x, itemManager)).ToList();
 
@@ -560,7 +560,7 @@ public class ParserTests
 
         var itemManager = Substitute.For<IItemManager>();
 
-        var groups = await _parserService.ParseFileGroupsAsync(input);
+        var groups = await _parserService.ParseFileGroupsAsync(input, TestContext.Current.CancellationToken);
 
         var mobDrops = groups.Select(x => _parserService.ParseMobGroup(x, itemManager)).ToList();
 
@@ -605,7 +605,7 @@ public class ParserTests
 
         var itemManager = Substitute.For<IItemManager>();
 
-        var groups = await _parserService.ParseFileGroupsAsync(input);
+        var groups = await _parserService.ParseFileGroupsAsync(input, TestContext.Current.CancellationToken);
 
         var mobDrops = groups.Select(x => _parserService.ParseMobGroup(x, itemManager)).ToList();
 
@@ -659,7 +659,7 @@ public class ParserTests
 
         var itemManager = Substitute.For<IItemManager>();
 
-        var groups = await _parserService.ParseFileGroupsAsync(input);
+        var groups = await _parserService.ParseFileGroupsAsync(input, TestContext.Current.CancellationToken);
 
         var mobDrops = groups.Select(x => _parserService.ParseMobGroup(x, itemManager)).ToList();
 
@@ -707,7 +707,7 @@ public class ParserTests
 
         var itemManager = Substitute.For<IItemManager>();
 
-        var groups = await _parserService.ParseFileGroupsAsync(input);
+        var groups = await _parserService.ParseFileGroupsAsync(input, TestContext.Current.CancellationToken);
 
         var mobDrops = groups.Select(x => _parserService.ParseMobGroup(x, itemManager)).ToList();
 
@@ -762,7 +762,7 @@ public class ParserTests
 
         var itemManager = Substitute.For<IItemManager>();
 
-        var groups = await _parserService.ParseFileGroupsAsync(input);
+        var groups = await _parserService.ParseFileGroupsAsync(input, TestContext.Current.CancellationToken);
 
         var mobDrops = groups.Select(x => _parserService.ParseMobGroup(x, itemManager)).ToList();
 
@@ -816,7 +816,7 @@ public class ParserTests
 
         var itemManager = Substitute.For<IItemManager>();
 
-        var groups = await _parserService.ParseFileGroupsAsync(input);
+        var groups = await _parserService.ParseFileGroupsAsync(input, TestContext.Current.CancellationToken);
 
         var mobDrops = groups.Select(x => _parserService.ParseMobGroup(x, itemManager)).ToList();
 
@@ -888,7 +888,7 @@ public class ParserTests
 
         var itemManager = Substitute.For<IItemManager>();
 
-        var groups = await _parserService.ParseFileGroupsAsync(input);
+        var groups = await _parserService.ParseFileGroupsAsync(input, TestContext.Current.CancellationToken);
 
         var mobDrops = groups.Select(x => _parserService.ParseMobGroup(x, itemManager)).ToList();
 
@@ -956,7 +956,7 @@ public class ParserTests
 
         var itemManager = Substitute.For<IItemManager>();
 
-        var groups = await _parserService.ParseFileGroupsAsync(input);
+        var groups = await _parserService.ParseFileGroupsAsync(input, TestContext.Current.CancellationToken);
 
         var mobDrops = groups.Select(x => _parserService.ParseMobGroup(x, itemManager)).ToList();
 
@@ -1123,7 +1123,7 @@ public class ParserTests
                                            ABC	1	15	0.08	11	5000
                                            """);
 
-        var result = await _parserService.GetCommonDropsAsync(input);
+        var result = await _parserService.GetCommonDropsAsync(input, TestContext.Current.CancellationToken);
 
         result.Should().HaveCount(1);
         result[0].MinLevel.Should().Be(1);
@@ -1139,7 +1139,7 @@ public class ParserTests
                                            	1	15	0.08	11	5000
                                            """);
 
-        var result = await _parserService.GetCommonDropsAsync(input);
+        var result = await _parserService.GetCommonDropsAsync(input, TestContext.Current.CancellationToken);
 
         result.Should().HaveCount(1);
         result[0].MinLevel.Should().Be(1);
@@ -1155,7 +1155,7 @@ public class ParserTests
 
                                            """);
 
-        var result = await _parserService.GetCommonDropsAsync(input);
+        var result = await _parserService.GetCommonDropsAsync(input, TestContext.Current.CancellationToken);
 
         result.Should().HaveCount(0);
     }
@@ -1167,7 +1167,7 @@ public class ParserTests
                                            ABC	1	15	0.08	11	5000	DEF	1	15	0.104	11	3846	GHI	1	15	0.12	11	3333	JKL	1	15	0.32	11	1250
                                            """);
 
-        var result = await _parserService.GetCommonDropsAsync(input);
+        var result = await _parserService.GetCommonDropsAsync(input, TestContext.Current.CancellationToken);
 
         result.Should().HaveCount(4);
         result[0].MinLevel.Should().Be(1);
@@ -1198,7 +1198,7 @@ public class ParserTests
                                            1	15	0.04	12	10000		1	15	0.052	12	7692		1	15	0.06	12	6666		1	15	0.16	12	2500
                                            """);
 
-        var result = await _parserService.GetCommonDropsAsync(input);
+        var result = await _parserService.GetCommonDropsAsync(input, TestContext.Current.CancellationToken);
 
         result.Should().HaveCount(4);
         result[0].MinLevel.Should().Be(1);

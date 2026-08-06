@@ -6,10 +6,9 @@ using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
 using QuantumCore.API;
 using QuantumCore.API.Game.World;
-using QuantumCore.Game;
+using QuantumCore.API.Packets;
 using QuantumCore.Game.Commands;
 using QuantumCore.Game.Persistence.Entities;
-using Xunit.Abstractions;
 
 namespace Game.Commands.Tests;
 
@@ -19,22 +18,24 @@ public class NonStrictCommandManagerTests
     private readonly IGameConnection _connection;
     private readonly List<string> _chatInfos = new();
 
-    public NonStrictCommandManagerTests(ITestOutputHelper outputHelper)
+    public NonStrictCommandManagerTests()
     {
         var services = new ServiceCollection()
             .AddSingleton(_ =>
             {
+                var conn = Substitute.For<IGameConnection>();
                 var player = Substitute.For<IPlayerEntity>();
                 player.Groups.Returns([PermGroup.OperatorGroup]);
-                player.When(x => x.SendChatInfo(Arg.Any<string>())).Do(info => _chatInfos.Add(info.Arg<string>()!));
-                var conn = Substitute.For<IGameConnection>();
+                player.Connection.Returns(conn);
+                conn.When(x => x.Send(Arg.Any<ChatOutcoming>()))
+                    .Do(info => _chatInfos.Add(info.Arg<ChatOutcoming>()!.Message));
                 conn.Player.Returns(player);
                 conn.BoundIpAddress.Returns(IPAddress.Loopback);
                 return conn;
             })
             .AddSingleton<IConfiguration>(_ => new ConfigurationBuilder().Build())
             .AddGameCommands()
-            .AddQuantumCoreTestLogger(outputHelper)
+            .AddQuantumCoreTestLogger()
             .BuildServiceProvider();
         _commandManager = services.GetRequiredService<ICommandManager>();
         _connection = services.GetRequiredService<IGameConnection>();
@@ -46,6 +47,6 @@ public class NonStrictCommandManagerTests
         _commandManager.Register(typeof(SetJobCommand).Namespace!, typeof(SetJobCommand).Assembly);
         await _commandManager.HandleAsync(_connection, "/setjob b");
 
-        _chatInfos.Should().BeEquivalentTo(["Comannd validation failed:", "  value pos. 0    Required."]);
+        _chatInfos.Should().BeEquivalentTo(["Command validation failed:", "  value pos. 0    Required."]);
     }
 }
