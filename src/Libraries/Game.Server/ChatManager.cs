@@ -2,12 +2,14 @@
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.World;
 using QuantumCore.API.Packets;
+using QuantumCore.Game.Extensions;
 using QuantumCore.Game.World.Entities;
 
 namespace QuantumCore.Game;
 
 internal sealed class ChatManager : IChatManager, ILoadable
 {
+    private readonly IGameServer _gameServer;
     private readonly IRedisStore _cacheManager;
 
     private struct ChatMessage
@@ -20,9 +22,10 @@ internal sealed class ChatManager : IChatManager, ILoadable
     private IRedisSubscriber? _subscriber;
     private Guid _id;
 
-    public ChatManager(ICacheManager cacheManager)
+    public ChatManager(ICacheManager cacheManager, IGameServer gameServer)
     {
         ArgumentNullException.ThrowIfNull(cacheManager);
+        _gameServer = gameServer;
         _cacheManager = cacheManager.Server;
     }
 
@@ -56,7 +59,7 @@ internal sealed class ChatManager : IChatManager, ILoadable
         };
 
         // Send message to all connections in the game phase
-        GameServer.Instance.ForAllConnections(connection =>
+        _gameServer.ForAllConnections(connection =>
         {
             if (connection.Phase != EPhase.GAME)
             {
@@ -100,7 +103,7 @@ internal sealed class ChatManager : IChatManager, ILoadable
         };
 
         // Send message to all connections in the game phase
-        GameServer.Instance.ForAllConnections(connection =>
+        _gameServer.ForAllConnections(connection =>
         {
             if (connection.Phase != EPhase.GAME)
             {
@@ -125,7 +128,7 @@ internal sealed class ChatManager : IChatManager, ILoadable
             Message = message
         };
 
-        GameServer.Instance.ForAllConnections(connection =>
+        _gameServer.ForAllConnections(connection =>
         {
             if (connection.Phase == EPhase.GAME)
             {

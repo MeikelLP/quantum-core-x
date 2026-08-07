@@ -247,10 +247,11 @@ public class World : IWorld
             return new CoreHost { Ip = remoteMap.Host, Port = remoteMap.Port };
         }
 
+        var server = _serviceProvider.GetRequiredService<IServerBase>();
         return new CoreHost
         {
-            Ip = _serviceProvider.GetRequiredService<IServerBase>().IpAddress, // lazy because of dependency loop
-            Port = GameServer.Instance.Port
+            Ip = server.IpAddress, // lazy because of dependency loop
+            Port = server.Port
         };
     }
 

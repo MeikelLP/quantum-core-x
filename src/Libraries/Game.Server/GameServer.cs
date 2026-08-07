@@ -32,20 +32,17 @@ public class GameServer : ServerBase<GameConnection>, IGameServer
     public new ImmutableArray<IGameConnection> Connections =>
         [.. base.Connections.Values.Cast<IGameConnection>()];
 
-    public static GameServer Instance { get; private set; } = null!; // singleton
-
     public GameServer(
         [FromKeyedServices(HostingOptions.MODE_GAME)]
         IPacketManager packetManager, ILogger<GameServer> logger,
         PluginExecutor pluginExecutor, IServiceProvider serviceProvider, ServerClock clock,
-        ICommandManager commandManager)
+        ICommandManager commandManager, IWorld world)
         : base(packetManager, logger, pluginExecutor, serviceProvider, clock, HostingOptions.MODE_GAME)
     {
         _logger = logger;
         _pluginExecutor = pluginExecutor;
         _commandManager = commandManager;
-        Instance = this;
-        _world = Scope.ServiceProvider.GetRequiredService<IWorld>();
+        _world = world;
         _lastTick = Clock.Now;
         Meter.CreateObservableGauge("Connections", () => Connections.Length);
     }
@@ -60,7 +57,9 @@ public class GameServer : ServerBase<GameConnection>, IGameServer
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         // Load game data
-        await Task.WhenAll(Scope.ServiceProvider.GetServices<ILoadable>().Select(async x =>
+        var loadables = Scope.ServiceProvider.GetServices<ILoadable>().ToArray();
+        _logger.LogDebug("Loading loadables: {Loadables}", loadables.Select(x => x.GetType().Name));
+        await Task.WhenAll(loadables.Select(async x =>
         {
             try
             {
@@ -68,9 +67,9 @@ public class GameServer : ServerBase<GameConnection>, IGameServer
             }
             catch (Exception e)
             {
-                _logger.LogError(
-                    "Loadable {Name} failed to load. This may or may not be an error. Please review it's error message: {Error}",
-                    x.GetType().Name, e.Message);
+                _logger.LogError(e,
+                    "Loadable {Name} failed to load. This may or may not be an error. Please review it's error message",
+                    x.GetType().Name);
             }
         }));
 
@@ -87,13 +86,11 @@ public class GameServer : ServerBase<GameConnection>, IGameServer
             return true;
         });
 
-        _logger.LogInformation("Start listening for connections...");
-
         StartListening();
 
-        _lastTick = Clock.Now;
+        _logger.LogInformation("Start listening for connections...");
 
-        _logger.LogDebug("Start!");
+        _lastTick = Clock.Now;
 
         while (!stoppingToken.IsCancellationRequested)
         {

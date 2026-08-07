@@ -106,15 +106,6 @@ public abstract class ServerBase<T> : BackgroundService, IServerBase
         }
     }
 
-    public void ForAllConnections(Action<IConnection> callback)
-    {
-        ArgumentNullException.ThrowIfNull(callback);
-        foreach (var connection in Connections.Values)
-        {
-            callback(connection);
-        }
-    }
-
     public void RegisterNewConnectionListener(Func<IConnection, bool> listener)
     {
         _connectionListeners.Add(listener);

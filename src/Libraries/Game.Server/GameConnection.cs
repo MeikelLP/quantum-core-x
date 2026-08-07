@@ -37,7 +37,7 @@ public class GameConnection : Connection, IGameConnection
 
     protected override void OnHandshakeFinished()
     {
-        GameServer.Instance.CallConnectionListener(this);
+        Server.CallConnectionListener(this);
         var pingInterval = TimeSpan.FromSeconds(NetworkingConstants.PingIntervalInSeconds);
         var ping = new Ping();
         EventSystem.EnqueueEvent(() =>
