@@ -5,7 +5,7 @@
   ],
   "packageRules": [
     {
-      "matchPackageNames": ["Microsoft.EntityFrameworkCore*", "Npgsql.EntityFrameworkCore.PostgreSQL"],
+      "matchPackageNames": ["Microsoft.EntityFrameworkCore*", "Npgsql.EntityFrameworkCore.PostgreSQL", "dotnet-ef"],
       "allowedVersions": "< 10"
     }
   ]
