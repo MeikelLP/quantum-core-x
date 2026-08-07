@@ -19,7 +19,7 @@ using QuantumCore.Game.World.Entities;
 
 namespace QuantumCore.Game.Services;
 
-public class DropProvider : IDropProvider, ILoadable
+internal sealed class DropProvider : IDropProvider, ILoadable
 {
     private static readonly Encoding FileEncoding = Encoding.GetEncoding("EUC-KR");
     private readonly Dictionary<uint, MonsterItemGroup> _monsterDrops = new();

@@ -13,7 +13,7 @@ namespace QuantumCore.Game;
 /// <summary>
 /// Manage all static data related to monster
 /// </summary>
-public class MonsterManager : IMonsterManager, ILoadable
+internal sealed class MonsterManager : IMonsterManager, ILoadable
 {
     private readonly ILogger<MonsterManager> _logger;
     private readonly IFileProvider _fileProvider;

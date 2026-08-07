@@ -6,7 +6,7 @@ using QuantumCore.API.Game.Types.Entities;
 
 namespace QuantumCore.Game;
 
-public class AnimationManager : IAnimationManager, ILoadable
+internal sealed class AnimationManager : IAnimationManager, ILoadable
 {
     private readonly Dictionary<uint, Dictionary<AnimationType, Dictionary<AnimationSubType, Animation>>>
         _animations = new();

@@ -5,7 +5,7 @@ using QuantumCore.API;
 
 namespace QuantumCore.Game.PlayerUtils;
 
-public class ExperienceManager : IExperienceManager, ILoadable
+internal sealed class ExperienceManager : IExperienceManager, ILoadable
 {
     private readonly ILogger<ExperienceManager> _logger;
     private readonly IFileProvider _fileProvider;

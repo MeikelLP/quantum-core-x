@@ -6,7 +6,7 @@ using QuantumCore.Game.World.Entities;
 
 namespace QuantumCore.Game;
 
-public class ChatManager : IChatManager, ILoadable
+internal sealed class ChatManager : IChatManager, ILoadable
 {
     private readonly IRedisStore _cacheManager;
 

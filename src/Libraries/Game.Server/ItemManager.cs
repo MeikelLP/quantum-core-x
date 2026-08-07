@@ -13,7 +13,7 @@ namespace QuantumCore.Game;
 /// <summary>
 /// Manage all static data related to items
 /// </summary>
-public class ItemManager : IItemManager, ILoadable
+internal sealed class ItemManager : IItemManager, ILoadable
 {
     private readonly ILogger<ItemManager> _logger;
     private readonly IFileProvider _fileProvider;

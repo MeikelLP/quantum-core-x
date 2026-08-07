@@ -8,7 +8,7 @@ using QuantumCore.Game.World.Entities;
 
 namespace QuantumCore.Game.Quest;
 
-public class QuestManager : IQuestManager, ILoadable
+internal sealed class QuestManager : IQuestManager, ILoadable
 {
     private readonly IServiceProvider _serviceProvider;
     private readonly ILogger<QuestManager> _logger;
