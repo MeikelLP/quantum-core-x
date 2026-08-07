@@ -3,13 +3,17 @@ using Game.Caching.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using QuantumCore.API;
+using QuantumCore.API.Extensions;
 using QuantumCore.API.Game.Guild;
+using QuantumCore.API.Game.World;
 using QuantumCore.API.PluginTypes;
 using QuantumCore.Extensions;
 using QuantumCore.Game.Commands;
 using QuantumCore.Game.Persistence.Extensions;
 using QuantumCore.Game.PlayerUtils;
+using QuantumCore.Game.Quest;
 using QuantumCore.Game.Services;
+using QuantumCore.Game.Shops;
 
 namespace QuantumCore.Game.Extensions;
 
@@ -24,10 +28,6 @@ public static class ServiceExtensions
                 .AddClasses(classes => classes.AssignableTo<IPacketHandler>())
                 .AsImplementedInterfaces()
                 .WithScopedLifetime();
-            scan.FromAssemblyOf<GameServer>()
-                .AddClasses(classes => classes.AssignableTo<ILoadable>(), false)
-                .AsSelfWithInterfaces()
-                .WithSingletonLifetime();
         });
         services.AddGameDatabase();
         services.AddGameCaching();
@@ -41,6 +41,17 @@ public static class ServiceExtensions
             var options = provider.GetRequiredService<IOptions<AuthOptions>>().Value;
             http.BaseAddress = new Uri(options.BaseUrl);
         });
+        services.AddLoadable<IAnimationManager, AnimationManager>();
+        services.AddLoadable<IChatManager, ChatManager>();
+        services.AddLoadable<IItemManager, ItemManager>();
+        services.AddLoadable<IMonsterManager, MonsterManager>();
+        services.AddLoadable<IExperienceManager, ExperienceManager>();
+        services.AddLoadable<IQuestManager, QuestManager>();
+        services.AddLoadable<IDropProvider, DropProvider>();
+        services.AddLoadable<INpcShopProvider, TsvShopProvider>();
+        services.AddLoadable<ISkillManager, SkillManager>();
+        services.AddLoadable<IWorld, World.World>();
+        services.AddSingleton<ILoadable, SessionManager>();
         services.AddSingleton<IGuildExperienceManager, GuildExperienceManager>();
         services.AddSingleton<IParserService, ParserService>();
         services.AddSingleton<ISpawnGroupProvider, SpawnGroupProvider>();
