@@ -6,7 +6,7 @@ using QuantumCore.API;
 
 namespace QuantumCore.Game.Shops;
 
-internal class NpcShopProvider : INpcShopProvider, ILoadable
+internal class JsonNpcShopProvider : INpcShopProvider, ILoadable
 {
     private static readonly JsonSerializerOptions _jsonSerializerOptions = new JsonSerializerOptions
     {
@@ -16,10 +16,10 @@ internal class NpcShopProvider : INpcShopProvider, ILoadable
     };
 
     private readonly IFileProvider _fileProvider;
-    private readonly ILogger<NpcShopProvider> _logger;
+    private readonly ILogger<JsonNpcShopProvider> _logger;
     public ImmutableArray<ShopMonsterInfo> Shops { get; private set; }
 
-    public NpcShopProvider(IFileProvider fileProvider, ILogger<NpcShopProvider> logger)
+    public JsonNpcShopProvider(IFileProvider fileProvider, ILogger<JsonNpcShopProvider> logger)
     {
         _fileProvider = fileProvider;
         _logger = logger;
