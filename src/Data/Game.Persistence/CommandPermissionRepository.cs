@@ -47,6 +47,7 @@ public class CommandPermissionRepository : ICommandPermissionRepository
     public async Task<IEnumerable<PermissionGroup>> GetGroupsAsync()
     {
         return await _db.PermissionGroups
+            .AsSplitQuery()
             .Select(x => new PermissionGroup
             {
                 Id = x.Id,
