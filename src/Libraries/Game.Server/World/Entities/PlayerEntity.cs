@@ -842,11 +842,6 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
             case EPoint.SUB_SKILL:
                 return 1;
             default:
-                if (Enum.GetValues<EPoint>().Contains(point))
-                {
-                    _logger.LogWarning("Point {Point} is not implemented on player", point);
-                }
-
                 return 0;
         }
     }
