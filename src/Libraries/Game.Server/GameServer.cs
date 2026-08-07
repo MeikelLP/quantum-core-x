@@ -60,7 +60,19 @@ public class GameServer : ServerBase<GameConnection>, IGameServer
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         // Load game data
-        await Task.WhenAll(Scope.ServiceProvider.GetServices<ILoadable>().Select(x => x.LoadAsync(stoppingToken)));
+        await Task.WhenAll(Scope.ServiceProvider.GetServices<ILoadable>().Select(async x =>
+        {
+            try
+            {
+                await x.LoadAsync(stoppingToken);
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(
+                    "Loadable {Name} failed to load. This may or may not be an error. Please review it's error message: {Error}",
+                    x.GetType().Name, e.Message);
+            }
+        }));
 
         await _world.InitAsync();
 
