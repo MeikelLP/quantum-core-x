@@ -36,12 +36,13 @@ public static class ServiceExtensions
         {
             var packetLocationProvider = provider.GetRequiredKeyedService<IPacketLocationProvider>(key);
             var assemblies = packetLocationProvider.GetPacketAssemblies();
-            var packetTypes = assemblies.SelectMany(x => x.ExportedTypes)
+            var assemblyTypes = assemblies.SelectMany(x => x.DefinedTypes).ToArray();
+            var packetTypes = assemblyTypes
                 .Where(x => x.IsAssignableTo(typeof(IPacketSerializable)) &&
                             x.GetCustomAttribute<PacketAttribute>()?.Direction.HasFlag(EDirection.INCOMING) == true)
                 .OrderBy(x => x.FullName)
                 .ToArray();
-            var handlerTypes = assemblies.SelectMany(x => x.ExportedTypes)
+            var handlerTypes = assemblyTypes
                 .Where(x =>
                     x.IsAssignableTo(typeof(IPacketHandler)) &&
                     x is { IsClass: true, IsAbstract: false, IsInterface: false })
