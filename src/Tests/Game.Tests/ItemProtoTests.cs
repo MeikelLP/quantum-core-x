@@ -45,7 +45,7 @@ public class ItemProtoTests
             Flags = 1u,
             Applies =
             [
-                new ItemApplyData { Type = (byte)EApplyType.ATTACK_SPEED, Value = 22 },
+                new ItemApplyData { Type = (byte)EApplyType.ATT_SPEED, Value = 22 },
                 new ItemApplyData { Type = 0, Value = 0 },
                 new ItemApplyData { Type = 0, Value = 0 },
             ],
@@ -80,7 +80,7 @@ public class ItemProtoTests
     {
         await _itemManager.LoadAsync(TestContext.Current.CancellationToken);
         var item = _itemManager.GetItem(10);
-        var value = item!.GetApplyValue(EApplyType.ATTACK_SPEED);
+        var value = item!.GetApplyValue(EApplyType.ATT_SPEED);
         value.Should().Be(22);
     }
 }

@@ -124,16 +124,16 @@ public class CommandTests : IAsyncLifetime
             .RuleFor(x => x.PlayerClass, _ => EPlayerClassGendered.WARRIOR_MALE)
             .Ignore(x => x.Health)
             .Ignore(x => x.Mana);
-        var monsterManagerMock = Substitute.For<IMonsterManager>();
+        var monsterManagerMock = Substitute.For<IMonsterManager, ILoadable>();
         monsterManagerMock.GetMonster(Arg.Any<uint>()).Returns(callerInfo =>
             new AutoFaker<MonsterData>().RuleFor(x => x.Id, _ => callerInfo.Arg<uint>()).Generate());
         monsterManagerMock.GetMonsters().Returns([]);
-        var experienceManagerMock = Substitute.For<IExperienceManager>();
+        var experienceManagerMock = Substitute.For<IExperienceManager, ILoadable>();
         experienceManagerMock.GetNeededExperience(Arg.Any<byte>()).Returns(1000u);
         experienceManagerMock.MaxLevel.Returns((byte)100);
         var jobManagerMock = Substitute.For<IJobManager>();
         jobManagerMock.Get(Arg.Any<EPlayerClassGendered>()).Returns(new Job());
-        var itemManagerMock = Substitute.For<IItemManager>();
+        var itemManagerMock = Substitute.For<IItemManager, ILoadable>();
         itemManagerMock.GetItem(Arg.Any<uint>()).Returns(call => new AutoFaker<ItemData>()
             .RuleFor(x => x.Id, new Func<Faker, ItemData, uint>((faker, data) => call.Arg<uint>()))
             .RuleFor(x => x.Size, _ => (byte)1)
@@ -156,7 +156,7 @@ public class CommandTests : IAsyncLifetime
         cacheManagerMock.KeysAsync(Arg.Any<string>()).Returns([]);
         cacheManagerMock.CreateList<Guid>(Arg.Any<string>()).Returns(redisListWrapperMock);
         cacheManagerMock.Subscribe().Returns(redisSubscriberWrapperMock);
-        _skillManager = Substitute.For<ISkillManager>();
+        _skillManager = Substitute.For<ISkillManager, ILoadable>();
         var fileProvider = Substitute.For<IFileProvider>();
         fileProvider.GetFileInfo("maps/map_b2/Town.txt").Returns(_ =>
         {
@@ -174,6 +174,8 @@ public class CommandTests : IAsyncLifetime
                 $"map_b2	{Map.MAP_UNIT * 10}	{Map.MAP_UNIT * 26}	6	6")));
             return fileInfo;
         });
+        var npcShopProvider = Substitute.For<INpcShopProvider, ILoadable>();
+        npcShopProvider.Shops.Returns([]);
         _services = new ServiceCollection()
             .AddCoreServices(new EmptyPluginCatalog(), new ConfigurationBuilder().Build())
             .AddGameServices()
@@ -200,6 +202,7 @@ public class CommandTests : IAsyncLifetime
             .Replace(new ServiceDescriptor(typeof(ICacheManager), _ => cacheManagerMock, ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(IGuildManager), _ => Substitute.For<IGuildManager>(),
                 ServiceLifetime.Scoped))
+            .Replace(new ServiceDescriptor(typeof(INpcShopProvider), _ => npcShopProvider, ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(IExperienceManager), _ => experienceManagerMock,
                 ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(ISkillManager), _ => _skillManager, ServiceLifetime.Singleton))

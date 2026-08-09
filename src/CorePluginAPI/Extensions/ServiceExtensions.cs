@@ -18,7 +18,21 @@ public static class ServiceExtensions
 
         services.Add(new ServiceDescriptor(typeof(TService), key, typeof(TImplementation), lifetime));
         services.Add(new ServiceDescriptor(typeof(ILoadable), key,
-            (provider, k) => provider.GetRequiredKeyedService(typeof(TService), k), lifetime));
+            (provider, k) =>
+            {
+                var service = provider.GetRequiredKeyedService(typeof(TService), k);
+                try
+                {
+                    return (ILoadable)service;
+                }
+                catch (InvalidCastException e)
+                {
+                    // improve error message especially for tests
+                    throw new InvalidCastException($"Cannot cast type of {service.GetType()} to {typeof(TService)}. " +
+                                                   $"You probably didn't use the AddLoadable extension method or are trying to replace a service with a mock that doesn't implement ILoadable.",
+                        e);
+                }
+            }, lifetime));
 
         return services;
     }

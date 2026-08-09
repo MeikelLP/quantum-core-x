@@ -78,6 +78,14 @@ public class WorldTests : IAsyncLifetime
                 mock.Subscribe().Returns(Substitute.For<IRedisSubscriber>());
                 return mock;
             }, ServiceLifetime.Singleton))
+            .Replace(new ServiceDescriptor(typeof(ICommandManager), null,
+                (_, _) => Substitute.For<ICommandManager, ILoadable>(), ServiceLifetime.Singleton))
+            .Replace(new ServiceDescriptor(typeof(INpcShopProvider), null, (_, _) =>
+            {
+                var npcShopProvider = Substitute.For<INpcShopProvider, ILoadable>();
+                npcShopProvider.Shops.Returns([]);
+                return npcShopProvider;
+            }, ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(ISpawnPointProvider), _ =>
             {
                 var mock = Substitute.For<ISpawnPointProvider>();
@@ -102,13 +110,13 @@ public class WorldTests : IAsyncLifetime
             }, ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(IJobManager), _ =>
             {
-                var mock = Substitute.For<IJobManager>();
+                var mock = Substitute.For<IJobManager, ILoadable>();
                 mock.Get(EPlayerClassGendered.NINJA_FEMALE).Returns(new Job());
                 return mock;
             }, ServiceLifetime.Singleton))
             .Replace(new ServiceDescriptor(typeof(IMonsterManager), _ =>
             {
-                var mock = Substitute.For<IMonsterManager>();
+                var mock = Substitute.For<IMonsterManager, ILoadable>();
                 mock.GetMonster(42).Returns(new MonsterData { Type = (byte)EEntityType.MONSTER });
                 mock.GetMonsters().Returns([
                     new MonsterData { Type = (byte)EEntityType.MONSTER }
