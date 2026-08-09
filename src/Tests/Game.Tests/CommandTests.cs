@@ -126,7 +126,10 @@ public class CommandTests : IAsyncLifetime
             .Ignore(x => x.Mana);
         var monsterManagerMock = Substitute.For<IMonsterManager, ILoadable>();
         monsterManagerMock.GetMonster(Arg.Any<uint>()).Returns(callerInfo =>
-            new AutoFaker<MonsterData>().RuleFor(x => x.Id, _ => callerInfo.Arg<uint>()).Generate());
+            new AutoFaker<MonsterData>()
+                .RuleFor(x => x.Id, _ => callerInfo.Arg<uint>())
+                .RuleFor(x => x.Type, _ => EEntityType.MONSTER)
+                .Generate());
         monsterManagerMock.GetMonsters().Returns([]);
         var experienceManagerMock = Substitute.For<IExperienceManager, ILoadable>();
         experienceManagerMock.GetNeededExperience(Arg.Any<byte>()).Returns(1000u);

@@ -21,7 +21,7 @@ public class MonsterEntity : Entity
     private readonly IDropProvider _dropProvider;
     private readonly ILogger _logger;
     public override EEntityType Type => EEntityType.MONSTER;
-    public bool IsStone => Proto.Type == (byte)EEntityType.METIN_STONE;
+    public bool IsStone => Proto.Type == EEntityType.METIN_STONE;
     public EMonsterLevel Rank => (EMonsterLevel)Proto.Rank;
 
     public override IEntity? Target
@@ -89,11 +89,11 @@ public class MonsterEntity : Entity
             // it's a monster
             _behaviour = new SimpleBehaviour(monsterManager);
         }
-        else if (Proto.Type == (byte)EEntityType.NPC)
+        else if (Proto.Type == EEntityType.NPC)
         {
             // npc
         }
-        else if (Proto.Type == (byte)EEntityType.METIN_STONE)
+        else if (Proto.Type == EEntityType.METIN_STONE)
         {
             _behaviour = ActivatorUtilities.CreateInstance<StoneBehaviour>(serviceProvider);
         }
@@ -330,7 +330,7 @@ public class MonsterEntity : Entity
             AttackSpeed = (byte)Proto.AttackSpeed
         });
 
-        if (Proto.Type == (byte)EEntityType.NPC)
+        if (Proto.Type == EEntityType.NPC)
         {
             // NPCs need additional information too to show up for some reason
             connection.Send(new CharacterInfo

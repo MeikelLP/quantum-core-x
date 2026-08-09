@@ -2,6 +2,7 @@ using System.Diagnostics;
 using BinarySerialization;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.Types.Combat;
+using QuantumCore.API.Game.Types.Entities;
 using QuantumCore.API.Game.Types.Monsters;
 
 namespace QuantumCore.API.Core.Models;
@@ -22,7 +23,7 @@ public class MonsterData
     [SerializeAs(SerializedType.TerminatedString)]
     public string TranslatedName { get; set; } = "";
 
-    [FieldOrder(3)] public byte Type { get; set; }
+    [FieldOrder(3)] public EEntityType Type { get; set; }
     [FieldOrder(4)] public byte Rank { get; set; }
     [FieldOrder(5)] public EBattleType BattleType { get; set; }
     [FieldOrder(6)] public byte Level { get; set; }
