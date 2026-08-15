@@ -1,39 +1,10 @@
 # Shops
 
-A json file with shops mapped to NPCs.
+The shop files are `shops.tsv` and `shop_items.tsv` which are the legacy sql tables but as TSV
 
-# Example
+## Generating tsv
 
-```json
-[
-    {
-        "monster": 9003, // general_store
-        "items": [
-            { "item": 14000, "amount": 1 },
-            { "item": 15000, "amount": 1 },
-            { "item": 16000, "amount": 1 },
-            { "item": 17000, "amount": 1 },
-            { "item": 27001, "amount": 5 },
-            { "item": 27001, "amount": 20 },
-            { "item": 27001, "amount": 200 },
-            { "item": 27002, "amount": 5 },
-            { "item": 27002, "amount": 20 },
-            { "item": 27002, "amount": 200 },
-            { "item": 27003, "amount": 5 },
-            { "item": 27003, "amount": 20 },
-            { "item": 27003, "amount": 200 },
-            { "item": 27004, "amount": 5 },
-            { "item": 27004, "amount": 20 },
-            { "item": 27004, "amount": 200 },
-            { "item": 27005, "amount": 5 },
-            { "item": 27005, "amount": 20 },
-            { "item": 27005, "amount": 200 },
-            { "item": 27006, "amount": 5 },
-            { "item": 27006, "amount": 20 },
-            { "item": 27006, "amount": 200 },
-            { "item": 50200, "amount": 1 },
-            { "item": 50901, "amount": 10 }
-        ]
-    }
-]
+```shell
+docker run --rm mysql:latest mysql -h host.docker.internal -P 3306 -u root -pREPLACE_ME -e "SELECT * FROM player.shop;" > shops.tsv
+docker run --rm mysql:latest mysql -h host.docker.internal -P 3306 -u root -pREPLACE_ME -e "SELECT * FROM player.shop_item;" > shop_items.tsv
 ```

@@ -6,6 +6,13 @@ import TabItem from '@theme/TabItem';
 
 # Configuration
 
+> [!NOTE]
+> While we try to support as much of the previous functionality not everything can be replicated due to different
+> constraints. If you think something should be supported please make a PR.
+>
+> QuantumCoreX tries to implement Metin2 in a modern way. Some things may not match the new workflow. However we want to
+> collect some scripts here to help migrating or importing legacy data into QuantumCoreX.
+
 QuantumCoreX uses [Microsoft.Extensions.Configuration](https://learn.microsoft.com/en-us/dotnet/core/extensions/configuration) which can have multiple data sources (i.e. json files, command line args, environment variables). Feel free to read into their docs do get a better understanding about overriding and naming.
 
 The following configuration providers are supported by default
@@ -44,11 +51,8 @@ The following examples are equivalent
 
 ## Settings
 
-:::warning
-
-:construction: This area is work in progress and might not be up to date
-
-:::
+> [!WARNING]
+> 🏗️ This area is work in progress and might not be up to date
 
 Depending on your application you have different settings:
 
@@ -56,25 +60,24 @@ Depending on your application you have different settings:
 * [Common](common.md) (equal in all apps)
 * [Game](game.md)
 
-:::tip
-
-By default QC comes with a preexisting `appsettings.json` file next to the executable. You can create a `appsettings.Production.json` to override values without touching the base config file
-
-:::
+> [!TIP]
+> By default, QC comes with a preexisting `appsettings.json` file next to the executable. You can create a
+`appsettings.Production.json` to override values without touching the base config file
 
 ## Additional config files
 
-The following files are location in `data/` next to the executable
+The following files will be loaded from the `data` directory in the directory where the `Game` executable is. The
+default path in development is `src/Executables/Game/data`
 
 * `936skilltable.txt`
 * [atlasinfo.txt](atlasinfo.md)
 * [exp.csv](exp.md)
 * [exp_guild.csv](exp_guild.md)
-* [shops.json](shops.md)
+* [shops.tsv](shops.md)
 * `group.txt`
 * `group_group.txt`
-* `item_proto`
-* `mob_proto`
+* [`item_proto`](item_mob_proto.md)
+* [`mob_proto`](item_mob_proto.md)
 * `skilltable.txt`
 * `maps/*/boss.txt`
 * `maps/*/npx.txt`
