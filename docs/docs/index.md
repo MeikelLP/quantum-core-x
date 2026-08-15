@@ -14,5 +14,5 @@ recent status updates.
 - Full scripting support
 - Compatible with standard so called 40k client
 - Fast and efficient
-- Modern technologies (.NET Core, Redis, Docker, ...)
+- Modern technologies (.NET 10+, Redis, Docker, ...)
 - see the full roadmap [here](https://github.com/MeikelLP/quantum-core-x/issues/98)

@@ -5,6 +5,7 @@
 // See: https://docusaurus.io/docs/api/docusaurus-config
 
 import {themes as prismThemes} from 'prism-react-renderer';
+import remarkGithubAdmonitionsToDirectives from "remark-github-admonitions-to-directives";
 
 /** @type {import('@docusaurus/types').Config} */
 const config = {
@@ -47,6 +48,7 @@ const config = {
           routeBasePath: '/',
           sidebarPath: './sidebars.js',
           editUrl: 'https://github.com/MeikelLP/quantum-core-x/tree/main/docs',
+          beforeDefaultRemarkPlugins: [remarkGithubAdmonitionsToDirectives],
         },
         blog: {
           showReadingTime: true,
