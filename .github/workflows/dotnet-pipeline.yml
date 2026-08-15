@@ -37,7 +37,8 @@ jobs:
         run: dotnet build --verbosity minimal src/QuantumCore.slnx
 
       - name: Test
-        run: dotnet test --no-build src/QuantumCore.slnx
+        working-directory: src
+        run: dotnet test --no-build QuantumCore.slnx
   publish_single:
     needs:
       - test
