@@ -27,7 +27,8 @@
   },
   "devDependencies": {
     "@docusaurus/module-type-aliases": "^3.7.0",
-    "@docusaurus/types": "^3.7.0"
+    "@docusaurus/types": "^3.7.0",
+    "remark-github-admonitions-to-directives": "^2.1.0"
   },
   "overrides": {
     "mermaid": "$mermaid"
