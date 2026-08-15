@@ -56,6 +56,10 @@ To get started contributing to the project, see the [contributing guide](CONTRIB
 
 To get in touch with the developers, the best way is to join our [Discord server](https://discord.gg/6VhbYxX).
 
+### References
+
+* [open-mt2](https://github.com/willianmarquess/open-mt2)
+
 ### Recommended IDE
 
 Jetbrains Rider is free as of 2024-10-24 so we recommend it as IDE for this project.
