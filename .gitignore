@@ -2,7 +2,6 @@
 .vscode/
 bin/
 obj/
-.idea/
 examples/
 *.user
 .DS_Store
@@ -20,3 +19,5 @@ docs/docs/Commands/*.md
 !docs/docs/Commands/Index.md
 
 src/Executables/**/data
+src/.idea/**/*
+!src/.idea/.idea.QuantumCore/.idea/icon.png
