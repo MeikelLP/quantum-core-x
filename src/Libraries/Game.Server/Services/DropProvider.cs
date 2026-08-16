@@ -29,12 +29,6 @@ internal sealed class DropProvider : IDropProvider, ILoadable
     private const string ETC_DROP_ITEM_FILE = "etc_drop_item.txt";
     private const string MOB_DROP_ITEM_FILE = "mob_drop_item.txt";
 
-#if DEBUG
-    private const bool DROP_DEBUG = true;
-#else
-    private const bool DROP_DEBUG = false;
-#endif
-
     private readonly ILogger<DropProvider> _logger;
     private readonly IItemManager _itemManager;
     private readonly IParserService _parserService;
@@ -290,10 +284,10 @@ internal sealed class DropProvider : IDropProvider, ILoadable
             var percent = (drop.Chance * delta) / 100;
             var target = CoreRandom.GenerateInt32(1, range + 1);
 
-            if (DROP_DEBUG)
+            if (_logger.IsEnabled(LogLevel.Debug))
             {
                 var realPercent = percent / range * 100;
-                _logger.LogTrace("Drop chance for {Name} ({MobProtoId}) is {RealPercent}%",
+                _logger.LogDebug("Drop chance for {Name} ({MobProtoId}) is {RealPercent}%",
                     monster.Proto.TranslatedName, monster.Proto.Id, realPercent);
             }
 
@@ -339,10 +333,10 @@ internal sealed class DropProvider : IDropProvider, ILoadable
                 var percent = drop.Chance * delta / 100;
                 var target = CoreRandom.GenerateInt32(1, range + 1);
 
-                if (DROP_DEBUG)
+                if (_logger.IsEnabled(LogLevel.Debug))
                 {
                     var realPercent = percent / range * 100;
-                    _logger.LogTrace("Drop chance for {Name} ({MobProtoId}) is {RealPercent}%",
+                    _logger.LogDebug("Drop chance for {Name} ({MobProtoId}) is {RealPercent}%",
                         monster.Proto.TranslatedName, monster.Proto.Id, realPercent);
                 }
 
@@ -387,10 +381,10 @@ internal sealed class DropProvider : IDropProvider, ILoadable
         var percent = 40000 * delta / mobDrops.MinKillCount;
         var target = CoreRandom.GenerateInt32(1, range + 1);
 
-        if (DROP_DEBUG)
+        if (_logger.IsEnabled(LogLevel.Debug))
         {
             var realPercent = (float)percent / range * 100;
-            _logger.LogTrace("Drop chance for {Name} ({MobProtoId}) is {RealPercent}%",
+            _logger.LogDebug("Drop chance for {Name} ({MobProtoId}) is {RealPercent}%",
                 monster.Proto.TranslatedName, monster.Proto.Id, realPercent);
         }
 
@@ -429,10 +423,10 @@ internal sealed class DropProvider : IDropProvider, ILoadable
                 var percent = drop.Chance;
                 var target = CoreRandom.GenerateInt32(1, 1_000_000 + 1);
 
-                if (DROP_DEBUG)
+                if (_logger.IsEnabled(LogLevel.Debug))
                 {
                     var realPercent = percent / range * 100;
-                    _logger.LogTrace("Drop chance for {Name} ({MobProtoId}) is {RealPercent}%",
+                    _logger.LogDebug("Drop chance for {Name} ({MobProtoId}) is {RealPercent}%",
                         monster.Proto.TranslatedName, monster.Proto.Id, realPercent);
                 }
 
@@ -467,10 +461,10 @@ internal sealed class DropProvider : IDropProvider, ILoadable
             var percent = drop.Multiplier * delta / 100;
             var target = CoreRandom.GenerateInt32(1, range + 1);
 
-            if (DROP_DEBUG)
+            if (_logger.IsEnabled(LogLevel.Debug))
             {
                 var realPercent = percent / range * 100;
-                _logger.LogTrace("Drop chance for {Name} ({MobProtoId}) is {RealPercent}%",
+                _logger.LogDebug("Drop chance for {Name} ({MobProtoId}) is {RealPercent}%",
                     monster.Proto.TranslatedName, monster.Proto.Id, realPercent);
             }
 
@@ -552,10 +546,10 @@ internal sealed class DropProvider : IDropProvider, ILoadable
         var percent = chance * delta * 400;
         var target = CoreRandom.GenerateInt32(1, range + 1);
 
-        if (DROP_DEBUG)
+        if (_logger.IsEnabled(LogLevel.Debug))
         {
             var realPercent = percent / range * 100;
-            _logger.LogTrace("Drop chance for {Name} ({MobProtoId}) is {RealPercent}%",
+            _logger.LogDebug("Drop chance for {Name} ({MobProtoId}) is {RealPercent}%",
                 monster.Proto.TranslatedName, monster.Proto.Id, realPercent);
         }
 
