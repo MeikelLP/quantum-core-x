@@ -1,4 +1,4 @@
-using Org.BouncyCastle.Security;
+using System.Security;
 
 namespace QuantumCore.Game.Types;
 
@@ -238,7 +238,7 @@ public class Lzo
             //Console.WriteLine($"lbcur {lbcur} lblen {lblen} destpos {destPos} srcPos {src.Position - 4}");
             if (lbcur < 0)
             {
-                throw new EncryptionException("LookbehindOverrun");
+                throw new SecurityException("LookbehindOverrun");
             }
 
             /* Copy lookbehind */
@@ -258,7 +258,7 @@ public class Lzo
 
         if (lblen != 3)
         {
-            throw new EncryptionException("Ensure terminating M4 was encountered");
+            throw new SecurityException("Ensure terminating M4 was encountered");
         }
     }
 }
