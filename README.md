@@ -72,4 +72,10 @@ License: **Mozilla Public License 2.0**
 For more details see [LICENSE](LICENSE)
                         
 ## Stargazers over time
-[![Stargazers over time](https://starchart.cc/MeikelLP/quantum-core-x.svg?variant=adaptive)](https://starchart.cc/MeikelLP/quantum-core-x)
+<a href="https://star-history.dera.page/#MeikelLP/quantum-core-x">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://star-history.dera.page/svg?repos=MeikelLP/quantum-core-x&theme=dark" />
+   <source media="(prefers-color-scheme: light)" srcset="https://star-history.dera.page/svg?repos=MeikelLP/quantum-core-x" />
+   <img alt="Star History Chart" src="https://star-history.dera.page/svg?repos=MeikelLP/quantum-core-x" />
+ </picture>
+</a>
