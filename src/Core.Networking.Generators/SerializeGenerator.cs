@@ -35,8 +35,12 @@ internal class SerializeGenerator
             for (var index = 0; index < fields.Length; index++)
             {
                 var field = fields[index];
+                // The size field holds the packet size without the trailing sequence byte -
+                // that is what the deserializer subtracts its static size from - while
+                // GetSize() has to include it so the whole packet gets written.
+                var sizeExpression = hasSequence ? "(this.GetSize() - 1)" : "this.GetSize()";
                 var fieldExpression = fields.Any(x => x.SizeFieldName == field.Name)
-                    ? "this.GetSize()"
+                    ? sizeExpression
                     : $"this.{field.Name}";
 
                 if (subHeader is not null && subHeader.Value.Position == index)

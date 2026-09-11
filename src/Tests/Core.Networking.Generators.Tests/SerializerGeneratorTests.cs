@@ -1347,8 +1347,8 @@ namespace QuantumCore.Game.Packets {
         public void Serialize(byte[] bytes, in int offset = 0)
         {
             bytes[offset + 0] = 0x03;
-            bytes[offset + 1] = (byte)(this.GetSize() >> 0);
-            bytes[offset + 2] = (byte)(this.GetSize() >> 8);
+            bytes[offset + 1] = (byte)((this.GetSize() - 1) >> 0);
+            bytes[offset + 2] = (byte)((this.GetSize() - 1) >> 8);
             bytes[offset + 3] = this.MessageType;
             bytes.WriteString(this.Message, offset + 4, (int)this.Size + 1);
             bytes[offset + 4 + this.Message.Length] = default;
