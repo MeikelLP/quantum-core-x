@@ -91,7 +91,7 @@ public class NetworkingTests
     {
         var obj = new ChatIncoming { MessageType = ChatMessageType.NORMAL, Message = "Hello New World!" };
         var size = obj.GetSize();
-        var bytes = new byte[size + 1]; // + 1 due to sequence
+        var bytes = new byte[size]; // GetSize already covers the sequence byte
         obj.Serialize(bytes);
 
         using var stream = new MemoryStream(bytes);
