@@ -32,7 +32,7 @@ This project is currently maintained by:
 <table>
   <tbody>
     <tr>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/MeikelLP"><img src="https://avatars.githubusercontent.com/u/11669846?v=4?s=100" width="100px;" alt="Meikel"/><br /><sub><b>Meikel</b></sub></a><br /><a href="https://github.com/MeikelLP/quantum-core-x/commits?author=MeikelLP" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/MeikelLP"><img src="https://avatars.githubusercontent.com/u/11669846?v=4?s=100" width="100px;" alt="Meikel Philipp"/><br /><sub><b>Meikel Philipp</b></sub></a><br /><a href="https://github.com/MeikelLP/quantum-core-x/commits?author=MeikelLP" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/Jafah"><img src="https://avatars.githubusercontent.com/u/130060170?v=4?s=100" width="100px;" alt="Jafah"/><br /><sub><b>Jafah</b></sub></a><br /><a href="https://github.com/MeikelLP/quantum-core-x/commits?author=Jafah" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/uutkukorkmaz"><img src="https://avatars.githubusercontent.com/u/19177587?v=4?s=100" width="100px;" alt="uutkukorkmaz"/><br /><sub><b>uutkukorkmaz</b></sub></a><br /><a href="https://github.com/MeikelLP/quantum-core-x/commits?author=uutkukorkmaz" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="https://www.linkedin.com/in/merlin-brandes-42328717a/"><img src="https://avatars.githubusercontent.com/u/14237330?v=4?s=100" width="100px;" alt="Merlin"/><br /><sub><b>Merlin</b></sub></a><br /><a href="https://github.com/MeikelLP/quantum-core-x/commits?author=FatalMerlin" title="Documentation">📖</a></td>
@@ -42,6 +42,7 @@ This project is currently maintained by:
     </tr>
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/andreionoie"><img src="https://avatars.githubusercontent.com/u/44656658?v=4?s=100" width="100px;" alt="Andrei Onoie"/><br /><sub><b>Andrei Onoie</b></sub></a><br /><a href="https://github.com/MeikelLP/quantum-core-x/commits?author=andreionoie" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/efehanbirinci6155"><img src="https://avatars.githubusercontent.com/u/183660341?v=4?s=100" width="100px;" alt="efehanbirinci6155"/><br /><sub><b>efehanbirinci6155</b></sub></a><br /><a href="https://github.com/MeikelLP/quantum-core-x/commits?author=efehanbirinci6155" title="Code">💻</a></td>
     </tr>
   </tbody>
 </table>
