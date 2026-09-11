@@ -122,11 +122,7 @@ public class PlayerSkills : IPlayerSkills
 
     public async Task LoadAsync()
     {
-        if (_player.Player.SkillGroup.IsDefined())
-        {
-            AssignDefaultActiveSkills();
-        }
-
+        AssignDefaultActiveSkills();
         AssignDefaultPassiveSkills();
 
         var skills = await _repository.GetPlayerSkillsAsync(_player.Player.Id);
@@ -191,10 +187,7 @@ public class PlayerSkills : IPlayerSkills
 
         _skills.Clear();
 
-        if (_player.Player.SkillGroup.IsDefined())
-        {
-            AssignDefaultActiveSkills();
-        }
+        AssignDefaultActiveSkills();
 
         foreach (var subSkill in subSkills)
         {
@@ -452,7 +445,7 @@ public class PlayerSkills : IPlayerSkills
 
         var skillGroup = _player.Player.SkillGroup;
 
-        if (skillGroup.IsDefined()) // if skill group was chosen
+        if (IsSkillGroupChosen(skillGroup))
         {
             for (var i = 0; i < SKILL_COUNT; i++)
             {
@@ -625,8 +618,19 @@ public class PlayerSkills : IPlayerSkills
         _player.Connection.Send(levels);
     }
 
+    /// <summary>
+    /// Whether the player actually picked a skill group. <see cref="ESkillGroup.UNKNOWN"/> is a
+    /// defined enum value, so <c>IsDefined()</c> on its own does not answer this.
+    /// </summary>
+    private static bool IsSkillGroupChosen(ESkillGroup skillGroup) =>
+        skillGroup != ESkillGroup.UNKNOWN && skillGroup.IsDefined();
+
     private void AssignDefaultActiveSkills()
     {
+        // A skill group is only picked from MINIMUM_LEVEL onwards, so a fresh character has
+        // none yet and there are no default active skills to assign.
+        if (!IsSkillGroupChosen(_player.Player.SkillGroup)) return;
+
         for (var i = 0; i < SKILL_COUNT; i++)
         {
             var skill = SkillList[(int)_player.Player.PlayerClass.GetClass(), (byte)_player.Player.SkillGroup - 1, i];
