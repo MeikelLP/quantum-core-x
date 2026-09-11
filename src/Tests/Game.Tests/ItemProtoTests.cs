@@ -83,4 +83,13 @@ public class ItemProtoTests
         var value = item!.GetApplyValue(EApplyType.ATTACK_SPEED);
         value.Should().Be(22);
     }
+
+    [Fact]
+    public void ItemWithoutWearFlagsHasNoEquipmentSlot()
+    {
+        // potions, materials and quest items are not equipment and carry no wear flags
+        var item = new ItemData { WearFlags = 0 };
+
+        item.GetWearSlot().Should().BeNull();
+    }
 }

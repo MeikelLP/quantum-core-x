@@ -108,6 +108,14 @@ public static class ItemExtensions
 
     private static EquipmentSlot? GetWearSlot(this EWearFlags wearFlags)
     {
+        // Items that are not equipment - potions, materials, quest items - carry no wear flags
+        // at all. That is not an unmapped flag combination, so report "no slot" rather than
+        // throwing; the nullable return type and the call sites already handle null.
+        if (wearFlags == 0)
+        {
+            return null;
+        }
+
         if (wearFlags.HasFlag(EWearFlags.HEAD))
         {
             return EquipmentSlot.HEAD;
