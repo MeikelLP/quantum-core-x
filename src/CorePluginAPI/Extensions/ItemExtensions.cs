@@ -148,7 +148,11 @@ public static class ItemExtensions
             return EquipmentSlot.SHIELD;
         }
 
-        throw new NotImplementedException($"No equipment slot for wear flags: {wearFlags}");
+        // Plenty of items go in no equipment slot at all: potions, materials and quest items
+        // carry no wear flags, and UNIQUE and ARROW are wear flags with no slot of their own.
+        // "No slot" is a legitimate answer here, which is what the nullable return type says
+        // and what every call site already checks for.
+        return null;
     }
 
     extension(IItemRepository repository)

@@ -83,4 +83,17 @@ public class ItemProtoTests
         var value = item!.GetApplyValue(EApplyType.ATTACK_SPEED);
         value.Should().Be(22);
     }
+
+    [Theory]
+    // potions, materials and quest items are not equipment and carry no wear flags at all
+    [InlineData(0u)]
+    // these are wear flags, but neither has an equipment slot of its own
+    [InlineData((uint)EWearFlags.UNIQUE)]
+    [InlineData((uint)EWearFlags.ARROW)]
+    public void ItemWithoutAnEquipmentSlotReportsNone(uint wearFlags)
+    {
+        var item = new ItemData { WearFlags = wearFlags };
+
+        item.GetWearSlot().Should().BeNull();
+    }
 }
