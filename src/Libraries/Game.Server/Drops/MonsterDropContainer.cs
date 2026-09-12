@@ -63,8 +63,10 @@ public class MonsterItemGroup : MonsterDropContainer
             }
         }
 
-        var distance = _probabilities.Count - lowerBound;
-        return distance;
+        // The index of the element we stopped at - not the distance from it to the end, which
+        // equals the element count whenever the first entry already matches and would then be
+        // one past the last valid index.
+        return lowerBound;
     }
 
     public Drop? GetDrop()
