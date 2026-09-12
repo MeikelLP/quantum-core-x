@@ -1,0 +1,21 @@
+Group FirstChest
+{
+	Vnum	9001
+	1	5001	1	70
+	2	5002	3	30
+}
+
+Group SecondChest
+{
+	Vnum	9002
+	type	Pct
+	1	5003	1	100
+}
+
+Group AttributeGroup
+{
+	Vnum	9003
+	type	ATTR
+	1	66	30
+	2	78	20
+}

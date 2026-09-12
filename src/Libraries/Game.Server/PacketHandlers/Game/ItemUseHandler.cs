@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using QuantumCore.API;
+using QuantumCore.API.Core.Models;
 using QuantumCore.API.Extensions;
 using QuantumCore.API.Game.Types.Items;
 using QuantumCore.API.Game.Types.Skills;
@@ -8,6 +9,8 @@ using QuantumCore.API.Packets;
 using QuantumCore.API.PluginTypes;
 using QuantumCore.Core.Utils;
 using QuantumCore.Game.Extensions;
+using QuantumCore.Game.Persistence;
+using QuantumCore.Game.Services;
 
 namespace QuantumCore.Game.PacketHandlers.Game;
 
@@ -16,12 +19,17 @@ internal class ItemUseHandler : IGamePacketHandler<ItemUse>
     private readonly IItemManager _itemManager;
     private readonly ILogger<ItemUseHandler> _logger;
     private readonly SkillsOptions _skillsOptions;
+    private readonly ISpecialItemProvider _specialItemProvider;
+    private readonly IItemRepository _itemRepository;
 
-    public ItemUseHandler(IItemManager itemManager, ILogger<ItemUseHandler> logger, IOptions<GameOptions> gameOptions)
+    public ItemUseHandler(IItemManager itemManager, ILogger<ItemUseHandler> logger, IOptions<GameOptions> gameOptions,
+        ISpecialItemProvider specialItemProvider, IItemRepository itemRepository)
     {
         _itemManager = itemManager;
         _logger = logger;
         _skillsOptions = gameOptions.Value.Skills;
+        _specialItemProvider = specialItemProvider;
+        _itemRepository = itemRepository;
     }
 
     public async Task ExecuteAsync(GamePacketContext<ItemUse> ctx, CancellationToken token = default)
@@ -99,6 +107,40 @@ internal class ItemUseHandler : IGamePacketHandler<ItemUse>
                     player.SendRemoveItem(ctx.Packet.Window, ctx.Packet.Position);
                     player.SendItem(item);
                 }
+            }
+        }
+        // Container items - chests and the like - hand out one of the rewards listed for them
+        // in special_item_group.txt and are consumed in the process.
+        else if (_specialItemProvider.Roll(item.ItemId) is { } reward)
+        {
+            var instance = new ItemInstance
+            {
+                ItemId = reward.ItemProtoId, Count = reward.Count, PlayerId = player.Player.Id
+            };
+
+            if (!await player.Inventory.PlaceItemAsync(instance))
+            {
+                player.SendChatInfo("Cannot open this while the inventory is full");
+                return;
+            }
+
+            await instance.PersistAsync(_itemRepository);
+            player.SendItem(instance);
+
+            _logger.LogDebug("{Player} opened {Container} and received {Item} x{Count}", player.Name, item.ItemId,
+                reward.ItemProtoId, reward.Count);
+
+            if (item.Count > 1)
+            {
+                // only one of the stack is opened
+                item.Count -= 1;
+                await item.PersistAsync(_itemRepository);
+                player.SendItem(item);
+            }
+            else
+            {
+                player.RemoveItem(item);
+                player.SendRemoveItem(ctx.Packet.Window, ctx.Packet.Position);
             }
         }
         // Skills related
