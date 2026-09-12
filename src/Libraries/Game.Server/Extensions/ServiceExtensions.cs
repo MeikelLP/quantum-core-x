@@ -48,6 +48,7 @@ public static class ServiceExtensions
         services.AddLoadable<IExperienceManager, ExperienceManager>();
         services.AddLoadable<IQuestManager, QuestManager>();
         services.AddLoadable<IDropProvider, DropProvider>();
+        services.AddLoadable<ISpecialItemProvider, SpecialItemProvider>();
         services.AddLoadable<INpcShopProvider, TsvShopProvider>();
         services.AddLoadable<ISkillManager, SkillManager>();
         services.AddLoadable<IWorld, World.World>();
