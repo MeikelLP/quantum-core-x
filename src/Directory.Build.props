@@ -11,7 +11,7 @@
     </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="CSharpIsNullAnalyzer" Version="0.1.593">
+    <PackageReference Include="CSharpIsNullAnalyzer" Version="0.2.19">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
