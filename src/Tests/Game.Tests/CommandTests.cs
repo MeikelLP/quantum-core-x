@@ -411,6 +411,32 @@ public class CommandTests : IAsyncLifetime
     }
 
     [Fact]
+    public void DropGold_AboveIntMaxValue_RemovesGold()
+    {
+        _player.SetPoint(EPoint.GOLD, uint.MaxValue);
+
+        _player.DropGold(2_500_000_000);
+
+        _player.GetPoint(EPoint.GOLD).Should().Be(uint.MaxValue - 2_500_000_000);
+    }
+
+    [Fact]
+    public async Task PickupGold_AboveIntMaxValue_AddsGoldAsync()
+    {
+        var world = await PrepareWorldAsync();
+        world.SpawnEntity(_player);
+        world.Update(Tick()); // spawn entities
+        _player.SetPoint(EPoint.GOLD, 10);
+        var groundItem = Substitute.For<IGroundItem>();
+        groundItem.Item.Returns(new ItemInstance { ItemId = 1 });
+        groundItem.Amount.Returns(2_500_000_000u);
+
+        await _player.PickupAsync(groundItem);
+
+        _player.GetPoint(EPoint.GOLD).Should().Be(2_500_000_010);
+    }
+
+    [Fact]
     public async Task GotoCommand_CoordsAsync()
     {
         var world = await PrepareWorldAsync();
