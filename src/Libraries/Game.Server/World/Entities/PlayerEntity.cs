@@ -914,7 +914,8 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
         var item = groundItem.Item;
         if (item.ItemId == 1)
         {
-            AddPoint(EPoint.GOLD, (int)groundItem.Amount);
+            var gold = (ulong)GetPoint(EPoint.GOLD) + groundItem.Amount;
+            SetPoint(EPoint.GOLD, (uint)Math.Min(uint.MaxValue, gold));
             this.SendPoints();
             Map.DespawnEntity(groundItem);
 
@@ -957,7 +958,7 @@ public class PlayerEntity : Entity, IPlayerEntity, IDisposable
             return; // We can't drop more gold than we have ^^
         }
 
-        AddPoint(EPoint.GOLD, -(int)amount);
+        SetPoint(EPoint.GOLD, GetPoint(EPoint.GOLD) - amount);
         this.SendPoints();
 
         var item = _itemManager.CreateItem(proto); // count will be overwritten as it's gold
