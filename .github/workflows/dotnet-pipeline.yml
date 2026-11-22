@@ -56,9 +56,7 @@ jobs:
         with:
           fetch-depth: '0'
       - name: Setup .NET Core SDK 10
-        uses: actions/setup-dotnet@v6
-        with:
-          dotnet-version: 10.0.x
+        uses: actions/setup-dotnet@v6 # uses global.json value
       - name: Build
         run: dotnet publish -r ${{ matrix.os }} --verbosity minimal -p DebugType=None -p DebugSymbols=false -p PublishSingleFile=true --self-contained  src/Executables/Single/
       - name: Archive build artifact
