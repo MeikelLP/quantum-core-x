@@ -28,13 +28,13 @@ jobs:
           fetch-depth: '0'
 
       # setup .NET
-      - name: Setup .NET Core SDK 10
-        uses: actions/setup-dotnet@v6
-        with:
-          dotnet-version: 10.0.x
+      - name: Setup .NET Core SDK
+        working-directory: src
+        uses: actions/setup-dotnet@v6 # uses global.json value
 
       - name: Build
-        run: dotnet build --verbosity minimal src/QuantumCore.slnx
+        working-directory: src
+        run: dotnet build --verbosity minimal QuantumCore.slnx
 
       - name: Test
         working-directory: src
@@ -56,14 +56,17 @@ jobs:
         with:
           fetch-depth: '0'
       - name: Setup .NET Core SDK 10
+        working-directory: src
         uses: actions/setup-dotnet@v6 # uses global.json value
       - name: Build
-        run: dotnet publish -r ${{ matrix.os }} --verbosity minimal -p DebugType=None -p DebugSymbols=false -p PublishSingleFile=true --self-contained  src/Executables/Single/
+        working-directory: src
+        run: dotnet publish -r ${{ matrix.os }} --verbosity minimal -p DebugType=None -p DebugSymbols=false -p PublishSingleFile=true --self-contained Executables/Single/
       - name: Archive build artifact
         uses: actions/upload-artifact@v7
+        working-directory: src
         with:
           name: QuantumCore Single ${{ matrix.os }}
-          path: src/Executables/Single/bin/Release/net10.0/${{ matrix.os }}/publish
+          path: Executables/Single/bin/Release/net10.0/${{ matrix.os }}/publish
   deploy:
     needs:
       - test
