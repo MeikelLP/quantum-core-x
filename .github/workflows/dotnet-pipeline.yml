@@ -29,8 +29,8 @@ jobs:
 
       # setup .NET
       - name: Setup .NET Core SDK
-        working-directory: src
         uses: actions/setup-dotnet@v6 # uses global.json value
+        working-directory: src
 
       - name: Build
         working-directory: src
@@ -56,8 +56,8 @@ jobs:
         with:
           fetch-depth: '0'
       - name: Setup .NET Core SDK 10
-        working-directory: src
         uses: actions/setup-dotnet@v6 # uses global.json value
+        working-directory: src
       - name: Build
         working-directory: src
         run: dotnet publish -r ${{ matrix.os }} --verbosity minimal -p DebugType=None -p DebugSymbols=false -p PublishSingleFile=true --self-contained Executables/Single/
