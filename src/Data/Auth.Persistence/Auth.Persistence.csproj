@@ -14,8 +14,6 @@
     <ItemGroup>
         <PackageReference Include="BCrypt.Net-Next" Version="4.2.0"/>
       <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="11.0.0" />
-        <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="11.0.0" />
-        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="11.0.0" />
         <PackageReference Include="Microting.EntityFrameworkCore.MySql" Version="11.0.0" />
         <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="11.0.0" />
         <PackageReference Include="SQLitePCLRaw.bundle_e_sqlite3" Version="3.0.5"/>

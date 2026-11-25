@@ -7,8 +7,6 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.Extensions.Configuration.Binder" Version="11.0.0" />
-        <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="11.0.0" />
-        <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" Version="11.0.0" />
         <PackageReference Update="CSharpIsNullAnalyzer" Version="0.2.19">
           <PrivateAssets>all</PrivateAssets>
           <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
