@@ -5,6 +5,7 @@
         <AssemblyName>QuantumCore.Single</AssemblyName>
         <RootNamespace>QuantumCore.Single</RootNamespace>
         <ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles> <!-- Workaround: https://github.com/dotnet/sdk/issues/25294 -->
+        <EnableHotReloadInRuntimeConfigDevFile>false</EnableHotReloadInRuntimeConfigDevFile> <!-- Workaround https://github.com/dotnet/sdk/issues/56656 -->
     </PropertyGroup>
 
     <ItemGroup>
