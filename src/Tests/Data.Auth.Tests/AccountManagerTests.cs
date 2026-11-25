@@ -67,9 +67,6 @@ public class AccountManagerTests : IClassFixture<RedisFixture>, IClassFixture<Da
         {
             await _cacheManager.DelAsync(key);
         }
-
-        var db = _scope.ServiceProvider.GetRequiredService<AuthDbContext>();
-        await db.AccountStatus.ExecuteDeleteAsync();
         await _scope.DisposeAsync();
     }
 
