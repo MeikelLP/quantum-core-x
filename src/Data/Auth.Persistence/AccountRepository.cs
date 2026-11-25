@@ -36,27 +36,21 @@ public class AccountRepository : IAccountRepository
     public async Task<AccountData> CreateAsync(AccountData account)
     {
         ArgumentNullException.ThrowIfNull(account);
-        var entity = await _db.Accounts
-            .Include(x => x.AccountStatus)
-            .FirstOrDefaultAsync(x => x.Email == account.Email);
-        if (entity is null)
+        var entity = new Account
         {
-            entity = new Account
-            {
-                Email = account.Email,
-                Username = account.Username,
-                Password = account.Password,
-                Status = account.Status,
-                CreatedAt = account.CreatedAt,
-                UpdatedAt = account.UpdatedAt,
-                DeleteCode = account.DeleteCode,
-            };
+            Email = account.Email,
+            Username = account.Username,
+            Password = account.Password,
+            Status = account.Status,
+            CreatedAt = account.CreatedAt,
+            UpdatedAt = account.UpdatedAt,
+            DeleteCode = account.DeleteCode,
+        };
 #pragma warning disable VSTHRD103 // use async overload - no because efcore
-            _db.Accounts.Add(entity);
+        _db.Accounts.Add(entity);
 #pragma warning restore VSTHRD103
-            await _db.SaveChangesAsync();
-            await _db.Entry(entity).Reference(x => x.AccountStatus).LoadAsync();
-        }
+        await _db.SaveChangesAsync();
+        await _db.Entry(entity).Reference(x => x.AccountStatus).LoadAsync();
 
         return new AccountData
         {
