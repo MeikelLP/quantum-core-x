@@ -13,4 +13,15 @@
         <ProjectReference Include="..\..\Data\Core.Caching\Core.Caching.csproj"/>
     </ItemGroup>
 
+    <ItemGroup>
+      <PackageReference Update="CSharpIsNullAnalyzer" Version="0.2.19">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+      </PackageReference>
+      <PackageReference Update="Microsoft.VisualStudio.Threading.Analyzers" Version="18.12.1">
+        <PrivateAssets>all</PrivateAssets>
+        <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+      </PackageReference>
+    </ItemGroup>
+
 </Project>
