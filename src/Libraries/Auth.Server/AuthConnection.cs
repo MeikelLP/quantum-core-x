@@ -11,8 +11,9 @@ public class AuthConnection : Connection, IAuthConnection
     private readonly IServerBase _server;
 
     public AuthConnection(IServerBase server, TcpClient client, ILogger<AuthConnection> logger,
-        PluginExecutor pluginExecutor, [FromKeyedServices(HostingOptions.MODE_AUTH)] IPacketReader packetReader)
-        : base(logger, pluginExecutor, packetReader)
+        [FromKeyedServices(HostingOptions.MODE_AUTH)]
+        IPacketReader packetReader)
+        : base(logger, packetReader)
     {
         _server = server;
         Init(client);
@@ -23,9 +24,11 @@ public class AuthConnection : Connection, IAuthConnection
         _server.CallConnectionListener(this);
     }
 
-    protected override async Task OnCloseAsync(bool expected = true)
+    protected override Task OnCloseAsync(bool expected = true)
     {
-        await _server.RemoveConnectionAsync(this);
+        _server.RemoveConnection(this);
+
+        return Task.CompletedTask;
     }
 
     protected override async Task OnReceiveAsync(IPacketSerializable packet)

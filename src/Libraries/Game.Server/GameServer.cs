@@ -7,7 +7,6 @@ using QuantumCore.API;
 using QuantumCore.API.Core.Timekeeping;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.World;
-using QuantumCore.API.PluginTypes;
 using QuantumCore.Core.Event;
 using QuantumCore.Core.Networking;
 using QuantumCore.Extensions;
@@ -20,7 +19,6 @@ public class GameServer : ServerBase<GameConnection>, IGameServer
     public static readonly Meter Meter = new Meter("QuantumCore:Game");
     private readonly Histogram<double> _serverTimes = Meter.CreateHistogram<double>("TickTime", "ms");
     private readonly ILogger<GameServer> _logger;
-    private readonly PluginExecutor _pluginExecutor;
     private readonly ICommandManager _commandManager;
     private readonly IWorld _world;
 
@@ -35,12 +33,11 @@ public class GameServer : ServerBase<GameConnection>, IGameServer
     public GameServer(
         [FromKeyedServices(HostingOptions.MODE_GAME)]
         IPacketManager packetManager, ILogger<GameServer> logger,
-        PluginExecutor pluginExecutor, IServiceProvider serviceProvider, ServerClock clock,
+        IServiceProvider serviceProvider, ServerClock clock,
         ICommandManager commandManager, IWorld world)
-        : base(packetManager, logger, pluginExecutor, serviceProvider, clock, HostingOptions.MODE_GAME)
+        : base(packetManager, logger, serviceProvider, clock, HostingOptions.MODE_GAME)
     {
         _logger = logger;
-        _pluginExecutor = pluginExecutor;
         _commandManager = commandManager;
         _world = world;
         _lastTick = Clock.Now;
@@ -96,11 +93,7 @@ public class GameServer : ServerBase<GameConnection>, IGameServer
         {
             try
             {
-                await _pluginExecutor.ExecutePluginsAsync<IGameTickListener>(_logger,
-                    x => x.PreUpdateAsync(stoppingToken));
                 await TickAsync(stoppingToken);
-                await _pluginExecutor.ExecutePluginsAsync<IGameTickListener>(_logger,
-                    x => x.PostUpdateAsync(stoppingToken));
             }
             catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
             {

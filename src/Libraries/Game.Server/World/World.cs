@@ -8,7 +8,6 @@ using QuantumCore.API;
 using QuantumCore.API.Core.Models;
 using QuantumCore.API.Core.Timekeeping;
 using QuantumCore.API.Game.World;
-using QuantumCore.API.PluginTypes;
 using QuantumCore.Core.Utils;
 using QuantumCore.Game.Services;
 
@@ -17,7 +16,6 @@ namespace QuantumCore.Game.World;
 public class World : IWorld
 {
     private readonly ILogger<World> _logger;
-    private readonly PluginExecutor _pluginExecutor;
     private uint _vid;
     private readonly Grid<IMap> _world = new(0, 0);
     private readonly Dictionary<string, IMap> _maps = new();
@@ -34,12 +32,11 @@ public class World : IWorld
     private readonly ISpawnGroupProvider _spawnGroupProvider;
     private readonly IServiceProvider _serviceProvider;
 
-    public World(ILogger<World> logger, PluginExecutor pluginExecutor, IItemManager itemManager,
+    public World(ILogger<World> logger, IItemManager itemManager,
         ICacheManager cacheManager, ISpawnGroupProvider spawnGroupProvider,
         IServiceProvider serviceProvider, INpcShopProvider shopProvider)
     {
         _logger = logger;
-        _pluginExecutor = pluginExecutor;
         _itemManager = itemManager;
         _cacheManager = cacheManager;
         _spawnGroupProvider = spawnGroupProvider;
@@ -307,12 +304,7 @@ public class World : IWorld
                 player.Vid, map.Name);
         }
 
-#pragma warning disable VSTHRD002 // use await - TODO
-        _pluginExecutor.ExecutePluginsAsync<IGameEntityLifetimeListener>(_logger, x => x.OnPreCreatedAsync()).Wait();
         map.SpawnEntity(e);
-
-        _pluginExecutor.ExecutePluginsAsync<IGameEntityLifetimeListener>(_logger, x => x.OnPostCreatedAsync()).Wait();
-#pragma warning restore VSTHRD002
     }
 
     public void DespawnEntity(IEntity entity)
@@ -323,11 +315,7 @@ public class World : IWorld
             RemovePlayer(player);
         }
 
-#pragma warning disable VSTHRD002 // use await - TODO
-        _pluginExecutor.ExecutePluginsAsync<IGameEntityLifetimeListener>(_logger, x => x.OnPreDeletedAsync()).Wait();
         entity.Map?.DespawnEntity(entity);
-        _pluginExecutor.ExecutePluginsAsync<IGameEntityLifetimeListener>(_logger, x => x.OnPostDeletedAsync()).Wait();
-#pragma warning restore VSTHRD002
     }
 
     public async Task DespawnPlayerAsync(IPlayerEntity player)
@@ -336,9 +324,7 @@ public class World : IWorld
         RemovePlayer(player);
         await player.OnDespawnAsync();
 
-        await _pluginExecutor.ExecutePluginsAsync<IGameEntityLifetimeListener>(_logger, x => x.OnPreDeletedAsync());
         player.Map?.DespawnEntity(player);
-        await _pluginExecutor.ExecutePluginsAsync<IGameEntityLifetimeListener>(_logger, x => x.OnPostDeletedAsync());
     }
 
     public uint GenerateVid()

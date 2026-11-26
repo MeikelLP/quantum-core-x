@@ -59,7 +59,6 @@ public class MapTests
             .AddSingleton(Substitute.For<IItemManager>())
             .AddSingleton(Substitute.For<IDropProvider>())
             .AddSingleton(Substitute.For<IMapAttributeProvider>())
-            .AddSingleton<PluginExecutor>()
             .AddSingleton<IAtlasProvider>(_ =>
             {
                 var mock = Substitute.For<IAtlasProvider>();

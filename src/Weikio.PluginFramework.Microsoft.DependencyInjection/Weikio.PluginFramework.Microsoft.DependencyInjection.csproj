@@ -1,8 +1,0 @@
-<Project Sdk="Microsoft.NET.Sdk">
-
-    <ItemGroup>
-      <PackageReference Include="Weikio.PluginFramework" Version="1.5.1" />
-      <PackageReference Include="Weikio.PluginFramework.Configuration" Version="1.5.1" />
-    </ItemGroup>
-
-</Project>

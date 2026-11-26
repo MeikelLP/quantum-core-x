@@ -22,7 +22,6 @@ using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Services;
 using QuantumCore.Game.World;
 using QuantumCore.Game.World.Entities;
-using Weikio.PluginFramework.Catalogs;
 
 namespace Game.Tests;
 
@@ -44,7 +43,7 @@ public class WorldTests : IAsyncLifetime
         _services = new ServiceCollection()
             .AddLogging()
             .AddSingleton<IConfiguration>(_ => config)
-            .AddCoreServices(new EmptyPluginCatalog(), config)
+            .AddCoreServices(config)
             .AddGameServices()
             .AddSingleton(Substitute.For<IServerBase>())
             .AddSingleton(Substitute.For<IGameServer>())

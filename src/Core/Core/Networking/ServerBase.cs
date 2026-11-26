@@ -7,7 +7,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using QuantumCore.API;
 using QuantumCore.API.Core.Timekeeping;
-using QuantumCore.API.PluginTypes;
 using QuantumCore.Networking;
 
 namespace QuantumCore.Core.Networking;
@@ -22,7 +21,6 @@ public abstract class ServerBase<T> : BackgroundService, IServerBase
     private readonly CancellationTokenSource _stoppingToken = new();
     protected TcpListener Listener { get; }
 
-    private readonly PluginExecutor _pluginExecutor;
     private readonly IServiceProvider _serviceProvider;
     private readonly string _serverMode;
     protected IServiceScope Scope { get; }
@@ -31,11 +29,10 @@ public abstract class ServerBase<T> : BackgroundService, IServerBase
     public ushort Port { get; }
     public IPAddress IpAddress { get; }
 
-    protected ServerBase(IPacketManager packetManager, ILogger logger, PluginExecutor pluginExecutor,
+    protected ServerBase(IPacketManager packetManager, ILogger logger,
         IServiceProvider serviceProvider, ServerClock clock, string mode)
     {
         _logger = logger;
-        _pluginExecutor = pluginExecutor;
         _serviceProvider = serviceProvider;
         _serverMode = mode;
         PacketManager = packetManager;
@@ -52,13 +49,10 @@ public abstract class ServerBase<T> : BackgroundService, IServerBase
         Listener = new TcpListener(IpAddress, Port);
     }
 
-    public async Task RemoveConnectionAsync(IConnection connection)
+    public void RemoveConnection(IConnection connection)
     {
         ArgumentNullException.ThrowIfNull(connection);
         Connections.Remove(connection.Id, out _);
-
-        await _pluginExecutor.ExecutePluginsAsync<IConnectionLifetimeListener>(_logger,
-            x => x.OnDisconnectedAsync(_stoppingToken.Token));
     }
 
     public async override Task StartAsync(CancellationToken token)
@@ -87,9 +81,6 @@ public abstract class ServerBase<T> : BackgroundService, IServerBase
             // cannot inject tcp client here
             var connection = ActivatorUtilities.CreateInstance<T>(scope.ServiceProvider, client, this);
             Connections.TryAdd(connection.Id, connection);
-
-            await _pluginExecutor.ExecutePluginsAsync<IConnectionLifetimeListener>(_logger,
-                x => x.OnConnectedAsync(_stoppingToken.Token));
 
             // accept new connections on another thread
             Listener.BeginAcceptTcpClient(OnClientAccepted, Listener);

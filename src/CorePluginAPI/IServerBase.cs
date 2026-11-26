@@ -6,7 +6,7 @@ namespace QuantumCore.API;
 
 public interface IServerBase
 {
-    Task RemoveConnectionAsync(IConnection connection);
+    void RemoveConnection(IConnection connection);
     Task CallListenerAsync(IConnection connection, IPacketSerializable packet);
     ServerClock Clock { get; }
     IPAddress IpAddress { get; }

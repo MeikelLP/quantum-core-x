@@ -9,7 +9,7 @@ using QuantumCore.Game;
 using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Persistence;
 
-var hostBuilder = await QuantumCoreHostBuilder.CreateHostAsync(args);
+var hostBuilder = QuantumCoreHost.CreateBuilder(args);
 hostBuilder.AddServiceDefaults();
 hostBuilder.Configuration.AddQuantumCoreDefaults();
 hostBuilder.Services.AddGameServices();
@@ -34,4 +34,4 @@ await using (var scope = host.Services.CreateAsyncScope())
     await db.Database.MigrateAsync();
 }
 
-await QuantumCoreHostBuilder.RunAsync<Program>(host);
+await host.RunAsync();

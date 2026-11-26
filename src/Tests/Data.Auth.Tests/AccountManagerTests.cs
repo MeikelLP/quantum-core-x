@@ -1,7 +1,6 @@
 ﻿using AwesomeAssertions;
 using Core.Persistence;
 using Data.Auth.Tests.Fixtures;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -67,6 +66,7 @@ public class AccountManagerTests : IClassFixture<RedisFixture>, IClassFixture<Da
         {
             await _cacheManager.DelAsync(key);
         }
+
         await _scope.DisposeAsync();
     }
 

@@ -35,7 +35,6 @@ using QuantumCore.Game.Persistence.Entities;
 using QuantumCore.Game.World;
 using QuantumCore.Game.World.Entities;
 using QuantumCore.Networking;
-using Weikio.PluginFramework.Catalogs;
 
 // cannot cast MockedGameConnection to IGameConnection ???
 #pragma warning disable CS8602
@@ -180,7 +179,7 @@ public class CommandTests : IAsyncLifetime
         var npcShopProvider = Substitute.For<INpcShopProvider, ILoadable>();
         npcShopProvider.Shops.Returns([]);
         _services = new ServiceCollection()
-            .AddCoreServices(new EmptyPluginCatalog(), new ConfigurationBuilder().Build())
+            .AddCoreServices(new ConfigurationBuilder().Build())
             .AddGameServices()
             .AddSingleton(Substitute.For<IServerBase>())
             .AddQuantumCoreTestLogger()

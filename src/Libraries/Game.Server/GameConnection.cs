@@ -23,11 +23,11 @@ public class GameConnection : Connection, IGameConnection
 
 
     public GameConnection(IServerBase server, TcpClient client, ILogger<GameConnection> logger,
-        PluginExecutor pluginExecutor, IWorld world,
+        IWorld world,
         [FromKeyedServices(HostingOptions.MODE_GAME)]
         IPacketReader packetReader,
         ICacheManager cacheManager)
-        : base(logger, pluginExecutor, packetReader)
+        : base(logger, packetReader)
     {
         _world = world;
         Server = server;
@@ -74,7 +74,7 @@ public class GameConnection : Connection, IGameConnection
             await _cacheManager.DelAsync($"account:token:{Player.Player.AccountId}");
         }
 
-        await Server.RemoveConnectionAsync(this);
+        Server.RemoveConnection(this);
 
         // todo enable expiry on auth token
     }

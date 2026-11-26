@@ -4,20 +4,18 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using QuantumCore;
 using QuantumCore.API;
 using QuantumCore.Auth;
 using QuantumCore.Auth.Extensions;
 using QuantumCore.Auth.Persistence;
 using QuantumCore.Auth.Persistence.Extensions;
 using QuantumCore.Extensions;
-using Weikio.PluginFramework.Catalogs;
 
 var hostBuilder = WebApplication.CreateBuilder(args);
 
 hostBuilder.AddServiceDefaults();
 hostBuilder.Services.Configure<ConsoleLifetimeOptions>(opts => opts.SuppressStatusMessages = true);
-hostBuilder.Services.AddCoreServices(new EmptyPluginCatalog(), hostBuilder.Configuration);
+hostBuilder.Services.AddCoreServices(hostBuilder.Configuration);
 hostBuilder.Services.AddAuthServices();
 hostBuilder.Services.AddHostedService<AuthServer>();
 hostBuilder.Services.AddSingleton<IServerBase>(provider =>
@@ -46,4 +44,4 @@ await using (var scope = host.Services.CreateAsyncScope())
 
 host.MapDefaultEndpoints();
 
-await QuantumCoreHostBuilder.RunAsync<Program>(host);
+await host.RunAsync();

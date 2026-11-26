@@ -2,7 +2,6 @@ using System.Linq.Expressions;
 using System.Reflection;
 using CommandLine;
 using CommandLine.Text;
-using Microsoft.CodeAnalysis;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -176,7 +175,7 @@ internal class CommandManager : ICommandManager, ILoadable
             return;
         }
 
-        var args = CommandLineParser.SplitCommandLineIntoArguments(chatline.TrimStart('/'), false).ToArray();
+        var args = chatline.TrimStart('/').Split(' ');
         var command = args[0];
         var argsWithoutCommand = args.Skip(1).ToArray();
 

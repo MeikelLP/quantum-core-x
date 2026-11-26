@@ -18,7 +18,7 @@ using QuantumCore.Game.Persistence;
 await Parser.Default.ParseArguments<SingleRunArgs>(args)
     .WithParsedAsync(async options =>
     {
-        var hostBuilder = await QuantumCoreHostBuilder.CreateHostAsync(args);
+        var hostBuilder = QuantumCoreHost.CreateBuilder(args);
         hostBuilder.Configuration.AddQuantumCoreDefaults();
         hostBuilder.Services.AddGameServices();
         hostBuilder.Services.AddAuthServices();
@@ -65,7 +65,7 @@ await Parser.Default.ParseArguments<SingleRunArgs>(args)
         await gameDb.Database.MigrateAsync();
         await accountDb.Database.MigrateAsync();
 
-        await QuantumCoreHostBuilder.RunAsync<Program>(host);
+        await host.RunAsync();
     });
 
 internal sealed class SingleRunArgs;

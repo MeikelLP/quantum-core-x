@@ -11,7 +11,6 @@ using QuantumCore.API.Packets.Shop;
 using QuantumCore.Core.Packets;
 using QuantumCore.Extensions;
 using QuantumCore.Networking;
-using Weikio.PluginFramework.Catalogs;
 using Xunit;
 using Version = QuantumCore.API.Packets.Version;
 
@@ -24,7 +23,7 @@ public class IncomingPacketTests
     public IncomingPacketTests()
     {
         var services = new ServiceCollection()
-            .AddCoreServices(new EmptyPluginCatalog(), new ConfigurationBuilder().Build())
+            .AddCoreServices(new ConfigurationBuilder().Build())
             .AddSingleton<IPacketSerializer, DefaultPacketSerializer>()
             .AddQuantumCoreTestLogger()
             .BuildServiceProvider();

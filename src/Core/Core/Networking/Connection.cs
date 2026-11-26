@@ -9,7 +9,6 @@ using QuantumCore.API;
 using QuantumCore.API.Core.Models;
 using QuantumCore.API.Core.Timekeeping;
 using QuantumCore.API.Game.Types;
-using QuantumCore.API.PluginTypes;
 using QuantumCore.Core.Packets;
 using QuantumCore.Core.Utils;
 using QuantumCore.Extensions;
@@ -20,7 +19,6 @@ namespace QuantumCore.Core.Networking;
 public abstract class Connection : BackgroundService, IConnection
 {
     private readonly ILogger _logger;
-    private readonly PluginExecutor _pluginExecutor;
     private readonly ConcurrentQueue<object> _packetsToSend = new();
     private readonly IPacketReader _packetReader;
 
@@ -36,10 +34,9 @@ public abstract class Connection : BackgroundService, IConnection
     public bool Handshaking { get; private set; }
     public EPhase Phase { get; set; }
 
-    protected Connection(ILogger logger, PluginExecutor pluginExecutor, IPacketReader packetReader)
+    protected Connection(ILogger logger, IPacketReader packetReader)
     {
         _logger = logger;
-        _pluginExecutor = pluginExecutor;
         _packetReader = packetReader;
         Id = Guid.NewGuid();
     }
@@ -79,13 +76,7 @@ public abstract class Connection : BackgroundService, IConnection
             await foreach (var packet in _packetReader.EnumerateAsync(_stream, stoppingToken))
             {
                 // _logger.LogDebug(" IN: {Type} {Data}", packet.GetType(), JsonSerializer.Serialize(packet));
-                await _pluginExecutor.ExecutePluginsAsync<IPacketOperationListener>(_logger,
-                    x => x.OnPrePacketReceivedAsync(packet, Array.Empty<byte>(), stoppingToken));
-
                 await OnReceiveAsync((IPacketSerializable) packet);
-
-                await _pluginExecutor.ExecutePluginsAsync<IPacketOperationListener>(_logger,
-                    x => x.OnPostPacketReceivedAsync(packet, Array.Empty<byte>(), stoppingToken));
             }
         }
         catch (IOException e)
@@ -170,14 +161,8 @@ public abstract class Connection : BackgroundService, IConnection
                             break;
                         }
 
-                        await _pluginExecutor
-                            .ExecutePluginsAsync<IPacketOperationListener>(_logger,
-                                x => x.OnPrePacketSentAsync(obj, CancellationToken.None)).ConfigureAwait(false);
                         await _stream.WriteAsync(bytesToSend).ConfigureAwait(false);
                         await _stream.FlushAsync().ConfigureAwait(false);
-                        await _pluginExecutor.ExecutePluginsAsync<IPacketOperationListener>(_logger,
-                                x => x.OnPostPacketSentAsync(obj, bytes, CancellationToken.None))
-                            .ConfigureAwait(false);
                     }
                     catch (Exception e)
                     {

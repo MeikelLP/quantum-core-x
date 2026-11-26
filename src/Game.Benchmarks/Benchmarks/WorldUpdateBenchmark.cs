@@ -23,7 +23,6 @@ using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Services;
 using QuantumCore.Game.World;
 using QuantumCore.Game.World.Entities;
-using Weikio.PluginFramework.Catalogs;
 
 namespace Game.Benchmarks.Benchmarks;
 
@@ -51,7 +50,7 @@ public class WorldUpdateBenchmark : IDisposable
         var services = new ServiceCollection()
             .AddLogging()
             .AddSingleton<IConfiguration>(_ => config)
-            .AddCoreServices(new EmptyPluginCatalog(), config)
+            .AddCoreServices(config)
             .AddQuantumCoreCaching()
             .AddGameCaching()
             .AddQuantumCoreDatabase(HostingOptions.MODE_GAME)

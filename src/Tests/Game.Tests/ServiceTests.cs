@@ -3,7 +3,6 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using NSubstitute;
-using QuantumCore;
 using QuantumCore.API;
 using QuantumCore.API.Extensions;
 using QuantumCore.API.Game.World;
@@ -29,7 +28,6 @@ public class ServiceTests
             .AddSingleton(Substitute.For<ISpawnGroupProvider>())
             .AddSingleton(Substitute.For<IParserService>())
             .AddSingleton(Substitute.For<IStructuredFileProvider>())
-            .AddSingleton<PluginExecutor>()
             .AddLogging()
             .AddLoadable<IAnimationManager, AnimationManager>()
             .AddLoadable<IChatManager, ChatManager>()

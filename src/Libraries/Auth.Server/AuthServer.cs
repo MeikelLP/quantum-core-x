@@ -14,8 +14,8 @@ public class AuthServer : ServerBase<AuthConnection>
 
     public AuthServer([FromKeyedServices(HostingOptions.MODE_AUTH)] IPacketManager packetManager,
         ILogger<AuthServer> logger,
-        PluginExecutor pluginExecutor, IServiceProvider serviceProvider, ServerClock clock, ICacheManager cacheManager)
-        : base(packetManager, logger, pluginExecutor, serviceProvider, clock, HostingOptions.MODE_AUTH)
+        IServiceProvider serviceProvider, ServerClock clock, ICacheManager cacheManager)
+        : base(packetManager, logger, serviceProvider, clock, HostingOptions.MODE_AUTH)
     {
         _logger = logger;
         _cacheManager = cacheManager;

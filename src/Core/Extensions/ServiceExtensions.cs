@@ -7,8 +7,6 @@ using QuantumCore.API.PluginTypes;
 using QuantumCore.Networking;
 using Serilog;
 using Serilog.Events;
-using Weikio.PluginFramework.Abstractions;
-using Weikio.PluginFramework.Microsoft.DependencyInjection;
 
 namespace QuantumCore.Extensions;
 
@@ -67,20 +65,12 @@ public static class ServiceExtensions
     /// <summary>
     /// Services required by Auth & Game
     /// </summary>
-    public static IServiceCollection AddCoreServices(this IServiceCollection services, IPluginCatalog pluginCatalog,
+    public static IServiceCollection AddCoreServices(this IServiceCollection services,
         IConfiguration configuration)
     {
         services.AddCustomLogging(configuration);
         services.AddSingleton(_ => TimeProvider.System);
         services.AddSingleton<ServerClock>();
-        services.AddSingleton<PluginExecutor>();
-        services.AddPluginFramework()
-            .AddPluginCatalog(pluginCatalog)
-            .AddPluginType<ISingletonPlugin>()
-            .AddPluginType<IConnectionLifetimeListener>()
-            .AddPluginType<IGameTickListener>()
-            .AddPluginType<IPacketOperationListener>()
-            .AddPluginType<IGameEntityLifetimeListener>();
 
         return services;
     }
