@@ -30,7 +30,6 @@
         <Project Path="Tests/Game.Commands.Tests/Game.Commands.Tests.csproj"/>
         <Project Path="Tests/Game.Tests/Game.Tests.csproj"/>
     </Folder>
-    <Project Path="AppHost/AppHost.csproj"/>
     <Project Path="Core.Networking.Generators/Core.Networking.Generators.csproj"/>
     <Project Path="Core.Networking/Core.Networking.csproj"/>
     <Project Path="Core/Core.csproj"/>
