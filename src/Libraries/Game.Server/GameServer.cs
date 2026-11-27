@@ -3,14 +3,13 @@ using System.Diagnostics.Metrics;
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using QuantumCore.API;
-using QuantumCore.API.Core.Timekeeping;
-using QuantumCore.API.Game.Types;
-using QuantumCore.API.Game.World;
 using QuantumCore.Core.Networking;
 using QuantumCore.Extensions;
 using QuantumCore.Game.Events;
+using QuantumCore.Game.Types;
+using QuantumCore.Game.World;
 using QuantumCore.Networking;
+using QuantumCore.Timekeeping;
 
 namespace QuantumCore.Game;
 

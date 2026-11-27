@@ -1,7 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using QuantumCore.API;
-using QuantumCore.API.Extensions;
 using QuantumCore.Caching.Extensions;
+using QuantumCore.Extensions;
 
 namespace QuantumCore.Game.Commands;
 

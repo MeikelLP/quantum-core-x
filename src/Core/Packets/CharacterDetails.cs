@@ -1,9 +1,9 @@
-﻿using QuantumCore.API.Game.Types;
-using QuantumCore.API.Game.Types.Players;
-using QuantumCore.API.Game.Types.Skills;
+﻿using QuantumCore.Game.Types;
+using QuantumCore.Game.Types.Players;
+using QuantumCore.Game.Types.Skills;
 using QuantumCore.Networking;
 
-namespace QuantumCore.API.Packets;
+namespace QuantumCore.Packets;
 
 [Packet(0x71, EDirection.OUTGOING)]
 [PacketGenerator]

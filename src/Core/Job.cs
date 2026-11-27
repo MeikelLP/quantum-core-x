@@ -1,6 +1,6 @@
-﻿using QuantumCore.API.Game.Types.Entities;
+﻿using QuantumCore.Game.Types.Entities;
 
-namespace QuantumCore.API;
+namespace QuantumCore;
 
 public class Job
 {

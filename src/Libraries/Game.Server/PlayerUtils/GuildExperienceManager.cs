@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.Logging;
-using QuantumCore.API;
-using QuantumCore.API.Game.Guild;
+using QuantumCore.Game.Guild;
 
 namespace QuantumCore.Game.PlayerUtils;
 

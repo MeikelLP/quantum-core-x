@@ -5,14 +5,12 @@ using System.Text.RegularExpressions;
 using EnumsNET;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
-using QuantumCore.API;
-using QuantumCore.API.Core.Models;
-using QuantumCore.API.Game.Types.Monsters;
-using QuantumCore.API.Game.Types.Skills;
-using QuantumCore.Core.Utils;
 using QuantumCore.Game.Drops;
+using QuantumCore.Game.Types.Monsters;
+using QuantumCore.Game.Types.Skills;
 using QuantumCore.Game.Utils;
 using QuantumCore.Game.World;
+using QuantumCore.Models;
 
 namespace QuantumCore.Game.Services;
 

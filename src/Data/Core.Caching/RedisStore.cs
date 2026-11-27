@@ -1,7 +1,6 @@
 ﻿using BeetleX.Redis;
 using EnumsNET;
 using Microsoft.Extensions.Logging;
-using QuantumCore.API;
 
 namespace QuantumCore.Caching;
 

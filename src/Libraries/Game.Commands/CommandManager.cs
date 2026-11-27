@@ -6,11 +6,9 @@ using CommandLine.Text;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using QuantumCore.API;
-using QuantumCore.API.Game;
-using QuantumCore.API.Game.World;
 using QuantumCore.Game.Persistence;
 using QuantumCore.Game.Persistence.Entities;
+using QuantumCore.Game.World;
 
 namespace QuantumCore.Game.Commands;
 

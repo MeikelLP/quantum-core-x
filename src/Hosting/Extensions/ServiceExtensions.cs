@@ -2,9 +2,9 @@ using System.Reflection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using QuantumCore.API.Core.Timekeeping;
-using QuantumCore.API.PluginTypes;
 using QuantumCore.Networking;
+using QuantumCore.PluginTypes;
+using QuantumCore.Timekeeping;
 using Serilog;
 using Serilog.Events;
 

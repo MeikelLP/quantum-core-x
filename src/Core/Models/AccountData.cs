@@ -1,4 +1,4 @@
-namespace QuantumCore.API.Core.Models;
+namespace QuantumCore.Models;
 
 public class AccountData
 {

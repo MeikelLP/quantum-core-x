@@ -1,4 +1,4 @@
-﻿namespace QuantumCore.API.Game.Types.Entities;
+﻿namespace QuantumCore.Game.Types.Entities;
 
 public enum EEntityState
 {

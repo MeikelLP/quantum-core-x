@@ -5,7 +5,6 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Options;
 using QuantumCore;
-using QuantumCore.API;
 using QuantumCore.Auth;
 using QuantumCore.Auth.Extensions;
 using QuantumCore.Auth.Persistence;
@@ -14,6 +13,7 @@ using QuantumCore.Caching.InMemory;
 using QuantumCore.Game;
 using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Persistence;
+using QuantumCore.Single;
 
 await Parser.Default.ParseArguments<SingleRunArgs>(args)
     .WithParsedAsync(async options =>
@@ -68,4 +68,7 @@ await Parser.Default.ParseArguments<SingleRunArgs>(args)
         await host.RunAsync();
     });
 
-internal sealed class SingleRunArgs;
+namespace QuantumCore.Single
+{
+    internal sealed class SingleRunArgs;
+}

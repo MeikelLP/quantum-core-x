@@ -1,6 +1,4 @@
-﻿using QuantumCore.API.Game;
-
-namespace QuantumCore.Game.Commands;
+﻿namespace QuantumCore.Game.Commands;
 
 [Command("dex+", "Increment dexterity stat by 1")]
 public class DexCommand : ICommandHandler

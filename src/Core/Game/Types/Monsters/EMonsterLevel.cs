@@ -1,4 +1,4 @@
-﻿namespace QuantumCore.API.Game.Types.Monsters;
+﻿namespace QuantumCore.Game.Types.Monsters;
 
 public enum EMonsterLevel : byte
 {

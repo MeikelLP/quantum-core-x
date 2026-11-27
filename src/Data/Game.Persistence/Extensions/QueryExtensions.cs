@@ -1,12 +1,11 @@
 ﻿using System.Collections.Immutable;
-using QuantumCore.API.Core.Models;
-using QuantumCore.API.Game.Guild;
-using QuantumCore.API.Game.Skills;
-using QuantumCore.API.Game.Types.Items;
-using QuantumCore.API.Game.Types.Players;
-using QuantumCore.API.Game.Types.Skills;
+using QuantumCore.Game.Guild;
 using QuantumCore.Game.Persistence.Entities;
-using QuantumCore.Game.Persistence.Entities.Guilds;
+using QuantumCore.Game.Skills;
+using QuantumCore.Game.Types.Items;
+using QuantumCore.Game.Types.Players;
+using QuantumCore.Game.Types.Skills;
+using QuantumCore.Models;
 
 namespace QuantumCore.Game.Persistence.Extensions;
 
@@ -68,7 +67,7 @@ public static class QueryExtensions
         });
     }
 
-    public static IQueryable<GuildData> SelectData(this IQueryable<Guild> query)
+    public static IQueryable<GuildData> SelectData(this IQueryable<Entities.Guilds.Guild> query)
     {
         return query.Select(x => new GuildData
         {

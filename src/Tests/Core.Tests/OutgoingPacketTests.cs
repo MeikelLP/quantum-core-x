@@ -5,13 +5,13 @@ using Bogus;
 using Core.Tests.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using QuantumCore.API.Packets;
-using QuantumCore.API.Packets.Quest;
-using QuantumCore.API.Packets.QuickBar;
-using QuantumCore.API.Packets.Shop;
+using QuantumCore.Packets;
+using QuantumCore.Packets.Quest;
+using QuantumCore.Packets.QuickBar;
+using QuantumCore.Packets.Shop;
 using QuantumCore.Extensions;
-using QuantumCore.Game.Packets.General;
 using QuantumCore.Networking;
+using QuantumCore.Packets.General;
 using Xunit;
 
 namespace Core.Tests;

@@ -1,6 +1,6 @@
 ﻿using QuantumCore.Networking;
 
-namespace QuantumCore.Game.Packets.General;
+namespace QuantumCore.Packets.General;
 
 public class ItemBonus
 {

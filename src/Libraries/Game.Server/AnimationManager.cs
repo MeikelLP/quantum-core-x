@@ -1,8 +1,7 @@
 ﻿using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
-using QuantumCore.API;
-using QuantumCore.API.Core.Models;
-using QuantumCore.API.Game.Types.Entities;
+using QuantumCore.Game.Types.Entities;
+using QuantumCore.Models;
 
 namespace QuantumCore.Game;
 

@@ -1,4 +1,4 @@
-﻿namespace QuantumCore.API.Game.Types.Players;
+﻿namespace QuantumCore.Game.Types.Players;
 
 public enum ENameChangeStatus : byte
 {

@@ -1,6 +1,6 @@
-﻿using QuantumCore.API.Core.Models;
-using QuantumCore.API.Game.Types.Quest;
-using QuantumCore.API.Game.World;
+﻿using QuantumCore.Game.Types.Quest;
+using QuantumCore.Game.World;
+using QuantumCore.Models;
 
 namespace QuantumCore.Game.Quest;
 

@@ -4,9 +4,8 @@ using BinarySerialization;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
 using Microsoft.VisualStudio.Threading;
-using QuantumCore.API;
-using QuantumCore.API.Core.Models;
 using QuantumCore.Game.Types;
+using QuantumCore.Models;
 
 namespace QuantumCore.Game;
 

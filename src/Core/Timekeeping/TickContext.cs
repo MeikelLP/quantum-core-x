@@ -1,4 +1,4 @@
-namespace QuantumCore.API.Core.Timekeeping;
+namespace QuantumCore.Timekeeping;
 
 public readonly record struct TickContext(
     ServerClock Clock,

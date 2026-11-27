@@ -1,8 +1,8 @@
-﻿using QuantumCore.API.Game.Types.Players;
-using QuantumCore.API.Game.Types.Skills;
+﻿using QuantumCore.Game.Types.Players;
+using QuantumCore.Game.Types.Skills;
 using QuantumCore.Networking;
 
-namespace QuantumCore.API.Packets;
+namespace QuantumCore.Packets;
 
 public class Character
 {

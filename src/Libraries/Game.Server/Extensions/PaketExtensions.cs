@@ -1,6 +1,6 @@
-﻿using QuantumCore.API.Core.Models;
-using QuantumCore.API.Game.Types.Players;
-using QuantumCore.API.Packets;
+﻿using QuantumCore.Packets;
+using QuantumCore.Game.Types.Players;
+using QuantumCore.Models;
 
 namespace QuantumCore.Game.Extensions;
 

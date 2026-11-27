@@ -1,8 +1,8 @@
-﻿using QuantumCore.API.Core.Models;
-using QuantumCore.API.Game.Types.Items;
-using QuantumCore.API.Game.World;
+﻿using QuantumCore.Game.Types.Items;
+using QuantumCore.Game.World;
+using QuantumCore.Models;
 
-namespace QuantumCore.API;
+namespace QuantumCore;
 
 public interface IEquipment
 {

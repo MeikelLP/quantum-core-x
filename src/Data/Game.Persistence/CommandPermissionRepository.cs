@@ -1,5 +1,4 @@
 using Microsoft.EntityFrameworkCore;
-using QuantumCore.API.Game;
 
 namespace QuantumCore.Game.Persistence;
 

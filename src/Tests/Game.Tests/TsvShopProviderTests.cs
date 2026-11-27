@@ -2,7 +2,7 @@
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging.Abstractions;
 using NSubstitute;
-using QuantumCore.API;
+using QuantumCore;
 using QuantumCore.Game.Shops;
 
 namespace Game.Tests;

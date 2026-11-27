@@ -1,5 +1,5 @@
 ﻿using System.Reflection;
-using QuantumCore.API.Packets;
+using QuantumCore.Packets;
 using QuantumCore.Core.Packets;
 
 namespace QuantumCore.Game;

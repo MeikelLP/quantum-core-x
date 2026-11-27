@@ -6,9 +6,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using NSubstitute;
 using QuantumCore;
-using QuantumCore.API;
-using QuantumCore.API.Game.Guild;
 using QuantumCore.Game;
+using QuantumCore.Game.Guild;
 using QuantumCore.Game.Persistence;
 using QuantumCore.Game.Persistence.Extensions;
 

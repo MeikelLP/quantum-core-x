@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 
-namespace QuantumCore.API.Extensions;
+namespace QuantumCore.Extensions;
 
 public static class ServiceExtensions
 {

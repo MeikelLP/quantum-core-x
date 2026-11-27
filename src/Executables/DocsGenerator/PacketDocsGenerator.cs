@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 using System.Text;
 using EnumsNET;
-using QuantumCore.API.Packets;
+using QuantumCore.Packets;
 using QuantumCore.Networking;
 
 namespace DocsGenerator;

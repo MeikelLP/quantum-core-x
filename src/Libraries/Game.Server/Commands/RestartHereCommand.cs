@@ -1,6 +1,4 @@
-﻿using QuantumCore.API.Game;
-
-namespace QuantumCore.Game.Commands;
+﻿namespace QuantumCore.Game.Commands;
 
 [Command("restart_here", "Respawns here")]
 [CommandNoPermission]

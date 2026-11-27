@@ -1,6 +1,4 @@
-﻿using QuantumCore.API.Game;
-
-namespace QuantumCore.Game.Commands;
+﻿namespace QuantumCore.Game.Commands;
 
 [Command("r", "Resets the players hp + sp to their max")]
 [Command("reset", "Resets the players hp + sp to their max")]

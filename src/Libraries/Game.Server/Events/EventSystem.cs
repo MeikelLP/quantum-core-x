@@ -1,6 +1,6 @@
 ﻿// using Prometheus; // TODO
 
-using QuantumCore.API.Core.Timekeeping;
+using QuantumCore.Timekeeping;
 
 namespace QuantumCore.Game.Events;
 

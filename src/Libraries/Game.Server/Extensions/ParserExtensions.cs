@@ -1,5 +1,5 @@
-﻿using QuantumCore.API.Game.World;
-using QuantumCore.Game.Services;
+﻿using QuantumCore.Game.Services;
+using QuantumCore.Game.World;
 
 namespace QuantumCore.Game.Extensions;
 

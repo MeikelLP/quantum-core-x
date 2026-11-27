@@ -1,5 +1,5 @@
 ﻿using System.Net;
 
-namespace QuantumCore.API.Core.Models;
+namespace QuantumCore.Models;
 
 public record struct CoreHost(IPAddress Ip, ushort Port);

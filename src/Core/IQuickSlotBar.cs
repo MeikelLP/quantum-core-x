@@ -1,8 +1,8 @@
 ﻿using System.Collections.Immutable;
-using QuantumCore.API.Core.Models;
-using QuantumCore.API.Game.World;
+using QuantumCore.Game.World;
+using QuantumCore.Models;
 
-namespace QuantumCore.API;
+namespace QuantumCore;
 
 public interface IQuickSlotBar
 {

@@ -1,4 +1,4 @@
-namespace QuantumCore.API.Core.Timekeeping;
+namespace QuantumCore.Timekeeping;
 
 /// <summary>
 /// Strongly typed wrapper for monotonic timestamps returned by <see cref="TimeProvider.GetTimestamp"/>.

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Immutable;
 
-namespace QuantumCore.API;
+namespace QuantumCore;
 
 public interface INpcShopProvider
 {

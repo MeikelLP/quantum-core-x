@@ -1,9 +1,7 @@
 using CommandLine;
-using QuantumCore.API;
-using QuantumCore.API.Core.Models;
-using QuantumCore.API.Extensions;
-using QuantumCore.API.Game;
-using QuantumCore.API.Game.World;
+using QuantumCore.Extensions;
+using QuantumCore.Game.World;
+using QuantumCore.Models;
 
 namespace QuantumCore.Game.Commands;
 

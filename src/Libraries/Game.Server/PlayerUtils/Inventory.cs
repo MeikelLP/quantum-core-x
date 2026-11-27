@@ -1,10 +1,8 @@
 using System.Collections.ObjectModel;
-using QuantumCore.API;
-using QuantumCore.API.Core.Models;
-using QuantumCore.API.Extensions;
-using QuantumCore.API.Game.Types.Items;
-using QuantumCore.Core.Utils;
+using QuantumCore.Extensions;
+using QuantumCore.Game.Types.Items;
 using QuantumCore.Game.Utils;
+using QuantumCore.Models;
 using Serilog;
 
 namespace QuantumCore.Game.PlayerUtils;

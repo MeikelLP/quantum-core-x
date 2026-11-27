@@ -1,8 +1,6 @@
 ﻿using System.Net;
-using QuantumCore.API;
-using QuantumCore.API.Core.Models;
-using QuantumCore.API.Core.Timekeeping;
-using QuantumCore.API.Game.World;
+using QuantumCore.Models;
+using QuantumCore.Timekeeping;
 
 namespace QuantumCore.Game.World;
 

@@ -1,11 +1,10 @@
 ﻿using EnumsNET;
 using Microsoft.Extensions.Logging;
-using QuantumCore.API;
-using QuantumCore.API.Game.Types.Players;
-using QuantumCore.API.Game.Types.Skills;
-using QuantumCore.API.Packets;
-using QuantumCore.API.PluginTypes;
+using QuantumCore.Packets;
+using QuantumCore.Game.Types.Players;
+using QuantumCore.Game.Types.Skills;
 using QuantumCore.Game.World.Entities;
+using QuantumCore.PluginTypes;
 
 namespace QuantumCore.Game.PacketHandlers.Game;
 

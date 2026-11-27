@@ -1,6 +1,6 @@
-﻿using QuantumCore.API.Game.Guild;
-using QuantumCore.API.Game.Types.Guild;
-using QuantumCore.API.Game.World;
+﻿using QuantumCore.Game.Guild;
+using QuantumCore.Game.Types.Guild;
+using QuantumCore.Game.World;
 
 namespace QuantumCore.Game.Extensions;
 

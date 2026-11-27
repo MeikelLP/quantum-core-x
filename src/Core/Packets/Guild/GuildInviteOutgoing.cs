@@ -1,7 +1,7 @@
-﻿using QuantumCore.API.Game.Guild;
+﻿using QuantumCore.Game.Guild;
 using QuantumCore.Networking;
 
-namespace QuantumCore.API.Packets.Guild;
+namespace QuantumCore.Packets.Guild;
 
 [Packet(0x4B, EDirection.OUTGOING)]
 [SubPacket(0xE, 1)]

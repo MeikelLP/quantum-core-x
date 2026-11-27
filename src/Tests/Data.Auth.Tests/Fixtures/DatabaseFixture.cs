@@ -2,7 +2,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using QuantumCore;
 using QuantumCore.Auth.Persistence;
 using QuantumCore.Auth.Persistence.Extensions;
 using Serilog;

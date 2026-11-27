@@ -26,7 +26,7 @@ public abstract class GameDbContext : DbContext
     public DbSet<PermAuth> Permissions { get; set; } = null!;
     public DbSet<PermGroup> PermissionGroups { get; set; } = null!;
     public DbSet<PermUser> PermissionUsers { get; set; } = null!;
-    public DbSet<Guild> Guilds { get; set; }
+    public DbSet<Entities.Guilds.Guild> Guilds { get; set; }
     public DbSet<GuildRank> GuildRanks { get; set; }
     public DbSet<GuildMember> GuildMembers { get; set; }
     public DbSet<GuildNews> GuildNews { get; set; }
@@ -44,7 +44,7 @@ public abstract class GameDbContext : DbContext
         PermGroup.Configure(modelBuilder.Entity<PermGroup>(), Database);
         PermUser.Configure(modelBuilder.Entity<PermUser>(), Database);
 
-        Guild.Configure(modelBuilder.Entity<Guild>(), Database);
+        Entities.Guilds.Guild.Configure(modelBuilder.Entity<Entities.Guilds.Guild>(), Database);
         GuildMember.Configure(modelBuilder.Entity<GuildMember>(), Database);
         GuildRank.Configure(modelBuilder.Entity<GuildRank>(), Database);
         Entities.Guilds.GuildNews.Configure(modelBuilder.Entity<GuildNews>(), Database);

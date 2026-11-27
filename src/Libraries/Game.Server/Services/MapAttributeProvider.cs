@@ -2,8 +2,6 @@ using System.Buffers.Binary;
 using System.Numerics;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
-using QuantumCore.API;
-using QuantumCore.API.Game.Types;
 using QuantumCore.Game.Types;
 using QuantumCore.Game.World;
 

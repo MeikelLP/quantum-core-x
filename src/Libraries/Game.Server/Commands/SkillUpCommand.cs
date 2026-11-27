@@ -1,7 +1,6 @@
 ﻿using CommandLine;
 using Microsoft.Extensions.Logging;
-using QuantumCore.API.Game;
-using QuantumCore.API.Game.Types.Skills;
+using QuantumCore.Game.Types.Skills;
 
 namespace QuantumCore.Game.Commands;
 

@@ -1,4 +1,4 @@
-﻿namespace QuantumCore.API.PluginTypes;
+﻿namespace QuantumCore.PluginTypes;
 
 public interface IConnectionLifetimeListener
 {

@@ -1,6 +1,5 @@
 ﻿using CommandLine;
-using QuantumCore.API.Game;
-using QuantumCore.API.Game.Guild;
+using QuantumCore.Game.Guild;
 
 namespace QuantumCore.Game.Commands;
 

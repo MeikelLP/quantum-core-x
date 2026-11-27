@@ -1,5 +1,5 @@
 using System.Collections.Immutable;
-using QuantumCore.API.Game.Types.Monsters;
+using QuantumCore.Game.Types.Monsters;
 
 namespace QuantumCore.Game.World;
 

@@ -2,7 +2,7 @@
 using System.Diagnostics.CodeAnalysis;
 using QuantumCore.Networking;
 
-namespace QuantumCore.API.Packets.Guild;
+namespace QuantumCore.Packets.Guild;
 
 [Packet(0x50, EDirection.INCOMING)]
 [SubPacket(0x05, 0)]

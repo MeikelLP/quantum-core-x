@@ -1,8 +1,8 @@
 ﻿using System.Net;
-using QuantumCore.API.Core.Timekeeping;
 using QuantumCore.Networking;
+using QuantumCore.Timekeeping;
 
-namespace QuantumCore.API;
+namespace QuantumCore;
 
 public interface IServerBase
 {

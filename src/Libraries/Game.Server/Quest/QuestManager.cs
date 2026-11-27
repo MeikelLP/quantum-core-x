@@ -1,10 +1,9 @@
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using QuantumCore.API;
-using QuantumCore.API.Core.Models;
-using QuantumCore.API.Game.World;
+using QuantumCore.Game.World;
 using QuantumCore.Game.World.Entities;
+using QuantumCore.Models;
 
 namespace QuantumCore.Game.Quest;
 

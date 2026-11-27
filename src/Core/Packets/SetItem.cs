@@ -1,8 +1,8 @@
-using QuantumCore.API.Game.Types.Items;
-using QuantumCore.Game.Packets.General;
+using QuantumCore.Game.Types.Items;
 using QuantumCore.Networking;
+using QuantumCore.Packets.General;
 
-namespace QuantumCore.API.Packets;
+namespace QuantumCore.Packets;
 
 [Packet(0x15, EDirection.OUTGOING)]
 [PacketGenerator]

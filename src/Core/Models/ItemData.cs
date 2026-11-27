@@ -1,7 +1,7 @@
 using System.Diagnostics;
 using BinarySerialization;
 
-namespace QuantumCore.API.Core.Models;
+namespace QuantumCore.Models;
 
 [DebuggerDisplay("{Name} ({Id})")]
 public class ItemData

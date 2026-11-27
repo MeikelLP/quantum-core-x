@@ -1,6 +1,6 @@
-﻿using QuantumCore.API.Game.Types.Players;
+﻿using QuantumCore.Game.Types.Players;
 
-namespace QuantumCore.API.Game.Guild;
+namespace QuantumCore.Game.Guild;
 
 public class GuildMemberData
 {

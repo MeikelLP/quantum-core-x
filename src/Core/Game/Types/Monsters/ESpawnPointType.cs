@@ -1,6 +1,6 @@
 ﻿using System.Runtime.Serialization;
 
-namespace QuantumCore.API.Game.Types.Monsters;
+namespace QuantumCore.Game.Types.Monsters;
 
 public enum ESpawnPointType
 {

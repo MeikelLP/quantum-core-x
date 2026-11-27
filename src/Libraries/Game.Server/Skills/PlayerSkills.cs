@@ -3,17 +3,15 @@ using System.Collections.Immutable;
 using EnumsNET;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using QuantumCore.API;
-using QuantumCore.API.Game.Skills;
-using QuantumCore.API.Game.Types.Entities;
-using QuantumCore.API.Game.Types.Players;
-using QuantumCore.API.Game.Types.Skills;
-using QuantumCore.API.Packets.Skills;
+using QuantumCore.Packets.Skills;
 using QuantumCore.Core.Utils;
 using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Persistence;
+using QuantumCore.Game.Types.Entities;
+using QuantumCore.Game.Types.Players;
+using QuantumCore.Game.Types.Skills;
 using QuantumCore.Game.World.Entities;
-using static QuantumCore.API.Game.Types.Skills.ESkillLevelUtils;
+using static QuantumCore.Game.Types.Skills.ESkillLevelUtils;
 
 namespace QuantumCore.Game.Skills;
 

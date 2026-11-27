@@ -1,8 +1,7 @@
 ﻿using System.Net.Sockets;
-using QuantumCore.API;
-using QuantumCore.API.Core.Timekeeping;
 using QuantumCore.Core.Networking;
 using QuantumCore.Networking;
+using QuantumCore.Timekeeping;
 
 namespace QuantumCore.Auth;
 

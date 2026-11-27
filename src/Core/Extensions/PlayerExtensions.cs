@@ -1,13 +1,12 @@
 ﻿using System.Diagnostics;
-using QuantumCore.API;
-using QuantumCore.API.Core.Models;
-using QuantumCore.API.Extensions;
-using QuantumCore.API.Game.Types;
-using QuantumCore.API.Game.Types.Entities;
-using QuantumCore.API.Game.Types.Items;
-using QuantumCore.API.Game.Types.Players;
-using QuantumCore.API.Game.World;
-using QuantumCore.API.Packets;
+using QuantumCore.Extensions;
+using QuantumCore.Packets;
+using QuantumCore.Game.Types;
+using QuantumCore.Game.Types.Entities;
+using QuantumCore.Game.Types.Items;
+using QuantumCore.Game.Types.Players;
+using QuantumCore.Game.World;
+using QuantumCore.Models;
 
 // ReSharper disable once CheckNamespace
 namespace QuantumCore.Game;

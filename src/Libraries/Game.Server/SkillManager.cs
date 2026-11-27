@@ -1,8 +1,7 @@
 ﻿using System.Collections.Immutable;
-using QuantumCore.API;
-using QuantumCore.API.Core.Models;
-using QuantumCore.API.Game.Types.Skills;
 using QuantumCore.Game.Services;
+using QuantumCore.Game.Types.Skills;
+using QuantumCore.Models;
 
 namespace QuantumCore.Game;
 

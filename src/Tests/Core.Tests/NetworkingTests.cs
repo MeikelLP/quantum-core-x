@@ -5,10 +5,10 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Hosting.Internal;
 using Microsoft.Extensions.Logging;
 using QuantumCore;
-using QuantumCore.API.Game.Types;
-using QuantumCore.API.Game.Types.Skills;
-using QuantumCore.API.Packets;
-using QuantumCore.API.Packets.Shop;
+using QuantumCore.Packets;
+using QuantumCore.Packets.Shop;
+using QuantumCore.Game.Types;
+using QuantumCore.Game.Types.Skills;
 using QuantumCore.Networking;
 using Xunit;
 

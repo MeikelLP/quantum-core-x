@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 using System.Text;
 using CommandLine;
-using QuantumCore.API.Game;
+using QuantumCore.Game;
 using QuantumCore.Game.Commands;
 
 namespace DocsGenerator;

@@ -1,8 +1,7 @@
 ﻿using System.Collections.Immutable;
-using QuantumCore.API;
-using QuantumCore.API.Game.Guild;
-using QuantumCore.API.Game.Types.Guild;
-using QuantumCore.API.Packets.Guild;
+using QuantumCore.Packets.Guild;
+using QuantumCore.Game.Guild;
+using QuantumCore.Game.Types.Guild;
 
 namespace QuantumCore.Game.Extensions;
 

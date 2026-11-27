@@ -1,6 +1,6 @@
 ﻿using System.Collections.Immutable;
 
-namespace QuantumCore.API.Game.Guild;
+namespace QuantumCore.Game.Guild;
 
 public class GuildData
 {

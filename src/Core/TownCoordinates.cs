@@ -1,4 +1,4 @@
-﻿namespace QuantumCore.API;
+﻿namespace QuantumCore;
 
 /// <summary>
 /// Contains town spawn points for each empire

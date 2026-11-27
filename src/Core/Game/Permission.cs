@@ -1,4 +1,4 @@
-﻿namespace QuantumCore.API.Game;
+﻿namespace QuantumCore.Game;
 
 public record PermissionGroup
 {

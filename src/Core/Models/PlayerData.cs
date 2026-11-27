@@ -1,8 +1,8 @@
-﻿using QuantumCore.API.Game.Types;
-using QuantumCore.API.Game.Types.Players;
-using QuantumCore.API.Game.Types.Skills;
+﻿using QuantumCore.Game.Types;
+using QuantumCore.Game.Types.Players;
+using QuantumCore.Game.Types.Skills;
 
-namespace QuantumCore.API.Core.Models;
+namespace QuantumCore.Models;
 
 public sealed class PlayerData
 {

@@ -3,12 +3,12 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.FileProviders.Physical;
 using NSubstitute;
-using QuantumCore.API;
-using QuantumCore.API.Core.Models;
-using QuantumCore.API.Game.Types.Combat;
-using QuantumCore.API.Game.Types.Entities;
-using QuantumCore.API.Game.Types.Monsters;
+using QuantumCore;
 using QuantumCore.Game;
+using QuantumCore.Game.Types.Combat;
+using QuantumCore.Game.Types.Entities;
+using QuantumCore.Game.Types.Monsters;
+using QuantumCore.Models;
 
 namespace Game.Tests;
 

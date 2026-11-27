@@ -1,16 +1,16 @@
 using System.Net;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
-using QuantumCore.API;
-using QuantumCore.API.Core.Models;
-using QuantumCore.API.Game.Guild;
-using QuantumCore.API.Game.Types;
-using QuantumCore.API.Game.Types.Players;
-using QuantumCore.API.Game.World;
-using QuantumCore.API.Packets;
+using QuantumCore;
+using QuantumCore.Packets;
 using QuantumCore.Cache;
 using QuantumCore.Game;
+using QuantumCore.Game.Guild;
 using QuantumCore.Game.PacketHandlers;
+using QuantumCore.Game.Types;
+using QuantumCore.Game.Types.Players;
+using QuantumCore.Game.World;
+using QuantumCore.Models;
 
 namespace Game.Tests;
 

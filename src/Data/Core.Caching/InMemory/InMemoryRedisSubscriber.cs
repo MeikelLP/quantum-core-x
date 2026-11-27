@@ -1,4 +1,3 @@
-using QuantumCore.API;
 
 namespace QuantumCore.Caching.InMemory;
 

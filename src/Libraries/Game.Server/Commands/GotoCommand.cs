@@ -1,7 +1,5 @@
 ﻿using CommandLine;
 using Microsoft.Extensions.Logging;
-using QuantumCore.API.Game;
-using QuantumCore.API.Game.World;
 using QuantumCore.Game.World;
 
 namespace QuantumCore.Game.Commands;

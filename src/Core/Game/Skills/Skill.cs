@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics;
-using QuantumCore.API.Game.Types.Skills;
+using QuantumCore.Game.Types.Skills;
 
-namespace QuantumCore.API.Game.Skills;
+namespace QuantumCore.Game.Skills;
 
 [DebuggerDisplay("Skill ({SkillId}) - MasterType: {MasterType}, Level: {Level}")]
 public class Skill : ISkill

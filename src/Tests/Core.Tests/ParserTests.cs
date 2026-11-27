@@ -4,13 +4,12 @@ using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.FileProviders.Physical;
 using Microsoft.Extensions.Logging;
 using NSubstitute;
-using QuantumCore.API;
-using QuantumCore.API.Game.Types.Monsters;
-using QuantumCore.API.Game.World;
+using QuantumCore;
 using QuantumCore.Game;
 using QuantumCore.Game.Drops;
 using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Services;
+using QuantumCore.Game.Types.Monsters;
 using QuantumCore.Game.World;
 using Xunit;
 

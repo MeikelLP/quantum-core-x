@@ -3,9 +3,9 @@ using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using QuantumCore.API.Game.Types;
-using QuantumCore.API.Game.Types.Skills;
 using QuantumCore.Game.Persistence.Entities.Guilds;
+using QuantumCore.Game.Types;
+using QuantumCore.Game.Types.Skills;
 
 namespace QuantumCore.Game.Persistence.Entities;
 
@@ -40,12 +40,12 @@ public class Player
 
 
     public uint? GuildId { get; set; }
-    public Guild? Guild { get; set; }
+    public Entities.Guilds.Guild? Guild { get; set; }
 
     /// <summary>
     /// Guilds where the player is leader of. Should be empty or 1
     /// </summary>
-    public ICollection<Guild> GuildsToLead { get; set; } = null!;
+    public ICollection<Entities.Guilds.Guild> GuildsToLead { get; set; } = null!;
 
     public ICollection<GuildMember> Members { get; set; } = null!;
     public ICollection<GuildNews> WrittenGuildNews { get; set; } = null!;

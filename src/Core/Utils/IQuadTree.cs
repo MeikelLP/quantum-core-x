@@ -1,6 +1,6 @@
-namespace QuantumCore.API.Core.Utils;
+namespace QuantumCore.Utils;
 
 public interface IQuadTree
 {
-        
+
 }

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Immutable;
-using QuantumCore.API.Game.Types.Guild;
+using QuantumCore.Game.Types.Guild;
 
-namespace QuantumCore.API.Game.Guild;
+namespace QuantumCore.Game.Guild;
 
 /// <summary>
 /// This manager does not validate input or overflows. Please validate yourself and updating using this manager.

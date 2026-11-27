@@ -1,4 +1,4 @@
-namespace QuantumCore.API.Game.Types;
+namespace QuantumCore.Game.Types;
 
 [Flags]
 public enum EMapAttributes : uint

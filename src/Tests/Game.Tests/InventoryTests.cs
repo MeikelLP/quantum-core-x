@@ -1,9 +1,9 @@
 ﻿using AwesomeAssertions;
 using NSubstitute;
-using QuantumCore.API;
-using QuantumCore.API.Core.Models;
-using QuantumCore.API.Game.Types.Items;
+using QuantumCore;
 using QuantumCore.Game.PlayerUtils;
+using QuantumCore.Game.Types.Items;
+using QuantumCore.Models;
 
 namespace Game.Tests;
 

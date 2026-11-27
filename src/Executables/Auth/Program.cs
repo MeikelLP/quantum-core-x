@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using QuantumCore.API;
+using QuantumCore;
 using QuantumCore.Auth;
 using QuantumCore.Auth.Extensions;
 using QuantumCore.Auth.Persistence;

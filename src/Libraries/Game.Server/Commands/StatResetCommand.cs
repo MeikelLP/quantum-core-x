@@ -1,6 +1,4 @@
-﻿using QuantumCore.API;
-using QuantumCore.API.Game;
-
+﻿
 namespace QuantumCore.Game.Commands;
 
 [Command("stat_reset", "Reset all stats and get back the stat points")]

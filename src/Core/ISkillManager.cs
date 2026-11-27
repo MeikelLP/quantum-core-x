@@ -1,7 +1,7 @@
-﻿using QuantumCore.API.Core.Models;
-using QuantumCore.API.Game.Types.Skills;
+﻿using QuantumCore.Game.Types.Skills;
+using QuantumCore.Models;
 
-namespace QuantumCore.API;
+namespace QuantumCore;
 
 public interface ISkillManager
 {

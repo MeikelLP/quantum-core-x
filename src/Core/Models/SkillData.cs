@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics;
-using QuantumCore.API.Game.Types.Skills;
+using QuantumCore.Game.Types.Skills;
 
-namespace QuantumCore.API.Core.Models;
+namespace QuantumCore.Models;
 
 [DebuggerDisplay("{Name} ({Id})")]
 public class SkillData

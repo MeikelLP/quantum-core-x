@@ -1,12 +1,11 @@
 using System.Runtime.Serialization;
 using EnumsNET;
-using QuantumCore.API;
-using QuantumCore.API.Core.Models;
-using QuantumCore.API.PluginTypes;
 using QuantumCore.Auth.Packets;
 using QuantumCore.Cache;
 using QuantumCore.Caching;
 using QuantumCore.Core.Utils;
+using QuantumCore.Models;
+using QuantumCore.PluginTypes;
 
 namespace QuantumCore.Auth.PacketHandlers;
 

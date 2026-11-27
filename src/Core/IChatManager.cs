@@ -1,6 +1,6 @@
-﻿using QuantumCore.API.Game.World;
+﻿using QuantumCore.Game.World;
 
-namespace QuantumCore.API;
+namespace QuantumCore;
 
 public interface IChatManager
 {

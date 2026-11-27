@@ -1,14 +1,13 @@
 ﻿using System.Net.Sockets;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using QuantumCore.API;
-using QuantumCore.API.Core.Timekeeping;
-using QuantumCore.API.Game.Types;
-using QuantumCore.API.Game.World;
-using QuantumCore.API.Packets;
+using QuantumCore.Packets;
 using QuantumCore.Core.Networking;
 using QuantumCore.Game.Events;
+using QuantumCore.Game.Types;
+using QuantumCore.Game.World;
 using QuantumCore.Networking;
+using QuantumCore.Timekeeping;
 
 namespace QuantumCore.Game;
 

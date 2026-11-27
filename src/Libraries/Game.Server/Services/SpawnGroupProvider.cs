@@ -1,6 +1,6 @@
 ﻿using Microsoft.Extensions.FileProviders;
-using QuantumCore.API.Game.World;
 using QuantumCore.Game.Extensions;
+using QuantumCore.Game.World;
 
 namespace QuantumCore.Game.Services;
 

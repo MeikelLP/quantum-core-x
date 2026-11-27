@@ -1,6 +1,6 @@
-﻿using QuantumCore.API.Game.Types.Items;
+﻿using QuantumCore.Game.Types.Items;
 
-namespace QuantumCore.API.Core.Models;
+namespace QuantumCore.Models;
 
 public class ItemInstance
 {

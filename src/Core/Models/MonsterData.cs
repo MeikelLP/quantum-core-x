@@ -1,11 +1,11 @@
 using System.Diagnostics;
 using BinarySerialization;
-using QuantumCore.API.Game.Types;
-using QuantumCore.API.Game.Types.Combat;
-using QuantumCore.API.Game.Types.Entities;
-using QuantumCore.API.Game.Types.Monsters;
+using QuantumCore.Game.Types;
+using QuantumCore.Game.Types.Combat;
+using QuantumCore.Game.Types.Entities;
+using QuantumCore.Game.Types.Monsters;
 
-namespace QuantumCore.API.Core.Models;
+namespace QuantumCore.Models;
 
 #pragma warning disable CA1819 // do not return arrays - required for BinarySerializer
 [DebuggerDisplay("{Name} ({Id})")]

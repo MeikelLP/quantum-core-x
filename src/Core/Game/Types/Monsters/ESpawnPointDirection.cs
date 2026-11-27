@@ -1,4 +1,4 @@
-﻿namespace QuantumCore.API.Game.Types.Monsters;
+﻿namespace QuantumCore.Game.Types.Monsters;
 
 /// <summary>
 /// Spawn point directions follows the compass rose with counter-clockwise increments.

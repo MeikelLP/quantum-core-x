@@ -1,6 +1,5 @@
-﻿using QuantumCore.API;
-using QuantumCore.API.Core.Models;
-using QuantumCore.API.Game.Types;
+﻿using QuantumCore.Game.Types;
+using QuantumCore.Models;
 
 namespace QuantumCore.Game.Persistence;
 

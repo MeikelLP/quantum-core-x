@@ -5,14 +5,13 @@ using System.Net.Sockets;
 using System.Text.Json;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using QuantumCore.API;
-using QuantumCore.API.Core.Models;
-using QuantumCore.API.Core.Timekeeping;
-using QuantumCore.API.Game.Types;
 using QuantumCore.Core.Packets;
 using QuantumCore.Core.Utils;
 using QuantumCore.Extensions;
+using QuantumCore.Game.Types;
+using QuantumCore.Models;
 using QuantumCore.Networking;
+using QuantumCore.Timekeeping;
 
 namespace QuantumCore.Core.Networking;
 

@@ -1,13 +1,11 @@
 ﻿using System.Collections.Immutable;
 using EnumsNET;
 using Microsoft.EntityFrameworkCore;
-using QuantumCore.API;
-using QuantumCore.API.Game.Guild;
-using QuantumCore.API.Game.Types.Guild;
+using QuantumCore.Game.Guild;
 using QuantumCore.Game.Persistence;
 using QuantumCore.Game.Persistence.Entities.Guilds;
 using QuantumCore.Game.Persistence.Extensions;
-using GuildMember = QuantumCore.Game.Persistence.Entities.Guilds.GuildMember;
+using QuantumCore.Game.Types.Guild;
 
 namespace QuantumCore.Game;
 
@@ -50,7 +48,7 @@ public class GuildManager : IGuildManager
     public async Task<GuildData> CreateGuildAsync(string name, uint leaderId, CancellationToken token = default)
     {
         var leaderRank = new GuildRank { Position = 1, Name = "Leader", Permissions = GuildRankPermissions.ALL };
-        var guild = new Guild
+        var guild = new Persistence.Entities.Guilds.Guild
         {
             Name = name,
             OwnerId = leaderId,

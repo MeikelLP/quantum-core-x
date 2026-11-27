@@ -1,8 +1,8 @@
 ﻿using System.Collections.Immutable;
-using QuantumCore.API.Core.Models;
-using QuantumCore.API.Core.Timekeeping;
+using QuantumCore.Models;
+using QuantumCore.Timekeeping;
 
-namespace QuantumCore.API.Game.World;
+namespace QuantumCore.Game.World;
 
 public interface IWorld : ILoadable
 {

@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using QuantumCore.API.Game.Types.Guild;
+using QuantumCore.Game.Types.Guild;
 
 namespace QuantumCore.Game.Persistence.Entities.Guilds;
 

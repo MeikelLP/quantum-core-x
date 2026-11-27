@@ -1,6 +1,4 @@
-﻿using QuantumCore.API.Game;
-
-namespace QuantumCore.Game.Commands;
+﻿namespace QuantumCore.Game.Commands;
 
 [Command("con+", "Increment health stat by 1")]
 public class ConCommand : ICommandHandler

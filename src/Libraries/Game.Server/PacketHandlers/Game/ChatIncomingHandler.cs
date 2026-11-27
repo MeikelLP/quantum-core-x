@@ -1,8 +1,7 @@
 ﻿using Microsoft.Extensions.Logging;
-using QuantumCore.API;
-using QuantumCore.API.Game.Types;
-using QuantumCore.API.Packets;
-using QuantumCore.API.PluginTypes;
+using QuantumCore.Packets;
+using QuantumCore.Game.Types;
+using QuantumCore.PluginTypes;
 
 namespace QuantumCore.Game.PacketHandlers.Game;
 

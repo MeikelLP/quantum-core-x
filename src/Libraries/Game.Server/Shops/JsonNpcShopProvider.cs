@@ -2,7 +2,6 @@
 using System.Text.Json;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
-using QuantumCore.API;
 
 namespace QuantumCore.Game.Shops;
 

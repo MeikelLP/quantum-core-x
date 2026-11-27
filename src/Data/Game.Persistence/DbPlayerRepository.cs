@@ -1,8 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using QuantumCore.API.Core.Models;
-using QuantumCore.API.Game.Types;
 using QuantumCore.Game.Persistence.Entities;
 using QuantumCore.Game.Persistence.Extensions;
+using QuantumCore.Game.Types;
+using QuantumCore.Models;
 
 namespace QuantumCore.Game.Persistence;
 

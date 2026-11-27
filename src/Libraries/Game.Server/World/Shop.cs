@@ -1,13 +1,10 @@
 using Microsoft.Extensions.Logging;
-using QuantumCore.API;
-using QuantumCore.API.Game.Types.Entities;
-using QuantumCore.API.Game.World;
-using QuantumCore.API.Packets.Shop;
-using QuantumCore.Core.Utils;
-using QuantumCore.Game.Packets.General;
+using QuantumCore.Packets.Shop;
+using QuantumCore.Game.Types.Entities;
 using QuantumCore.Game.Utils;
 using QuantumCore.Game.World.Entities;
-using ShopItem = QuantumCore.API.Core.Models.ShopItem;
+using QuantumCore.Packets.General;
+using ShopItem = QuantumCore.Models.ShopItem;
 
 namespace QuantumCore.Game.World;
 
@@ -72,7 +69,7 @@ public class Shop : IShop
         foreach (var item in _items)
         {
             // For some reason the item also contains the position while the client uses the array index as position
-            shopStart.Items[item.Position] = new API.Packets.Shop.ShopItem
+            shopStart.Items[item.Position] = new Packets.Shop.ShopItem
             {
                 Position = item.Position, ItemId = item.ItemId, Count = item.Count, Price = item.Price
             };
@@ -84,7 +81,7 @@ public class Shop : IShop
             // ReSharper disable once ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
             if (shopStart.Items[i] is null)
             {
-                shopStart.Items[i] = new API.Packets.Shop.ShopItem();
+                shopStart.Items[i] = new Packets.Shop.ShopItem();
             }
 
             for (var ii = 0; ii < shopStart.Items[i].Bonuses.Length; ii++)

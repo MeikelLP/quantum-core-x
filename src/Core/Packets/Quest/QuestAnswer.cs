@@ -1,6 +1,6 @@
 using QuantumCore.Networking;
 
-namespace QuantumCore.API.Packets.Quest;
+namespace QuantumCore.Packets.Quest;
 
 [Packet(0x1D, EDirection.INCOMING, Sequence = true)]
 [PacketGenerator]

@@ -1,7 +1,7 @@
-﻿using QuantumCore.API.Core.Models;
-using QuantumCore.API.Game.Types.Entities;
+﻿using QuantumCore.Game.Types.Entities;
+using QuantumCore.Models;
 
-namespace QuantumCore.API;
+namespace QuantumCore;
 
 public interface IAnimationManager
 {

@@ -1,4 +1,4 @@
-namespace QuantumCore.API.Core.Timekeeping;
+namespace QuantumCore.Timekeeping;
 
 /// <summary>
 /// Wraps the builtin <see cref="TimeProvider"/> to expose a monotonic server clock anchored at construction time.

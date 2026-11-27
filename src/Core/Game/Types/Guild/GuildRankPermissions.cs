@@ -1,4 +1,4 @@
-﻿namespace QuantumCore.API.Game.Types.Guild;
+﻿namespace QuantumCore.Game.Types.Guild;
 
 [Flags]
 public enum GuildRankPermissions : byte

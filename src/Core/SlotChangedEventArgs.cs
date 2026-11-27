@@ -1,6 +1,6 @@
-﻿using QuantumCore.API.Core.Models;
-using QuantumCore.API.Game.Types.Items;
+﻿using QuantumCore.Game.Types.Items;
+using QuantumCore.Models;
 
-namespace QuantumCore.API;
+namespace QuantumCore;
 
 public record struct SlotChangedEventArgs(ItemInstance? ItemInstance, EquipmentSlot Slot);

@@ -1,6 +1,6 @@
 ﻿using System.Numerics;
 
-namespace QuantumCore.API;
+namespace QuantumCore;
 
 public record struct Coordinates(uint X, uint Y)
 {
@@ -13,7 +13,7 @@ public record struct Coordinates(uint X, uint Y)
     {
         return new Coordinates(checked((uint)(a.X + delta.X)), checked((uint)(a.Y + delta.Y)));
     }
-    
+
     // throw on underflow with checked()
     public static Coordinates operator -(Coordinates a, Coordinates b) => new(checked(a.X - b.X), checked(a.Y - b.Y));
 }

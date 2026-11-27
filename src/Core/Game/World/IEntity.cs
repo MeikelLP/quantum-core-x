@@ -1,10 +1,10 @@
-﻿using QuantumCore.API.Core.Timekeeping;
-using QuantumCore.API.Core.Utils;
-using QuantumCore.API.Game.Types;
-using QuantumCore.API.Game.Types.Combat;
-using QuantumCore.API.Game.Types.Entities;
+﻿using QuantumCore.Game.Types;
+using QuantumCore.Game.Types.Combat;
+using QuantumCore.Game.Types.Entities;
+using QuantumCore.Timekeeping;
+using QuantumCore.Utils;
 
-namespace QuantumCore.API.Game.World;
+namespace QuantumCore.Game.World;
 
 public interface IEntity
 {

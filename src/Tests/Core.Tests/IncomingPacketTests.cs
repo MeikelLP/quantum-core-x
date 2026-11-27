@@ -4,15 +4,14 @@ using AwesomeAssertions;
 using Core.Tests.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using QuantumCore.API.Packets;
-using QuantumCore.API.Packets.Quest;
-using QuantumCore.API.Packets.QuickBar;
-using QuantumCore.API.Packets.Shop;
+using QuantumCore.Packets;
+using QuantumCore.Packets.Quest;
+using QuantumCore.Packets.QuickBar;
+using QuantumCore.Packets.Shop;
 using QuantumCore.Core.Packets;
 using QuantumCore.Extensions;
 using QuantumCore.Networking;
 using Xunit;
-using Version = QuantumCore.API.Packets.Version;
 
 namespace Core.Tests;
 
@@ -70,7 +69,7 @@ public class IncomingPacketTests
 
         result.Should().BeEquivalentTo(expected);
 
-        QuantumCore.API.Packets.ChatIncoming.HasSequence.Should().BeTrue();
+        QuantumCore.Packets.ChatIncoming.HasSequence.Should().BeTrue();
     }
 
     [Fact]
@@ -371,7 +370,7 @@ public class IncomingPacketTests
     [Fact]
     public void Version()
     {
-        var expected = new AutoFaker<Version>()
+        var expected = new AutoFaker<QuantumCore.Packets.Version>()
             .RuleFor(x => x.ExecutableName, faker => faker.Lorem.Letter(33))
             .RuleFor(x => x.Timestamp, faker => faker.Lorem.Letter(33))
             .Generate();
@@ -379,7 +378,7 @@ public class IncomingPacketTests
             .Concat(Encoding.ASCII.GetBytes(expected.ExecutableName))
             .Concat(Encoding.ASCII.GetBytes(expected.Timestamp))
             .ToArray();
-        var result = _serializer.Deserialize<Version>(bytes);
+        var result = _serializer.Deserialize<QuantumCore.Packets.Version>(bytes);
 
         result.Should().BeEquivalentTo(expected);
     }

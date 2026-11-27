@@ -1,5 +1,4 @@
-using QuantumCore.API;
-using QuantumCore.API.Game.Types;
+using QuantumCore.Game.Types;
 
 namespace QuantumCore.Game.Services;
 

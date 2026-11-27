@@ -1,4 +1,4 @@
-﻿namespace QuantumCore.API.Game;
+﻿namespace QuantumCore.Game;
 
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
 public sealed class CommandAttribute : Attribute

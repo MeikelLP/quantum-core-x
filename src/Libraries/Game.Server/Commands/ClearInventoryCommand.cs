@@ -1,7 +1,5 @@
-using QuantumCore.API;
-using QuantumCore.API.Core.Models;
-using QuantumCore.API.Extensions;
-using QuantumCore.API.Game;
+using QuantumCore.Extensions;
+using QuantumCore.Models;
 
 namespace QuantumCore.Game.Commands;
 

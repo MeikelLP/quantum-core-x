@@ -1,4 +1,4 @@
-﻿using QuantumCore.API.PluginTypes;
+﻿using QuantumCore.PluginTypes;
 
 namespace QuantumCore.Extensions;
 

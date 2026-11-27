@@ -1,4 +1,4 @@
-using QuantumCore.API.Core.Models;
+using QuantumCore.Models;
 
 namespace QuantumCore.Auth.Persistence;
 

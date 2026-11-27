@@ -1,6 +1,6 @@
 using System.Collections.Immutable;
 
-namespace QuantumCore.API.Game.World;
+namespace QuantumCore.Game.World;
 
 public class SpawnMember
 {

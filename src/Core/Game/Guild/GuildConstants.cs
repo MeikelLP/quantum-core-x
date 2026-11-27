@@ -1,4 +1,4 @@
-﻿namespace QuantumCore.API.Game.Guild;
+﻿namespace QuantumCore.Game.Guild;
 
 public static class GuildConstants
 {

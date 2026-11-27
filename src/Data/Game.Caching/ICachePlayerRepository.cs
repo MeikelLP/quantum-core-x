@@ -1,6 +1,6 @@
-﻿using QuantumCore.API;
-using QuantumCore.API.Core.Models;
-using QuantumCore.API.Game.Types;
+﻿using QuantumCore;
+using QuantumCore.Game.Types;
+using QuantumCore.Models;
 
 namespace Game.Caching;
 

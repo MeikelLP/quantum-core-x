@@ -1,7 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <RootNamespace>QuantumCore.API</RootNamespace>
+        <AssemblyName>QuantumCore</AssemblyName>
+        <RootNamespace>QuantumCore</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>

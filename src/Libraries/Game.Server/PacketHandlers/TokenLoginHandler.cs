@@ -1,15 +1,14 @@
 using System.Net;
 using Microsoft.Extensions.Logging;
-using QuantumCore.API;
-using QuantumCore.API.Game.Guild;
-using QuantumCore.API.Game.Types;
-using QuantumCore.API.Game.World;
-using QuantumCore.API.Packets;
-using QuantumCore.API.PluginTypes;
+using QuantumCore.Packets;
 using QuantumCore.Cache;
 using QuantumCore.Caching;
 using QuantumCore.Extensions;
 using QuantumCore.Game.Extensions;
+using QuantumCore.Game.Guild;
+using QuantumCore.Game.Types;
+using QuantumCore.Game.World;
+using QuantumCore.PluginTypes;
 
 namespace QuantumCore.Game.PacketHandlers;
 

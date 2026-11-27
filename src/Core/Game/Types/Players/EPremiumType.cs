@@ -1,4 +1,4 @@
-﻿namespace QuantumCore.API.Game.Types.Players;
+﻿namespace QuantumCore.Game.Types.Players;
 
 public enum EPremiumType
 {
@@ -6,6 +6,6 @@ public enum EPremiumType
     ITEM = 1,
     SAFEBOX = 2,
     AUTOLOOT = 3,
-    
+
     GOLD = 6
 }

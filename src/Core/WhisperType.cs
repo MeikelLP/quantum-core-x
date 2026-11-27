@@ -1,4 +1,4 @@
-﻿namespace QuantumCore.API;
+﻿namespace QuantumCore;
 
 public enum WhisperType : byte
 {

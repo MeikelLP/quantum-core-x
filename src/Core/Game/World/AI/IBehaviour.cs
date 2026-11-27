@@ -1,6 +1,6 @@
-using QuantumCore.API.Core.Timekeeping;
+using QuantumCore.Timekeeping;
 
-namespace QuantumCore.API.Game.World.AI;
+namespace QuantumCore.Game.World.AI;
 
 public interface IBehaviour
 {

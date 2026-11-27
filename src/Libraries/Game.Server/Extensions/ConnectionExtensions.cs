@@ -1,5 +1,4 @@
-﻿using QuantumCore.API;
-
+﻿
 namespace QuantumCore.Game.Extensions;
 
 public static class ConnectionExtensions

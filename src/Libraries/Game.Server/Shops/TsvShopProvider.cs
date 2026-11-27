@@ -3,7 +3,6 @@ using Csv;
 using Csv.Annotations;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
-using QuantumCore.API;
 
 namespace QuantumCore.Game.Shops;
 

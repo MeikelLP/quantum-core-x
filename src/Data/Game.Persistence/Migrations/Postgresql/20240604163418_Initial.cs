@@ -2,7 +2,7 @@
 
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
-using QuantumCore.API.Game.Types;
+using QuantumCore.Game.Types;
 
 namespace QuantumCore.Game.Persistence.Migrations.Postgresql;
 

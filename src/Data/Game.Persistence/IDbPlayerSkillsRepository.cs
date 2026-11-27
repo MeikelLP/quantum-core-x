@@ -1,5 +1,4 @@
-﻿using QuantumCore.API;
-using QuantumCore.API.Game.Skills;
+﻿using QuantumCore.Game.Skills;
 
 namespace QuantumCore.Game.Persistence;
 

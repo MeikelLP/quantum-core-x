@@ -1,7 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
-using QuantumCore.API.Core.Models;
+using QuantumCore.Models;
 
-namespace QuantumCore.API;
+namespace QuantumCore;
 
 public interface IItemManager
 {

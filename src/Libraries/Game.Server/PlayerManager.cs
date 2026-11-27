@@ -1,12 +1,11 @@
 ﻿using Game.Caching;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using QuantumCore.API;
-using QuantumCore.API.Core.Models;
-using QuantumCore.API.Game.Types;
-using QuantumCore.API.Game.Types.Players;
 using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Persistence;
+using QuantumCore.Game.Types;
+using QuantumCore.Game.Types.Players;
+using QuantumCore.Models;
 
 namespace QuantumCore.Game;
 

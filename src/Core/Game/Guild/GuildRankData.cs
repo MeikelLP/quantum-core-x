@@ -1,6 +1,6 @@
-﻿using QuantumCore.API.Game.Types.Guild;
+﻿using QuantumCore.Game.Types.Guild;
 
-namespace QuantumCore.API.Game.Guild;
+namespace QuantumCore.Game.Guild;
 
 public class GuildRankData
 {

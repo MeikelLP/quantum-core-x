@@ -1,7 +1,7 @@
-﻿using QuantumCore.API.Game.Types.Skills;
+﻿using QuantumCore.Game.Types.Skills;
 using QuantumCore.Networking;
 
-namespace QuantumCore.API.Packets.Skills;
+namespace QuantumCore.Packets.Skills;
 
 public partial class PlayerSkill
 {

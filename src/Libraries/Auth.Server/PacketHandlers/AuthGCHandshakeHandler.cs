@@ -1,7 +1,6 @@
-using QuantumCore.API;
-using QuantumCore.API.Core.Models;
-using QuantumCore.API.PluginTypes;
 using QuantumCore.Core.Packets;
+using QuantumCore.Models;
+using QuantumCore.PluginTypes;
 
 namespace QuantumCore.Auth.PacketHandlers;
 

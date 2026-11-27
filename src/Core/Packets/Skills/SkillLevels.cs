@@ -1,6 +1,6 @@
 ﻿using QuantumCore.Networking;
 
-namespace QuantumCore.API.Packets.Skills;
+namespace QuantumCore.Packets.Skills;
 
 [Packet(0x4C, EDirection.OUTGOING)]
 [PacketGenerator]

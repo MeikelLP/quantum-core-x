@@ -2,7 +2,6 @@ using System.Collections;
 using System.Diagnostics;
 using System.Text;
 using System.Text.RegularExpressions;
-using QuantumCore.API;
 
 namespace QuantumCore.Caching.InMemory;
 

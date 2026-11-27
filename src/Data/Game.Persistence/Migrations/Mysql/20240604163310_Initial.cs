@@ -2,7 +2,7 @@
 
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
-using QuantumCore.API.Game.Types;
+using QuantumCore.Game.Types;
 
 namespace QuantumCore.Game.Persistence.Migrations.Mysql;
 

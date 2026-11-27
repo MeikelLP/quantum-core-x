@@ -11,13 +11,12 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NSubstitute;
 using QuantumCore;
-using QuantumCore.API;
-using QuantumCore.API.Core.Models;
-using QuantumCore.API.Game.Types;
 using QuantumCore.Caching;
 using QuantumCore.Game;
 using QuantumCore.Game.Extensions;
 using QuantumCore.Game.Persistence;
+using QuantumCore.Game.Types;
+using QuantumCore.Models;
 using Serilog;
 
 namespace Game.Tests;

@@ -1,6 +1,6 @@
 ﻿using QuantumCore.Networking;
 
-namespace QuantumCore.API.Packets.Guild;
+namespace QuantumCore.Packets.Guild;
 
 [PacketGenerator]
 [Packet(0x50, EDirection.INCOMING, Sequence = true)]

@@ -5,11 +5,11 @@ using Game.Commands.Tests.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
-using QuantumCore.API;
-using QuantumCore.API.Game.World;
-using QuantumCore.API.Packets;
+using QuantumCore;
+using QuantumCore.Packets;
 using QuantumCore.Game.Commands;
 using QuantumCore.Game.Persistence.Entities;
+using QuantumCore.Game.World;
 
 namespace Game.Commands.Tests;
 

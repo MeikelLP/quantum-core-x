@@ -1,4 +1,4 @@
-﻿namespace QuantumCore.API.Game.Types.Items;
+﻿namespace QuantumCore.Game.Types.Items;
 
 public enum EItemType
 {

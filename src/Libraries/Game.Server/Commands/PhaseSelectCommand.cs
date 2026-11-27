@@ -1,11 +1,10 @@
 using Microsoft.Extensions.DependencyInjection;
-using QuantumCore.API.Game;
-using QuantumCore.API.Game.Guild;
-using QuantumCore.API.Game.Types;
-using QuantumCore.API.Game.World;
-using QuantumCore.API.Packets;
+using QuantumCore.Packets;
 using QuantumCore.Extensions;
 using QuantumCore.Game.Extensions;
+using QuantumCore.Game.Guild;
+using QuantumCore.Game.Types;
+using QuantumCore.Game.World;
 
 namespace QuantumCore.Game.Commands;
 
