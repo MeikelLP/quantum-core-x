@@ -5,6 +5,7 @@ using QuantumCore.API.Game.World;
 using QuantumCore.API.Packets.Shop;
 using QuantumCore.Core.Utils;
 using QuantumCore.Game.Packets.General;
+using QuantumCore.Game.Utils;
 using QuantumCore.Game.World.Entities;
 using ShopItem = QuantumCore.API.Core.Models.ShopItem;
 

@@ -5,7 +5,7 @@ using QuantumCore.API.Core.Utils;
 using QuantumCore.API.Game.Types.Entities;
 using QuantumCore.API.Game.World;
 
-namespace QuantumCore.Core.Utils;
+namespace QuantumCore.Game.Utils;
 
 [DebuggerDisplay("{Bounds}")]
 public class QuadTree : IQuadTree

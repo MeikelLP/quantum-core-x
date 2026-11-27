@@ -1,7 +1,7 @@
 using System.Reflection;
 using System.Runtime.CompilerServices;
 
-namespace QuantumCore.Core.Utils;
+namespace QuantumCore.Game.Utils;
 
 public static class ReflectionUtils
 {

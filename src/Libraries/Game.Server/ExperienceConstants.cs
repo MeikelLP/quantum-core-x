@@ -1,4 +1,4 @@
-﻿namespace QuantumCore.Core.Constants;
+﻿namespace QuantumCore.Game;
 
 public static class ExperienceConstants
 {

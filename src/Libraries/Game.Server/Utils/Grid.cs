@@ -2,7 +2,7 @@
 
 using System.Diagnostics;
 
-namespace QuantumCore.Core.Utils;
+namespace QuantumCore.Game.Utils;
 
 public class Grid<T> where T : class?
 {

@@ -1,4 +1,4 @@
-﻿namespace QuantumCore.Core.Event;
+﻿namespace QuantumCore.Game.Events;
 
 public class Event
 {

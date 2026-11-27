@@ -7,9 +7,9 @@ using QuantumCore.API;
 using QuantumCore.API.Core.Timekeeping;
 using QuantumCore.API.Game.Types;
 using QuantumCore.API.Game.World;
-using QuantumCore.Core.Event;
 using QuantumCore.Core.Networking;
 using QuantumCore.Extensions;
+using QuantumCore.Game.Events;
 using QuantumCore.Networking;
 
 namespace QuantumCore.Game;

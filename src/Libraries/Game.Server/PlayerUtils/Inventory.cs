@@ -4,6 +4,7 @@ using QuantumCore.API.Core.Models;
 using QuantumCore.API.Extensions;
 using QuantumCore.API.Game.Types.Items;
 using QuantumCore.Core.Utils;
+using QuantumCore.Game.Utils;
 using Serilog;
 
 namespace QuantumCore.Game.PlayerUtils;

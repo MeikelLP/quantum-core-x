@@ -2,7 +2,7 @@
 
 using QuantumCore.API.Core.Timekeeping;
 
-namespace QuantumCore.Core.Event;
+namespace QuantumCore.Game.Events;
 
 public static class EventSystem
 {

@@ -12,6 +12,7 @@ using QuantumCore.API.Game.World.AI;
 using QuantumCore.API.Packets;
 using QuantumCore.Core.Utils;
 using QuantumCore.Game.Services;
+using QuantumCore.Game.Utils;
 using QuantumCore.Game.World.AI;
 
 namespace QuantumCore.Game.World.Entities;
