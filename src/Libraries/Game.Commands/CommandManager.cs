@@ -1,5 +1,6 @@
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Text;
 using CommandLine;
 using CommandLine.Text;
 using Microsoft.Extensions.DependencyInjection;
@@ -175,7 +176,7 @@ internal class CommandManager : ICommandManager, ILoadable
             return;
         }
 
-        var args = chatline.TrimStart('/').Split(' ');
+        var args = SplitArgs(chatline.TrimStart('/'));
         var command = args[0];
         var argsWithoutCommand = args.Skip(1).ToArray();
 
@@ -323,5 +324,80 @@ internal class CommandManager : ICommandManager, ILoadable
                 connection.Player.SendChatInfo($"Unknown command {command}");
             }
         }
+    }
+
+    private static string[] SplitArgs(ReadOnlySpan<char> input)
+    {
+        var args = new List<string>();
+        StringBuilder? builder = null;
+        var tokenStart = 0;
+        var segmentStart = 0;
+        var inQuotes = false;
+        var tokenStarted = false;
+
+        for (var i = 0; i < input.Length; i++)
+        {
+            var c = input[i];
+
+            if (c == '\\' && i + 1 < input.Length &&
+                (input[i + 1] == '"' || input[i + 1] == '\\'))
+            {
+                builder ??= new StringBuilder();
+                builder.Append(input[segmentStart..i]);
+                builder.Append(input[i + 1]);
+
+                i++;
+                segmentStart = i + 1;
+                tokenStarted = true;
+            }
+            else if (c == '"')
+            {
+                builder ??= new StringBuilder();
+                builder.Append(input[segmentStart..i]);
+
+                inQuotes = !inQuotes;
+                segmentStart = i + 1;
+                tokenStarted = true; // Preserves empty quoted args: ""
+            }
+            else if (char.IsWhiteSpace(c) && !inQuotes)
+            {
+                if (tokenStarted)
+                {
+                    if (builder is null)
+                        args.Add(input[tokenStart..i].ToString());
+                    else
+                    {
+                        builder.Append(input[segmentStart..i]);
+                        args.Add(builder.ToString());
+                        builder = null;
+                    }
+
+                    tokenStarted = false;
+                }
+
+                tokenStart = i + 1;
+                segmentStart = i + 1;
+            }
+            else
+            {
+                tokenStarted = true;
+            }
+        }
+
+        if (inQuotes)
+            throw new FormatException("Unclosed double quote.");
+
+        if (tokenStarted)
+        {
+            if (builder is null)
+                args.Add(input[tokenStart..].ToString());
+            else
+            {
+                builder.Append(input[segmentStart..]);
+                args.Add(builder.ToString());
+            }
+        }
+
+        return [.. args];
     }
 }
