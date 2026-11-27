@@ -28,7 +28,7 @@
     </Folder>
     <Project Path="Core.Networking.Generators/Core.Networking.Generators.csproj" />
     <Project Path="Core.Networking/Core.Networking.csproj" />
-    <Project Path="CorePluginAPI/CorePluginAPI.csproj" />
+    <Project Path="Core\Core.csproj" />
     <Project Path="Game.Benchmarks/Game.Benchmarks.csproj" />
     <Project Path="Hosting\Hosting.csproj" />
     <Project Path="ServiceDefaults/ServiceDefaults.csproj" />
