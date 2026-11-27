@@ -8,6 +8,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <IsPackable>false</IsPackable>
         <Authors>MeikelLP</Authors>
+        <Features>$(Features);runtime-async=on</Features>
     </PropertyGroup>
 
   <ItemGroup>
