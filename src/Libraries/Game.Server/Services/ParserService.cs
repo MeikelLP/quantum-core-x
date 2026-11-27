@@ -396,7 +396,7 @@ public partial class ParserService : IParserService
 
         foreach (var flag in flags)
         {
-            if (!EnumUtils.TryParseEnum<ESkillFlags>(flag, out var parsed)) continue;
+            if (!Enums.TryParse<ESkillFlags>(flag, out var parsed)) continue;
             result |= parsed;
         }
 
@@ -416,7 +416,7 @@ public partial class ParserService : IParserService
 
         foreach (var flag in flags)
         {
-            if (!EnumUtils.TryParseEnum<EAffectFlags>(flag, out var parsed)) continue;
+            if (!Enums.TryParse<EAffectFlags>(flag, out var parsed)) continue;
             result |= parsed;
         }
 
