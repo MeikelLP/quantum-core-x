@@ -8,16 +8,18 @@ namespace QuantumCore.Game.Persistence.Extensions;
 
 public static class ServiceExtensions
 {
+    internal const string MODE_GAME = "game";
+
     public static IServiceCollection AddGameDatabase(this IServiceCollection services)
     {
-        services.AddQuantumCoreDatabase(HostingOptions.MODE_GAME);
+        services.AddQuantumCoreDatabase(MODE_GAME);
         services.AddDbContext<MySqlGameDbContext>();
         services.AddDbContext<PostgresqlGameDbContext>();
         services.AddDbContext<SqliteGameDbContext>();
         services.AddScoped<GameDbContext>(provider =>
         {
             var options = provider.GetRequiredService<IOptionsSnapshot<DatabaseOptions>>()
-                .Get(HostingOptions.MODE_GAME);
+                .Get(MODE_GAME);
             return options.Provider switch
             {
                 DatabaseProvider.MYSQL => provider.GetRequiredService<MySqlGameDbContext>(),

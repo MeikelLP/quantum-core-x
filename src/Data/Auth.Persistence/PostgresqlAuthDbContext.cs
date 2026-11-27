@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using QuantumCore.Auth.Persistence.Extensions;
 
 namespace QuantumCore.Auth.Persistence;
 
@@ -18,7 +19,7 @@ internal class PostgresqlAuthDbContext : AuthDbContext
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         base.OnConfiguring(optionsBuilder);
-        var opts = _options.Get(HostingOptions.MODE_AUTH);
+        var opts = _options.Get(ServiceExtensions.MODE_AUTH);
         optionsBuilder.UseNpgsql(opts.ConnectionString);
     }
 }

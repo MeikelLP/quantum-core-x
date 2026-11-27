@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using QuantumCore.Game.Persistence.Extensions;
 
 namespace QuantumCore.Game.Persistence;
 
@@ -19,7 +20,7 @@ internal class PostgresqlGameDbContext : GameDbContext
 
     protected override void OnConfiguring(DbContextOptionsBuilder options)
     {
-        var opts = _options.Get(HostingOptions.MODE_GAME);
+        var opts = _options.Get(ServiceExtensions.MODE_GAME);
         options.UseNpgsql(opts.ConnectionString);
     }
 }

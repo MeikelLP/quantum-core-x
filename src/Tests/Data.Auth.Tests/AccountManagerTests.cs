@@ -15,6 +15,7 @@ using QuantumCore.Caching.Extensions;
 using Serilog;
 using Testcontainers.Redis;
 using Xunit;
+using ServiceExtensions = QuantumCore.Auth.Persistence.Extensions.ServiceExtensions;
 
 namespace Data.Auth.Tests;
 
@@ -37,7 +38,7 @@ public class AccountManagerTests : IClassFixture<RedisFixture>, IClassFixture<Da
             .AddAuthDatabase()
             .AddQuantumCoreCaching()
             .AddSingleton<IConfiguration>(new ConfigurationBuilder().Build())
-            .Configure<DatabaseOptions>(HostingOptions.MODE_AUTH, opts =>
+            .Configure<DatabaseOptions>(ServiceExtensions.MODE_AUTH, opts =>
             {
                 opts.Provider = DatabaseProvider.MYSQL;
                 opts.ConnectionString = databaseFixture.Container.GetConnectionString();

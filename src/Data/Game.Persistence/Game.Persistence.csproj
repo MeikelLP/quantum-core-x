@@ -10,7 +10,6 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\Core\Core.csproj"/>
       <ProjectReference Include="..\Core.Caching\Core.Caching.csproj" />
       <ProjectReference Include="..\Core.Persistence\Core.Persistence.csproj" />
       <ProjectReference Include="..\..\CorePluginAPI\CorePluginAPI.csproj" />

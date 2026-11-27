@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using QuantumCore;
 using QuantumCore.Auth.Persistence;
+using QuantumCore.Auth.Persistence.Extensions;
 using Serilog;
 using Testcontainers.MySql;
 using Xunit;
@@ -38,7 +39,7 @@ public class DatabaseFixture : IAsyncLifetime
                     .WriteTo.Console()
                     .CreateLogger());
             })
-            .Configure<DatabaseOptions>(HostingOptions.MODE_AUTH, opts =>
+            .Configure<DatabaseOptions>(ServiceExtensions.MODE_AUTH, opts =>
             {
                 opts.ConnectionString = connectionString;
                 opts.Provider = DatabaseProvider.MYSQL;

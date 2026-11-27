@@ -1,8 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-	<AssemblyName>Core</AssemblyName>
 	<RootNamespace>QuantumCore</RootNamespace>
+	<PackageId>Hosting</PackageId>
   </PropertyGroup>
 
   <ItemGroup>

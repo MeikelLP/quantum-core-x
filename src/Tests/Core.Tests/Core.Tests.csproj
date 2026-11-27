@@ -18,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Core\Core.csproj"/>
+    <ProjectReference Include="..\..\Hosting\Hosting.csproj" />
     <ProjectReference Include="..\..\Core.Networking.Generators\Core.Networking.Generators.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false"/>
     <ProjectReference Include="..\..\Libraries\Game.Server\Game.Server.csproj"/>
   </ItemGroup>

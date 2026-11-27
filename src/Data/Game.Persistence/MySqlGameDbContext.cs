@@ -4,6 +4,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microting.EntityFrameworkCore.MySql.Infrastructure;
+using QuantumCore.Game.Persistence.Extensions;
 
 namespace QuantumCore.Game.Persistence;
 
@@ -21,7 +22,7 @@ internal class MySqlGameDbContext : GameDbContext
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         base.OnConfiguring(optionsBuilder);
-        var opts = _options.Get(HostingOptions.MODE_GAME);
+        var opts = _options.Get(ServiceExtensions.MODE_GAME);
         optionsBuilder.UseMySql(opts.ConnectionString, ServerVersion.AutoDetect(opts.ConnectionString), mysql =>
         {
             // because MySQL does not support schemas: https://github.com/PomeloFoundation/Pomelo.EntityFrameworkCore.MySql/issues/1100

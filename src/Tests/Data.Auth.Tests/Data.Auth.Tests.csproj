@@ -10,6 +10,7 @@
       <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.12.0" />
         <PackageReference Include="NSubstitute" Version="6.2.0"/>
         <PackageReference Include="Serilog.Extensions.Hosting" Version="11.0.0" />
+        <PackageReference Include="Serilog.Sinks.Console" Version="6.1.1" />
       <PackageReference Include="Testcontainers.MySql" Version="4.17.0" />
       <PackageReference Include="Testcontainers.Redis" Version="4.17.0" />
       <PackageReference Include="xunit.runner.visualstudio" Version="4.0.1">
@@ -24,7 +25,6 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\Core\Core.csproj"/>
         <ProjectReference Include="..\..\Data\Auth.Persistence\Auth.Persistence.csproj"/>
       <ProjectReference Include="..\..\Data\Core.Caching\Core.Caching.csproj" />
     </ItemGroup>

@@ -18,7 +18,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\Core\Core.csproj"/>
+        <ProjectReference Include="..\..\Hosting\Hosting.csproj" />
         <ProjectReference Include="..\..\Data\Game.Caching\Game.Caching.csproj"/>
         <ProjectReference Include="..\..\Data\Game.Persistence\Game.Persistence.csproj"/>
         <ProjectReference Include="..\..\Libraries\Game.Commands\Game.Commands.csproj"/>
