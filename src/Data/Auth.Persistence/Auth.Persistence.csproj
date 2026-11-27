@@ -6,8 +6,8 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\..\Libraries\Core\Core.csproj" />
       <ProjectReference Include="..\Core.Persistence\Core.Persistence.csproj" />
-      <ProjectReference Include="..\..\Core\Core.csproj" />
     </ItemGroup>
 
     <ItemGroup>

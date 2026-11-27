@@ -16,8 +16,8 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\Core.Networking.Generators\Core.Networking.Generators.csproj" />
-      <ProjectReference Include="..\..\Core.Networking\Core.Networking.csproj" />
+      <ProjectReference Include="..\..\Libraries\Core.Networking.Generators\Core.Networking.Generators.csproj" />
+      <ProjectReference Include="..\..\Libraries\Core.Networking\Core.Networking.csproj" />
     </ItemGroup>
 
 </Project>

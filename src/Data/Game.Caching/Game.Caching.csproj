@@ -5,7 +5,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Core.Caching\Core.Caching.csproj" />
-      <ProjectReference Include="..\..\Core\Core.csproj" />
+        <ProjectReference Include="..\..\Libraries\Core\Core.csproj" />
     </ItemGroup>
 
 </Project>

@@ -28,8 +28,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <ProjectReference Include="..\..\Libraries\Game.Commands\Game.Commands.csproj"/>
-      <ProjectReference Include="..\..\Libraries\Game.Server\Game.Server.csproj"/>
+      <ProjectReference Include="..\..\Libraries\Game.Server\Game.Server.csproj" />
     </ItemGroup>
 
 </Project>

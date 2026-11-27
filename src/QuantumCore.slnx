@@ -1,11 +1,4 @@
 ﻿<Solution>
-    <Folder Name="/Data/">
-        <Project Path="Data/Auth.Persistence/Auth.Persistence.csproj" />
-        <Project Path="Data/Core.Caching/Core.Caching.csproj" />
-        <Project Path="Data/Core.Persistence/Core.Persistence.csproj" />
-        <Project Path="Data/Game.Caching/Game.Caching.csproj" />
-        <Project Path="Data/Game.Persistence/Game.Persistence.csproj" />
-    </Folder>
     <Folder Name="/Executables/">
         <Project Path="Executables/Auth/Auth.csproj" />
         <Project Path="Executables/DocsGenerator/DocsGenerator.csproj" />
@@ -13,9 +6,21 @@
         <Project Path="Executables/Single/Single.csproj" />
     </Folder>
     <Folder Name="/Libraries/">
+        <Project Path="Libraries/Core.Networking.Generators/Core.Networking.Generators.csproj" />
+        <Project Path="Libraries/Core.Networking/Core.Networking.csproj" />
+        <Project Path="Libraries/Core/Core.csproj" />
+        <Project Path="Libraries/Hosting/Hosting.csproj" />
         <Project Path="Libraries/Auth.Server/Auth.Server.csproj" />
         <Project Path="Libraries/Game.Commands/Game.Commands.csproj" />
         <Project Path="Libraries/Game.Server/Game.Server.csproj" />
+        <Project Path="Libraries/ServiceDefaults/ServiceDefaults.csproj" />
+    </Folder>
+    <Folder Name="/Libraries/Data/">
+        <Project Path="Data/Auth.Persistence/Auth.Persistence.csproj" />
+        <Project Path="Data/Core.Caching/Core.Caching.csproj" />
+        <Project Path="Data/Core.Persistence/Core.Persistence.csproj" />
+        <Project Path="Data/Game.Caching/Game.Caching.csproj" />
+        <Project Path="Data/Game.Persistence/Game.Persistence.csproj" />
     </Folder>
     <Folder Name="/Tests/">
         <Project Path="Tests/Auth.Tests/Auth.Tests.csproj" />
@@ -26,10 +31,5 @@
         <Project Path="Tests/Game.Commands.Tests/Game.Commands.Tests.csproj" />
         <Project Path="Tests/Game.Tests/Game.Tests.csproj" />
     </Folder>
-    <Project Path="Core.Networking.Generators/Core.Networking.Generators.csproj" />
-    <Project Path="Core.Networking/Core.Networking.csproj" />
-    <Project Path="Core\Core.csproj" />
     <Project Path="Game.Benchmarks/Game.Benchmarks.csproj" />
-    <Project Path="Hosting\Hosting.csproj" />
-    <Project Path="ServiceDefaults/ServiceDefaults.csproj" />
 </Solution>
